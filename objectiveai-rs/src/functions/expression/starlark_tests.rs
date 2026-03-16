@@ -1263,7 +1263,7 @@ fn test_starlark_message_user_without_name() {
         content: WithExpression::Value(RichContentExpression::Text(
             "hi".to_string(),
         )),
-        name: None,
+        name: WithExpression::Value(None),
     });
     assert_starlark_deep_eq(
         "{\"role\": \"user\", \"content\": \"hi\"}",
@@ -1279,7 +1279,7 @@ fn test_starlark_message_user_with_name() {
         content: WithExpression::Value(RichContentExpression::Text(
             "hey".to_string(),
         )),
-        name: Some(WithExpression::Value(Some("alice".to_string()))),
+        name: WithExpression::Value(Some("alice".to_string())),
     });
     assert_starlark_deep_eq(
         "{\"role\": \"user\", \"content\": \"hey\", \"name\": \"alice\"}",
@@ -1295,7 +1295,7 @@ fn test_starlark_message_system_without_name() {
         content: WithExpression::Value(SimpleContentExpression::Text(
             "sys".to_string(),
         )),
-        name: None,
+        name: WithExpression::Value(None),
     });
     assert_starlark_deep_eq(
         "{\"role\": \"system\", \"content\": \"sys\"}",
@@ -1311,7 +1311,7 @@ fn test_starlark_message_system_with_name() {
         content: WithExpression::Value(SimpleContentExpression::Text(
             "s".to_string(),
         )),
-        name: Some(WithExpression::Value(Some("bot".to_string()))),
+        name: WithExpression::Value(Some("bot".to_string())),
     });
     assert_starlark_deep_eq(
         "{\"role\": \"system\", \"content\": \"s\", \"name\": \"bot\"}",
@@ -1325,11 +1325,11 @@ fn test_starlark_message_assistant_content_none() {
     let params = make_params(empty_input());
     let expected =
         MessageExpression::Assistant(AssistantMessageExpression {
-            content: Some(WithExpression::Value(None)),
-            name: None,
-            refusal: None,
-            tool_calls: None,
-            reasoning: None,
+            content: WithExpression::Value(None),
+            name: WithExpression::Value(None),
+            refusal: WithExpression::Value(None),
+            tool_calls: WithExpression::Value(None),
+            reasoning: WithExpression::Value(None),
         });
     assert_starlark_deep_eq(
         "{\"role\": \"assistant\", \"content\": None}",
@@ -1343,13 +1343,13 @@ fn test_starlark_message_assistant_with_content() {
     let params = make_params(empty_input());
     let expected =
         MessageExpression::Assistant(AssistantMessageExpression {
-            content: Some(WithExpression::Value(Some(
+            content: WithExpression::Value(Some(
                 RichContentExpression::Text("ok".to_string()),
-            ))),
-            name: None,
-            refusal: None,
-            tool_calls: None,
-            reasoning: None,
+            )),
+            name: WithExpression::Value(None),
+            refusal: WithExpression::Value(None),
+            tool_calls: WithExpression::Value(None),
+            reasoning: WithExpression::Value(None),
         });
     assert_starlark_deep_eq(
         "{\"role\": \"assistant\", \"content\": \"ok\"}",
@@ -1363,13 +1363,13 @@ fn test_starlark_message_assistant_with_refusal() {
     let params = make_params(empty_input());
     let expected =
         MessageExpression::Assistant(AssistantMessageExpression {
-            content: Some(WithExpression::Value(None)),
-            name: None,
-            refusal: Some(WithExpression::Value(Some(
+            content: WithExpression::Value(None),
+            name: WithExpression::Value(None),
+            refusal: WithExpression::Value(Some(
                 "declined".to_string(),
-            ))),
-            tool_calls: None,
-            reasoning: None,
+            )),
+            tool_calls: WithExpression::Value(None),
+            reasoning: WithExpression::Value(None),
         });
     assert_starlark_deep_eq(
         "{\"role\": \"assistant\", \"content\": None, \"refusal\": \"declined\"}",
@@ -1383,11 +1383,11 @@ fn test_starlark_message_assistant_with_name() {
     let params = make_params(empty_input());
     let expected =
         MessageExpression::Assistant(AssistantMessageExpression {
-            content: Some(WithExpression::Value(None)),
-            name: Some(WithExpression::Value(Some("asst".to_string()))),
-            refusal: None,
-            tool_calls: None,
-            reasoning: None,
+            content: WithExpression::Value(None),
+            name: WithExpression::Value(Some("asst".to_string())),
+            refusal: WithExpression::Value(None),
+            tool_calls: WithExpression::Value(None),
+            reasoning: WithExpression::Value(None),
         });
     assert_starlark_deep_eq(
         "{\"role\": \"assistant\", \"content\": None, \"name\": \"asst\"}",
@@ -1420,7 +1420,7 @@ fn test_starlark_message_developer() {
             content: WithExpression::Value(SimpleContentExpression::Text(
                 "dev".to_string(),
             )),
-            name: None,
+            name: WithExpression::Value(None),
         });
     assert_starlark_deep_eq(
         "{\"role\": \"developer\", \"content\": \"dev\"}",

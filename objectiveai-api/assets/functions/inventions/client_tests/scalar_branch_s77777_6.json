@@ -311,7 +311,7 @@
         {
           "role": "tool",
           "index": 12,
-          "content": "{\r\n  \"title\": \"functions.expression.StringInputSchema\",\r\n  \"description\": \"Schema for a string input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the string.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"enum\": {\r\n      \"description\": \"If provided, the string must be one of these values.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"array\",\r\n          \"items\": {\r\n            \"type\": \"string\"\r\n          }\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.StringInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.StringInputSchema\",\n  \"description\": \"Schema for a string input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the string.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"enum\": {\n      \"description\": \"If provided, the string must be one of these values.\",\n      \"anyOf\": [\n        {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.StringInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_17492036053593893179"
         },
         {
@@ -349,7 +349,7 @@
         {
           "role": "tool",
           "index": 14,
-          "content": "{\r\n  \"title\": \"functions.expression.ObjectInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"object\"\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.ObjectInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"object\"\n  ]\n}\n",
           "tool_call_id": "call_mock_12091144512138422692"
         },
         {
@@ -424,7 +424,7 @@
         {
           "role": "tool",
           "index": 18,
-          "content": "{\r\n  \"title\": \"functions.expression.ImageInputSchema\",\r\n  \"description\": \"Schema for an image input (URL or base64-encoded).\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the expected image.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.ImageInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.ImageInputSchema\",\n  \"description\": \"Schema for an image input (URL or base64-encoded).\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the expected image.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.ImageInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_242602839301799857"
         },
         {
@@ -499,7 +499,7 @@
         {
           "role": "tool",
           "index": 22,
-          "content": "{\r\n  \"title\": \"functions.expression.VideoInputSchema\",\r\n  \"description\": \"Schema for a video input (URL or base64-encoded).\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the expected video.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.VideoInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.VideoInputSchema\",\n  \"description\": \"Schema for a video input (URL or base64-encoded).\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the expected video.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.VideoInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_16278865337165287903"
         },
         {
@@ -651,7 +651,7 @@
         {
           "role": "tool",
           "index": 30,
-          "content": "{\r\n  \"title\": \"functions.expression.AudioInputSchema\",\r\n  \"description\": \"Schema for an audio input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the expected audio.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.AudioInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.AudioInputSchema\",\n  \"description\": \"Schema for an audio input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the expected audio.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.AudioInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_4791454417299761576"
         },
         {
@@ -689,7 +689,7 @@
         {
           "role": "tool",
           "index": 32,
-          "content": "{\r\n  \"title\": \"agent.completions.message.InputAudio\",\r\n  \"description\": \"Audio input for multimodal messages.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"data\": {\r\n      \"description\": \"Base64-encoded audio data.\",\r\n      \"type\": \"string\"\r\n    },\r\n    \"format\": {\r\n      \"description\": \"The audio format (e.g., \\\"wav\\\", \\\"mp3\\\").\",\r\n      \"type\": \"string\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"agent.completions.message.InputAudio\",\n  \"description\": \"Audio input for multimodal messages.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"data\": {\n      \"description\": \"Base64-encoded audio data.\",\n      \"type\": \"string\"\n    },\n    \"format\": {\n      \"description\": \"The audio format (e.g., \\\"wav\\\", \\\"mp3\\\").\",\n      \"type\": \"string\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_14818375217125615494"
         },
         {
@@ -727,7 +727,7 @@
         {
           "role": "tool",
           "index": 34,
-          "content": "{\r\n  \"title\": \"functions.expression.InputSchema\",\r\n  \"description\": \"Schema for validating Function input.\\n\\nDefines the expected structure and constraints for input data.\\nUsed by remote Functions to document and validate their inputs.\",\r\n  \"anyOf\": [\r\n    {\r\n      \"description\": \"A union of schemas - input must match at least one.\",\r\n      \"$ref\": \"functions.expression.AnyOfInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"An object with named properties.\",\r\n      \"$ref\": \"functions.expression.ObjectInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"An array of items.\",\r\n      \"$ref\": \"functions.expression.ArrayInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"A string value.\",\r\n      \"$ref\": \"functions.expression.StringInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"An integer value.\",\r\n      \"$ref\": \"functions.expression.IntegerInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"A floating-point number.\",\r\n      \"$ref\": \"functions.expression.NumberInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"A boolean value.\",\r\n      \"$ref\": \"functions.expression.BooleanInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"An image (URL or base64).\",\r\n      \"$ref\": \"functions.expression.ImageInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"Audio content.\",\r\n      \"$ref\": \"functions.expression.AudioInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"Video content.\",\r\n      \"$ref\": \"functions.expression.VideoInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"A file.\",\r\n      \"$ref\": \"functions.expression.FileInputSchema\"\r\n    }\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.InputSchema\",\n  \"description\": \"Schema for validating Function input.\\n\\nDefines the expected structure and constraints for input data.\\nUsed by remote Functions to document and validate their inputs.\",\n  \"anyOf\": [\n    {\n      \"description\": \"A union of schemas - input must match at least one.\",\n      \"$ref\": \"functions.expression.AnyOfInputSchema\"\n    },\n    {\n      \"description\": \"An object with named properties.\",\n      \"$ref\": \"functions.expression.ObjectInputSchema\"\n    },\n    {\n      \"description\": \"An array of items.\",\n      \"$ref\": \"functions.expression.ArrayInputSchema\"\n    },\n    {\n      \"description\": \"A string value.\",\n      \"$ref\": \"functions.expression.StringInputSchema\"\n    },\n    {\n      \"description\": \"An integer value.\",\n      \"$ref\": \"functions.expression.IntegerInputSchema\"\n    },\n    {\n      \"description\": \"A floating-point number.\",\n      \"$ref\": \"functions.expression.NumberInputSchema\"\n    },\n    {\n      \"description\": \"A boolean value.\",\n      \"$ref\": \"functions.expression.BooleanInputSchema\"\n    },\n    {\n      \"description\": \"An image (URL or base64).\",\n      \"$ref\": \"functions.expression.ImageInputSchema\"\n    },\n    {\n      \"description\": \"Audio content.\",\n      \"$ref\": \"functions.expression.AudioInputSchema\"\n    },\n    {\n      \"description\": \"Video content.\",\n      \"$ref\": \"functions.expression.VideoInputSchema\"\n    },\n    {\n      \"description\": \"A file.\",\n      \"$ref\": \"functions.expression.FileInputSchema\"\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_1384427957779341215"
         },
         {
@@ -840,7 +840,7 @@
         {
           "role": "tool",
           "index": 40,
-          "content": "{\r\n  \"title\": \"functions.expression.FileInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"file\"\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.FileInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"file\"\n  ]\n}\n",
           "tool_call_id": "call_mock_4659958090616803761"
         },
         {
@@ -915,7 +915,7 @@
         {
           "role": "tool",
           "index": 44,
-          "content": "{\r\n  \"title\": \"agent.completions.message.InputAudio\",\r\n  \"description\": \"Audio input for multimodal messages.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"data\": {\r\n      \"description\": \"Base64-encoded audio data.\",\r\n      \"type\": \"string\"\r\n    },\r\n    \"format\": {\r\n      \"description\": \"The audio format (e.g., \\\"wav\\\", \\\"mp3\\\").\",\r\n      \"type\": \"string\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"agent.completions.message.InputAudio\",\n  \"description\": \"Audio input for multimodal messages.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"data\": {\n      \"description\": \"Base64-encoded audio data.\",\n      \"type\": \"string\"\n    },\n    \"format\": {\n      \"description\": \"The audio format (e.g., \\\"wav\\\", \\\"mp3\\\").\",\n      \"type\": \"string\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_3067777957127501827"
         },
         {
@@ -953,7 +953,7 @@
         {
           "role": "tool",
           "index": 46,
-          "content": "{\r\n  \"title\": \"functions.expression.StringInputSchema\",\r\n  \"description\": \"Schema for a string input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the string.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"enum\": {\r\n      \"description\": \"If provided, the string must be one of these values.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"array\",\r\n          \"items\": {\r\n            \"type\": \"string\"\r\n          }\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.StringInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.StringInputSchema\",\n  \"description\": \"Schema for a string input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the string.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"enum\": {\n      \"description\": \"If provided, the string must be one of these values.\",\n      \"anyOf\": [\n        {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.StringInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_4962014640569551593"
         },
         {
@@ -1029,7 +1029,7 @@
         {
           "role": "tool",
           "index": 50,
-          "content": "{\r\n  \"title\": \"functions.expression.AnyOfInputSchema\",\r\n  \"description\": \"Schema for a union of possible types - input must match at least one.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"anyOf\": {\r\n      \"description\": \"The possible schemas that the input can match.\",\r\n      \"type\": \"array\",\r\n      \"items\": {\r\n        \"$ref\": \"functions.expression.InputSchema\"\r\n      }\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.AnyOfInputSchema\",\n  \"description\": \"Schema for a union of possible types - input must match at least one.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"anyOf\": {\n      \"description\": \"The possible schemas that the input can match.\",\n      \"type\": \"array\",\n      \"items\": {\n        \"$ref\": \"functions.expression.InputSchema\"\n      }\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_6826792079070606815"
         },
         {
@@ -1067,7 +1067,7 @@
         {
           "role": "tool",
           "index": 52,
-          "content": "{\r\n  \"title\": \"functions.expression.NumberInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"number\"\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.NumberInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"number\"\n  ]\n}\n",
           "tool_call_id": "call_mock_6666826202378878110"
         },
         {

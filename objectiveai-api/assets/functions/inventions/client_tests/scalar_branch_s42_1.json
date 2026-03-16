@@ -119,7 +119,7 @@
         {
           "role": "tool",
           "index": 4,
-          "content": "{\r\n  \"title\": \"functions.expression.ImageInputSchema\",\r\n  \"description\": \"Schema for an image input (URL or base64-encoded).\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the expected image.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.ImageInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.ImageInputSchema\",\n  \"description\": \"Schema for an image input (URL or base64-encoded).\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the expected image.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.ImageInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_4694539855410257725"
         },
         {
@@ -351,7 +351,7 @@
         {
           "role": "tool",
           "index": 14,
-          "content": "{\r\n  \"title\": \"functions.expression.BooleanInputSchema\",\r\n  \"description\": \"Schema for a boolean input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the boolean.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.BooleanInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.BooleanInputSchema\",\n  \"description\": \"Schema for a boolean input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the boolean.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.BooleanInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_7630914955716769911"
         },
         {
@@ -388,7 +388,7 @@
         {
           "role": "tool",
           "index": 16,
-          "content": "{\r\n  \"title\": \"agent.completions.message.VideoUrl\",\r\n  \"description\": \"A video URL for multimodal input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"url\": {\r\n      \"description\": \"The URL of the video.\",\r\n      \"type\": \"string\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"agent.completions.message.VideoUrl\",\n  \"description\": \"A video URL for multimodal input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"url\": {\n      \"description\": \"The URL of the video.\",\n      \"type\": \"string\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_10223423070621387138"
         },
         {
@@ -464,7 +464,7 @@
         {
           "role": "tool",
           "index": 20,
-          "content": "{\r\n  \"title\": \"agent.completions.message.File\",\r\n  \"description\": \"A file attachment for multimodal input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"file_data\": {\r\n      \"description\": \"Base64-encoded file data.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"file_id\": {\r\n      \"description\": \"The ID of a previously uploaded file.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"file_url\": {\r\n      \"description\": \"A URL to fetch the file from.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"filename\": {\r\n      \"description\": \"The filename for display purposes.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"agent.completions.message.File\",\n  \"description\": \"A file attachment for multimodal input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"file_data\": {\n      \"description\": \"Base64-encoded file data.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"file_id\": {\n      \"description\": \"The ID of a previously uploaded file.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"file_url\": {\n      \"description\": \"A URL to fetch the file from.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"filename\": {\n      \"description\": \"The filename for display purposes.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_15544221571323607503"
         },
         {

@@ -156,7 +156,7 @@
         {
           "role": "tool",
           "index": 6,
-          "content": "{\r\n  \"title\": \"functions.expression.IntegerInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"integer\"\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.IntegerInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"integer\"\n  ]\n}\n",
           "tool_call_id": "call_mock_10311257984864212842"
         },
         {
@@ -194,7 +194,7 @@
         {
           "role": "tool",
           "index": 8,
-          "content": "{\r\n  \"title\": \"functions.expression.BooleanInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"boolean\"\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.BooleanInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"boolean\"\n  ]\n}\n",
           "tool_call_id": "call_mock_4030299450993628820"
         },
         {
@@ -232,7 +232,7 @@
         {
           "role": "tool",
           "index": 10,
-          "content": "{\r\n  \"title\": \"functions.expression.StringInputSchema\",\r\n  \"description\": \"Schema for a string input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the string.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"enum\": {\r\n      \"description\": \"If provided, the string must be one of these values.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"array\",\r\n          \"items\": {\r\n            \"type\": \"string\"\r\n          }\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.StringInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.StringInputSchema\",\n  \"description\": \"Schema for a string input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the string.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"enum\": {\n      \"description\": \"If provided, the string must be one of these values.\",\n      \"anyOf\": [\n        {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.StringInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_9906665747620943397"
         },
         {
@@ -269,7 +269,7 @@
         {
           "role": "tool",
           "index": 12,
-          "content": "{\r\n  \"title\": \"functions.expression.FileInputSchema\",\r\n  \"description\": \"Schema for a file input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the expected file.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.FileInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.FileInputSchema\",\n  \"description\": \"Schema for a file input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the expected file.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.FileInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_15692480165919306213"
         },
         {
@@ -577,7 +577,7 @@
         {
           "role": "tool",
           "index": 26,
-          "content": "{\r\n  \"title\": \"agent.completions.message.ImageUrlDetail\",\r\n  \"description\": \"Detail level for image processing.\",\r\n  \"anyOf\": [\r\n    {\r\n      \"description\": \"Let the model decide the detail level.\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"auto\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"Low detail mode (faster, less tokens).\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"low\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"High detail mode (more accurate, more tokens).\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"high\"\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"agent.completions.message.ImageUrlDetail\",\n  \"description\": \"Detail level for image processing.\",\n  \"anyOf\": [\n    {\n      \"description\": \"Let the model decide the detail level.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"auto\"\n      ]\n    },\n    {\n      \"description\": \"Low detail mode (faster, less tokens).\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"low\"\n      ]\n    },\n    {\n      \"description\": \"High detail mode (more accurate, more tokens).\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"high\"\n      ]\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_14827908151481249547"
         },
         {
@@ -653,7 +653,7 @@
         {
           "role": "tool",
           "index": 30,
-          "content": "{\r\n  \"title\": \"agent.completions.message.ImageUrlDetail\",\r\n  \"description\": \"Detail level for image processing.\",\r\n  \"anyOf\": [\r\n    {\r\n      \"description\": \"Let the model decide the detail level.\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"auto\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"Low detail mode (faster, less tokens).\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"low\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"High detail mode (more accurate, more tokens).\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"high\"\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"agent.completions.message.ImageUrlDetail\",\n  \"description\": \"Detail level for image processing.\",\n  \"anyOf\": [\n    {\n      \"description\": \"Let the model decide the detail level.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"auto\"\n      ]\n    },\n    {\n      \"description\": \"Low detail mode (faster, less tokens).\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"low\"\n      ]\n    },\n    {\n      \"description\": \"High detail mode (more accurate, more tokens).\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"high\"\n      ]\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_12536989895769937893"
         },
         {

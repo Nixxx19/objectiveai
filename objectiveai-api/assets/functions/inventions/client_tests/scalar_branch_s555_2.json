@@ -463,7 +463,7 @@
         {
           "role": "tool",
           "index": 20,
-          "content": "{\r\n  \"title\": \"functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"depth\": {\r\n      \"type\": \"integer\",\r\n      \"minimum\": 0,\r\n      \"maximum\": 18446744073709551615\r\n    },\r\n    \"input\": {\r\n      \"$ref\": \"functions.expression.Expression\"\r\n    },\r\n    \"input_schema\": {\r\n      \"$ref\": \"functions.expression.ObjectInputSchema\"\r\n    },\r\n    \"max_branch_width\": {\r\n      \"type\": \"integer\",\r\n      \"minimum\": 0,\r\n      \"maximum\": 18446744073709551615\r\n    },\r\n    \"max_leaf_width\": {\r\n      \"type\": \"integer\",\r\n      \"minimum\": 0,\r\n      \"maximum\": 18446744073709551615\r\n    },\r\n    \"min_branch_width\": {\r\n      \"type\": \"integer\",\r\n      \"minimum\": 0,\r\n      \"maximum\": 18446744073709551615\r\n    },\r\n    \"min_leaf_width\": {\r\n      \"type\": \"integer\",\r\n      \"minimum\": 0,\r\n      \"maximum\": 18446744073709551615\r\n    },\r\n    \"name\": {\r\n      \"type\": \"string\"\r\n    },\r\n    \"skip\": {\r\n      \"anyOf\": [\r\n        {\r\n          \"$ref\": \"functions.expression.Expression\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"spec\": {\r\n      \"type\": \"string\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"depth\": {\n      \"type\": \"integer\",\n      \"minimum\": 0,\n      \"maximum\": 18446744073709551615\n    },\n    \"input\": {\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    \"input_schema\": {\n      \"$ref\": \"functions.expression.ObjectInputSchema\"\n    },\n    \"max_branch_width\": {\n      \"type\": \"integer\",\n      \"minimum\": 0,\n      \"maximum\": 18446744073709551615\n    },\n    \"max_leaf_width\": {\n      \"type\": \"integer\",\n      \"minimum\": 0,\n      \"maximum\": 18446744073709551615\n    },\n    \"min_branch_width\": {\n      \"type\": \"integer\",\n      \"minimum\": 0,\n      \"maximum\": 18446744073709551615\n    },\n    \"min_leaf_width\": {\n      \"type\": \"integer\",\n      \"minimum\": 0,\n      \"maximum\": 18446744073709551615\n    },\n    \"name\": {\n      \"type\": \"string\"\n    },\n    \"skip\": {\n      \"anyOf\": [\n        {\n          \"$ref\": \"functions.expression.Expression\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"spec\": {\n      \"type\": \"string\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_13174401305293918757"
         },
         {
@@ -539,7 +539,7 @@
         {
           "role": "tool",
           "index": 24,
-          "content": "{\r\n  \"title\": \"functions.expression.Special\",\r\n  \"description\": \"Predefined expression behaviors that require no user-authored code.\",\r\n  \"anyOf\": [\r\n    {\r\n      \"description\": \"Returns the params input as-is.\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"input\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"Returns the params output as-is.\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"output\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"L1-normalizes the output. Scalar/Err pass through.\\nVector: L1 normalize. Vectors: L1 normalize each.\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"task_output_l1_normalized\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"Weighted sum of the output. Vector → Scalar. Vectors → Vector.\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"task_output_weighted_sum\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"Returns the length of input['items'] as u64\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"input_items_output_length\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"Splits an input containing items and optionally context into multiple inputs\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"input_items_optional_context_split\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"Merges multiple inputs containing items and optionally context into a single input\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"input_items_optional_context_merge\"\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.Special\",\n  \"description\": \"Predefined expression behaviors that require no user-authored code.\",\n  \"anyOf\": [\n    {\n      \"description\": \"Returns the params input as-is.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input\"\n      ]\n    },\n    {\n      \"description\": \"Returns the params output as-is.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"output\"\n      ]\n    },\n    {\n      \"description\": \"L1-normalizes the output. Scalar/Err pass through.\\nVector: L1 normalize. Vectors: L1 normalize each.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"task_output_l1_normalized\"\n      ]\n    },\n    {\n      \"description\": \"Weighted sum of the output. Vector → Scalar. Vectors → Vector.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"task_output_weighted_sum\"\n      ]\n    },\n    {\n      \"description\": \"Returns the length of input['items'] as u64\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_output_length\"\n      ]\n    },\n    {\n      \"description\": \"Splits an input containing items and optionally context into multiple inputs\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_optional_context_split\"\n      ]\n    },\n    {\n      \"description\": \"Merges multiple inputs containing items and optionally context into a single input\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_optional_context_merge\"\n      ]\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_9364861276837016117"
         },
         {
@@ -614,7 +614,7 @@
         {
           "role": "tool",
           "index": 28,
-          "content": "{\r\n  \"title\": \"functions.expression.ImageInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"image\"\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.ImageInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"image\"\n  ]\n}\n",
           "tool_call_id": "call_mock_18403324402840786575"
         },
         {
@@ -689,7 +689,7 @@
         {
           "role": "tool",
           "index": 32,
-          "content": "{\r\n  \"title\": \"functions.expression.FileInputSchema\",\r\n  \"description\": \"Schema for a file input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the expected file.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.FileInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.FileInputSchema\",\n  \"description\": \"Schema for a file input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the expected file.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.FileInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_14643460705205827540"
         },
         {
@@ -727,7 +727,7 @@
         {
           "role": "tool",
           "index": 34,
-          "content": "{\r\n  \"title\": \"agent.completions.message.ImageUrlDetail\",\r\n  \"description\": \"Detail level for image processing.\",\r\n  \"anyOf\": [\r\n    {\r\n      \"description\": \"Let the model decide the detail level.\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"auto\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"Low detail mode (faster, less tokens).\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"low\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"High detail mode (more accurate, more tokens).\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"high\"\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"agent.completions.message.ImageUrlDetail\",\n  \"description\": \"Detail level for image processing.\",\n  \"anyOf\": [\n    {\n      \"description\": \"Let the model decide the detail level.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"auto\"\n      ]\n    },\n    {\n      \"description\": \"Low detail mode (faster, less tokens).\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"low\"\n      ]\n    },\n    {\n      \"description\": \"High detail mode (more accurate, more tokens).\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"high\"\n      ]\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_8464021306438508286"
         },
         {
@@ -765,7 +765,7 @@
         {
           "role": "tool",
           "index": 36,
-          "content": "{\r\n  \"title\": \"functions.expression.ArrayInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"array\"\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.ArrayInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"array\"\n  ]\n}\n",
           "tool_call_id": "call_mock_6319236275366578889"
         },
         {

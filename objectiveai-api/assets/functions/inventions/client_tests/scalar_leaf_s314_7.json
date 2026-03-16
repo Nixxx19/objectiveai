@@ -118,7 +118,7 @@
         {
           "role": "tool",
           "index": 4,
-          "content": "{\r\n  \"title\": \"functions.expression.VideoInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"video\"\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.VideoInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"video\"\n  ]\n}\n",
           "tool_call_id": "call_mock_16805359821615788746"
         },
         {
@@ -194,7 +194,7 @@
         {
           "role": "tool",
           "index": 8,
-          "content": "{\r\n  \"title\": \"functions.expression.ImageInputSchema\",\r\n  \"description\": \"Schema for an image input (URL or base64-encoded).\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the expected image.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.ImageInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.ImageInputSchema\",\n  \"description\": \"Schema for an image input (URL or base64-encoded).\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the expected image.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.ImageInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_17096246649223713356"
         },
         {
@@ -232,7 +232,7 @@
         {
           "role": "tool",
           "index": 10,
-          "content": "{\r\n  \"title\": \"functions.expression.StringInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"string\"\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.StringInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"string\"\n  ]\n}\n",
           "tool_call_id": "call_mock_8231571315353014042"
         },
         {
@@ -614,7 +614,7 @@
         {
           "role": "tool",
           "index": 28,
-          "content": "{\r\n  \"title\": \"functions.expression.Special\",\r\n  \"description\": \"Predefined expression behaviors that require no user-authored code.\",\r\n  \"anyOf\": [\r\n    {\r\n      \"description\": \"Returns the params input as-is.\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"input\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"Returns the params output as-is.\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"output\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"L1-normalizes the output. Scalar/Err pass through.\\nVector: L1 normalize. Vectors: L1 normalize each.\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"task_output_l1_normalized\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"Weighted sum of the output. Vector → Scalar. Vectors → Vector.\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"task_output_weighted_sum\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"Returns the length of input['items'] as u64\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"input_items_output_length\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"Splits an input containing items and optionally context into multiple inputs\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"input_items_optional_context_split\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"Merges multiple inputs containing items and optionally context into a single input\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"input_items_optional_context_merge\"\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.Special\",\n  \"description\": \"Predefined expression behaviors that require no user-authored code.\",\n  \"anyOf\": [\n    {\n      \"description\": \"Returns the params input as-is.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input\"\n      ]\n    },\n    {\n      \"description\": \"Returns the params output as-is.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"output\"\n      ]\n    },\n    {\n      \"description\": \"L1-normalizes the output. Scalar/Err pass through.\\nVector: L1 normalize. Vectors: L1 normalize each.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"task_output_l1_normalized\"\n      ]\n    },\n    {\n      \"description\": \"Weighted sum of the output. Vector → Scalar. Vectors → Vector.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"task_output_weighted_sum\"\n      ]\n    },\n    {\n      \"description\": \"Returns the length of input['items'] as u64\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_output_length\"\n      ]\n    },\n    {\n      \"description\": \"Splits an input containing items and optionally context into multiple inputs\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_optional_context_split\"\n      ]\n    },\n    {\n      \"description\": \"Merges multiple inputs containing items and optionally context into a single input\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_optional_context_merge\"\n      ]\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_10946913175535372276"
         },
         {
@@ -728,7 +728,7 @@
         {
           "role": "tool",
           "index": 34,
-          "content": "{\r\n  \"title\": \"agent.completions.message.SimpleContentPartExpression\",\r\n  \"description\": \"A text part expression.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"text\": {\r\n      \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\r\n      \"anyOf\": [\r\n        {\r\n          \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\r\n          \"$ref\": \"functions.expression.Expression\"\r\n        },\r\n        {\r\n          \"description\": \"A literal value.\",\r\n          \"type\": \"string\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"text\"\r\n      ]\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"agent.completions.message.SimpleContentPartExpression\",\n  \"description\": \"A text part expression.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"text\": {\n      \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\n      \"anyOf\": [\n        {\n          \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\n          \"$ref\": \"functions.expression.Expression\"\n        },\n        {\n          \"description\": \"A literal value.\",\n          \"type\": \"string\"\n        }\n      ]\n    },\n    \"type\": {\n      \"type\": \"string\",\n      \"enum\": [\n        \"text\"\n      ]\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_10858299602562648796"
         },
         {
@@ -804,7 +804,7 @@
         {
           "role": "tool",
           "index": 38,
-          "content": "{\r\n  \"title\": \"agent.completions.message.ImageUrl\",\r\n  \"description\": \"An image URL for multimodal input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"detail\": {\r\n      \"description\": \"The detail level for image processing.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"$ref\": \"agent.completions.message.ImageUrlDetail\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"url\": {\r\n      \"description\": \"The URL of the image (can be a data URL or HTTP URL).\",\r\n      \"type\": \"string\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"agent.completions.message.ImageUrl\",\n  \"description\": \"An image URL for multimodal input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"detail\": {\n      \"description\": \"The detail level for image processing.\",\n      \"anyOf\": [\n        {\n          \"$ref\": \"agent.completions.message.ImageUrlDetail\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"url\": {\n      \"description\": \"The URL of the image (can be a data URL or HTTP URL).\",\n      \"type\": \"string\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_13783712297139736499"
         },
         {

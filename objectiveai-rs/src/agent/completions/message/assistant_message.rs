@@ -117,16 +117,15 @@ impl FromStarlarkValue for AssistantMessage {
 #[schemars(rename = "agent.completions.message.AssistantMessageExpression")]
 pub struct AssistantMessageExpression {
     /// The content expression.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub content: Option<
+    #[serde(skip_serializing_if = "functions::expression::WithExpression::is_none")]
+    pub content:
         functions::expression::WithExpression<Option<RichContentExpression>>,
-    >,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub name: Option<functions::expression::WithExpression<Option<String>>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub refusal: Option<functions::expression::WithExpression<Option<String>>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub tool_calls: Option<
+    #[serde(skip_serializing_if = "functions::expression::WithExpression::is_none")]
+    pub name: functions::expression::WithExpression<Option<String>>,
+    #[serde(skip_serializing_if = "functions::expression::WithExpression::is_none")]
+    pub refusal: functions::expression::WithExpression<Option<String>>,
+    #[serde(skip_serializing_if = "functions::expression::WithExpression::is_none")]
+    pub tool_calls:
         functions::expression::WithExpression<
             Option<
                 Vec<
@@ -136,10 +135,9 @@ pub struct AssistantMessageExpression {
                 >,
             >,
         >,
-    >,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "functions::expression::WithExpression::is_none")]
     pub reasoning:
-        Option<functions::expression::WithExpression<Option<String>>>,
+        functions::expression::WithExpression<Option<String>>,
 }
 
 impl AssistantMessageExpression {
@@ -150,61 +148,41 @@ impl AssistantMessageExpression {
     ) -> Result<AssistantMessage, functions::expression::ExpressionError> {
         let content = self
             .content
-            .map(|content| content.compile_one(params))
-            .transpose()?
-            .flatten()
+            .compile_one(params)?
             .map(|content| content.compile(params))
             .transpose()?;
-        let name = self
-            .name
-            .map(|name| name.compile_one(params))
-            .transpose()?
-            .flatten();
-        let refusal = self
-            .refusal
-            .map(|refusal| refusal.compile_one(params))
-            .transpose()?
-            .flatten();
+        let name = self.name.compile_one(params)?;
+        let refusal = self.refusal.compile_one(params)?;
         let tool_calls = self
             .tool_calls
+            .compile_one(params)?
             .map(|tool_calls| {
-                let tool_calls = tool_calls.compile_one(params)?;
-                Ok::<_, functions::expression::ExpressionError>(tool_calls.map(
-                    |tool_calls| {
-                        let mut compiled_tool_calls =
-                            Vec::with_capacity(tool_calls.len());
-                        for tool_call in tool_calls {
-                            match tool_call.compile_one_or_many(params)? {
-                                functions::expression::OneOrMany::One(
-                                    one_tool_call,
-                                ) => {
-                                    compiled_tool_calls
-                                        .push(one_tool_call.compile(params)?);
-                                }
-                                functions::expression::OneOrMany::Many(
-                                    many_tool_calls,
-                                ) => {
-                                    for tool_call in many_tool_calls {
-                                        compiled_tool_calls
-                                            .push(tool_call.compile(params)?);
-                                    }
-                                }
+                let mut compiled_tool_calls =
+                    Vec::with_capacity(tool_calls.len());
+                for tool_call in tool_calls {
+                    match tool_call.compile_one_or_many(params)? {
+                        functions::expression::OneOrMany::One(
+                            one_tool_call,
+                        ) => {
+                            compiled_tool_calls
+                                .push(one_tool_call.compile(params)?);
+                        }
+                        functions::expression::OneOrMany::Many(
+                            many_tool_calls,
+                        ) => {
+                            for tool_call in many_tool_calls {
+                                compiled_tool_calls
+                                    .push(tool_call.compile(params)?);
                             }
                         }
-                        Ok::<_, functions::expression::ExpressionError>(
-                            compiled_tool_calls,
-                        )
-                    },
-                ))
+                    }
+                }
+                Ok::<_, functions::expression::ExpressionError>(
+                    compiled_tool_calls,
+                )
             })
-            .transpose()?
-            .flatten()
             .transpose()?;
-        let reasoning = self
-            .reasoning
-            .map(|reasoning| reasoning.compile_one(params))
-            .transpose()?
-            .flatten();
+        let reasoning = self.reasoning.compile_one(params)?;
         Ok(AssistantMessage {
             content,
             name,
@@ -224,11 +202,11 @@ impl FromStarlarkValue for AssistantMessageExpression {
                 "AssistantMessageExpression: expected dict".into(),
             )
         })?;
-        let mut content = None;
-        let mut name = None;
-        let mut refusal = None;
-        let mut tool_calls = None;
-        let mut reasoning = None;
+        let mut content = WithExpression::Value(None);
+        let mut name = WithExpression::Value(None);
+        let mut refusal = WithExpression::Value(None);
+        let mut tool_calls = WithExpression::Value(None);
+        let mut reasoning = WithExpression::Value(None);
         for (k, v) in dict.iter() {
             let key = <&str as UnpackValue>::unpack_value(k)
                 .map_err(|e| {
@@ -242,39 +220,39 @@ impl FromStarlarkValue for AssistantMessageExpression {
                 })?;
             match key {
                 "content" => {
-                    content = Some(WithExpression::Value(if v.is_none() {
+                    content = WithExpression::Value(if v.is_none() {
                         None
                     } else {
                         Some(RichContentExpression::from_starlark_value(&v)?)
-                    }));
+                    });
                 }
                 "name" => {
-                    name = Some(WithExpression::Value(if v.is_none() {
+                    name = WithExpression::Value(if v.is_none() {
                         None
                     } else {
                         Some(String::from_starlark_value(&v)?)
-                    }));
+                    });
                 }
                 "refusal" => {
-                    refusal = Some(WithExpression::Value(if v.is_none() {
+                    refusal = WithExpression::Value(if v.is_none() {
                         None
                     } else {
                         Some(String::from_starlark_value(&v)?)
-                    }));
+                    });
                 }
                 "tool_calls" => {
-                    tool_calls = Some(WithExpression::Value(if v.is_none() {
+                    tool_calls = WithExpression::Value(if v.is_none() {
                         None
                     } else {
                         Some(Vec::<WithExpression<AssistantToolCallExpression>>::from_starlark_value(&v)?)
-                    }));
+                    });
                 }
                 "reasoning" => {
-                    reasoning = Some(WithExpression::Value(if v.is_none() {
+                    reasoning = WithExpression::Value(if v.is_none() {
                         None
                     } else {
                         Some(String::from_starlark_value(&v)?)
-                    }));
+                    });
                 }
                 _ => {}
             }

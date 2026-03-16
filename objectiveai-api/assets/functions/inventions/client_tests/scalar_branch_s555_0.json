@@ -350,7 +350,7 @@
         {
           "role": "tool",
           "index": 14,
-          "content": "{\r\n  \"title\": \"functions.expression.StringInputSchema\",\r\n  \"description\": \"Schema for a string input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the string.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"enum\": {\r\n      \"description\": \"If provided, the string must be one of these values.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"array\",\r\n          \"items\": {\r\n            \"type\": \"string\"\r\n          }\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.StringInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.StringInputSchema\",\n  \"description\": \"Schema for a string input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the string.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"enum\": {\n      \"description\": \"If provided, the string must be one of these values.\",\n      \"anyOf\": [\n        {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.StringInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_15725039206028367474"
         },
         {
@@ -388,7 +388,7 @@
         {
           "role": "tool",
           "index": 16,
-          "content": "{\r\n  \"title\": \"functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"depth\": {\r\n      \"type\": \"integer\",\r\n      \"minimum\": 0,\r\n      \"maximum\": 18446744073709551615\r\n    },\r\n    \"input\": {\r\n      \"$ref\": \"functions.expression.Expression\"\r\n    },\r\n    \"input_schema\": {\r\n      \"$ref\": \"functions.expression.ObjectInputSchema\"\r\n    },\r\n    \"max_branch_width\": {\r\n      \"type\": \"integer\",\r\n      \"minimum\": 0,\r\n      \"maximum\": 18446744073709551615\r\n    },\r\n    \"max_leaf_width\": {\r\n      \"type\": \"integer\",\r\n      \"minimum\": 0,\r\n      \"maximum\": 18446744073709551615\r\n    },\r\n    \"min_branch_width\": {\r\n      \"type\": \"integer\",\r\n      \"minimum\": 0,\r\n      \"maximum\": 18446744073709551615\r\n    },\r\n    \"min_leaf_width\": {\r\n      \"type\": \"integer\",\r\n      \"minimum\": 0,\r\n      \"maximum\": 18446744073709551615\r\n    },\r\n    \"name\": {\r\n      \"type\": \"string\"\r\n    },\r\n    \"skip\": {\r\n      \"anyOf\": [\r\n        {\r\n          \"$ref\": \"functions.expression.Expression\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"spec\": {\r\n      \"type\": \"string\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"depth\": {\n      \"type\": \"integer\",\n      \"minimum\": 0,\n      \"maximum\": 18446744073709551615\n    },\n    \"input\": {\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    \"input_schema\": {\n      \"$ref\": \"functions.expression.ObjectInputSchema\"\n    },\n    \"max_branch_width\": {\n      \"type\": \"integer\",\n      \"minimum\": 0,\n      \"maximum\": 18446744073709551615\n    },\n    \"max_leaf_width\": {\n      \"type\": \"integer\",\n      \"minimum\": 0,\n      \"maximum\": 18446744073709551615\n    },\n    \"min_branch_width\": {\n      \"type\": \"integer\",\n      \"minimum\": 0,\n      \"maximum\": 18446744073709551615\n    },\n    \"min_leaf_width\": {\n      \"type\": \"integer\",\n      \"minimum\": 0,\n      \"maximum\": 18446744073709551615\n    },\n    \"name\": {\n      \"type\": \"string\"\n    },\n    \"skip\": {\n      \"anyOf\": [\n        {\n          \"$ref\": \"functions.expression.Expression\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"spec\": {\n      \"type\": \"string\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_3272977848896944416"
         },
         {
@@ -426,7 +426,7 @@
         {
           "role": "tool",
           "index": 18,
-          "content": "{\r\n  \"title\": \"functions.expression.VideoInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"video\"\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.VideoInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"video\"\n  ]\n}\n",
           "tool_call_id": "call_mock_11606663358225801867"
         },
         {
@@ -540,7 +540,7 @@
         {
           "role": "tool",
           "index": 24,
-          "content": "{\r\n  \"title\": \"agent.completions.message.ImageUrlDetail\",\r\n  \"description\": \"Detail level for image processing.\",\r\n  \"anyOf\": [\r\n    {\r\n      \"description\": \"Let the model decide the detail level.\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"auto\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"Low detail mode (faster, less tokens).\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"low\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"High detail mode (more accurate, more tokens).\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"high\"\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"agent.completions.message.ImageUrlDetail\",\n  \"description\": \"Detail level for image processing.\",\n  \"anyOf\": [\n    {\n      \"description\": \"Let the model decide the detail level.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"auto\"\n      ]\n    },\n    {\n      \"description\": \"Low detail mode (faster, less tokens).\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"low\"\n      ]\n    },\n    {\n      \"description\": \"High detail mode (more accurate, more tokens).\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"high\"\n      ]\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_17932655921183165464"
         },
         {
@@ -578,7 +578,7 @@
         {
           "role": "tool",
           "index": 26,
-          "content": "{\r\n  \"title\": \"functions.expression.IntegerInputSchema\",\r\n  \"description\": \"Schema for an integer input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the integer.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"maximum\": {\r\n      \"description\": \"Maximum allowed value (inclusive).\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"integer\",\r\n          \"minimum\": -9223372036854775808,\r\n          \"maximum\": 9223372036854775807\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"minimum\": {\r\n      \"description\": \"Minimum allowed value (inclusive).\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"integer\",\r\n          \"minimum\": -9223372036854775808,\r\n          \"maximum\": 9223372036854775807\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.IntegerInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.IntegerInputSchema\",\n  \"description\": \"Schema for an integer input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the integer.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"maximum\": {\n      \"description\": \"Maximum allowed value (inclusive).\",\n      \"anyOf\": [\n        {\n          \"type\": \"integer\",\n          \"minimum\": -9223372036854775808,\n          \"maximum\": 9223372036854775807\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"minimum\": {\n      \"description\": \"Minimum allowed value (inclusive).\",\n      \"anyOf\": [\n        {\n          \"type\": \"integer\",\n          \"minimum\": -9223372036854775808,\n          \"maximum\": 9223372036854775807\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.IntegerInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_7585888658810543592"
         },
         {
@@ -653,7 +653,7 @@
         {
           "role": "tool",
           "index": 30,
-          "content": "{\r\n  \"title\": \"functions.expression.NumberInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"number\"\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.NumberInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"number\"\n  ]\n}\n",
           "tool_call_id": "call_mock_3664343123041709710"
         },
         {

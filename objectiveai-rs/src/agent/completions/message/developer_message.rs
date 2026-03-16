@@ -89,8 +89,8 @@ pub struct DeveloperMessageExpression {
     /// The message content expression.
     pub content: functions::expression::WithExpression<SimpleContentExpression>,
     /// Optional name expression.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub name: Option<functions::expression::WithExpression<Option<String>>>,
+    #[serde(skip_serializing_if = "functions::expression::WithExpression::is_none")]
+    pub name: functions::expression::WithExpression<Option<String>>,
 }
 
 impl DeveloperMessageExpression {
@@ -100,11 +100,7 @@ impl DeveloperMessageExpression {
         params: &functions::expression::Params,
     ) -> Result<DeveloperMessage, functions::expression::ExpressionError> {
         let content = self.content.compile_one(params)?.compile(params)?;
-        let name = self
-            .name
-            .map(|name| name.compile_one(params))
-            .transpose()?
-            .flatten();
+        let name = self.name.compile_one(params)?;
         Ok(DeveloperMessage { content, name })
     }
 }
@@ -119,7 +115,7 @@ impl FromStarlarkValue for DeveloperMessageExpression {
             )
         })?;
         let mut content = None;
-        let mut name = None;
+        let mut name = WithExpression::Value(None);
         for (k, v) in dict.iter() {
             let key = <&str as UnpackValue>::unpack_value(k)
                 .map_err(|e| {
@@ -138,11 +134,11 @@ impl FromStarlarkValue for DeveloperMessageExpression {
                     ))
                 }
                 "name" => {
-                    name = Some(WithExpression::Value(if v.is_none() {
+                    name = WithExpression::Value(if v.is_none() {
                         None
                     } else {
                         Some(String::from_starlark_value(&v)?)
-                    }));
+                    });
                 }
                 _ => {}
             }

@@ -274,7 +274,7 @@
         {
           "role": "tool",
           "index": 10,
-          "content": "{\r\n  \"title\": \"functions.expression.AnyOfInputSchema\",\r\n  \"description\": \"Schema for a union of possible types - input must match at least one.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"anyOf\": {\r\n      \"description\": \"The possible schemas that the input can match.\",\r\n      \"type\": \"array\",\r\n      \"items\": {\r\n        \"$ref\": \"functions.expression.InputSchema\"\r\n      }\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.AnyOfInputSchema\",\n  \"description\": \"Schema for a union of possible types - input must match at least one.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"anyOf\": {\n      \"description\": \"The possible schemas that the input can match.\",\n      \"type\": \"array\",\n      \"items\": {\n        \"$ref\": \"functions.expression.InputSchema\"\n      }\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_12702810133639053557"
         },
         {
@@ -539,7 +539,7 @@
         {
           "role": "tool",
           "index": 24,
-          "content": "{\r\n  \"title\": \"functions.expression.ObjectInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"object\"\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.ObjectInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"object\"\n  ]\n}\n",
           "tool_call_id": "call_mock_8690609307615417812"
         },
         {
@@ -577,7 +577,7 @@
         {
           "role": "tool",
           "index": 26,
-          "content": "{\r\n  \"title\": \"functions.expression.IntegerInputSchema\",\r\n  \"description\": \"Schema for an integer input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the integer.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"maximum\": {\r\n      \"description\": \"Maximum allowed value (inclusive).\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"integer\",\r\n          \"minimum\": -9223372036854775808,\r\n          \"maximum\": 9223372036854775807\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"minimum\": {\r\n      \"description\": \"Minimum allowed value (inclusive).\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"integer\",\r\n          \"minimum\": -9223372036854775808,\r\n          \"maximum\": 9223372036854775807\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.IntegerInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.IntegerInputSchema\",\n  \"description\": \"Schema for an integer input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the integer.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"maximum\": {\n      \"description\": \"Maximum allowed value (inclusive).\",\n      \"anyOf\": [\n        {\n          \"type\": \"integer\",\n          \"minimum\": -9223372036854775808,\n          \"maximum\": 9223372036854775807\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"minimum\": {\n      \"description\": \"Minimum allowed value (inclusive).\",\n      \"anyOf\": [\n        {\n          \"type\": \"integer\",\n          \"minimum\": -9223372036854775808,\n          \"maximum\": 9223372036854775807\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.IntegerInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_10111697708821979123"
         },
         {
@@ -653,7 +653,7 @@
         {
           "role": "tool",
           "index": 30,
-          "content": "{\r\n  \"title\": \"functions.expression.StringInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"string\"\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.StringInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"string\"\n  ]\n}\n",
           "tool_call_id": "call_mock_11372032357457027951"
         },
         {
@@ -729,7 +729,7 @@
         {
           "role": "tool",
           "index": 34,
-          "content": "{\r\n  \"title\": \"functions.expression.IntegerInputSchema\",\r\n  \"description\": \"Schema for an integer input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the integer.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"maximum\": {\r\n      \"description\": \"Maximum allowed value (inclusive).\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"integer\",\r\n          \"minimum\": -9223372036854775808,\r\n          \"maximum\": 9223372036854775807\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"minimum\": {\r\n      \"description\": \"Minimum allowed value (inclusive).\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"integer\",\r\n          \"minimum\": -9223372036854775808,\r\n          \"maximum\": 9223372036854775807\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.IntegerInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.IntegerInputSchema\",\n  \"description\": \"Schema for an integer input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the integer.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"maximum\": {\n      \"description\": \"Maximum allowed value (inclusive).\",\n      \"anyOf\": [\n        {\n          \"type\": \"integer\",\n          \"minimum\": -9223372036854775808,\n          \"maximum\": 9223372036854775807\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"minimum\": {\n      \"description\": \"Minimum allowed value (inclusive).\",\n      \"anyOf\": [\n        {\n          \"type\": \"integer\",\n          \"minimum\": -9223372036854775808,\n          \"maximum\": 9223372036854775807\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.IntegerInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_9999226926700331154"
         },
         {
@@ -767,7 +767,7 @@
         {
           "role": "tool",
           "index": 36,
-          "content": "{\r\n  \"title\": \"functions.expression.ImageInputSchema\",\r\n  \"description\": \"Schema for an image input (URL or base64-encoded).\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the expected image.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.ImageInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.ImageInputSchema\",\n  \"description\": \"Schema for an image input (URL or base64-encoded).\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the expected image.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.ImageInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_12877622360711392589"
         },
         {
@@ -918,7 +918,7 @@
         {
           "role": "tool",
           "index": 44,
-          "content": "{\r\n  \"title\": \"functions.expression.ArrayInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"array\"\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.ArrayInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"array\"\n  ]\n}\n",
           "tool_call_id": "call_mock_3029882504489381608"
         },
         {
@@ -955,7 +955,7 @@
         {
           "role": "tool",
           "index": 46,
-          "content": "{\r\n  \"title\": \"functions.expression.FileInputSchema\",\r\n  \"description\": \"Schema for a file input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the expected file.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.FileInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.FileInputSchema\",\n  \"description\": \"Schema for a file input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the expected file.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.FileInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_940099868075314291"
         },
         {
@@ -1068,7 +1068,7 @@
         {
           "role": "tool",
           "index": 52,
-          "content": "{\r\n  \"title\": \"functions.expression.StringInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"string\"\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"functions.expression.StringInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"string\"\n  ]\n}\n",
           "tool_call_id": "call_mock_8635692505780097292"
         },
         {
@@ -1144,7 +1144,7 @@
         {
           "role": "tool",
           "index": 56,
-          "content": "{\r\n  \"title\": \"agent.completions.message.InputAudio\",\r\n  \"description\": \"Audio input for multimodal messages.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"data\": {\r\n      \"description\": \"Base64-encoded audio data.\",\r\n      \"type\": \"string\"\r\n    },\r\n    \"format\": {\r\n      \"description\": \"The audio format (e.g., \\\"wav\\\", \\\"mp3\\\").\",\r\n      \"type\": \"string\"\r\n    }\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"agent.completions.message.InputAudio\",\n  \"description\": \"Audio input for multimodal messages.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"data\": {\n      \"description\": \"Base64-encoded audio data.\",\n      \"type\": \"string\"\n    },\n    \"format\": {\n      \"description\": \"The audio format (e.g., \\\"wav\\\", \\\"mp3\\\").\",\n      \"type\": \"string\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_2018099778181522908"
         },
         {

@@ -227,3 +227,9 @@ impl<T: super::special::FromSpecial> FromSpecial
     }
 }
 
+impl<T> WithExpression<Option<T>> {
+    pub fn is_none(&self) -> bool {
+        matches!(self, WithExpression::Value(None))
+    }
+}
+

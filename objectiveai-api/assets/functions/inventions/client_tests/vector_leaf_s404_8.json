@@ -349,7 +349,7 @@
         {
           "role": "tool",
           "index": 14,
-          "content": "{\r\n  \"title\": \"vector.completions.VectorResponses\",\r\n  \"description\": \"The list of response options in a vector completion request.\\n\\nEach element is a [`RichContent`] value that an LLM can vote for.\\nResponses can be plain text strings or multi-part content containing\\ntext, images, audio, video, or files.\\n\\n# Minimum Length\\n\\nA vector completion requires at least 2 responses to vote between.\\n\\n# Examples\\n\\nPlain text responses:\\n```json\\n[\\\"Yes\\\", \\\"No\\\", \\\"Maybe\\\"]\\n```\\n\\nMultimodal responses:\\n```json\\n[\\n  [{\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"Option A\\\"}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/a.png\\\"}}],\\n  [{\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"Option B\\\"}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/b.png\\\"}}]\\n]\\n```\",\r\n  \"type\": \"array\",\r\n  \"items\": {\r\n    \"$ref\": \"agent.completions.message.RichContent\"\r\n  }\r\n}\r\n",
+          "content": "{\n  \"title\": \"vector.completions.VectorResponses\",\n  \"description\": \"The list of response options in a vector completion request.\\n\\nEach element is a [`RichContent`] value that an LLM can vote for.\\nResponses can be plain text strings or multi-part content containing\\ntext, images, audio, video, or files.\\n\\n# Minimum Length\\n\\nA vector completion requires at least 2 responses to vote between.\\n\\n# Examples\\n\\nPlain text responses:\\n```json\\n[\\\"Yes\\\", \\\"No\\\", \\\"Maybe\\\"]\\n```\\n\\nMultimodal responses:\\n```json\\n[\\n  [{\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"Option A\\\"}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/a.png\\\"}}],\\n  [{\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"Option B\\\"}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/b.png\\\"}}]\\n]\\n```\",\n  \"type\": \"array\",\n  \"items\": {\n    \"$ref\": \"agent.completions.message.RichContent\"\n  }\n}\n",
           "tool_call_id": "call_mock_10075312805001377763"
         },
         {
@@ -387,7 +387,7 @@
         {
           "role": "tool",
           "index": 16,
-          "content": "{\r\n  \"title\": \"agent.completions.message.RichContent\",\r\n  \"description\": \"Rich content for user/assistant messages (supports multimodal input).\",\r\n  \"anyOf\": [\r\n    {\r\n      \"description\": \"Plain text content.\",\r\n      \"type\": \"string\"\r\n    },\r\n    {\r\n      \"description\": \"Multi-part content (text, images, audio, video, files).\",\r\n      \"type\": \"array\",\r\n      \"items\": {\r\n        \"$ref\": \"agent.completions.message.RichContentPart\"\r\n      }\r\n    }\r\n  ]\r\n}\r\n",
+          "content": "{\n  \"title\": \"agent.completions.message.RichContent\",\n  \"description\": \"Rich content for user/assistant messages (supports multimodal input).\",\n  \"anyOf\": [\n    {\n      \"description\": \"Plain text content.\",\n      \"type\": \"string\"\n    },\n    {\n      \"description\": \"Multi-part content (text, images, audio, video, files).\",\n      \"type\": \"array\",\n      \"items\": {\n        \"$ref\": \"agent.completions.message.RichContentPart\"\n      }\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_10085191856418055025"
         },
         {
