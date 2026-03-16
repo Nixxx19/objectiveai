@@ -7,7 +7,7 @@ from objectiveai.agent.completions.response.unary.message import Message
 from objectiveai.agent.completions.response.unary.object import Object
 from objectiveai.agent.completions.response.usage import Usage
 from objectiveai.agent.upstream import Upstream
-from objectiveai.response_error import ResponseError
+from objectiveai.error.response_error import ResponseError
 
 
 class AgentCompletion(BaseModel):

@@ -8,25 +8,12 @@ from objectiveai.functions.inventions.recursive.response.streaming.function_inve
 
 
 def _push(self, other: FunctionInventionChunk) -> None:
-    # completions: merge by index
     push_by_index(self.completions, other.completions)
-
-    # state: replace
-    self.state = push_replace(self.state, other.state)
-
-    # path: replace
-    self.path = push_replace(self.path, other.path)
-
-    # function: replace
-    self.function = push_replace(self.function, other.function)
-
-    # error: replace
-    self.error = push_replace(self.error, other.error)
-
-    # usage: delegate
-    self.usage = push_option(self.usage, other.usage)
-
-    # id, created, object, index are immutable
+    push_replace(self, "state", other.state)
+    push_replace(self, "path", other.path)
+    push_replace(self, "function", other.function)
+    push_replace(self, "error", other.error)
+    push_option(self, "usage", other.usage)
 
 
 FunctionInventionChunk.push = _push

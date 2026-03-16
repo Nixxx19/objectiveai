@@ -8,25 +8,12 @@ from objectiveai.functions.profiles.computations.response.streaming.function_pro
 
 
 def _push(self, other: FunctionProfileComputationChunk) -> None:
-    # executions: merge by index
     push_by_index(self.executions, other.executions)
-
-    # executions_errors: lazy set true
-    self.executions_errors = push_lazy_set_true(self.executions_errors, other.executions_errors)
-
-    # profile: replace
-    self.profile = push_replace(self.profile, other.profile)
-
-    # fitting_stats: replace
-    self.fitting_stats = push_replace(self.fitting_stats, other.fitting_stats)
-
-    # retry_token: replace
-    self.retry_token = push_replace(self.retry_token, other.retry_token)
-
-    # usage: delegate
-    self.usage = push_option(self.usage, other.usage)
-
-    # id, created, object, function are immutable
+    push_lazy_set_true(self, "executions_errors", other.executions_errors)
+    push_replace(self, "profile", other.profile)
+    push_replace(self, "fitting_stats", other.fitting_stats)
+    push_replace(self, "retry_token", other.retry_token)
+    push_option(self, "usage", other.usage)
 
 
 FunctionProfileComputationChunk.push = _push

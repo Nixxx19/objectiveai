@@ -3,16 +3,16 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.functions.alpha_scalar.inline_function import InlineFunction as FunctionsAlphaScalarInlineFunction
-from objectiveai.functions.alpha_vector.inline_function import InlineFunction
+from objectiveai.functions.alpha_scalar.inline_function import InlineFunction
+from objectiveai.functions.alpha_vector.inline_function import InlineFunction as FunctionsAlphaVectorInlineFunction
 
 
 class AlphaInlineFunctionVariant1(RootModel):
-    root: FunctionsAlphaScalarInlineFunction
+    root: InlineFunction
 
 
 class AlphaInlineFunctionVariant2(RootModel):
-    root: InlineFunction
+    root: FunctionsAlphaVectorInlineFunction
 
 
 class AlphaInlineFunction(RootModel):

@@ -10,20 +10,8 @@ class ResponseError(BaseModel):
 
 This struct represents an API error response containing an HTTP status
 code and a message. The message can be any JSON value, allowing for
-both simple string errors and structured error objects.
-
-# Examples
-
-```
-use objectiveai::error::ResponseError;
-use serde_json::json;
-
-let error = ResponseError {
-    code: 400,
-    message: json!({"error": "Invalid request"}),
-};
-```"""
-    model_config = ConfigDict(title='ResponseError')
+both simple string errors and structured error objects."""
+    model_config = ConfigDict(title='error.ResponseError')
 
     code: int = Field(..., description='The HTTP status code of the error response.', ge=0, le=65535)
     message: JsonValue = Field(..., description='The error message or details as a JSON value.')

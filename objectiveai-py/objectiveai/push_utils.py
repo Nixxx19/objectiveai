@@ -3,47 +3,12 @@
 from __future__ import annotations
 
 
-def push_option_int(self_val: int | None, other_val: int | None) -> int | None:
-    """Sum two optional ints (like Rust ``push_option_u64``)."""
-    if self_val is not None and other_val is not None:
-        return self_val + other_val
-    if other_val is not None:
-        return other_val
-    return self_val
-
-
-def push_option_string(self_val: str | None, other_val: str | None) -> str | None:
-    """Concatenate two optional strings."""
-    if self_val is not None and other_val is not None:
-        return self_val + other_val
-    if other_val is not None:
-        return other_val
-    return self_val
-
-
-def push_option(self_val, other_val):
-    """Merge two optional sub-objects by delegating to ``push()``.
-
-    Both present → ``self_val.push(other_val)``, returns self_val.
-    Only other → returns other_val (adopted).
-    Only self / neither → returns self_val.
-    """
-    if self_val is not None and other_val is not None:
-        self_val.push(other_val)
-        return self_val
-    if other_val is not None:
-        return other_val
-    return self_val
-
-
 def push_by_index(self_list: list, other_list: list) -> None:
     """Merge *other_list* into *self_list* by ``index`` field.
 
     Items with a matching index are merged via ``push()``.
     New indices are appended.
     """
-    from pydantic import RootModel
-
     index_map: dict[int, int] = {}
     for pos, item in enumerate(self_list):
         idx = _get_index(item)
@@ -60,19 +25,62 @@ def push_by_index(self_list: list, other_list: list) -> None:
                 index_map[idx] = len(self_list) - 1
 
 
-def push_lazy_set_true(self_val: bool | None, other_val: bool | None) -> bool | None:
-    """Lazy set that only sets to True, never overwrites to False."""
-    if other_val is True:
-        return True
-    return self_val
+def push_option(obj: object, attr: str, other_val) -> None:
+    """Conditionally merge an optional sub-object field.
+
+    Both present → delegate to push(). Only other → adopt.
+    Only self / neither → no assignment (field stays unset).
+    """
+    self_val = getattr(obj, attr)
+    if self_val is not None and other_val is not None:
+        self_val.push(other_val)
+    elif other_val is not None:
+        setattr(obj, attr, other_val)
 
 
-def push_replace(self_val, other_val):
-    """Replace self with other if other is not None (latest wins)."""
+def push_replace(obj: object, attr: str, other_val) -> None:
+    """Replace field only if other is not None (latest wins)."""
     if other_val is not None:
-        return other_val
-    return self_val
+        setattr(obj, attr, other_val)
 
+
+def push_option_int(obj: object, attr: str, other_val: int | None) -> None:
+    """Sum two optional ints. Only assigns if other is not None."""
+    if other_val is None:
+        return
+    self_val = getattr(obj, attr)
+    if self_val is not None:
+        setattr(obj, attr, self_val + other_val)
+    else:
+        setattr(obj, attr, other_val)
+
+
+def push_option_string(obj: object, attr: str, other_val: str | None) -> None:
+    """Concatenate two optional strings. Only assigns if other is not None."""
+    if other_val is None:
+        return
+    self_val = getattr(obj, attr)
+    if self_val is not None:
+        setattr(obj, attr, self_val + other_val)
+    else:
+        setattr(obj, attr, other_val)
+
+
+def push_option_decimal(obj: object, attr: str, other_val) -> None:
+    """Sum two optional decimals/floats. Only assigns if other is not None."""
+    if other_val is None:
+        return
+    self_val = getattr(obj, attr)
+    if self_val is not None:
+        setattr(obj, attr, self_val + other_val)
+    else:
+        setattr(obj, attr, other_val)
+
+
+def push_lazy_set_true(obj: object, attr: str, other_val: bool | None) -> None:
+    """Set to True only if other is True. Never overwrites to False."""
+    if other_val is True:
+        setattr(obj, attr, True)
 
 
 def _get_index(item):

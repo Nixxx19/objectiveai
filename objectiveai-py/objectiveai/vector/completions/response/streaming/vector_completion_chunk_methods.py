@@ -8,24 +8,13 @@ from objectiveai.vector.completions.response.streaming.vector_completion_chunk i
 
 
 def _push(self, other: VectorCompletionChunk) -> None:
-    # completions: merge by index
     push_by_index(self.completions, other.completions)
-
-    # votes: extend
     self.votes.extend(other.votes)
-
-    # scores: replace
     if other.scores:
         self.scores = list(other.scores)
-
-    # weights: replace
     if other.weights:
         self.weights = list(other.weights)
-
-    # usage: delegate
-    self.usage = push_option(self.usage, other.usage)
-
-    # id, created, ensemble, object are immutable
+    push_option(self, "usage", other.usage)
 
 
 VectorCompletionChunk.push = _push

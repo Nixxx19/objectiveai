@@ -4,10 +4,10 @@ from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
 from objectiveai.agent.completions.response.usage import Usage
+from objectiveai.error.response_error import ResponseError
+from objectiveai.functions.executions.response.output import Output
 from objectiveai.functions.executions.response.unary.object import Object
 from objectiveai.functions.executions.response.unary.reasoning_summary import ReasoningSummary
-from objectiveai.functions.expression.task_output_owned import TaskOutputOwned
-from objectiveai.response_error import ResponseError
 
 
 class FunctionExecutionTask(BaseModel):
@@ -20,7 +20,7 @@ class FunctionExecutionTask(BaseModel):
     id: str = Field(..., description='Unique identifier for this execution.')
     index: int = Field(..., ge=0, le=18446744073709551615)
     object: Object = Field(..., description='Object type identifier.')
-    output: TaskOutputOwned = Field(..., description='The final output (scalar or vector score).')
+    output: Output = Field(..., description='The final output (scalar or vector score).')
     profile: Optional[str] = Field(None, description='ID of the profile used (if remote).')
     reasoning: Optional[ReasoningSummary] = Field(None, description='Reasoning summary if reasoning was enabled.')
     retry_token: Optional[str] = Field(None, description='Token for retrying this execution with cached votes.')

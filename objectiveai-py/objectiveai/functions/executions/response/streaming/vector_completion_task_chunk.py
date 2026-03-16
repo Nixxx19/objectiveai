@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
 from objectiveai.agent.completions.response.usage import Usage
-from objectiveai.response_error import ResponseError
+from objectiveai.error.response_error import ResponseError
 from objectiveai.vector.completions.response.streaming.agent_completion_chunk import AgentCompletionChunk
 from objectiveai.vector.completions.response.streaming.object import Object
 from objectiveai.vector.completions.response.vote import Vote

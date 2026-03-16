@@ -7,11 +7,8 @@ Mirrors the JS merged.test.ts pattern:
 """
 from __future__ import annotations
 
-import copy
 import math
 from typing import Any
-
-from pydantic import BaseModel
 
 DIGITS = 8
 
@@ -32,15 +29,3 @@ def rounded(value: Any) -> Any:
     if isinstance(value, dict):
         return {k: rounded(v) for k, v in value.items()}
     return value
-
-
-def pydantic_push(acc: dict, chunk: dict, model_cls: type[BaseModel]) -> dict:
-    """Push a chunk into an accumulator using the Python Pydantic implementation.
-
-    Deserializes both dicts into Pydantic models, calls push(), and
-    re-serializes to a dict for comparison.
-    """
-    acc_model = model_cls.model_validate(acc)
-    chunk_model = model_cls.model_validate(chunk)
-    acc_model.push(chunk_model)
-    return acc_model.model_dump(mode="python", by_alias=True)

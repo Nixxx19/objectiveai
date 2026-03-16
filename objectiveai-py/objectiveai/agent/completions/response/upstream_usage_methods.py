@@ -13,16 +13,9 @@ def _push(self, other: UpstreamUsage) -> None:
     self.total_tokens += other.total_tokens
     self.cost += other.cost
     self.total_cost += other.total_cost
-
-    self.completion_tokens_details = push_option(
-        self.completion_tokens_details, other.completion_tokens_details,
-    )
-    self.prompt_tokens_details = push_option(
-        self.prompt_tokens_details, other.prompt_tokens_details,
-    )
-    self.cost_details = push_option(self.cost_details, other.cost_details)
-
-    # cost_multiplier and is_byok are immutable — kept from self
+    push_option(self, "completion_tokens_details", other.completion_tokens_details)
+    push_option(self, "prompt_tokens_details", other.prompt_tokens_details)
+    push_option(self, "cost_details", other.cost_details)
 
 
 UpstreamUsage.push = _push

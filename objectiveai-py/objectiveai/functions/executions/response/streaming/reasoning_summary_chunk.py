@@ -7,7 +7,7 @@ from objectiveai.agent.completions.response.streaming.message_chunk import Messa
 from objectiveai.agent.completions.response.streaming.object import Object
 from objectiveai.agent.completions.response.usage import Usage
 from objectiveai.agent.upstream import Upstream
-from objectiveai.response_error import ResponseError
+from objectiveai.error.response_error import ResponseError
 
 
 class ReasoningSummaryChunk(BaseModel):

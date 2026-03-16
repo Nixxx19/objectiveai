@@ -4,12 +4,12 @@ from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 from objectiveai.agent.completions.response.usage import Usage
+from objectiveai.error.response_error import ResponseError
 from objectiveai.functions.full_remote_function import FullRemoteFunction
 from objectiveai.functions.inventions.response.unary.agent_completion import AgentCompletion
 from objectiveai.functions.inventions.response.unary.object import Object
 from objectiveai.functions.inventions.state.state import State
 from objectiveai.functions.remote_function_path import RemoteFunctionPath
-from objectiveai.response_error import ResponseError
 
 
 class FunctionInvention(BaseModel):

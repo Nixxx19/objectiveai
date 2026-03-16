@@ -13,14 +13,9 @@ def _push(self, other: Usage) -> None:
     self.total_tokens += other.total_tokens
     self.cost += other.cost
     self.total_cost += other.total_cost
-
-    self.completion_tokens_details = push_option(
-        self.completion_tokens_details, other.completion_tokens_details,
-    )
-    self.prompt_tokens_details = push_option(
-        self.prompt_tokens_details, other.prompt_tokens_details,
-    )
-    self.cost_details = push_option(self.cost_details, other.cost_details)
+    push_option(self, "completion_tokens_details", other.completion_tokens_details)
+    push_option(self, "prompt_tokens_details", other.prompt_tokens_details)
+    push_option(self, "cost_details", other.cost_details)
 
 
 Usage.push = _push

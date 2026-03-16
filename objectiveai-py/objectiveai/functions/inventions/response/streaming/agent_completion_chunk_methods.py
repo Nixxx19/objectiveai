@@ -8,16 +8,9 @@ from objectiveai.functions.inventions.response.streaming.agent_completion_chunk 
 
 
 def _push(self, other: AgentCompletionChunk) -> None:
-    # messages: merge by index
     push_by_index(self.messages, other.messages)
-
-    # error: replace
-    self.error = push_replace(self.error, other.error)
-
-    # usage: delegate
-    self.usage = push_option(self.usage, other.usage)
-
-    # id, created, object, upstream, index are immutable
+    push_replace(self, "error", other.error)
+    push_option(self, "usage", other.usage)
 
 
 AgentCompletionChunk.push = _push

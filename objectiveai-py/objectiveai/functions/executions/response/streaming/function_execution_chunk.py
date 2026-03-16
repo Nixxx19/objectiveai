@@ -4,11 +4,11 @@ from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 from objectiveai.agent.completions.response.usage import Usage
+from objectiveai.error.response_error import ResponseError
+from objectiveai.functions.executions.response.output import Output
 from objectiveai.functions.executions.response.streaming.object import Object
 from objectiveai.functions.executions.response.streaming.reasoning_summary_chunk import ReasoningSummaryChunk
 from objectiveai.functions.executions.response.streaming.task_chunk import TaskChunk
-from objectiveai.functions.expression.task_output_owned import TaskOutputOwned
-from objectiveai.response_error import ResponseError
 
 
 class FunctionExecutionChunk(BaseModel):
@@ -19,7 +19,7 @@ class FunctionExecutionChunk(BaseModel):
     function: Optional[str] = None
     id: str
     object: Object
-    output: Optional[TaskOutputOwned] = None
+    output: Optional[Output] = None
     profile: Optional[str] = None
     reasoning: Optional[ReasoningSummaryChunk] = None
     retry_token: Optional[str] = None

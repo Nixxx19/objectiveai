@@ -8,14 +8,11 @@ from objectiveai.agent.completions.message.assistant_tool_call_delta import (
 
 
 def _push(self, other: AssistantToolCallDelta) -> None:
-    # type: lazy set
-    if self.type_ is None:
+    if self.type_ is None and other.type_ is not None:
         self.type_ = other.type_
-    # id: lazy set
-    if self.id is None:
+    if self.id is None and other.id is not None:
         self.id = other.id
-    # function: delegate
-    self.function = push_option(self.function, other.function)
+    push_option(self, "function", other.function)
 
 
 AssistantToolCallDelta.push = _push
