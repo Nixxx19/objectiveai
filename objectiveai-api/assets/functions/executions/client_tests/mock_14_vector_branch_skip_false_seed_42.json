@@ -22,6 +22,25 @@
               "index": 0,
               "id": "",
               "created": 0,
+              "messages": [],
+              "object": "agent.completion",
+              "usage": {
+                "completion_tokens": 0,
+                "prompt_tokens": 0,
+                "total_tokens": 0,
+                "cost": 0.0,
+                "total_cost": 0.0
+              },
+              "upstream": "mock",
+              "error": {
+                "code": 500,
+                "message": "Expected error"
+              }
+            },
+            {
+              "index": 1,
+              "id": "",
+              "created": 0,
               "messages": [
                 {
                   "role": "assistant",
@@ -59,7 +78,7 @@
               "error": null
             },
             {
-              "index": 1,
+              "index": 2,
               "id": "",
               "created": 0,
               "messages": [
@@ -97,25 +116,6 @@
               },
               "upstream": "mock",
               "error": null
-            },
-            {
-              "index": 2,
-              "id": "",
-              "created": 0,
-              "messages": [],
-              "object": "agent.completion",
-              "usage": {
-                "completion_tokens": 0,
-                "prompt_tokens": 0,
-                "total_tokens": 0,
-                "cost": 0.0,
-                "total_cost": 0.0
-              },
-              "upstream": "mock",
-              "error": {
-                "code": 500,
-                "message": "Expected error"
-              }
             },
             {
               "index": 3,
@@ -168,28 +168,34 @@
           ],
           "votes": [
             {
-              "agent": "4wXv5UufT9xfKYKsCLpBXT",
-              "ensemble_index": 1,
-              "flat_ensemble_index": 1,
-              "prompt_id": "",
-              "responses_ids": [],
-              "vote": [
-                1.0,
-                0.0
-              ],
-              "weight": 0.5
-            },
-            {
               "agent": "0Lp0y7y2LyM1VsV2TScyKZ",
               "ensemble_index": 0,
               "flat_ensemble_index": 0,
-              "prompt_id": "",
-              "responses_ids": [],
+              "prompt_id": "1izH83iXjCToDAcaLbhXJq",
+              "responses_ids": [
+                "2sjO6KXkfyGGYX1AZQhZYl",
+                "31D48sjBgVKX8jtSEmQOQO"
+              ],
               "vote": [
                 1.0,
                 0.0
               ],
               "weight": 0.3
+            },
+            {
+              "agent": "4wXv5UufT9xfKYKsCLpBXT",
+              "ensemble_index": 1,
+              "flat_ensemble_index": 1,
+              "prompt_id": "1izH83iXjCToDAcaLbhXJq",
+              "responses_ids": [
+                "2sjO6KXkfyGGYX1AZQhZYl",
+                "31D48sjBgVKX8jtSEmQOQO"
+              ],
+              "vote": [
+                1.0,
+                0.0
+              ],
+              "weight": 0.5
             }
           ],
           "scores": [
