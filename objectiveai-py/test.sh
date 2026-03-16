@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Spawns the API server (if needed) and runs tests.
+# Output is captured to .logs/test/objectiveai-py.txt.
 #
 # If OBJECTIVEAI_TEST_PORT is already set, uses that server as-is.
 # Otherwise, spawns a new server via test-spawn-api-server.sh and kills it on exit.
@@ -10,9 +11,15 @@
 
 set -euo pipefail
 
+MODULE="objectiveai-py"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 VENV_DIR="$SCRIPT_DIR/venv"
+LOG_DIR="$REPO_ROOT/.logs/test"
+LOG_FILE="$LOG_DIR/$MODULE.txt"
+
+mkdir -p "$LOG_DIR"
+> "$LOG_FILE"
 
 # Parse flags
 PYTEST_ARGS=()
@@ -32,11 +39,26 @@ fi
 
 # Spawn test server if needed
 if [ -z "${OBJECTIVEAI_TEST_PORT:-}" ]; then
-  read -r PORT PID < <(bash "$REPO_ROOT/test-spawn-api-server.sh")
-  echo "API server running on port $PORT (pid $PID)"
-  trap 'echo "Shutting down API server (pid $PID)..."; kill "$PID" 2>/dev/null || true' EXIT
+  read -r PORT PID < <(bash "$REPO_ROOT/test-spawn-api-server.sh" 2>>"$LOG_FILE")
+  trap 'kill "$PID" 2>/dev/null || true' EXIT
   export OBJECTIVEAI_TEST_PORT="$PORT"
 fi
 
-# Run tests (PYTHONPATH ensures objectiveai package is importable from repo root)
-PYTHONPATH="$SCRIPT_DIR${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON" -m pytest "$SCRIPT_DIR/tests/" -v --tb=long "${PYTEST_ARGS[@]}"
+# Run tests, capture all output
+# pytest summary: "1060 passed, 31 skipped, 2 warnings in 17.66s" or "3 failed, 1057 passed ..."
+if PYTHONPATH="$SCRIPT_DIR${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON" -m pytest "$SCRIPT_DIR/tests/" -v --tb=long "${PYTEST_ARGS[@]}" >> "$LOG_FILE" 2>&1; then
+  PASSED=$(grep -oP '(\d+) passed' "$LOG_FILE" | grep -oP '\d+' | tail -1 || true)
+  FAILED=$(grep -oP '(\d+) failed' "$LOG_FILE" | grep -oP '\d+' | tail -1 || true)
+  TOTAL=$(( ${PASSED:-0} + ${FAILED:-0} ))
+  echo "$MODULE: PASS ${PASSED:-0}/$TOTAL"
+else
+  PASSED=$(grep -oP '(\d+) passed' "$LOG_FILE" | grep -oP '\d+' | tail -1 || true)
+  FAILED=$(grep -oP '(\d+) failed' "$LOG_FILE" | grep -oP '\d+' | tail -1 || true)
+  TOTAL=$(( ${PASSED:-0} + ${FAILED:-0} ))
+  if [ "$TOTAL" -gt 0 ]; then
+    echo "$MODULE: FAIL ${PASSED:-0}/$TOTAL"
+  else
+    echo "$MODULE: FAIL"
+  fi
+  exit 1
+fi

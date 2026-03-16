@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Runs objectiveai-api tests.
+# Output is captured to .logs/test/objectiveai-api.txt.
 #
 # Usage:
 #   bash objectiveai-api/test.sh
@@ -8,7 +9,13 @@
 
 set -euo pipefail
 
+MODULE="objectiveai-api"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+LOG_DIR="$REPO_ROOT/.logs/test"
+LOG_FILE="$LOG_DIR/$MODULE.txt"
+
+mkdir -p "$LOG_DIR"
 
 # If UPDATE_SNAPSHOTS is set, propagate to all 6 snapshot env vars.
 if [ "${UPDATE_SNAPSHOTS:-}" = "1" ]; then
@@ -29,4 +36,20 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-cargo test --manifest-path "$SCRIPT_DIR/Cargo.toml" "${CARGO_ARGS[@]}"
+# Run tests, capture all output
+if cargo test --manifest-path "$SCRIPT_DIR/Cargo.toml" "${CARGO_ARGS[@]}" > "$LOG_FILE" 2>&1; then
+  PASSED=$(grep -oP '(\d+) passed' "$LOG_FILE" | awk '{s+=$1} END {print s+0}')
+  FAILED=$(grep -oP '(\d+) failed' "$LOG_FILE" | awk '{s+=$1} END {print s+0}')
+  TOTAL=$((PASSED + FAILED))
+  echo "$MODULE: PASS $PASSED/$TOTAL"
+else
+  PASSED=$(grep -oP '(\d+) passed' "$LOG_FILE" | awk '{s+=$1} END {print s+0}')
+  FAILED=$(grep -oP '(\d+) failed' "$LOG_FILE" | awk '{s+=$1} END {print s+0}')
+  TOTAL=$((PASSED + FAILED))
+  if [ "$TOTAL" -gt 0 ]; then
+    echo "$MODULE: FAIL $PASSED/$TOTAL"
+  else
+    echo "$MODULE: FAIL"
+  fi
+  exit 1
+fi

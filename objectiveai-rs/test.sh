@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Runs objectiveai-rs tests.
+# Output is captured to .logs/test/objectiveai-rs.txt.
 #
 # Usage:
 #   bash objectiveai-rs/test.sh
@@ -7,7 +8,13 @@
 
 set -euo pipefail
 
+MODULE="objectiveai-rs"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+LOG_DIR="$REPO_ROOT/.logs/test"
+LOG_FILE="$LOG_DIR/$MODULE.txt"
+
+mkdir -p "$LOG_DIR"
 
 # Parse flags
 CARGO_ARGS=()
@@ -18,4 +25,22 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-cargo test --manifest-path "$SCRIPT_DIR/Cargo.toml" "${CARGO_ARGS[@]}"
+# Run tests, capture all output
+if cargo test --manifest-path "$SCRIPT_DIR/Cargo.toml" "${CARGO_ARGS[@]}" > "$LOG_FILE" 2>&1; then
+  # Sum passed/failed across all test binaries
+  PASSED=$(grep -oP '(\d+) passed' "$LOG_FILE" | awk '{s+=$1} END {print s+0}')
+  FAILED=$(grep -oP '(\d+) failed' "$LOG_FILE" | awk '{s+=$1} END {print s+0}')
+  TOTAL=$((PASSED + FAILED))
+  echo "$MODULE: PASS $PASSED/$TOTAL"
+else
+  # Try to extract counts even on failure
+  PASSED=$(grep -oP '(\d+) passed' "$LOG_FILE" | awk '{s+=$1} END {print s+0}')
+  FAILED=$(grep -oP '(\d+) failed' "$LOG_FILE" | awk '{s+=$1} END {print s+0}')
+  TOTAL=$((PASSED + FAILED))
+  if [ "$TOTAL" -gt 0 ]; then
+    echo "$MODULE: FAIL $PASSED/$TOTAL"
+  else
+    echo "$MODULE: FAIL"
+  fi
+  exit 1
+fi
