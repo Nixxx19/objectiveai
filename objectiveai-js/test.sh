@@ -19,4 +19,4 @@ if [ -z "${OBJECTIVEAI_TEST_PORT:-}" ]; then
   export OBJECTIVEAI_TEST_PORT="$PORT"
 fi
 
-npm test --workspace=objectiveai
+npm test --workspace=objectiveai -- --reporter=verbose
