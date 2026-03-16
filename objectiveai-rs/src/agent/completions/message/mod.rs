@@ -19,6 +19,9 @@ pub use system_message::*;
 pub use tool_message::*;
 pub use user_message::*;
 
+#[cfg(test)]
+mod assistant_message_tests;
+
 use crate::functions;
 use functions::expression::{ExpressionError, FromStarlarkValue};
 use schemars::JsonSchema;

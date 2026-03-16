@@ -117,14 +117,14 @@ impl FromStarlarkValue for AssistantMessage {
 #[schemars(rename = "agent.completions.message.AssistantMessageExpression")]
 pub struct AssistantMessageExpression {
     /// The content expression.
-    #[serde(skip_serializing_if = "functions::expression::WithExpression::is_none")]
+    #[serde(default, skip_serializing_if = "functions::expression::WithExpression::is_none")]
     pub content:
         functions::expression::WithExpression<Option<RichContentExpression>>,
-    #[serde(skip_serializing_if = "functions::expression::WithExpression::is_none")]
+    #[serde(default, skip_serializing_if = "functions::expression::WithExpression::is_none")]
     pub name: functions::expression::WithExpression<Option<String>>,
-    #[serde(skip_serializing_if = "functions::expression::WithExpression::is_none")]
+    #[serde(default, skip_serializing_if = "functions::expression::WithExpression::is_none")]
     pub refusal: functions::expression::WithExpression<Option<String>>,
-    #[serde(skip_serializing_if = "functions::expression::WithExpression::is_none")]
+    #[serde(default, skip_serializing_if = "functions::expression::WithExpression::is_none")]
     pub tool_calls:
         functions::expression::WithExpression<
             Option<
@@ -135,7 +135,7 @@ pub struct AssistantMessageExpression {
                 >,
             >,
         >,
-    #[serde(skip_serializing_if = "functions::expression::WithExpression::is_none")]
+    #[serde(default, skip_serializing_if = "functions::expression::WithExpression::is_none")]
     pub reasoning:
         functions::expression::WithExpression<Option<String>>,
 }

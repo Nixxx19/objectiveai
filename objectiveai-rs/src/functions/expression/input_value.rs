@@ -236,8 +236,8 @@ impl<'a> arbitrary::Arbitrary<'a> for InputValue {
             match u.int_in_range(0..=4)? {
                 0 => Ok(InputValue::RichContentPart(u.arbitrary()?)),
                 1 => Ok(InputValue::String(u.arbitrary()?)),
-                2 => Ok(InputValue::Integer(u.arbitrary()?)),
-                3 => Ok(InputValue::Number(u.arbitrary()?)),
+                2 => Ok(InputValue::Integer(crate::arbitrary_util::arbitrary_i64(u)?)),
+                3 => Ok(InputValue::Number(crate::arbitrary_util::arbitrary_f64(u)?)),
                 _ => Ok(InputValue::Boolean(u.arbitrary()?)),
             }
         }
@@ -625,8 +625,8 @@ impl<'a> arbitrary::Arbitrary<'a> for InputValueExpression {
             match u.int_in_range(0..=4)? {
                 0 => Ok(InputValueExpression::RichContentPart(u.arbitrary()?)),
                 1 => Ok(InputValueExpression::String(u.arbitrary()?)),
-                2 => Ok(InputValueExpression::Integer(u.arbitrary()?)),
-                3 => Ok(InputValueExpression::Number(u.arbitrary()?)),
+                2 => Ok(InputValueExpression::Integer(crate::arbitrary_util::arbitrary_i64(u)?)),
+                3 => Ok(InputValueExpression::Number(crate::arbitrary_util::arbitrary_f64(u)?)),
                 _ => Ok(InputValueExpression::Boolean(u.arbitrary()?)),
             }
         }

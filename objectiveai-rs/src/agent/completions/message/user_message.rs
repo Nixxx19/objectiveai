@@ -89,7 +89,7 @@ pub struct UserMessageExpression {
     /// The message content expression.
     pub content: functions::expression::WithExpression<RichContentExpression>,
     /// Optional name expression.
-    #[serde(skip_serializing_if = "functions::expression::WithExpression::is_none")]
+    #[serde(default, skip_serializing_if = "functions::expression::WithExpression::is_none")]
     pub name: functions::expression::WithExpression<Option<String>>,
 }
 
