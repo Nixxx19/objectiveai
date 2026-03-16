@@ -43,9 +43,16 @@ impl VectorCompletion {
         for completion in &mut self.completions {
             completion.inner.normalize_for_tests();
         }
-        for vote in &mut self.votes {
-            vote.prompt_id = String::new();
-            vote.responses_ids = Vec::new();
+        self.votes.sort_by_key(|v| v.flat_ensemble_index);
+
+        // sort completions by JSON representation since ordering is non-determinstic
+        self.completions.sort_by_cached_key(|c| serde_json::to_string(&c.inner).unwrap());
+
+        // re-apply completion indices since indices are non-deterministic
+        let mut i = 0;
+        for completion in &mut self.completions {
+            completion.index = i;
+            i += 1;
         }
     }
 

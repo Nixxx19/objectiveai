@@ -22,12 +22,15 @@ impl FunctionInventionRecursive {
         for invention in &mut self.inventions {
             invention.inner.normalize_for_tests();
         }
-        // Sort inventions by state name and renumber indices sequentially.
-        self.inventions.sort_by(|a, b| {
-            a.inner.state.name().cmp(b.inner.state.name())
-        });
-        for (i, inv) in self.inventions.iter_mut().enumerate() {
-            inv.index = i as u64;
+
+        // sort inventions by JSON representation since ordering is non-deterministic
+        self.inventions.sort_by_cached_key(|i| serde_json::to_string(&i.inner).unwrap());
+
+        // re-apply invention indices since indices are non-determinstic
+        let mut i = 0;
+        for invention in &mut self.inventions {
+            invention.index = i;
+            i += 1;
         }
     }
 }
