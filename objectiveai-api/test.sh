@@ -3,11 +3,22 @@
 #
 # Usage:
 #   bash objectiveai-api/test.sh
-#   bash objectiveai-api/test.sh -- --test-threads=1   # pass args to cargo test
+#   bash objectiveai-api/test.sh -- -k client_tests     # pass args to cargo test
+#   UPDATE_SNAPSHOTS=1 bash objectiveai-api/test.sh      # regenerate all snapshots
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# If UPDATE_SNAPSHOTS is set, propagate to all 6 snapshot env vars.
+if [ "${UPDATE_SNAPSHOTS:-}" = "1" ]; then
+  export UPDATE_AGENT_COMPLETIONS_CLIENT_TESTS_SNAPSHOTS=1
+  export UPDATE_AGENT_COMPLETIONS_MOCK_CLIENT_TESTS_SNAPSHOTS=1
+  export UPDATE_VECTOR_COMPLETIONS_CLIENT_TESTS_SNAPSHOTS=1
+  export UPDATE_FUNCTIONS_EXECUTIONS_CLIENT_TESTS_SNAPSHOTS=1
+  export UPDATE_FUNCTIONS_INVENTIONS_CLIENT_TESTS_SNAPSHOTS=1
+  export UPDATE_FUNCTIONS_INVENTIONS_RECURSIVE_CLIENT_TESTS_SNAPSHOTS=1
+fi
 
 # Parse flags
 CARGO_ARGS=()
