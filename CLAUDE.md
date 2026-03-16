@@ -144,6 +144,10 @@ Available variables during compilation:
 
 ## Conventions
 
+### Test Failures
+
+Never dismiss a test failure as a "pre-existing issue" as an excuse to ignore it. If tests fail, investigate and fix them.
+
 ### Code Changes
 
 When asked to "standardize" or "apply patterns from X to Y", preserve existing functionality while adopting the visual/structural patterns. Never remove features (like filters, sorts, controls) unless explicitly told to.
