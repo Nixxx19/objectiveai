@@ -19,7 +19,10 @@ class PlaceholderScalarFunctionTaskExpressionInputVariant2(RootModel):
 
 
 class PlaceholderScalarFunctionTaskExpressionInput(RootModel):
-    """A value that can be either a literal or an expression.
+    """Expression for the input to pass to the placeholder function.
+Receives: `input`, `map` (if mapped).
+
+A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
 expressions. During compilation, expressions are evaluated while
@@ -51,7 +54,7 @@ Like [`ScalarFunctionTaskExpression`] but without owner/repository/commit.
 Always produces a fixed output of 0.5."""
     model_config = ConfigDict(title='functions.PlaceholderScalarFunctionTaskExpression')
 
-    input: PlaceholderScalarFunctionTaskExpressionInput = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+    input: PlaceholderScalarFunctionTaskExpressionInput = Field(..., description='Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
     input_schema: InputSchema = Field(..., description='JSON Schema defining the expected input structure.')
     map: Optional[Expression] = Field(None, description='Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).')
     output: Expression = Field(..., description='Expression to transform the fixed 0.5 output.\nReceives: `input`, `output` as `Scalar(0.5)`.')

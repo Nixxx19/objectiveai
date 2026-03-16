@@ -18,7 +18,9 @@ class SystemMessageExpressionContentVariant2(RootModel):
 
 
 class SystemMessageExpressionContent(RootModel):
-    """A value that can be either a literal or an expression.
+    """The message content expression.
+
+A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
 expressions. During compilation, expressions are evaluated while
@@ -54,7 +56,9 @@ class SystemMessageExpressionNameVariant2(RootModel):
 
 
 class SystemMessageExpressionName(RootModel):
-    """A value that can be either a literal or an expression.
+    """Optional name expression.
+
+A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
 expressions. During compilation, expressions are evaluated while
@@ -83,6 +87,6 @@ class SystemMessageExpression(BaseModel):
     """Expression variant of [`SystemMessage`] for dynamic content."""
     model_config = ConfigDict(title='agent.completions.message.SystemMessageExpression')
 
-    content: SystemMessageExpressionContent = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
-    name: Optional[SystemMessageExpressionName] = Field(None, description='Optional name expression.')
+    content: SystemMessageExpressionContent = Field(..., description='The message content expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+    name: Optional[SystemMessageExpressionName] = Field(None, description='Optional name expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```', json_schema_extra={'_nullable': False})
 

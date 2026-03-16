@@ -531,6 +531,15 @@ def _convert_property(tp: Any, field_info: FieldInfo, root_title: str) -> dict:
     if field_info.description:
         result["description"] = field_info.description
 
+    # Check if nullability was inherited from a nested anyOf.
+    # If so, strip the Optional wrapper — the inner type already contains null.
+    fi_extra = field_info.json_schema_extra
+    inherited_nullable = isinstance(fi_extra, dict) and fi_extra.get("_nullable") is False
+    if inherited_nullable and _is_nullable_type(tp):
+        # Unwrap Optional[X] → X
+        non_none = [a for a in get_args(tp) if not _is_none_type(a)]
+        tp = non_none[0] if len(non_none) == 1 else Union[tuple(non_none)]
+
     # Convert the type annotation to JSON Schema
     type_schema = convert_type(tp, root_title)
 
@@ -571,7 +580,7 @@ def _convert_property(tp: Any, field_info: FieldInfo, root_title: str) -> dict:
     # Default value — but don't emit "default: null" for nullable fields
     # since that's just the implicit Optional default, not an explicit schema default
     if field_info.default is not PydanticUndefined:
-        if field_info.default is None and _is_nullable_type(tp):
+        if field_info.default is None and (_is_nullable_type(field_info.annotation) or inherited_nullable):
             pass  # Suppress implicit default: null for nullable fields
         else:
             result["default"] = field_info.default

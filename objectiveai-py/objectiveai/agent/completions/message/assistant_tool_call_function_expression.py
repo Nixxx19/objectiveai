@@ -17,7 +17,9 @@ class AssistantToolCallFunctionExpressionArgumentsVariant2(RootModel):
 
 
 class AssistantToolCallFunctionExpressionArguments(RootModel):
-    """A value that can be either a literal or an expression.
+    """The arguments expression.
+
+A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
 expressions. During compilation, expressions are evaluated while
@@ -53,7 +55,9 @@ class AssistantToolCallFunctionExpressionNameVariant2(RootModel):
 
 
 class AssistantToolCallFunctionExpressionName(RootModel):
-    """A value that can be either a literal or an expression.
+    """The function name expression.
+
+A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
 expressions. During compilation, expressions are evaluated while
@@ -82,6 +86,6 @@ class AssistantToolCallFunctionExpression(BaseModel):
     """Expression variant of [`AssistantToolCallFunction`] for dynamic content."""
     model_config = ConfigDict(title='agent.completions.message.AssistantToolCallFunctionExpression')
 
-    arguments: AssistantToolCallFunctionExpressionArguments = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
-    name: AssistantToolCallFunctionExpressionName = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+    arguments: AssistantToolCallFunctionExpressionArguments = Field(..., description='The arguments expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+    name: AssistantToolCallFunctionExpressionName = Field(..., description='The function name expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
 

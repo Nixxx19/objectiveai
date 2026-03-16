@@ -393,11 +393,23 @@ def has_self_ref(schema: dict | list | None) -> bool:
 
 
 def _is_nullable(prop_schema: dict) -> bool:
-    """Check if a property schema is nullable (has a null variant in anyOf).
+    """Check if a property schema is nullable (has a null variant in anyOf, possibly nested).
 
     In the ObjectiveAI JSON Schema convention, nullable = optional:
     if a field's type includes null, the key can be omitted from the object.
+
+    Recurses into nested anyOf to find null at any depth, matching the
+    JS SDK's isNullableSchema() behavior.
     """
+    any_of = prop_schema.get("anyOf", [])
+    return any(
+        isinstance(v, dict) and (v.get("type") == "null" or _is_nullable(v))
+        for v in any_of
+    )
+
+
+def _is_directly_nullable(prop_schema: dict) -> bool:
+    """Check if a property schema has null directly in its top-level anyOf."""
     any_of = prop_schema.get("anyOf", [])
     return any(
         isinstance(v, dict) and v.get("type") == "null"
@@ -689,6 +701,8 @@ def _generate_field_line(
     prop_schema: dict,
     prop_type: str,
     is_required: bool,
+    *,
+    inherited_nullable: bool = False,
 ) -> str:
     """Generate a single field line for a BaseModel class."""
     field_name = _to_snake(prop_name) if not _is_snake(prop_name) else prop_name
@@ -702,6 +716,11 @@ def _generate_field_line(
         alias = prop_name if prop_name != field_name else None
 
     meta = _extract_field_metadata(prop_schema)
+
+    # Mark fields whose nullability was uplifted from a nested anyOf.
+    # The roundtrip converter uses this to avoid adding an outer null wrapper.
+    if inherited_nullable:
+        meta.setdefault("json_schema_extra", {})["_nullable"] = False
 
     # A property with an explicit default is never "required" in our generation,
     # even if it's not nullable.
@@ -794,8 +813,10 @@ def _generate_object_model(
         prop_type = convert_to_type(prop_schema, title, all_titles)
         _naming_context.pop()
         _naming_context.pop()
-        is_required = not _is_nullable(prop_schema)
-        line = _generate_field_line(prop_name, prop_schema, prop_type, is_required)
+        nullable = _is_nullable(prop_schema)
+        is_required = not nullable
+        inherited = nullable and not _is_directly_nullable(prop_schema)
+        line = _generate_field_line(prop_name, prop_schema, prop_type, is_required, inherited_nullable=inherited)
         lines.append(f"    {line}")
 
     return "\n".join(lines) + "\n"
@@ -845,8 +866,10 @@ def _generate_flattened_model(
         prop_type = convert_to_type(prop_schema, title, all_titles)
         _naming_context.pop()
         _naming_context.pop()
-        is_required = not _is_nullable(prop_schema)
-        line = _generate_field_line(prop_name, prop_schema, prop_type, is_required)
+        nullable = _is_nullable(prop_schema)
+        is_required = not nullable
+        inherited = nullable and not _is_directly_nullable(prop_schema)
+        line = _generate_field_line(prop_name, prop_schema, prop_type, is_required, inherited_nullable=inherited)
         lines.append(f"    {line}")
 
     if not properties:

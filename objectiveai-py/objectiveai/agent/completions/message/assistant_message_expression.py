@@ -19,7 +19,9 @@ class AssistantMessageExpressionContentVariant2(RootModel):
 
 
 class AssistantMessageExpressionContent(RootModel):
-    """A value that can be either a literal or an expression.
+    """The content expression.
+
+A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
 expressions. During compilation, expressions are evaluated while
@@ -228,9 +230,9 @@ class AssistantMessageExpression(BaseModel):
     """Expression variant of [`AssistantMessage`] for dynamic content."""
     model_config = ConfigDict(title='agent.completions.message.AssistantMessageExpression')
 
-    content: Optional[AssistantMessageExpressionContent] = Field(None, description='The content expression.')
-    name: Optional[AssistantMessageExpressionName] = None
-    reasoning: Optional[AssistantMessageExpressionReasoning] = None
-    refusal: Optional[AssistantMessageExpressionRefusal] = None
-    tool_calls: Optional[AssistantMessageExpressionTool_calls] = None
+    content: Optional[AssistantMessageExpressionContent] = Field(None, description='The content expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```', json_schema_extra={'_nullable': False})
+    name: Optional[AssistantMessageExpressionName] = Field(None, description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```', json_schema_extra={'_nullable': False})
+    reasoning: Optional[AssistantMessageExpressionReasoning] = Field(None, description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```', json_schema_extra={'_nullable': False})
+    refusal: Optional[AssistantMessageExpressionRefusal] = Field(None, description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```', json_schema_extra={'_nullable': False})
+    tool_calls: Optional[AssistantMessageExpressionTool_calls] = Field(None, description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```', json_schema_extra={'_nullable': False})
 

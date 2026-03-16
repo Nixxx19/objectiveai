@@ -10,10 +10,8 @@ from objectiveai.functions.executions.response.streaming.vector_completion_task_
 def _push(self, other: VectorCompletionTaskChunk) -> None:
     push_by_index(self.completions, other.completions)
     self.votes.extend(other.votes)
-    if other.scores:
-        self.scores = list(other.scores)
-    if other.weights:
-        self.weights = list(other.weights)
+    self.scores = list(other.scores)
+    self.weights = list(other.weights)
     push_replace(self, "error", other.error)
     push_option(self, "usage", other.usage)
 

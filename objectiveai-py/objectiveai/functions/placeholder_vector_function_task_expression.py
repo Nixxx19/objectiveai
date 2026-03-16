@@ -19,7 +19,10 @@ class PlaceholderVectorFunctionTaskExpressionInputVariant2(RootModel):
 
 
 class PlaceholderVectorFunctionTaskExpressionInput(RootModel):
-    """A value that can be either a literal or an expression.
+    """Expression for the input to pass to the placeholder function.
+Receives: `input`, `map` (if mapped).
+
+A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
 expressions. During compilation, expressions are evaluated while
@@ -51,7 +54,7 @@ Like [`VectorFunctionTaskExpression`] but without owner/repository/commit.
 Always produces an equalized vector of length `output_length`."""
     model_config = ConfigDict(title='functions.PlaceholderVectorFunctionTaskExpression')
 
-    input: PlaceholderVectorFunctionTaskExpressionInput = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+    input: PlaceholderVectorFunctionTaskExpressionInput = Field(..., description='Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
     input_merge: Expression = Field(..., description='Expression merging sub-inputs back into one input.\nReceives: `input` (as an array).')
     input_schema: InputSchema = Field(..., description='JSON Schema defining the expected input structure.')
     input_split: Expression = Field(..., description='Expression transforming input into sub-inputs for swiss system.\nReceives: `input`.')

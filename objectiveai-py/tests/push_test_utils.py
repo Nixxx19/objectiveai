@@ -10,20 +10,20 @@ from __future__ import annotations
 import math
 from typing import Any
 
-DIGITS = 8
-
 
 def rounded(value: Any) -> Any:
-    """Round all floats to DIGITS significant figures for comparison.
+    """Round all floats to 8 significant figures for comparison.
 
-    Mirrors mergeTestUtil.ts rounded().
+    Mirrors mergeTestUtil.ts rounded(). Double-rounds through 12 digits
+    first to normalize 1-ULP representation artifacts that can cause
+    different rounding directions at the target precision.
     """
     if isinstance(value, bool):
         return value
     if isinstance(value, float):
         if value == 0 or not math.isfinite(value):
             return value
-        return float(f"{value:.{DIGITS}g}")
+        return float(f"{float(f'{value:.12g}'):.8g}")
     if isinstance(value, list):
         return [rounded(v) for v in value]
     if isinstance(value, dict):
