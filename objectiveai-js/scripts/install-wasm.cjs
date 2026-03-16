@@ -13,39 +13,31 @@ const jsRoot = process.cwd(); // objectiveai-js
 const repoRoot = path.resolve(jsRoot, ".."); // objectiveai
 const wasmDir = path.join(repoRoot, "objectiveai-rs-wasm-js");
 const outDir = path.join(jsRoot, "src", "wasm");
+const wasmDistDir = path.join(wasmDir, "dist");
 
-// Clean up old files
+// 1. Validate dist/ is up to date
+const validateResult = spawnSync("bash", [path.join(wasmDir, "validate.sh")], {
+  stdio: "inherit",
+  shell: process.platform === "win32",
+});
+
+if (validateResult.status !== 0) {
+  process.exit(validateResult.status ?? 1);
+}
+
+// Clean up old output files
 if (existsSync(outDir)) {
   rmSync(outDir, { recursive: true });
 }
 mkdirSync(outDir, { recursive: true });
 
-// 1. Build nodejs target (we only need one target now - just need the glue code and .wasm)
-console.log("⚙ Building wasm-pack target: nodejs");
-
-const result = spawnSync(
-  "wasm-pack",
-  ["build", "--target", "nodejs", "--release", "--out-dir", "pkg-nodejs"],
-  {
-    cwd: wasmDir,
-    stdio: "inherit",
-    shell: process.platform === "win32",
-  },
-);
-
-if (result.status !== 0) {
-  console.error("Failed to build nodejs target");
-  process.exit(result.status ?? 1);
-}
-
 // 2. Read the generated files
-const nodejsPkgDir = path.join(wasmDir, "pkg-nodejs");
 const glueCode = readFileSync(
-  path.join(nodejsPkgDir, "objectiveai_wasm_js.js"),
+  path.join(wasmDistDir, "objectiveai_wasm_js.js"),
   "utf-8",
 );
 const wasmBinary = readFileSync(
-  path.join(nodejsPkgDir, "objectiveai_wasm_js_bg.wasm"),
+  path.join(wasmDistDir, "objectiveai_wasm_js_bg.wasm"),
 );
 const wasmBase64 = wasmBinary.toString("base64");
 
@@ -101,7 +93,7 @@ console.log("✓ Created loader.cjs (universal CJS loader)");
 
 // 5. Read type declarations and extract exported function names
 const dtsContent = readFileSync(
-  path.join(nodejsPkgDir, "objectiveai_wasm_js.d.ts"),
+  path.join(wasmDistDir, "objectiveai_wasm_js.d.ts"),
   "utf-8",
 );
 
