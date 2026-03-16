@@ -226,7 +226,7 @@ declare const AgentCompletionsMessageAssistantMessageSchema: z.ZodObject<{
 type AgentCompletionsMessageAssistantMessage = z.infer<typeof AgentCompletionsMessageAssistantMessageSchema>;
 
 declare const AgentCompletionsMessageAssistantMessageExpressionSchema: z.ZodObject<{
-    content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+    content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
@@ -307,29 +307,29 @@ declare const AgentCompletionsMessageAssistantMessageExpressionSchema: z.ZodObje
             filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
         }, z.core.$strip>]>;
         type: z.ZodLiteral<"file">;
-    }, z.core.$strip>]>]>>]>>]>>>;
-    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+    }, z.core.$strip>]>]>>]>>]>>;
+    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-    reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+    reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-    refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+    refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-    tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+    tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
@@ -372,7 +372,7 @@ declare const AgentCompletionsMessageAssistantMessageExpressionSchema: z.ZodObje
             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
         }, z.core.$strict>]>, z.ZodString]>;
         type: z.ZodLiteral<"function">;
-    }, z.core.$strip>]>>>]>>>;
+    }, z.core.$strip>]>>>]>>;
 }, z.core.$strip>;
 type AgentCompletionsMessageAssistantMessageExpression = z.infer<typeof AgentCompletionsMessageAssistantMessageExpressionSchema>;
 
@@ -496,13 +496,13 @@ declare const AgentCompletionsMessageDeveloperMessageExpressionSchema: z.ZodObje
         }, z.core.$strict>]>, z.ZodString]>;
         type: z.ZodLiteral<"text">;
     }, z.core.$strip>]>>]>]>;
-    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
 }, z.core.$strip>;
 type AgentCompletionsMessageDeveloperMessageExpression = z.infer<typeof AgentCompletionsMessageDeveloperMessageExpressionSchema>;
 
@@ -695,13 +695,13 @@ declare const AgentCompletionsMessageMessageExpressionSchema: z.ZodUnion<readonl
         }, z.core.$strict>]>, z.ZodString]>;
         type: z.ZodLiteral<"text">;
     }, z.core.$strip>]>>]>]>;
-    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
 }, z.core.$strip>, z.ZodObject<{
     role: z.ZodLiteral<"developer">;
 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -727,13 +727,13 @@ declare const AgentCompletionsMessageMessageExpressionSchema: z.ZodUnion<readonl
         }, z.core.$strict>]>, z.ZodString]>;
         type: z.ZodLiteral<"text">;
     }, z.core.$strip>]>>]>]>;
-    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
 }, z.core.$strip>, z.ZodObject<{
     role: z.ZodLiteral<"system">;
 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -819,17 +819,17 @@ declare const AgentCompletionsMessageMessageExpressionSchema: z.ZodUnion<readonl
         }, z.core.$strip>]>;
         type: z.ZodLiteral<"file">;
     }, z.core.$strip>]>]>>]>]>;
-    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
 }, z.core.$strip>, z.ZodObject<{
     role: z.ZodLiteral<"user">;
 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-    content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+    content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
@@ -910,29 +910,29 @@ declare const AgentCompletionsMessageMessageExpressionSchema: z.ZodUnion<readonl
             filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
         }, z.core.$strip>]>;
         type: z.ZodLiteral<"file">;
-    }, z.core.$strip>]>]>>]>>]>>>;
-    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+    }, z.core.$strip>]>]>>]>>]>>;
+    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-    reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+    reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-    refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+    refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-    tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+    tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
@@ -975,7 +975,7 @@ declare const AgentCompletionsMessageMessageExpressionSchema: z.ZodUnion<readonl
             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
         }, z.core.$strict>]>, z.ZodString]>;
         type: z.ZodLiteral<"function">;
-    }, z.core.$strip>]>>>]>>>;
+    }, z.core.$strip>]>>>]>>;
 }, z.core.$strip>, z.ZodObject<{
     role: z.ZodLiteral<"assistant">;
 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -1369,13 +1369,13 @@ declare const AgentCompletionsMessageSystemMessageExpressionSchema: z.ZodObject<
         }, z.core.$strict>]>, z.ZodString]>;
         type: z.ZodLiteral<"text">;
     }, z.core.$strip>]>>]>]>;
-    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
 }, z.core.$strip>;
 type AgentCompletionsMessageSystemMessageExpression = z.infer<typeof AgentCompletionsMessageSystemMessageExpressionSchema>;
 
@@ -1633,13 +1633,13 @@ declare const AgentCompletionsMessageUserMessageExpressionSchema: z.ZodObject<{
         }, z.core.$strip>]>;
         type: z.ZodLiteral<"file">;
     }, z.core.$strip>]>]>>]>]>;
-    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
 }, z.core.$strip>;
 type AgentCompletionsMessageUserMessageExpression = z.infer<typeof AgentCompletionsMessageUserMessageExpressionSchema>;
 
@@ -14903,13 +14903,13 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -14935,13 +14935,13 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -15027,17 +15027,17 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -15118,29 +15118,29 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -15183,7 +15183,7 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -15598,13 +15598,13 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -15630,13 +15630,13 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -15722,17 +15722,17 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -15813,29 +15813,29 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -15878,7 +15878,7 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -17407,13 +17407,13 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -17439,13 +17439,13 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -17531,17 +17531,17 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -17622,29 +17622,29 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -17687,7 +17687,7 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -18102,13 +18102,13 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -18134,13 +18134,13 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -18226,17 +18226,17 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -18317,29 +18317,29 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -18382,7 +18382,7 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -23298,13 +23298,13 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySc
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -23330,13 +23330,13 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySc
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -23422,17 +23422,17 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySc
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -23513,29 +23513,29 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySc
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -23578,7 +23578,7 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySc
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -23993,13 +23993,13 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySc
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -24025,13 +24025,13 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySc
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -24117,17 +24117,17 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySc
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -24208,29 +24208,29 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySc
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -24273,7 +24273,7 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySc
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -25805,13 +25805,13 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySc
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -25837,13 +25837,13 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySc
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -25929,17 +25929,17 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySc
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -26020,29 +26020,29 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySc
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -26085,7 +26085,7 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySc
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -26500,13 +26500,13 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySc
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -26532,13 +26532,13 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySc
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -26624,17 +26624,17 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySc
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -26715,29 +26715,29 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySc
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -26780,7 +26780,7 @@ declare const FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySc
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -31697,13 +31697,13 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"developer">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -31729,13 +31729,13 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"system">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -31821,17 +31821,17 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
                     }, z.core.$strip>]>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"user">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                    content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -31912,29 +31912,29 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                             filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
-                    }, z.core.$strip>]>]>>]>>]>>>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strip>]>]>>]>>]>>;
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -31977,7 +31977,7 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"function">;
-                    }, z.core.$strip>]>>>]>>>;
+                    }, z.core.$strip>]>>>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"assistant">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -32392,13 +32392,13 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"developer">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -32424,13 +32424,13 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"system">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -32516,17 +32516,17 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
                     }, z.core.$strip>]>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"user">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                    content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -32607,29 +32607,29 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                             filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
-                    }, z.core.$strip>]>]>>]>>]>>>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strip>]>]>>]>>]>>;
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -32672,7 +32672,7 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"function">;
-                    }, z.core.$strip>]>>>]>>>;
+                    }, z.core.$strip>]>>>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"assistant">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -34203,13 +34203,13 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"developer">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -34235,13 +34235,13 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"system">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -34327,17 +34327,17 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
                     }, z.core.$strip>]>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"user">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                    content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -34418,29 +34418,29 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                             filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
-                    }, z.core.$strip>]>]>>]>>]>>>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strip>]>]>>]>>]>>;
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -34483,7 +34483,7 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"function">;
-                    }, z.core.$strip>]>>>]>>>;
+                    }, z.core.$strip>]>>>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"assistant">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -34898,13 +34898,13 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"developer">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -34930,13 +34930,13 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"system">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -35022,17 +35022,17 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
                     }, z.core.$strip>]>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"user">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                    content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -35113,29 +35113,29 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                             filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
-                    }, z.core.$strip>]>]>>]>>]>>>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strip>]>]>>]>>]>>;
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -35178,7 +35178,7 @@ declare const FunctionsExecutionsRequestRequestSchema: z.ZodUnion<readonly [z.Zo
                             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"function">;
-                    }, z.core.$strip>]>>>]>>>;
+                    }, z.core.$strip>]>>>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"assistant">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -42309,13 +42309,13 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionChun
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -42341,13 +42341,13 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionChun
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -42433,17 +42433,17 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionChun
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -42524,29 +42524,29 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionChun
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -42589,7 +42589,7 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionChun
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -43013,13 +43013,13 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionChun
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -43045,13 +43045,13 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionChun
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -43137,17 +43137,17 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionChun
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -43228,29 +43228,29 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionChun
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -43293,7 +43293,7 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionChun
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -44489,13 +44489,13 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"developer">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -44521,13 +44521,13 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"system">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -44613,17 +44613,17 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
                     }, z.core.$strip>]>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"user">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                    content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -44704,29 +44704,29 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
                             filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
-                    }, z.core.$strip>]>]>>]>>]>>>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strip>]>]>>]>>]>>;
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -44769,7 +44769,7 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
                             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"function">;
-                    }, z.core.$strip>]>>>]>>>;
+                    }, z.core.$strip>]>>>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"assistant">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -45193,13 +45193,13 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"developer">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -45225,13 +45225,13 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"system">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -45317,17 +45317,17 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
                     }, z.core.$strip>]>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"user">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                    content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -45408,29 +45408,29 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
                             filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
-                    }, z.core.$strip>]>]>>]>>]>>>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strip>]>]>>]>>]>>;
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -45473,7 +45473,7 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
                             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"function">;
-                    }, z.core.$strip>]>>>]>>>;
+                    }, z.core.$strip>]>>>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"assistant">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -46708,13 +46708,13 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiv
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"developer">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -46740,13 +46740,13 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiv
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"system">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -46832,17 +46832,17 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiv
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
                     }, z.core.$strip>]>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"user">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                    content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -46923,29 +46923,29 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiv
                             filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
-                    }, z.core.$strip>]>]>>]>>]>>>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strip>]>]>>]>>]>>;
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -46988,7 +46988,7 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiv
                             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"function">;
-                    }, z.core.$strip>]>>>]>>>;
+                    }, z.core.$strip>]>>>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"assistant">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -47412,13 +47412,13 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiv
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"developer">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -47444,13 +47444,13 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiv
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"system">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -47536,17 +47536,17 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiv
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
                     }, z.core.$strip>]>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"user">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                    content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -47627,29 +47627,29 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiv
                             filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
-                    }, z.core.$strip>]>]>>]>>]>>>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strip>]>]>>]>>]>>;
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -47692,7 +47692,7 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiv
                             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"function">;
-                    }, z.core.$strip>]>>>]>>>;
+                    }, z.core.$strip>]>>>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"assistant">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -48919,13 +48919,13 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema: 
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -48951,13 +48951,13 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema: 
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -49043,17 +49043,17 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema: 
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -49134,29 +49134,29 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema: 
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -49199,7 +49199,7 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema: 
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -49623,13 +49623,13 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema: 
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -49655,13 +49655,13 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema: 
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -49747,17 +49747,17 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema: 
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -49838,29 +49838,29 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema: 
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -49903,7 +49903,7 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema: 
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -55643,13 +55643,13 @@ declare const FunctionsInventionsResponseStreamingFunctionInventionChunkSchema: 
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -55675,13 +55675,13 @@ declare const FunctionsInventionsResponseStreamingFunctionInventionChunkSchema: 
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -55767,17 +55767,17 @@ declare const FunctionsInventionsResponseStreamingFunctionInventionChunkSchema: 
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -55858,29 +55858,29 @@ declare const FunctionsInventionsResponseStreamingFunctionInventionChunkSchema: 
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -55923,7 +55923,7 @@ declare const FunctionsInventionsResponseStreamingFunctionInventionChunkSchema: 
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -56347,13 +56347,13 @@ declare const FunctionsInventionsResponseStreamingFunctionInventionChunkSchema: 
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -56379,13 +56379,13 @@ declare const FunctionsInventionsResponseStreamingFunctionInventionChunkSchema: 
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -56471,17 +56471,17 @@ declare const FunctionsInventionsResponseStreamingFunctionInventionChunkSchema: 
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -56562,29 +56562,29 @@ declare const FunctionsInventionsResponseStreamingFunctionInventionChunkSchema: 
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -56627,7 +56627,7 @@ declare const FunctionsInventionsResponseStreamingFunctionInventionChunkSchema: 
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -57829,13 +57829,13 @@ declare const FunctionsInventionsResponseUnaryFunctionInventionSchema: z.ZodObje
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -57861,13 +57861,13 @@ declare const FunctionsInventionsResponseUnaryFunctionInventionSchema: z.ZodObje
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -57953,17 +57953,17 @@ declare const FunctionsInventionsResponseUnaryFunctionInventionSchema: z.ZodObje
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -58044,29 +58044,29 @@ declare const FunctionsInventionsResponseUnaryFunctionInventionSchema: z.ZodObje
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -58109,7 +58109,7 @@ declare const FunctionsInventionsResponseUnaryFunctionInventionSchema: z.ZodObje
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -58533,13 +58533,13 @@ declare const FunctionsInventionsResponseUnaryFunctionInventionSchema: z.ZodObje
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -58565,13 +58565,13 @@ declare const FunctionsInventionsResponseUnaryFunctionInventionSchema: z.ZodObje
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -58657,17 +58657,17 @@ declare const FunctionsInventionsResponseUnaryFunctionInventionSchema: z.ZodObje
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -58748,29 +58748,29 @@ declare const FunctionsInventionsResponseUnaryFunctionInventionSchema: z.ZodObje
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -58813,7 +58813,7 @@ declare const FunctionsInventionsResponseUnaryFunctionInventionSchema: z.ZodObje
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -64809,13 +64809,13 @@ declare const FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchem
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -64841,13 +64841,13 @@ declare const FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchem
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -64933,17 +64933,17 @@ declare const FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchem
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -65024,29 +65024,29 @@ declare const FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchem
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -65089,7 +65089,7 @@ declare const FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchem
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -65504,13 +65504,13 @@ declare const FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchem
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -65536,13 +65536,13 @@ declare const FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchem
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -65628,17 +65628,17 @@ declare const FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchem
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -65719,29 +65719,29 @@ declare const FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchem
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -65784,7 +65784,7 @@ declare const FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchem
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -67324,13 +67324,13 @@ declare const FunctionsProfilesComputationsRequestFunctionProfileComputationCrea
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -67356,13 +67356,13 @@ declare const FunctionsProfilesComputationsRequestFunctionProfileComputationCrea
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -67448,17 +67448,17 @@ declare const FunctionsProfilesComputationsRequestFunctionProfileComputationCrea
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -67539,29 +67539,29 @@ declare const FunctionsProfilesComputationsRequestFunctionProfileComputationCrea
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -67604,7 +67604,7 @@ declare const FunctionsProfilesComputationsRequestFunctionProfileComputationCrea
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -68019,13 +68019,13 @@ declare const FunctionsProfilesComputationsRequestFunctionProfileComputationCrea
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -68051,13 +68051,13 @@ declare const FunctionsProfilesComputationsRequestFunctionProfileComputationCrea
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -68143,17 +68143,17 @@ declare const FunctionsProfilesComputationsRequestFunctionProfileComputationCrea
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -68234,29 +68234,29 @@ declare const FunctionsProfilesComputationsRequestFunctionProfileComputationCrea
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -68299,7 +68299,7 @@ declare const FunctionsProfilesComputationsRequestFunctionProfileComputationCrea
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -72121,13 +72121,13 @@ declare const FunctionsProfilesComputationsRequestRequestSchema: z.ZodUnion<read
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"developer">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -72153,13 +72153,13 @@ declare const FunctionsProfilesComputationsRequestRequestSchema: z.ZodUnion<read
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"system">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -72245,17 +72245,17 @@ declare const FunctionsProfilesComputationsRequestRequestSchema: z.ZodUnion<read
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
                     }, z.core.$strip>]>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"user">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                    content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -72336,29 +72336,29 @@ declare const FunctionsProfilesComputationsRequestRequestSchema: z.ZodUnion<read
                             filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
-                    }, z.core.$strip>]>]>>]>>]>>>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strip>]>]>>]>>]>>;
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -72401,7 +72401,7 @@ declare const FunctionsProfilesComputationsRequestRequestSchema: z.ZodUnion<read
                             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"function">;
-                    }, z.core.$strip>]>>>]>>>;
+                    }, z.core.$strip>]>>>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"assistant">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -72816,13 +72816,13 @@ declare const FunctionsProfilesComputationsRequestRequestSchema: z.ZodUnion<read
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"developer">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -72848,13 +72848,13 @@ declare const FunctionsProfilesComputationsRequestRequestSchema: z.ZodUnion<read
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"text">;
                     }, z.core.$strip>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"system">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -72940,17 +72940,17 @@ declare const FunctionsProfilesComputationsRequestRequestSchema: z.ZodUnion<read
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
                     }, z.core.$strip>]>]>>]>]>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"user">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                    content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -73031,29 +73031,29 @@ declare const FunctionsProfilesComputationsRequestRequestSchema: z.ZodUnion<read
                             filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                         }, z.core.$strip>]>;
                         type: z.ZodLiteral<"file">;
-                    }, z.core.$strip>]>]>>]>>]>>>;
-                    name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strip>]>]>>]>>]>>;
+                    name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                    tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                    }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                    tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                         $jmespath: z.ZodString;
                     }, z.core.$strict>, z.ZodObject<{
                         $starlark: z.ZodString;
@@ -73096,7 +73096,7 @@ declare const FunctionsProfilesComputationsRequestRequestSchema: z.ZodUnion<read
                             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                         }, z.core.$strict>]>, z.ZodString]>;
                         type: z.ZodLiteral<"function">;
-                    }, z.core.$strip>]>>>]>>>;
+                    }, z.core.$strip>]>>>]>>;
                 }, z.core.$strip>, z.ZodObject<{
                     role: z.ZodLiteral<"assistant">;
                 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -78139,13 +78139,13 @@ declare const FunctionsFullInlineFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"developer">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -78171,13 +78171,13 @@ declare const FunctionsFullInlineFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"system">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -78263,17 +78263,17 @@ declare const FunctionsFullInlineFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
             }, z.core.$strip>]>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"user">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -78354,29 +78354,29 @@ declare const FunctionsFullInlineFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                     filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>]>>]>>]>>>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strip>]>]>>]>>]>>;
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -78419,7 +78419,7 @@ declare const FunctionsFullInlineFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"function">;
-            }, z.core.$strip>]>>>]>>>;
+            }, z.core.$strip>]>>>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"assistant">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -78834,13 +78834,13 @@ declare const FunctionsFullInlineFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"developer">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -78866,13 +78866,13 @@ declare const FunctionsFullInlineFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"system">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -78958,17 +78958,17 @@ declare const FunctionsFullInlineFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
             }, z.core.$strip>]>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"user">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -79049,29 +79049,29 @@ declare const FunctionsFullInlineFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                     filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>]>>]>>]>>>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strip>]>]>>]>>]>>;
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -79114,7 +79114,7 @@ declare const FunctionsFullInlineFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"function">;
-            }, z.core.$strip>]>>>]>>>;
+            }, z.core.$strip>]>>>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"assistant">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -79780,13 +79780,13 @@ declare const FunctionsFullRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"developer">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -79812,13 +79812,13 @@ declare const FunctionsFullRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"system">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -79904,17 +79904,17 @@ declare const FunctionsFullRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
             }, z.core.$strip>]>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"user">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -79995,29 +79995,29 @@ declare const FunctionsFullRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                     filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>]>>]>>]>>>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strip>]>]>>]>>]>>;
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -80060,7 +80060,7 @@ declare const FunctionsFullRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"function">;
-            }, z.core.$strip>]>>>]>>>;
+            }, z.core.$strip>]>>>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"assistant">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -80484,13 +80484,13 @@ declare const FunctionsFullRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"developer">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -80516,13 +80516,13 @@ declare const FunctionsFullRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"system">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -80608,17 +80608,17 @@ declare const FunctionsFullRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
             }, z.core.$strip>]>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"user">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -80699,29 +80699,29 @@ declare const FunctionsFullRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                     filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>]>>]>>]>>>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strip>]>]>>]>>]>>;
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -80764,7 +80764,7 @@ declare const FunctionsFullRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodUnion
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"function">;
-            }, z.core.$strip>]>>>]>>>;
+            }, z.core.$strip>]>>>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"assistant">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -81170,13 +81170,13 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"developer">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -81202,13 +81202,13 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"system">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -81294,17 +81294,17 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
             }, z.core.$strip>]>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"user">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -81385,29 +81385,29 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                     filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>]>>]>>]>>>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strip>]>]>>]>>]>>;
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -81450,7 +81450,7 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"function">;
-            }, z.core.$strip>]>>>]>>>;
+            }, z.core.$strip>]>>>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"assistant">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -81874,13 +81874,13 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"developer">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -81906,13 +81906,13 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"system">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -81998,17 +81998,17 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
             }, z.core.$strip>]>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"user">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -82089,29 +82089,29 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                     filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>]>>]>>]>>>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strip>]>]>>]>>]>>;
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -82154,7 +82154,7 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"function">;
-            }, z.core.$strip>]>>>]>>>;
+            }, z.core.$strip>]>>>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"assistant">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -82555,13 +82555,13 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"developer">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -82587,13 +82587,13 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"system">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -82679,17 +82679,17 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
             }, z.core.$strip>]>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"user">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -82770,29 +82770,29 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                     filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>]>>]>>]>>>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strip>]>]>>]>>]>>;
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -82835,7 +82835,7 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"function">;
-            }, z.core.$strip>]>>>]>>>;
+            }, z.core.$strip>]>>>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"assistant">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -83250,13 +83250,13 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"developer">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -83282,13 +83282,13 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"system">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -83374,17 +83374,17 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
             }, z.core.$strip>]>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"user">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -83465,29 +83465,29 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                     filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>]>>]>>]>>>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strip>]>]>>]>>]>>;
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -83530,7 +83530,7 @@ declare const FunctionsFunctionSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"function">;
-            }, z.core.$strip>]>>>]>>>;
+            }, z.core.$strip>]>>>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"assistant">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -83942,13 +83942,13 @@ declare const FunctionsGetFunctionSchema: z.ZodIntersection<z.ZodUnion<readonly 
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"developer">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -83974,13 +83974,13 @@ declare const FunctionsGetFunctionSchema: z.ZodIntersection<z.ZodUnion<readonly 
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"system">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -84066,17 +84066,17 @@ declare const FunctionsGetFunctionSchema: z.ZodIntersection<z.ZodUnion<readonly 
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
             }, z.core.$strip>]>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"user">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -84157,29 +84157,29 @@ declare const FunctionsGetFunctionSchema: z.ZodIntersection<z.ZodUnion<readonly 
                     filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>]>>]>>]>>>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strip>]>]>>]>>]>>;
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -84222,7 +84222,7 @@ declare const FunctionsGetFunctionSchema: z.ZodIntersection<z.ZodUnion<readonly 
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"function">;
-            }, z.core.$strip>]>>>]>>>;
+            }, z.core.$strip>]>>>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"assistant">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -84646,13 +84646,13 @@ declare const FunctionsGetFunctionSchema: z.ZodIntersection<z.ZodUnion<readonly 
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"developer">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -84678,13 +84678,13 @@ declare const FunctionsGetFunctionSchema: z.ZodIntersection<z.ZodUnion<readonly 
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"system">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -84770,17 +84770,17 @@ declare const FunctionsGetFunctionSchema: z.ZodIntersection<z.ZodUnion<readonly 
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
             }, z.core.$strip>]>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"user">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -84861,29 +84861,29 @@ declare const FunctionsGetFunctionSchema: z.ZodIntersection<z.ZodUnion<readonly 
                     filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>]>>]>>]>>>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strip>]>]>>]>>]>>;
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -84926,7 +84926,7 @@ declare const FunctionsGetFunctionSchema: z.ZodIntersection<z.ZodUnion<readonly 
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"function">;
-            }, z.core.$strip>]>>>]>>>;
+            }, z.core.$strip>]>>>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"assistant">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -85338,13 +85338,13 @@ declare const FunctionsGetFunctionProfilePairSchema: z.ZodObject<{
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -85370,13 +85370,13 @@ declare const FunctionsGetFunctionProfilePairSchema: z.ZodObject<{
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -85462,17 +85462,17 @@ declare const FunctionsGetFunctionProfilePairSchema: z.ZodObject<{
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -85553,29 +85553,29 @@ declare const FunctionsGetFunctionProfilePairSchema: z.ZodObject<{
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -85618,7 +85618,7 @@ declare const FunctionsGetFunctionProfilePairSchema: z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -86042,13 +86042,13 @@ declare const FunctionsGetFunctionProfilePairSchema: z.ZodObject<{
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"developer">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -86074,13 +86074,13 @@ declare const FunctionsGetFunctionProfilePairSchema: z.ZodObject<{
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"text">;
                 }, z.core.$strip>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"system">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -86166,17 +86166,17 @@ declare const FunctionsGetFunctionProfilePairSchema: z.ZodObject<{
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
                 }, z.core.$strip>]>]>>]>]>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"user">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -86257,29 +86257,29 @@ declare const FunctionsGetFunctionProfilePairSchema: z.ZodObject<{
                         filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                     }, z.core.$strip>]>;
                     type: z.ZodLiteral<"file">;
-                }, z.core.$strip>]>]>>]>>]>>>;
-                name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strip>]>]>>]>>]>>;
+                name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+                }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+                tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                     $jmespath: z.ZodString;
                 }, z.core.$strict>, z.ZodObject<{
                     $starlark: z.ZodString;
@@ -86322,7 +86322,7 @@ declare const FunctionsGetFunctionProfilePairSchema: z.ZodObject<{
                         $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                     }, z.core.$strict>]>, z.ZodString]>;
                     type: z.ZodLiteral<"function">;
-                }, z.core.$strip>]>>>]>>>;
+                }, z.core.$strip>]>>>]>>;
             }, z.core.$strip>, z.ZodObject<{
                 role: z.ZodLiteral<"assistant">;
             }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -87849,13 +87849,13 @@ declare const FunctionsInlineFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"developer">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -87881,13 +87881,13 @@ declare const FunctionsInlineFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"system">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -87973,17 +87973,17 @@ declare const FunctionsInlineFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
             }, z.core.$strip>]>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"user">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -88064,29 +88064,29 @@ declare const FunctionsInlineFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                     filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>]>>]>>]>>>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strip>]>]>>]>>]>>;
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -88129,7 +88129,7 @@ declare const FunctionsInlineFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"function">;
-            }, z.core.$strip>]>>>]>>>;
+            }, z.core.$strip>]>>>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"assistant">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -88544,13 +88544,13 @@ declare const FunctionsInlineFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"developer">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -88576,13 +88576,13 @@ declare const FunctionsInlineFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"system">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -88668,17 +88668,17 @@ declare const FunctionsInlineFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
             }, z.core.$strip>]>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"user">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -88759,29 +88759,29 @@ declare const FunctionsInlineFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                     filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>]>>]>>]>>>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strip>]>]>>]>>]>>;
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -88824,7 +88824,7 @@ declare const FunctionsInlineFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"function">;
-            }, z.core.$strip>]>>>]>>>;
+            }, z.core.$strip>]>>>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"assistant">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -91663,13 +91663,13 @@ declare const FunctionsRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"developer">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -91695,13 +91695,13 @@ declare const FunctionsRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"system">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -91787,17 +91787,17 @@ declare const FunctionsRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
             }, z.core.$strip>]>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"user">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -91878,29 +91878,29 @@ declare const FunctionsRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                     filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>]>>]>>]>>>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strip>]>]>>]>>]>>;
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -91943,7 +91943,7 @@ declare const FunctionsRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"function">;
-            }, z.core.$strip>]>>>]>>>;
+            }, z.core.$strip>]>>>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"assistant">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -92367,13 +92367,13 @@ declare const FunctionsRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"developer">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -92399,13 +92399,13 @@ declare const FunctionsRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"text">;
             }, z.core.$strip>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"system">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -92491,17 +92491,17 @@ declare const FunctionsRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
             }, z.core.$strip>]>]>>]>]>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"user">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -92582,29 +92582,29 @@ declare const FunctionsRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                     filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
                 }, z.core.$strip>]>;
                 type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>]>>]>>]>>>;
-            name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strip>]>]>>]>>]>>;
+            name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+            }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+            tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -92647,7 +92647,7 @@ declare const FunctionsRemoteFunctionSchema: z.ZodUnion<readonly [z.ZodObject<{
                     $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
                 }, z.core.$strict>]>, z.ZodString]>;
                 type: z.ZodLiteral<"function">;
-            }, z.core.$strip>]>>>]>>>;
+            }, z.core.$strip>]>>>]>>;
         }, z.core.$strip>, z.ZodObject<{
             role: z.ZodLiteral<"assistant">;
         }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -94497,13 +94497,13 @@ declare const FunctionsTaskExpressionSchema: z.ZodUnion<readonly [z.ZodIntersect
             }, z.core.$strict>]>, z.ZodString]>;
             type: z.ZodLiteral<"text">;
         }, z.core.$strip>]>>]>]>;
-        name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+        name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
     }, z.core.$strip>, z.ZodObject<{
         role: z.ZodLiteral<"developer">;
     }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -94529,13 +94529,13 @@ declare const FunctionsTaskExpressionSchema: z.ZodUnion<readonly [z.ZodIntersect
             }, z.core.$strict>]>, z.ZodString]>;
             type: z.ZodLiteral<"text">;
         }, z.core.$strip>]>>]>]>;
-        name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+        name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
     }, z.core.$strip>, z.ZodObject<{
         role: z.ZodLiteral<"system">;
     }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -94621,17 +94621,17 @@ declare const FunctionsTaskExpressionSchema: z.ZodUnion<readonly [z.ZodIntersect
             }, z.core.$strip>]>;
             type: z.ZodLiteral<"file">;
         }, z.core.$strip>]>]>>]>]>;
-        name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+        name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
     }, z.core.$strip>, z.ZodObject<{
         role: z.ZodLiteral<"user">;
     }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-        content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+        content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
@@ -94712,29 +94712,29 @@ declare const FunctionsTaskExpressionSchema: z.ZodUnion<readonly [z.ZodIntersect
                 filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
             }, z.core.$strip>]>;
             type: z.ZodLiteral<"file">;
-        }, z.core.$strip>]>]>>]>>]>>>;
-        name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+        }, z.core.$strip>]>]>>]>>]>>;
+        name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-        reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+        reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-        refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+        refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-        tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+        tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
@@ -94777,7 +94777,7 @@ declare const FunctionsTaskExpressionSchema: z.ZodUnion<readonly [z.ZodIntersect
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
             }, z.core.$strict>]>, z.ZodString]>;
             type: z.ZodLiteral<"function">;
-        }, z.core.$strip>]>>>]>>>;
+        }, z.core.$strip>]>>>]>>;
     }, z.core.$strip>, z.ZodObject<{
         role: z.ZodLiteral<"assistant">;
     }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -95310,13 +95310,13 @@ declare const FunctionsVectorCompletionTaskExpressionSchema: z.ZodObject<{
             }, z.core.$strict>]>, z.ZodString]>;
             type: z.ZodLiteral<"text">;
         }, z.core.$strip>]>>]>]>;
-        name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+        name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
     }, z.core.$strip>, z.ZodObject<{
         role: z.ZodLiteral<"developer">;
     }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -95342,13 +95342,13 @@ declare const FunctionsVectorCompletionTaskExpressionSchema: z.ZodObject<{
             }, z.core.$strict>]>, z.ZodString]>;
             type: z.ZodLiteral<"text">;
         }, z.core.$strip>]>>]>]>;
-        name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+        name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
     }, z.core.$strip>, z.ZodObject<{
         role: z.ZodLiteral<"system">;
     }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -95434,17 +95434,17 @@ declare const FunctionsVectorCompletionTaskExpressionSchema: z.ZodObject<{
             }, z.core.$strip>]>;
             type: z.ZodLiteral<"file">;
         }, z.core.$strip>]>]>>]>]>;
-        name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+        name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
+        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
     }, z.core.$strip>, z.ZodObject<{
         role: z.ZodLiteral<"user">;
     }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-        content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+        content: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
@@ -95525,29 +95525,29 @@ declare const FunctionsVectorCompletionTaskExpressionSchema: z.ZodObject<{
                 filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
             }, z.core.$strip>]>;
             type: z.ZodLiteral<"file">;
-        }, z.core.$strip>]>]>>]>>]>>>;
-        name: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+        }, z.core.$strip>]>]>>]>>]>>;
+        name: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-        reasoning: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+        reasoning: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-        refusal: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+        refusal: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>>;
-        tool_calls: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+        }, z.core.$strict>]>, z.ZodNullable<z.ZodString>]>>;
+        tool_calls: z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
@@ -95590,7 +95590,7 @@ declare const FunctionsVectorCompletionTaskExpressionSchema: z.ZodObject<{
                 $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
             }, z.core.$strict>]>, z.ZodString]>;
             type: z.ZodLiteral<"function">;
-        }, z.core.$strip>]>>>]>>>;
+        }, z.core.$strip>]>>>]>>;
     }, z.core.$strip>, z.ZodObject<{
         role: z.ZodLiteral<"assistant">;
     }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{

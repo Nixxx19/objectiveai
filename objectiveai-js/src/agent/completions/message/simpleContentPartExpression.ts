@@ -4,7 +4,7 @@ import { z } from "zod";
 import { FunctionsExpressionExpressionSchema } from "../../../functions/expression/expression";
 
 export const AgentCompletionsMessageSimpleContentPartExpressionSchema = z.object({
-  text: z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), z.string().describe("A literal value.")]).describe("A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```"),
+  text: z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), z.string().describe("A literal value.")]).describe("The text expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```"),
   type: z.literal("text"),
 }).describe("A text part expression.").meta({ title: "agent.completions.message.SimpleContentPartExpression" });
 export type AgentCompletionsMessageSimpleContentPartExpression = z.infer<typeof AgentCompletionsMessageSimpleContentPartExpressionSchema>;

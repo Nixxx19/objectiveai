@@ -352,10 +352,10 @@ function convert(schema, refs, lazyRefs, selfTitle, cyclicTitles) {
   return expr;
 }
 
-/** Check if a property schema is nullable (anyOf containing {type: "null"}). */
+/** Check if a property schema is nullable (anyOf containing {type: "null"}, possibly nested). */
 function isNullableSchema(schema) {
   if (!schema || !schema.anyOf) return false;
-  return schema.anyOf.some((v) => v.type === "null");
+  return schema.anyOf.some((v) => v.type === "null" || isNullableSchema(v));
 }
 
 function convertAnyOf(schema, refs, lazyRefs, selfTitle, cyclicTitles) {
