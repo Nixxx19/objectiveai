@@ -1,21 +1,5 @@
+use crate::retrieval::Kind;
 use std::path::{Path, PathBuf};
-
-/// The kind of resource stored in a filesystem repository.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Kind {
-    Functions,
-    Profiles,
-}
-
-impl Kind {
-    /// Returns the directory name for this kind.
-    pub fn as_str(self) -> &'static str {
-        match self {
-            Kind::Functions => "functions",
-            Kind::Profiles => "profiles",
-        }
-    }
-}
 
 /// Reads files from local git repositories on the filesystem.
 ///

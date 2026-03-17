@@ -1,6 +1,36 @@
-//! Shared mock data for Functions and Profiles.
+//! Shared mock data for Agents, Swarms, Functions, and Profiles.
 //!
-//! Provides embedded JSON fixtures used by both the fetchers and list clients.
+//! Provides embedded JSON fixtures used by the retrieval module.
+
+/// Returns a mock Agent by owner/repository/commit.
+pub fn get_agent(
+    _owner: &str,
+    _repository: &str,
+    _commit: Option<&str>,
+) -> Option<objectiveai::agent::RemoteAgent> {
+    // No mock agent fixtures yet.
+    None
+}
+
+/// Lists all mock Agents.
+pub fn list_agents() -> objectiveai::agent::response::ListAgentResponse {
+    objectiveai::agent::response::ListAgentResponse { data: vec![] }
+}
+
+/// Returns a mock Swarm by owner/repository/commit.
+pub fn get_swarm(
+    _owner: &str,
+    _repository: &str,
+    _commit: Option<&str>,
+) -> Option<objectiveai::swarm::RemoteSwarm> {
+    // No mock swarm fixtures yet.
+    None
+}
+
+/// Lists all mock Swarms.
+pub fn list_swarms() -> objectiveai::swarm::response::ListSwarmResponse {
+    objectiveai::swarm::response::ListSwarmResponse { data: vec![] }
+}
 
 /// Returns a mock Function by owner/repository/commit.
 ///

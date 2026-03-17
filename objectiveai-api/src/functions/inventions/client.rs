@@ -395,7 +395,7 @@ where
                 } else {
                     return Ok(());
                 };
-                self.filesystem_client.repository_exists(crate::filesystem::Kind::Functions, owner, repo)
+                self.filesystem_client.repository_exists(crate::retrieval::Kind::Functions, owner, repo)
             }
             objectiveai::functions::Remote::Mock => false,
         };
@@ -1012,7 +1012,7 @@ pub(crate) fn publish_filesystem(
         .collect();
 
     let commit = filesystem_client
-        .publish(crate::filesystem::Kind::Functions, owner, repo, &file_refs, &format!("publish {}", name))?;
+        .publish(crate::retrieval::Kind::Functions, owner, repo, &file_refs, &format!("publish {}", name))?;
 
     Ok(objectiveai::functions::RemoteFunctionPath {
         remote: objectiveai::functions::Remote::Filesystem,

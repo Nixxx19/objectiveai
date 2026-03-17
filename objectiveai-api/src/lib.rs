@@ -37,6 +37,8 @@ pub mod github;
 pub mod mcp;
 /// ObjectiveAI HTTP client wrapper with per-request authorization.
 pub mod objectiveai_http;
+/// Unified retrieval for agents, swarms, functions, and profiles.
+pub mod retrieval;
 /// Utility types for streaming and choice indexing.
 pub mod util;
 /// Vector completions for scoring and ranking responses.
