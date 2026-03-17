@@ -5,8 +5,8 @@ use serde::{Deserialize, Serialize};
 
 /// Query parameters for the list profiles endpoint.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.profiles.ListProfilesQueryParameters")]
-pub struct ListProfilesQueryParameters {
+#[schemars(rename = "functions.profiles.ListProfilesRequest")]
+pub struct ListProfilesRequest {
     /// Optional source filter for listing profiles.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub source: Option<ListProfilesSource>,
@@ -22,6 +22,9 @@ pub enum ListProfilesSource {
     Filesystem,
     Objectiveai,
 }
+
+/// Query parameters for getting a specific profile.
+pub type GetProfileRequest = crate::RemotePathCommitOptional;
 
 impl ListProfilesSource {
     pub fn as_str(&self) -> &str {

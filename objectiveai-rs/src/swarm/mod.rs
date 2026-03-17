@@ -72,6 +72,7 @@
 //! ```
 
 mod swarm;
+pub mod request;
 pub mod response;
 
 pub use swarm::*;

@@ -33,6 +33,7 @@ mod mcp;
 pub mod mock;
 pub mod openrouter;
 mod output_mode;
+pub mod request;
 pub mod response;
 mod upstream;
 

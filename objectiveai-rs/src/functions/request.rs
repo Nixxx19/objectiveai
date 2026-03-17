@@ -5,8 +5,8 @@ use serde::{Deserialize, Serialize};
 
 /// Query parameters for the list functions endpoint.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.ListFunctionsQueryParameters")]
-pub struct ListFunctionsQueryParameters {
+#[schemars(rename = "functions.ListFunctionsRequest")]
+pub struct ListFunctionsRequest {
     /// Optional source filter for listing functions.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub source: Option<ListFunctionsSource>,
@@ -36,8 +36,8 @@ impl ListFunctionsSource {
 
 /// Query parameters for the list function-profile pairs endpoint.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.ListFunctionProfilePairsQueryParameters")]
-pub struct ListFunctionProfilePairsQueryParameters {
+#[schemars(rename = "functions.ListFunctionProfilePairsRequest")]
+pub struct ListFunctionProfilePairsRequest {
     /// Optional source filter for listing function-profile pairs.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub source: Option<ListFunctionProfilePairsSource>,
@@ -49,6 +49,19 @@ pub struct ListFunctionProfilePairsQueryParameters {
 #[serde(rename_all = "snake_case")]
 pub enum ListFunctionProfilePairsSource {
     Objectiveai,
+}
+
+/// Request parameters for getting a specific function.
+pub type GetFunctionRequest = crate::RemotePathCommitOptional;
+
+/// Request parameters for getting usage of a specific function-profile pair.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.GetFunctionProfilePairUsageRequest")]
+pub struct GetFunctionProfilePairUsageRequest {
+    /// The function path.
+    pub function: crate::RemotePathCommitOptional,
+    /// The profile path.
+    pub profile: crate::RemotePathCommitOptional,
 }
 
 impl ListFunctionProfilePairsSource {

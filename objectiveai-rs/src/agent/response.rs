@@ -5,36 +5,32 @@ use schemars::JsonSchema;
 
 /// Response containing a list of Agents.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "agent.ListAgent")]
-pub struct ListAgent {
+#[schemars(rename = "agent.ListAgentResponse")]
+pub struct ListAgentResponse {
     /// The list of Agent summaries.
     pub data: Vec<ListAgentItem>,
 }
 
 /// Summary information for a listed Agent.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "agent.ListAgentItem")]
-pub struct ListAgentItem {
-    /// The unique content-addressed ID of the Agent.
-    pub id: String,
-}
+pub type ListAgentItem = crate::RemotePath;
 
 /// Response containing a single Agent with creation timestamp.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "agent.GetAgent")]
-pub struct GetAgent {
-    /// Unix timestamp when this Agent was first used.
-    pub created: u64,
+#[schemars(rename = "agent.GetAgentResponse")]
+pub struct GetAgentResponse {
+    #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
+    pub path: crate::RemotePath,
     /// The Agent definition.
     #[serde(flatten)]
     #[schemars(schema_with = "crate::flatten_schema::<super::InlineAgent>")]
-    pub inner: super::InlineAgent,
+    pub inner: super::RemoteAgent,
 }
 
 /// Usage statistics for an Agent.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "agent.UsageAgent")]
-pub struct UsageAgent {
+#[schemars(rename = "agent.UsageAgentResponse")]
+pub struct UsageAgentResponse {
     /// Total number of requests made with this Agent.
     pub requests: u64,
     /// Total completion tokens generated.

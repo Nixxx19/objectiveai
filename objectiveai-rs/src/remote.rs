@@ -55,3 +55,12 @@ pub struct RemotePath {
     pub repository: String,
     pub commit: String,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash, JsonSchema, arbitrary::Arbitrary)]
+#[schemars(rename = "RemotePathCommitOptional")]
+pub struct RemotePathCommitOptional {
+    pub remote: Remote,
+    pub owner: String,
+    pub repository: String,
+    pub commit: Option<String>,
+}

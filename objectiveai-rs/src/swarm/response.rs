@@ -5,36 +5,32 @@ use schemars::JsonSchema;
 
 /// Response containing a list of Swarms.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "swarm.ListSwarm")]
-pub struct ListSwarm {
+#[schemars(rename = "swarm.ListSwarmResponse")]
+pub struct ListSwarmResponse {
     /// The list of Swarm summaries.
     pub data: Vec<ListSwarmItem>,
 }
 
 /// Summary information for a listed Swarm.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "swarm.ListSwarmItem")]
-pub struct ListSwarmItem {
-    /// The unique content-addressed ID of the Swarm.
-    pub id: String,
-}
+pub type ListSwarmItem = crate::RemotePath;
 
-/// Response containing a single Swarm with creation timestamp.
+/// Response containing a single Swarm.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "swarm.GetSwarm")]
-pub struct GetSwarm {
-    /// Unix timestamp when this Swarm was first used.
-    pub created: u64,
+#[schemars(rename = "swarm.GetSwarmResponse")]
+pub struct GetSwarmResponse {
+    #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
+    pub path: crate::RemotePath,
     /// The Swarm definition.
     #[serde(flatten)]
     #[schemars(schema_with = "crate::flatten_schema::<super::InlineSwarm>")]
-    pub inner: super::InlineSwarm,
+    pub inner: super::RemoteSwarm,
 }
 
-/// Usage statistics for an Swarm.
+/// Usage statistics for a Swarm.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "swarm.UsageSwarm")]
-pub struct UsageSwarm {
+#[schemars(rename = "swarm.UsageSwarmResponse")]
+pub struct UsageSwarmResponse {
     /// Total number of requests made with this Swarm.
     pub requests: u64,
     /// Total completion tokens generated across all agents.
