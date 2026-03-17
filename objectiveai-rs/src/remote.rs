@@ -1,13 +1,13 @@
-//! Remote source types for function and profile hosting.
+//! Remote source types for function, profile, and agent hosting.
 
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use schemars::JsonSchema;
 
-/// The remote source where a function or profile is hosted.
+/// The remote source where a function, profile, or agent is hosted.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "snake_case")]
-#[schemars(rename = "functions.Remote")]
+#[schemars(rename = "Remote")]
 pub enum Remote {
     /// GitHub repository.
     Github,
@@ -45,4 +45,13 @@ impl fmt::Display for Remote {
             Remote::Mock => write!(f, "mock"),
         }
     }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash, JsonSchema, arbitrary::Arbitrary)]
+#[schemars(rename = "RemotePath")]
+pub struct RemotePath {
+    pub remote: Remote,
+    pub owner: String,
+    pub repository: String,
+    pub commit: String,
 }

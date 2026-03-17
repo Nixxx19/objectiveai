@@ -20,7 +20,7 @@
 //!
 //! # Normalization
 //!
-//! Before computing an ID, definitions are normalized via [`AgentBase::prepare`]:
+//! Before computing an ID, definitions are normalized via [`InlineAgentBase::prepare`]:
 //!
 //! - Default values are removed (e.g., `temperature: 1.0` becomes `None`)
 //! - Empty collections are removed

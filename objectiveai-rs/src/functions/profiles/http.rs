@@ -1,7 +1,7 @@
 //! HTTP functions for profile management.
 
 use super::request::ListProfilesSource;
-use crate::functions::Remote;
+use crate::Remote;
 use crate::{HttpClient, HttpError};
 
 /// Lists all profiles accessible to the authenticated user.

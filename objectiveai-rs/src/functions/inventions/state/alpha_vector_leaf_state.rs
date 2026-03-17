@@ -703,7 +703,7 @@ impl AlphaVectorLeafState {
 
     pub fn replace_placeholders(
         &mut self,
-        _paths: &[crate::functions::RemoteFunctionPath],
+        _paths: &[crate::RemotePath],
     ) {}
 
     pub fn build_function(&self) -> Option<crate::functions::FullRemoteFunction> {
@@ -796,7 +796,7 @@ impl super::InventionState for AlphaVectorLeafState {
 
     fn replace_placeholders(
         this: &Arc<Mutex<Self>>,
-        paths: &[crate::functions::RemoteFunctionPath],
+        paths: &[crate::RemotePath],
     ) {
         this.lock().unwrap().replace_placeholders(paths);
     }

@@ -68,3 +68,13 @@ impl AlphaInlineFunction {
         }
     }
 }
+
+/// A function specification that is either a full inline function definition
+/// or a remote path reference.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+#[schemars(rename = "functions.FullInlineFunctionOrRemote")]
+pub enum FullInlineFunctionOrRemote {
+    Inline(FullInlineFunction),
+    Remote(crate::RemotePath),
+}

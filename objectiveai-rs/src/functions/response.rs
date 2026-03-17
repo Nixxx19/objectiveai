@@ -17,7 +17,7 @@ pub struct ListFunction {
 #[schemars(rename = "functions.ListFunctionItem")]
 pub struct ListFunctionItem {
     /// The remote source where the function is hosted.
-    pub remote: functions::Remote,
+    pub remote: crate::Remote,
     /// Repository owner.
     pub owner: String,
     /// Repository name.
@@ -29,7 +29,7 @@ pub struct ListFunctionItem {
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.GetFunction")]
 pub struct GetFunction {
-    pub remote: functions::Remote,
+    pub remote: crate::Remote,
     pub owner: String,
     pub repository: String,
     pub commit: String,

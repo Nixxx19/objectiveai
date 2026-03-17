@@ -1,22 +1,33 @@
 use super::*;
-use crate::agent::{self, AgentBaseWithFallbacksAndCount};
+use crate::agent::{self, InlineAgentBaseWithFallbacksOrRemote, InlineAgentBaseWithFallbacksOrRemoteWithCount};
+
 use crate::vector::completions::request::{Profile, ProfileEntry};
 use rust_decimal::dec;
 use rust_decimal::Decimal;
 
-fn make_agent(model: &str, count: u64) -> AgentBaseWithFallbacksAndCount {
-    AgentBaseWithFallbacksAndCount {
+fn make_agent(model: &str, count: u64) -> InlineAgentBaseWithFallbacksOrRemoteWithCount {
+    InlineAgentBaseWithFallbacksOrRemoteWithCount {
         count,
-        inner: agent::AgentBase::Openrouter(agent::openrouter::AgentBase {
-            model: model.to_string(),
-            ..Default::default()
+        inner: InlineAgentBaseWithFallbacksOrRemote::AgentBase(agent::InlineAgentBaseWithFallbacks {
+            inner: agent::InlineAgentBase::Openrouter(agent::openrouter::AgentBase {
+                model: model.to_string(),
+                ..Default::default()
+            }),
+            fallbacks: None,
         }),
-        fallbacks: None,
     }
 }
 
-fn make_or(model: &str) -> agent::AgentBase {
-    agent::AgentBase::Openrouter(agent::openrouter::AgentBase {
+/// Helper: extract the model name from a validated AgentWithFallbacks.
+fn agent_model(a: &agent::AgentWithFallbacks) -> &str {
+    match a {
+        agent::AgentWithFallbacks::Inline(wf) => wf.inner.base().model(),
+        agent::AgentWithFallbacks::Remote(wf) => wf.inner.inner.base().model(),
+    }
+}
+
+fn make_or(model: &str) -> agent::InlineAgentBase {
+    agent::InlineAgentBase::Openrouter(agent::openrouter::AgentBase {
         model: model.to_string(),
         ..Default::default()
     })
@@ -24,7 +35,7 @@ fn make_or(model: &str) -> agent::AgentBase {
 
 #[test]
 fn filter_removes_count_zero_llms_and_profile_entries() {
-    let base = SwarmBase {
+    let base = InlineSwarmBase {
         agents: vec![
             make_agent("openai/gpt-4o", 1),
             make_agent("openai/gpt-4o-mini", 0), // should be filtered
@@ -37,7 +48,8 @@ fn filter_removes_count_zero_llms_and_profile_entries() {
         ProfileEntry { weight: dec!(0.4), invert: None },
     ]);
 
-    let (swarm, aligned) = Swarm::try_from_with_profile(base, profile).unwrap();
+    let result = InlineSwarmBaseWithProfile { inner: base, profile }.convert(None).unwrap();
+    let (swarm, aligned) = (result.inner, result.profile);
     assert_eq!(swarm.agents.len(), 2);
     let pairs = aligned.to_weights_and_invert();
     assert_eq!(pairs.len(), 2);
@@ -51,7 +63,7 @@ fn filter_removes_count_zero_llms_and_profile_entries() {
 fn merge_duplicates_with_weighted_average() {
     // Two identical LLMs: count 3 weight 1.0, count 1 weight 0.5
     // Merged weight = (1.0 * 3 + 0.5 * 1) / (3 + 1) = 3.5 / 4 = 0.875
-    let base = SwarmBase {
+    let base = InlineSwarmBase {
         agents: vec![
             make_agent("openai/gpt-4o", 3),
             make_agent("openai/gpt-4o", 1),
@@ -62,7 +74,8 @@ fn merge_duplicates_with_weighted_average() {
         ProfileEntry { weight: dec!(0.5), invert: None },
     ]);
 
-    let (swarm, aligned) = Swarm::try_from_with_profile(base, profile).unwrap();
+    let result = InlineSwarmBaseWithProfile { inner: base, profile }.convert(None).unwrap();
+    let (swarm, aligned) = (result.inner, result.profile);
     assert_eq!(swarm.agents.len(), 1);
     assert_eq!(swarm.agents[0].count, 4);
     let pairs = aligned.to_weights_and_invert();
@@ -74,7 +87,7 @@ fn merge_duplicates_with_weighted_average() {
 #[test]
 fn sort_reorders_profile_entries() {
     // Put two different LLMs in; verify profile entries follow the LLMs after sort
-    let base = SwarmBase {
+    let base = InlineSwarmBase {
         agents: vec![
             make_agent("openai/gpt-4o", 1),
             make_agent("anthropic/claude-3.5-sonnet", 1),
@@ -85,7 +98,8 @@ fn sort_reorders_profile_entries() {
         ProfileEntry { weight: dec!(0.3), invert: Some(true) },
     ]);
 
-    let (swarm, aligned) = Swarm::try_from_with_profile(base, profile).unwrap();
+    let result = InlineSwarmBaseWithProfile { inner: base, profile }.convert(None).unwrap();
+    let (swarm, aligned) = (result.inner, result.profile);
     let pairs = aligned.to_weights_and_invert();
     assert_eq!(swarm.agents.len(), 2);
 
@@ -93,11 +107,11 @@ fn sort_reorders_profile_entries() {
     // Verify that the profile entry with weight 0.7 follows the openai LLM
     // and the entry with weight 0.3 follows the anthropic LLM.
     for (i, a) in swarm.agents.iter().enumerate() {
-        if a.inner.base().model() == "openai/gpt-4o" {
+        if agent_model(&a.inner) == "openai/gpt-4o" {
             assert_eq!(pairs[i].0, dec!(0.7));
             assert_eq!(pairs[i].1, false);
         } else {
-            assert_eq!(a.inner.base().model(), "anthropic/claude-3.5-sonnet");
+            assert_eq!(agent_model(&a.inner), "anthropic/claude-3.5-sonnet");
             assert_eq!(pairs[i].0, dec!(0.3));
             assert_eq!(pairs[i].1, true);
         }
@@ -106,7 +120,7 @@ fn sort_reorders_profile_entries() {
 
 #[test]
 fn combined_filter_merge_sort() {
-    let base = SwarmBase {
+    let base = InlineSwarmBase {
         agents: vec![
             make_agent("openai/gpt-4o", 2),
             make_agent("anthropic/claude-3.5-sonnet", 0), // filtered
@@ -121,14 +135,15 @@ fn combined_filter_merge_sort() {
         ProfileEntry { weight: dec!(0.9), invert: None },
     ]);
 
-    let (swarm, aligned) = Swarm::try_from_with_profile(base, profile).unwrap();
+    let result = InlineSwarmBaseWithProfile { inner: base, profile }.convert(None).unwrap();
+    let (swarm, aligned) = (result.inner, result.profile);
     assert_eq!(swarm.agents.len(), 2);
     let pairs = aligned.to_weights_and_invert();
     assert_eq!(pairs.len(), 2);
 
     // sorted by full_id — check which order they ended up in
     for (i, a) in swarm.agents.iter().enumerate() {
-        let model = a.inner.base().model();
+        let model = agent_model(&a.inner);
         if model.starts_with("google") {
             assert_eq!(pairs[i].0, dec!(0.9)); // google weight
         } else {
@@ -140,7 +155,7 @@ fn combined_filter_merge_sort() {
 
 #[test]
 fn error_on_conflicting_invert_flags() {
-    let base = SwarmBase {
+    let base = InlineSwarmBase {
         agents: vec![
             make_agent("openai/gpt-4o", 1),
             make_agent("openai/gpt-4o", 1),
@@ -151,14 +166,14 @@ fn error_on_conflicting_invert_flags() {
         ProfileEntry { weight: dec!(0.5), invert: Some(true) },
     ]);
 
-    let result = Swarm::try_from_with_profile(base, profile);
+    let result = InlineSwarmBaseWithProfile { inner: base, profile }.convert(None);
     assert!(result.is_err());
     assert!(result.unwrap_err().contains("conflicting invert flags"));
 }
 
 #[test]
 fn error_on_profile_length_mismatch() {
-    let base = SwarmBase {
+    let base = InlineSwarmBase {
         agents: vec![
             make_agent("openai/gpt-4o", 1),
             make_agent("anthropic/claude-3.5-sonnet", 1),
@@ -168,14 +183,14 @@ fn error_on_profile_length_mismatch() {
         ProfileEntry { weight: dec!(0.5), invert: None },
     ]);
 
-    let result = Swarm::try_from_with_profile(base, profile);
+    let result = InlineSwarmBaseWithProfile { inner: base, profile }.convert(None);
     assert!(result.is_err());
     assert!(result.unwrap_err().contains("does not match"));
 }
 
 #[test]
 fn legacy_weights_format() {
-    let base = SwarmBase {
+    let base = InlineSwarmBase {
         agents: vec![
             make_agent("openai/gpt-4o", 1),
             make_agent("anthropic/claude-3.5-sonnet", 1),
@@ -183,7 +198,8 @@ fn legacy_weights_format() {
     };
     let profile = Profile::Weights(vec![dec!(0.7), dec!(0.3)]);
 
-    let (swarm, aligned) = Swarm::try_from_with_profile(base, profile).unwrap();
+    let result = InlineSwarmBaseWithProfile { inner: base, profile }.convert(None).unwrap();
+    let (swarm, aligned) = (result.inner, result.profile);
     assert_eq!(swarm.agents.len(), 2);
     let pairs = aligned.to_weights_and_invert();
     assert_eq!(pairs.len(), 2);
@@ -193,8 +209,8 @@ fn legacy_weights_format() {
 }
 
 #[test]
-fn produces_same_swarm_id_as_try_from() {
-    let base = SwarmBase {
+fn produces_same_swarm_id_as_convert() {
+    let base = InlineSwarmBase {
         agents: vec![
             make_agent("openai/gpt-4o", 2),
             make_agent("anthropic/claude-3.5-sonnet", 1),
@@ -203,53 +219,52 @@ fn produces_same_swarm_id_as_try_from() {
     };
     let profile = Profile::Weights(vec![dec!(0.5), dec!(0.5), dec!(0.5)]);
 
-    let swarm_from_try: Swarm = base.clone().try_into().unwrap();
-    let (swarm_with_profile, _) =
-        Swarm::try_from_with_profile(base, profile).unwrap();
+    let swarm_from_convert: InlineSwarm = base.clone().convert(None).unwrap();
+    let result = InlineSwarmBaseWithProfile { inner: base, profile }.convert(None).unwrap();
+    let swarm_with_profile = result.inner;
 
-    assert_eq!(swarm_from_try.id, swarm_with_profile.id);
-    assert_eq!(swarm_from_try.agents.len(), swarm_with_profile.agents.len());
-    for (a, b) in swarm_from_try.agents.iter().zip(swarm_with_profile.agents.iter()) {
+    assert_eq!(swarm_from_convert.id, swarm_with_profile.id);
+    assert_eq!(swarm_from_convert.agents.len(), swarm_with_profile.agents.len());
+    for (a, b) in swarm_from_convert.agents.iter().zip(swarm_with_profile.agents.iter()) {
         assert_eq!(a.count, b.count);
-        assert_eq!(a.full_id(), b.full_id());
+        assert_eq!(a.inner.full_id(), b.inner.full_id());
     }
 }
 
-// ---- Parity tests: TryFrom and try_from_with_profile must always produce
+// ---- Parity tests: convert and WithProfile::convert must always produce
 //      identical swarms (same id, same agent order, same counts). ----
 
-/// Helper: assert that TryFrom<SwarmBase> and try_from_with_profile
+/// Helper: assert that InlineSwarmBase::convert and WithProfile::convert
 /// produce identical swarms for the given base.
-fn assert_parity(base: SwarmBase) {
+fn assert_parity(base: InlineSwarmBase) {
     let n = base.agents.len();
     // uniform weights so profile is always valid
     let profile = Profile::Weights(vec![dec!(0.5); n]);
 
-    let swarm_try: Swarm = base.clone().try_into().unwrap();
-    let (swarm_wp, _) =
-        Swarm::try_from_with_profile(base, profile).unwrap();
+    let swarm_convert: InlineSwarm = base.clone().convert(None).unwrap();
+    let swarm_wp = InlineSwarmBaseWithProfile { inner: base, profile }.convert(None).unwrap().inner;
 
-    assert_eq!(swarm_try.id, swarm_wp.id,
-        "IDs differ: try_from={}, with_profile={}", swarm_try.id, swarm_wp.id);
-    assert_eq!(swarm_try.agents.len(), swarm_wp.agents.len(),
+    assert_eq!(swarm_convert.id, swarm_wp.id,
+        "IDs differ: convert={}, with_profile={}", swarm_convert.id, swarm_wp.id);
+    assert_eq!(swarm_convert.agents.len(), swarm_wp.agents.len(),
         "agent count differs");
-    for (a, b) in swarm_try.agents.iter().zip(swarm_wp.agents.iter()) {
-        assert_eq!(a.count, b.count, "count differs for full_id {}", a.full_id());
-        assert_eq!(a.full_id(), b.full_id(), "full_id differs");
-        assert_eq!(a.inner.base().model(), b.inner.base().model(), "model differs");
+    for (a, b) in swarm_convert.agents.iter().zip(swarm_wp.agents.iter()) {
+        assert_eq!(a.count, b.count, "count differs for full_id {}", a.inner.full_id());
+        assert_eq!(a.inner.full_id(), b.inner.full_id(), "full_id differs");
+        assert_eq!(agent_model(&a.inner), agent_model(&b.inner), "model differs");
     }
 }
 
 #[test]
 fn parity_single_llm() {
-    assert_parity(SwarmBase {
+    assert_parity(InlineSwarmBase {
         agents: vec![make_agent("openai/gpt-4o", 1)],
     });
 }
 
 #[test]
 fn parity_two_distinct_llms() {
-    assert_parity(SwarmBase {
+    assert_parity(InlineSwarmBase {
         agents: vec![
             make_agent("openai/gpt-4o", 1),
             make_agent("anthropic/claude-3.5-sonnet", 1),
@@ -259,7 +274,7 @@ fn parity_two_distinct_llms() {
 
 #[test]
 fn parity_many_distinct_models() {
-    assert_parity(SwarmBase {
+    assert_parity(InlineSwarmBase {
         agents: vec![
             make_agent("openai/gpt-4o", 1),
             make_agent("anthropic/claude-3.5-sonnet", 2),
@@ -272,8 +287,8 @@ fn parity_many_distinct_models() {
 
 #[test]
 fn parity_all_same_model_merged() {
-    // 4 entries for the same model → merged into 1 with count=10
-    assert_parity(SwarmBase {
+    // 4 entries for the same model -> merged into 1 with count=10
+    assert_parity(InlineSwarmBase {
         agents: vec![
             make_agent("openai/gpt-4o", 3),
             make_agent("openai/gpt-4o", 2),
@@ -285,7 +300,7 @@ fn parity_all_same_model_merged() {
 
 #[test]
 fn parity_with_count_zero_filtered() {
-    assert_parity(SwarmBase {
+    assert_parity(InlineSwarmBase {
         agents: vec![
             make_agent("openai/gpt-4o", 0),       // filtered
             make_agent("anthropic/claude-3.5-sonnet", 1),
@@ -298,15 +313,15 @@ fn parity_with_count_zero_filtered() {
 #[test]
 fn parity_interleaved_duplicates_and_zeros() {
     // Mix of count-0 filtering and duplicate merging
-    assert_parity(SwarmBase {
+    assert_parity(InlineSwarmBase {
         agents: vec![
             make_agent("openai/gpt-4o", 2),
             make_agent("anthropic/claude-3.5-sonnet", 0), // filtered
-            make_agent("openai/gpt-4o", 3),               // merged → count 5
+            make_agent("openai/gpt-4o", 3),               // merged -> count 5
             make_agent("google/gemini-2.0-flash", 1),
             make_agent("google/gemini-2.0-flash", 0),     // filtered (count 0)
             make_agent("meta/llama-3-70b", 1),
-            make_agent("openai/gpt-4o", 1),               // merged → count 6
+            make_agent("openai/gpt-4o", 1),               // merged -> count 6
         ],
     });
 }
@@ -314,26 +329,30 @@ fn parity_interleaved_duplicates_and_zeros() {
 #[test]
 fn parity_different_output_modes_are_distinct() {
     use agent::openrouter;
-    // Same model but different output_mode → different full_id, not merged
-    let base = SwarmBase {
+    // Same model but different output_mode -> different full_id, not merged
+    let base = InlineSwarmBase {
         agents: vec![
-            AgentBaseWithFallbacksAndCount {
+            InlineAgentBaseWithFallbacksOrRemoteWithCount {
                 count: 1,
-                inner: agent::AgentBase::Openrouter(openrouter::AgentBase {
-                    model: "openai/gpt-4o".to_string(),
-                    output_mode: openrouter::OutputMode::Instruction,
-                    ..Default::default()
+                inner: InlineAgentBaseWithFallbacksOrRemote::AgentBase(agent::InlineAgentBaseWithFallbacks {
+                    inner: agent::InlineAgentBase::Openrouter(openrouter::AgentBase {
+                        model: "openai/gpt-4o".to_string(),
+                        output_mode: openrouter::OutputMode::Instruction,
+                        ..Default::default()
+                    }),
+                    fallbacks: None,
                 }),
-                fallbacks: None,
             },
-            AgentBaseWithFallbacksAndCount {
+            InlineAgentBaseWithFallbacksOrRemoteWithCount {
                 count: 1,
-                inner: agent::AgentBase::Openrouter(openrouter::AgentBase {
-                    model: "openai/gpt-4o".to_string(),
-                    output_mode: openrouter::OutputMode::JsonSchema,
-                    ..Default::default()
+                inner: InlineAgentBaseWithFallbacksOrRemote::AgentBase(agent::InlineAgentBaseWithFallbacks {
+                    inner: agent::InlineAgentBase::Openrouter(openrouter::AgentBase {
+                        model: "openai/gpt-4o".to_string(),
+                        output_mode: openrouter::OutputMode::JsonSchema,
+                        ..Default::default()
+                    }),
+                    fallbacks: None,
                 }),
-                fallbacks: None,
             },
         ],
     };
@@ -343,25 +362,29 @@ fn parity_different_output_modes_are_distinct() {
 #[test]
 fn parity_different_temperatures_are_distinct() {
     use agent::openrouter;
-    let base = SwarmBase {
+    let base = InlineSwarmBase {
         agents: vec![
-            AgentBaseWithFallbacksAndCount {
+            InlineAgentBaseWithFallbacksOrRemoteWithCount {
                 count: 1,
-                inner: agent::AgentBase::Openrouter(openrouter::AgentBase {
-                    model: "openai/gpt-4o".to_string(),
-                    temperature: Some(0.0),
-                    ..Default::default()
+                inner: InlineAgentBaseWithFallbacksOrRemote::AgentBase(agent::InlineAgentBaseWithFallbacks {
+                    inner: agent::InlineAgentBase::Openrouter(openrouter::AgentBase {
+                        model: "openai/gpt-4o".to_string(),
+                        temperature: Some(0.0),
+                        ..Default::default()
+                    }),
+                    fallbacks: None,
                 }),
-                fallbacks: None,
             },
-            AgentBaseWithFallbacksAndCount {
+            InlineAgentBaseWithFallbacksOrRemoteWithCount {
                 count: 1,
-                inner: agent::AgentBase::Openrouter(openrouter::AgentBase {
-                    model: "openai/gpt-4o".to_string(),
-                    temperature: Some(1.5),
-                    ..Default::default()
+                inner: InlineAgentBaseWithFallbacksOrRemote::AgentBase(agent::InlineAgentBaseWithFallbacks {
+                    inner: agent::InlineAgentBase::Openrouter(openrouter::AgentBase {
+                        model: "openai/gpt-4o".to_string(),
+                        temperature: Some(1.5),
+                        ..Default::default()
+                    }),
+                    fallbacks: None,
                 }),
-                fallbacks: None,
             },
         ],
     };
@@ -370,12 +393,14 @@ fn parity_different_temperatures_are_distinct() {
 
 #[test]
 fn parity_with_fallbacks() {
-    let base = SwarmBase {
+    let base = InlineSwarmBase {
         agents: vec![
-            AgentBaseWithFallbacksAndCount {
+            InlineAgentBaseWithFallbacksOrRemoteWithCount {
                 count: 2,
-                inner: make_or("openai/gpt-4o"),
-                fallbacks: Some(vec![make_or("openai/gpt-4o-mini")]),
+                inner: InlineAgentBaseWithFallbacksOrRemote::AgentBase(agent::InlineAgentBaseWithFallbacks {
+                    inner: make_or("openai/gpt-4o"),
+                    fallbacks: Some(vec![make_or("openai/gpt-4o-mini")]),
+                }),
             },
             make_agent("anthropic/claude-3.5-sonnet", 1),
         ],
@@ -385,13 +410,15 @@ fn parity_with_fallbacks() {
 
 #[test]
 fn parity_duplicate_llms_with_fallbacks_merged() {
-    // Two entries with same primary+fallback config → should merge
-    let make_with_fallback = || AgentBaseWithFallbacksAndCount {
+    // Two entries with same primary+fallback config -> should merge
+    let make_with_fallback = || InlineAgentBaseWithFallbacksOrRemoteWithCount {
         count: 2,
-        inner: make_or("openai/gpt-4o"),
-        fallbacks: Some(vec![make_or("openai/gpt-4o-mini")]),
+        inner: InlineAgentBaseWithFallbacksOrRemote::AgentBase(agent::InlineAgentBaseWithFallbacks {
+            inner: make_or("openai/gpt-4o"),
+            fallbacks: Some(vec![make_or("openai/gpt-4o-mini")]),
+        }),
     };
-    assert_parity(SwarmBase {
+    assert_parity(InlineSwarmBase {
         agents: vec![make_with_fallback(), make_with_fallback()],
     });
 }
@@ -399,7 +426,7 @@ fn parity_duplicate_llms_with_fallbacks_merged() {
 #[test]
 fn parity_high_count() {
     // Max total count is 128
-    assert_parity(SwarmBase {
+    assert_parity(InlineSwarmBase {
         agents: vec![
             make_agent("openai/gpt-4o", 64),
             make_agent("anthropic/claude-3.5-sonnet", 64),
@@ -409,15 +436,15 @@ fn parity_high_count() {
 
 #[test]
 fn parity_single_llm_high_count() {
-    assert_parity(SwarmBase {
+    assert_parity(InlineSwarmBase {
         agents: vec![make_agent("openai/gpt-4o", 128)],
     });
 }
 
 #[test]
 fn parity_many_duplicates_merged_to_one() {
-    // 10 identical entries of count 1 → merged to count 10
-    assert_parity(SwarmBase {
+    // 10 identical entries of count 1 -> merged to count 10
+    assert_parity(InlineSwarmBase {
         agents: (0..10).map(|_| make_agent("openai/gpt-4o", 1)).collect(),
     });
 }
@@ -425,14 +452,14 @@ fn parity_many_duplicates_merged_to_one() {
 #[test]
 fn parity_reverse_input_order() {
     // Verify that swapping input order still produces the same swarm
-    let base_a = SwarmBase {
+    let base_a = InlineSwarmBase {
         agents: vec![
             make_agent("openai/gpt-4o", 1),
             make_agent("anthropic/claude-3.5-sonnet", 2),
             make_agent("google/gemini-2.0-flash", 3),
         ],
     };
-    let base_b = SwarmBase {
+    let base_b = InlineSwarmBase {
         agents: vec![
             make_agent("google/gemini-2.0-flash", 3),
             make_agent("anthropic/claude-3.5-sonnet", 2),
@@ -440,22 +467,22 @@ fn parity_reverse_input_order() {
         ],
     };
 
-    let try_a: Swarm = base_a.clone().try_into().unwrap();
-    let try_b: Swarm = base_b.clone().try_into().unwrap();
-    assert_eq!(try_a.id, try_b.id, "TryFrom should be order-independent");
+    let convert_a: InlineSwarm = base_a.clone().convert(None).unwrap();
+    let convert_b: InlineSwarm = base_b.clone().convert(None).unwrap();
+    assert_eq!(convert_a.id, convert_b.id, "convert should be order-independent");
 
     let profile_a = Profile::Weights(vec![dec!(0.5); 3]);
     let profile_b = Profile::Weights(vec![dec!(0.5); 3]);
-    let (wp_a, _) = Swarm::try_from_with_profile(base_a, profile_a).unwrap();
-    let (wp_b, _) = Swarm::try_from_with_profile(base_b, profile_b).unwrap();
-    assert_eq!(wp_a.id, wp_b.id, "with_profile should be order-independent");
-    assert_eq!(try_a.id, wp_a.id, "TryFrom and with_profile should match");
+    let wp_a = InlineSwarmBaseWithProfile { inner: base_a, profile: profile_a }.convert(None).unwrap().inner;
+    let wp_b = InlineSwarmBaseWithProfile { inner: base_b, profile: profile_b }.convert(None).unwrap().inner;
+    assert_eq!(wp_a.id, wp_b.id, "WithProfile::convert should be order-independent");
+    assert_eq!(convert_a.id, wp_a.id, "convert and WithProfile::convert should match");
 }
 
 #[test]
 fn parity_entries_profile_format() {
     // Use Entries format (not Weights) and verify parity
-    let base = SwarmBase {
+    let base = InlineSwarmBase {
         agents: vec![
             make_agent("openai/gpt-4o", 2),
             make_agent("anthropic/claude-3.5-sonnet", 1),
@@ -468,22 +495,21 @@ fn parity_entries_profile_format() {
         ProfileEntry { weight: dec!(0.2), invert: Some(true) },
     ]);
 
-    let swarm_try: Swarm = base.clone().try_into().unwrap();
-    let (swarm_wp, _) =
-        Swarm::try_from_with_profile(base, profile).unwrap();
+    let swarm_convert: InlineSwarm = base.clone().convert(None).unwrap();
+    let swarm_wp = InlineSwarmBaseWithProfile { inner: base, profile }.convert(None).unwrap().inner;
 
-    assert_eq!(swarm_try.id, swarm_wp.id);
-    assert_eq!(swarm_try.agents.len(), swarm_wp.agents.len());
-    for (a, b) in swarm_try.agents.iter().zip(swarm_wp.agents.iter()) {
+    assert_eq!(swarm_convert.id, swarm_wp.id);
+    assert_eq!(swarm_convert.agents.len(), swarm_wp.agents.len());
+    for (a, b) in swarm_convert.agents.iter().zip(swarm_wp.agents.iter()) {
         assert_eq!(a.count, b.count);
-        assert_eq!(a.full_id(), b.full_id());
+        assert_eq!(a.inner.full_id(), b.inner.full_id());
     }
 }
 
 #[test]
 fn parity_all_but_one_filtered() {
-    // All count-0 except one → should produce single-agent swarm
-    assert_parity(SwarmBase {
+    // All count-0 except one -> should produce single-agent swarm
+    assert_parity(InlineSwarmBase {
         agents: vec![
             make_agent("openai/gpt-4o", 0),
             make_agent("anthropic/claude-3.5-sonnet", 0),
@@ -495,7 +521,7 @@ fn parity_all_but_one_filtered() {
 
 #[test]
 fn parity_both_error_on_all_zero_counts() {
-    let base = SwarmBase {
+    let base = InlineSwarmBase {
         agents: vec![
             make_agent("openai/gpt-4o", 0),
             make_agent("anthropic/claude-3.5-sonnet", 0),
@@ -503,9 +529,9 @@ fn parity_both_error_on_all_zero_counts() {
     };
     let profile = Profile::Weights(vec![dec!(0.5), dec!(0.5)]);
 
-    let try_result: Result<Swarm, _> = base.clone().try_into();
-    let wp_result = Swarm::try_from_with_profile(base, profile);
+    let convert_result: Result<InlineSwarm, _> = base.clone().convert(None);
+    let wp_result = InlineSwarmBaseWithProfile { inner: base, profile }.convert(None);
 
-    assert!(try_result.is_err(), "TryFrom should error on all-zero counts");
-    assert!(wp_result.is_err(), "with_profile should error on all-zero counts");
+    assert!(convert_result.is_err(), "convert should error on all-zero counts");
+    assert!(wp_result.is_err(), "WithProfile::convert should error on all-zero counts");
 }

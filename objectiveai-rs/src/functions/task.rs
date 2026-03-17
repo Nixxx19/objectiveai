@@ -171,7 +171,7 @@ impl Task {
 #[schemars(rename = "functions.ScalarFunctionTaskExpression")]
 pub struct ScalarFunctionTaskExpression {
     /// The remote source where the function is hosted.
-    pub remote: super::Remote,
+    pub remote: crate::Remote,
     /// Repository owner.
     pub owner: String,
     /// Repository name.
@@ -238,7 +238,7 @@ impl ScalarFunctionTaskExpression {
 #[schemars(rename = "functions.ScalarFunctionTask")]
 pub struct ScalarFunctionTask {
     /// The remote source where the function is hosted.
-    pub remote: super::Remote,
+    pub remote: crate::Remote,
     /// Repository owner.
     pub owner: String,
     /// Repository name.
@@ -284,7 +284,7 @@ impl ScalarFunctionTask {
 #[schemars(rename = "functions.VectorFunctionTaskExpression")]
 pub struct VectorFunctionTaskExpression {
     /// The remote source where the function is hosted.
-    pub remote: super::Remote,
+    pub remote: crate::Remote,
     /// Repository owner.
     pub owner: String,
     /// Repository name.
@@ -351,7 +351,7 @@ impl VectorFunctionTaskExpression {
 #[schemars(rename = "functions.VectorFunctionTask")]
 pub struct VectorFunctionTask {
     /// The remote source where the function is hosted.
-    pub remote: super::Remote,
+    pub remote: crate::Remote,
     /// Repository owner.
     pub owner: String,
     /// Repository name.

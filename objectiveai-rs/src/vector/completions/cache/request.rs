@@ -23,8 +23,8 @@ impl<'de> serde::de::Deserialize<'de> for CacheVoteRequest<'static> {
 #[derive(Debug, Clone, Serialize, JsonSchema)]
 #[schemars(rename = "vector.completions.cache.CacheVoteRequestRef")]
 pub struct CacheVoteRequestRef<'a> {
-    pub agent: &'a agent::completions::request::Agent,
-    pub agents: Option<&'a [agent::completions::request::Agent]>,
+    pub agent: &'a agent::InlineAgentBaseWithFallbacksOrRemote,
+    pub agents: Option<&'a [agent::InlineAgentBaseWithFallbacksOrRemote]>,
     pub messages: &'a [agent::completions::message::Message],
     pub responses: &'a [agent::completions::message::RichContent],
 }
@@ -32,8 +32,8 @@ pub struct CacheVoteRequestRef<'a> {
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "vector.completions.cache.CacheVoteRequestOwned")]
 pub struct CacheVoteRequestOwned {
-    pub agent: agent::completions::request::Agent,
-    pub agents: Option<Vec<agent::completions::request::Agent>>,
+    pub agent: agent::InlineAgentBaseWithFallbacksOrRemote,
+    pub agents: Option<Vec<agent::InlineAgentBaseWithFallbacksOrRemote>>,
     pub messages: Vec<agent::completions::message::Message>,
     pub responses: Vec<agent::completions::message::RichContent>,
 }

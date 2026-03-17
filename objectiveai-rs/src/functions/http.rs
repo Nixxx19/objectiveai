@@ -1,7 +1,7 @@
 //! HTTP functions for function management.
 
 use super::request::{ListFunctionProfilePairsSource, ListFunctionsSource};
-use super::Remote;
+use crate::Remote;
 use crate::{HttpClient, HttpError};
 
 /// Lists all functions accessible to the authenticated user.

@@ -9,7 +9,7 @@ pub struct FunctionInvention {
     pub id: String,
     pub completions: Vec<super::AgentCompletion>,
     pub state: functions::inventions::State,
-    pub path: Option<functions::RemoteFunctionPath>,
+    pub path: Option<crate::RemotePath>,
     pub function: Option<functions::FullRemoteFunction>,
     pub created: u64,
     pub object: super::Object,

@@ -17,7 +17,7 @@ pub struct ListProfile {
 #[schemars(rename = "functions.profiles.ListProfileItem")]
 pub struct ListProfileItem {
     /// The remote source where the profile is hosted.
-    pub remote: functions::Remote,
+    pub remote: crate::Remote,
     /// Repository owner.
     pub owner: String,
     /// Repository name.
@@ -29,7 +29,7 @@ pub struct ListProfileItem {
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.profiles.GetProfile")]
 pub struct GetProfile {
-    pub remote: functions::Remote,
+    pub remote: crate::Remote,
     pub owner: String,
     pub repository: String,
     pub commit: String,

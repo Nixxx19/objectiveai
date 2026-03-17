@@ -15,7 +15,7 @@ use crate::functions::expression::{
     ObjectInputSchema, StringInputSchema,
 };
 use crate::functions::alpha_vector::check::check_alpha_branch_vector_function;
-use crate::functions::Remote;
+use crate::Remote;
 use crate::util::index_map;
 
 fn test(f: &RemoteFunction) {

@@ -86,7 +86,7 @@ pub trait InventionState: Clone + Send + 'static {
 
     fn replace_placeholders(
         this: &Arc<Mutex<Self>>,
-        paths: &[crate::functions::RemoteFunctionPath],
+        paths: &[crate::RemotePath],
     );
 }
 
@@ -165,7 +165,7 @@ impl State {
     /// Matches by `repository == name`. No-op for leaf states.
     pub fn replace_placeholders(
         &mut self,
-        paths: &[crate::functions::RemoteFunctionPath],
+        paths: &[crate::RemotePath],
     ) {
         match self {
             State::AlphaScalarBranch(s) => s.replace_placeholders(paths),

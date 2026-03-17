@@ -15,53 +15,59 @@
 //! # Example
 //!
 //! ```
-//! use objectiveai::swarm::{SwarmBase, Swarm};
-//! use objectiveai::agent::{AgentBase, AgentBaseWithFallbacksAndCount};
+//! use objectiveai::swarm::{InlineSwarmBase, InlineSwarm};
+//! use objectiveai::agent::{InlineAgentBase, InlineAgentBaseWithFallbacks, InlineAgentBaseWithFallbacksOrRemote, InlineAgentBaseWithFallbacksOrRemoteWithCount};
 //! use objectiveai::agent::openrouter;
 //! use objectiveai::agent::completions::message::{Message, SystemMessage, SimpleContent};
 //!
-//! let swarm_base = SwarmBase {
+//! let swarm_base = InlineSwarmBase {
 //!     agents: vec![
 //!         // A simple GPT-4 configuration
-//!         AgentBaseWithFallbacksAndCount {
+//!         InlineAgentBaseWithFallbacksOrRemoteWithCount {
 //!             count: 1,
-//!             inner: AgentBase::Openrouter(openrouter::AgentBase {
-//!                 model: "openai/gpt-4o".to_string(),
-//!                 ..Default::default()
+//!             inner: InlineAgentBaseWithFallbacksOrRemote::AgentBase(InlineAgentBaseWithFallbacks {
+//!                 inner: InlineAgentBase::Openrouter(openrouter::AgentBase {
+//!                     model: "openai/gpt-4o".to_string(),
+//!                     ..Default::default()
+//!                 }),
+//!                 fallbacks: None,
 //!             }),
-//!             fallbacks: None,
 //!         },
 //!         // Claude with a system prompt
-//!         AgentBaseWithFallbacksAndCount {
+//!         InlineAgentBaseWithFallbacksOrRemoteWithCount {
 //!             count: 1,
-//!             inner: AgentBase::Openrouter(openrouter::AgentBase {
-//!                 model: "anthropic/claude-3.5-sonnet".to_string(),
-//!                 output_mode: openrouter::OutputMode::JsonSchema,
-//!                 prefix_messages: Some(vec![
-//!                     Message::System(SystemMessage {
-//!                         content: SimpleContent::Text("You are a careful evaluator.".to_string()),
-//!                         name: None,
-//!                     }),
-//!                 ]),
-//!                 ..Default::default()
+//!             inner: InlineAgentBaseWithFallbacksOrRemote::AgentBase(InlineAgentBaseWithFallbacks {
+//!                 inner: InlineAgentBase::Openrouter(openrouter::AgentBase {
+//!                     model: "anthropic/claude-3.5-sonnet".to_string(),
+//!                     output_mode: openrouter::OutputMode::JsonSchema,
+//!                     prefix_messages: Some(vec![
+//!                         Message::System(SystemMessage {
+//!                             content: SimpleContent::Text("You are a careful evaluator.".to_string()),
+//!                             name: None,
+//!                         }),
+//!                     ]),
+//!                     ..Default::default()
+//!                 }),
+//!                 fallbacks: None,
 //!             }),
-//!             fallbacks: None,
 //!         },
 //!         // Gemini with lower temperature
-//!         AgentBaseWithFallbacksAndCount {
+//!         InlineAgentBaseWithFallbacksOrRemoteWithCount {
 //!             count: 2, // Include 2 instances
-//!             inner: AgentBase::Openrouter(openrouter::AgentBase {
-//!                 model: "google/gemini-2.0-flash-001".to_string(),
-//!                 output_mode: openrouter::OutputMode::ToolCall,
-//!                 temperature: Some(0.3),
-//!                 ..Default::default()
+//!             inner: InlineAgentBaseWithFallbacksOrRemote::AgentBase(InlineAgentBaseWithFallbacks {
+//!                 inner: InlineAgentBase::Openrouter(openrouter::AgentBase {
+//!                     model: "google/gemini-2.0-flash-001".to_string(),
+//!                     output_mode: openrouter::OutputMode::ToolCall,
+//!                     temperature: Some(0.3),
+//!                     ..Default::default()
+//!                 }),
+//!                 fallbacks: None,
 //!             }),
-//!             fallbacks: None,
 //!         },
 //!     ],
 //! };
 //!
-//! let swarm: Swarm = swarm_base.try_into().unwrap();
+//! let swarm: InlineSwarm = swarm_base.convert(None).unwrap();
 //! println!("Swarm ID: {}", swarm.id);
 //! ```
 

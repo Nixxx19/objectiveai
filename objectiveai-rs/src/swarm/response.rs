@@ -27,8 +27,8 @@ pub struct GetSwarm {
     pub created: u64,
     /// The Swarm definition.
     #[serde(flatten)]
-    #[schemars(schema_with = "crate::flatten_schema::<super::Swarm>")]
-    pub inner: super::Swarm,
+    #[schemars(schema_with = "crate::flatten_schema::<super::InlineSwarm>")]
+    pub inner: super::InlineSwarm,
 }
 
 /// Usage statistics for an Swarm.

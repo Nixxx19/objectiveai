@@ -127,7 +127,7 @@ impl LeafTaskExpression {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "functions.alpha_vector.ScalarFunctionTaskExpression")]
 pub struct ScalarFunctionTaskExpression {
-    pub remote: functions::Remote,
+    pub remote: crate::Remote,
     pub owner: String,
     pub repository: String,
     pub commit: String,
@@ -163,7 +163,7 @@ impl ScalarFunctionTaskExpression {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "functions.alpha_vector.VectorFunctionTaskExpression")]
 pub struct VectorFunctionTaskExpression {
-    pub remote: functions::Remote,
+    pub remote: crate::Remote,
     pub owner: String,
     pub repository: String,
     pub commit: String,
@@ -229,7 +229,7 @@ impl PlaceholderScalarFunctionTaskExpression {
 
     pub fn replace(
         self,
-        path: &functions::RemoteFunctionPath,
+        path: &crate::RemotePath,
     ) -> ScalarFunctionTaskExpression {
         ScalarFunctionTaskExpression {
             remote: path.remote,
@@ -316,7 +316,7 @@ impl PlaceholderVectorFunctionTaskExpression {
 
     pub fn replace(
         self,
-        path: &functions::RemoteFunctionPath,
+        path: &crate::RemotePath,
     ) -> VectorFunctionTaskExpression {
         VectorFunctionTaskExpression {
             remote: path.remote,

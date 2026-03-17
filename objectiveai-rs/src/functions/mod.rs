@@ -46,19 +46,15 @@ pub mod expression;
 mod full_function;
 mod function;
 pub mod inventions;
-mod path;
 mod profile;
 pub mod profiles;
-mod remote;
 pub mod request;
 pub mod response;
 mod task;
 
 pub use full_function::*;
 pub use function::*;
-pub use path::*;
 pub use profile::*;
-pub use remote::*;
 pub use task::*;
 
 #[cfg(feature = "http")]
