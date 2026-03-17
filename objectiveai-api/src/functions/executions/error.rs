@@ -20,15 +20,15 @@ pub enum Error {
     /// The Profile is invalid for the Function.
     #[error("invalid profile: {0}")]
     InvalidProfile(String),
-    /// Failed to fetch an Ensemble definition.
-    #[error("fetch ensemble error: {0}")]
-    FetchEnsemble(objectiveai::error::ResponseError),
-    /// The requested Ensemble was not found.
-    #[error("ensemble not found")]
-    EnsembleNotFound,
-    /// The Ensemble definition is invalid.
-    #[error("invalid ensemble: {0}")]
-    InvalidEnsemble(String),
+    /// Failed to fetch an Swarm definition.
+    #[error("fetch swarm error: {0}")]
+    FetchSwarm(objectiveai::error::ResponseError),
+    /// The requested Swarm was not found.
+    #[error("swarm not found")]
+    SwarmNotFound,
+    /// The Swarm definition is invalid.
+    #[error("invalid swarm: {0}")]
+    InvalidSwarm(String),
     /// Failed to fetch retry data.
     #[error("fetch retry error: {0}")]
     FetchRetry(objectiveai::error::ResponseError),
@@ -88,9 +88,9 @@ impl objectiveai::error::StatusError for Error {
             Error::FetchProfile(e) => e.status(),
             Error::ProfileNotFound => 404,
             Error::InvalidProfile(_) => 400,
-            Error::FetchEnsemble(e) => e.status(),
-            Error::EnsembleNotFound => 404,
-            Error::InvalidEnsemble(_) => 400,
+            Error::FetchSwarm(e) => e.status(),
+            Error::SwarmNotFound => 404,
+            Error::InvalidSwarm(_) => 400,
             Error::FetchRetry(e) => e.status(),
             Error::RetryNotFound => 404,
             Error::InvalidRetryToken => 400,
@@ -130,16 +130,16 @@ impl objectiveai::error::StatusError for Error {
                     "kind": "invalid_profile",
                     "error": msg,
                 }),
-                Error::FetchEnsemble(e) => serde_json::json!({
-                    "kind": "fetch_ensemble",
+                Error::FetchSwarm(e) => serde_json::json!({
+                    "kind": "fetch_swarm",
                     "error": e.message(),
                 }),
-                Error::EnsembleNotFound => serde_json::json!({
-                    "kind": "ensemble_not_found",
-                    "error": "ensemble not found",
+                Error::SwarmNotFound => serde_json::json!({
+                    "kind": "swarm_not_found",
+                    "error": "swarm not found",
                 }),
-                Error::InvalidEnsemble(msg) => serde_json::json!({
-                    "kind": "invalid_ensemble",
+                Error::InvalidSwarm(msg) => serde_json::json!({
+                    "kind": "invalid_swarm",
                     "error": msg,
                 }),
                 Error::FetchRetry(e) => serde_json::json!({

@@ -195,12 +195,12 @@ impl TryFrom<AgentBase> for Agent {
 
 /// Wrapper that adds fallback agents and a count to any agent type.
 ///
-/// Used to specify how many instances of an agent to include in an ensemble,
+/// Used to specify how many instances of an agent to include in an swarm,
 /// along with fallback agents to try if the primary fails.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.WithFallbacksAndCount.{T}")]
 pub struct WithFallbacksAndCount<T> {
-    /// Number of instances of this agent in the ensemble. Defaults to 1.
+    /// Number of instances of this agent in the swarm. Defaults to 1.
     #[serde(default = "WithFallbacksAndCount::<T>::default_count")]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub count: u64,
@@ -228,7 +228,7 @@ pub type AgentWithFallbacksAndCount = WithFallbacksAndCount<Agent>;
 impl AgentWithFallbacksAndCount {
     /// Returns the concatenated IDs of the primary agent and all fallbacks.
     ///
-    /// Used by [`Ensemble`](crate::ensemble::Ensemble) to compute its own
+    /// Used by [`Swarm`](crate::swarm::Swarm) to compute its own
     /// content-addressed ID.
     pub fn full_id(&self) -> String {
         match &self.fallbacks {

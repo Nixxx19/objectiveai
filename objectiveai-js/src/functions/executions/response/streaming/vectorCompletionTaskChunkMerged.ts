@@ -49,7 +49,7 @@ export function functionsExecutionsResponseStreamingVectorCompletionTaskChunkMer
     scores,
     weights,
     created: a.created,
-    ensemble: a.ensemble,
+    swarm: a.swarm,
     object: a.object,
     ...(usage != null ? { usage } : {}),
     ...(error != null ? { error } : {}),

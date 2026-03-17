@@ -8,7 +8,7 @@ use schemars::JsonSchema;
 /// Parameters for creating a vector completion.
 ///
 /// Vector completions run multiple agent completions (one per LLM in the
-/// ensemble), force each to vote for one of the predefined responses, and
+/// swarm), force each to vote for one of the predefined responses, and
 /// combine votes using the provided profile weights to produce final scores.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "vector.completions.request.VectorCompletionCreateParams")]
@@ -27,11 +27,11 @@ pub struct VectorCompletionCreateParams {
     /// Provider routing preferences.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<agent::completions::request::Provider>,
-    /// The Ensemble of agents to use.
-    pub ensemble: super::Ensemble,
-    /// The profile weights for each agent in the ensemble.
+    /// The Swarm of agents to use.
+    pub swarm: super::Swarm,
+    /// The profile weights for each agent in the swarm.
     ///
-    /// Must have the same length as the total agent count in the ensemble.
+    /// Must have the same length as the total agent count in the swarm.
     /// Can be either:
     /// - A vector of decimals (legacy representation), or
     /// - A vector of objects with `weight` and optional `invert` fields.

@@ -28,8 +28,8 @@ pub struct VectorCompletionChunk {
     /// Unix timestamp when the completion was created.
     #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub created: u64,
-    /// ID of the ensemble used for this completion.
-    pub ensemble: String,
+    /// ID of the swarm used for this completion.
+    pub swarm: String,
     /// Object type identifier (`"vector.completion.chunk"`).
     pub object: super::Object,
     /// Aggregated usage statistics. Typically present only in the final chunk.
@@ -56,7 +56,7 @@ impl VectorCompletionChunk {
             scores,
             weights,
             created: 0,
-            ensemble: String::new(),
+            swarm: String::new(),
             object: super::Object::default(),
             usage: None,
         }

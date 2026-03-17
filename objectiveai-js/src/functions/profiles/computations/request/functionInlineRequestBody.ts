@@ -4,11 +4,10 @@ import { z } from "zod";
 import { AgentCompletionsRequestProviderSchema } from "../../../../agent/completions/request/provider";
 import { FunctionsInlineFunctionSchema } from "../../../inlineFunction";
 import { FunctionsProfilesComputationsRequestDatasetItemSchema } from "./datasetItem";
-import { VectorCompletionsRequestEnsembleSchema } from "../../../../vector/completions/request/ensemble";
+import { VectorCompletionsRequestSwarmSchema } from "../../../../vector/completions/request/swarm";
 
 export const FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchema = z.object({
   dataset: z.array(FunctionsProfilesComputationsRequestDatasetItemSchema),
-  ensemble: VectorCompletionsRequestEnsembleSchema,
   from_cache: z.boolean().nullable().optional(),
   function: FunctionsInlineFunctionSchema,
   max_retries: z.number().int().min(0).max(18446744073709552000).nullable().optional(),
@@ -18,5 +17,6 @@ export const FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchema
   retry_token: z.string().nullable().optional(),
   seed: z.number().int().min(-9223372036854776000).max(9223372036854776000).nullable().optional(),
   stream: z.boolean().nullable().optional(),
+  swarm: VectorCompletionsRequestSwarmSchema,
 }).meta({ title: "functions.profiles.computations.request.FunctionInlineRequestBody" });
 export type FunctionsProfilesComputationsRequestFunctionInlineRequestBody = z.infer<typeof FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchema>;

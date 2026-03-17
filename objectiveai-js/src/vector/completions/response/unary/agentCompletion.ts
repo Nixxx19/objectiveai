@@ -16,5 +16,5 @@ export const VectorCompletionsResponseUnaryAgentCompletionSchema = z.object({
   object: AgentCompletionsResponseUnaryObjectSchema.describe("The object type (always \"agent.completion\")."),
   upstream: AgentUpstreamSchema.describe("Upstream provider"),
   usage: AgentCompletionsResponseUsageSchema,
-}).describe("A agent completion from a single agent within a vector completion.\n\nWraps the standard agent completion response with an index to identify\nwhich agent in the ensemble produced it.").meta({ title: "vector.completions.response.unary.AgentCompletion" });
+}).describe("A agent completion from a single agent within a vector completion.\n\nWraps the standard agent completion response with an index to identify\nwhich agent in the swarm produced it.").meta({ title: "vector.completions.response.unary.AgentCompletion" });
 export type VectorCompletionsResponseUnaryAgentCompletion = z.infer<typeof VectorCompletionsResponseUnaryAgentCompletionSchema>;

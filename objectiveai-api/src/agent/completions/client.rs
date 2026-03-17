@@ -4,7 +4,7 @@ use crate::ctx;
 use futures::StreamExt;
 
 /// A function that transforms messages before they are sent to an upstream.
-/// Keyed by agent ID so each agent in an ensemble can receive different messages.
+/// Keyed by agent ID so each agent in an swarm can receive different messages.
 pub type TransformMessages = HashMap<
     String,
     Box<dyn Fn(Vec<objectiveai::agent::completions::message::Message>) -> Vec<objectiveai::agent::completions::message::Message> + Send + Sync>,
@@ -20,7 +20,7 @@ pub fn response_id(created: u64) -> String {
 pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> {
     /// MCP Client
     pub mcp_client: Arc<crate::mcp::Client>,
-    /// Caching fetcher for Ensemble LLM definitions.
+    /// Caching fetcher for Swarm LLM definitions.
     pub agent_fetcher:
         Arc<super::super::fetcher::CachingFetcher<CTXEXT, FAGENT>>,
     /// Handler for tracking usage after completion.

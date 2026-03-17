@@ -5,14 +5,14 @@ from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
 from objectiveai.agent.completions.request.provider import Provider
 from objectiveai.functions.profiles.computations.request.dataset_item import DatasetItem
-from objectiveai.vector.completions.request.ensemble import Ensemble
+from objectiveai.vector.completions.request.swarm import Swarm
 
 
 class FunctionRemoteRequestBody(BaseModel):
     model_config = ConfigDict(title='functions.profiles.computations.request.FunctionRemoteRequestBody')
 
     dataset: list[DatasetItem]
-    ensemble: Ensemble
+    swarm: Swarm
     from_cache: Optional[bool] = None
     max_retries: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = None
     mcp_server_authorization: Optional[dict[str, str]] = Field(None, description='Map from MCP server URL to authorization header value.')

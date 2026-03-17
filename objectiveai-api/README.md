@@ -79,7 +79,7 @@ objectiveai-api = "0.1.0"
 ### Example: Custom Server
 
 ```rust
-use objectiveai_api::{chat, ctx, vector, functions, ensemble, ensemble_llm};
+use objectiveai_api::{chat, ctx, vector, functions, swarm, swarm_llm};
 use std::sync::Arc;
 
 // Create your HTTP client
@@ -94,14 +94,14 @@ let objectiveai_client = Arc::new(objectiveai::HttpClient::new(
 ));
 
 // Build the component stack
-let ensemble_llm_fetcher = Arc::new(
-    ensemble_llm::fetcher::CachingFetcher::new(Arc::new(
-        ensemble_llm::fetcher::ObjectiveAiFetcher::new(objectiveai_client.clone()),
+let swarm_llm_fetcher = Arc::new(
+    swarm_llm::fetcher::CachingFetcher::new(Arc::new(
+        swarm_llm::fetcher::ObjectiveAiFetcher::new(objectiveai_client.clone()),
     )),
 );
 
 let chat_client = Arc::new(chat::completions::Client::new(
-    ensemble_llm_fetcher.clone(),
+    swarm_llm_fetcher.clone(),
     Arc::new(chat::completions::usage_handler::LogUsageHandler),
     // ... upstream client configuration
 ));
@@ -116,11 +116,11 @@ let chat_client = Arc::new(chat::completions::Client::new(
 | Module | Description |
 |--------|-------------|
 | `auth` | Authentication and API key management |
-| `chat` | Chat completions with Ensemble LLMs |
+| `chat` | Chat completions with Swarm LLMs |
 | `vector` | Vector completions for scoring and ranking |
 | `functions` | Function execution and Profile management |
-| `ensemble` | Ensemble management and caching |
-| `ensemble_llm` | Ensemble LLM management and caching |
+| `swarm` | Swarm management and caching |
+| `swarm_llm` | Swarm LLM management and caching |
 | `ctx` | Request context for dependency injection |
 | `error` | Error response handling |
 | `util` | Utilities for streaming and indexing |
@@ -140,7 +140,7 @@ Request
     ▼
 ┌─────────────────────────────────────────────────┐
 │  Vector Completions Client                      │
-│  - Runs ensemble voting                         │
+│  - Runs swarm voting                         │
 │  - Combines votes into scores                   │
 └─────────────────────────────────────────────────┘
     │
@@ -162,7 +162,7 @@ Request
 
 Each layer uses traits for dependency injection:
 
-- **Fetchers** - Implement custom caching or data sources for Ensembles, Functions, Profiles
+- **Fetchers** - Implement custom caching or data sources for Swarms, Functions, Profiles
 - **Usage Handlers** - Track usage, billing, or analytics
 - **Context Extensions** - Add per-request state (authentication, BYOK keys, etc.)
 
@@ -187,9 +187,9 @@ Each layer uses traits for dependency injection:
 - `POST /functions/{owner}/{repo}/profiles/{owner}/{repo}` - Execute remote function with remote profile
 - `POST /functions/profiles/compute` - Train a profile
 
-### Ensembles
-- `GET /ensembles` - List ensembles
-- `GET /ensembles/{id}` - Get ensemble
+### Swarms
+- `GET /swarms` - List swarms
+- `GET /swarms/{id}` - Get swarm
 
 ## License
 

@@ -30,8 +30,8 @@ if npm test --workspace=objectiveai -- --reporter=verbose >> "$LOG_FILE" 2>&1; t
   # vitest summary: "Tests  959 passed | 6 todo (965)" or "Tests  3 failed | 959 passed | 6 todo (965)"
   # Strip ANSI codes; parse passed + failed, ignore todo/skipped
   CLEAN=$(sed 's/\x1b\[[0-9;]*m//g' "$LOG_FILE")
-  PASSED=$(echo "$CLEAN" | grep -oP 'Tests\s+.*?\K\d+(?=\s+passed)' | tail -1 || true)
-  FAILED=$(echo "$CLEAN" | grep -oP 'Tests\s+.*?\K\d+(?=\s+failed)' | tail -1 || true)
+  PASSED=$(echo "$CLEAN" | sed -n 's/.*[^0-9]\([0-9][0-9]*\) passed.*/\1/p' | tail -1 || true)
+  FAILED=$(echo "$CLEAN" | sed -n 's/.*[^0-9]\([0-9][0-9]*\) failed.*/\1/p' | tail -1 || true)
   TOTAL=$(( ${PASSED:-0} + ${FAILED:-0} ))
   if [ "$TOTAL" -gt 0 ]; then
     echo "$MODULE: PASS ${PASSED:-0}/$TOTAL"
@@ -40,8 +40,8 @@ if npm test --workspace=objectiveai -- --reporter=verbose >> "$LOG_FILE" 2>&1; t
   fi
 else
   CLEAN=$(sed 's/\x1b\[[0-9;]*m//g' "$LOG_FILE")
-  PASSED=$(echo "$CLEAN" | grep -oP 'Tests\s+.*?\K\d+(?=\s+passed)' | tail -1 || true)
-  FAILED=$(echo "$CLEAN" | grep -oP 'Tests\s+.*?\K\d+(?=\s+failed)' | tail -1 || true)
+  PASSED=$(echo "$CLEAN" | sed -n 's/.*[^0-9]\([0-9][0-9]*\) passed.*/\1/p' | tail -1 || true)
+  FAILED=$(echo "$CLEAN" | sed -n 's/.*[^0-9]\([0-9][0-9]*\) failed.*/\1/p' | tail -1 || true)
   TOTAL=$(( ${PASSED:-0} + ${FAILED:-0} ))
   if [ "$TOTAL" -gt 0 ]; then
     echo "$MODULE: FAIL ${PASSED:-0}/$TOTAL"

@@ -6,14 +6,14 @@ from pydantic import BaseModel, ConfigDict, Field
 from objectiveai.agent.completions.request.provider import Provider
 from objectiveai.functions.inline_function import InlineFunction
 from objectiveai.functions.profiles.computations.request.dataset_item import DatasetItem
-from objectiveai.vector.completions.request.ensemble import Ensemble
+from objectiveai.vector.completions.request.swarm import Swarm
 
 
 class FunctionInlineRequestBody(BaseModel):
     model_config = ConfigDict(title='functions.profiles.computations.request.FunctionInlineRequestBody')
 
     dataset: list[DatasetItem]
-    ensemble: Ensemble
+    swarm: Swarm
     from_cache: Optional[bool] = None
     function: InlineFunction
     max_retries: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = None

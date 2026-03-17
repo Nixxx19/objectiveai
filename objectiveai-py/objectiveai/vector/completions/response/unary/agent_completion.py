@@ -14,7 +14,7 @@ class AgentCompletion(BaseModel):
     """A agent completion from a single agent within a vector completion.
 
 Wraps the standard agent completion response with an index to identify
-which agent in the ensemble produced it."""
+which agent in the swarm produced it."""
     model_config = ConfigDict(title='vector.completions.response.unary.AgentCompletion')
 
     created: int = Field(..., ge=0, le=18446744073709551615)

@@ -292,14 +292,14 @@ impl MapVectorCompletionFlatTaskProfile {
 /// A flattened vector completion task ready for execution.
 ///
 /// The leaf task type. Contains everything needed to run a vector completion:
-/// the Ensemble of LLMs, their weights from the Profile, and the compiled
+/// the Swarm of LLMs, their weights from the Profile, and the compiled
 /// messages/responses.
 #[derive(Debug, Clone)]
 pub struct VectorCompletionFlatTaskProfile {
     /// Path to this task in the Function tree (indices into tasks arrays).
     pub path: Vec<u64>,
-    /// The Ensemble configuration with LLMs and their settings.
-    pub ensemble: objectiveai::ensemble::EnsembleBase,
+    /// The Swarm configuration with LLMs and their settings.
+    pub swarm: objectiveai::swarm::SwarmBase,
     /// The profile for the vector completion (weights and optional per-LLM invert flags).
     pub profile: objectiveai::vector::completions::request::Profile,
     /// The compiled messages for the vector completion.
@@ -437,7 +437,7 @@ pub enum ProfileParam {
 
 /// Recursively builds a flattened task from a Function and Profile.
 ///
-/// Fetches any remote Functions/Profiles/Ensembles, compiles task expressions
+/// Fetches any remote Functions/Profiles/Swarms, compiles task expressions
 /// with the input, and validates that the Profile structure matches the Function.
 /// The result is a flat tree of tasks ready for parallel execution.
 pub async fn get_flat_task_profile<CTXEXT>(
@@ -462,10 +462,10 @@ pub async fn get_flat_task_profile<CTXEXT>(
             impl super::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
         >,
     >,
-    ensemble_fetcher: Arc<
-        crate::ensemble::fetcher::CachingFetcher<
+    swarm_fetcher: Arc<
+        crate::swarm::fetcher::CachingFetcher<
             CTXEXT,
-            impl crate::ensemble::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+            impl crate::swarm::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
         >,
     >,
 ) -> Result<super::FunctionFlatTaskProfile, super::executions::Error>
@@ -610,7 +610,7 @@ where
 
     // extract profile data based on profile type (tasks-based or auto)
     struct AutoConfig {
-        ensemble: objectiveai::vector::completions::request::Ensemble,
+        swarm: objectiveai::vector::completions::request::Swarm,
         vc_profile: objectiveai::vector::completions::request::Profile,
     }
 
@@ -672,7 +672,7 @@ where
             profile_invert_flags = Vec::new();
             task_profiles = None;
             auto_config = Some(AutoConfig {
-                ensemble: rp.ensemble,
+                swarm: rp.swarm,
                 vc_profile: rp.profile,
             });
         }
@@ -683,7 +683,7 @@ where
             profile_invert_flags = Vec::new();
             task_profiles = None;
             auto_config = Some(AutoConfig {
-                ensemble: ip.ensemble,
+                swarm: ip.swarm,
                 vc_profile: ip.profile,
             });
         }
@@ -838,7 +838,7 @@ where
                         profile: objectiveai::functions::Profile::Inline(
                             objectiveai::functions::InlineProfile::Auto(
                                 objectiveai::functions::InlineAutoProfile {
-                                    ensemble: auto.ensemble.clone(),
+                                    swarm: auto.swarm.clone(),
                                     profile: auto.vc_profile.clone(),
                                 },
                             ),
@@ -861,25 +861,25 @@ where
                         effective_invert_output,
                         function_fetcher.clone(),
                         profile_fetcher.clone(),
-                        ensemble_fetcher.clone(),
+                        swarm_fetcher.clone(),
                     )
                 )));
             }
             objectiveai::functions::CompiledTask::One(
                 objectiveai::functions::Task::VectorCompletion(task),
             ) => {
-                let (ensemble, vc_profile) = if let Some(task_profile) = task_profile {
+                let (swarm, vc_profile) = if let Some(task_profile) = task_profile {
                     match task_profile {
                         objectiveai::functions::TaskProfile::Inline(
                             objectiveai::functions::InlineProfile::Auto(auto),
-                        ) => (auto.ensemble, auto.profile),
+                        ) => (auto.swarm, auto.profile),
                         _ => return Err(super::executions::Error::InvalidProfile(
                             "expected Inline(Auto) profile for vector completion task".to_string()
                         )),
                     }
                 } else {
                     let auto = auto_config.as_ref().unwrap();
-                    (auto.ensemble.clone(), auto.vc_profile.clone())
+                    (auto.swarm.clone(), auto.vc_profile.clone())
                 };
                 let effective_invert_output = profile_invert_flags[i];
                 flat_tasks_or_futs.push(TaskFut::VectorTaskFut(Box::pin(
@@ -887,10 +887,10 @@ where
                         ctx.clone(),
                         task_path,
                         task,
-                        ensemble,
+                        swarm,
                         vc_profile,
                         effective_invert_output,
-                        ensemble_fetcher.clone(),
+                        swarm_fetcher.clone(),
                     ),
                 )));
             }
@@ -994,18 +994,18 @@ where
                         for (j, task) in tasks.into_iter().enumerate() {
                             let mut task_path = task_path.clone();
                             task_path.push(j as u64);
-                            let (ensemble, vc_profile) = if let Some(ref task_profile) = task_profile {
+                            let (swarm, vc_profile) = if let Some(ref task_profile) = task_profile {
                                 match task_profile {
                                     objectiveai::functions::TaskProfile::Inline(
                                         objectiveai::functions::InlineProfile::Auto(auto),
-                                    ) => (auto.ensemble.clone(), auto.profile.clone()),
+                                    ) => (auto.swarm.clone(), auto.profile.clone()),
                                     _ => return Err(super::executions::Error::InvalidProfile(
                                         "expected Inline(Auto) profile for mapped vector completion task".to_string()
                                     )),
                                 }
                             } else {
                                 let auto = auto_config.as_ref().unwrap();
-                                (auto.ensemble.clone(), auto.vc_profile.clone())
+                                (auto.swarm.clone(), auto.vc_profile.clone())
                             };
                             futs.push(get_vector_completion_flat_task_profile(
                                 ctx.clone(),
@@ -1016,10 +1016,10 @@ where
                                     ) => vc_task,
                                     _ => unreachable!(),
                                 },
-                                ensemble,
+                                swarm,
                                 vc_profile,
                                 map_invert_output,
-                                ensemble_fetcher.clone(),
+                                swarm_fetcher.clone(),
                             ));
                         }
                         flat_tasks_or_futs.push(TaskFut::MapVectorTaskFut((
@@ -1107,7 +1107,7 @@ where
                                         profile: objectiveai::functions::Profile::Inline(
                                             objectiveai::functions::InlineProfile::Auto(
                                                 objectiveai::functions::InlineAutoProfile {
-                                                    ensemble: auto.ensemble.clone(),
+                                                    swarm: auto.swarm.clone(),
                                                     profile: auto.vc_profile.clone(),
                                                 },
                                             ),
@@ -1128,7 +1128,7 @@ where
                                 false,
                                 function_fetcher.clone(),
                                 profile_fetcher.clone(),
-                                ensemble_fetcher.clone(),
+                                swarm_fetcher.clone(),
                             ));
                         }
                         flat_tasks_or_futs.push(TaskFut::MapFunctionTaskFut((
@@ -1247,13 +1247,13 @@ async fn get_vector_completion_flat_task_profile<CTXEXT>(
     ctx: ctx::Context<CTXEXT>,
     path: Vec<u64>,
     task: objectiveai::functions::VectorCompletionTask,
-    ensemble: objectiveai::vector::completions::request::Ensemble,
+    swarm: objectiveai::vector::completions::request::Swarm,
     mut profile: objectiveai::vector::completions::request::Profile,
     invert_output: bool,
-    ensemble_fetcher: Arc<
-        crate::ensemble::fetcher::CachingFetcher<
+    swarm_fetcher: Arc<
+        crate::swarm::fetcher::CachingFetcher<
             CTXEXT,
-            impl crate::ensemble::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+            impl crate::swarm::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
         >,
     >,
 ) -> Result<super::VectorCompletionFlatTaskProfile, super::executions::Error>
@@ -1261,28 +1261,28 @@ where
     CTXEXT: Send + Sync + 'static,
 {
     // switch based on profile
-    let ensemble = match ensemble {
-        objectiveai::vector::completions::request::Ensemble::Id(id) => {
-            // fetch ensemble
-            ensemble_fetcher
+    let swarm = match swarm {
+        objectiveai::vector::completions::request::Swarm::Id(id) => {
+            // fetch swarm
+            swarm_fetcher
                 .fetch(ctx, &id)
                 .map(|result| match result {
-                    Ok(Some((ensemble, _))) => Ok(ensemble),
-                    Ok(None) => Err(super::executions::Error::EnsembleNotFound),
-                    Err(e) => Err(super::executions::Error::FetchEnsemble(e)),
+                    Ok(Some((swarm, _))) => Ok(swarm),
+                    Ok(None) => Err(super::executions::Error::SwarmNotFound),
+                    Err(e) => Err(super::executions::Error::FetchSwarm(e)),
                 })
                 .await?
         }
-        objectiveai::vector::completions::request::Ensemble::Provided(
-            ensemble,
+        objectiveai::vector::completions::request::Swarm::Provided(
+            swarm,
         ) => {
-            // validate ensemble and align profile weights
+            // validate swarm and align profile weights
             let (ens, aligned_profile) =
-                objectiveai::ensemble::Ensemble::try_from_with_profile(
-                    ensemble.clone(),
+                objectiveai::swarm::Swarm::try_from_with_profile(
+                    swarm.clone(),
                     profile,
                 )
-                .map_err(super::executions::Error::InvalidEnsemble)?;
+                .map_err(super::executions::Error::InvalidSwarm)?;
             profile = aligned_profile;
             ens
         }
@@ -1291,8 +1291,8 @@ where
     // construct flat task profile
     Ok(super::VectorCompletionFlatTaskProfile {
         path,
-        ensemble: objectiveai::ensemble::EnsembleBase {
-            agents: ensemble
+        swarm: objectiveai::swarm::SwarmBase {
+            agents: swarm
                 .agents
                 .into_iter()
                 .map(|agent| agent.into_base())

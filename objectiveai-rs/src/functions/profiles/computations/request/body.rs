@@ -26,7 +26,7 @@ pub struct FunctionRemoteRequestBody {
     pub max_retries: Option<u64>,
     pub n: u64,
     pub dataset: Vec<super::DatasetItem>,
-    pub ensemble: vector::completions::request::Ensemble,
+    pub swarm: vector::completions::request::Swarm,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<agent::completions::request::Provider>,
     #[serde(skip_serializing_if = "Option::is_none")]

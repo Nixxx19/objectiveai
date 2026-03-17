@@ -13,7 +13,7 @@ class RemoteProfileVariant1(RootModel):
 
 
 class RemoteProfileVariant2(RootModel):
-    """Auto profile that applies a single ensemble+weights to all vector completion tasks."""
+    """Auto profile that applies a single swarm+weights to all vector completion tasks."""
     root: RemoteAutoProfile
 
 

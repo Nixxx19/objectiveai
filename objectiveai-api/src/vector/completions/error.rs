@@ -15,15 +15,15 @@ pub enum Error {
     /// Failed to fetch a vote from the global cache.
     #[error("fetch cache vote error: {0}")]
     FetchCacheVote(objectiveai::error::ResponseError),
-    /// Failed to fetch the Ensemble definition.
-    #[error("fetch ensemble error: {0}")]
-    FetchEnsemble(objectiveai::error::ResponseError),
-    /// The requested Ensemble was not found.
-    #[error("ensemble not found")]
-    EnsembleNotFound,
-    /// The provided Ensemble definition is invalid.
-    #[error("invalid ensemble: {0}")]
-    InvalidEnsemble(String),
+    /// Failed to fetch the Swarm definition.
+    #[error("fetch swarm error: {0}")]
+    FetchSwarm(objectiveai::error::ResponseError),
+    /// The requested Swarm was not found.
+    #[error("swarm not found")]
+    SwarmNotFound,
+    /// The provided Swarm definition is invalid.
+    #[error("invalid swarm: {0}")]
+    InvalidSwarm(String),
     /// Vector completions require at least two response options.
     #[error("expected two or more request vector responses, got {0}")]
     ExpectedTwoOrMoreRequestVectorResponses(usize),
@@ -36,9 +36,9 @@ impl objectiveai::error::StatusError for Error {
             Error::FetchRetry(e) => e.status(),
             Error::RetryNotFound => 404,
             Error::FetchCacheVote(e) => e.status(),
-            Error::FetchEnsemble(e) => e.status(),
-            Error::EnsembleNotFound => 404,
-            Error::InvalidEnsemble(_) => 400,
+            Error::FetchSwarm(e) => e.status(),
+            Error::SwarmNotFound => 404,
+            Error::InvalidSwarm(_) => 400,
             Error::ExpectedTwoOrMoreRequestVectorResponses(_) => 400,
         }
     }
@@ -63,16 +63,16 @@ impl objectiveai::error::StatusError for Error {
                     "kind": "fetch_cache_vote",
                     "error": e.message(),
                 }),
-                Error::FetchEnsemble(e) => serde_json::json!({
-                    "kind": "fetch_ensemble",
+                Error::FetchSwarm(e) => serde_json::json!({
+                    "kind": "fetch_swarm",
                     "error": e.message(),
                 }),
-                Error::EnsembleNotFound => serde_json::json!({
-                    "kind": "ensemble_not_found",
-                    "error": "ensemble not found",
+                Error::SwarmNotFound => serde_json::json!({
+                    "kind": "swarm_not_found",
+                    "error": "swarm not found",
                 }),
-                Error::InvalidEnsemble(msg) => serde_json::json!({
-                    "kind": "invalid_ensemble",
+                Error::InvalidSwarm(msg) => serde_json::json!({
+                    "kind": "invalid_swarm",
                     "error": msg,
                 }),
                 Error::ExpectedTwoOrMoreRequestVectorResponses(n) => serde_json::json!({

@@ -3,7 +3,7 @@
 //! This crate provides JavaScript/TypeScript bindings for client-side validation
 //! and compilation of ObjectiveAI types. It enables browser-based applications to:
 //!
-//! - Validate Ensemble LLM and Ensemble configurations
+//! - Validate Swarm LLM and Swarm configurations
 //! - Compute content-addressed IDs (deterministic hashes)
 //! - Compile Function expressions for previewing during authoring
 //! - Compute prompt, tools, and response IDs for caching/deduplication
@@ -16,7 +16,7 @@
 //! # Functions
 //!
 //! - [`validateAgent`] - Validate and compute ID for an Agent
-//! - [`validateEnsemble`] - Validate and compute ID for an Ensemble
+//! - [`validateSwarm`] - Validate and compute ID for an Swarm
 //! - [`compileFunctionTasks`] - Compile function tasks for a given input
 //! - [`compileFunctionOutput`] - Compile function output from task results
 //! - [`promptId`] - Compute content-addressed ID for chat messages
@@ -76,35 +76,35 @@ pub fn validateAgent(agent: JsValue) -> Result<String, JsValue> {
     serde_json::to_string(&agent).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
-/// Validates an Ensemble configuration and computes its content-addressed ID.
+/// Validates an Swarm configuration and computes its content-addressed ID.
 ///
-/// Takes an Ensemble definition (a collection of Ensemble LLMs), validates each
-/// LLM, and computes a deterministic ID for the ensemble as a whole.
+/// Takes an Swarm definition (a collection of Swarm LLMs), validates each
+/// LLM, and computes a deterministic ID for the swarm as a whole.
 ///
 /// # Arguments
 ///
-/// * `ensemble` - JavaScript object representing an Ensemble configuration
+/// * `swarm` - JavaScript object representing an Swarm configuration
 ///
 /// # Returns
 ///
-/// The validated Ensemble with its computed `id` field populated and all
+/// The validated Swarm with its computed `id` field populated and all
 /// member LLMs validated with their IDs.
 ///
 /// # Errors
 ///
-/// Returns an error string if any LLM validation fails or the ensemble
+/// Returns an error string if any LLM validation fails or the swarm
 /// structure is invalid.
 #[wasm_bindgen]
-pub fn validateEnsemble(ensemble: JsValue) -> Result<String, JsValue> {
+pub fn validateSwarm(swarm: JsValue) -> Result<String, JsValue> {
     // deserialize
-    let ensemble_base: objectiveai::ensemble::EnsembleBase =
-        serde_wasm_bindgen::from_value(ensemble)?;
+    let swarm_base: objectiveai::swarm::SwarmBase =
+        serde_wasm_bindgen::from_value(swarm)?;
     // prepare, validate, and compute ID
-    let ensemble: objectiveai::ensemble::Ensemble = ensemble_base
+    let swarm: objectiveai::swarm::Swarm = swarm_base
         .try_into()
         .map_err(|e: String| JsValue::from_str(&e))?;
     // serialize
-    serde_json::to_string(&ensemble).map_err(|e| JsValue::from_str(&e.to_string()))
+    serde_json::to_string(&swarm).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
 /// Validates function input against its schema.

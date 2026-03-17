@@ -77,7 +77,7 @@ These also terminate early via `?` propagation.
 ### 2.9 `InvalidProfile` — wrong TaskProfile type for VC task (400)
 **Trigger:** A function task is a VectorCompletion but the corresponding TaskProfile is not `Inline(Auto)`.
 **Location:** `flat_task_profile.rs:876-878`
-**Strategy:** Create a tasks-based profile for a leaf function where a VC task gets a `Remote` reference or `Inline(Tasks)` instead of `Inline(Auto)` with ensemble+profile.
+**Strategy:** Create a tasks-based profile for a leaf function where a VC task gets a `Remote` reference or `Inline(Tasks)` instead of `Inline(Auto)` with swarm+profile.
 
 ### 2.10 `InvalidProfile` — wrong TaskProfile type for placeholder scalar (400)
 **Trigger:** A PlaceholderScalarFunction task has a non-Placeholder TaskProfile.
@@ -117,20 +117,20 @@ These also terminate early via `?` propagation.
 **Location:** `flat_task_profile.rs:740` (via `function.compile_tasks(&input)?`)
 **Strategy:** Create a mock function with a Starlark expression that references a missing key, e.g. a task input expression like `{"$starlark": "input['missing_key']"}` when the input doesn't have that key.
 
-### 2.18 `EnsembleNotFound` (404)
-**Trigger:** A VC task's ensemble is specified by ID string and that ID is not found.
+### 2.18 `SwarmNotFound` (404)
+**Trigger:** A VC task's swarm is specified by ID string and that ID is not found.
 **Location:** `flat_task_profile.rs:1271`
-**Strategy:** Create a mock profile with an inline auto profile whose `ensemble` is a string ID (e.g. `"ensemble": "nonexistent_id"`). The `StubEnsembleFetcher` in tests returns `Err(501)`, so this would actually trigger `FetchEnsemble` instead. To get `EnsembleNotFound`, would need an ensemble fetcher that returns `Ok(None)`.
+**Strategy:** Create a mock profile with an inline auto profile whose `swarm` is a string ID (e.g. `"swarm": "nonexistent_id"`). The `StubSwarmFetcher` in tests returns `Err(501)`, so this would actually trigger `FetchSwarm` instead. To get `SwarmNotFound`, would need an swarm fetcher that returns `Ok(None)`.
 
-### 2.19 `FetchEnsemble` (varies)
-**Trigger:** Ensemble fetcher returns `Err(...)` when looking up an ensemble ID.
+### 2.19 `FetchSwarm` (varies)
+**Trigger:** Swarm fetcher returns `Err(...)` when looking up an swarm ID.
 **Location:** `flat_task_profile.rs:1272`
-**Strategy:** Same as 2.18 — the `StubEnsembleFetcher` returns `Err(ResponseError { code: 501, ... })`. So using a string ensemble ID in a mock profile will trigger this. Create a profile with `"ensemble": "some-id"` instead of `"ensemble": {"agents": [...]}`.
+**Strategy:** Same as 2.18 — the `StubSwarmFetcher` returns `Err(ResponseError { code: 501, ... })`. So using a string swarm ID in a mock profile will trigger this. Create a profile with `"swarm": "some-id"` instead of `"swarm": {"agents": [...]}`.
 
-### 2.20 `InvalidEnsemble` (400)
-**Trigger:** `Ensemble::try_from_with_profile()` fails — e.g. profile length doesn't match ensemble agent count after deduplication/merging.
+### 2.20 `InvalidSwarm` (400)
+**Trigger:** `Swarm::try_from_with_profile()` fails — e.g. profile length doesn't match swarm agent count after deduplication/merging.
 **Location:** `flat_task_profile.rs:1285`
-**Strategy:** Create a mock profile where an inline auto VC profile has `"ensemble": {"agents": [{"upstream": "mock", "output_mode": "json_schema"}]}` with `"profile": [0.5, 0.5]` — 1 agent but 2 weights.
+**Strategy:** Create a mock profile where an inline auto VC profile has `"swarm": {"agents": [{"upstream": "mock", "output_mode": "json_schema"}]}` with `"profile": [0.5, 0.5]` — 1 agent but 2 weights.
 
 ### 2.21 Recursive `FunctionNotFound` in sub-function task (404)
 **Trigger:** A branch function references a sub-function that doesn't exist (e.g. `"repository": "mock-nonexistent"`).
@@ -273,9 +273,9 @@ These are non-fatal — execution completes and the error is reported in the fin
 | 2.15 | InvalidProfile (mapped placeholder vector) | No | Requires input_maps |
 | 2.16 | InvalidAppExpression (output_length) | Yes | Bad output_length expression |
 | 2.17 | InvalidAppExpression (compile_tasks) | Yes | Bad task expression |
-| 2.18 | EnsembleNotFound | No | StubEnsembleFetcher returns Err, not Ok(None) |
-| 2.19 | FetchEnsemble | Yes | String ensemble ID hits StubEnsembleFetcher |
-| 2.20 | InvalidEnsemble | Yes | Profile/ensemble agent count mismatch |
+| 2.18 | SwarmNotFound | No | StubSwarmFetcher returns Err, not Ok(None) |
+| 2.19 | FetchSwarm | Yes | String swarm ID hits StubSwarmFetcher |
+| 2.20 | InvalidSwarm | Yes | Profile/swarm agent count mismatch |
 | 2.21 | Recursive FunctionNotFound | Yes | Sub-function repo doesn't exist |
 | 2.22 | Recursive ProfileNotFound | Yes | Sub-profile repo doesn't exist |
 | 2.23 | Recursive InputSchemaMismatch | Yes | Bad input expression for sub-function |

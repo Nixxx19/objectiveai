@@ -2,7 +2,7 @@
 
 **IMPORTANT: DO NOT RE-EXPORT TYPES.** When fixing import issues, never add re-exports unless explicitly authorized. Fix the import path at the call site instead.
 
-ObjectiveAI is an agentic collective judgment harness. It uses scoring, ranking, and simulation across ensembles of agents to produce collective judgments that can be easily fine-tuned. Full brand description is a WIP.
+ObjectiveAI is an agentic collective judgment harness. It uses scoring, ranking, and simulation across swarms of agents to produce collective judgments that can be easily fine-tuned. Full brand description is a WIP.
 
 **API:** https://api.objective-ai.io
 
@@ -27,13 +27,13 @@ objectiveai/
 
 A fully-specified configuration of a single upstream model: model identity, prompt structure, decoding parameters, output mode, provider preferences. **Content-addressed:** IDs are deterministic via XXHash3-128.
 
-### Ensemble
+### Swarm
 
 A collection of Agents used together for collective judgment. Immutable, does NOT contain weights (weights are execution-time parameters). Can be inline or referenced by ID.
 
 ### Weights
 
-Execution-time parameters controlling each Agent's influence. External to Ensembles, learnable via training (Profiles), never baked into definitions.
+Execution-time parameters controlling each Agent's influence. External to Swarms, learnable via training (Profiles), never baked into definitions.
 
 ## API Capabilities
 
@@ -46,7 +46,7 @@ Standard chat (messages in, text out). The "model" can be an Agent ID or inline 
 The core primitive. Produces **scores**, not text:
 
 1. Takes a prompt and possible **responses** (text, images, videos, files, audio)
-2. Runs Agent Completions across all Agents in an Ensemble
+2. Runs Agent Completions across all Agents in a Swarm
 3. Each Agent **votes** for one of the responses
 4. Votes are combined using **weights** to produce **scores**
 5. Returns a vector of scores that sums to 1

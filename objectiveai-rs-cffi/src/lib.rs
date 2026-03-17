@@ -120,12 +120,12 @@ pub unsafe extern "C" fn objectiveai_validate_agent(
     }
 }
 
-/// Validates an Ensemble configuration and computes its content-addressed ID.
+/// Validates an Swarm configuration and computes its content-addressed ID.
 ///
-/// Input: JSON bytes of an EnsembleBase.
-/// Output: JSON bytes of the validated Ensemble with computed `id` field.
+/// Input: JSON bytes of an SwarmBase.
+/// Output: JSON bytes of the validated Swarm with computed `id` field.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn objectiveai_validate_ensemble(
+pub unsafe extern "C" fn objectiveai_validate_swarm(
     json_in: *const u8,
     json_in_len: usize,
     json_out: *mut *mut u8,
@@ -133,10 +133,10 @@ pub unsafe extern "C" fn objectiveai_validate_ensemble(
 ) -> i32 {
     unsafe {
         run(json_out, json_out_len, || {
-            let base: objectiveai::ensemble::EnsembleBase = from_json(json_in, json_in_len)?;
-            let ensemble: objectiveai::ensemble::Ensemble =
+            let base: objectiveai::swarm::SwarmBase = from_json(json_in, json_in_len)?;
+            let swarm: objectiveai::swarm::Swarm =
                 base.try_into().map_err(|e: String| e)?;
-            to_json(&ensemble)
+            to_json(&swarm)
         })
     }
 }

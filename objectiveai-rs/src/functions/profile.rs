@@ -29,7 +29,7 @@ pub enum Profile {
 pub enum RemoteProfile {
     /// Tasks-based profile with per-task configuration.
     Tasks(RemoteTasksProfile),
-    /// Auto profile that applies a single ensemble+weights to all vector completion tasks.
+    /// Auto profile that applies a single swarm+weights to all vector completion tasks.
     Auto(RemoteAutoProfile),
 }
 
@@ -40,7 +40,7 @@ pub enum RemoteProfile {
 pub enum InlineProfile {
     /// Tasks-based profile with per-task configuration.
     Tasks(InlineTasksProfile),
-    /// Auto profile that applies a single ensemble+weights to all vector completion tasks.
+    /// Auto profile that applies a single swarm+weights to all vector completion tasks.
     Auto(InlineAutoProfile),
 }
 
@@ -75,16 +75,16 @@ pub struct RemoteTasksProfile {
 
 /// A remote auto profile with full metadata.
 ///
-/// Applies a single ensemble and weights to every vector completion task
+/// Applies a single swarm and weights to every vector completion task
 /// in the function, with equal task weights.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.RemoteAutoProfile")]
 pub struct RemoteAutoProfile {
     /// Human-readable description of the profile.
     pub description: String,
-    /// The ensemble to use for all vector completion tasks.
-    pub ensemble: vector::completions::request::Ensemble,
-    /// Weights for each agent in the ensemble.
+    /// The swarm to use for all vector completion tasks.
+    pub swarm: vector::completions::request::Swarm,
+    /// Weights for each agent in the swarm.
     pub profile: crate::vector::completions::request::Profile,
 }
 
@@ -104,14 +104,14 @@ pub struct InlineTasksProfile {
 
 /// An inline auto profile definition without metadata.
 ///
-/// Applies a single ensemble and weights to every vector completion task
+/// Applies a single swarm and weights to every vector completion task
 /// in the function, with equal task weights.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "functions.InlineAutoProfile")]
 pub struct InlineAutoProfile {
-    /// The ensemble to use for all vector completion tasks.
-    pub ensemble: vector::completions::request::Ensemble,
-    /// Weights for each agent in the ensemble.
+    /// The swarm to use for all vector completion tasks.
+    pub swarm: vector::completions::request::Swarm,
+    /// Weights for each agent in the swarm.
     pub profile: crate::vector::completions::request::Profile,
 }
 

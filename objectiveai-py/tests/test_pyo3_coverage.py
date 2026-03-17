@@ -28,7 +28,7 @@ PY_SRC = Path(__file__).resolve().parent.parent / "objectiveai"
 FUNCTION_TO_MODULE: dict[str, str] = {
     # Validation & ID
     "validate_agent": "agent",
-    "validate_ensemble": "ensemble",
+    "validate_swarm": "swarm",
     "prompt_id": "agent.completions.message",
     "vector_response_id": "agent.completions.message",
 

@@ -2,12 +2,12 @@
 //!
 //! This crate provides data structures, validation, and client-side compilation
 //! for the ObjectiveAI API - a platform for scoring, ranking, and simulating
-//! preferences using ensembles of agents.
+//! preferences using swarms of agents.
 //!
 //! # Core Concepts
 //!
 //! - **Agent**: A configured instance of a single upstream language model
-//! - **Ensemble**: A collection of Agents used together for voting
+//! - **Swarm**: A collection of Agents used together for voting
 //! - **Vector Completion**: Runs multiple agents to vote on responses, producing weighted scores
 //! - **Function**: A composable scoring pipeline built from Vector Completions
 //! - **Profile**: Learned weights for a Function, trained on example data
@@ -20,7 +20,7 @@
 //!
 //! - [`auth`] - API authentication types
 //! - [`agent`] - Agent definitions, configuration, and completion APIs
-//! - [`ensemble`] - Ensemble definitions and validation
+//! - [`swarm`] - Swarm definitions and validation
 //! - [`error`] - Error types
 //! - [`functions`] - Function definitions, execution, and client-side compilation
 //! - [`prefixed_uuid`] - UUID utilities
@@ -33,7 +33,7 @@
 pub mod agent;
 pub mod arbitrary_util;
 pub mod auth;
-pub mod ensemble;
+pub mod swarm;
 pub mod error;
 pub mod functions;
 pub mod json_schema;
@@ -156,12 +156,12 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(auth::response::ListApiKeyResponse),
         schemars::schema_for!(auth::response::ListApiKeyItem),
         schemars::schema_for!(auth::response::GetOpenRouterByokApiKeyResponse),
-        schemars::schema_for!(ensemble::EnsembleBase),
-        schemars::schema_for!(ensemble::Ensemble),
-        schemars::schema_for!(ensemble::response::ListEnsemble),
-        schemars::schema_for!(ensemble::response::ListEnsembleItem),
-        schemars::schema_for!(ensemble::response::GetEnsemble),
-        schemars::schema_for!(ensemble::response::UsageEnsemble),
+        schemars::schema_for!(swarm::SwarmBase),
+        schemars::schema_for!(swarm::Swarm),
+        schemars::schema_for!(swarm::response::ListSwarm),
+        schemars::schema_for!(swarm::response::ListSwarmItem),
+        schemars::schema_for!(swarm::response::GetSwarm),
+        schemars::schema_for!(swarm::response::UsageSwarm),
         schemars::schema_for!(error::ResponseError),
         schemars::schema_for!(error::request::ErrorCreateParams),
         schemars::schema_for!(error::response::ErrorResponse),
@@ -345,7 +345,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(vector::completions::cache::request::CacheVoteRequestOwned),
         schemars::schema_for!(vector::completions::cache::response::CompletionVotes),
         schemars::schema_for!(vector::completions::cache::response::CacheVote),
-        schemars::schema_for!(vector::completions::request::Ensemble),
+        schemars::schema_for!(vector::completions::request::Swarm),
         schemars::schema_for!(vector::completions::request::ProfileEntry),
         schemars::schema_for!(vector::completions::request::Profile),
         schemars::schema_for!(vector::completions::request::VectorCompletionCreateParams),

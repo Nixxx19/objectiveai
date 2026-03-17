@@ -12,13 +12,13 @@ from objectiveai.vector.completions.response.vote import Vote
 class VectorCompletion(BaseModel):
     """A complete vector completion response (non-streaming).
 
-Contains the final scores, all votes from the ensemble, and the underlying
+Contains the final scores, all votes from the swarm, and the underlying
 agent completions that produced those votes."""
     model_config = ConfigDict(title='vector.completions.response.unary.VectorCompletion')
 
-    completions: list[AgentCompletion] = Field(..., description='The underlying agent completions from each agent in the ensemble.')
+    completions: list[AgentCompletion] = Field(..., description='The underlying agent completions from each agent in the swarm.')
     created: int = Field(..., description='Unix timestamp when the completion was created.', ge=0, le=18446744073709551615)
-    ensemble: str = Field(..., description='ID of the ensemble used for this completion.')
+    swarm: str = Field(..., description='ID of the swarm used for this completion.')
     id: str = Field(..., description='Unique identifier for this vector completion.')
     object: Object = Field(..., description='Object type identifier (`"vector.completion"`).')
     scores: list[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]] = Field(..., description='Final weighted scores for each response option. Sums to 1.')

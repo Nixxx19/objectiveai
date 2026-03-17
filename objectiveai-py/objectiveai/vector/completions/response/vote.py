@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class Vote(BaseModel):
     """A single LLM's vote in a vector completion.
 
-Each LLM in the ensemble produces a vote indicating which response(s) it
+Each LLM in the swarm produces a vote indicating which response(s) it
 selected. Votes are weighted according to the profile and combined to
 produce the final scores.
 
@@ -21,8 +21,8 @@ distributions."""
     model_config = ConfigDict(title='vector.completions.response.Vote')
 
     agent: str = Field(..., description='The agent that produced this vote (content-addressed ID).')
-    ensemble_index: int = Field(..., description='Index of the agent configuration within the ensemble.', ge=0, le=18446744073709551615)
-    flat_ensemble_index: int = Field(..., description='Flattened index accounting for agent counts in the ensemble.', ge=0, le=18446744073709551615)
+    swarm_index: int = Field(..., description='Index of the agent configuration within the swarm.', ge=0, le=18446744073709551615)
+    flat_swarm_index: int = Field(..., description='Flattened index accounting for agent counts in the swarm.', ge=0, le=18446744073709551615)
     from_cache: Optional[bool] = Field(None, description='If true, this vote was retrieved from cache rather than generated fresh.')
     prompt_id: str = Field(..., description='Content hash of the request messages (for caching/deduplication).')
     responses_ids: list[str] = Field(..., description='Content hashes of each response option in the request.')

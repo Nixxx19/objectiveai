@@ -14,7 +14,7 @@ use tokio::sync::OnceCell;
 /// # Caches
 ///
 /// The caches deduplicate concurrent fetches for the same resource within a request.
-/// When multiple parts of a request need the same ensemble or agent,
+/// When multiple parts of a request need the same swarm or agent,
 /// only one fetch is performed and the result is shared.
 #[derive(Debug)]
 pub struct Context<CTXEXT> {
@@ -34,14 +34,14 @@ pub struct Context<CTXEXT> {
     github_authorization_cached: OnceCell<Option<Arc<String>>>,
     /// Cached resolved MCP authorization (self + BYOK merged).
     mcp_authorization_cached: OnceCell<Option<Arc<HashMap<String, String>>>>,
-    /// Cache for ensemble fetches, keyed by ensemble ID.
-    pub ensemble_cache: Arc<
+    /// Cache for swarm fetches, keyed by swarm ID.
+    pub swarm_cache: Arc<
         DashMap<
             String,
             Shared<
                 tokio::sync::oneshot::Receiver<
                     Result<
-                        Option<(objectiveai::ensemble::Ensemble, u64)>,
+                        Option<(objectiveai::swarm::Swarm, u64)>,
                         objectiveai::error::ResponseError,
                     >,
                 >,
@@ -117,7 +117,7 @@ impl<CTXEXT> Clone for Context<CTXEXT> {
             openrouter_authorization_cached: OnceCell::new(),
             github_authorization_cached: OnceCell::new(),
             mcp_authorization_cached: OnceCell::new(),
-            ensemble_cache: self.ensemble_cache.clone(),
+            swarm_cache: self.swarm_cache.clone(),
             agent_cache: self.agent_cache.clone(),
             latest_commit_cache: self.latest_commit_cache.clone(),
             function_cache: self.function_cache.clone(),
@@ -167,7 +167,7 @@ impl<CTXEXT> Context<CTXEXT> {
             openrouter_authorization_cached: OnceCell::new(),
             github_authorization_cached: OnceCell::new(),
             mcp_authorization_cached: OnceCell::new(),
-            ensemble_cache: Arc::new(DashMap::new()),
+            swarm_cache: Arc::new(DashMap::new()),
             agent_cache: Arc::new(DashMap::new()),
             latest_commit_cache: Arc::new(DashMap::new()),
             function_cache: Arc::new(DashMap::new()),

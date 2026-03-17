@@ -1,0 +1,31 @@
+{
+  "title": "swarm.UsageSwarm",
+  "description": "Usage statistics for an Swarm.",
+  "type": "object",
+  "properties": {
+    "completion_tokens": {
+      "description": "Total completion tokens generated across all agents.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "prompt_tokens": {
+      "description": "Total prompt tokens processed across all agents.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "requests": {
+      "description": "Total number of requests made with this Swarm.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "total_cost": {
+      "description": "Total cost incurred.",
+      "type": "number",
+      "minimum": -3.4028234663852886e+38,
+      "maximum": 3.4028234663852886e+38
+    }
+  }
+}

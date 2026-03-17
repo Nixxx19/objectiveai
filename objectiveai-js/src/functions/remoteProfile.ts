@@ -4,5 +4,5 @@ import { z } from "zod";
 import { FunctionsRemoteAutoProfileSchema } from "./remoteAutoProfile";
 import { FunctionsRemoteTasksProfileSchema } from "./remoteTasksProfile";
 
-export const FunctionsRemoteProfileSchema = z.union([FunctionsRemoteTasksProfileSchema.describe("Tasks-based profile with per-task configuration."), FunctionsRemoteAutoProfileSchema.describe("Auto profile that applies a single ensemble+weights to all vector completion tasks.")]).describe("A remote profile, either tasks-based or auto.").meta({ title: "functions.RemoteProfile" });
+export const FunctionsRemoteProfileSchema = z.union([FunctionsRemoteTasksProfileSchema.describe("Tasks-based profile with per-task configuration."), FunctionsRemoteAutoProfileSchema.describe("Auto profile that applies a single swarm+weights to all vector completion tasks.")]).describe("A remote profile, either tasks-based or auto.").meta({ title: "functions.RemoteProfile" });
 export type FunctionsRemoteProfile = z.infer<typeof FunctionsRemoteProfileSchema>;

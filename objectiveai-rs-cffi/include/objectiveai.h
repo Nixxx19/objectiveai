@@ -27,7 +27,7 @@ int32_t objectiveai_validate_agent(
     const uint8_t *json_in, size_t json_in_len,
     uint8_t **json_out, size_t *json_out_len);
 
-int32_t objectiveai_validate_ensemble(
+int32_t objectiveai_validate_swarm(
     const uint8_t *json_in, size_t json_in_len,
     uint8_t **json_out, size_t *json_out_len);
 

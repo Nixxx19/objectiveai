@@ -35,21 +35,21 @@ impl crate::agent::fetcher::Fetcher<ctx::DefaultContextExt> for StubAgentFetcher
     }
 }
 
-struct StubEnsembleFetcher;
+struct StubSwarmFetcher;
 
 #[async_trait::async_trait]
-impl crate::ensemble::fetcher::Fetcher<ctx::DefaultContextExt> for StubEnsembleFetcher {
+impl crate::swarm::fetcher::Fetcher<ctx::DefaultContextExt> for StubSwarmFetcher {
     async fn fetch(
         &self,
         _ctx: ctx::Context<ctx::DefaultContextExt>,
         _id: &str,
     ) -> Result<
-        Option<(objectiveai::ensemble::Ensemble, u64)>,
+        Option<(objectiveai::swarm::Swarm, u64)>,
         objectiveai::error::ResponseError,
     > {
         Err(objectiveai::error::ResponseError {
             code: 501,
-            message: serde_json::json!("stub ensemble fetcher should not be called"),
+            message: serde_json::json!("stub swarm fetcher should not be called"),
         })
     }
 }
@@ -216,8 +216,8 @@ async fn test_single_agent_2_responses_instruction_seed_42() {
     });
     let client = Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -231,8 +231,8 @@ async fn test_single_agent_2_responses_instruction_seed_42() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 1,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -316,8 +316,8 @@ async fn test_single_agent_3_responses_instruction_seed_42() {
     });
     let client = Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -331,8 +331,8 @@ async fn test_single_agent_3_responses_instruction_seed_42() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 1,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -417,8 +417,8 @@ async fn test_two_agents_equal_weights_seed_42() {
     });
     let client = Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -432,8 +432,8 @@ async fn test_two_agents_equal_weights_seed_42() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 2,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -517,8 +517,8 @@ async fn test_two_agents_unequal_weights_seed_42() {
     });
     let client = Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -532,8 +532,8 @@ async fn test_two_agents_unequal_weights_seed_42() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![
                     objectiveai::agent::AgentBaseWithFallbacksAndCount {
                         count: 1,
@@ -631,8 +631,8 @@ async fn test_three_agents_4_responses_seed_99() {
     });
     let client = Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -646,8 +646,8 @@ async fn test_three_agents_4_responses_seed_99() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 3,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -733,8 +733,8 @@ async fn test_invert_vote_seed_42() {
     });
     let client = Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -748,8 +748,8 @@ async fn test_invert_vote_seed_42() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 1,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -837,8 +837,8 @@ async fn test_deterministic_same_seed() {
         });
         Arc::new(super::Client {
             agent_client,
-            ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-                Arc::new(StubEnsembleFetcher),
+            swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+                Arc::new(StubSwarmFetcher),
             )),
             completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
             cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -854,8 +854,8 @@ async fn test_deterministic_same_seed() {
                 name: None,
             })],
             provider: None,
-            ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-                objectiveai::ensemble::EnsembleBase {
+            swarm: objectiveai::vector::completions::request::Swarm::Provided(
+                objectiveai::swarm::SwarmBase {
                     agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                         count: 2,
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -942,8 +942,8 @@ async fn test_different_seeds_differ() {
         });
         Arc::new(super::Client {
             agent_client,
-            ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-                Arc::new(StubEnsembleFetcher),
+            swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+                Arc::new(StubSwarmFetcher),
             )),
             completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
             cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -959,8 +959,8 @@ async fn test_different_seeds_differ() {
                 name: None,
             })],
             provider: None,
-            ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-                objectiveai::ensemble::EnsembleBase {
+            swarm: objectiveai::vector::completions::request::Swarm::Provided(
+                objectiveai::swarm::SwarmBase {
                     agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                         count: 1,
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -1045,8 +1045,8 @@ async fn test_many_responses_deep_prefix_tree_seed_42() {
     });
     let client = Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -1063,8 +1063,8 @@ async fn test_many_responses_deep_prefix_tree_seed_42() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 1,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -1145,8 +1145,8 @@ async fn test_json_schema_single_agent_seed_77() {
     });
     let client = Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -1160,8 +1160,8 @@ async fn test_json_schema_single_agent_seed_77() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 1,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -1246,8 +1246,8 @@ async fn test_tool_call_single_agent_seed_55() {
     });
     let client = Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -1261,8 +1261,8 @@ async fn test_tool_call_single_agent_seed_55() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 1,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -1346,8 +1346,8 @@ async fn test_error_agent_skipped_seed_42() {
     });
     let client = Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -1361,8 +1361,8 @@ async fn test_error_agent_skipped_seed_42() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 1,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -1446,8 +1446,8 @@ async fn test_mixed_output_modes_seed_88() {
     });
     let client = Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -1461,8 +1461,8 @@ async fn test_mixed_output_modes_seed_88() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![
                     objectiveai::agent::AgentBaseWithFallbacksAndCount {
                         count: 1,
@@ -1573,8 +1573,8 @@ async fn test_image_responses_instruction_seed_33() {
     });
     let client = Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -1588,8 +1588,8 @@ async fn test_image_responses_instruction_seed_33() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 1,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -1698,8 +1698,8 @@ async fn test_video_and_file_responses_seed_66() {
     });
     let client = Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -1720,8 +1720,8 @@ async fn test_video_and_file_responses_seed_66() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 1,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -1837,8 +1837,8 @@ async fn test_three_different_agents_seed_11() {
     });
     let client = Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -1860,8 +1860,8 @@ async fn test_three_different_agents_seed_11() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![
                     objectiveai::agent::AgentBaseWithFallbacksAndCount {
                         count: 1,
@@ -1973,8 +1973,8 @@ async fn test_json_schema_many_responses_seed_22() {
     });
     let client = Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -1988,8 +1988,8 @@ async fn test_json_schema_many_responses_seed_22() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 2,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -2079,8 +2079,8 @@ async fn test_tool_call_two_agents_seed_44() {
     });
     let client = Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -2102,8 +2102,8 @@ async fn test_tool_call_two_agents_seed_44() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![
                     objectiveai::agent::AgentBaseWithFallbacksAndCount {
                         count: 1,
@@ -2217,8 +2217,8 @@ async fn test_error_and_healthy_agents_seed_99() {
     });
     let client = Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -2242,8 +2242,8 @@ async fn test_error_and_healthy_agents_seed_99() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![
                     objectiveai::agent::AgentBaseWithFallbacksAndCount {
                         count: 1,
@@ -2374,8 +2374,8 @@ async fn test_only_final_chunk_has_usage() {
     });
     let client = Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -2389,8 +2389,8 @@ async fn test_only_final_chunk_has_usage() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 2,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -2439,7 +2439,7 @@ fn make_error_test_client() -> Arc<
         crate::agent::completions::mock::Client,
         StubAgentFetcher,
         StubAgentUsageHandler,
-        StubEnsembleFetcher,
+        StubSwarmFetcher,
         StubCompletionVotesFetcher,
         StubCacheVoteFetcher,
         StubVectorUsageHandler,
@@ -2481,8 +2481,8 @@ fn make_error_test_client() -> Arc<
     });
     Arc::new(super::Client {
         agent_client,
-        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-            Arc::new(StubEnsembleFetcher),
+        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+            Arc::new(StubSwarmFetcher),
         )),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
@@ -2502,8 +2502,8 @@ async fn test_error_zero_responses() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 1,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -2553,8 +2553,8 @@ async fn test_error_one_response() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 1,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -2594,9 +2594,9 @@ async fn test_error_one_response() {
     );
 }
 
-/// All agents have count=0 → InvalidEnsemble (no agents after filtering).
+/// All agents have count=0 → InvalidSwarm (no agents after filtering).
 #[tokio::test]
-async fn test_error_invalid_ensemble_all_count_zero() {
+async fn test_error_invalid_swarm_all_count_zero() {
     let client = make_error_test_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -2606,8 +2606,8 @@ async fn test_error_invalid_ensemble_all_count_zero() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![
                     objectiveai::agent::AgentBaseWithFallbacksAndCount {
                         count: 0,
@@ -2657,14 +2657,14 @@ async fn test_error_invalid_ensemble_all_count_zero() {
         .expect("should fail with all count-0 agents");
     let msg = err.to_string();
     assert!(
-        msg.contains("invalid ensemble"),
+        msg.contains("invalid swarm"),
         "unexpected error: {msg}"
     );
 }
 
-/// Empty agents vec → InvalidEnsemble.
+/// Empty agents vec → InvalidSwarm.
 #[tokio::test]
-async fn test_error_invalid_ensemble_empty_agents() {
+async fn test_error_invalid_swarm_empty_agents() {
     let client = make_error_test_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -2674,8 +2674,8 @@ async fn test_error_invalid_ensemble_empty_agents() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![],
             },
         ),
@@ -2699,14 +2699,14 @@ async fn test_error_invalid_ensemble_empty_agents() {
         .expect("should fail with empty agents");
     let msg = err.to_string();
     assert!(
-        msg.contains("invalid ensemble"),
+        msg.contains("invalid swarm"),
         "unexpected error: {msg}"
     );
 }
 
-/// Profile length doesn't match agents length → InvalidEnsemble (caught by try_from_with_profile).
+/// Profile length doesn't match agents length → InvalidSwarm (caught by try_from_with_profile).
 #[tokio::test]
-async fn test_error_invalid_ensemble_profile_length_mismatch() {
+async fn test_error_invalid_swarm_profile_length_mismatch() {
     let client = make_error_test_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -2716,8 +2716,8 @@ async fn test_error_invalid_ensemble_profile_length_mismatch() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![
                     objectiveai::agent::AgentBaseWithFallbacksAndCount {
                         count: 1,
@@ -2766,14 +2766,14 @@ async fn test_error_invalid_ensemble_profile_length_mismatch() {
         .expect("should fail with profile/agents length mismatch");
     let msg = err.to_string();
     assert!(
-        msg.contains("invalid ensemble") && msg.contains("does not match"),
+        msg.contains("invalid swarm") && msg.contains("does not match"),
         "unexpected error: {msg}"
     );
 }
 
-/// Duplicate agents with conflicting invert flags → InvalidEnsemble.
+/// Duplicate agents with conflicting invert flags → InvalidSwarm.
 #[tokio::test]
-async fn test_error_invalid_ensemble_conflicting_invert() {
+async fn test_error_invalid_swarm_conflicting_invert() {
     let client = make_error_test_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -2783,8 +2783,8 @@ async fn test_error_invalid_ensemble_conflicting_invert() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![
                     objectiveai::agent::AgentBaseWithFallbacksAndCount {
                         count: 1,
@@ -2841,7 +2841,7 @@ async fn test_error_invalid_ensemble_conflicting_invert() {
         .expect("should fail with conflicting invert flags");
     let msg = err.to_string();
     assert!(
-        msg.contains("invalid ensemble") && msg.contains("conflicting invert"),
+        msg.contains("invalid swarm") && msg.contains("conflicting invert"),
         "unexpected error: {msg}"
     );
 }
@@ -2858,8 +2858,8 @@ async fn test_error_invalid_profile_all_zero_weights() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 1,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -2916,8 +2916,8 @@ async fn test_logprobs_json_schema_2_agents_seed_42() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![
                     objectiveai::agent::AgentBaseWithFallbacksAndCount {
                         count: 1,
@@ -2988,8 +2988,8 @@ async fn test_logprobs_json_schema_3_agents_unequal_seed_77() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![
                     objectiveai::agent::AgentBaseWithFallbacksAndCount {
                         count: 1,
@@ -3073,8 +3073,8 @@ async fn test_logprobs_tool_call_single_agent_seed_55() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 1,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -3130,8 +3130,8 @@ async fn test_logprobs_error_with_fallback_seed_99() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 1,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -3194,8 +3194,8 @@ async fn test_logprobs_all_errors_seed_42() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 1,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -3258,8 +3258,8 @@ async fn test_logprobs_instruction_seed_33() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
                     count: 1,
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
@@ -3315,8 +3315,8 @@ async fn test_logprobs_mixed_modes_with_fallback_seed_88() {
             name: None,
         })],
         provider: None,
-        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
+        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+            objectiveai::swarm::SwarmBase {
                 agents: vec![
                     // JsonSchema agent with logprobs.
                     objectiveai::agent::AgentBaseWithFallbacksAndCount {

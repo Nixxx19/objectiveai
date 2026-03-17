@@ -9,7 +9,7 @@ class PrefixedUuid(BaseModel):
     """A UUID with a 3-character prefix for type-safe identifiers.
 
 This struct wraps a standard UUID and adds a compile-time prefix,
-ensuring that different types of identifiers (API keys, ensemble IDs, etc.)
+ensuring that different types of identifiers (API keys, swarm IDs, etc.)
 cannot be confused at the type level.
 
 The prefix is specified as three `const char` generic parameters.

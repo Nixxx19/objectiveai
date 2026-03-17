@@ -12,7 +12,7 @@ class InlineProfileVariant1(RootModel):
 
 
 class InlineProfileVariant2(RootModel):
-    """Auto profile that applies a single ensemble+weights to all vector completion tasks."""
+    """Auto profile that applies a single swarm+weights to all vector completion tasks."""
     root: InlineAutoProfile
 
 

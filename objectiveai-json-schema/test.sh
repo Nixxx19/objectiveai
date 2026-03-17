@@ -27,13 +27,13 @@ done
 
 # Run tests, capture all output
 if cargo test --manifest-path "$SCRIPT_DIR/builder/Cargo.toml" "${CARGO_ARGS[@]}" > "$LOG_FILE" 2>&1; then
-  PASSED=$(grep -oP '(\d+) passed' "$LOG_FILE" | awk '{s+=$1} END {print s+0}')
-  FAILED=$(grep -oP '(\d+) failed' "$LOG_FILE" | awk '{s+=$1} END {print s+0}')
+  PASSED=$(sed -n 's/.* \([0-9][0-9]*\) passed.*/\1/p' "$LOG_FILE" | awk '{s+=$1} END {print s+0}')
+  FAILED=$(sed -n 's/.* \([0-9][0-9]*\) failed.*/\1/p' "$LOG_FILE" | awk '{s+=$1} END {print s+0}')
   TOTAL=$((PASSED + FAILED))
   echo "$MODULE: PASS $PASSED/$TOTAL"
 else
-  PASSED=$(grep -oP '(\d+) passed' "$LOG_FILE" | awk '{s+=$1} END {print s+0}')
-  FAILED=$(grep -oP '(\d+) failed' "$LOG_FILE" | awk '{s+=$1} END {print s+0}')
+  PASSED=$(sed -n 's/.* \([0-9][0-9]*\) passed.*/\1/p' "$LOG_FILE" | awk '{s+=$1} END {print s+0}')
+  FAILED=$(sed -n 's/.* \([0-9][0-9]*\) failed.*/\1/p' "$LOG_FILE" | awk '{s+=$1} END {print s+0}')
   TOTAL=$((PASSED + FAILED))
   if [ "$TOTAL" -gt 0 ]; then
     echo "$MODULE: FAIL $PASSED/$TOTAL"

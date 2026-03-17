@@ -10,5 +10,5 @@ class ProfileEntry(BaseModel):
     model_config = ConfigDict(title='vector.completions.request.ProfileEntry')
 
     invert: Optional[bool] = Field(None, description="If true, invert this agent's vote distribution before combining.\n\nWhen omitted or false, the vote distribution is used as-is.")
-    weight: float = Field(..., description='The weight for this agent in the ensemble. Must be in [0, 1].', ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)
+    weight: float = Field(..., description='The weight for this agent in the swarm. Must be in [0, 1].', ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)
 

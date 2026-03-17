@@ -7,7 +7,7 @@ use schemars::JsonSchema;
 /// A agent completion from a single agent within a vector completion.
 ///
 /// Wraps the standard agent completion response with an index to identify
-/// which agent in the ensemble produced it.
+/// which agent in the swarm produced it.
 #[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
 #[schemars(rename = "vector.completions.response.unary.AgentCompletion")]
 pub struct AgentCompletion {

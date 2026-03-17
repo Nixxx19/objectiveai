@@ -1,12 +1,8 @@
 {
   "title": "vector.completions.request.VectorCompletionCreateParams",
-  "description": "Parameters for creating a vector completion.\n\nVector completions run multiple agent completions (one per LLM in the\nensemble), force each to vote for one of the predefined responses, and\ncombine votes using the provided profile weights to produce final scores.",
+  "description": "Parameters for creating a vector completion.\n\nVector completions run multiple agent completions (one per LLM in the\nswarm), force each to vote for one of the predefined responses, and\ncombine votes using the provided profile weights to produce final scores.",
   "type": "object",
   "properties": {
-    "ensemble": {
-      "description": "The Ensemble of agents to use.",
-      "$ref": "vector.completions.request.Ensemble"
-    },
     "from_cache": {
       "description": "If true, uses cached votes when available.",
       "anyOf": [
@@ -40,7 +36,7 @@
       }
     },
     "profile": {
-      "description": "The profile weights for each agent in the ensemble.\n\nMust have the same length as the total agent count in the ensemble.\nCan be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields.",
+      "description": "The profile weights for each agent in the swarm.\n\nMust have the same length as the total agent count in the swarm.\nCan be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields.",
       "$ref": "vector.completions.request.Profile"
     },
     "provider": {
@@ -95,6 +91,10 @@
           "type": "null"
         }
       ]
+    },
+    "swarm": {
+      "description": "The Swarm of agents to use.",
+      "$ref": "vector.completions.request.Swarm"
     }
   }
 }

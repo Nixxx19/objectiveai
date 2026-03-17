@@ -19,7 +19,7 @@ Each chunk contains incremental updates to the completion. Use the
 
     completions: list[AgentCompletionChunk] = Field(..., description='Incremental agent completion chunks from each agent.')
     created: int = Field(..., description='Unix timestamp when the completion was created.', ge=0, le=18446744073709551615)
-    ensemble: str = Field(..., description='ID of the ensemble used for this completion.')
+    swarm: str = Field(..., description='ID of the swarm used for this completion.')
     error: Optional[ResponseError] = None
     id: str = Field(..., description='Unique identifier for this vector completion.')
     index: int = Field(..., ge=0, le=18446744073709551615)

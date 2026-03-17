@@ -41,16 +41,16 @@ fn validate_agent(py: Python<'_>, agent: &Bound<'_, PyAny>) -> PyResult<Py<PyAny
     to_py(py, &agent)
 }
 
-/// Validates an Ensemble configuration and computes its content-addressed ID.
+/// Validates an Swarm configuration and computes its content-addressed ID.
 ///
-/// Returns the validated Ensemble as a Python dict with its computed `id` field.
+/// Returns the validated Swarm as a Python dict with its computed `id` field.
 #[pyfunction]
-fn validate_ensemble(py: Python<'_>, ensemble: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
-    let ensemble_base: objectiveai::ensemble::EnsembleBase = from_py(ensemble)?;
-    let ensemble: objectiveai::ensemble::Ensemble = ensemble_base
+fn validate_swarm(py: Python<'_>, swarm: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    let swarm_base: objectiveai::swarm::SwarmBase = from_py(swarm)?;
+    let swarm: objectiveai::swarm::Swarm = swarm_base
         .try_into()
         .map_err(|e: String| PyValueError::new_err(e))?;
-    to_py(py, &ensemble)
+    to_py(py, &swarm)
 }
 
 /// Computes a content-addressed ID for chat messages.
@@ -635,7 +635,7 @@ fn generate_function_profile_computation_chunk(py: Python<'_>, seed: Option<i64>
 fn objectiveai_pyo3(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // Validation & ID
     m.add_function(wrap_pyfunction!(validate_agent, m)?)?;
-    m.add_function(wrap_pyfunction!(validate_ensemble, m)?)?;
+    m.add_function(wrap_pyfunction!(validate_swarm, m)?)?;
     m.add_function(wrap_pyfunction!(prompt_id, m)?)?;
     m.add_function(wrap_pyfunction!(vector_response_id, m)?)?;
 

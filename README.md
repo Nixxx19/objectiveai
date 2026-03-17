@@ -6,7 +6,7 @@
 
 ## Score everything. Rank everything. Simulate anyone.
 
-ObjectiveAI is a platform for **Functions** - remote scoring/ranking pipelines powered by ensembles of LLMs. Define a Function, train it on your data, and call it from anywhere.
+ObjectiveAI is a platform for **Functions** - remote scoring/ranking pipelines powered by swarms of LLMs. Define a Function, train it on your data, and call it from anywhere.
 
 [Website](https://objective-ai.io) | [API](https://api.objective-ai.io) | [Discord](https://discord.gg/gbNFHensby) | [npm](https://www.npmjs.com/package/objectiveai) | [crates.io](https://crates.io/crates/objectiveai)
 
@@ -30,9 +30,9 @@ objectiveai = "0.1.1"
 
 ## How it works
 
-### Ensembles
+### Swarms
 
-An **Ensemble** is a group of LLMs that vote together. Each LLM can have its own personality prompt, temperature, output mode, etc.
+A **Swarm** is a group of LLMs that vote together. Each LLM can have its own personality prompt, temperature, output mode, etc.
 
 ```json
 {
@@ -59,7 +59,7 @@ An **Ensemble** is a group of LLMs that vote together. Each LLM can have its own
 
 ### Vector Completions
 
-Give the ensemble a prompt and possible responses. Each LLM votes for what it thinks is the best response, and votes are combined with weights to produce scores.
+Give the swarm a prompt and possible responses. Each LLM votes for what it thinks is the best response, and votes are combined with weights to produce scores.
 
 ```
 Prompt: "What color is the sky?"
@@ -97,7 +97,7 @@ objectiveai/sentiment-scorer
 
 ### Profiles
 
-ObjectiveAI doesn't fine-tune models - it learns **weights** over your ensemble.
+ObjectiveAI doesn't fine-tune models - it learns **weights** over your swarm.
 
 Give it a dataset of inputs and expected outputs. It optimizes the weights to match, producing a **Profile** you can reuse. Profiles are GitHub-hosted as `profile.json`.
 
@@ -105,8 +105,8 @@ Give it a dataset of inputs and expected outputs. It optimizes the weights to ma
 
 | Concept | Description |
 |---------|-------------|
-| **Ensemble LLM** | A configured LLM (model + settings). Content-addressed. |
-| **Ensemble** | Group of Ensemble LLMs that vote together. No weights. |
+| **Swarm LLM** | A configured LLM (model + settings). Content-addressed. |
+| **Swarm** | Group of Swarm LLMs that vote together. No weights. |
 | **Weights** | Per-model influence. Learned from data. |
 | **Vector Completion** | Prompt + responses -> scores that sum to 1 |
 | **Function** | Data in -> score out. GitHub-hosted. |

@@ -1,20 +1,14 @@
 {
   "title": "vector.completions.response.Vote",
-  "description": "A single LLM's vote in a vector completion.\n\nEach LLM in the ensemble produces a vote indicating which response(s) it\nselected. Votes are weighted according to the profile and combined to\nproduce the final scores.\n\n# Vote Format\n\nThe `vote` field is a vector of decimals corresponding to the responses\nin the request. Typically one element is 1.0 and the rest are 0.0 (discrete\nselection), but when `top_logprobs` is used, votes may be probability\ndistributions.",
+  "description": "A single LLM's vote in a vector completion.\n\nEach LLM in the swarm produces a vote indicating which response(s) it\nselected. Votes are weighted according to the profile and combined to\nproduce the final scores.\n\n# Vote Format\n\nThe `vote` field is a vector of decimals corresponding to the responses\nin the request. Typically one element is 1.0 and the rest are 0.0 (discrete\nselection), but when `top_logprobs` is used, votes may be probability\ndistributions.",
   "type": "object",
   "properties": {
     "agent": {
       "description": "The agent that produced this vote (content-addressed ID).",
       "type": "string"
     },
-    "ensemble_index": {
-      "description": "Index of the agent configuration within the ensemble.",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 18446744073709551615
-    },
-    "flat_ensemble_index": {
-      "description": "Flattened index accounting for agent counts in the ensemble.",
+    "flat_swarm_index": {
+      "description": "Flattened index accounting for agent counts in the swarm.",
       "type": "integer",
       "minimum": 0,
       "maximum": 18446744073709551615
@@ -51,6 +45,12 @@
           "type": "null"
         }
       ]
+    },
+    "swarm_index": {
+      "description": "Index of the agent configuration within the swarm.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
     },
     "vote": {
       "description": "The vote distribution. Each index corresponds to a response from the\nrequest. Typically one element is 1.0 (selected) and the rest are 0.0.",

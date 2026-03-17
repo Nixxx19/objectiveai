@@ -9,10 +9,10 @@ import { VectorCompletionsResponseVoteSchema } from "../vote";
 export const VectorCompletionsResponseStreamingVectorCompletionChunkSchema = z.object({
   completions: z.array(VectorCompletionsResponseStreamingAgentCompletionChunkSchema).describe("Incremental agent completion chunks from each agent."),
   created: z.number().int().min(0).max(18446744073709552000).describe("Unix timestamp when the completion was created."),
-  ensemble: z.string().describe("ID of the ensemble used for this completion."),
   id: z.string().describe("Unique identifier for this vector completion."),
   object: VectorCompletionsResponseStreamingObjectSchema.describe("Object type identifier (`\"vector.completion.chunk\"`)."),
   scores: z.array(z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38)).describe("Current weighted scores. Updated as new votes arrive."),
+  swarm: z.string().describe("ID of the swarm used for this completion."),
   usage: AgentCompletionsResponseUsageSchema.nullable().describe("Aggregated usage statistics. Typically present only in the final chunk.").optional(),
   votes: z.array(VectorCompletionsResponseVoteSchema).describe("Votes received so far. New votes are appended in subsequent chunks."),
   weights: z.array(z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38)).describe("Current weight distribution across responses. Updated as new votes arrive."),

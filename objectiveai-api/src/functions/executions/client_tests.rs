@@ -41,21 +41,21 @@ impl crate::agent::fetcher::Fetcher<ctx::DefaultContextExt> for StubAgentFetcher
     }
 }
 
-struct StubEnsembleFetcher;
+struct StubSwarmFetcher;
 
 #[async_trait::async_trait]
-impl crate::ensemble::fetcher::Fetcher<ctx::DefaultContextExt> for StubEnsembleFetcher {
+impl crate::swarm::fetcher::Fetcher<ctx::DefaultContextExt> for StubSwarmFetcher {
     async fn fetch(
         &self,
         _ctx: ctx::Context<ctx::DefaultContextExt>,
         _id: &str,
     ) -> Result<
-        Option<(objectiveai::ensemble::Ensemble, u64)>,
+        Option<(objectiveai::swarm::Swarm, u64)>,
         objectiveai::error::ResponseError,
     > {
         Err(objectiveai::error::ResponseError {
             code: 501,
-            message: serde_json::json!("stub ensemble fetcher should not be called"),
+            message: serde_json::json!("stub swarm fetcher should not be called"),
         })
     }
 }
@@ -239,7 +239,7 @@ type TestClient = super::Client<
     crate::agent::completions::mock::Client,
     StubAgentFetcher,
     StubAgentUsageHandler,
-    StubEnsembleFetcher,
+    StubSwarmFetcher,
     StubCompletionVotesFetcher,
     StubCacheVoteFetcher,
     StubVectorUsageHandler,
@@ -287,12 +287,12 @@ fn make_client() -> Arc<TestClient> {
         first_chunk_timeout: Duration::from_millis(1),
         other_chunk_timeout: Duration::from_millis(1),
     });
-    let ensemble_fetcher = Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
-        Arc::new(StubEnsembleFetcher),
+    let swarm_fetcher = Arc::new(crate::swarm::fetcher::CachingFetcher::new(
+        Arc::new(StubSwarmFetcher),
     ));
     let vector_client = Arc::new(crate::vector::completions::Client {
         agent_client: agent_client.clone(),
-        ensemble_fetcher: ensemble_fetcher.clone(),
+        swarm_fetcher: swarm_fetcher.clone(),
         completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
         cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
         usage_handler: Arc::new(StubVectorUsageHandler),
@@ -309,7 +309,7 @@ fn make_client() -> Arc<TestClient> {
     ));
     Arc::new(super::Client::new(
         agent_client,
-        ensemble_fetcher,
+        swarm_fetcher,
         vector_client,
         function_fetcher,
         profile_fetcher,
@@ -1340,9 +1340,9 @@ async fn test_error_2_17_bad_task_expression() {
     assert!(matches!(err, super::Error::InvalidAppExpression(_)), "expected InvalidAppExpression, got: {err}");
 }
 
-/// 2.19: FetchEnsemble — string ensemble ID hits StubEnsembleFetcher (returns 501).
+/// 2.19: FetchSwarm — string swarm ID hits StubSwarmFetcher (returns 501).
 #[tokio::test]
-async fn test_error_2_19_fetch_ensemble() {
+async fn test_error_2_19_fetch_swarm() {
     let client = make_client();
     let request = make_request(
         "mock-1",
@@ -1353,12 +1353,12 @@ async fn test_error_2_19_fetch_ensemble() {
         42,
     );
     let err = expect_err(&client, request, 501).await;
-    assert!(matches!(err, super::Error::FetchEnsemble(_)), "expected FetchEnsemble, got: {err}");
+    assert!(matches!(err, super::Error::FetchSwarm(_)), "expected FetchSwarm, got: {err}");
 }
 
-/// 2.20: InvalidEnsemble — 1 agent but 2 profile weights.
+/// 2.20: InvalidSwarm — 1 agent but 2 profile weights.
 #[tokio::test]
-async fn test_error_2_20_invalid_ensemble() {
+async fn test_error_2_20_invalid_swarm() {
     let client = make_client();
     let request = make_request(
         "mock-1",
@@ -1369,7 +1369,7 @@ async fn test_error_2_20_invalid_ensemble() {
         42,
     );
     let err = expect_err(&client, request, 400).await;
-    assert!(matches!(err, super::Error::InvalidEnsemble(_)), "expected InvalidEnsemble, got: {err}");
+    assert!(matches!(err, super::Error::InvalidSwarm(_)), "expected InvalidSwarm, got: {err}");
 }
 
 /// 2.21: Recursive FunctionNotFound — branch references mock-999.

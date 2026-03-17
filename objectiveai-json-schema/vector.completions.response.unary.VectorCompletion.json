@@ -1,10 +1,10 @@
 {
   "title": "vector.completions.response.unary.VectorCompletion",
-  "description": "A complete vector completion response (non-streaming).\n\nContains the final scores, all votes from the ensemble, and the underlying\nagent completions that produced those votes.",
+  "description": "A complete vector completion response (non-streaming).\n\nContains the final scores, all votes from the swarm, and the underlying\nagent completions that produced those votes.",
   "type": "object",
   "properties": {
     "completions": {
-      "description": "The underlying agent completions from each agent in the ensemble.",
+      "description": "The underlying agent completions from each agent in the swarm.",
       "type": "array",
       "items": {
         "$ref": "vector.completions.response.unary.AgentCompletion"
@@ -15,10 +15,6 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 18446744073709551615
-    },
-    "ensemble": {
-      "description": "ID of the ensemble used for this completion.",
-      "type": "string"
     },
     "id": {
       "description": "Unique identifier for this vector completion.",
@@ -36,6 +32,10 @@
         "minimum": -3.4028234663852886e+38,
         "maximum": 3.4028234663852886e+38
       }
+    },
+    "swarm": {
+      "description": "ID of the swarm used for this completion.",
+      "type": "string"
     },
     "usage": {
       "description": "Aggregated token and cost usage across all completions.",

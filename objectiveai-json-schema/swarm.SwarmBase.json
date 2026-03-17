@@ -1,0 +1,39 @@
+{
+  "title": "swarm.SwarmBase",
+  "description": "The base configuration for an Swarm (without computed ID).\n\nContains a list of agent configurations that will be validated, deduplicated,\nand sorted when converting to [`Swarm`].",
+  "type": "object",
+  "properties": {
+    "agents": {
+      "description": "The LLMs in this swarm, with optional counts and fallbacks.",
+      "type": "array",
+      "items": {
+        "description": "Wrapper that adds fallback agents and a count to any agent type.\n\nUsed to specify how many instances of an agent to include in an swarm,\nalong with fallback agents to try if the primary fails.",
+        "type": "object",
+        "$ref": "agent.AgentBase",
+        "properties": {
+          "count": {
+            "description": "Number of instances of this agent in the swarm. Defaults to 1.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615,
+            "default": 1
+          },
+          "fallbacks": {
+            "description": "Fallback agents to try if the primary fails.",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "agent.AgentBase"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

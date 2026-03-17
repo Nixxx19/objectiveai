@@ -121,7 +121,7 @@ _all_schemas: dict[str, dict] = {}
 
 # Current naming context stack for inline type generation.
 # Pushed/popped as we descend into properties, items, etc.
-# E.g., ["Ensemble", "Agents", "Item"] → "EnsembleAgentsItem"
+# E.g., ["Swarm", "Agents", "Item"] → "SwarmAgentsItem"
 _naming_context: list[str] = []
 
 

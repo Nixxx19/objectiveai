@@ -46,15 +46,23 @@ fi
 
 # Run tests, capture all output
 # pytest summary: "1060 passed, 31 skipped, 2 warnings in 17.66s" or "3 failed, 1057 passed ..."
+parse_summary() {
+  local summary
+  summary=$(tail -1 "$LOG_FILE")
+  PASSED=$(echo "$summary" | sed -n 's/.* \([0-9]*\) passed.*/\1/p')
+  FAILED=$(echo "$summary" | sed -n 's/.* \([0-9]*\) failed.*/\1/p')
+  TOTAL=$(( ${PASSED:-0} + ${FAILED:-0} ))
+}
+
 if PYTHONPATH="$SCRIPT_DIR${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON" -m pytest "$SCRIPT_DIR/tests/" -v --tb=long "${PYTEST_ARGS[@]}" >> "$LOG_FILE" 2>&1; then
-  PASSED=$(grep -oP '(\d+) passed' "$LOG_FILE" | grep -oP '\d+' | tail -1 || true)
-  FAILED=$(grep -oP '(\d+) failed' "$LOG_FILE" | grep -oP '\d+' | tail -1 || true)
-  TOTAL=$(( ${PASSED:-0} + ${FAILED:-0} ))
-  echo "$MODULE: PASS ${PASSED:-0}/$TOTAL"
+  parse_summary
+  if [ "$TOTAL" -gt 0 ]; then
+    echo "$MODULE: PASS ${PASSED:-0}/$TOTAL"
+  else
+    echo "$MODULE: PASS"
+  fi
 else
-  PASSED=$(grep -oP '(\d+) passed' "$LOG_FILE" | grep -oP '\d+' | tail -1 || true)
-  FAILED=$(grep -oP '(\d+) failed' "$LOG_FILE" | grep -oP '\d+' | tail -1 || true)
-  TOTAL=$(( ${PASSED:-0} + ${FAILED:-0} ))
+  parse_summary
   if [ "$TOTAL" -gt 0 ]; then
     echo "$MODULE: FAIL ${PASSED:-0}/$TOTAL"
   else

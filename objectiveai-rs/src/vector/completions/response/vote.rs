@@ -8,7 +8,7 @@ use schemars::JsonSchema;
 
 /// A single LLM's vote in a vector completion.
 ///
-/// Each LLM in the ensemble produces a vote indicating which response(s) it
+/// Each LLM in the swarm produces a vote indicating which response(s) it
 /// selected. Votes are weighted according to the profile and combined to
 /// produce the final scores.
 ///
@@ -25,12 +25,12 @@ pub struct Vote {
 
     /// The agent that produced this vote (content-addressed ID).
     pub agent: String,
-    /// Index of the agent configuration within the ensemble.
+    /// Index of the agent configuration within the swarm.
     #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
-    pub ensemble_index: u64,
-    /// Flattened index accounting for agent counts in the ensemble.
+    pub swarm_index: u64,
+    /// Flattened index accounting for agent counts in the swarm.
     #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
-    pub flat_ensemble_index: u64,
+    pub flat_swarm_index: u64,
     /// Content hash of the request messages (for caching/deduplication).
     pub prompt_id: String,
     /// Content hashes of each response option in the request.
@@ -72,8 +72,8 @@ impl ToStarlarkValue for Vote {
     fn to_starlark_value<'v>(&self, heap: &'v StarlarkHeap) -> StarlarkValue<'v> {
         heap.alloc(StarlarkAllocDict([
             ("agent", self.agent.to_starlark_value(heap)),
-            ("ensemble_index", self.ensemble_index.to_starlark_value(heap)),
-            ("flat_ensemble_index", self.flat_ensemble_index.to_starlark_value(heap)),
+            ("swarm_index", self.swarm_index.to_starlark_value(heap)),
+            ("flat_swarm_index", self.flat_swarm_index.to_starlark_value(heap)),
             ("prompt_id", self.prompt_id.to_starlark_value(heap)),
             ("responses_ids", self.responses_ids.to_starlark_value(heap)),
             ("vote", self.vote.to_starlark_value(heap)),

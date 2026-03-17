@@ -1,13 +1,13 @@
 //! Profile weights for vector completion requests.
 //!
-//! A profile specifies how much influence each agent in the Ensemble has when
+//! A profile specifies how much influence each agent in the Swarm has when
 //! combining votes into final scores. Profiles can either be a simple vector
 //! of decimal weights or a vector of objects that also include an optional
 //! `invert` flag, which inverts that agent.s vote distribution before it is
 //! combined.
 //!
-//! The `invert` flag is part of the **profile**, not the Ensemble definition,
-//! so different profiles can use the same Ensemble with different inversion
+//! The `invert` flag is part of the **profile**, not the Swarm definition,
+//! so different profiles can use the same Swarm with different inversion
 //! behavior.
 
 use rust_decimal::Decimal;
@@ -18,7 +18,7 @@ use schemars::JsonSchema;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "vector.completions.request.ProfileEntry")]
 pub struct ProfileEntry {
-    /// The weight for this agent in the ensemble. Must be in [0, 1].
+    /// The weight for this agent in the swarm. Must be in [0, 1].
     #[schemars(with = "f64")]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub weight: Decimal,

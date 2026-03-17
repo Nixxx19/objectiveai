@@ -19,7 +19,7 @@ globals().update(http_test_suite(
             snapshot="single_agent_2_responses_instruction_seed_42",
             body={
                 "messages": [{"role": "user", "content": "Which is better?"}],
-                "ensemble": {"agents": [MOCK_AGENT]},
+                "swarm": {"agents": [MOCK_AGENT]},
                 "profile": ["1"],
                 "responses": ["Response A", "Response B"],
                 "seed": 42,
@@ -29,7 +29,7 @@ globals().update(http_test_suite(
             snapshot="many_responses_deep_prefix_tree_seed_42",
             body={
                 "messages": [{"role": "user", "content": "Pick the best"}],
-                "ensemble": {"agents": [MOCK_AGENT]},
+                "swarm": {"agents": [MOCK_AGENT]},
                 "profile": ["1"],
                 "responses": [f"Response {i}" for i in range(25)],
                 "seed": 42,
@@ -41,7 +41,7 @@ globals().update(http_test_suite(
                 "messages": [
                     {"role": "user", "content": "Compare these vacation destinations"},
                 ],
-                "ensemble": {
+                "swarm": {
                     "agents": [
                         {"upstream": "mock", "output_mode": "instruction"},
                         {"upstream": "mock", "output_mode": "json_schema"},

@@ -6,7 +6,7 @@
 
 **Score everything. Rank everything. Simulate anyone.**
 
-The official Rust SDK for [ObjectiveAI](https://objective-ai.io) - a platform for remote Functions that score, rank, and simulate preferences using ensembles of LLMs.
+The official Rust SDK for [ObjectiveAI](https://objective-ai.io) - a platform for remote Functions that score, rank, and simulate preferences using swarms of LLMs.
 
 [Website](https://objective-ai.io) | [Documentation](https://docs.rs/objectiveai) | [GitHub](https://github.com/ObjectiveAI/objectiveai) | [Discord](https://discord.gg/gbNFHensby)
 
@@ -21,7 +21,7 @@ objectiveai = "0.1.1"
 
 ## Features
 
-- **Data structures and validation** for Ensemble LLMs, Ensembles, Functions, and Profiles
+- **Data structures and validation** for Swarm LLMs, Swarms, Functions, and Profiles
 - **Deterministic ID computation** using XXHash3-128 (content-addressed identities)
 - **Client-side Function compilation** with JMESPath and Starlark expression evaluation
 - **HTTP client** with streaming support (optional, enabled by default)

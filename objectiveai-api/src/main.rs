@@ -1,7 +1,7 @@
 //! ObjectiveAI API server.
 //!
 //! REST API server for chat completions, vector completions, Functions,
-//! Profiles, Ensembles, and authentication.
+//! Profiles, Swarms, and authentication.
 
 use axum::{
     Json,
@@ -11,7 +11,7 @@ use axum::{
 use envconfig::Envconfig;
 use objectiveai::error::ResponseError;
 use objectiveai_api::{
-    agent, auth, ctx, ensemble,
+    agent, auth, ctx, swarm,
     error::ResponseErrorExt,
     filesystem,
     functions::{self, profiles::computations::Client},
@@ -225,9 +225,9 @@ async fn main() {
         http_referer.clone(),
     ));
 
-    // Ensemble Fetcher
-    let ensemble_fetcher = Arc::new(ensemble::fetcher::CachingFetcher::new(
-        Arc::new(ensemble::fetcher::ObjectiveAiFetcher::new(
+    // Swarm Fetcher
+    let swarm_fetcher = Arc::new(swarm::fetcher::CachingFetcher::new(
+        Arc::new(swarm::fetcher::ObjectiveAiFetcher::new(
             objectiveai_http_client.clone(),
         )),
     ));
@@ -368,7 +368,7 @@ async fn main() {
     // Vector Completions Client
     let vector_completions_client = Arc::new(vector::completions::Client::new(
         agent_completions_client.clone(),
-        ensemble_fetcher.clone(),
+        swarm_fetcher.clone(),
         completion_votes_fetcher.clone(),
         cache_vote_fetcher.clone(),
         Arc::new(vector::completions::usage_handler::LogUsageHandler),
@@ -405,7 +405,7 @@ async fn main() {
     let function_executions_client =
         Arc::new(functions::executions::Client::new(
             agent_completions_client.clone(),
-            ensemble_fetcher.clone(),
+            swarm_fetcher.clone(),
             vector_completions_client.clone(),
             function_fetcher.clone(),
             profile_fetcher.clone(),
@@ -447,10 +447,10 @@ async fn main() {
         objectiveai_http_client.clone(),
     ));
 
-    // Ensemble Client
-    let ensemble_client = Arc::new(ensemble::Client::new(
-        ensemble_fetcher.clone(),
-        Arc::new(ensemble::retrieval_client::ObjectiveAiClient::new(
+    // Swarm Client
+    let swarm_client = Arc::new(swarm::Client::new(
+        swarm_fetcher.clone(),
+        Arc::new(swarm::retrieval_client::ObjectiveAiClient::new(
             objectiveai_http_client.clone(),
         )),
     ));
@@ -1142,33 +1142,33 @@ async fn main() {
                 }
             }),
         )
-        // Ensemble - list
+        // Swarm - list
         .route(
-            "/ensembles",
+            "/swarms",
             axum::routing::get({
-                let ensemble_client = ensemble_client.clone();
+                let swarm_client = swarm_client.clone();
                 move |headers: axum::http::HeaderMap| {
-                    list_ensembles(ensemble_client, headers)
+                    list_swarms(swarm_client, headers)
                 }
             }),
         )
-        // Ensemble - get
+        // Swarm - get
         .route(
-            "/ensembles/{id}",
+            "/swarms/{id}",
             axum::routing::get({
-                let ensemble_client = ensemble_client.clone();
+                let swarm_client = swarm_client.clone();
                 move |Path(id): Path<String>, headers: axum::http::HeaderMap| {
-                    get_ensemble(ensemble_client, headers, id)
+                    get_swarm(swarm_client, headers, id)
                 }
             }),
         )
-        // Ensemble - get usage
+        // Swarm - get usage
         .route(
-            "/ensembles/{id}/usage",
+            "/swarms/{id}/usage",
             axum::routing::get({
-                let ensemble_client = ensemble_client.clone();
+                let swarm_client = swarm_client.clone();
                 move |Path(id): Path<String>, headers: axum::http::HeaderMap| {
-                    get_ensemble_usage(ensemble_client, headers, id)
+                    get_swarm_usage(swarm_client, headers, id)
                 }
             }),
         )
@@ -1358,7 +1358,7 @@ async fn create_vector_completion(
             > + Send
             + Sync
             + 'static,
-            impl ensemble::fetcher::Fetcher<ctx::DefaultContextExt>
+            impl swarm::fetcher::Fetcher<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
@@ -1510,7 +1510,7 @@ async fn execute_function(
             > + Send
             + Sync
             + 'static,
-            impl ensemble::fetcher::Fetcher<ctx::DefaultContextExt>
+            impl swarm::fetcher::Fetcher<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
@@ -2010,17 +2010,17 @@ async fn get_credits(
     }
 }
 
-// Ensemble
+// Swarm
 
-async fn list_ensembles(
+async fn list_swarms(
     client: Arc<
-        ensemble::Client<
+        swarm::Client<
             ctx::DefaultContextExt,
-            impl ensemble::fetcher::Fetcher<ctx::DefaultContextExt>
+            impl swarm::fetcher::Fetcher<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
-            impl ensemble::retrieval_client::Client<ctx::DefaultContextExt>
+            impl swarm::retrieval_client::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
@@ -2035,15 +2035,15 @@ async fn list_ensembles(
     }
 }
 
-async fn get_ensemble(
+async fn get_swarm(
     client: Arc<
-        ensemble::Client<
+        swarm::Client<
             ctx::DefaultContextExt,
-            impl ensemble::fetcher::Fetcher<ctx::DefaultContextExt>
+            impl swarm::fetcher::Fetcher<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
-            impl ensemble::retrieval_client::Client<ctx::DefaultContextExt>
+            impl swarm::retrieval_client::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
@@ -2059,15 +2059,15 @@ async fn get_ensemble(
     }
 }
 
-async fn get_ensemble_usage(
+async fn get_swarm_usage(
     client: Arc<
-        ensemble::Client<
+        swarm::Client<
             ctx::DefaultContextExt,
-            impl ensemble::fetcher::Fetcher<ctx::DefaultContextExt>
+            impl swarm::fetcher::Fetcher<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
-            impl ensemble::retrieval_client::Client<ctx::DefaultContextExt>
+            impl swarm::retrieval_client::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,

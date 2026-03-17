@@ -324,9 +324,9 @@ pub struct Client<
 > {
     /// Agent completions client for reasoning summaries.
     pub agent_client: Arc<crate::agent::completions::Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG>>,
-    /// Fetcher for Ensemble definitions.
-    pub ensemble_fetcher:
-        Arc<crate::ensemble::fetcher::CachingFetcher<CTXEXT, FENS>>,
+    /// Fetcher for Swarm definitions.
+    pub swarm_fetcher:
+        Arc<crate::swarm::fetcher::CachingFetcher<CTXEXT, FENS>>,
     /// Vector completions client for executing Vector Completion tasks.
     pub vector_client: Arc<
         vector::completions::Client<
@@ -394,8 +394,8 @@ impl<
     /// Creates a new Function execution client.
     pub fn new(
         agent_client: Arc<crate::agent::completions::Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG>>,
-        ensemble_fetcher: Arc<
-            crate::ensemble::fetcher::CachingFetcher<CTXEXT, FENS>,
+        swarm_fetcher: Arc<
+            crate::swarm::fetcher::CachingFetcher<CTXEXT, FENS>,
         >,
         vector_client: Arc<
             vector::completions::Client<
@@ -421,7 +421,7 @@ impl<
     ) -> Self {
         Self {
             agent_client,
-            ensemble_fetcher,
+            swarm_fetcher,
             vector_client,
             function_fetcher,
             profile_fetcher,
@@ -478,7 +478,7 @@ where
         + Send
         + Sync
         + 'static,
-    FENS: crate::ensemble::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FENS: crate::swarm::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FVVOTE: vector::completions::completion_votes_fetcher::Fetcher<CTXEXT>
         + Send
         + Sync
@@ -632,7 +632,7 @@ where
         + Send
         + Sync
         + 'static,
-    FENS: crate::ensemble::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FENS: crate::swarm::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FVVOTE: vector::completions::completion_votes_fetcher::Fetcher<CTXEXT>
         + Send
         + Sync
@@ -1695,7 +1695,7 @@ where
                     false, // Root-level function has no invert flag
                     self.function_fetcher.clone(),
                     self.profile_fetcher.clone(),
-                    self.ensemble_fetcher.clone(),
+                    self.swarm_fetcher.clone(),
                 )
                 .await
             }
@@ -1723,7 +1723,7 @@ where
                     false, // Root-level function has no invert flag
                     self.function_fetcher.clone(),
                     self.profile_fetcher.clone(),
-                    self.ensemble_fetcher.clone(),
+                    self.swarm_fetcher.clone(),
                 )
                 .await
             }
@@ -1751,7 +1751,7 @@ where
                     false, // Root-level function has no invert flag
                     self.function_fetcher.clone(),
                     self.profile_fetcher.clone(),
-                    self.ensemble_fetcher.clone(),
+                    self.swarm_fetcher.clone(),
                 )
                 .await
             }
@@ -1779,7 +1779,7 @@ where
                     false, // Root-level function has no invert flag
                     self.function_fetcher.clone(),
                     self.profile_fetcher.clone(),
-                    self.ensemble_fetcher.clone(),
+                    self.swarm_fetcher.clone(),
                 )
                 .await
             }
@@ -2538,8 +2538,8 @@ where
                         from_cache: request_base.from_cache,
                         messages: ftp.messages,
                         provider: request_base.provider,
-                        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
-                            ftp.ensemble,
+                        swarm: objectiveai::vector::completions::request::Swarm::Provided(
+                            ftp.swarm,
                         ),
                         profile: ftp.profile,
                         seed: request_base.seed,
@@ -2727,7 +2727,7 @@ where
             }
         });
         parts.push(objectiveai::agent::completions::message::RichContentPart::Text {
-            text: "The ObjectiveAI Function used LLM Ensembles to arrive at this output by making assertions with associated confidence scores:\n\n".to_string(),
+            text: "The ObjectiveAI Function used LLM Swarms to arrive at this output by making assertions with associated confidence scores:\n\n".to_string(),
         });
         parts.extend(ConfidenceResponse::assertions(confidence_responses));
         parts.push(objectiveai::agent::completions::message::RichContentPart::Text {

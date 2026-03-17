@@ -3,11 +3,10 @@
 import { z } from "zod";
 import { AgentCompletionsRequestProviderSchema } from "../../../../agent/completions/request/provider";
 import { FunctionsProfilesComputationsRequestDatasetItemSchema } from "./datasetItem";
-import { VectorCompletionsRequestEnsembleSchema } from "../../../../vector/completions/request/ensemble";
+import { VectorCompletionsRequestSwarmSchema } from "../../../../vector/completions/request/swarm";
 
 export const FunctionsProfilesComputationsRequestFunctionRemoteRequestBodySchema = z.object({
   dataset: z.array(FunctionsProfilesComputationsRequestDatasetItemSchema),
-  ensemble: VectorCompletionsRequestEnsembleSchema,
   from_cache: z.boolean().nullable().optional(),
   max_retries: z.number().int().min(0).max(18446744073709552000).nullable().optional(),
   mcp_server_authorization: z.record(z.string(), z.string()).nullable().describe("Map from MCP server URL to authorization header value.").optional(),
@@ -16,5 +15,6 @@ export const FunctionsProfilesComputationsRequestFunctionRemoteRequestBodySchema
   retry_token: z.string().nullable().optional(),
   seed: z.number().int().min(-9223372036854776000).max(9223372036854776000).nullable().optional(),
   stream: z.boolean().nullable().optional(),
+  swarm: VectorCompletionsRequestSwarmSchema,
 }).meta({ title: "functions.profiles.computations.request.FunctionRemoteRequestBody" });
 export type FunctionsProfilesComputationsRequestFunctionRemoteRequestBody = z.infer<typeof FunctionsProfilesComputationsRequestFunctionRemoteRequestBodySchema>;

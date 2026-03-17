@@ -1,14 +1,14 @@
 //! ObjectiveAI API server library.
 //!
 //! This crate provides the core implementation for the ObjectiveAI REST API,
-//! which enables scoring, ranking, and simulating preferences using ensembles of LLMs.
+//! which enables scoring, ranking, and simulating preferences using swarms of LLMs.
 //!
 //! # Modules
 //!
 //! - [`auth`] - Authentication and API key management
-//! - [`chat`] - Chat completions with Ensemble LLMs
+//! - [`chat`] - Chat completions with Swarm LLMs
 //! - [`ctx`] - Request context and extensions
-//! - [`ensemble`] - Ensemble management and retrieval
+//! - [`swarm`] - Swarm management and retrieval
 //! - [`agent`] - Agent management and retrieval
 //! - [`error`] - Error response handling
 //! - [`functions`] - Function execution and profile management
@@ -17,12 +17,12 @@
 
 /// Authentication and API key management.
 pub mod auth;
-// /// Chat completions with Ensemble LLMs.
+// /// Chat completions with Swarm LLMs.
 // pub mod chat;
 /// Request context and extensions for dependency injection.
 pub mod ctx;
-/// Ensemble management, fetching, and retrieval.
-pub mod ensemble;
+/// Swarm management, fetching, and retrieval.
+pub mod swarm;
 /// Agent management, fetching, and retrieval.
 pub mod agent;
 /// Error response handling and conversion.

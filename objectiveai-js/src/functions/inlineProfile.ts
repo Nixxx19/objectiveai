@@ -5,4 +5,4 @@ import { FunctionsInlineAutoProfileSchema, type FunctionsInlineAutoProfile } fro
 import { FunctionsInlineTasksProfileSchema, type FunctionsInlineTasksProfile } from "./inlineTasksProfile";
 
 export type FunctionsInlineProfile = FunctionsInlineTasksProfile | FunctionsInlineAutoProfile;
-export const FunctionsInlineProfileSchema: z.ZodType<FunctionsInlineProfile> = z.union([z.lazy(() => FunctionsInlineTasksProfileSchema).describe("Tasks-based profile with per-task configuration."), FunctionsInlineAutoProfileSchema.describe("Auto profile that applies a single ensemble+weights to all vector completion tasks.")]).describe("An inline profile, either tasks-based or auto.").meta({ title: "functions.InlineProfile" });
+export const FunctionsInlineProfileSchema: z.ZodType<FunctionsInlineProfile> = z.union([z.lazy(() => FunctionsInlineTasksProfileSchema).describe("Tasks-based profile with per-task configuration."), FunctionsInlineAutoProfileSchema.describe("Auto profile that applies a single swarm+weights to all vector completion tasks.")]).describe("An inline profile, either tasks-based or auto.").meta({ title: "functions.InlineProfile" });

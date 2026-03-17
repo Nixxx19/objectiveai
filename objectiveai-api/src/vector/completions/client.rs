@@ -42,9 +42,9 @@ pub(super) fn invert_and_l1_normalize(mut xs: Vec<Decimal>) -> Vec<Decimal> {
 pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG, FENS, FVVOTE, FCVOTE, VUSG> {
     /// The underlying agent completion client.
     pub agent_client: Arc<agent::completions::Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG>>,
-    /// Fetcher for Ensemble definitions.
-    pub ensemble_fetcher:
-        Arc<crate::ensemble::fetcher::CachingFetcher<CTXEXT, FENS>>,
+    /// Fetcher for Swarm definitions.
+    pub swarm_fetcher:
+        Arc<crate::swarm::fetcher::CachingFetcher<CTXEXT, FENS>>,
     /// Fetcher for votes from historical completions.
     pub completion_votes_fetcher: Arc<FVVOTE>,
     /// Fetcher for votes from the global cache.
@@ -59,8 +59,8 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG, FENS, FVVOTE, FCVO
     /// Creates a new vector completion client.
     pub fn new(
         agent_client: Arc<agent::completions::Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG>>,
-        ensemble_fetcher: Arc<
-            crate::ensemble::fetcher::CachingFetcher<CTXEXT, FENS>,
+        swarm_fetcher: Arc<
+            crate::swarm::fetcher::CachingFetcher<CTXEXT, FENS>,
         >,
         completion_votes_fetcher: Arc<FVVOTE>,
         cache_vote_fetcher: Arc<FCVOTE>,
@@ -68,7 +68,7 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG, FENS, FVVOTE, FCVO
     ) -> Self {
         Self {
             agent_client,
-            ensemble_fetcher,
+            swarm_fetcher,
             completion_votes_fetcher,
             cache_vote_fetcher,
             usage_handler,
@@ -85,7 +85,7 @@ where
     MOCK: agent::completions::UpstreamClient<objectiveai::agent::mock::Agent> + Send + Sync + 'static,
     FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     ACUSG: agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
-    FENS: crate::ensemble::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FENS: crate::swarm::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FVVOTE: super::completion_votes_fetcher::Fetcher<CTXEXT>
         + Send
         + Sync
@@ -189,7 +189,7 @@ where
     MOCK: agent::completions::UpstreamClient<objectiveai::agent::mock::Agent> + Send + Sync + 'static,
     FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     ACUSG: agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
-    FENS: crate::ensemble::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FENS: crate::swarm::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FVVOTE: super::completion_votes_fetcher::Fetcher<CTXEXT>
         + Send
         + Sync
@@ -199,7 +199,7 @@ where
 {
     /// Creates a streaming vector completion.
     ///
-    /// Orchestrates agent completions across all LLMs in the ensemble, extracting
+    /// Orchestrates agent completions across all LLMs in the swarm, extracting
     /// votes from each and combining them with weights to produce scores.
     pub async fn create_streaming(
         self: Arc<Self>,
@@ -226,24 +226,24 @@ where
             ));
         }
 
-        // validate credits + fetch ensemble if needed + fetch retry votes if needed
-        let (ensemble, mut static_votes, profile) = match (
-            &request.ensemble,
+        // validate credits + fetch swarm if needed + fetch retry votes if needed
+        let (swarm, mut static_votes, profile) = match (
+            &request.swarm,
             &request.retry,
         ) {
             (
-                objectiveai::vector::completions::request::Ensemble::Id(
-                    ensemble_id,
+                objectiveai::vector::completions::request::Swarm::Id(
+                    swarm_id,
                 ),
                 Some(retry),
             ) => {
-                let (ensemble, mut votes) = tokio::try_join!(
-                    self.ensemble_fetcher.fetch(ctx.clone(), ensemble_id).map(
+                let (swarm, mut votes) = tokio::try_join!(
+                    self.swarm_fetcher.fetch(ctx.clone(), swarm_id).map(
                         |result| {
                             match result {
-                                Ok(Some((ensemble, _))) => Ok(ensemble),
-                                Ok(None) => Err(super::Error::EnsembleNotFound),
-                                Err(e) => Err(super::Error::FetchEnsemble(e)),
+                                Ok(Some((swarm, _))) => Ok(swarm),
+                                Ok(None) => Err(super::Error::SwarmNotFound),
+                                Err(e) => Err(super::Error::FetchSwarm(e)),
                             }
                         }
                     ),
@@ -262,20 +262,20 @@ where
                     vote.from_cache = Some(true);
                     vote.completion_index = None;
                 });
-                (ensemble, votes, request.profile.clone())
+                (swarm, votes, request.profile.clone())
             }
             (
-                objectiveai::vector::completions::request::Ensemble::Provided(
-                    ensemble_base,
+                objectiveai::vector::completions::request::Swarm::Provided(
+                    swarm_base,
                 ),
                 Some(retry),
             ) => {
-                let (ensemble, aligned_profile) =
-                    objectiveai::ensemble::Ensemble::try_from_with_profile(
-                        ensemble_base.clone(),
+                let (swarm, aligned_profile) =
+                    objectiveai::swarm::Swarm::try_from_with_profile(
+                        swarm_base.clone(),
                         request.profile.clone(),
                     )
-                    .map_err(super::Error::InvalidEnsemble)?;
+                    .map_err(super::Error::InvalidSwarm)?;
                 let mut votes = self
                     .completion_votes_fetcher
                     .fetch(ctx.clone(), retry)
@@ -290,38 +290,38 @@ where
                     vote.from_cache = Some(true);
                     vote.completion_index = None;
                 });
-                (ensemble, votes, aligned_profile)
+                (swarm, votes, aligned_profile)
             }
             (
-                objectiveai::vector::completions::request::Ensemble::Id(
-                    ensemble_id,
+                objectiveai::vector::completions::request::Swarm::Id(
+                    swarm_id,
                 ),
                 None,
             ) => {
-                let ensemble = self
-                    .ensemble_fetcher
-                    .fetch(ctx.clone(), ensemble_id)
+                let swarm = self
+                    .swarm_fetcher
+                    .fetch(ctx.clone(), swarm_id)
                     .map(|result| match result {
-                        Ok(Some((ensemble, _))) => Ok(ensemble),
-                        Ok(None) => Err(super::Error::EnsembleNotFound),
-                        Err(e) => Err(super::Error::FetchEnsemble(e)),
+                        Ok(Some((swarm, _))) => Ok(swarm),
+                        Ok(None) => Err(super::Error::SwarmNotFound),
+                        Err(e) => Err(super::Error::FetchSwarm(e)),
                     })
                     .await?;
-                (ensemble, Vec::new(), request.profile.clone())
+                (swarm, Vec::new(), request.profile.clone())
             }
             (
-                objectiveai::vector::completions::request::Ensemble::Provided(
-                    ensemble_base,
+                objectiveai::vector::completions::request::Swarm::Provided(
+                    swarm_base,
                 ),
                 None,
             ) => {
-                let (ensemble, aligned_profile) =
-                    objectiveai::ensemble::Ensemble::try_from_with_profile(
-                        ensemble_base.clone(),
+                let (swarm, aligned_profile) =
+                    objectiveai::swarm::Swarm::try_from_with_profile(
+                        swarm_base.clone(),
                         request.profile.clone(),
                     )
-                    .map_err(super::Error::InvalidEnsemble)?;
-                (ensemble, Vec::new(), aligned_profile)
+                    .map_err(super::Error::InvalidSwarm)?;
+                (swarm, Vec::new(), aligned_profile)
             }
         };
 
@@ -333,9 +333,9 @@ where
             profile.to_weights_and_invert();
 
         // validate profile
-        if profile_pairs.len() != ensemble.agents.len() {
+        if profile_pairs.len() != swarm.agents.len() {
             return Err(super::Error::InvalidProfile(
-                "profile length must match ensemble length".to_string(),
+                "profile length must match swarm length".to_string(),
             ));
         }
         let mut positive_weight_count = 0;
@@ -376,34 +376,34 @@ where
 
         // create a vector of LLMs with useful info
         // only ones that may stream
-        let flat_ensemble_len = ensemble.agents.iter().map(|a| a.count as usize).sum::<usize>();
-        let mut llms = ensemble
+        let flat_swarm_len = swarm.agents.iter().map(|a| a.count as usize).sum::<usize>();
+        let mut llms = swarm
             .agents
             .into_iter()
             .enumerate()
-            .flat_map(|(ensemble_index, agent)| {
+            .flat_map(|(swarm_index, agent)| {
                 let count = agent.count as usize;
-                let (weight, invert) = profile_pairs[ensemble_index];
+                let (weight, invert) = profile_pairs[swarm_index];
                 std::iter::repeat_n(
-                    (ensemble_index, agent, weight, invert),
+                    (swarm_index, agent, weight, invert),
                     count,
                 )
             })
             .enumerate()
             .filter_map(
-                |(flat_ensemble_index, (ensemble_index, agent, weight, invert))| {
+                |(flat_swarm_index, (swarm_index, agent, weight, invert))| {
                     if weight <= Decimal::ZERO {
                         // skip agents with zero weight
                         None
                     } else if static_votes.iter().any(|v| {
-                        v.flat_ensemble_index == flat_ensemble_index as u64
+                        v.flat_swarm_index == flat_swarm_index as u64
                     }) {
                         // skip agents that have votes already
                         None
                     } else {
                         Some((
-                            flat_ensemble_index,
-                            ensemble_index,
+                            flat_swarm_index,
+                            swarm_index,
                             agent,
                             weight,
                             invert,
@@ -434,7 +434,7 @@ where
             // execute the futures
             let mut futs = Vec::with_capacity(llms.len());
             for (
-                (flat_ensemble_index, ensemble_index, _, weight, _),
+                (flat_swarm_index, swarm_index, _, weight, _),
                 (primary, fallbacks),
             ) in llms.iter().zip(agent_refs.iter())
             {
@@ -452,8 +452,8 @@ where
                     ).await {
                         Ok(Some(mut vote)) => {
                             // update fields
-                            vote.ensemble_index = *ensemble_index as u64;
-                            vote.flat_ensemble_index = *flat_ensemble_index as u64;
+                            vote.swarm_index = *swarm_index as u64;
+                            vote.flat_swarm_index = *flat_swarm_index as u64;
                             vote.weight = *weight;
                             vote.retry = None;
                             vote.from_cache = Some(true);
@@ -495,15 +495,15 @@ where
         }
 
         // filter LLMs that now have votes from cache
-        llms.retain(|(flat_ensemble_index, _, _, _, _)| {
+        llms.retain(|(flat_swarm_index, _, _, _, _)| {
             !static_votes
                 .iter()
-                .any(|v| v.flat_ensemble_index == *flat_ensemble_index as u64)
+                .any(|v| v.flat_swarm_index == *flat_swarm_index as u64)
         });
 
 
         // sort retry/cached/rng votes
-        static_votes.sort_by_key(|vote| vote.flat_ensemble_index);
+        static_votes.sort_by_key(|vote| vote.flat_swarm_index);
 
         // track usage
         let mut usage =
@@ -520,20 +520,20 @@ where
         // completion chunk indices are first come first served
         let indexer = Arc::new(ChoiceIndexer::new(0));
 
-        // stream votes from each LLM in the ensemble
+        // stream votes from each LLM in the swarm
         let mut vote_stream =
             futures::stream::select_all(llms.into_iter().map(
-                |(flat_ensemble_index, ensemble_index, agent, weight, invert)| {
+                |(flat_swarm_index, swarm_index, agent, weight, invert)| {
                     futures::stream::once(self.clone().llm_create_streaming(
                         ctx.clone(),
                         response_id.clone(),
                         created,
-                        ensemble.id.clone(),
+                        swarm.id.clone(),
                         indexer.clone(),
                         agent,
-                        ensemble_index,
-                        flat_ensemble_index,
-                        flat_ensemble_len,
+                        swarm_index,
+                        flat_swarm_index,
+                        flat_swarm_len,
                         weight,
                         invert,
                         request.clone(),
@@ -570,7 +570,7 @@ where
                         scores,
                         weights,
                         created,
-                        ensemble: ensemble.id,
+                        swarm: swarm.id,
                         object: objectiveai::vector::completions::response::streaming::Object::VectorCompletionChunk,
                         usage: None,
                     }
@@ -644,7 +644,7 @@ where
         }))
     }
 
-    /// Creates a completion for a single LLM in the ensemble, extracting its vote.
+    /// Creates a completion for a single LLM in the swarm, extracting its vote.
     ///
     /// Builds an AgentCompletionCreateParams with an inline agent for each LLM,
     /// sends the request via the agent completions client using per-agent
@@ -655,12 +655,12 @@ where
         ctx: ctx::Context<CTXEXT>,
         id: String,
         created: u64,
-        ensemble: String,
+        swarm: String,
         indexer: Arc<ChoiceIndexer>,
         agent: objectiveai::agent::AgentWithFallbacksAndCount,
-        ensemble_index: usize,
-        flat_ensemble_index: usize,
-        flat_ensemble_len: usize,
+        swarm_index: usize,
+        flat_swarm_index: usize,
+        flat_swarm_len: usize,
         weight: Decimal,
         invert_vote: bool,
         request: Arc<objectiveai::vector::completions::request::VectorCompletionCreateParams>,
@@ -685,7 +685,7 @@ where
             ) {
                 let agent_id = a.id().to_string();
                 let mut rng = make_rng(
-                    request.seed.map(|s| per_agent_seed(s, &agent_id, flat_ensemble_index, &prompt_id, &responses_ids) as u64),
+                    request.seed.map(|s| per_agent_seed(s, &agent_id, flat_swarm_index, &prompt_id, &responses_ids) as u64),
                 );
                 let top_logprobs = a.top_logprobs();
                 let pfx_tree = super::PfxTree::new(
@@ -785,7 +785,7 @@ where
                     .collect()
             }),
             response_format: response_format.clone(),
-            seed: request.seed.map(|s| per_agent_seed(s, &primary_id, flat_ensemble_index, &prompt_id, &responses_ids)),
+            seed: request.seed.map(|s| per_agent_seed(s, &primary_id, flat_swarm_index, &prompt_id, &responses_ids)),
             stream: Some(false),
             mcp_server_authorization: request.mcp_server_authorization.clone(),
         });
@@ -796,7 +796,7 @@ where
         // Helper to wrap an agent chunk into a VectorCompletionChunk
         let wrap_agent_chunk = {
             let id = id.clone();
-            let ensemble = ensemble.clone();
+            let swarm = swarm.clone();
             move |completion_index: u64, inner: objectiveai::agent::completions::response::streaming::AgentCompletionChunk| {
                 objectiveai::vector::completions::response::streaming::VectorCompletionChunk {
                     id: id.clone(),
@@ -810,7 +810,7 @@ where
                     scores: Vec::new(),
                     weights: Vec::new(),
                     created,
-                    ensemble: ensemble.clone(),
+                    swarm: swarm.clone(),
                     object: objectiveai::vector::completions::response::streaming::Object::VectorCompletionChunk,
                     usage: None,
                 }
@@ -839,7 +839,7 @@ where
                 Ok((stream, aggregate, continuation)) => (stream, aggregate, continuation),
                 Err(e) => {
                     yield Self::llm_create_streaming_vector_error(
-                        id.clone(), indexer.get(flat_ensemble_index), e, agent.inner.base().upstream(), created, ensemble.clone(),
+                        id.clone(), indexer.get(flat_swarm_index), e, agent.inner.base().upstream(), created, swarm.clone(),
                     );
                     return;
                 }
@@ -849,7 +849,7 @@ where
                 match item {
                     agent::completions::StreamItem::Chunk(chunk) => {
                         // Yield immediately
-                        yield wrap_agent_chunk(indexer.get(flat_ensemble_index), chunk.clone());
+                        yield wrap_agent_chunk(indexer.get(flat_swarm_index), chunk.clone());
                         // Also aggregate for vote extraction
                         match &mut aggregate {
                             Some(agg) => agg.push(&chunk),
@@ -912,15 +912,15 @@ where
                             };
                             votes.push(objectiveai::vector::completions::response::Vote {
                                 agent: agent_id.clone(),
-                                ensemble_index: ensemble_index as u64,
-                                flat_ensemble_index: flat_ensemble_index as u64,
+                                swarm_index: swarm_index as u64,
+                                flat_swarm_index: flat_swarm_index as u64,
                                 prompt_id: prompt_id.clone(),
                                 responses_ids: responses_ids.clone(),
                                 vote,
                                 weight,
                                 retry: None,
                                 from_cache: None,
-                                completion_index: Some(indexer.get(flat_ensemble_index)),
+                                completion_index: Some(indexer.get(flat_swarm_index)),
                             });
                         } else if let Some(mut cont) = continuation.take() {
                             // Retry via continuation — stream chunks immediately
@@ -965,7 +965,7 @@ where
                                     while let Some(item) = retry_stream.next().await {
                                         match item {
                                             agent::completions::StreamItem::Chunk(chunk) => {
-                                                yield wrap_agent_chunk(indexer.get(flat_ensemble_index + flat_ensemble_len), chunk.clone());
+                                                yield wrap_agent_chunk(indexer.get(flat_swarm_index + flat_swarm_len), chunk.clone());
                                                 match &mut retry_agg {
                                                     Some(agg) => agg.push(&chunk),
                                                     None => retry_agg = Some(chunk),
@@ -993,15 +993,15 @@ where
                                             };
                                             votes.push(objectiveai::vector::completions::response::Vote {
                                                 agent: agent_id.clone(),
-                                                ensemble_index: ensemble_index as u64,
-                                                flat_ensemble_index: flat_ensemble_index as u64,
+                                                swarm_index: swarm_index as u64,
+                                                flat_swarm_index: flat_swarm_index as u64,
                                                 prompt_id: prompt_id.clone(),
                                                 responses_ids: responses_ids.clone(),
                                                 vote: retry_vote,
                                                 weight,
                                                 retry: None,
                                                 from_cache: None,
-                                                completion_index: Some(indexer.get(flat_ensemble_index + flat_ensemble_len)),
+                                                completion_index: Some(indexer.get(flat_swarm_index + flat_swarm_len)),
                                             });
                                         }
                                     }
@@ -1016,15 +1016,15 @@ where
                                         };
                                         votes.push(objectiveai::vector::completions::response::Vote {
                                             agent: agent_id.clone(),
-                                            ensemble_index: ensemble_index as u64,
-                                            flat_ensemble_index: flat_ensemble_index as u64,
+                                            swarm_index: swarm_index as u64,
+                                            flat_swarm_index: flat_swarm_index as u64,
                                             prompt_id: prompt_id.clone(),
                                             responses_ids: responses_ids.clone(),
                                             vote,
                                             weight,
                                             retry: None,
                                             from_cache: None,
-                                            completion_index: Some(indexer.get(flat_ensemble_index)),
+                                            completion_index: Some(indexer.get(flat_swarm_index)),
                                         });
                                     }
                                 }
@@ -1040,15 +1040,15 @@ where
                             };
                             votes.push(objectiveai::vector::completions::response::Vote {
                                 agent: agent_id.clone(),
-                                ensemble_index: ensemble_index as u64,
-                                flat_ensemble_index: flat_ensemble_index as u64,
+                                swarm_index: swarm_index as u64,
+                                flat_swarm_index: flat_swarm_index as u64,
                                 prompt_id: prompt_id.clone(),
                                 responses_ids: responses_ids.clone(),
                                 vote,
                                 weight,
                                 retry: None,
                                 from_cache: None,
-                                completion_index: Some(indexer.get(flat_ensemble_index)),
+                                completion_index: Some(indexer.get(flat_swarm_index)),
                             });
                         } else if let Some(mut cont) = continuation.take() {
                             // Retry with required: true — stream chunks immediately
@@ -1091,7 +1091,7 @@ where
                                     while let Some(item) = retry_stream.next().await {
                                         match item {
                                             agent::completions::StreamItem::Chunk(chunk) => {
-                                                yield wrap_agent_chunk(indexer.get(flat_ensemble_index + flat_ensemble_len), chunk.clone());
+                                                yield wrap_agent_chunk(indexer.get(flat_swarm_index + flat_swarm_len), chunk.clone());
                                                 match &mut retry_agg {
                                                     Some(agg) => agg.push(&chunk),
                                                     None => retry_agg = Some(chunk),
@@ -1123,15 +1123,15 @@ where
                                                     };
                                                     votes.push(objectiveai::vector::completions::response::Vote {
                                                         agent: agent_id.clone(),
-                                                        ensemble_index: ensemble_index as u64,
-                                                        flat_ensemble_index: flat_ensemble_index as u64,
+                                                        swarm_index: swarm_index as u64,
+                                                        flat_swarm_index: flat_swarm_index as u64,
                                                         prompt_id: prompt_id.clone(),
                                                         responses_ids: responses_ids.clone(),
                                                         vote: retry_vote,
                                                         weight,
                                                         retry: None,
                                                         from_cache: None,
-                                                        completion_index: Some(indexer.get(flat_ensemble_index + flat_ensemble_len)),
+                                                        completion_index: Some(indexer.get(flat_swarm_index + flat_swarm_len)),
                                                     });
                                                 }
                                             }
@@ -1153,15 +1153,15 @@ where
                             };
                             votes.push(objectiveai::vector::completions::response::Vote {
                                 agent: agent_id.clone(),
-                                ensemble_index: ensemble_index as u64,
-                                flat_ensemble_index: flat_ensemble_index as u64,
+                                swarm_index: swarm_index as u64,
+                                flat_swarm_index: flat_swarm_index as u64,
                                 prompt_id: prompt_id.clone(),
                                 responses_ids: responses_ids.clone(),
                                 vote,
                                 weight,
                                 retry: None,
                                 from_cache: None,
-                                completion_index: Some(indexer.get(flat_ensemble_index)),
+                                completion_index: Some(indexer.get(flat_swarm_index)),
                             });
                         }
                     }
@@ -1177,7 +1177,7 @@ where
                     scores: Vec::new(),
                     weights: Vec::new(),
                     created,
-                    ensemble: ensemble.clone(),
+                    swarm: swarm.clone(),
                     object: objectiveai::vector::completions::response::streaming::Object::VectorCompletionChunk,
                     usage: None,
                 };
@@ -1192,7 +1192,7 @@ where
         error: agent::completions::Error,
         upstream: objectiveai::agent::Upstream,
         created: u64,
-        ensemble: String,
+        swarm: String,
     ) -> objectiveai::vector::completions::response::streaming::VectorCompletionChunk {
         objectiveai::vector::completions::response::streaming::VectorCompletionChunk {
             id,
@@ -1210,7 +1210,7 @@ where
             scores: Vec::new(),
             weights: Vec::new(),
             created,
-            ensemble,
+            swarm,
             object: objectiveai::vector::completions::response::streaming::Object::VectorCompletionChunk,
             usage: None,
         }
@@ -1291,21 +1291,21 @@ fn rich_content_to_string(
 }
 
 /// Computes a per-agent seed by hashing the base seed with the agent ID,
-/// flat ensemble index, prompt ID, and response IDs.
+/// flat swarm index, prompt ID, and response IDs.
 ///
-/// This ensures each agent in an ensemble gets a different but deterministic
+/// This ensures each agent in an swarm gets a different but deterministic
 /// seed, and different vector completion tasks (with different prompts or
 /// responses) also get different seeds for the same agent.
 fn per_agent_seed(
     seed: i64,
     agent_id: &str,
-    flat_ensemble_index: usize,
+    flat_swarm_index: usize,
     prompt_id: &str,
     responses_ids: &[String],
 ) -> i64 {
     let mut hasher = twox_hash::XxHash3_64::with_seed(seed as u64);
     hasher.write(agent_id.as_bytes());
-    hasher.write(&(flat_ensemble_index as u64).to_le_bytes());
+    hasher.write(&(flat_swarm_index as u64).to_le_bytes());
     hasher.write(prompt_id.as_bytes());
     for rid in responses_ids {
         hasher.write(rid.as_bytes());
