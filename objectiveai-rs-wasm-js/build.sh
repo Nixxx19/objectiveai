@@ -1,26 +1,43 @@
 #!/usr/bin/env bash
 # Builds objectiveai-rs-wasm-js to dist/.
 # Skips the build if the source fingerprint hasn't changed (SHA-based, like cargo).
+# Output is captured to .logs/build/objectiveai-rs-wasm-js.txt.
 #
 # Usage:
 #   bash objectiveai-rs-wasm-js/build.sh
 
 set -euo pipefail
 
+MODULE="objectiveai-rs-wasm-js"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-
-# Check fingerprint — exits early if dist/ is up to date.
-source "$SCRIPT_DIR/fingerprint.sh"
-
-# Require wasm-pack from repo root bin/
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-WASM_PACK="$REPO_ROOT/bin/wasm-pack"
-[ -x "$WASM_PACK" ] || { echo "ERROR: wasm-pack not found at $WASM_PACK. Run 'bash build.sh' from the repo root first." >&2; exit 1; }
+LOG_DIR="$REPO_ROOT/.logs/build"
+LOG_FILE="$LOG_DIR/$MODULE.txt"
 
-# Build
-echo "Building wasm-pack (nodejs, release)..."
-"$WASM_PACK" build "$SCRIPT_DIR" --target nodejs --release --out-dir dist
+mkdir -p "$LOG_DIR"
 
-# Stamp the fingerprint
-echo "$CURRENT_FP" > "$FINGERPRINT_FILE"
-echo "Build complete (fingerprint: ${CURRENT_FP:0:12}...)"
+run() {
+  # Check fingerprint — returns 1 if dist/ is up to date (not an error).
+  if ! source "$SCRIPT_DIR/fingerprint.sh"; then
+    return 0
+  fi
+
+  # Require wasm-pack from repo root bin/
+  WASM_PACK="$REPO_ROOT/bin/wasm-pack"
+  [ -x "$WASM_PACK" ] || { echo "ERROR: wasm-pack not found at $WASM_PACK. Run 'bash build-bin.sh' from the repo root first." >&2; return 1; }
+
+  # Build
+  echo "Building wasm-pack (nodejs, release)..."
+  "$WASM_PACK" build "$SCRIPT_DIR" --target nodejs --release --out-dir dist
+
+  # Stamp the fingerprint
+  echo "$CURRENT_FP" > "$FINGERPRINT_FILE"
+  echo "Build complete (fingerprint: ${CURRENT_FP:0:12}...)"
+}
+
+if run > "$LOG_FILE" 2>&1; then
+  echo "$MODULE: SUCCESS"
+else
+  echo "$MODULE: ERROR"
+  exit 1
+fi

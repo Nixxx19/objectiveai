@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# Installs build tools (wasm-pack, maturin) into ./bin/ using versions
-# from [workspace.metadata.tools] in Cargo.toml.
+# Builds all packages in dependency order with parallelism.
+#
+# Phase 1 (parallel): build-bin + objectiveai-json-schema
+# Phase 2 (parallel): objectiveai-rs-wasm-js + objectiveai-rs-pyo3
+# Phase 3 (parallel): objectiveai-js + objectiveai-py
 #
 # Usage:
 #   bash build.sh
@@ -9,31 +12,31 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
 
-# Parse tool versions from Cargo.toml [workspace.metadata.tools]
-WASM_PACK_VERSION=$(sed -n 's/^wasm-pack *= *"\(.*\)"/\1/p' "$REPO_ROOT/Cargo.toml")
-MATURIN_VERSION=$(sed -n 's/^maturin *= *"\(.*\)"/\1/p' "$REPO_ROOT/Cargo.toml")
+# Run a phase: launch all given scripts in parallel, wait for all, fail if any failed.
+run_phase() {
+  local pids=()
+  for script in "$@"; do
+    bash "$REPO_ROOT/$script" &
+    pids+=($!)
+  done
 
-[ -n "$WASM_PACK_VERSION" ] || { echo "ERROR: Could not read wasm-pack version from Cargo.toml" >&2; exit 1; }
-[ -n "$MATURIN_VERSION" ] || { echo "ERROR: Could not read maturin version from Cargo.toml" >&2; exit 1; }
-
-BIN_DIR="$REPO_ROOT/bin"
-
-install_if_needed() {
-  local name="$1" version="$2"
-  local bin="$BIN_DIR/$name"
-  if [ -x "$bin" ]; then
-    local installed
-    installed=$("$bin" --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-    if [ "$installed" = "$version" ]; then
-      echo "$name $version already installed, skipping."
-      return
+  local failed=false
+  for pid in "${pids[@]}"; do
+    if ! wait "$pid"; then
+      failed=true
     fi
+  done
+
+  if $failed; then
+    exit 1
   fi
-  echo "Installing $name $version..."
-  cargo install "$name" --version "$version" --locked --root "$REPO_ROOT"
 }
 
-install_if_needed wasm-pack "$WASM_PACK_VERSION"
-install_if_needed maturin "$MATURIN_VERSION"
+# Phase 1: build tools + json schema
+run_phase build-bin.sh objectiveai-json-schema/build.sh
 
-echo "Done. Tools at $BIN_DIR/"
+# Phase 2: wasm + pyo3 (need build tools from phase 1)
+run_phase objectiveai-rs-wasm-js/build.sh objectiveai-rs-pyo3/build.sh
+
+# Phase 3: js + py (need wasm/pyo3 from phase 2)
+run_phase objectiveai-js/build.sh objectiveai-py/build.sh
