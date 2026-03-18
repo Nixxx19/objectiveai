@@ -144,6 +144,16 @@ pub enum InlineSwarmBaseOrRemote {
     Remote(crate::RemotePath),
 }
 
+/// Like [`InlineSwarmBaseOrRemote`] but with optional commit.
+/// Used in request types where commit resolution happens server-side.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+#[schemars(rename = "swarm.InlineSwarmBaseOrRemoteCommitOptional")]
+pub enum InlineSwarmBaseOrRemoteCommitOptional {
+    SwarmBase(InlineSwarmBase),
+    Remote(crate::RemotePathCommitOptional),
+}
+
 // ── Private helpers ────────────────────────────────────────────────
 
 /// Validates agent fallbacks for duplicate IDs.

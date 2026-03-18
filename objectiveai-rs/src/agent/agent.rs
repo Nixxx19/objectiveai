@@ -580,6 +580,16 @@ pub enum InlineAgentBaseWithFallbacksOrRemote {
     Remote(crate::RemotePath),
 }
 
+/// Like [`InlineAgentBaseWithFallbacksOrRemote`] but with optional commit.
+/// Used in request types where commit resolution happens server-side.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+#[schemars(rename = "agent.InlineAgentBaseWithFallbacksOrRemoteCommitOptional")]
+pub enum InlineAgentBaseWithFallbacksOrRemoteCommitOptional {
+    AgentBase(InlineAgentBaseWithFallbacks),
+    Remote(crate::RemotePathCommitOptional),
+}
+
 // ── WithCount types (for swarm agent slots) ────────────────────────
 
 fn default_count() -> u64 {

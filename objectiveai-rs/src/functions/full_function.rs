@@ -73,8 +73,8 @@ impl AlphaInlineFunction {
 /// or a remote path reference.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "functions.FullInlineFunctionOrRemote")]
-pub enum FullInlineFunctionOrRemote {
+#[schemars(rename = "functions.FullInlineFunctionOrRemoteCommitOptional")]
+pub enum FullInlineFunctionOrRemoteCommitOptional {
     Inline(FullInlineFunction),
-    Remote(crate::RemotePath),
+    Remote(crate::RemotePathCommitOptional),
 }

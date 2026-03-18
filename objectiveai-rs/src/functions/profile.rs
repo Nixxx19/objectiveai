@@ -11,10 +11,10 @@ use schemars::JsonSchema;
 /// or a remote path reference.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "functions.InlineProfileOrRemote")]
-pub enum InlineProfileOrRemote {
+#[schemars(rename = "functions.InlineProfileOrRemoteCommitOptional")]
+pub enum InlineProfileOrRemoteCommitOptional {
     Inline(InlineProfile),
-    Remote(crate::RemotePath),
+    Remote(crate::RemotePathCommitOptional),
 }
 
 /// A Profile definition, either remote or inline.

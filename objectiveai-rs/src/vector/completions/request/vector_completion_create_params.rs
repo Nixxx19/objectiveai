@@ -28,7 +28,7 @@ pub struct VectorCompletionCreateParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<agent::completions::request::Provider>,
     /// The Swarm of agents to use.
-    pub swarm: crate::swarm::InlineSwarmBase,
+    pub swarm: crate::swarm::InlineSwarmBaseOrRemoteCommitOptional,
     /// Random seed for deterministic results.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub seed: Option<i64>,

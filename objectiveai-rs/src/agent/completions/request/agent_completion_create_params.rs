@@ -14,7 +14,7 @@ pub struct AgentCompletionCreateParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<super::Provider>,
     /// The agent to use (inline Agent or stored ID).
-    pub agent: crate::agent::InlineAgentBaseWithFallbacksOrRemote,
+    pub agent: crate::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
     /// Output format constraints (text, JSON, or JSON schema).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub response_format: Option<super::ResponseFormatParam>,

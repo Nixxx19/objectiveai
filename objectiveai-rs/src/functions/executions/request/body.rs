@@ -8,9 +8,9 @@ use schemars::JsonSchema;
 #[schemars(rename = "functions.executions.request.FunctionExecutionCreateParams")]
 pub struct FunctionExecutionCreateParams {
     /// The function to execute (inline definition or remote path).
-    pub function: functions::FullInlineFunctionOrRemote,
+    pub function: functions::FullInlineFunctionOrRemoteCommitOptional,
     /// The profile to use (inline definition or remote path).
-    pub profile: functions::InlineProfileOrRemote,
+    pub profile: functions::InlineProfileOrRemoteCommitOptional,
 
     // --- Caching and retry options ---
     #[serde(skip_serializing_if = "Option::is_none")]

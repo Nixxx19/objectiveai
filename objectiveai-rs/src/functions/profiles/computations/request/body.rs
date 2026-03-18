@@ -8,7 +8,7 @@ use schemars::JsonSchema;
 #[schemars(rename = "functions.profiles.computations.request.FunctionProfileComputationCreateParams")]
 pub struct FunctionProfileComputationCreateParams {
     /// The function to compute a profile for (inline definition or remote path).
-    pub function: functions::FullInlineFunctionOrRemote,
+    pub function: functions::FullInlineFunctionOrRemoteCommitOptional,
 
     // --- Caching and retry options ---
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -21,7 +21,7 @@ pub struct FunctionProfileComputationCreateParams {
     pub max_retries: Option<u64>,
     pub n: u64,
     pub dataset: Vec<super::DatasetItem>,
-    pub swarm: crate::swarm::InlineSwarmBaseOrRemote,
+    pub swarm: crate::swarm::InlineSwarmBaseOrRemoteCommitOptional,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<agent::completions::request::Provider>,
     #[serde(skip_serializing_if = "Option::is_none")]

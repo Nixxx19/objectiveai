@@ -23,7 +23,7 @@ pub struct GetAgentResponse {
     pub path: crate::RemotePath,
     /// The Agent definition.
     #[serde(flatten)]
-    #[schemars(schema_with = "crate::flatten_schema::<super::InlineAgent>")]
+    #[schemars(schema_with = "crate::flatten_schema::<super::RemoteAgent>")]
     pub inner: super::RemoteAgent,
 }
 
