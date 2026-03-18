@@ -5,22 +5,41 @@
 
 use axum::{
     Json,
-    extract::Path,
     response::{IntoResponse, Sse, sse::Event},
 };
 use envconfig::Envconfig;
 use objectiveai::error::ResponseError;
 use objectiveai_api::{
-    agent, auth, ctx, swarm,
+    agent, auth, ctx,
     error::ResponseErrorExt,
     filesystem,
     functions::{self, profiles::computations::Client},
     github, mcp, objectiveai_http,
+    retrieval,
     util::StreamOnce,
     vector,
 };
 use std::{convert::Infallible, sync::Arc};
 use tokio_stream::StreamExt;
+
+type ListRouter = retrieval::list::Router<
+    retrieval::list::objectiveai::ObjectiveAiClient,
+    retrieval::list::filesystem::FilesystemClient,
+    retrieval::list::mock::MockClient,
+    ctx::DefaultContextExt,
+>;
+
+type RetrieveRouter = retrieval::retrieve::Router<
+    retrieval::retrieve::github::GithubClient,
+    retrieval::retrieve::filesystem::FilesystemClient,
+    retrieval::retrieve::mock::MockClient,
+    ctx::DefaultContextExt,
+>;
+
+type UsageRouter = retrieval::usage::Router<
+    retrieval::usage::objectiveai::ObjectiveAiClient,
+    ctx::DefaultContextExt,
+>;
 
 #[derive(Envconfig)]
 struct Config {
@@ -225,13 +244,6 @@ async fn main() {
         http_referer.clone(),
     ));
 
-    // Swarm Fetcher
-    let swarm_fetcher = Arc::new(swarm::fetcher::CachingFetcher::new(
-        Arc::new(swarm::fetcher::ObjectiveAiFetcher::new(
-            objectiveai_http_client.clone(),
-        )),
-    ));
-
     // Vector Completion Votes Fetcher
     let completion_votes_fetcher = Arc::new(
         vector::completions::completion_votes_fetcher::ObjectiveAiFetcher::new(
@@ -248,12 +260,12 @@ async fn main() {
 
     // GitHub Client
     let github_client = Arc::new(github::Client::new(
-        reqwest::Client::new(),
+        http_client.clone(),
         fetch_github_token,
         publish_github_token,
-        user_agent,
-        x_title,
-        http_referer,
+        user_agent.clone(),
+        x_title.clone(),
+        http_referer.clone(),
         std::time::Duration::from_millis(github_backoff_current_interval),
         std::time::Duration::from_millis(github_backoff_initial_interval),
         github_backoff_randomization_factor,
@@ -274,40 +286,24 @@ async fn main() {
         filesystem_commit_author_email,
     ));
 
-    // Function Fetcher (routes to GitHub, Filesystem, or Mock based on Remote)
-    let function_fetcher =
-        Arc::new(functions::function_fetcher::FetcherRouter::new(
-            Arc::new(functions::function_fetcher::github::GithubFetcher::new(
-                github_client.clone(),
-            )),
-            Arc::new(
-                functions::function_fetcher::filesystem::FilesystemFetcher::new(
-                    filesystem_client.clone(),
-                ),
-            ),
-            Arc::new(functions::function_fetcher::mock::MockFetcher),
-        ));
 
-    // Function Profile Fetcher (routes to GitHub, Filesystem, or Mock based on Remote)
-    let profile_fetcher =
-        Arc::new(functions::profile_fetcher::FetcherRouter::new(
-            Arc::new(functions::profile_fetcher::github::GithubFetcher::new(
-                github_client.clone(),
-            )),
-            Arc::new(
-                functions::profile_fetcher::filesystem::FilesystemFetcher::new(
-                    filesystem_client.clone(),
-                ),
-            ),
-            Arc::new(functions::profile_fetcher::mock::MockFetcher),
-        ));
+    // Retrieval: Retrieve Router
+    let retrieve_router = Arc::new(retrieval::retrieve::Router::new(
+        Arc::new(retrieval::retrieve::github::GithubClient::new(
+            github_client.clone(),
+        )),
+        Arc::new(retrieval::retrieve::filesystem::FilesystemClient::new(
+            filesystem_client.clone(),
+        )),
+        Arc::new(retrieval::retrieve::mock::MockClient),
+    ));
 
     // MCP Client
     let mcp_client = Arc::new(mcp::Client::new(
-        reqwest::Client::new(),
-        None, // user_agent already moved
-        None, // x_title already moved
-        None, // referer already moved
+        http_client.clone(),
+        user_agent.clone(),
+        x_title.clone(),
+        http_referer.clone(),
         std::time::Duration::from_millis(mcp_connect_timeout),
         std::time::Duration::from_millis(
             mcp_backoff_current_interval,
@@ -324,25 +320,18 @@ async fn main() {
         std::time::Duration::from_millis(mcp_call_timeout),
     ));
 
-    // Agent Fetcher
-    let agent_fetcher = Arc::new(agent::fetcher::CachingFetcher::new(
-        Arc::new(agent::fetcher::ObjectiveAiFetcher::new(
-            objectiveai_http_client.clone(),
-        )),
-    ));
-
     // Agent Completions Client
     let agent_completions_client = Arc::new(agent::completions::Client::new(
         mcp_client.clone(),
-        agent_fetcher.clone(),
+        retrieve_router.clone(),
         Arc::new(agent::completions::usage_handler::LogUsageHandler),
         Arc::new(agent::completions::openrouter::Client {
-            http_client: reqwest::Client::new(),
+            http_client,
             api_base: openrouter_api_base.clone(),
             api_key: openrouter_api_key.clone().unwrap_or_default(),
-            user_agent: None,
-            x_title: None,
-            referer: None,
+            user_agent,
+            x_title,
+            referer: http_referer,
         }),
         Arc::new(agent::completions::claude_agent_sdk::Client::new(None)),
         Arc::new(agent::completions::mock::Client {
@@ -368,7 +357,7 @@ async fn main() {
     // Vector Completions Client
     let vector_completions_client = Arc::new(vector::completions::Client::new(
         agent_completions_client.clone(),
-        swarm_fetcher.clone(),
+        retrieve_router.clone(),
         completion_votes_fetcher.clone(),
         cache_vote_fetcher.clone(),
         Arc::new(vector::completions::usage_handler::LogUsageHandler),
@@ -381,13 +370,31 @@ async fn main() {
             cache_vote_fetcher.clone(),
         ));
 
+    // Retrieval: List Router
+    let list_router = Arc::new(retrieval::list::Router::new(
+        Arc::new(retrieval::list::objectiveai::ObjectiveAiClient::new(
+            objectiveai_http_client.clone(),
+        )),
+        Arc::new(retrieval::list::filesystem::FilesystemClient::new(
+            filesystem_client.clone(),
+        )),
+        Arc::new(retrieval::list::mock::MockClient),
+    ));
+
+    // Retrieval: Usage Router
+    let usage_router = Arc::new(retrieval::usage::Router::new(
+        Arc::new(retrieval::usage::objectiveai::ObjectiveAiClient::new(
+            objectiveai_http_client.clone(),
+        )),
+    ));
+
     // Function Inventions Client
     let function_inventions_client =
         Arc::new(functions::inventions::Client::new(
             agent_completions_client.clone(),
             github_client.clone(),
             filesystem_client.clone(),
-            function_fetcher.clone(),
+            retrieve_router.clone(),
             Arc::new(functions::inventions::usage_handler::LogUsageHandler),
             true, // persist
         ));
@@ -405,10 +412,8 @@ async fn main() {
     let function_executions_client =
         Arc::new(functions::executions::Client::new(
             agent_completions_client.clone(),
-            swarm_fetcher.clone(),
             vector_completions_client.clone(),
-            function_fetcher.clone(),
-            profile_fetcher.clone(),
+            retrieve_router.clone(),
             Arc::new(functions::executions::usage_handler::LogUsageHandler),
         ));
 
@@ -418,50 +423,11 @@ async fn main() {
             objectiveai_http_client.clone(),
         ));
 
-    // Functions Client
-    let functions_client = Arc::new(functions::Client::new(
-        function_fetcher.clone(),
-        Arc::new(functions::retrieval_client::ObjectiveAiClient::new(
-            objectiveai_http_client.clone(),
-        )),
-    ));
-
-    // Function Profiles Client
-    let profiles_client = Arc::new(functions::profiles::Client::new(
-        profile_fetcher.clone(),
-        Arc::new(
-            functions::profiles::retrieval_client::ObjectiveAiClient::new(
-                objectiveai_http_client.clone(),
-            ),
-        ),
-    ));
-
-    // Function-Profile Pairs Client
-    let pairs_client =
-        Arc::new(functions::pair_retrieval_client::ObjectiveAiClient::new(
-            objectiveai_http_client.clone(),
-        ));
-
     // Auth Client
     let auth_client = Arc::new(auth::ObjectiveAiClient::new(
         objectiveai_http_client.clone(),
     ));
 
-    // Swarm Client
-    let swarm_client = Arc::new(swarm::Client::new(
-        swarm_fetcher.clone(),
-        Arc::new(swarm::retrieval_client::ObjectiveAiClient::new(
-            objectiveai_http_client.clone(),
-        )),
-    ));
-
-    // Agent Client (browse/list/get)
-    let agent_client = Arc::new(agent::Client::new(
-        agent_fetcher.clone(),
-        Arc::new(agent::retrieval_client::ObjectiveAiClient::new(
-            objectiveai_http_client.clone(),
-        )),
-    ));
 
     // Router
     let app = axum::Router::new()
@@ -491,15 +457,17 @@ async fn main() {
         )
         // Vector Completions - get completion votes
         .route(
-            "/vector/completions/{id}",
-            axum::routing::post({
+            "/vector/completions/votes",
+            axum::routing::get({
                 let vector_completions_cache_client =
                     vector_completions_cache_client.clone();
-                move |Path(id): Path<String>, headers: axum::http::HeaderMap| {
+                move |headers: axum::http::HeaderMap, Json(body): Json<
+                    objectiveai::vector::completions::cache::request::GetCompletionVotesRequest,
+                >| {
                     get_vector_completion_votes(
                         vector_completions_cache_client,
                         headers,
-                        id,
+                        body,
                     )
                 }
             }),
@@ -507,7 +475,7 @@ async fn main() {
         // Vector Completions - get cache vote
         .route(
             "/vector/completions/cache",
-            axum::routing::post({
+            axum::routing::get({
                 let vector_completions_cache_client =
                     vector_completions_cache_client.clone();
                 move |headers: axum::http::HeaderMap, Json(body): Json<
@@ -523,447 +491,113 @@ async fn main() {
         )
         // Functions - list
         .route(
+            "/functions/list",
+            axum::routing::get({
+                let list_router = list_router.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::functions::request::ListFunctionsRequest,
+                >| {
+                    list_functions(list_router, headers, params)
+                }
+            }),
+        )
+        // Functions - get
+        .route(
             "/functions",
             axum::routing::get({
-                let functions_client = functions_client.clone();
-                move |headers: axum::http::HeaderMap| list_functions(functions_client, headers)
-            }),
-        )
-        // Functions - get (without commit)
-        .route(
-            "/functions/{fremote}/{fowner}/{frepository}",
-            axum::routing::get({
-                let functions_client = functions_client.clone();
-                move |Path((fremote, fowner, frepository)): Path<(objectiveai::functions::Remote, String, String)>, headers: axum::http::HeaderMap| {
-                    get_function(functions_client, headers, fremote, fowner, frepository, None)
+                let retrieve_router = retrieve_router.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::RemotePathCommitOptional,
+                >| {
+                    get_function(retrieve_router, headers, params)
                 }
             }),
         )
-        // Functions - get (with commit)
+        // Functions - get usage
         .route(
-            "/functions/{fremote}/{fowner}/{frepository}/{fcommit}",
+            "/functions/usage",
             axum::routing::get({
-                let functions_client = functions_client.clone();
-                move |Path((fremote, fowner, frepository, fcommit)): Path<(
-                    objectiveai::functions::Remote,
-                    String,
-                    String,
-                    String,
-                )>, headers: axum::http::HeaderMap| {
-                    get_function(
-                        functions_client,
-                        headers,
-                        fremote,
-                        fowner,
-                        frepository,
-                        Some(fcommit),
-                    )
-                }
-            }),
-        )
-        // Functions - get usage (without commit)
-        .route(
-            "/functions/{fremote}/{fowner}/{frepository}/usage",
-            axum::routing::get({
-                let functions_client = functions_client.clone();
-                move |Path((fremote, fowner, frepository)): Path<(objectiveai::functions::Remote, String, String)>, headers: axum::http::HeaderMap| {
-                    get_function_usage(functions_client, headers, fremote, fowner, frepository, None)
-                }
-            }),
-        )
-        // Functions - get usage (with commit)
-        .route(
-            "/functions/{fremote}/{fowner}/{frepository}/{fcommit}/usage",
-            axum::routing::get({
-                let functions_client = functions_client.clone();
-                move |Path((fremote, fowner, frepository, fcommit)): Path<(objectiveai::functions::Remote, String, String, String)>, headers: axum::http::HeaderMap| {
-                    get_function_usage(
-                        functions_client,
-                        headers,
-                        fremote,
-                        fowner,
-                        frepository,
-                        Some(fcommit),
-                    )
+                let usage_router = usage_router.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::functions::request::GetFunctionRequest,
+                >| {
+                    get_function_usage(usage_router, headers, params)
                 }
             }),
         )
         // Function Executions - create
-        // inline function
-        // inline profile
         .route(
             "/functions",
             axum::routing::post({
                 let function_executions_client = function_executions_client.clone();
                 move |headers: axum::http::HeaderMap, Json(body): Json<
-                    objectiveai::functions::executions::request::FunctionInlineProfileInlineRequestBody,
+                    objectiveai::functions::executions::request::FunctionExecutionCreateParams,
                 >| {
                     execute_function(
                         function_executions_client,
                         headers,
-                        objectiveai::functions::executions::request::Request::FunctionInlineProfileInline {
-                            body,
-                        },
-                    )
-                }
-            }),
-        )
-        // Function Executions - create
-        // remote function (without commit)
-        // inline profile
-        .route(
-            "/functions/{fremote}/{fowner}/{frepository}",
-            axum::routing::post({
-                let function_executions_client = function_executions_client.clone();
-                move |Path(path): Path<
-                    objectiveai::functions::executions::request::FunctionRemoteProfileInlineRequestPath,
-                >,
-                      headers: axum::http::HeaderMap,
-                      Json(body): Json<
-                    objectiveai::functions::executions::request::FunctionRemoteProfileInlineRequestBody,
-                >| {
-                    execute_function(
-                        function_executions_client,
-                        headers,
-                        objectiveai::functions::executions::request::Request::FunctionRemoteProfileInline {
-                            path,
-                            body,
-                        },
-                    )
-                }
-            }),
-        )
-        // Function Executions - create
-        // remote function (with commit)
-        // inline profile
-        .route(
-            "/functions/{fremote}/{fowner}/{frepository}/{fcommit}",
-            axum::routing::post({
-                let function_executions_client = function_executions_client.clone();
-                move |Path(path): Path<
-                    objectiveai::functions::executions::request::FunctionRemoteProfileInlineRequestPath,
-                >,
-                      headers: axum::http::HeaderMap,
-                      Json(body): Json<
-                    objectiveai::functions::executions::request::FunctionRemoteProfileInlineRequestBody,
-                >| {
-                    execute_function(
-                        function_executions_client,
-                        headers,
-                        objectiveai::functions::executions::request::Request::FunctionRemoteProfileInline {
-                            path,
-                            body,
-                        },
-                    )
-                }
-            }),
-        )
-        // Function Executions - create
-        // inline function
-        // remote profile (without commit)
-        .route(
-            "/functions/profiles/{premote}/{powner}/{prepository}",
-            axum::routing::post({
-                let function_executions_client = function_executions_client.clone();
-                move |Path(path): Path<
-                    objectiveai::functions::executions::request::FunctionInlineProfileRemoteRequestPath,
-                >,
-                      headers: axum::http::HeaderMap,
-                      Json(body): Json<
-                    objectiveai::functions::executions::request::FunctionInlineProfileRemoteRequestBody,
-                >| {
-                    execute_function(
-                        function_executions_client,
-                        headers,
-                        objectiveai::functions::executions::request::Request::FunctionInlineProfileRemote {
-                            path,
-                            body,
-                        },
-                    )
-                }
-            }),
-        )
-        // Function Executions - create
-        // inline function
-        // remote profile (with commit)
-        .route(
-            "/functions/profiles/{premote}/{powner}/{prepository}/{pcommit}",
-            axum::routing::post({
-                let function_executions_client = function_executions_client.clone();
-                move |Path(path): Path<
-                    objectiveai::functions::executions::request::FunctionInlineProfileRemoteRequestPath,
-                >,
-                      headers: axum::http::HeaderMap,
-                      Json(body): Json<
-                    objectiveai::functions::executions::request::FunctionInlineProfileRemoteRequestBody,
-                >| {
-                    execute_function(
-                        function_executions_client,
-                        headers,
-                        objectiveai::functions::executions::request::Request::FunctionInlineProfileRemote {
-                            path,
-                            body,
-                        },
-                    )
-                }
-            }),
-        )
-        // Function Executions - create
-        // remote function (without commit)
-        // remote profile (without commit)
-        .route(
-            "/functions/{fremote}/{fowner}/{frepository}/profiles/{premote}/{powner}/{prepository}",
-            axum::routing::post({
-                let function_executions_client = function_executions_client.clone();
-                move |Path(path): Path<
-                    objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestPath,
-                >,
-                      headers: axum::http::HeaderMap,
-                      Json(body): Json<
-                    objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestBody,
-                >| {
-                    execute_function(
-                        function_executions_client,
-                        headers,
-                        objectiveai::functions::executions::request::Request::FunctionRemoteProfileRemote {
-                            path,
-                            body,
-                        },
-                    )
-                }
-            }),
-        )
-        // Function Executions - create
-        // remote function (without commit)
-        // remote profile (with commit)
-        .route(
-            "/functions/{fremote}/{fowner}/{frepository}/profiles/{premote}/{powner}/{prepository}/{pcommit}",
-            axum::routing::post({
-                let function_executions_client = function_executions_client.clone();
-                move |Path(path): Path<
-                    objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestPath,
-                >,
-                      headers: axum::http::HeaderMap,
-                      Json(body): Json<
-                    objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestBody,
-                >| {
-                    execute_function(
-                        function_executions_client,
-                        headers,
-                        objectiveai::functions::executions::request::Request::FunctionRemoteProfileRemote {
-                            path,
-                            body,
-                        },
-                    )
-                }
-            }),
-        )
-        // Function Executions - create
-        // remote function (with commit)
-        // remote profile (without commit)
-        .route(
-            "/functions/{fremote}/{fowner}/{frepository}/{fcommit}/profiles/{premote}/{powner}/{prepository}",
-            axum::routing::post({
-                let function_executions_client = function_executions_client.clone();
-                move |Path(path): Path<
-                    objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestPath,
-                >,
-                      headers: axum::http::HeaderMap,
-                      Json(body): Json<
-                    objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestBody,
-                >| {
-                    execute_function(
-                        function_executions_client,
-                        headers,
-                        objectiveai::functions::executions::request::Request::FunctionRemoteProfileRemote {
-                            path,
-                            body,
-                        },
-                    )
-                }
-            }),
-        )
-        // Function Executions - create
-        // remote function (with commit)
-        // remote profile (with commit)
-        .route(
-            "/functions/{fremote}/{fowner}/{frepository}/{fcommit}/profiles/{premote}/{powner}/{prepository}/{pcommit}",
-            axum::routing::post({
-                let function_executions_client = function_executions_client.clone();
-                move |Path(path): Path<
-                    objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestPath,
-                >,
-                      headers: axum::http::HeaderMap,
-                      Json(body): Json<
-                    objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestBody,
-                >| {
-                    execute_function(
-                        function_executions_client,
-                        headers,
-                        objectiveai::functions::executions::request::Request::FunctionRemoteProfileRemote {
-                            path,
-                            body,
-                        },
+                        body,
                     )
                 }
             }),
         )
         // Function Profiles - list
         .route(
+            "/functions/profiles/list",
+            axum::routing::get({
+                let list_router = list_router.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::functions::profiles::request::ListProfilesRequest,
+                >| {
+                    list_profiles(list_router, headers, params)
+                }
+            }),
+        )
+        // Function Profiles - get
+        .route(
             "/functions/profiles",
             axum::routing::get({
-                let profiles_client = profiles_client.clone();
-                move |headers: axum::http::HeaderMap| list_profiles(profiles_client, headers)
-            }),
-        )
-        // Function Profiles - get (without commit)
-        .route(
-            "/functions/profiles/{premote}/{powner}/{prepository}",
-            axum::routing::get({
-                let profiles_client = profiles_client.clone();
-                move |Path((premote, powner, prepository)): Path<(objectiveai::functions::Remote, String, String)>, headers: axum::http::HeaderMap| {
-                    get_profile(profiles_client, headers, premote, powner, prepository, None)
+                let retrieve_router = retrieve_router.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::RemotePathCommitOptional,
+                >| {
+                    get_profile(retrieve_router, headers, params)
                 }
             }),
         )
-        // Function Profiles - get (with commit)
+        // Function Profiles - get usage
         .route(
-            "/functions/profiles/{premote}/{powner}/{prepository}/{pcommit}",
+            "/functions/profiles/usage",
             axum::routing::get({
-                let profiles_client = profiles_client.clone();
-                move |Path((premote, powner, prepository, pcommit)): Path<(
-                    objectiveai::functions::Remote,
-                    String,
-                    String,
-                    String,
-                )>, headers: axum::http::HeaderMap| {
-                    get_profile(
-                        profiles_client,
-                        headers,
-                        premote,
-                        powner,
-                        prepository,
-                        Some(pcommit),
-                    )
-                }
-            }),
-        )
-        // Function Profiles - get usage (without commit)
-        .route(
-            "/functions/profiles/{premote}/{powner}/{prepository}/usage",
-            axum::routing::get({
-                let profiles_client = profiles_client.clone();
-                move |Path((premote, powner, prepository)): Path<(objectiveai::functions::Remote, String, String)>, headers: axum::http::HeaderMap| {
-                    get_profile_usage(profiles_client, headers, premote, powner, prepository, None)
-                }
-            }),
-        )
-        // Function Profiles - get usage (with commit)
-        .route(
-            "/functions/profiles/{premote}/{powner}/{prepository}/{pcommit}/usage",
-            axum::routing::get({
-                let profiles_client = profiles_client.clone();
-                move |Path((premote, powner, prepository, pcommit)): Path<(objectiveai::functions::Remote, String, String, String)>, headers: axum::http::HeaderMap| {
-                    get_profile_usage(
-                        profiles_client,
-                        headers,
-                        premote,
-                        powner,
-                        prepository,
-                        Some(pcommit),
-                    )
+                let usage_router = usage_router.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::functions::profiles::request::GetProfileRequest,
+                >| {
+                    get_profile_usage(usage_router, headers, params)
                 }
             }),
         )
         // Function-Profile Pairs - list
         .route(
-            "/functions/profiles/pairs",
+            "/functions/profiles/pairs/list",
             axum::routing::get({
-                let pairs_client = pairs_client.clone();
-                move |headers: axum::http::HeaderMap| list_function_profile_pairs(pairs_client, headers)
-            }),
-        )
-        // Function-Profile Pairs - get usage (no commits)
-        .route(
-            "/functions/{fremote}/{fowner}/{frepository}/profiles/{premote}/{powner}/{prepository}/usage",
-            axum::routing::get({
-                let pairs_client = pairs_client.clone();
-                move |Path((fremote, fowner, frepository, premote, powner, prepository)): Path<(objectiveai::functions::Remote, String, String, objectiveai::functions::Remote, String, String)>, headers: axum::http::HeaderMap| {
-                    get_function_profile_pair_usage(
-                        pairs_client,
-                        headers,
-                        fremote,
-                        fowner,
-                        frepository,
-                        None,
-                        premote,
-                        powner,
-                        prepository,
-                        None,
-                    )
+                let list_router = list_router.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::functions::request::ListFunctionProfilePairsRequest,
+                >| {
+                    list_function_profile_pairs(list_router, headers, params)
                 }
             }),
         )
-        // Function-Profile Pairs - get usage (fcommit only)
+        // Function-Profile Pairs - get usage
         .route(
-            "/functions/{fremote}/{fowner}/{frepository}/{fcommit}/profiles/{premote}/{powner}/{prepository}/usage",
+            "/functions/profiles/pairs/usage",
             axum::routing::get({
-                let pairs_client = pairs_client.clone();
-                move |Path((fremote, fowner, frepository, fcommit, premote, powner, prepository)): Path<(objectiveai::functions::Remote, String, String, String, objectiveai::functions::Remote, String, String)>, headers: axum::http::HeaderMap| {
-                    get_function_profile_pair_usage(
-                        pairs_client,
-                        headers,
-                        fremote,
-                        fowner,
-                        frepository,
-                        Some(fcommit),
-                        premote,
-                        powner,
-                        prepository,
-                        None,
-                    )
-                }
-            }),
-        )
-        // Function-Profile Pairs - get usage (pcommit only)
-        .route(
-            "/functions/{fremote}/{fowner}/{frepository}/profiles/{premote}/{powner}/{prepository}/{pcommit}/usage",
-            axum::routing::get({
-                let pairs_client = pairs_client.clone();
-                move |Path((fremote, fowner, frepository, premote, powner, prepository, pcommit)): Path<(objectiveai::functions::Remote, String, String, objectiveai::functions::Remote, String, String, String)>, headers: axum::http::HeaderMap| {
-                    get_function_profile_pair_usage(
-                        pairs_client,
-                        headers,
-                        fremote,
-                        fowner,
-                        frepository,
-                        None,
-                        premote,
-                        powner,
-                        prepository,
-                        Some(pcommit),
-                    )
-                }
-            }),
-        )
-        // Function-Profile Pairs - get usage (both commits)
-        .route(
-            "/functions/{fremote}/{fowner}/{frepository}/{fcommit}/profiles/{premote}/{powner}/{prepository}/{pcommit}/usage",
-            axum::routing::get({
-                let pairs_client = pairs_client.clone();
-                move |Path((fremote, fowner, frepository, fcommit, premote, powner, prepository, pcommit)): Path<(objectiveai::functions::Remote, String, String, String, objectiveai::functions::Remote, String, String, String)>, headers: axum::http::HeaderMap| {
-                    get_function_profile_pair_usage(
-                        pairs_client,
-                        headers,
-                        fremote,
-                        fowner,
-                        frepository,
-                        Some(fcommit),
-                        premote,
-                        powner,
-                        prepository,
-                        Some(pcommit),
-                    )
+                let usage_router = usage_router.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::functions::request::GetFunctionProfilePairUsageRequest,
+                >| {
+                    get_function_profile_pair_usage(usage_router, headers, params)
                 }
             }),
         )
@@ -997,71 +631,18 @@ async fn main() {
             }),
         )
         // Function Profile Computations - create
-        // inline function
         .route(
             "/functions/profiles/compute",
             axum::routing::post({
                 let profile_computations_client =
                     profile_computations_client.clone();
                 move |headers: axum::http::HeaderMap, Json(body): Json<
-                    objectiveai::functions::profiles::computations::request::FunctionInlineRequestBody,
+                    objectiveai::functions::profiles::computations::request::FunctionProfileComputationCreateParams,
                 >| {
                     create_profile_computation(
                         profile_computations_client,
                         headers,
-                        objectiveai::functions::profiles::computations::request::Request::FunctionInline {
-                            body,
-                        },
-                    )
-                }
-            }),
-        )
-        // Function Profile Computations - create
-        // remote function (without commit)
-        .route(
-            "/functions/{fremote}/{fowner}/{frepository}/profiles/compute",
-            axum::routing::post({
-                let profile_computations_client =
-                    profile_computations_client.clone();
-                move |Path(path): Path<
-                    objectiveai::functions::profiles::computations::request::FunctionRemoteRequestPath,
-                >,
-                      headers: axum::http::HeaderMap,
-                      Json(body): Json<
-                    objectiveai::functions::profiles::computations::request::FunctionRemoteRequestBody,
-                >| {
-                    create_profile_computation(
-                        profile_computations_client,
-                        headers,
-                        objectiveai::functions::profiles::computations::request::Request::FunctionRemote {
-                            path,
-                            body,
-                        },
-                    )
-                }
-            }),
-        )
-        // Function Profile Computations - create
-        // remote function (with commit)
-        .route(
-            "/functions/{fremote}/{fowner}/{frepository}/{fcommit}/profiles/compute",
-            axum::routing::post({
-                let profile_computations_client =
-                    profile_computations_client.clone();
-                move |Path(path): Path<
-                    objectiveai::functions::profiles::computations::request::FunctionRemoteRequestPath,
-                >,
-                      headers: axum::http::HeaderMap,
-                      Json(body): Json<
-                    objectiveai::functions::profiles::computations::request::FunctionRemoteRequestBody,
-                >| {
-                    create_profile_computation(
-                        profile_computations_client,
-                        headers,
-                        objectiveai::functions::profiles::computations::request::Request::FunctionRemote {
-                            path,
-                            body,
-                        },
+                        body,
                     )
                 }
             }),
@@ -1144,61 +725,73 @@ async fn main() {
         )
         // Swarm - list
         .route(
-            "/swarms",
+            "/swarms/list",
             axum::routing::get({
-                let swarm_client = swarm_client.clone();
-                move |headers: axum::http::HeaderMap| {
-                    list_swarms(swarm_client, headers)
+                let list_router = list_router.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::swarm::request::ListSwarmsRequest,
+                >| {
+                    list_swarms(list_router, headers, params)
                 }
             }),
         )
         // Swarm - get
         .route(
-            "/swarms/{id}",
+            "/swarms",
             axum::routing::get({
-                let swarm_client = swarm_client.clone();
-                move |Path(id): Path<String>, headers: axum::http::HeaderMap| {
-                    get_swarm(swarm_client, headers, id)
+                let retrieve_router = retrieve_router.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::RemotePathCommitOptional,
+                >| {
+                    get_swarm(retrieve_router, headers, params)
                 }
             }),
         )
         // Swarm - get usage
         .route(
-            "/swarms/{id}/usage",
+            "/swarms/usage",
             axum::routing::get({
-                let swarm_client = swarm_client.clone();
-                move |Path(id): Path<String>, headers: axum::http::HeaderMap| {
-                    get_swarm_usage(swarm_client, headers, id)
+                let usage_router = usage_router.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::swarm::request::GetSwarmRequest,
+                >| {
+                    get_swarm_usage(usage_router, headers, params)
                 }
             }),
         )
         // Agent - list
         .route(
-            "/agents",
+            "/agents/list",
             axum::routing::get({
-                let agent_client = agent_client.clone();
-                move |headers: axum::http::HeaderMap| {
-                    list_agents(agent_client, headers)
+                let list_router = list_router.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::agent::request::ListAgentsRequest,
+                >| {
+                    list_agents(list_router, headers, params)
                 }
             }),
         )
         // Agent - get
         .route(
-            "/agents/{id}",
+            "/agents",
             axum::routing::get({
-                let agent_client = agent_client.clone();
-                move |Path(id): Path<String>, headers: axum::http::HeaderMap| {
-                    get_agent(agent_client, headers, id)
+                let retrieve_router = retrieve_router.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::RemotePathCommitOptional,
+                >| {
+                    get_agent(retrieve_router, headers, params)
                 }
             }),
         )
         // Agent - get usage
         .route(
-            "/agents/{id}/usage",
+            "/agents/usage",
             axum::routing::get({
-                let agent_client = agent_client.clone();
-                move |Path(id): Path<String>, headers: axum::http::HeaderMap| {
-                    get_agent_usage(agent_client, headers, id)
+                let usage_router = usage_router.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::agent::request::GetAgentRequest,
+                >| {
+                    get_agent_usage(usage_router, headers, params)
                 }
             }),
         )
@@ -1263,7 +856,15 @@ async fn create_agent_completion(
             > + Send
             + Sync
             + 'static,
-            impl agent::fetcher::Fetcher<ctx::DefaultContextExt>
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
@@ -1349,17 +950,21 @@ async fn create_vector_completion(
             > + Send
             + Sync
             + 'static,
-            impl agent::fetcher::Fetcher<ctx::DefaultContextExt>
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
             impl agent::completions::usage_handler::UsageHandler<
                 ctx::DefaultContextExt,
             > + Send
-            + Sync
-            + 'static,
-            impl swarm::fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
             + Sync
             + 'static,
             impl vector::completions::completion_votes_fetcher::Fetcher<
@@ -1414,71 +1019,32 @@ async fn create_vector_completion(
 // Functions
 
 async fn list_functions(
-    client: Arc<
-        functions::Client<
-            ctx::DefaultContextExt,
-            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::retrieval_client::Client<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-        >,
-    >,
+    list_router: Arc<ListRouter>,
     headers: axum::http::HeaderMap,
+    params: objectiveai::functions::request::ListFunctionsRequest,
 ) -> axum::response::Response {
     let ctx = context(&headers);
-    match client.list_functions(ctx).await {
+    let source = params.source.map(|s| match s {
+        objectiveai::functions::request::ListFunctionsSource::All => retrieval::list::SourceFilter::All,
+        objectiveai::functions::request::ListFunctionsSource::Mock => retrieval::list::SourceFilter::Mock,
+        objectiveai::functions::request::ListFunctionsSource::Filesystem => retrieval::list::SourceFilter::Filesystem,
+        objectiveai::functions::request::ListFunctionsSource::Objectiveai => retrieval::list::SourceFilter::Objectiveai,
+    });
+    match list_router.list_functions(&ctx, source).await {
         Ok(r) => Json(r).into_response(),
-        Err(e) => ResponseError::from(&e).into_response(),
+        Err(e) => e.into_response(),
     }
 }
 
 async fn get_function_usage(
-    client: Arc<
-        functions::Client<
-            ctx::DefaultContextExt,
-            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::retrieval_client::Client<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-        >,
-    >,
+    usage_router: Arc<UsageRouter>,
     headers: axum::http::HeaderMap,
-    remote: objectiveai::functions::Remote,
-    owner: String,
-    repository: String,
-    commit: Option<String>,
+    params: objectiveai::functions::request::GetFunctionRequest,
 ) -> axum::response::Response {
     let ctx = context(&headers);
-    match client
-        .get_function_usage(ctx, remote, &owner, &repository, commit.as_deref())
-        .await
-    {
+    match usage_router.get_function_usage(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
-        Err(e) => ResponseError::from(&e).into_response(),
+        Err(e) => e.into_response(),
     }
 }
 
@@ -1501,17 +1067,9 @@ async fn execute_function(
             > + Send
             + Sync
             + 'static,
-            impl agent::fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
             impl agent::completions::usage_handler::UsageHandler<
                 ctx::DefaultContextExt,
             > + Send
-            + Sync
-            + 'static,
-            impl swarm::fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
             + Sync
             + 'static,
             impl vector::completions::completion_votes_fetcher::Fetcher<
@@ -1529,27 +1087,15 @@ async fn execute_function(
             > + Send
             + Sync
             + 'static,
-            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
-            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
-            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
@@ -1561,10 +1107,10 @@ async fn execute_function(
         >,
     >,
     headers: axum::http::HeaderMap,
-    request: objectiveai::functions::executions::request::Request,
+    request: objectiveai::functions::executions::request::FunctionExecutionCreateParams,
 ) -> axum::response::Response {
     let ctx = context(&headers);
-    if request.base().stream.unwrap_or(false) {
+    if request.stream.unwrap_or(false) {
         match client
             .create_streaming_handle_usage(ctx, Arc::new(request))
             .await
@@ -1598,127 +1144,56 @@ async fn execute_function(
 // Profiles
 
 async fn list_profiles(
-    client: Arc<
-        functions::profiles::Client<
-            ctx::DefaultContextExt,
-            impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::profiles::retrieval_client::Client<
-                ctx::DefaultContextExt,
-            > + Send
-            + Sync
-            + 'static,
-        >,
-    >,
+    list_router: Arc<ListRouter>,
     headers: axum::http::HeaderMap,
+    params: objectiveai::functions::profiles::request::ListProfilesRequest,
 ) -> axum::response::Response {
     let ctx = context(&headers);
-    match client.list_profiles(ctx).await {
+    let source = params.source.map(|s| match s {
+        objectiveai::functions::profiles::request::ListProfilesSource::All => retrieval::list::SourceFilter::All,
+        objectiveai::functions::profiles::request::ListProfilesSource::Mock => retrieval::list::SourceFilter::Mock,
+        objectiveai::functions::profiles::request::ListProfilesSource::Filesystem => retrieval::list::SourceFilter::Filesystem,
+        objectiveai::functions::profiles::request::ListProfilesSource::Objectiveai => retrieval::list::SourceFilter::Objectiveai,
+    });
+    match list_router.list_profiles(&ctx, source).await {
         Ok(r) => Json(r).into_response(),
-        Err(e) => ResponseError::from(&e).into_response(),
+        Err(e) => e.into_response(),
     }
 }
 
 async fn get_profile_usage(
-    client: Arc<
-        functions::profiles::Client<
-            ctx::DefaultContextExt,
-            impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::profiles::retrieval_client::Client<
-                ctx::DefaultContextExt,
-            > + Send
-            + Sync
-            + 'static,
-        >,
-    >,
+    usage_router: Arc<UsageRouter>,
     headers: axum::http::HeaderMap,
-    remote: objectiveai::functions::Remote,
-    owner: String,
-    repository: String,
-    commit: Option<String>,
+    params: objectiveai::functions::profiles::request::GetProfileRequest,
 ) -> axum::response::Response {
     let ctx = context(&headers);
-    match client
-        .get_profile_usage(ctx, remote, &owner, &repository, commit.as_deref())
-        .await
-    {
+    match usage_router.get_profile_usage(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
-        Err(e) => ResponseError::from(&e).into_response(),
+        Err(e) => e.into_response(),
     }
 }
 
 // Function-Profile Pairs
 
 async fn list_function_profile_pairs(
-    client: Arc<
-        impl functions::pair_retrieval_client::Client<ctx::DefaultContextExt>
-        + Send
-        + Sync
-        + 'static,
-    >,
+    list_router: Arc<ListRouter>,
     headers: axum::http::HeaderMap,
+    _params: objectiveai::functions::request::ListFunctionProfilePairsRequest,
 ) -> axum::response::Response {
     let ctx = context(&headers);
-    match client.list_function_profile_pairs(ctx).await {
+    match list_router.list_function_profile_pairs(&ctx).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
     }
 }
 
-
 async fn get_function_profile_pair_usage(
-    client: Arc<
-        impl functions::pair_retrieval_client::Client<ctx::DefaultContextExt>
-        + Send
-        + Sync
-        + 'static,
-    >,
+    usage_router: Arc<UsageRouter>,
     headers: axum::http::HeaderMap,
-    fremote: objectiveai::functions::Remote,
-    fowner: String,
-    frepository: String,
-    fcommit: Option<String>,
-    premote: objectiveai::functions::Remote,
-    powner: String,
-    prepository: String,
-    pcommit: Option<String>,
+    params: objectiveai::functions::request::GetFunctionProfilePairUsageRequest,
 ) -> axum::response::Response {
     let ctx = context(&headers);
-    match client
-        .get_function_profile_pair_usage(
-            ctx,
-            fremote,
-            &fowner,
-            &frepository,
-            fcommit.as_deref(),
-            premote,
-            &powner,
-            &prepository,
-            pcommit.as_deref(),
-        )
-        .await
-    {
+    match usage_router.get_function_profile_pair_usage(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
     }
@@ -1743,10 +1218,10 @@ async fn get_vector_completion_votes(
         >,
     >,
     headers: axum::http::HeaderMap,
-    id: String,
+    body: objectiveai::vector::completions::cache::request::GetCompletionVotesRequest,
 ) -> axum::response::Response {
     let ctx = context(&headers);
-    match client.fetch_completion_votes(ctx, &id).await {
+    match client.fetch_completion_votes(ctx, &body.id).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
     }
@@ -1776,7 +1251,6 @@ async fn get_vector_cache_vote(
         .fetch_cache_vote(
             ctx,
             &body.agent,
-            body.agents.as_deref(),
             &body.messages,
             &body.responses,
         )
@@ -1790,38 +1264,12 @@ async fn get_vector_cache_vote(
 // Functions - get
 
 async fn get_function(
-    client: Arc<
-        functions::Client<
-            ctx::DefaultContextExt,
-            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::retrieval_client::Client<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-        >,
-    >,
+    retrieve_router: Arc<RetrieveRouter>,
     headers: axum::http::HeaderMap,
-    remote: objectiveai::functions::Remote,
-    owner: String,
-    repository: String,
-    commit: Option<String>,
+    params: objectiveai::RemotePathCommitOptional,
 ) -> axum::response::Response {
     let ctx = context(&headers);
-    match client
-        .get_function(ctx, remote, &owner, &repository, commit.as_deref())
-        .await
-    {
+    match retrieve_router.endpoint_get_function(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
     }
@@ -1830,39 +1278,12 @@ async fn get_function(
 // Profiles - get
 
 async fn get_profile(
-    client: Arc<
-        functions::profiles::Client<
-            ctx::DefaultContextExt,
-            impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl functions::profiles::retrieval_client::Client<
-                ctx::DefaultContextExt,
-            > + Send
-            + Sync
-            + 'static,
-        >,
-    >,
+    retrieve_router: Arc<RetrieveRouter>,
     headers: axum::http::HeaderMap,
-    remote: objectiveai::functions::Remote,
-    owner: String,
-    repository: String,
-    commit: Option<String>,
+    params: objectiveai::RemotePathCommitOptional,
 ) -> axum::response::Response {
     let ctx = context(&headers);
-    match client
-        .get_profile(ctx, remote, &owner, &repository, commit.as_deref())
-        .await
-    {
+    match retrieve_router.endpoint_get_profile(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
     }
@@ -1881,10 +1302,10 @@ async fn create_profile_computation(
     // using a concrete type for client instead
     client: Arc<functions::profiles::computations::ObjectiveAiClient>,
     headers: axum::http::HeaderMap,
-    request: objectiveai::functions::profiles::computations::request::Request,
+    request: objectiveai::functions::profiles::computations::request::FunctionProfileComputationCreateParams,
 ) -> axum::response::Response {
     let ctx = context(&headers);
-    if request.base().stream.unwrap_or(false) {
+    if request.stream.unwrap_or(false) {
         match client.create_streaming(ctx, Arc::new(request)).await {
             Ok(stream) => Sse::new(
                 stream
@@ -2013,71 +1434,42 @@ async fn get_credits(
 // Swarm
 
 async fn list_swarms(
-    client: Arc<
-        swarm::Client<
-            ctx::DefaultContextExt,
-            impl swarm::fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl swarm::retrieval_client::Client<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-        >,
-    >,
+    list_router: Arc<ListRouter>,
     headers: axum::http::HeaderMap,
+    params: objectiveai::swarm::request::ListSwarmsRequest,
 ) -> axum::response::Response {
     let ctx = context(&headers);
-    match client.list(ctx).await {
+    let source = params.source.map(|s| match s {
+        objectiveai::swarm::request::ListSwarmsSource::All => retrieval::list::SourceFilter::All,
+        objectiveai::swarm::request::ListSwarmsSource::Mock => retrieval::list::SourceFilter::Mock,
+        objectiveai::swarm::request::ListSwarmsSource::Filesystem => retrieval::list::SourceFilter::Filesystem,
+        objectiveai::swarm::request::ListSwarmsSource::Objectiveai => retrieval::list::SourceFilter::Objectiveai,
+    });
+    match list_router.list_swarms(&ctx, source).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
     }
 }
 
 async fn get_swarm(
-    client: Arc<
-        swarm::Client<
-            ctx::DefaultContextExt,
-            impl swarm::fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl swarm::retrieval_client::Client<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-        >,
-    >,
+    retrieve_router: Arc<RetrieveRouter>,
     headers: axum::http::HeaderMap,
-    id: String,
+    params: objectiveai::RemotePathCommitOptional,
 ) -> axum::response::Response {
     let ctx = context(&headers);
-    match client.get(ctx, &id).await {
+    match retrieve_router.endpoint_get_swarm(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
     }
 }
 
 async fn get_swarm_usage(
-    client: Arc<
-        swarm::Client<
-            ctx::DefaultContextExt,
-            impl swarm::fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl swarm::retrieval_client::Client<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-        >,
-    >,
+    usage_router: Arc<UsageRouter>,
     headers: axum::http::HeaderMap,
-    id: String,
+    params: objectiveai::swarm::request::GetSwarmRequest,
 ) -> axum::response::Response {
     let ctx = context(&headers);
-    match client.get_usage(ctx, &id).await {
+    match usage_router.get_swarm_usage(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
     }
@@ -2086,71 +1478,42 @@ async fn get_swarm_usage(
 // Agent
 
 async fn list_agents(
-    client: Arc<
-        agent::Client<
-            ctx::DefaultContextExt,
-            impl agent::fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl agent::retrieval_client::Client<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-        >,
-    >,
+    list_router: Arc<ListRouter>,
     headers: axum::http::HeaderMap,
+    params: objectiveai::agent::request::ListAgentsRequest,
 ) -> axum::response::Response {
     let ctx = context(&headers);
-    match client.list(ctx).await {
+    let source = params.source.map(|s| match s {
+        objectiveai::agent::request::ListAgentsSource::All => retrieval::list::SourceFilter::All,
+        objectiveai::agent::request::ListAgentsSource::Mock => retrieval::list::SourceFilter::Mock,
+        objectiveai::agent::request::ListAgentsSource::Filesystem => retrieval::list::SourceFilter::Filesystem,
+        objectiveai::agent::request::ListAgentsSource::Objectiveai => retrieval::list::SourceFilter::Objectiveai,
+    });
+    match list_router.list_agents(&ctx, source).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
     }
 }
 
 async fn get_agent(
-    client: Arc<
-        agent::Client<
-            ctx::DefaultContextExt,
-            impl agent::fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl agent::retrieval_client::Client<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-        >,
-    >,
+    retrieve_router: Arc<RetrieveRouter>,
     headers: axum::http::HeaderMap,
-    id: String,
+    params: objectiveai::RemotePathCommitOptional,
 ) -> axum::response::Response {
     let ctx = context(&headers);
-    match client.get(ctx, &id).await {
+    match retrieve_router.endpoint_get_agent(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
     }
 }
 
 async fn get_agent_usage(
-    client: Arc<
-        agent::Client<
-            ctx::DefaultContextExt,
-            impl agent::fetcher::Fetcher<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-            impl agent::retrieval_client::Client<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
-        >,
-    >,
+    usage_router: Arc<UsageRouter>,
     headers: axum::http::HeaderMap,
-    id: String,
+    params: objectiveai::agent::request::GetAgentRequest,
 ) -> axum::response::Response {
     let ctx = context(&headers);
-    match client.get_usage(ctx, &id).await {
+    match usage_router.get_agent_usage(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
     }
@@ -2176,7 +1539,15 @@ async fn create_function_invention(
             > + Send
             + Sync
             + 'static,
-            impl agent::fetcher::Fetcher<ctx::DefaultContextExt>
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
@@ -2190,15 +1561,15 @@ async fn create_function_invention(
             > + Send
             + Sync
             + 'static,
-            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
-            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
-            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
@@ -2260,7 +1631,15 @@ async fn create_function_invention_recursive(
             > + Send
             + Sync
             + 'static,
-            impl agent::fetcher::Fetcher<ctx::DefaultContextExt>
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
@@ -2274,15 +1653,15 @@ async fn create_function_invention_recursive(
             > + Send
             + Sync
             + 'static,
-            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
-            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
-            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,

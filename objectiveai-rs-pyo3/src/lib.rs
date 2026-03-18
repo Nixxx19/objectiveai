@@ -36,8 +36,8 @@ fn to_py<T: serde::Serialize>(py: Python<'_>, val: &T) -> PyResult<Py<PyAny>> {
 fn validate_agent(py: Python<'_>, agent: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
     let agent_base: objectiveai::agent::AgentBase = from_py(agent)?;
     let agent: objectiveai::agent::Agent = agent_base
-        .try_into()
-        .map_err(|e: String| PyValueError::new_err(e))?;
+        .convert()
+        .map_err(|e| PyValueError::new_err(e))?;
     to_py(py, &agent)
 }
 
@@ -48,8 +48,8 @@ fn validate_agent(py: Python<'_>, agent: &Bound<'_, PyAny>) -> PyResult<Py<PyAny
 fn validate_swarm(py: Python<'_>, swarm: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
     let swarm_base: objectiveai::swarm::SwarmBase = from_py(swarm)?;
     let swarm: objectiveai::swarm::Swarm = swarm_base
-        .try_into()
-        .map_err(|e: String| PyValueError::new_err(e))?;
+        .convert(None)
+        .map_err(|e| PyValueError::new_err(e))?;
     to_py(py, &swarm)
 }
 

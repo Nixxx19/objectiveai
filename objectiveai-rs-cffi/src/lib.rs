@@ -114,7 +114,7 @@ pub unsafe extern "C" fn objectiveai_validate_agent(
     unsafe {
         run(json_out, json_out_len, || {
             let base: objectiveai::agent::AgentBase = from_json(json_in, json_in_len)?;
-            let agent: objectiveai::agent::Agent = base.try_into().map_err(|e: String| e)?;
+            let agent: objectiveai::agent::Agent = base.convert()?;
             to_json(&agent)
         })
     }
@@ -134,8 +134,7 @@ pub unsafe extern "C" fn objectiveai_validate_swarm(
     unsafe {
         run(json_out, json_out_len, || {
             let base: objectiveai::swarm::SwarmBase = from_json(json_in, json_in_len)?;
-            let swarm: objectiveai::swarm::Swarm =
-                base.try_into().map_err(|e: String| e)?;
+            let swarm: objectiveai::swarm::Swarm = base.convert(None)?;
             to_json(&swarm)
         })
     }

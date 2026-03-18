@@ -83,9 +83,13 @@ fn test_no_tools_empty_params() {
 
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: messages.clone(),
-        agent: objectiveai::agent::completions::request::Agent::Id("dummy".into()),
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
-        agents: None,
         response_format: None,
         seed: None,
         stream: None,
@@ -174,9 +178,13 @@ fn test_invention_response_format_name_conflict() {
 
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: messages.clone(),
-        agent: objectiveai::agent::completions::request::Agent::Id("dummy".into()),
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
-        agents: None,
         response_format: Some(
             objectiveai::agent::completions::request::ResponseFormatParam::Single(
                 objectiveai::agent::completions::request::ResponseFormat::ToolCall {
@@ -295,8 +303,12 @@ fn test_top_logprobs_zero_omits_logprobs() {
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: vec![],
         provider: None,
-        agent: objectiveai::agent::completions::request::Agent::Id("unused".to_string()),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         response_format: None,
         seed: None,
         stream: None,
@@ -367,8 +379,12 @@ fn test_multiple_invention_tools_no_conflicts() {
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: vec![],
         provider: None,
-        agent: objectiveai::agent::completions::request::Agent::Id("dummy".into()),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         response_format: None,
         seed: None,
         stream: None,
@@ -530,8 +546,12 @@ fn test_toolcall_not_required_uses_auto_choice() {
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: vec![],
         provider: None,
-        agent: objectiveai::agent::completions::request::Agent::Id("dummy".into()),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         response_format: Some(
             objectiveai::agent::completions::request::ResponseFormatParam::Single(
                 objectiveai::agent::completions::request::ResponseFormat::ToolCall {
@@ -641,9 +661,13 @@ fn test_invention_tool_parameters_preserved() {
 
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: messages.clone(),
-        agent: objectiveai::agent::completions::request::Agent::Id("dummy".into()),
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
-        agents: None,
         response_format: None,
         seed: None,
         stream: None,
@@ -770,10 +794,12 @@ fn test_agent_base_fields_passthrough() {
         objectiveai::agent::completions::request::AgentCompletionCreateParams {
             messages: vec![],
             provider: None,
-            agent: objectiveai::agent::completions::request::Agent::Id(
-                "unused".to_string(),
+            agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+                objectiveai::agent::InlineAgentBaseWithFallbacks {
+                    inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                    fallbacks: None,
+                },
             ),
-            agents: None,
             response_format: None,
             seed: None,
             stream: None,
@@ -879,11 +905,12 @@ fn test_provider_merging_both_sides() {
                     max_latency: None,
                 },
             ),
-            agent:
-                objectiveai::agent::completions::request::Agent::Id(
-                    agent.id.clone(),
-                ),
-            agents: None,
+            agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+                objectiveai::agent::InlineAgentBaseWithFallbacks {
+                    inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                    fallbacks: None,
+                },
+            ),
             response_format: None,
             seed: None,
             stream: None,
@@ -978,10 +1005,12 @@ fn test_per_agent_response_format_miss() {
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: vec![],
         provider: None,
-        agent: objectiveai::agent::completions::request::Agent::Id(
-            agent.id.clone(),
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
         ),
-        agents: None,
         response_format: Some(
             objectiveai::agent::completions::request::ResponseFormatParam::PerAgent(
                 per_agent_map,
@@ -1077,8 +1106,12 @@ fn test_json_schema_response_format_extracts_title() {
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: vec![],
         provider: None,
-        agent: objectiveai::agent::completions::request::Agent::Id(agent.id.clone()),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         response_format: Some(
             objectiveai::agent::completions::request::ResponseFormatParam::Single(
                 objectiveai::agent::completions::request::ResponseFormat::JsonSchema {
@@ -1183,10 +1216,12 @@ fn test_seed_passthrough() {
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: vec![],
         provider: None,
-        agent: objectiveai::agent::completions::request::Agent::Id(
-            agent.id.clone(),
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
         ),
-        agents: None,
         response_format: None,
         seed: Some(42),
         stream: None,
@@ -1313,9 +1348,13 @@ fn test_toolcall_required_forces_function_choice() {
 
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: vec![],
-        agent: objectiveai::agent::completions::request::Agent::Id("x".into()),
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
-        agents: None,
         response_format: Some(
             objectiveai::agent::completions::request::ResponseFormatParam::Single(
                 objectiveai::agent::completions::request::ResponseFormat::ToolCall {
@@ -1417,9 +1456,13 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
 
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: messages.clone(),
-        agent: objectiveai::agent::completions::request::Agent::Id("x".into()),
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
-        agents: None,
         response_format: None,
         seed: None,
         stream: None,
@@ -2009,9 +2052,13 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
 
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: messages.clone(),
-        agent: objectiveai::agent::completions::request::Agent::Id("x".into()),
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
-        agents: None,
         response_format: None,
         seed: Some(7),
         stream: None,
@@ -2591,9 +2638,13 @@ fn test_mcp_tool_conflicts_with_invention_tool() {
 
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: messages.clone(),
-        agent: objectiveai::agent::completions::request::Agent::Id("x".into()),
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
-        agents: None,
         response_format: None,
         seed: None,
         stream: None,
@@ -2778,9 +2829,13 @@ fn test_mcp_tool_conflicts_with_response_format_tool() {
     // Response format ToolCall named "evaluate"
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: messages.clone(),
-        agent: objectiveai::agent::completions::request::Agent::Id("x".into()),
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
-        agents: None,
         response_format: Some(
             objectiveai::agent::completions::request::ResponseFormatParam::Single(
                 objectiveai::agent::completions::request::ResponseFormat::ToolCall {
@@ -2985,9 +3040,13 @@ fn test_four_way_name_conflict_mcp_x2_invention_response_format() {
     // Response format ToolCall named "output" (required=false → Auto)
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: messages.clone(),
-        agent: objectiveai::agent::completions::request::Agent::Id("x".into()),
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
-        agents: None,
         response_format: Some(
             objectiveai::agent::completions::request::ResponseFormatParam::Single(
                 objectiveai::agent::completions::request::ResponseFormat::ToolCall {
@@ -3277,8 +3336,12 @@ fn test_continuation_assistant_message_appended() {
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: vec![],
         provider: None,
-        agent: objectiveai::agent::completions::request::Agent::Id("unused".to_string()),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         response_format: None,
         seed: None,
         stream: None,
@@ -3392,8 +3455,12 @@ fn test_continuation_mixed_items() {
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: vec![],
         provider: None,
-        agent: objectiveai::agent::completions::request::Agent::Id("unused".to_string()),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         response_format: None,
         seed: None,
         stream: None,
@@ -3555,9 +3622,13 @@ fn test_tools_disabled_sets_tool_choice_none() {
     // it's not required (required would be rejected earlier in the client).
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: vec![],
-        agent: objectiveai::agent::completions::request::Agent::Id("test".into()),
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
-        agents: None,
         response_format: Some(
             objectiveai::agent::completions::request::ResponseFormatParam::Single(
                 objectiveai::agent::completions::request::ResponseFormat::ToolCall {
@@ -3603,9 +3674,13 @@ fn test_tools_disabled_no_tools_no_tool_choice() {
 
     let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
         messages: vec![],
-        agent: objectiveai::agent::completions::request::Agent::Id("test".into()),
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
-        agents: None,
         response_format: None,
         seed: None,
         stream: None,

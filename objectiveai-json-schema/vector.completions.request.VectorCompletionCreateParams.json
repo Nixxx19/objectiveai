@@ -35,10 +35,6 @@
         "$ref": "agent.completions.message.Message"
       }
     },
-    "profile": {
-      "description": "The profile weights for each agent in the swarm.\n\nMust have the same length as the total agent count in the swarm.\nCan be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields.",
-      "$ref": "vector.completions.request.Profile"
-    },
     "provider": {
       "description": "Provider routing preferences.",
       "anyOf": [
@@ -94,7 +90,7 @@
     },
     "swarm": {
       "description": "The Swarm of agents to use.",
-      "$ref": "vector.completions.request.Swarm"
+      "$ref": "swarm.InlineSwarmBaseOrRemoteCommitOptional"
     }
   }
 }

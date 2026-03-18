@@ -2,6 +2,14 @@ use crate::agent;
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
+/// Request body for retrieving completion votes by vector completion ID.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "vector.completions.cache.GetCompletionVotesRequest")]
+pub struct GetCompletionVotesRequest {
+    /// The vector completion ID.
+    pub id: String,
+}
+
 #[derive(Debug, Clone, Serialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "vector.completions.cache.CacheVoteRequest")]

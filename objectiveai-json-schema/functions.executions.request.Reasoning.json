@@ -1,25 +1,9 @@
 {
   "title": "functions.executions.request.Reasoning",
-  "description": "Configuration for generating reasoning summaries during execution.\n\nWhen enabled, an LLM summarizes the execution's reasoning process.",
   "type": "object",
   "properties": {
     "agent": {
-      "description": "The primary agent to use for generating reasoning summaries.",
-      "$ref": "agent.completions.request.Agent"
-    },
-    "agents": {
-      "description": "Fallback agents tried in order if the primary is rate-limited or errors.",
-      "anyOf": [
-        {
-          "type": "array",
-          "items": {
-            "$ref": "agent.completions.request.Agent"
-          }
-        },
-        {
-          "type": "null"
-        }
-      ]
+      "$ref": "agent.InlineAgentBaseWithFallbacksOrRemoteCommitOptional"
     }
   }
 }

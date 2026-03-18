@@ -16,6 +16,7 @@ impl FullRemoteFunction {
             FullRemoteFunction::Standard(function) => function,
         }
     }
+
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]

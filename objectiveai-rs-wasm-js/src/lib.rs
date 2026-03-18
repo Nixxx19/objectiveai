@@ -70,8 +70,8 @@ pub fn validateAgent(agent: JsValue) -> Result<String, JsValue> {
         serde_wasm_bindgen::from_value(agent)?;
     // prepare, validate, and compute ID
     let agent: objectiveai::agent::Agent = agent_base
-        .try_into()
-        .map_err(|e: String| JsValue::from_str(&e))?;
+        .convert()
+        .map_err(|e| JsValue::from_str(&e))?;
     // serialize
     serde_json::to_string(&agent).map_err(|e| JsValue::from_str(&e.to_string()))
 }
@@ -101,8 +101,8 @@ pub fn validateSwarm(swarm: JsValue) -> Result<String, JsValue> {
         serde_wasm_bindgen::from_value(swarm)?;
     // prepare, validate, and compute ID
     let swarm: objectiveai::swarm::Swarm = swarm_base
-        .try_into()
-        .map_err(|e: String| JsValue::from_str(&e))?;
+        .convert(None)
+        .map_err(|e| JsValue::from_str(&e))?;
     // serialize
     serde_json::to_string(&swarm).map_err(|e| JsValue::from_str(&e.to_string()))
 }

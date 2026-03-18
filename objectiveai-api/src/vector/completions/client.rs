@@ -255,16 +255,14 @@ where
         // prune votes that don't match responses length
         static_votes.retain(|vote| vote.vote.len() == request_responses_len);
 
-        // compute uniform profile weights (equal weight per agent, no inversion)
+        // extract profile weights from swarm (already validated during conversion)
         let agent_count = swarm.agents.len();
         if agent_count == 0 {
             return Err(super::Error::InvalidSwarm(
                 "swarm must have at least one agent".to_string(),
             ));
         }
-        let uniform_weight = Decimal::ONE / Decimal::from(agent_count);
-        let profile_pairs: Vec<(Decimal, bool)> =
-            vec![(uniform_weight, false); agent_count];
+        let profile_pairs: Vec<(Decimal, bool)> = swarm.weights.to_weights_and_invert();
 
         // compute hash IDs
         let prompt_id = {

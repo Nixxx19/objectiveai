@@ -1,0 +1,12 @@
+{
+  "title": "agent.InlineAgentBaseWithFallbacksOrRemoteCommitOptional",
+  "description": "Like [`InlineAgentBaseWithFallbacksOrRemote`] but with optional commit.\nUsed in request types where commit resolution happens server-side.",
+  "anyOf": [
+    {
+      "$ref": "agent.InlineAgentBaseWithFallbacks"
+    },
+    {
+      "$ref": "RemotePathCommitOptional"
+    }
+  ]
+}

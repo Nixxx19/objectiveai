@@ -5,8 +5,6 @@ use std::time::Duration;
 
 use rust_decimal::Decimal;
 
-use objectiveai::agent::completions::request::Agent as AgentParam;
-use objectiveai::agent::AgentBase;
 use objectiveai::functions::expression::{
     InputSchema, ObjectInputSchema, ArrayInputSchema, AnyOfInputSchema,
     StringInputSchema, IntegerInputSchema, NumberInputSchema,
@@ -29,22 +27,47 @@ use crate::ctx;
 // Stubs
 // ---------------------------------------------------------------------------
 
-struct StubAgentFetcher;
+struct StubRetrieveClient;
 
 #[async_trait::async_trait]
-impl crate::agent::fetcher::Fetcher<ctx::DefaultContextExt> for StubAgentFetcher {
-    async fn fetch(
+impl crate::retrieval::retrieve::Client<ctx::DefaultContextExt> for StubRetrieveClient {
+    async fn get_agent(
         &self,
-        _ctx: ctx::Context<ctx::DefaultContextExt>,
-        _id: &str,
-    ) -> Result<
-        Option<(objectiveai::agent::Agent, u64)>,
-        objectiveai::error::ResponseError,
-    > {
-        Err(objectiveai::error::ResponseError {
-            code: 501,
-            message: serde_json::json!("stub agent fetcher should not be called"),
-        })
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::agent::RemoteAgentBaseWithFallbacks>, objectiveai::error::ResponseError> {
+        unimplemented!()
+    }
+    async fn get_swarm(
+        &self,
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::swarm::RemoteSwarmBase>, objectiveai::error::ResponseError> {
+        unimplemented!()
+    }
+    async fn get_function(
+        &self,
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::functions::FullRemoteFunction>, objectiveai::error::ResponseError> {
+        unimplemented!()
+    }
+    async fn get_profile(
+        &self,
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::functions::RemoteProfile>, objectiveai::error::ResponseError> {
+        unimplemented!()
+    }
+    async fn resolve_latest_commit(
+        &self,
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _kind: crate::retrieval::Kind,
+        _remote: objectiveai::Remote,
+        _owner: &str,
+        _repository: &str,
+    ) -> Result<Option<String>, objectiveai::error::ResponseError> {
+        unimplemented!()
     }
 }
 
@@ -85,17 +108,24 @@ type TestClient = super::Client<
     UnimplementedUpstreamClient,
     UnimplementedUpstreamClient,
     crate::agent::completions::mock::Client,
-    StubAgentFetcher,
+    StubRetrieveClient,
+    StubRetrieveClient,
+    StubRetrieveClient,
     StubAgentUsageHandler,
     StubInventionUsageHandler,
-    crate::functions::function_fetcher::mock::MockFetcher,
-    crate::functions::function_fetcher::mock::MockFetcher,
-    crate::functions::function_fetcher::mock::MockFetcher,
+    crate::retrieval::retrieve::mock::MockClient,
+    crate::retrieval::retrieve::mock::MockClient,
+    crate::retrieval::retrieve::mock::MockClient,
 >;
 
 fn make_client() -> Arc<TestClient> {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
+    let retrieve_router = Arc::new(crate::retrieval::retrieve::Router::new(
+        Arc::new(StubRetrieveClient),
+        Arc::new(StubRetrieveClient),
+        Arc::new(StubRetrieveClient),
+    ));
+    let agent_client = Arc::new(crate::agent::completions::Client::new(
+        Arc::new(crate::mcp::Client::new(
             reqwest::Client::new(),
             None,
             None,
@@ -109,25 +139,23 @@ fn make_client() -> Arc<TestClient> {
             Duration::ZERO,
             Duration::from_millis(1),
         )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
+        retrieve_router.clone(),
+        Arc::new(StubAgentUsageHandler),
+        Arc::new(UnimplementedUpstreamClient),
+        Arc::new(UnimplementedUpstreamClient),
+        Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
             max_tool_calls: 1000,
         }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
+        Duration::ZERO,
+        Duration::ZERO,
+        0.0,
+        1.0,
+        Duration::ZERO,
+        Duration::ZERO,
+        Duration::from_millis(1),
+        Duration::from_millis(1),
+    ));
     let github_client = Arc::new(crate::github::Client::new(
         reqwest::Client::new(),
         None,
@@ -147,16 +175,16 @@ fn make_client() -> Arc<TestClient> {
         "ObjectiveAI".to_string(),
         "noreply@objective-ai.io".to_string(),
     ));
-    let function_fetcher = Arc::new(crate::functions::function_fetcher::FetcherRouter::new(
-        Arc::new(crate::functions::function_fetcher::mock::MockFetcher),
-        Arc::new(crate::functions::function_fetcher::mock::MockFetcher),
-        Arc::new(crate::functions::function_fetcher::mock::MockFetcher),
+    let function_retrieve_router = Arc::new(crate::retrieval::retrieve::Router::new(
+        Arc::new(crate::retrieval::retrieve::mock::MockClient),
+        Arc::new(crate::retrieval::retrieve::mock::MockClient),
+        Arc::new(crate::retrieval::retrieve::mock::MockClient),
     ));
     Arc::new(super::Client::new(
         agent_client,
         github_client,
         filesystem_client,
-        function_fetcher,
+        function_retrieve_router,
         Arc::new(StubInventionUsageHandler),
         true,
     ))
@@ -168,13 +196,15 @@ fn make_request(state: ParamsState, seed: i64) -> Arc<FunctionInventionCreatePar
         overwrite: None,
         state,
         provider: None,
-        agent: AgentParam::Provided(AgentBase::Mock(
-            objectiveai::agent::mock::AgentBase {
-                invention: Some(true),
-                ..Default::default()
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase {
+                    invention: Some(true),
+                    ..Default::default()
+                }),
+                fallbacks: None,
             },
-        )),
-        agents: None,
+        ),
         seed: Some(seed),
         stream: Some(true),
         max_step_retries: Some(1),

@@ -294,6 +294,59 @@ where
         Ok(objectiveai::functions::response::GetFunctionResponse { path, inner })
     }
 
+    /// Recursively fetches all child functions referenced by a function's tasks.
+    ///
+    /// Iterates over the function's task expressions, finds ScalarFunction and
+    /// VectorFunction tasks (which reference remote functions), and fetches each
+    /// concurrently. Returns a HashMap keyed by `"{owner}/{repository}/{commit}"`.
+    pub async fn get_function_recursive(
+        self: &Arc<Self>,
+        ctx: &ctx::Context<CTXEXT>,
+        function: objectiveai::functions::FullRemoteFunction,
+    ) -> Result<std::collections::HashMap<String, objectiveai::functions::RemoteFunction>, ResponseError> {
+        let transpiled = function.transpile();
+        let mut futs: Vec<(String, _)> = Vec::new();
+
+        for task_expr in transpiled.tasks() {
+            let (remote, owner, repository, commit) = match task_expr {
+                objectiveai::functions::TaskExpression::ScalarFunction(t) => {
+                    (t.remote, t.owner.clone(), t.repository.clone(), t.commit.clone())
+                }
+                objectiveai::functions::TaskExpression::VectorFunction(t) => {
+                    (t.remote, t.owner.clone(), t.repository.clone(), t.commit.clone())
+                }
+                _ => continue,
+            };
+            let url = format!("{}/{}/{}", owner, repository, commit);
+            let params = objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
+                objectiveai::RemotePathCommitOptional {
+                    remote, owner, repository, commit: Some(commit),
+                },
+            );
+            let router = self.clone();
+            let ctx = ctx.clone();
+            futs.push((url, tokio::spawn(async move {
+                router.get_function(&ctx, params).await
+            })));
+        }
+
+        let mut children = std::collections::HashMap::new();
+        for (url, handle) in futs {
+            let full_fn = handle.await.expect("get_function task panicked")?;
+            match full_fn {
+                objectiveai::functions::FullFunction::Remote(r) => {
+                    children.insert(url, r.transpile());
+                }
+                objectiveai::functions::FullFunction::Inline(_) => {
+                    // Remote references always resolve to remote functions.
+                    unreachable!()
+                }
+            }
+        }
+
+        Ok(children)
+    }
+
     // ── Profile ───────────────────────────────────────────────────
 
     /// Resolve a profile: inline returns directly, remote fetches with caching.

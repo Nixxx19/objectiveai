@@ -7,7 +7,7 @@ pub fn get_agent(
     _owner: &str,
     _repository: &str,
     _commit: Option<&str>,
-) -> Option<objectiveai::agent::RemoteAgent> {
+) -> Option<objectiveai::agent::RemoteAgentBaseWithFallbacks> {
     // No mock agent fixtures yet.
     None
 }
@@ -22,7 +22,7 @@ pub fn get_swarm(
     _owner: &str,
     _repository: &str,
     _commit: Option<&str>,
-) -> Option<objectiveai::swarm::RemoteSwarm> {
+) -> Option<objectiveai::swarm::RemoteSwarmBase> {
     // No mock swarm fixtures yet.
     None
 }
@@ -98,12 +98,12 @@ const FUNCTION_REPOSITORIES: &[&str] = &[
 ];
 
 /// Lists all mock Functions.
-pub fn list_functions() -> objectiveai::functions::response::ListFunction {
-    objectiveai::functions::response::ListFunction {
+pub fn list_functions() -> objectiveai::functions::response::ListFunctionResponse {
+    objectiveai::functions::response::ListFunctionResponse {
         data: FUNCTION_REPOSITORIES
             .iter()
-            .map(|repo| objectiveai::functions::response::ListFunctionItem {
-                remote: objectiveai::functions::Remote::Mock,
+            .map(|repo| objectiveai::RemotePath {
+                remote: objectiveai::Remote::Mock,
                 owner: "mock".to_string(),
                 repository: repo.to_string(),
                 commit: "mock".to_string(),
@@ -188,12 +188,12 @@ const PROFILE_REPOSITORIES: &[&str] = &[
 ];
 
 /// Lists all mock Profiles.
-pub fn list_profiles() -> objectiveai::functions::profiles::response::ListProfile {
-    objectiveai::functions::profiles::response::ListProfile {
+pub fn list_profiles() -> objectiveai::functions::profiles::response::ListProfileResponse {
+    objectiveai::functions::profiles::response::ListProfileResponse {
         data: PROFILE_REPOSITORIES
             .iter()
-            .map(|repo| objectiveai::functions::profiles::response::ListProfileItem {
-                remote: objectiveai::functions::Remote::Mock,
+            .map(|repo| objectiveai::RemotePath {
+                remote: objectiveai::Remote::Mock,
                 owner: "mock".to_string(),
                 repository: repo.to_string(),
                 commit: "mock".to_string(),

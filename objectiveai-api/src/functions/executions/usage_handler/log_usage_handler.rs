@@ -14,7 +14,7 @@ where
     async fn handle_usage(
         &self,
         _ctx: ctx::Context<CTXEXT>,
-        _request: Arc<objectiveai::functions::executions::request::Request>,
+        _request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
         response: objectiveai::functions::executions::response::unary::FunctionExecution,
     ) {
         println!(

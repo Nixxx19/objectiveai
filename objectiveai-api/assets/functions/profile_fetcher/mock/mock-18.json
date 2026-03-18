@@ -4,34 +4,30 @@
     {
       "tasks": [
         {
-          "swarm": {
-            "agents": [
-              {
-                "upstream": "mock",
-                "output_mode": "json_schema",
-                "top_logprobs": 5
-              },
-              {
-                "upstream": "mock",
-                "output_mode": "tool_call"
-              }
-            ]
-          },
-          "profile": [0.65, 0.35]
+          "agents": [
+            {
+              "upstream": "mock",
+              "output_mode": "json_schema",
+              "top_logprobs": 5
+            },
+            {
+              "upstream": "mock",
+              "output_mode": "tool_call"
+            }
+          ],
+          "weights": [0.65, 0.35]
         },
         {
-          "swarm": {
-            "agents": [
-              {
-                "upstream": "mock",
-                "output_mode": "instruction"
-              }
-            ]
-          },
-          "profile": [1.0]
+          "agents": [
+            {
+              "upstream": "mock",
+              "output_mode": "instruction"
+            }
+          ],
+          "weights": [1.0]
         }
       ],
-      "profile": [0.6, 0.4]
+      "weights": [0.6, 0.4]
     },
     {
       "remote": "mock",
@@ -40,5 +36,5 @@
       "commit": "mock"
     }
   ],
-  "profile": [0.55, 0.45]
+  "weights": [0.55, 0.45]
 }

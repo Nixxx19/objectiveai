@@ -3,16 +3,23 @@
   "description": "An inline tasks-based profile definition without metadata.",
   "type": "object",
   "properties": {
-    "profile": {
-      "description": "Weights for each Task in the corresponding Function.\n\nMust have the same length as `tasks`. Can be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields.",
-      "$ref": "vector.completions.request.Profile"
-    },
     "tasks": {
       "description": "Configuration for each task in the corresponding Function.",
       "type": "array",
       "items": {
         "$ref": "functions.TaskProfile"
       }
+    },
+    "weights": {
+      "description": "Optional weights for each Task in the corresponding Function.\nIf `None`, uniform weights are used.",
+      "anyOf": [
+        {
+          "$ref": "Weights"
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   }
 }

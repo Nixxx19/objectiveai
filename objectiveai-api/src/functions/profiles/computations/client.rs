@@ -11,7 +11,7 @@ pub trait Client<CTXEXT> {
     async fn create_unary(
         &self,
         ctx: ctx::Context<CTXEXT>,
-        request: Arc<objectiveai::functions::profiles::computations::request::Request>,
+        request: Arc<objectiveai::functions::profiles::computations::request::FunctionProfileComputationCreateParams>,
     ) -> Result<
         objectiveai::functions::profiles::computations::response::unary::FunctionProfileComputation,
         objectiveai::error::ResponseError,
@@ -21,7 +21,7 @@ pub trait Client<CTXEXT> {
     async fn create_streaming(
         &self,
         ctx: ctx::Context<CTXEXT>,
-        request: Arc<objectiveai::functions::profiles::computations::request::Request>,
+        request: Arc<objectiveai::functions::profiles::computations::request::FunctionProfileComputationCreateParams>,
     ) -> Result<
         impl Stream<Item = Result<
             objectiveai::functions::profiles::computations::response::streaming::FunctionProfileComputationChunk,

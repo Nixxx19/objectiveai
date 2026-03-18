@@ -132,6 +132,32 @@ pub enum Swarm {
     Inline(InlineSwarm),
 }
 
+impl InlineSwarm {
+    /// Converts back to an `InlineSwarmBase`, dropping the computed ID.
+    pub fn into_base(self) -> InlineSwarmBase {
+        InlineSwarmBase {
+            agents: self.agents.into_iter().map(|a| {
+                agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
+                    count: a.count,
+                    inner: agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
+                        match a.inner {
+                            agent::AgentWithFallbacks::Inline(i) => agent::InlineAgentBaseWithFallbacks {
+                                inner: i.inner.into_base(),
+                                fallbacks: i.fallbacks.map(|fbs| fbs.into_iter().map(|fb| fb.into_base()).collect()),
+                            },
+                            agent::AgentWithFallbacks::Remote(r) => agent::InlineAgentBaseWithFallbacks {
+                                inner: r.inner.inner.into_base(),
+                                fallbacks: r.inner.fallbacks.map(|fbs| fbs.into_iter().map(|fb| fb.into_base()).collect()),
+                            },
+                        },
+                    ),
+                }
+            }).collect(),
+            weights: Some(self.weights),
+        }
+    }
+}
+
 impl Swarm {
     /// Returns the inner `InlineSwarm` regardless of variant.
     pub fn inline(&self) -> &InlineSwarm {
@@ -252,7 +278,8 @@ fn convert_base(
         None => vec![(Decimal::ONE, false); agents.len()],
     };
 
-    // Validate weights are in [0, 1].
+    // Validate weights are in [0, 1] and at least one is positive.
+    let mut has_positive = false;
     for (i, (weight, _)) in weight_pairs.iter().enumerate() {
         if *weight < Decimal::ZERO || *weight > Decimal::ONE {
             return Err(format!(
@@ -260,6 +287,14 @@ fn convert_base(
                 i, weight
             ));
         }
+        if *weight > Decimal::ZERO {
+            has_positive = true;
+        }
+    }
+    if !has_positive {
+        return Err(
+            "weights must have at least one positive value".to_string(),
+        );
     }
 
     let mut agents_with_full_id: IndexMap<

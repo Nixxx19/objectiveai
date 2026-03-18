@@ -1,43 +1,12 @@
 {
   "title": "swarm.Swarm",
-  "description": "A validated Swarm with its computed content-addressed ID.\n\nCreated by converting from [`SwarmBase`] via [`TryFrom`]. The conversion:\n1. Validates and normalizes each agent\n2. Merges duplicate LLMs (by full_id) and sums their counts\n3. Sorts LLMs by full_id for deterministic ordering\n4. Computes the swarm ID from the sorted (full_id, count) pairs\n\n# Constraints\n\n- Individual LLMs with `count: 0` are skipped\n- Total agent count (sum of all counts) must be between 1 and 128",
-  "type": "object",
-  "properties": {
-    "agents": {
-      "description": "The validated and deduplicated LLMs, sorted by full_id.",
-      "type": "array",
-      "items": {
-        "description": "Wrapper that adds fallback agents and a count to any agent type.\n\nUsed to specify how many instances of an agent to include in an swarm,\nalong with fallback agents to try if the primary fails.",
-        "type": "object",
-        "$ref": "agent.Agent",
-        "properties": {
-          "count": {
-            "description": "Number of instances of this agent in the swarm. Defaults to 1.",
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 18446744073709551615,
-            "default": 1
-          },
-          "fallbacks": {
-            "description": "Fallback agents to try if the primary fails.",
-            "anyOf": [
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "agent.Agent"
-                }
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        }
-      }
+  "description": "A validated Swarm, either remote (with metadata) or inline.",
+  "anyOf": [
+    {
+      "$ref": "swarm.RemoteSwarm"
     },
-    "id": {
-      "description": "The deterministic content-addressed ID (22-character base62 string).",
-      "type": "string"
+    {
+      "$ref": "swarm.InlineSwarm"
     }
-  }
+  ]
 }

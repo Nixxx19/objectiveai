@@ -1,10 +1,8 @@
 use std::collections::HashMap;
-use std::sync::Arc;
 
-use objectiveai::agent::completions::request::{
-    AgentCompletionCreateParams, Agent as AgentParam,
-};
+use objectiveai::agent::completions::request::AgentCompletionCreateParams;
 use objectiveai::agent::claude_agent_sdk::{Agent, AgentBase};
+use objectiveai::agent::{InlineAgentBase, InlineAgentBaseWithFallbacks, InlineAgentBaseWithFallbacksOrRemoteCommitOptional};
 
 use super::Client;
 use crate::agent::completions::upstream_client::UpstreamClient;
@@ -24,9 +22,13 @@ fn default_agent() -> Agent {
 fn default_params() -> AgentCompletionCreateParams {
     AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Id("test".into()),
+        agent: InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            InlineAgentBaseWithFallbacks {
+                inner: InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
-        agents: None,
         response_format: None,
         seed: None,
         stream: None,
