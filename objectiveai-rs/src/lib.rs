@@ -40,8 +40,10 @@ pub mod json_schema;
 pub mod prefixed_uuid;
 mod remote;
 pub mod vector;
+mod weights;
 
 pub use remote::*;
+pub use weights::*;
 
 #[cfg(test)]
 mod tests;
@@ -170,13 +172,9 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(swarm::InlineSwarm),
         schemars::schema_for!(swarm::RemoteSwarm),
         schemars::schema_for!(swarm::Swarm),
-        schemars::schema_for!(swarm::InlineSwarmBaseWithProfile),
-        schemars::schema_for!(swarm::RemoteSwarmBaseWithProfile),
-        schemars::schema_for!(swarm::SwarmBaseWithProfile),
-        schemars::schema_for!(swarm::InlineSwarmWithProfile),
-        schemars::schema_for!(swarm::RemoteSwarmWithProfile),
-        schemars::schema_for!(swarm::SwarmWithProfile),
-        schemars::schema_for!(swarm::InlineSwarmBaseWithProfileOrRemote),
+        schemars::schema_for!(swarm::InlineSwarmBaseOrRemote),
+        schemars::schema_for!(Weights),
+        schemars::schema_for!(WeightsEntry),
         schemars::schema_for!(swarm::request::ListSwarmsRequest),
         schemars::schema_for!(swarm::request::ListSwarmsSource),
         schemars::schema_for!(swarm::response::ListSwarmResponse),
@@ -326,6 +324,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(functions::request::ListFunctionsSource),
         schemars::schema_for!(functions::request::ListFunctionProfilePairsRequest),
         schemars::schema_for!(functions::request::ListFunctionProfilePairsSource),
+        schemars::schema_for!(functions::request::GetFunctionProfilePairUsageRequest),
         schemars::schema_for!(functions::response::ListFunctionResponse),
         schemars::schema_for!(functions::response::GetFunctionResponse),
         schemars::schema_for!(functions::response::UsageFunctionResponse),
@@ -352,8 +351,6 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(vector::completions::cache::request::CacheVoteRequestOwned),
         schemars::schema_for!(vector::completions::cache::response::CompletionVotes),
         schemars::schema_for!(vector::completions::cache::response::CacheVote),
-        schemars::schema_for!(vector::completions::request::ProfileEntry),
-        schemars::schema_for!(vector::completions::request::Profile),
         schemars::schema_for!(vector::completions::request::VectorCompletionCreateParams),
         schemars::schema_for!(vector::completions::response::streaming::AgentCompletionChunk),
         schemars::schema_for!(vector::completions::response::streaming::Object),

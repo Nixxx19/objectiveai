@@ -39,7 +39,7 @@ pub enum RemoteProfile {
     /// Tasks-based profile with per-task configuration.
     Tasks(RemoteTasksProfile),
     /// Auto profile that applies a single swarm+weights to all vector completion tasks.
-    Auto(crate::swarm::RemoteSwarmBaseWithProfile),
+    Auto(crate::swarm::RemoteSwarmBase),
 }
 
 /// An inline profile, either tasks-based or auto.
@@ -50,7 +50,7 @@ pub enum InlineProfile {
     /// Tasks-based profile with per-task configuration.
     Tasks(InlineTasksProfile),
     /// Auto profile that applies a single swarm+weights to all vector completion tasks.
-    Auto(crate::swarm::InlineSwarmBaseWithProfile),
+    Auto(crate::swarm::InlineSwarmBase),
 }
 
 impl<'a> arbitrary::Arbitrary<'a> for InlineProfile {
@@ -67,12 +67,10 @@ impl<'a> arbitrary::Arbitrary<'a> for InlineProfile {
 pub struct InlineTasksProfile {
     /// Configuration for each task in the corresponding Function.
     pub tasks: Vec<TaskProfile>,
-    /// Weights for each Task in the corresponding Function.
-    ///
-    /// Must have the same length as `tasks`. Can be either:
-    /// - A vector of decimals (legacy representation), or
-    /// - A vector of objects with `weight` and optional `invert` fields.
-    pub profile: crate::vector::completions::request::Profile,
+    /// Optional weights for each Task in the corresponding Function.
+    /// If `None`, uniform weights are used.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub weights: Option<crate::Weights>,
 }
 
 /// A remote tasks-based profile with full metadata.

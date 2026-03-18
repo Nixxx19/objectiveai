@@ -23,7 +23,7 @@ pub struct GetSwarmResponse {
     pub path: crate::RemotePath,
     /// The Swarm definition.
     #[serde(flatten)]
-    #[schemars(schema_with = "crate::flatten_schema::<super::InlineSwarm>")]
+    #[schemars(schema_with = "crate::flatten_schema::<super::RemoteSwarm>")]
     pub inner: super::RemoteSwarm,
 }
 

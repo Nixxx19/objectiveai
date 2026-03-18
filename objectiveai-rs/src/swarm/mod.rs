@@ -65,6 +65,7 @@
 //!             }),
 //!         },
 //!     ],
+//!     weights: None,
 //! };
 //!
 //! let swarm: InlineSwarm = swarm_base.convert(None).unwrap();

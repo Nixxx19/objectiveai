@@ -523,21 +523,44 @@ pub enum AgentWithFallbacks {
 }
 
 impl AgentWithFallbacks {
+    /// Returns the inner `InlineAgentWithFallbacks` regardless of variant.
+    pub fn inline(&self) -> &InlineAgentWithFallbacks {
+        match self {
+            AgentWithFallbacks::Remote(a) => &a.inner,
+            AgentWithFallbacks::Inline(a) => a,
+        }
+    }
+
+    /// Returns the primary agent.
+    pub fn agent(&self) -> &InlineAgent {
+        &self.inline().inner
+    }
+
+    /// Returns the fallback agents.
+    pub fn fallbacks(&self) -> Option<&Vec<InlineAgent>> {
+        self.inline().fallbacks.as_ref()
+    }
+
     /// Returns the concatenated IDs of the primary agent and all fallbacks.
     pub fn full_id(&self) -> String {
-        match self {
-            AgentWithFallbacks::Remote(a) => a.full_id(),
-            AgentWithFallbacks::Inline(a) => a.full_id(),
-        }
+        self.inline().full_id()
     }
 
     /// Returns an iterator over the IDs of the primary agent and all fallbacks.
     pub fn ids(&self) -> impl Iterator<Item = &str> {
-        // Both variants delegate to InlineAgentWithFallbacks::ids
-        match self {
-            AgentWithFallbacks::Remote(a) => a.inner.ids(),
-            AgentWithFallbacks::Inline(a) => a.ids(),
-        }
+        self.inline().ids()
+    }
+
+    pub fn id(&self) -> &str {
+        self.agent().id()
+    }
+
+    pub fn base(&self) -> InlineAgentRef<'_> {
+        self.agent().base()
+    }
+
+    pub fn top_logprobs(&self) -> Option<u64> {
+        self.agent().top_logprobs()
     }
 }
 

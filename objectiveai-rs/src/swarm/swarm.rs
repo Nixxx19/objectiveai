@@ -1,7 +1,7 @@
 //! Core Swarm types and validation logic.
 
 use crate::agent;
-use crate::vector::completions::request::{Profile, ProfileEntry};
+use crate::weights::{Weights, WeightsEntry};
 use indexmap::IndexMap;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
@@ -20,18 +20,21 @@ use schemars::JsonSchema;
 pub struct InlineSwarmBase {
     /// The LLMs in this swarm, with optional counts and fallbacks.
     pub agents: Vec<agent::InlineAgentBaseWithFallbacksOrRemoteWithCount>,
+    /// Optional weights for each agent. If `None`, uniform weights are used.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub weights: Option<Weights>,
 }
 
 impl InlineSwarmBase {
     /// Validates and converts to an [`InlineSwarm`] with computed ID.
     ///
+    /// If `weights` is `None`, uniform weights (`Decimal::ONE` per agent) are used.
     /// Remote agent references are resolved from the provided hashmap.
-    /// The hashmap key format is `"{owner}/{repository}/{commit}"`.
     pub fn convert(
         self,
         remote_agents: Option<&HashMap<String, agent::RemoteAgentWithFallbacks>>,
     ) -> Result<InlineSwarm, String> {
-        convert_base(self.agents, remote_agents)
+        convert_base(self.agents, self.weights, remote_agents)
     }
 }
 
@@ -93,6 +96,7 @@ impl SwarmBase {
 /// 2. Merges duplicate LLMs (by full_id) and sums their counts
 /// 3. Sorts LLMs by full_id for deterministic ordering
 /// 4. Computes the swarm ID from the sorted (full_id, count) pairs
+/// 5. Aligns weights (merging duplicates by weighted average)
 ///
 /// # Constraints
 ///
@@ -105,6 +109,8 @@ pub struct InlineSwarm {
     pub id: String,
     /// The validated and deduplicated LLMs, sorted by full_id.
     pub agents: Vec<agent::AgentWithFallbacksWithCount>,
+    /// The aligned weights for each agent.
+    pub weights: Weights,
 }
 
 /// A validated remote Swarm with metadata and computed content-addressed ID.
@@ -126,143 +132,15 @@ pub enum Swarm {
     Inline(InlineSwarm),
 }
 
-// ── WithProfile types ──────────────────────────────────────────────
+// ── InlineSwarmBaseOrRemote ────────────────────────────────────────
 
-/// An [`InlineSwarmBase`] with a profile.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "swarm.InlineSwarmBaseWithProfile")]
-pub struct InlineSwarmBaseWithProfile {
-    #[serde(flatten)]
-    #[schemars(schema_with = "crate::flatten_schema::<InlineSwarmBase>")]
-    pub inner: InlineSwarmBase,
-    pub profile: Profile,
-}
-
-impl InlineSwarmBaseWithProfile {
-    /// Converts to an [`InlineSwarmWithProfile`] with computed ID and aligned profile.
-    pub fn convert(
-        self,
-        remote_agents: Option<&HashMap<String, agent::RemoteAgentWithFallbacks>>,
-    ) -> Result<InlineSwarmWithProfile, String> {
-        let (inner, profile) = convert_with_profile(
-            self.inner.agents,
-            self.profile,
-            remote_agents,
-        )?;
-        Ok(InlineSwarmWithProfile { inner, profile })
-    }
-}
-
-/// A [`RemoteSwarmBase`] with a profile.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "swarm.RemoteSwarmBaseWithProfile")]
-pub struct RemoteSwarmBaseWithProfile {
-    #[serde(flatten)]
-    #[schemars(schema_with = "crate::flatten_schema::<RemoteSwarmBase>")]
-    pub inner: RemoteSwarmBase,
-    pub profile: Profile,
-}
-
-impl RemoteSwarmBaseWithProfile {
-    /// Converts to a [`RemoteSwarmWithProfile`] with computed ID and aligned profile.
-    pub fn convert(
-        self,
-        remote_agents: Option<&HashMap<String, agent::RemoteAgentWithFallbacks>>,
-    ) -> Result<RemoteSwarmWithProfile, String> {
-        let (inner, profile) = convert_with_profile(
-            self.inner.inner.agents,
-            self.profile,
-            remote_agents,
-        )?;
-        Ok(RemoteSwarmWithProfile {
-            inner: RemoteSwarm {
-                description: self.inner.description,
-                inner,
-            },
-            profile,
-        })
-    }
-}
-
-/// A [`SwarmBase`] with a profile.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "swarm.SwarmBaseWithProfile")]
-pub struct SwarmBaseWithProfile {
-    #[serde(flatten)]
-    #[schemars(schema_with = "crate::flatten_schema::<SwarmBase>")]
-    pub inner: SwarmBase,
-    pub profile: Profile,
-}
-
-impl SwarmBaseWithProfile {
-    /// Converts to a [`SwarmWithProfile`] with computed ID and aligned profile.
-    pub fn convert(
-        self,
-        remote_agents: Option<&HashMap<String, agent::RemoteAgentWithFallbacks>>,
-    ) -> Result<SwarmWithProfile, String> {
-        match self.inner {
-            SwarmBase::Remote(r) => {
-                let wp = RemoteSwarmBaseWithProfile { inner: r, profile: self.profile };
-                let converted = wp.convert(remote_agents)?;
-                Ok(SwarmWithProfile {
-                    inner: Swarm::Remote(converted.inner),
-                    profile: converted.profile,
-                })
-            }
-            SwarmBase::Inline(i) => {
-                let wp = InlineSwarmBaseWithProfile { inner: i, profile: self.profile };
-                let converted = wp.convert(remote_agents)?;
-                Ok(SwarmWithProfile {
-                    inner: Swarm::Inline(converted.inner),
-                    profile: converted.profile,
-                })
-            }
-        }
-    }
-}
-
-/// A validated [`InlineSwarm`] with an aligned profile.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "swarm.InlineSwarmWithProfile")]
-pub struct InlineSwarmWithProfile {
-    #[serde(flatten)]
-    #[schemars(schema_with = "crate::flatten_schema::<InlineSwarm>")]
-    pub inner: InlineSwarm,
-    pub profile: Profile,
-}
-
-/// A validated [`RemoteSwarm`] with an aligned profile.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "swarm.RemoteSwarmWithProfile")]
-pub struct RemoteSwarmWithProfile {
-    #[serde(flatten)]
-    #[schemars(schema_with = "crate::flatten_schema::<RemoteSwarm>")]
-    pub inner: RemoteSwarm,
-    pub profile: Profile,
-}
-
-/// A validated [`Swarm`] with an aligned profile.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "swarm.SwarmWithProfile")]
-pub struct SwarmWithProfile {
-    #[serde(flatten)]
-    #[schemars(schema_with = "crate::flatten_schema::<Swarm>")]
-    pub inner: Swarm,
-    pub profile: Profile,
-}
-
-// ── InlineSwarmBaseWithProfileOrRemote ──────────────────────────────
-
-/// A swarm specification that is either an inline swarm base with profile
+/// A swarm specification that is either an inline swarm base
 /// or a remote path reference.
-///
-/// Used to allow swarms to be specified inline (with optional profile)
-/// or resolved from a remote source via a hashmap during conversion.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "swarm.InlineSwarmBaseWithProfileOrRemote")]
-pub enum InlineSwarmBaseWithProfileOrRemote {
-    SwarmBase(InlineSwarmBaseWithProfile),
+#[schemars(rename = "swarm.InlineSwarmBaseOrRemote")]
+pub enum InlineSwarmBaseOrRemote {
+    SwarmBase(InlineSwarmBase),
     Remote(crate::RemotePath),
 }
 
@@ -323,62 +201,42 @@ fn convert_agent_slot(
     }
 }
 
-/// Core conversion: validates agents, deduplicates, sorts, computes ID.
+/// Core conversion: validates agents, deduplicates, sorts, computes ID, aligns weights.
+///
+/// If `weights` is `None`, uniform weights (`Decimal::ONE` per agent) are used.
 fn convert_base(
     agents: Vec<agent::InlineAgentBaseWithFallbacksOrRemoteWithCount>,
+    weights: Option<Weights>,
     remote_agents: Option<&HashMap<String, agent::RemoteAgentWithFallbacks>>,
 ) -> Result<InlineSwarm, String> {
-    let mut agents_with_full_id: IndexMap<
-        String,
-        agent::AgentWithFallbacksWithCount,
-    > = IndexMap::with_capacity(agents.len());
-    let mut count = 0;
-    for base_agent in agents {
-        match base_agent.count {
-            0 => continue,
-            n => count += n,
+    // Resolve weights: use provided or default to uniform
+    let weight_pairs: Vec<(Decimal, bool)> = match &weights {
+        Some(w) => {
+            if w.len() != agents.len() {
+                return Err(format!(
+                    "weights length ({}) does not match agents length ({})",
+                    w.len(),
+                    agents.len()
+                ));
+            }
+            w.to_weights_and_invert()
         }
-        let converted = convert_agent_slot(base_agent.inner, remote_agents)?;
-        validate_agent_fallbacks(&converted)?;
-        let agent_with_count = agent::AgentWithFallbacksWithCount {
-            count: base_agent.count,
-            inner: converted,
-        };
-        merge_agent(&mut agents_with_full_id, agent_with_count);
-    }
-
-    finalize_swarm(count, agents_with_full_id)
-}
-
-/// Core conversion with profile alignment.
-fn convert_with_profile(
-    agents: Vec<agent::InlineAgentBaseWithFallbacksOrRemoteWithCount>,
-    profile: Profile,
-    remote_agents: Option<&HashMap<String, agent::RemoteAgentWithFallbacks>>,
-) -> Result<(InlineSwarm, Profile), String> {
-    if profile.len() != agents.len() {
-        return Err(format!(
-            "profile length ({}) does not match agents length ({})",
-            profile.len(),
-            agents.len()
-        ));
-    }
-
-    let profile_pairs = profile.to_weights_and_invert();
+        None => vec![(Decimal::ONE, false); agents.len()],
+    };
 
     let mut agents_with_full_id: IndexMap<
         String,
         (
             agent::AgentWithFallbacksWithCount,
-            Decimal,
-            u64,
-            bool,
+            Decimal, // weighted sum
+            u64,     // total count
+            bool,    // invert
         ),
     > = IndexMap::with_capacity(agents.len());
     let mut count = 0u64;
 
     for (base_agent, (weight, invert)) in
-        agents.into_iter().zip(profile_pairs.into_iter())
+        agents.into_iter().zip(weight_pairs.into_iter())
     {
         match base_agent.count {
             0 => continue,
@@ -436,48 +294,24 @@ fn convert_with_profile(
     }
     let id = format!("{:0>22}", base62::encode(hasher.finish_128()));
 
-    let mut agents = Vec::with_capacity(agents_with_full_id.len());
+    let mut result_agents = Vec::with_capacity(agents_with_full_id.len());
     let mut entries = Vec::with_capacity(agents_with_full_id.len());
     for (_, (agent, weighted_sum, total_count, invert)) in
         agents_with_full_id
     {
-        agents.push(agent);
+        result_agents.push(agent);
         let merged_weight = weighted_sum / Decimal::from(total_count);
-        entries.push(ProfileEntry {
+        entries.push(WeightsEntry {
             weight: merged_weight,
             invert: if invert { Some(true) } else { None },
         });
     }
 
-    Ok((InlineSwarm { id, agents }, Profile::Entries(entries)))
-}
-
-/// Finalize: validate count, sort, compute ID, collect agents.
-fn finalize_swarm(
-    count: u64,
-    agents_with_full_id: IndexMap<String, agent::AgentWithFallbacksWithCount>,
-) -> Result<InlineSwarm, String> {
-    if count == 0 || count > 128 {
-        return Err(
-            "`swarm.agents` must contain between 1 and 128 total LLMs"
-                .to_string(),
-        );
-    }
-
-    let mut agents_with_full_id = agents_with_full_id;
-    agents_with_full_id.sort_unstable_keys();
-
-    let mut hasher = XxHash3_128::with_seed(0);
-    for (full_id, agent) in &agents_with_full_id {
-        hasher.write(full_id.as_bytes());
-        let count_bytes = agent.count.to_le_bytes();
-        hasher.write(&count_bytes);
-    }
-    let id = format!("{:0>22}", base62::encode(hasher.finish_128()));
-
-    let agents = agents_with_full_id.into_values().collect::<Vec<_>>();
-
-    Ok(InlineSwarm { id, agents })
+    Ok(InlineSwarm {
+        id,
+        agents: result_agents,
+        weights: Weights::Entries(entries),
+    })
 }
 
 /// Merge a validated agent into the dedup map.

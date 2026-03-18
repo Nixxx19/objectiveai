@@ -21,7 +21,7 @@ pub struct FunctionProfileComputationCreateParams {
     pub max_retries: Option<u64>,
     pub n: u64,
     pub dataset: Vec<super::DatasetItem>,
-    pub swarm: crate::swarm::InlineSwarmBaseWithProfileOrRemote,
+    pub swarm: crate::swarm::InlineSwarmBaseOrRemote,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<agent::completions::request::Provider>,
     #[serde(skip_serializing_if = "Option::is_none")]
