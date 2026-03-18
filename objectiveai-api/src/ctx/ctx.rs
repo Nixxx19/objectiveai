@@ -41,7 +41,7 @@ pub struct Context<CTXEXT> {
             Shared<
                 tokio::sync::oneshot::Receiver<
                     Result<
-                        Option<objectiveai::agent::response::GetAgentResponse>,
+                        Option<objectiveai::agent::RemoteAgentBaseWithFallbacks>,
                         objectiveai::error::ResponseError,
                     >,
                 >,
@@ -55,7 +55,7 @@ pub struct Context<CTXEXT> {
             Shared<
                 tokio::sync::oneshot::Receiver<
                     Result<
-                        Option<objectiveai::swarm::response::GetSwarmResponse>,
+                        Option<objectiveai::swarm::RemoteSwarmBase>,
                         objectiveai::error::ResponseError,
                     >,
                 >,

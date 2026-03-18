@@ -9,22 +9,23 @@ use std::sync::Arc;
 /// Routes fetch operations by `Remote` to GitHub/Filesystem/Mock,
 /// with per-request deduplication caching via context caches.
 ///
-/// Public methods accept `RemotePathCommitOptional`. If commit is `None`,
-/// the router resolves the latest commit via `resolve_latest_commit` on the
-/// source trait, then delegates with a fully-resolved `RemotePath`.
-pub struct Router<G, F, M> {
+/// Main methods accept `CommitOptional` enums (inline or remote ref).
+/// If inline, converts directly. If remote, resolves commit, fetches
+/// from source, converts, and returns the union type.
+pub struct Router<G, F, M, CTXEXT> {
     pub github: Arc<G>,
     pub filesystem: Arc<F>,
     pub mock: Arc<M>,
+    _ctxext: std::marker::PhantomData<CTXEXT>,
 }
 
-impl<G, F, M> Router<G, F, M> {
+impl<G, F, M, CTXEXT> Router<G, F, M, CTXEXT> {
     pub fn new(github: Arc<G>, filesystem: Arc<F>, mock: Arc<M>) -> Self {
-        Self { github, filesystem, mock }
+        Self { github, filesystem, mock, _ctxext: std::marker::PhantomData }
     }
 }
 
-impl<G, F, M, CTXEXT> Router<G, F, M>
+impl<G, F, M, CTXEXT> Router<G, F, M, CTXEXT>
 where
     G: super::Client<CTXEXT>,
     F: super::Client<CTXEXT>,
@@ -39,9 +40,8 @@ where
         }
     }
 
-    /// Resolves a `RemotePathCommitOptional` to a `RemotePath` by looking up
-    /// the latest commit if missing, with per-request dedup caching.
-    async fn resolve_path(
+    /// Resolves a `RemotePathCommitOptional` to a `RemotePath`.
+    pub async fn resolve_path(
         self: &Arc<Self>,
         ctx: &ctx::Context<CTXEXT>,
         kind: crate::retrieval::Kind,
@@ -85,12 +85,34 @@ where
         }))
     }
 
-    /// Fetch an agent, with per-request dedup caching.
+    // ── Agent ──────────────────────────────────────────────────────
+
+    /// Resolve an agent: inline converts directly, remote fetches and converts.
     pub async fn get_agent(
         self: &Arc<Self>,
         ctx: &ctx::Context<CTXEXT>,
+        params: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
+    ) -> Result<objectiveai::agent::AgentWithFallbacks, ResponseError> {
+        match params {
+            objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(base) => {
+                let converted = base.convert().map_err(|e| bad_request(&e))?;
+                Ok(objectiveai::agent::AgentWithFallbacks::Inline(converted))
+            }
+            objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::Remote(remote) => {
+                let base = self.fetch_agent_base(ctx, &remote).await?
+                    .ok_or_else(|| not_found("agent"))?;
+                let converted = base.convert().map_err(|e| bad_request(&e))?;
+                Ok(objectiveai::agent::AgentWithFallbacks::Remote(converted))
+            }
+        }
+    }
+
+    /// Fetch a raw `RemoteAgentBaseWithFallbacks` from a source, with per-request dedup caching.
+    async fn fetch_agent_base(
+        self: &Arc<Self>,
+        ctx: &ctx::Context<CTXEXT>,
         params: &objectiveai::RemotePathCommitOptional,
-    ) -> Result<Option<objectiveai::agent::response::GetAgentResponse>, ResponseError> {
+    ) -> Result<Option<objectiveai::agent::RemoteAgentBaseWithFallbacks>, ResponseError> {
         let Some(path) = self.resolve_path(ctx, crate::retrieval::Kind::Agents, params).await? else {
             return Ok(None);
         };
@@ -112,12 +134,54 @@ where
         shared.await.unwrap()
     }
 
-    /// Fetch a swarm, with per-request dedup caching.
-    pub async fn get_swarm(
+    /// API endpoint: fetch a remote agent, convert, wrap in response.
+    pub async fn endpoint_get_agent(
         self: &Arc<Self>,
         ctx: &ctx::Context<CTXEXT>,
         params: &objectiveai::RemotePathCommitOptional,
-    ) -> Result<Option<objectiveai::swarm::response::GetSwarmResponse>, ResponseError> {
+    ) -> Result<objectiveai::agent::response::GetAgentResponse, ResponseError> {
+        let path = self.resolve_path(ctx, crate::retrieval::Kind::Agents, params).await?
+            .ok_or_else(|| not_found("agent"))?;
+        let result = self.get_agent(
+            ctx,
+            objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::Remote(params.clone()),
+        ).await?;
+        let inner = match result {
+            objectiveai::agent::AgentWithFallbacks::Remote(r) => r,
+            objectiveai::agent::AgentWithFallbacks::Inline(_) => unreachable!(),
+        };
+        Ok(objectiveai::agent::response::GetAgentResponse { path, inner })
+    }
+
+    // ── Swarm ─────────────────────────────────────────────────────
+
+    /// Resolve a swarm: inline converts directly, remote fetches and converts.
+    pub async fn get_swarm(
+        self: &Arc<Self>,
+        ctx: &ctx::Context<CTXEXT>,
+        params: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional,
+    ) -> Result<objectiveai::swarm::Swarm, ResponseError> {
+        match params {
+            objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(base) => {
+                let converted = base.convert(None).map_err(|e| bad_request(&e))?;
+                Ok(objectiveai::swarm::Swarm::Inline(converted))
+            }
+            objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::Remote(remote) => {
+                let base = self.fetch_swarm_base(ctx, &remote).await?
+                    .ok_or_else(|| not_found("swarm"))?;
+                let converted = base.convert(None).map_err(|e| bad_request(&e))?;
+                Ok(objectiveai::swarm::Swarm::Remote(converted))
+            }
+        }
+    }
+
+    /// Fetch a raw `RemoteSwarmBase` from a source, with per-request dedup caching.
+    /// Falls back to swarm.json if profile.json is not found (for profile retrieval).
+    async fn fetch_swarm_base(
+        self: &Arc<Self>,
+        ctx: &ctx::Context<CTXEXT>,
+        params: &objectiveai::RemotePathCommitOptional,
+    ) -> Result<Option<objectiveai::swarm::RemoteSwarmBase>, ResponseError> {
         let Some(path) = self.resolve_path(ctx, crate::retrieval::Kind::Swarms, params).await? else {
             return Ok(None);
         };
@@ -139,8 +203,47 @@ where
         shared.await.unwrap()
     }
 
-    /// Fetch a function, with per-request dedup caching.
+    /// API endpoint: fetch a remote swarm, convert, wrap in response.
+    pub async fn endpoint_get_swarm(
+        self: &Arc<Self>,
+        ctx: &ctx::Context<CTXEXT>,
+        params: &objectiveai::RemotePathCommitOptional,
+    ) -> Result<objectiveai::swarm::response::GetSwarmResponse, ResponseError> {
+        let path = self.resolve_path(ctx, crate::retrieval::Kind::Swarms, params).await?
+            .ok_or_else(|| not_found("swarm"))?;
+        let result = self.get_swarm(
+            ctx,
+            objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::Remote(params.clone()),
+        ).await?;
+        let inner = match result {
+            objectiveai::swarm::Swarm::Remote(r) => r,
+            objectiveai::swarm::Swarm::Inline(_) => unreachable!(),
+        };
+        Ok(objectiveai::swarm::response::GetSwarmResponse { path, inner })
+    }
+
+    // ── Function ──────────────────────────────────────────────────
+
+    /// Resolve a function: inline returns directly, remote fetches with caching.
     pub async fn get_function(
+        self: &Arc<Self>,
+        ctx: &ctx::Context<CTXEXT>,
+        params: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional,
+    ) -> Result<objectiveai::functions::FullFunction, ResponseError> {
+        match params {
+            objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Inline(inline) => {
+                Ok(objectiveai::functions::FullFunction::Inline(inline))
+            }
+            objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(remote) => {
+                let fetched = self.fetch_function(ctx, &remote).await?
+                    .ok_or_else(|| not_found("function"))?;
+                Ok(objectiveai::functions::FullFunction::Remote(fetched))
+            }
+        }
+    }
+
+    /// Fetch a raw `FullRemoteFunction` from a source, with per-request dedup caching.
+    async fn fetch_function(
         self: &Arc<Self>,
         ctx: &ctx::Context<CTXEXT>,
         params: &objectiveai::RemotePathCommitOptional,
@@ -172,25 +275,7 @@ where
         shared.await.unwrap()
     }
 
-    /// Fetch an agent for the API endpoint. Returns 404 if not found.
-    pub async fn endpoint_get_agent(
-        self: &Arc<Self>,
-        ctx: &ctx::Context<CTXEXT>,
-        params: &objectiveai::RemotePathCommitOptional,
-    ) -> Result<objectiveai::agent::response::GetAgentResponse, ResponseError> {
-        self.get_agent(ctx, params).await?.ok_or_else(|| not_found("agent"))
-    }
-
-    /// Fetch a swarm for the API endpoint. Returns 404 if not found.
-    pub async fn endpoint_get_swarm(
-        self: &Arc<Self>,
-        ctx: &ctx::Context<CTXEXT>,
-        params: &objectiveai::RemotePathCommitOptional,
-    ) -> Result<objectiveai::swarm::response::GetSwarmResponse, ResponseError> {
-        self.get_swarm(ctx, params).await?.ok_or_else(|| not_found("swarm"))
-    }
-
-    /// Fetch a function and wrap into a `GetFunctionResponse` for the API endpoint. Returns 404 if not found.
+    /// API endpoint: fetch a remote function, wrap in response.
     pub async fn endpoint_get_function(
         self: &Arc<Self>,
         ctx: &ctx::Context<CTXEXT>,
@@ -198,14 +283,40 @@ where
     ) -> Result<objectiveai::functions::response::GetFunctionResponse, ResponseError> {
         let path = self.resolve_path(ctx, crate::retrieval::Kind::Functions, params).await?
             .ok_or_else(|| not_found("function"))?;
-        let full_fn = self.get_function(ctx, params).await?
-            .ok_or_else(|| not_found("function"))?;
-        let remote_fn = full_fn.transpile();
-        Ok(objectiveai::functions::response::GetFunctionResponse { path, inner: remote_fn })
+        let result = self.get_function(
+            ctx,
+            objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(params.clone()),
+        ).await?;
+        let inner = match result {
+            objectiveai::functions::FullFunction::Remote(r) => r.transpile(),
+            objectiveai::functions::FullFunction::Inline(_) => unreachable!(),
+        };
+        Ok(objectiveai::functions::response::GetFunctionResponse { path, inner })
     }
 
-    /// Fetch a profile, with per-request dedup caching.
+    // ── Profile ───────────────────────────────────────────────────
+
+    /// Resolve a profile: inline returns directly, remote fetches with caching.
     pub async fn get_profile(
+        self: &Arc<Self>,
+        ctx: &ctx::Context<CTXEXT>,
+        params: objectiveai::functions::InlineProfileOrRemoteCommitOptional,
+    ) -> Result<objectiveai::functions::Profile, ResponseError> {
+        match params {
+            objectiveai::functions::InlineProfileOrRemoteCommitOptional::Inline(inline) => {
+                Ok(objectiveai::functions::Profile::Inline(inline))
+            }
+            objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(remote) => {
+                let fetched = self.fetch_profile(ctx, &remote).await?
+                    .ok_or_else(|| not_found("profile"))?;
+                Ok(objectiveai::functions::Profile::Remote(fetched))
+            }
+        }
+    }
+
+    /// Fetch a raw `RemoteProfile` from a source, with per-request dedup caching.
+    /// Falls back to swarm.json if profile.json is not found.
+    async fn fetch_profile(
         self: &Arc<Self>,
         ctx: &ctx::Context<CTXEXT>,
         params: &objectiveai::RemotePathCommitOptional,
@@ -228,7 +339,21 @@ where
                 let path = path.clone();
                 let ctx = ctx.clone();
                 tokio::spawn(async move {
+                    // Try profile.json first
                     let result = router.source(path.remote).get_profile(&ctx, &path).await;
+                    let result = match &result {
+                        Ok(None) => {
+                            // Fallback: try swarm.json (a swarm definition is a valid Auto profile)
+                            match router.source(path.remote).get_swarm(&ctx, &path).await {
+                                Ok(Some(swarm)) => Ok(Some(
+                                    objectiveai::functions::RemoteProfile::Auto(swarm),
+                                )),
+                                Ok(None) => Ok(None),
+                                Err(e) => Err(e),
+                            }
+                        }
+                        _ => result,
+                    };
                     let _ = tx.send(result);
                 });
                 rx.shared()
@@ -237,7 +362,7 @@ where
         shared.await.unwrap()
     }
 
-    /// Fetch a profile and wrap into a `GetProfileResponse` for the API endpoint. Returns 404 if not found.
+    /// API endpoint: fetch a remote profile, wrap in response.
     pub async fn endpoint_get_profile(
         self: &Arc<Self>,
         ctx: &ctx::Context<CTXEXT>,
@@ -245,9 +370,15 @@ where
     ) -> Result<objectiveai::functions::profiles::response::GetProfileResponse, ResponseError> {
         let path = self.resolve_path(ctx, crate::retrieval::Kind::Profiles, params).await?
             .ok_or_else(|| not_found("profile"))?;
-        let profile = self.get_profile(ctx, params).await?
-            .ok_or_else(|| not_found("profile"))?;
-        Ok(objectiveai::functions::profiles::response::GetProfileResponse { path, inner: profile })
+        let result = self.get_profile(
+            ctx,
+            objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(params.clone()),
+        ).await?;
+        let inner = match result {
+            objectiveai::functions::Profile::Remote(r) => r,
+            objectiveai::functions::Profile::Inline(_) => unreachable!(),
+        };
+        Ok(objectiveai::functions::profiles::response::GetProfileResponse { path, inner })
     }
 }
 
@@ -255,5 +386,12 @@ fn not_found(kind: &str) -> ResponseError {
     ResponseError {
         code: 404,
         message: serde_json::json!({ "error": format!("{} not found", kind) }),
+    }
+}
+
+fn bad_request(msg: &str) -> ResponseError {
+    ResponseError {
+        code: 400,
+        message: serde_json::json!({ "error": msg }),
     }
 }

@@ -13,13 +13,13 @@ pub trait Client<CTXEXT>: Send + Sync + 'static {
         &self,
         ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
-    ) -> Result<Option<objectiveai::agent::response::GetAgentResponse>, ResponseError>;
+    ) -> Result<Option<objectiveai::agent::RemoteAgentBaseWithFallbacks>, ResponseError>;
 
     async fn get_swarm(
         &self,
         ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
-    ) -> Result<Option<objectiveai::swarm::response::GetSwarmResponse>, ResponseError>;
+    ) -> Result<Option<objectiveai::swarm::RemoteSwarmBase>, ResponseError>;
 
     async fn get_function(
         &self,

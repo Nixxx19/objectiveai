@@ -14,30 +14,24 @@ where
         &self,
         _ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
-    ) -> Result<Option<objectiveai::agent::response::GetAgentResponse>, ResponseError> {
+    ) -> Result<Option<objectiveai::agent::RemoteAgentBaseWithFallbacks>, ResponseError> {
         Ok(crate::functions::mock::get_agent(
             &path.owner,
             &path.repository,
             Some(&path.commit),
-        ).map(|inner| objectiveai::agent::response::GetAgentResponse {
-            path: path.clone(),
-            inner,
-        }))
+        ))
     }
 
     async fn get_swarm(
         &self,
         _ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
-    ) -> Result<Option<objectiveai::swarm::response::GetSwarmResponse>, ResponseError> {
+    ) -> Result<Option<objectiveai::swarm::RemoteSwarmBase>, ResponseError> {
         Ok(crate::functions::mock::get_swarm(
             &path.owner,
             &path.repository,
             Some(&path.commit),
-        ).map(|inner| objectiveai::swarm::response::GetSwarmResponse {
-            path: path.clone(),
-            inner,
-        }))
+        ))
     }
 
     async fn get_function(

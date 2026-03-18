@@ -6,17 +6,17 @@ pub enum Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK> {
     Openrouter {
         items: Vec<ContinuationItem<OPENROUTER>>,
         agent: objectiveai::agent::openrouter::Agent,
-        mcp_connections: Vec<Arc<mcp::Connection>>,
+        mcp_connections: Arc<Vec<Arc<mcp::Connection>>>,
     },
     ClaudeAgentSdk {
         items: Vec<ContinuationItem<CLAUDEAGENTSDK>>,
         agent: objectiveai::agent::claude_agent_sdk::Agent,
-        mcp_connections: Vec<Arc<mcp::Connection>>,
+        mcp_connections: Arc<Vec<Arc<mcp::Connection>>>,
     },
     Mock {
         items: Vec<ContinuationItem<MOCK>>,
         agent: objectiveai::agent::mock::Agent,
-        mcp_connections: Vec<Arc<mcp::Connection>>,
+        mcp_connections: Arc<Vec<Arc<mcp::Connection>>>,
     },
 }
 

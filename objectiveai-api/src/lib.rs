@@ -17,12 +17,8 @@
 
 /// Authentication and API key management.
 pub mod auth;
-// /// Chat completions with Swarm LLMs.
-// pub mod chat;
 /// Request context and extensions for dependency injection.
 pub mod ctx;
-/// Swarm management, fetching, and retrieval.
-pub mod swarm;
 /// Agent management, fetching, and retrieval.
 pub mod agent;
 /// Error response handling and conversion.

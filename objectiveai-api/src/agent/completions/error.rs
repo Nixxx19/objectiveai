@@ -9,6 +9,9 @@ pub enum Error {
     #[error("MCP connection error: {0}")]
     McpConnection(crate::mcp::Error),
 
+    #[error("MCP connection error: {0}")]
+    McpConnectionArc(std::sync::Arc<crate::mcp::Error>),
+
     #[error("MCP list_tools error ({url}): {error}")]
     McpListTools {
         url: String,
@@ -49,7 +52,7 @@ impl objectiveai::error::StatusError for Error {
         match self {
             Self::InvalidAgent(_) => 400,
             Self::AgentNotFound(_) => 404,
-            Self::McpConnection(_) => 502,
+            Self::McpConnection(_) | Self::McpConnectionArc(_) => 502,
             Self::McpListTools { .. } => 502,
             Self::McpCallTool(_) => 502,
             Self::Fetch(e) => e.code,

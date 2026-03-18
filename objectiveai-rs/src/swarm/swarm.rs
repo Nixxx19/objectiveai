@@ -132,6 +132,24 @@ pub enum Swarm {
     Inline(InlineSwarm),
 }
 
+impl Swarm {
+    /// Returns the inner `InlineSwarm` regardless of variant.
+    pub fn inline(&self) -> &InlineSwarm {
+        match self {
+            Swarm::Remote(r) => &r.inner,
+            Swarm::Inline(i) => i,
+        }
+    }
+
+    /// Consumes self and returns the inner `InlineSwarm`.
+    pub fn into_inline(self) -> InlineSwarm {
+        match self {
+            Swarm::Remote(r) => r.inner,
+            Swarm::Inline(i) => i,
+        }
+    }
+}
+
 // ── InlineSwarmBaseOrRemote ────────────────────────────────────────
 
 /// A swarm specification that is either an inline swarm base
@@ -233,6 +251,16 @@ fn convert_base(
         }
         None => vec![(Decimal::ONE, false); agents.len()],
     };
+
+    // Validate weights are in [0, 1].
+    for (i, (weight, _)) in weight_pairs.iter().enumerate() {
+        if *weight < Decimal::ZERO || *weight > Decimal::ONE {
+            return Err(format!(
+                "weight at index {} must be between 0 and 1, got {}",
+                i, weight
+            ));
+        }
+    }
 
     let mut agents_with_full_id: IndexMap<
         String,

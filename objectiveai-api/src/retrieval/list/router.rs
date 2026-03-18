@@ -14,20 +14,21 @@ pub enum SourceFilter {
 }
 
 /// Routes list operations to ObjectiveAI/Filesystem/Mock and merges results.
-pub struct Router<O, F, M> {
+pub struct Router<O, F, M, CTXEXT> {
     pub objectiveai: Arc<O>,
     pub filesystem: Arc<F>,
     pub mock: Arc<M>,
+    _ctxext: std::marker::PhantomData<CTXEXT>,
 }
 
-impl<O, F, M> Router<O, F, M> {
+impl<O, F, M, CTXEXT> Router<O, F, M, CTXEXT> {
     pub fn new(objectiveai: Arc<O>, filesystem: Arc<F>, mock: Arc<M>) -> Self {
-        Self { objectiveai, filesystem, mock }
+        Self { objectiveai, filesystem, mock, _ctxext: std::marker::PhantomData }
     }
 }
 
 /// No caching needed for list — results are not deduplicated.
-impl<O, F, M, CTXEXT> Router<O, F, M>
+impl<O, F, M, CTXEXT> Router<O, F, M, CTXEXT>
 where
     O: super::Client<CTXEXT>,
     F: super::Client<CTXEXT>,

@@ -23,10 +23,10 @@ where
         &self,
         _ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
-    ) -> Result<Option<objectiveai::agent::response::GetAgentResponse>, ResponseError> {
+    ) -> Result<Option<objectiveai::agent::RemoteAgentBaseWithFallbacks>, ResponseError> {
         match self
             .client
-            .read_json::<objectiveai::agent::RemoteAgent>(
+            .read_json::<objectiveai::agent::RemoteAgentBaseWithFallbacks>(
                 crate::retrieval::Kind::Agents,
                 &path.owner,
                 &path.repository,
@@ -35,10 +35,7 @@ where
             )
             .await
         {
-            Ok(Some((agent, _resolved_commit))) => Ok(Some(objectiveai::agent::response::GetAgentResponse {
-                path: path.clone(),
-                inner: agent,
-            })),
+            Ok(Some((agent, _resolved_commit))) => Ok(Some(agent)),
             Ok(None) => Ok(None),
             Err(e) => Err(ResponseError::from(&e)),
         }
@@ -48,10 +45,10 @@ where
         &self,
         _ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
-    ) -> Result<Option<objectiveai::swarm::response::GetSwarmResponse>, ResponseError> {
+    ) -> Result<Option<objectiveai::swarm::RemoteSwarmBase>, ResponseError> {
         match self
             .client
-            .read_json::<objectiveai::swarm::RemoteSwarm>(
+            .read_json::<objectiveai::swarm::RemoteSwarmBase>(
                 crate::retrieval::Kind::Swarms,
                 &path.owner,
                 &path.repository,
@@ -60,10 +57,7 @@ where
             )
             .await
         {
-            Ok(Some((swarm, _resolved_commit))) => Ok(Some(objectiveai::swarm::response::GetSwarmResponse {
-                path: path.clone(),
-                inner: swarm,
-            })),
+            Ok(Some((swarm, _resolved_commit))) => Ok(Some(swarm)),
             Ok(None) => Ok(None),
             Err(e) => Err(ResponseError::from(&e)),
         }

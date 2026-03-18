@@ -23,14 +23,10 @@ where
         &self,
         ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
-    ) -> Result<Option<objectiveai::agent::response::GetAgentResponse>, ResponseError> {
+    ) -> Result<Option<objectiveai::agent::RemoteAgentBaseWithFallbacks>, ResponseError> {
         self.client
             .read_json(ctx, &path.owner, &path.repository, &path.commit, "agent.json")
             .await
-            .map(|opt| opt.map(|inner| objectiveai::agent::response::GetAgentResponse {
-                path: path.clone(),
-                inner,
-            }))
             .map_err(|e| ResponseError::from(&e))
     }
 
@@ -38,14 +34,10 @@ where
         &self,
         ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
-    ) -> Result<Option<objectiveai::swarm::response::GetSwarmResponse>, ResponseError> {
+    ) -> Result<Option<objectiveai::swarm::RemoteSwarmBase>, ResponseError> {
         self.client
             .read_json(ctx, &path.owner, &path.repository, &path.commit, "swarm.json")
             .await
-            .map(|opt| opt.map(|inner| objectiveai::swarm::response::GetSwarmResponse {
-                path: path.clone(),
-                inner,
-            }))
             .map_err(|e| ResponseError::from(&e))
     }
 

@@ -9,17 +9,18 @@ use std::sync::Arc;
 /// Routes usage requests to the ObjectiveAI usage client.
 ///
 /// Only ObjectiveAI tracks usage, so there's only one delegate.
-pub struct Router<O> {
+pub struct Router<O, CTXEXT> {
     pub objectiveai: Arc<O>,
+    _ctxext: std::marker::PhantomData<CTXEXT>,
 }
 
-impl<O> Router<O> {
+impl<O, CTXEXT> Router<O, CTXEXT> {
     pub fn new(objectiveai: Arc<O>) -> Self {
-        Self { objectiveai }
+        Self { objectiveai, _ctxext: std::marker::PhantomData }
     }
 }
 
-impl<O, CTXEXT> Router<O>
+impl<O, CTXEXT> Router<O, CTXEXT>
 where
     O: super::Client<CTXEXT>,
     CTXEXT: Send + Sync + 'static,

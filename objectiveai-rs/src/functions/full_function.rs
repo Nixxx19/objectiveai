@@ -69,6 +69,15 @@ impl AlphaInlineFunction {
     }
 }
 
+/// A full function, either remote or inline.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+#[schemars(rename = "functions.FullFunction")]
+pub enum FullFunction {
+    Remote(FullRemoteFunction),
+    Inline(FullInlineFunction),
+}
+
 /// A function specification that is either a full inline function definition
 /// or a remote path reference.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]

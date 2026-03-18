@@ -23,8 +23,8 @@ pub struct GetAgentResponse {
     pub path: crate::RemotePath,
     /// The Agent definition.
     #[serde(flatten)]
-    #[schemars(schema_with = "crate::flatten_schema::<super::RemoteAgent>")]
-    pub inner: super::RemoteAgent,
+    #[schemars(schema_with = "crate::flatten_schema::<super::RemoteAgentWithFallbacks>")]
+    pub inner: super::RemoteAgentWithFallbacks,
 }
 
 /// Usage statistics for an Agent.

@@ -130,6 +130,7 @@ impl Client {
             sha: String,
         }
         let token = self.resolve_fetch_token(ctx).await;
+        let token_str: Option<&str> = token.as_deref().map(|s| s.as_str());
         let http_request = self.request_headers(
             self.http_client
                 .get(format!(
@@ -137,7 +138,7 @@ impl Client {
                     owner, repository,
                 ))
                 .header("accept", "application/vnd.github+json"),
-            token.as_deref(),
+            token_str,
         );
         backoff::future::retry(self.backoff(), || async {
             let response = http_request
@@ -181,7 +182,7 @@ impl Client {
         T: serde::de::DeserializeOwned,
     {
         let token = self.resolve_fetch_token(ctx).await;
-        let token_str = token.as_deref();
+        let token_str: Option<&str> = token.as_deref().map(|s| s.as_str());
         backoff::future::retry(self.backoff(), || async {
             match self.fetch_file_raw::<T>(token_str, owner, repository, commit, path).await {
                 Ok(opt) => Ok(opt),
