@@ -11,9 +11,7 @@ pub struct FunctionInventionRecursiveCreateParams {
     pub state: functions::inventions::ParamsState,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<agent::completions::request::Provider>,
-    pub agent: agent::InlineAgentBaseWithFallbacksOrRemote,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub agents: Option<Vec<agent::InlineAgentBaseWithFallbacksOrRemote>>,
+    pub agent: agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub seed: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
