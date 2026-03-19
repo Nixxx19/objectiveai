@@ -5,7 +5,7 @@ from typing import Optional, Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 from objectiveai.functions.expression.expression import Expression
 from objectiveai.functions.expression.input_value_expression import InputValueExpression
-from objectiveai.functions.remote import Remote
+from objectiveai.remote import Remote
 
 
 class ScalarFunctionTaskExpressionInputVariant1(RootModel):

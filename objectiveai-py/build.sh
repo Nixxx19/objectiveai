@@ -61,6 +61,10 @@ run() {
     "$PIP" install -r "$SCRIPT_DIR/requirements-dev.txt" --quiet
   fi
 
+  # ── pydantic type generation ────────────────────────────────────────────────────
+
+  "$PYTHON" "$SCRIPT_DIR/scripts/install_pydantic.py"
+
   # ── pyo3 build + install ────────────────────────────────────────────────────────
 
   "$PYTHON" "$SCRIPT_DIR/scripts/install_pyo3.py"

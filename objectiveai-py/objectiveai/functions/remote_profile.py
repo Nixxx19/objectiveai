@@ -3,8 +3,8 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.functions.remote_auto_profile import RemoteAutoProfile
 from objectiveai.functions.remote_tasks_profile import RemoteTasksProfile
+from objectiveai.swarm.remote_swarm_base import RemoteSwarmBase
 
 
 class RemoteProfileVariant1(RootModel):
@@ -14,7 +14,7 @@ class RemoteProfileVariant1(RootModel):
 
 class RemoteProfileVariant2(RootModel):
     """Auto profile that applies a single swarm+weights to all vector completion tasks."""
-    root: RemoteAutoProfile
+    root: RemoteSwarmBase
 
 
 class RemoteProfile(RootModel):

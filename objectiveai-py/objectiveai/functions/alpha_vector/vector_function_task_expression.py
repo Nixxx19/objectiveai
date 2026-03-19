@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 from objectiveai.functions.alpha_vector.expression.vector_function_input_value_expression import VectorFunctionInputValueExpression
 from objectiveai.functions.expression.expression import Expression
-from objectiveai.functions.remote import Remote
+from objectiveai.remote import Remote
 
 
 class VectorFunctionTaskExpression(BaseModel):

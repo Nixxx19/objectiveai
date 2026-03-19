@@ -459,8 +459,8 @@ def generate_model(
         code = _generate_flattened_model(title, schema, refs, all_titles, pascal_name, safe_desc, all_schemas=all_schemas, schema_title=title)
         return code, refs
 
-    # Case 1b: Object with properties AND $ref (adjacently-tagged enum variant)
-    if has_properties and "$ref" in schema:
+    # Case 1b: Object with $ref (with or without properties)
+    if "$ref" in schema and (has_properties or type_ == "object"):
         ref_target = schema["$ref"]
         if ref_target == "#":
             ref_target = title
@@ -879,13 +879,21 @@ def _generate_flattened_model(
     return "\n\n".join(variant_codes + [main_code])
 
 
-def _is_root_model_schema(schema: dict) -> bool:
+def _is_root_model_schema(schema: dict, all_schemas: dict[str, dict] | None = None) -> bool:
     """Check if a schema would generate a RootModel (not a BaseModel).
 
     RootModels are generated for anyOf unions, enums, and primitive types.
-    BaseModels are generated for objects with properties.
+    BaseModels are generated for objects with properties — UNLESS the schema
+    has $ref + properties where the $ref target is a RootModel union, in which
+    case _generate_expanded_union_ref produces a RootModel.
     """
     if "properties" in schema:
+        # $ref + properties where the $ref target is a RootModel → also a RootModel
+        ref_target = schema.get("$ref")
+        if ref_target and all_schemas:
+            ref_schema = all_schemas.get(ref_target)
+            if ref_schema and _is_root_model_schema(ref_schema, all_schemas):
+                return True
         return False
     if schema.get("type") == "object":
         return False
@@ -916,7 +924,7 @@ def _generate_flattened_ref_model(
 
     # Check if the $ref target would be a RootModel
     ref_schema = (all_schemas or {}).get(ref_target)
-    if ref_schema and _is_root_model_schema(ref_schema):
+    if ref_schema and _is_root_model_schema(ref_schema, all_schemas):
         return _generate_expanded_union_ref(
             title, schema, refs, all_titles, pascal_name, safe_desc,
             ref_target, ref_schema, all_schemas=all_schemas, schema_title=schema_title,
@@ -964,7 +972,29 @@ def _generate_expanded_union_ref(
     a RootModel union of the expanded variants.
     """
     properties = schema.get("properties", {})
+    # Save original property names for _expanded_ref_props metadata
+    original_prop_names = list(properties.keys()) if properties else None
     any_of = ref_schema.get("anyOf", [])
+
+    # If no direct anyOf, follow the $ref chain to find it,
+    # accumulating properties from intermediate schemas.
+    if not any_of and all_schemas:
+        intermediate_props = dict(ref_schema.get("properties", {}))
+        inner_ref = ref_schema.get("$ref")
+        while inner_ref and not any_of:
+            inner_schema = all_schemas.get(inner_ref)
+            if inner_schema is None:
+                break
+            any_of = inner_schema.get("anyOf", [])
+            if not any_of:
+                for k, v in inner_schema.get("properties", {}).items():
+                    intermediate_props.setdefault(k, v)
+                inner_ref = inner_schema.get("$ref")
+        if any_of:
+            # Merge intermediate properties under our own properties
+            merged = dict(intermediate_props)
+            merged.update(properties)
+            properties = merged
 
     if not any_of:
         # Not a union — fall back to wrapping as a field
@@ -983,53 +1013,98 @@ def _generate_expanded_union_ref(
     variant_codes: list[str] = []
     union_members: list[str] = []
 
-    for i, variant_schema in enumerate(any_of, 1):
-        if _is_simple_null_variant(variant_schema):
-            union_members.append("None")
-            continue
+    # Use a recursive helper to flatten through nested RootModel unions
+    _counter = [0]
 
-        var_name = f"{pascal_name}Variant{i}"
+    def _expand_variants(
+        any_of_list: list[dict],
+        props: dict,
+    ) -> None:
+        for variant_schema in any_of_list:
+            if _is_simple_null_variant(variant_schema):
+                union_members.append("None")
+                continue
 
-        # Resolve the variant to a BaseModel by unwrapping $ref chains
-        resolved_ref, resolved_schema = _resolve_to_base_model(
-            variant_schema, all_schemas,
-        )
-
-        if resolved_ref and resolved_schema and not _is_root_model_schema(resolved_schema):
-            # BaseModel — inherit and add properties.
-            # Use title_to_pascal for the base class name to avoid collisions
-            # when multiple variants resolve to types with the same short name.
-            refs.add(resolved_ref)
-            inner_class = title_to_pascal(resolved_ref)
-            # Register in the name map so imports use the correct alias
-            _current_name_map[resolved_ref] = inner_class
-            var_code = _generate_variant_with_properties(
-                var_name, inner_class, properties, title, refs, all_titles,
+            # Resolve the variant to a BaseModel by unwrapping $ref chains
+            resolved_ref, resolved_schema = _resolve_to_base_model(
+                variant_schema, all_schemas,
             )
-        elif "properties" in variant_schema:
-            # Inline object variant — generate as BaseModel with merged properties
-            merged_props = dict(variant_schema.get("properties", {}))
-            merged_props.update(properties)
-            merged_schema = dict(variant_schema)
-            merged_schema["properties"] = merged_props
-            var_code = _generate_object_model(
-                title, merged_schema, refs, all_titles, var_name, "",
-            )
-        else:
-            # Other variant type — just generate as-is with properties
-            var_code, var_name, var_refs = _generate_variant_class(
-                variant_schema, pascal_name, i, title, all_titles,
-                all_schemas=all_schemas,
-            )
-            refs.update(var_refs)
 
-        variant_codes.append(var_code)
-        union_members.append(var_name)
+            if resolved_ref and resolved_schema and not _is_root_model_schema(resolved_schema, all_schemas):
+                # BaseModel — inherit and add properties.
+                _counter[0] += 1
+                var_name = f"{pascal_name}Variant{_counter[0]}"
+                # Use title_to_pascal for the base class name to avoid collisions
+                # when multiple variants resolve to types with the same short name.
+                refs.add(resolved_ref)
+                inner_class = title_to_pascal(resolved_ref)
+                # Register in the name map so imports use the correct alias
+                _current_name_map[resolved_ref] = inner_class
+                var_code = _generate_variant_with_properties(
+                    var_name, inner_class, props, title, refs, all_titles,
+                )
+                variant_codes.append(var_code)
+                union_members.append(var_name)
+            elif resolved_ref and resolved_schema and _is_root_model_schema(resolved_schema, all_schemas):
+                # RootModel union — recursively expand its variants,
+                # carrying our properties down to each leaf BaseModel.
+                # Collect properties and follow $ref to find the anyOf.
+                inner_props = dict(resolved_schema.get("properties", {}))
+                inner_props.update(props)
+                inner_any_of = resolved_schema.get("anyOf", [])
+                # If no direct anyOf, follow the $ref chain to find it
+                if not inner_any_of:
+                    inner_ref = resolved_schema.get("$ref")
+                    while inner_ref and not inner_any_of and all_schemas:
+                        ref_s = all_schemas.get(inner_ref)
+                        if ref_s is None:
+                            break
+                        # Accumulate properties from intermediate schemas
+                        for k, v in ref_s.get("properties", {}).items():
+                            inner_props.setdefault(k, v)
+                        inner_any_of = ref_s.get("anyOf", [])
+                        inner_ref = ref_s.get("$ref") if not inner_any_of else None
+                if inner_any_of:
+                    _expand_variants(inner_any_of, inner_props)
+                else:
+                    # RootModel without anyOf — fallback
+                    _counter[0] += 1
+                    var_code, var_name_out, var_refs = _generate_variant_class(
+                        variant_schema, pascal_name, _counter[0], title, all_titles,
+                        all_schemas=all_schemas,
+                    )
+                    refs.update(var_refs)
+                    variant_codes.append(var_code)
+                    union_members.append(var_name_out)
+            elif "properties" in variant_schema:
+                # Inline object variant — generate as BaseModel with merged properties
+                _counter[0] += 1
+                var_name = f"{pascal_name}Variant{_counter[0]}"
+                merged_props = dict(variant_schema.get("properties", {}))
+                merged_props.update(props)
+                merged_schema = dict(variant_schema)
+                merged_schema["properties"] = merged_props
+                var_code = _generate_object_model(
+                    title, merged_schema, refs, all_titles, var_name, "",
+                )
+                variant_codes.append(var_code)
+                union_members.append(var_name)
+            else:
+                # Other variant type — just generate as-is with properties
+                _counter[0] += 1
+                var_code, var_name_out, var_refs = _generate_variant_class(
+                    variant_schema, pascal_name, _counter[0], title, all_titles,
+                    all_schemas=all_schemas,
+                )
+                refs.update(var_refs)
+                variant_codes.append(var_code)
+                union_members.append(var_name_out)
+
+    _expand_variants(any_of, properties)
 
     # Generate the main RootModel union
     root_type = _union_type(union_members)
-    prop_names = list(properties.keys()) if properties else None
-    main_code = _make_root_model(pascal_name, safe_desc, root_type, schema_title=schema_title, expanded_ref=ref_target, expanded_ref_props=prop_names)
+    main_code = _make_root_model(pascal_name, safe_desc, root_type, schema_title=schema_title, expanded_ref=ref_target, expanded_ref_props=original_prop_names)
     return "\n\n".join(variant_codes + [main_code])
 
 
@@ -1051,7 +1126,7 @@ def _resolve_to_base_model(
         if target_schema is None:
             return current_ref, None
 
-        if not _is_root_model_schema(target_schema):
+        if not _is_root_model_schema(target_schema, all_schemas):
             # Found a BaseModel
             return current_ref, target_schema
 

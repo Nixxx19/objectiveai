@@ -3,28 +3,21 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.agent.claude_agent_sdk.agent import Agent as AgentClaudeAgentSdkAgent
-from objectiveai.agent.mock.agent import Agent as AgentMockAgent
-from objectiveai.agent.openrouter.agent import Agent as AgentOpenrouterAgent
+from objectiveai.agent.inline_agent import InlineAgent
+from objectiveai.agent.remote_agent import RemoteAgent
 
 
 class AgentVariant1(RootModel):
-    root: AgentOpenrouterAgent
+    root: RemoteAgent
 
 
 class AgentVariant2(RootModel):
-    root: AgentClaudeAgentSdkAgent
-
-
-class AgentVariant3(RootModel):
-    root: AgentMockAgent
+    root: InlineAgent
 
 
 class Agent(RootModel):
-    """A validated Agent with its computed content-addressed ID.
-
-This is an untagged enum that dispatches to the per-upstream Agent."""
+    """A validated Agent, either remote (with metadata) or inline."""
     model_config = ConfigDict(title='agent.Agent')
 
-    root: Union[AgentVariant1, AgentVariant2, AgentVariant3]
+    root: Union[AgentVariant1, AgentVariant2]
 

@@ -9,7 +9,7 @@ from objectiveai.functions.full_remote_function import FullRemoteFunction
 from objectiveai.functions.inventions.response.unary.agent_completion import AgentCompletion
 from objectiveai.functions.inventions.response.unary.object import Object
 from objectiveai.functions.inventions.state.state import State
-from objectiveai.functions.remote_function_path import RemoteFunctionPath
+from objectiveai.remote_path import RemotePath
 
 
 class FunctionInvention(BaseModel):
@@ -22,7 +22,7 @@ class FunctionInvention(BaseModel):
     id: str
     index: int = Field(..., ge=0, le=18446744073709551615)
     object: Object
-    path: Optional[RemoteFunctionPath] = None
+    path: Optional[RemotePath] = None
     state: State
     usage: Usage
 

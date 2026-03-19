@@ -4,32 +4,30 @@ from .alpha_inline_function import AlphaInlineFunction, AlphaInlineFunctionVaria
 from .alpha_remote_function import AlphaRemoteFunction, AlphaRemoteFunctionVariant1, AlphaRemoteFunctionVariant2  # noqa: F401
 from .compiled_task import CompiledTask, CompiledTaskVariant1, CompiledTaskVariant2  # noqa: F401
 from .full_inline_function import FullInlineFunction, FullInlineFunctionVariant1, FullInlineFunctionVariant2  # noqa: F401
+from .full_inline_function_or_remote_commit_optional import FullInlineFunctionOrRemoteCommitOptional, FullInlineFunctionOrRemoteCommitOptionalVariant1, FullInlineFunctionOrRemoteCommitOptionalVariant2  # noqa: F401
 from .full_remote_function import FullRemoteFunction, FullRemoteFunctionVariant1, FullRemoteFunctionVariant2  # noqa: F401
 from .function import Function, FunctionVariant1, FunctionVariant2  # noqa: F401
 from .function_type import FunctionType  # noqa: F401
-from .get_function import GetFunction, GetFunctionVariant1, GetFunctionVariant2  # noqa: F401
-from .get_function_profile_pair import GetFunctionProfilePair  # noqa: F401
-from .inline_auto_profile import InlineAutoProfile  # noqa: F401
+from .get_function_profile_pair_response import GetFunctionProfilePairResponse  # noqa: F401
+from .get_function_profile_pair_usage_request import GetFunctionProfilePairUsageRequest  # noqa: F401
+from .get_function_response import GetFunctionResponse  # noqa: F401
 from .inline_function import InlineFunction, InlineFunctionVariant1, InlineFunctionVariant2  # noqa: F401
 from .inline_profile import InlineProfile, InlineProfileVariant1, InlineProfileVariant2  # noqa: F401
+from .inline_profile_or_remote_commit_optional import InlineProfileOrRemoteCommitOptional, InlineProfileOrRemoteCommitOptionalVariant1, InlineProfileOrRemoteCommitOptionalVariant2  # noqa: F401
 from .inline_tasks_profile import InlineTasksProfile  # noqa: F401
-from .list_function import ListFunction  # noqa: F401
-from .list_function_item import ListFunctionItem  # noqa: F401
-from .list_function_profile_pair import ListFunctionProfilePair  # noqa: F401
 from .list_function_profile_pair_item import ListFunctionProfilePairItem  # noqa: F401
-from .list_function_profile_pairs_query_parameters import ListFunctionProfilePairsQueryParameters  # noqa: F401
+from .list_function_profile_pair_response import ListFunctionProfilePairResponse  # noqa: F401
+from .list_function_profile_pairs_request import ListFunctionProfilePairsRequest  # noqa: F401
 from .list_function_profile_pairs_source import ListFunctionProfilePairsSource  # noqa: F401
-from .list_functions_query_parameters import ListFunctionsQueryParameters  # noqa: F401
+from .list_function_response import ListFunctionResponse  # noqa: F401
+from .list_functions_request import ListFunctionsRequest  # noqa: F401
 from .list_functions_source import ListFunctionsSource  # noqa: F401
 from .placeholder_scalar_function_task import PlaceholderScalarFunctionTask  # noqa: F401
 from .placeholder_scalar_function_task_expression import PlaceholderScalarFunctionTaskExpression, PlaceholderScalarFunctionTaskExpressionInputVariant1, PlaceholderScalarFunctionTaskExpressionInputVariant2  # noqa: F401
 from .placeholder_vector_function_task import PlaceholderVectorFunctionTask  # noqa: F401
 from .placeholder_vector_function_task_expression import PlaceholderVectorFunctionTaskExpression, PlaceholderVectorFunctionTaskExpressionInputVariant1, PlaceholderVectorFunctionTaskExpressionInputVariant2  # noqa: F401
 from .profile import Profile, ProfileVariant1, ProfileVariant2  # noqa: F401
-from .remote import Remote, RemoteVariant1, RemoteVariant2, RemoteVariant3  # noqa: F401
-from .remote_auto_profile import RemoteAutoProfile  # noqa: F401
 from .remote_function import RemoteFunction, RemoteFunctionVariant1, RemoteFunctionVariant2  # noqa: F401
-from .remote_function_path import RemoteFunctionPath  # noqa: F401
 from .remote_profile import RemoteProfile, RemoteProfileVariant1, RemoteProfileVariant2  # noqa: F401
 from .remote_tasks_profile import RemoteTasksProfile  # noqa: F401
 from .scalar_function_task import ScalarFunctionTask  # noqa: F401
@@ -37,8 +35,8 @@ from .scalar_function_task_expression import ScalarFunctionTaskExpression, Scala
 from .task import Task, TaskVariant1, TaskVariant2, TaskVariant3, TaskVariant4, TaskVariant5  # noqa: F401
 from .task_expression import TaskExpression, TaskExpressionVariant1, TaskExpressionVariant2, TaskExpressionVariant3, TaskExpressionVariant4, TaskExpressionVariant5  # noqa: F401
 from .task_profile import TaskProfile, TaskProfileVariant1, TaskProfileVariant2, TaskProfileVariant3  # noqa: F401
-from .usage_function import UsageFunction  # noqa: F401
-from .usage_function_profile_pair import UsageFunctionProfilePair  # noqa: F401
+from .usage_function_profile_pair_response import UsageFunctionProfilePairResponse  # noqa: F401
+from .usage_function_response import UsageFunctionResponse  # noqa: F401
 from .vector_completion_task import VectorCompletionTask  # noqa: F401
 from .vector_completion_task_expression import VectorCompletionTaskExpression, VectorCompletionTaskExpressionMessagesItemVariant1, VectorCompletionTaskExpressionMessagesItemVariant2, VectorCompletionTaskExpressionMessagesVariant1, VectorCompletionTaskExpressionMessagesVariant2, VectorCompletionTaskExpressionResponsesItemVariant1, VectorCompletionTaskExpressionResponsesItemVariant2, VectorCompletionTaskExpressionResponsesVariant1, VectorCompletionTaskExpressionResponsesVariant2  # noqa: F401
 from .vector_function_task import VectorFunctionTask  # noqa: F401

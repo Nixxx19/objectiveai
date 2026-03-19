@@ -20,7 +20,6 @@ globals().update(http_test_suite(
             body={
                 "messages": [{"role": "user", "content": "Which is better?"}],
                 "swarm": {"agents": [MOCK_AGENT]},
-                "profile": ["1"],
                 "responses": ["Response A", "Response B"],
                 "seed": 42,
             },
@@ -30,7 +29,6 @@ globals().update(http_test_suite(
             body={
                 "messages": [{"role": "user", "content": "Pick the best"}],
                 "swarm": {"agents": [MOCK_AGENT]},
-                "profile": ["1"],
                 "responses": [f"Response {i}" for i in range(25)],
                 "seed": 42,
             },
@@ -47,8 +45,8 @@ globals().update(http_test_suite(
                         {"upstream": "mock", "output_mode": "json_schema"},
                         {"upstream": "mock", "output_mode": "tool_call"},
                     ],
+                    "weights": ["0.4", "0.3", "0.3"],
                 },
-                "profile": ["0.4", "0.3", "0.3"],
                 "responses": [
                     "Kyoto, Japan",
                     "Reykjavik, Iceland",

@@ -6,13 +6,13 @@ from objectiveai.functions.executions.response.streaming import FunctionExecutio
 from tests.http_test_util import HttpTestCase, http_test_suite, ASSETS_DIR
 
 
-def execution_endpoint(repo: str) -> str:
-    return f"/functions/mock/mock/{repo}/mock/profiles/mock/mock/{repo}/mock"
+def mock_remote(repo: str) -> dict:
+    return {"remote": "mock", "owner": "mock", "repository": repo, "commit": "mock"}
 
 
 globals().update(http_test_suite(
     name="function executions http",
-    endpoint="",
+    endpoint="/functions",
     snapshots_dir=ASSETS_DIR / "functions" / "executions" / "client_tests",
     chunk_cls=FunctionExecutionChunk,
     chunk_to_unary=objectiveai_pyo3.function_execution_chunk_to_unary,
@@ -20,18 +20,30 @@ globals().update(http_test_suite(
     cases=[
         HttpTestCase(
             snapshot="mock_1_scalar_leaf_binary_seed_42",
-            endpoint=execution_endpoint("mock-1"),
-            body={"input": {"text": "Hello world"}, "seed": 42},
+            body={
+                "function": mock_remote("mock-1"),
+                "profile": mock_remote("mock-1"),
+                "input": {"text": "Hello world"},
+                "seed": 42,
+            },
         ),
         HttpTestCase(
             snapshot="mock_7_vector_5_criteria_seed_42",
-            endpoint=execution_endpoint("mock-7"),
-            body={"input": {"items": ["Option A", "Option B", "Option C"]}, "seed": 42},
+            body={
+                "function": mock_remote("mock-7"),
+                "profile": mock_remote("mock-7"),
+                "input": {"items": ["Option A", "Option B", "Option C"]},
+                "seed": 42,
+            },
         ),
         HttpTestCase(
             snapshot="mock_20_vector_super_branch_seed_42",
-            endpoint=execution_endpoint("mock-20"),
-            body={"input": {"items": ["Alpha", "Beta", "Gamma"]}, "seed": 42},
+            body={
+                "function": mock_remote("mock-20"),
+                "profile": mock_remote("mock-20"),
+                "input": {"items": ["Alpha", "Beta", "Gamma"]},
+                "seed": 42,
+            },
         ),
     ],
 ))

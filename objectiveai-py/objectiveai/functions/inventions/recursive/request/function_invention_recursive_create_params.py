@@ -3,17 +3,16 @@
 from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.request.agent import Agent
 from objectiveai.agent.completions.request.provider import Provider
+from objectiveai.agent.inline_agent_base_with_fallbacks_or_remote_commit_optional import InlineAgentBaseWithFallbacksOrRemoteCommitOptional
 from objectiveai.functions.inventions.state.params_state import ParamsState
-from objectiveai.functions.remote import Remote
+from objectiveai.remote import Remote
 
 
 class FunctionInventionRecursiveCreateParams(BaseModel):
     model_config = ConfigDict(title='functions.inventions.recursive.request.FunctionInventionRecursiveCreateParams')
 
-    agent: Agent
-    agents: Optional[list[Agent]] = None
+    agent: InlineAgentBaseWithFallbacksOrRemoteCommitOptional
     max_step_retries: Optional[Annotated[int, Field(ge=0, le=4294967295)]] = Field(None, description="Maximum number of retries per invention step.\nEach step is one agent completion (which itself may loop internally\nvia tool calls). If the step's validation still fails after the\nagent loop ends, the step is retried up to this many times.\nDefaults to 3 if not specified.")
     mcp_server_authorization: Optional[dict[str, str]] = Field(None, description='Map from MCP server URL to authorization header value.')
     name: str
