@@ -64,7 +64,7 @@ impl AlphaScalarBranchState {
     pub fn read_spec_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
+        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::EmptyObjectJsonSchema>(
             "ReadSpec",
             "Read Spec",
             {
@@ -80,7 +80,7 @@ impl AlphaScalarBranchState {
     pub fn read_essay_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
+        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::EmptyObjectJsonSchema>(
             "ReadEssay",
             "Read Essay",
             {
@@ -156,7 +156,7 @@ impl AlphaScalarBranchState {
     pub fn read_input_schema_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
+        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::EmptyObjectJsonSchema>(
             "ReadInputSchema",
             "Read Input Schema",
             {
@@ -179,7 +179,7 @@ impl AlphaScalarBranchState {
     pub fn write_input_schema_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::AnyObjectJsonSchema>(
+        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::AnyObjectJsonSchema>(
             "WriteInputSchema",
             "Write Input Schema",
             {
@@ -252,7 +252,7 @@ impl AlphaScalarBranchState {
     pub fn read_essay_tasks_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
+        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::EmptyObjectJsonSchema>(
             "ReadEssayTasks",
             "Read Essay Tasks",
             {
@@ -330,7 +330,7 @@ impl AlphaScalarBranchState {
     pub fn read_tasks_length_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
+        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::EmptyObjectJsonSchema>(
             "ReadTasksLength",
             "Read Tasks Length",
             {
@@ -455,7 +455,7 @@ impl AlphaScalarBranchState {
     pub fn append_task_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::AnyObjectJsonSchema>(
+        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::AnyObjectJsonSchema>(
             "AppendTask",
             "Append Task",
             {
@@ -526,7 +526,7 @@ impl AlphaScalarBranchState {
     pub fn check_function_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
+        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::EmptyObjectJsonSchema>(
             "CheckFunction",
             "Check if function is valid",
             {
@@ -563,7 +563,7 @@ impl AlphaScalarBranchState {
     pub fn read_predicted_tasks_length_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
+        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::EmptyObjectJsonSchema>(
             "ReadPredictedTasksLength",
             "Read Predicted Tasks Length",
             {
@@ -657,7 +657,7 @@ impl AlphaScalarBranchState {
     pub fn read_description_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
+        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::EmptyObjectJsonSchema>(
             "ReadDescription",
             "Read Description",
             {

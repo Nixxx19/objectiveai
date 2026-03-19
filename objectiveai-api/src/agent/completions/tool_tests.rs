@@ -21,7 +21,7 @@ fn mcp_tool(name: &str) -> crate::mcp::tool::Tool {
 }
 
 fn invention_tool(name: &'static str) -> objectiveai::functions::inventions::InventionTool {
-    objectiveai::functions::inventions::InventionTool::new_sync::<objectiveai::json_schema::EmptyObjectJsonSchema>(
+    objectiveai::functions::inventions::InventionTool::new_sync::<objectiveai::functions::inventions::EmptyObjectJsonSchema>(
         name,
         "test tool",
         |_| Ok("ok".into()),

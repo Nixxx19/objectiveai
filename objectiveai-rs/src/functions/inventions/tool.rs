@@ -34,7 +34,7 @@ impl InventionTool {
         format!("{:x}", h.finish())
     }
 
-    pub fn new_sync<T: crate::json_schema::JsonSchema>(
+    pub fn new_sync<T: super::JsonSchema>(
         name: &'static str,
         description: &'static str,
         f: impl Fn(serde_json::Value) -> Result<String, String>
@@ -53,7 +53,7 @@ impl InventionTool {
         }
     }
 
-    pub fn new_async<T: crate::json_schema::JsonSchema>(
+    pub fn new_async<T: super::JsonSchema>(
         name: &'static str,
         description: &'static str,
         f: impl Fn(

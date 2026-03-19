@@ -21,7 +21,7 @@ pub fn schema_tools(schemas: &[&str]) -> Vec<InventionTool> {
         let tool_name = schema_lookup::tool_name(name).unwrap();
         let tool_desc = schema_lookup::tool_description(name).unwrap();
 
-        tools.push(InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
+        tools.push(InventionTool::new_sync::<super::EmptyObjectJsonSchema>(
             tool_name,
             tool_desc,
             move |_| Ok(content.to_string()),
