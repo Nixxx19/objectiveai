@@ -52,9 +52,9 @@ where
                     self.mock.list_agents(ctx),
                 ).await;
                 let mut data = Vec::new();
-                if let Ok(r) = o { data.extend(r.data); }
-                if let Ok(r) = f { data.extend(r.data); }
-                if let Ok(r) = m { data.extend(r.data); }
+                data.extend(o?.data);
+                data.extend(f?.data);
+                data.extend(m?.data);
                 Ok(ListAgentResponse { data })
             }
         }
@@ -77,9 +77,9 @@ where
                     self.mock.list_swarms(ctx),
                 ).await;
                 let mut data = Vec::new();
-                if let Ok(r) = o { data.extend(r.data); }
-                if let Ok(r) = f { data.extend(r.data); }
-                if let Ok(r) = m { data.extend(r.data); }
+                data.extend(o?.data);
+                data.extend(f?.data);
+                data.extend(m?.data);
                 Ok(ListSwarmResponse { data })
             }
         }
@@ -102,9 +102,9 @@ where
                     self.mock.list_functions(ctx),
                 ).await;
                 let mut data = Vec::new();
-                if let Ok(r) = o { data.extend(r.data); }
-                if let Ok(r) = f { data.extend(r.data); }
-                if let Ok(r) = m { data.extend(r.data); }
+                data.extend(o?.data);
+                data.extend(f?.data);
+                data.extend(m?.data);
                 Ok(ListFunctionResponse { data })
             }
         }
@@ -127,9 +127,9 @@ where
                     self.mock.list_profiles(ctx),
                 ).await;
                 let mut data = Vec::new();
-                if let Ok(r) = o { data.extend(r.data); }
-                if let Ok(r) = f { data.extend(r.data); }
-                if let Ok(r) = m { data.extend(r.data); }
+                data.extend(o?.data);
+                data.extend(f?.data);
+                data.extend(m?.data);
                 Ok(ListProfileResponse { data })
             }
         }
