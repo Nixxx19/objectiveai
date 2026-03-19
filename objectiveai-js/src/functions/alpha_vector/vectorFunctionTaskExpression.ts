@@ -3,13 +3,13 @@
 import { z } from "zod";
 import { FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema } from "./expression/vectorFunctionInputValueExpression";
 import { FunctionsExpressionExpressionSchema } from "../expression/expression";
-import { FunctionsRemoteSchema } from "../remote";
+import { RemoteSchema } from "../../remote";
 
 export const FunctionsAlphaVectorVectorFunctionTaskExpressionSchema = z.object({
   commit: z.string(),
   input: FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema,
   owner: z.string(),
-  remote: FunctionsRemoteSchema,
+  remote: RemoteSchema,
   repository: z.string(),
   skip: FunctionsExpressionExpressionSchema.nullable().optional(),
 }).meta({ title: "functions.alpha_vector.VectorFunctionTaskExpression" });

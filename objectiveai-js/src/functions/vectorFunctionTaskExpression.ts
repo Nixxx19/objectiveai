@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { FunctionsExpressionExpressionSchema } from "./expression/expression";
 import { FunctionsExpressionInputValueExpressionSchema } from "./expression/inputValueExpression";
-import { FunctionsRemoteSchema } from "./remote";
+import { RemoteSchema } from "../remote";
 
 export const FunctionsVectorFunctionTaskExpressionSchema = z.object({
   commit: z.string().describe("Git commit SHA for the function version."),
@@ -11,7 +11,7 @@ export const FunctionsVectorFunctionTaskExpressionSchema = z.object({
   map: FunctionsExpressionExpressionSchema.nullable().describe("Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).").optional(),
   output: FunctionsExpressionExpressionSchema.describe("Expression to transform the task result into a valid function output.\n\nReceives `output` which is one of 4 variants:\n- `Scalar(Decimal)` - a single score\n- `Vector(Vec<Decimal>)` - a vector of scores\n- `Vectors(Vec<Vec<Decimal>>)` - multiple vectors (from mapped tasks)\n- `Err(Value)` - an error\n\nThe expression must return a `TaskOutputOwned` that is valid for the parent function's type:\n- For scalar functions: must return `Scalar(value)` where value is in [0, 1]\n- For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length\n\nThe function's final output is computed as a weighted average of all task outputs using\nprofile weights. If a function has only one task, that task's output becomes the function's\noutput directly."),
   owner: z.string().describe("Repository owner."),
-  remote: FunctionsRemoteSchema.describe("The remote source where the function is hosted."),
+  remote: RemoteSchema.describe("The remote source where the function is hosted."),
   repository: z.string().describe("Repository name."),
   skip: FunctionsExpressionExpressionSchema.nullable().describe("If this expression evaluates to true, skip the task. Receives: `input`.").optional(),
 }).describe("Expression for a task that calls a vector function (pre-compilation).").meta({ title: "functions.VectorFunctionTaskExpression" });

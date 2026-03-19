@@ -7,7 +7,7 @@ import { FunctionsFullRemoteFunctionSchema } from "../../../../fullRemoteFunctio
 import { FunctionsInventionsResponseStreamingAgentCompletionChunkSchema } from "../../../response/streaming/agentCompletionChunk";
 import { FunctionsInventionsResponseStreamingObjectSchema } from "../../../response/streaming/object";
 import { FunctionsInventionsStateStateSchema } from "../../../state/state";
-import { FunctionsRemoteFunctionPathSchema } from "../../../../remoteFunctionPath";
+import { RemotePathSchema } from "../../../../../remotePath";
 
 export const FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema = z.object({
   completions: z.array(FunctionsInventionsResponseStreamingAgentCompletionChunkSchema),
@@ -17,7 +17,7 @@ export const FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk
   id: z.string(),
   index: z.number().int().min(0).max(18446744073709552000),
   object: FunctionsInventionsResponseStreamingObjectSchema,
-  path: FunctionsRemoteFunctionPathSchema.nullable().optional(),
+  path: RemotePathSchema.nullable().optional(),
   state: FunctionsInventionsStateStateSchema.nullable().optional(),
   usage: AgentCompletionsResponseUsageSchema.nullable().optional(),
 }).meta({ title: "functions.inventions.recursive.response.streaming.FunctionInventionChunk" });

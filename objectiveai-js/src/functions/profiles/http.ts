@@ -1,45 +1,30 @@
 import { ObjectiveAI, type RequestOptions } from "../../client";
-import type { FunctionsRemote } from "../remote";
-import type { FunctionsProfilesListProfilesSource } from "./listProfilesSource";
-import type { FunctionsProfilesListProfile } from "./listProfile";
-import type { FunctionsProfilesGetProfile } from "./getProfile";
-import type { FunctionsProfilesUsageProfile } from "./usageProfile";
+import type { RemotePathCommitOptional } from "../../remotePathCommitOptional";
+import type { FunctionsProfilesListProfilesRequest } from "./listProfilesRequest";
+import type { FunctionsProfilesListProfileResponse } from "./listProfileResponse";
+import type { FunctionsProfilesGetProfileResponse } from "./getProfileResponse";
+import type { FunctionsProfilesUsageProfileResponse } from "./usageProfileResponse";
 
 export function functionsProfilesListProfiles(
   client: ObjectiveAI,
-  source?: FunctionsProfilesListProfilesSource | null,
+  params: FunctionsProfilesListProfilesRequest,
   options?: RequestOptions,
-): Promise<FunctionsProfilesListProfile> {
-  const path = source != null ? `/functions/profiles?source=${source}` : "/functions/profiles";
-  return client.get_unary<FunctionsProfilesListProfile>(path, undefined, options);
+): Promise<FunctionsProfilesListProfileResponse> {
+  return client.get_unary<FunctionsProfilesListProfileResponse>("functions/profiles/list", params, options);
 }
 
 export function functionsProfilesGetProfile(
   client: ObjectiveAI,
-  remote: FunctionsRemote,
-  owner: string,
-  repository: string,
-  commit?: string | null,
+  params: RemotePathCommitOptional,
   options?: RequestOptions,
-): Promise<FunctionsProfilesGetProfile> {
-  const path =
-    commit != null
-      ? `/functions/profiles/${remote}/${owner}/${repository}/${commit}`
-      : `/functions/profiles/${remote}/${owner}/${repository}`;
-  return client.get_unary<FunctionsProfilesGetProfile>(path, undefined, options);
+): Promise<FunctionsProfilesGetProfileResponse> {
+  return client.get_unary<FunctionsProfilesGetProfileResponse>("functions/profiles", params, options);
 }
 
 export function functionsProfilesGetProfileUsage(
   client: ObjectiveAI,
-  premote: FunctionsRemote,
-  powner: string,
-  prepository: string,
-  pcommit?: string | null,
+  params: RemotePathCommitOptional,
   options?: RequestOptions,
-): Promise<FunctionsProfilesUsageProfile> {
-  const path =
-    pcommit != null
-      ? `/functions/profiles/${premote}/${powner}/${prepository}/${pcommit}/usage`
-      : `/functions/profiles/${premote}/${powner}/${prepository}/usage`;
-  return client.get_unary<FunctionsProfilesUsageProfile>(path, undefined, options);
+): Promise<FunctionsProfilesUsageProfileResponse> {
+  return client.get_unary<FunctionsProfilesUsageProfileResponse>("functions/profiles/usage", params, options);
 }

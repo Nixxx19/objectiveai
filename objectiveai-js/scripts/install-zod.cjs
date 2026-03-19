@@ -294,6 +294,14 @@ function convert(schema, refs, lazyRefs, selfTitle, cyclicTitles) {
       } else {
         expr = `${baseName}${andBlock}`;
       }
+    } else if (schema.type === "object") {
+      // $ref with type: "object" but no properties — use .and(z.object({}))
+      // to preserve the $ref during roundtrip (otherwise the ref is inlined)
+      if (isLazy) {
+        expr = `z.lazy(() => ${baseName}).and(z.object({}))`;
+      } else {
+        expr = `${baseName}.and(z.object({}))`;
+      }
     } else if (isLazy) {
       expr = `z.lazy(() => ${baseName})`;
     } else {
