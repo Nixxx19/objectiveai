@@ -123,18 +123,28 @@ pub unsafe extern "C" fn objectiveai_validate_agent(
 /// Validates an Swarm configuration and computes its content-addressed ID.
 ///
 /// Input: JSON bytes of an SwarmBase.
+/// Optional: JSON bytes of a remote agents hashmap (pass null/0 if none).
 /// Output: JSON bytes of the validated Swarm with computed `id` field.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn objectiveai_validate_swarm(
     json_in: *const u8,
     json_in_len: usize,
+    remote_agents_in: *const u8,
+    remote_agents_in_len: usize,
     json_out: *mut *mut u8,
     json_out_len: *mut usize,
 ) -> i32 {
     unsafe {
         run(json_out, json_out_len, || {
             let base: objectiveai::swarm::SwarmBase = from_json(json_in, json_in_len)?;
-            let swarm: objectiveai::swarm::Swarm = base.convert(None)?;
+            let remote_agents: Option<
+                std::collections::HashMap<String, objectiveai::agent::RemoteAgentWithFallbacks>,
+            > = if remote_agents_in.is_null() || remote_agents_in_len == 0 {
+                None
+            } else {
+                Some(from_json(remote_agents_in, remote_agents_in_len)?)
+            };
+            let swarm: objectiveai::swarm::Swarm = base.convert(remote_agents.as_ref())?;
             to_json(&swarm)
         })
     }

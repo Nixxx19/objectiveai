@@ -45,10 +45,16 @@ fn validate_agent(py: Python<'_>, agent: &Bound<'_, PyAny>) -> PyResult<Py<PyAny
 ///
 /// Returns the validated Swarm as a Python dict with its computed `id` field.
 #[pyfunction]
-fn validate_swarm(py: Python<'_>, swarm: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+#[pyo3(signature = (swarm, remote_agents=None))]
+fn validate_swarm(py: Python<'_>, swarm: &Bound<'_, PyAny>, remote_agents: Option<&Bound<'_, PyAny>>) -> PyResult<Py<PyAny>> {
     let swarm_base: objectiveai::swarm::SwarmBase = from_py(swarm)?;
+    let remote_agents: Option<std::collections::HashMap<String, objectiveai::agent::RemoteAgentWithFallbacks>> =
+        match remote_agents {
+            Some(ra) => Some(from_py(ra)?),
+            None => None,
+        };
     let swarm: objectiveai::swarm::Swarm = swarm_base
-        .convert(None)
+        .convert(remote_agents.as_ref())
         .map_err(|e| PyValueError::new_err(e))?;
     to_py(py, &swarm)
 }
