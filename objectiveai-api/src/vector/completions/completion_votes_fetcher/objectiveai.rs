@@ -31,9 +31,12 @@ where
         objectiveai::error::ResponseError,
     > {
         let client = self.client.with_authorization(&ctx).await;
+        let request = objectiveai::vector::completions::cache::request::GetCompletionVotesRequest {
+            id: id.to_owned(),
+        };
         match objectiveai::vector::completions::cache::get_completion_votes(
             &client,
-            id,
+            &request,
         )
         .await
         {

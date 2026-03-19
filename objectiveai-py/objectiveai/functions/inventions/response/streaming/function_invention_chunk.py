@@ -9,7 +9,7 @@ from objectiveai.functions.full_remote_function import FullRemoteFunction
 from objectiveai.functions.inventions.response.streaming.agent_completion_chunk import AgentCompletionChunk
 from objectiveai.functions.inventions.response.streaming.object import Object
 from objectiveai.functions.inventions.state.state import State
-from objectiveai.functions.remote_function_path import RemoteFunctionPath
+from objectiveai.remote_path import RemotePath
 
 
 class FunctionInventionChunk(BaseModel):
@@ -21,7 +21,7 @@ class FunctionInventionChunk(BaseModel):
     function: Optional[FullRemoteFunction] = None
     id: str
     object: Object
-    path: Optional[RemoteFunctionPath] = None
+    path: Optional[RemotePath] = None
     state: Optional[State] = None
     usage: Optional[Usage] = None
 

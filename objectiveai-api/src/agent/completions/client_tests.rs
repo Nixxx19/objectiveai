@@ -5,7 +5,7 @@ use objectiveai::agent::completions::message::{
     Message, RichContent, SimpleContent, UserMessage, DeveloperMessage,
 };
 use objectiveai::agent::completions::request::{
-    Agent as AgentParam, AgentCompletionCreateParams, ResponseFormat,
+    AgentCompletionCreateParams, ResponseFormat,
     ResponseFormatParam,
 };
 use objectiveai::agent::completions::response::unary::{AgentCompletion, Message as UnaryMessage};
@@ -16,24 +16,68 @@ use crate::agent::completions::StreamItem;
 use crate::ctx;
 
 // ---------------------------------------------------------------------------
-// Stub fetcher — never actually called since we always provide inline agents.
+// Stub retrieve client — never actually called since we always provide inline agents.
 // ---------------------------------------------------------------------------
 
-struct StubFetcher;
+struct StubRetrieveClient;
 
 #[async_trait::async_trait]
-impl crate::agent::fetcher::Fetcher<ctx::DefaultContextExt> for StubFetcher {
-    async fn fetch(
+impl crate::retrieval::retrieve::Client<ctx::DefaultContextExt> for StubRetrieveClient {
+    async fn get_agent(
         &self,
-        _ctx: ctx::Context<ctx::DefaultContextExt>,
-        _id: &str,
-    ) -> Result<
-        Option<(objectiveai::agent::Agent, u64)>,
-        objectiveai::error::ResponseError,
-    > {
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::agent::RemoteAgentBaseWithFallbacks>, objectiveai::error::ResponseError> {
         Err(objectiveai::error::ResponseError {
             code: 501,
-            message: serde_json::json!("stub fetcher should not be called"),
+            message: serde_json::json!("stub retrieve client should not be called"),
+        })
+    }
+
+    async fn get_swarm(
+        &self,
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::swarm::RemoteSwarmBase>, objectiveai::error::ResponseError> {
+        Err(objectiveai::error::ResponseError {
+            code: 501,
+            message: serde_json::json!("stub retrieve client should not be called"),
+        })
+    }
+
+    async fn get_function(
+        &self,
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::functions::FullRemoteFunction>, objectiveai::error::ResponseError> {
+        Err(objectiveai::error::ResponseError {
+            code: 501,
+            message: serde_json::json!("stub retrieve client should not be called"),
+        })
+    }
+
+    async fn get_profile(
+        &self,
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::functions::RemoteProfile>, objectiveai::error::ResponseError> {
+        Err(objectiveai::error::ResponseError {
+            code: 501,
+            message: serde_json::json!("stub retrieve client should not be called"),
+        })
+    }
+
+    async fn resolve_latest_commit(
+        &self,
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _kind: crate::retrieval::Kind,
+        _remote: objectiveai::Remote,
+        _owner: &str,
+        _repository: &str,
+    ) -> Result<Option<String>, objectiveai::error::ResponseError> {
+        Err(objectiveai::error::ResponseError {
+            code: 501,
+            message: serde_json::json!("stub retrieve client should not be called"),
         })
     }
 }
@@ -62,11 +106,13 @@ fn make_client() -> super::Client<
     UnimplementedUpstreamClient,
     UnimplementedUpstreamClient,
     crate::agent::completions::mock::Client,
-    StubFetcher,
+    StubRetrieveClient,
+    StubRetrieveClient,
+    StubRetrieveClient,
     StubUsageHandler,
 > {
-    super::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
+    super::Client::new(
+        Arc::new(crate::mcp::Client::new(
             reqwest::Client::new(),
             None,
             None,
@@ -80,25 +126,27 @@ fn make_client() -> super::Client<
             Duration::ZERO,
             Duration::from_millis(1),
         )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubFetcher),
+        Arc::new(crate::retrieval::retrieve::Router::new(
+            Arc::new(StubRetrieveClient),
+            Arc::new(StubRetrieveClient),
+            Arc::new(StubRetrieveClient),
         )),
-        usage_handler: Arc::new(StubUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
+        Arc::new(StubUsageHandler),
+        Arc::new(UnimplementedUpstreamClient),
+        Arc::new(UnimplementedUpstreamClient),
+        Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
             max_tool_calls: 1000,
         }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    }
+        Duration::ZERO,
+        Duration::ZERO,
+        0.0,
+        1.0,
+        Duration::ZERO,
+        Duration::ZERO,
+        Duration::from_millis(1),
+        Duration::from_millis(1),
+    )
 }
 
 fn make_ctx() -> ctx::Context<ctx::DefaultContextExt> {
@@ -181,10 +229,12 @@ async fn test_basic_mock_agent_seed_42() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: None,
         seed: Some(42),
@@ -212,10 +262,12 @@ async fn test_basic_mock_agent_seed_123() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: None,
         seed: Some(123),
@@ -242,10 +294,12 @@ async fn test_basic_mock_agent_seed_123() {
 async fn test_deterministic_with_same_seed() {
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: None,
         seed: Some(77),
@@ -281,10 +335,12 @@ async fn test_deterministic_with_same_seed() {
 async fn test_different_seeds_differ() {
     let params_a = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: None,
         seed: Some(1),
@@ -293,10 +349,12 @@ async fn test_different_seeds_differ() {
     });
     let params_b = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: None,
         seed: Some(2),
@@ -341,13 +399,15 @@ async fn test_mock_agent_with_error() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase {
-                error: Some(true),
-                ..Default::default()
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase {
+                    error: Some(true),
+                    ..Default::default()
+                }),
+                fallbacks: None,
             },
-        )),
-        agents: None,
+        ),
         provider: None,
         response_format: None,
         seed: Some(42),
@@ -370,10 +430,12 @@ async fn test_with_single_user_message() {
             content: RichContent::Text("Hello, world!".into()),
             name: None,
         })],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: None,
         seed: Some(42),
@@ -410,10 +472,12 @@ async fn test_with_developer_and_user_messages() {
                 name: None,
             }),
         ],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: None,
         seed: Some(99),
@@ -441,10 +505,12 @@ async fn test_json_object_response_format() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: Some(ResponseFormatParam::Single(ResponseFormat::JsonObject)),
         seed: Some(42),
@@ -472,10 +538,12 @@ async fn test_json_schema_response_format() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: Some(ResponseFormatParam::Single(ResponseFormat::JsonSchema {
             schema: indexmap::indexmap! {
@@ -511,10 +579,12 @@ async fn test_text_response_format() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: Some(ResponseFormatParam::Single(ResponseFormat::Text)),
         seed: Some(77),
@@ -542,10 +612,12 @@ async fn test_grammar_response_format_rejected() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: Some(ResponseFormatParam::Single(ResponseFormat::Grammar {
             grammar: "root ::= 'hello'".into(),
@@ -567,10 +639,12 @@ async fn test_python_response_format_rejected() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: Some(ResponseFormatParam::Single(ResponseFormat::Python)),
         seed: Some(42),
@@ -590,10 +664,12 @@ async fn test_required_tool_call_response_format() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: Some(ResponseFormatParam::Single(ResponseFormat::ToolCall {
             name: "submit".into(),
@@ -631,10 +707,12 @@ async fn test_optional_tool_call_response_format() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: Some(ResponseFormatParam::Single(ResponseFormat::ToolCall {
             name: "submit_answer".into(),
@@ -700,10 +778,12 @@ async fn test_with_invention_tools() {
             content: RichContent::Text("Run some code".into()),
             name: None,
         })],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: None,
         seed: Some(88),
@@ -744,10 +824,12 @@ async fn test_invention_tools_with_tool_call_response_format() {
 
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: Some(ResponseFormatParam::Single(ResponseFormat::ToolCall {
             name: "submit".into(),
@@ -798,10 +880,12 @@ async fn test_invention_tool_returns_error() {
 
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: None,
         seed: Some(88),
@@ -838,10 +922,12 @@ async fn test_multiple_user_messages() {
                 name: Some("alice".into()),
             }),
         ],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: None,
         seed: Some(55),
@@ -869,13 +955,15 @@ async fn test_mock_agent_error_false_succeeds() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase {
-                error: Some(false),
-                ..Default::default()
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase {
+                    error: Some(false),
+                    ..Default::default()
+                }),
+                fallbacks: None,
             },
-        )),
-        agents: None,
+        ),
         provider: None,
         response_format: None,
         seed: Some(42),
@@ -903,10 +991,12 @@ async fn test_final_item_is_mock_continuation() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: None,
         seed: Some(42),
@@ -943,8 +1033,12 @@ async fn test_per_agent_response_format() {
 
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(mock_base)),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(mock_base),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: Some(ResponseFormatParam::PerAgent(per_agent)),
         seed: Some(42),
@@ -978,10 +1072,12 @@ async fn test_per_agent_response_format_unknown_id() {
 
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: Some(ResponseFormatParam::PerAgent(per_agent)),
         seed: Some(42),
@@ -1012,10 +1108,12 @@ async fn test_json_schema_nested_object() {
             content: RichContent::Text("Generate a person".into()),
             name: None,
         })],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: Some(ResponseFormatParam::Single(ResponseFormat::JsonSchema {
             schema: indexmap::indexmap! {
@@ -1062,15 +1160,17 @@ async fn test_fallback_agent_on_error() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase {
-                error: Some(true),
-                ..Default::default()
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase {
+                    error: Some(true),
+                    ..Default::default()
+                }),
+                fallbacks: Some(vec![
+                    objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                ]),
             },
-        )),
-        agents: Some(vec![AgentParam::Provided(
-            objectiveai::agent::AgentBase::Mock(MockAgentBase::default()),
-        )]),
+        ),
         provider: None,
         response_format: None,
         seed: Some(42),
@@ -1098,18 +1198,20 @@ async fn test_all_agents_error() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase {
-                error: Some(true),
-                ..Default::default()
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase {
+                    error: Some(true),
+                    ..Default::default()
+                }),
+                fallbacks: Some(vec![
+                    objectiveai::agent::InlineAgentBase::Mock(MockAgentBase {
+                        error: Some(true),
+                        ..Default::default()
+                    }),
+                ]),
             },
-        )),
-        agents: Some(vec![AgentParam::Provided(
-            objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                error: Some(true),
-                ..Default::default()
-            }),
-        )]),
+        ),
         provider: None,
         response_format: None,
         seed: Some(42),
@@ -1129,23 +1231,21 @@ async fn test_multiple_fallback_agents() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase {
-                error: Some(true),
-                ..Default::default()
-            },
-        )),
-        agents: Some(vec![
-            AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-                MockAgentBase {
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase {
                     error: Some(true),
                     ..Default::default()
-                },
-            )),
-            AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-                MockAgentBase::default(),
-            )),
-        ]),
+                }),
+                fallbacks: Some(vec![
+                    objectiveai::agent::InlineAgentBase::Mock(MockAgentBase {
+                        error: Some(true),
+                        ..Default::default()
+                    }),
+                    objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                ]),
+            },
+        ),
         provider: None,
         response_format: None,
         seed: Some(42),
@@ -1175,10 +1275,12 @@ async fn test_with_mock_continuation() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: None,
         seed: Some(42),
@@ -1191,7 +1293,7 @@ async fn test_with_mock_continuation() {
             crate::agent::completions::ContinuationItem::State(crate::agent::completions::mock::State::default()),
         ],
         agent: mock_agent,
-        mcp_connections: vec![],
+        mcp_connections: Arc::new(vec![]),
     };
 
     let stream = client
@@ -1214,10 +1316,12 @@ async fn test_stream_yields_chunks_before_state() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: None,
         seed: Some(42),
@@ -1245,10 +1349,12 @@ async fn test_large_seed_value() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: None,
         seed: Some(u64::MAX as i64),
@@ -1276,10 +1382,12 @@ async fn test_seed_zero() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase::default(),
-        )),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: None,
         seed: Some(0),
@@ -1346,13 +1454,15 @@ async fn test_logprobs_basic_seed_42() {
             content: RichContent::Text("Tell me something".into()),
             name: None,
         })],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase {
-                top_logprobs: Some(5),
-                ..Default::default()
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase {
+                    top_logprobs: Some(5),
+                    ..Default::default()
+                }),
+                fallbacks: None,
             },
-        )),
-        agents: None,
+        ),
         provider: None,
         response_format: None,
         seed: Some(42),
@@ -1382,13 +1492,15 @@ async fn test_logprobs_json_schema_nested() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase {
-                top_logprobs: Some(10),
-                ..Default::default()
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase {
+                    top_logprobs: Some(10),
+                    ..Default::default()
+                }),
+                fallbacks: None,
             },
-        )),
-        agents: None,
+        ),
         provider: None,
         response_format: Some(ResponseFormatParam::Single(ResponseFormat::JsonSchema {
             schema: indexmap::indexmap! {
@@ -1459,13 +1571,15 @@ async fn test_logprobs_with_invention_tools() {
             content: RichContent::Text("Look up foo".into()),
             name: None,
         })],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase {
-                top_logprobs: Some(3),
-                ..Default::default()
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase {
+                    top_logprobs: Some(3),
+                    ..Default::default()
+                }),
+                fallbacks: None,
             },
-        )),
-        agents: None,
+        ),
         provider: None,
         response_format: None,
         seed: Some(88),
@@ -1513,8 +1627,12 @@ async fn test_logprobs_with_continuation() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(mock_base)),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(mock_base),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: None,
         seed: Some(42),
@@ -1529,7 +1647,7 @@ async fn test_logprobs_with_continuation() {
             ),
         ],
         agent: mock_agent,
-        mcp_connections: vec![],
+        mcp_connections: Arc::new(vec![]),
     };
 
     let stream = client
@@ -1554,18 +1672,20 @@ async fn test_logprobs_fallback_agent() {
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
-            MockAgentBase {
-                error: Some(true),
-                ..Default::default()
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase {
+                    error: Some(true),
+                    ..Default::default()
+                }),
+                fallbacks: Some(vec![
+                    objectiveai::agent::InlineAgentBase::Mock(MockAgentBase {
+                        top_logprobs: Some(12),
+                        ..Default::default()
+                    }),
+                ]),
             },
-        )),
-        agents: Some(vec![AgentParam::Provided(
-            objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                top_logprobs: Some(12),
-                ..Default::default()
-            }),
-        )]),
+        ),
         provider: None,
         response_format: None,
         seed: Some(55),
@@ -1607,8 +1727,12 @@ async fn test_logprobs_per_agent_json_object() {
             content: SimpleContent::Text("Respond with JSON".into()),
             name: None,
         })],
-        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(mock_base)),
-        agents: None,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(mock_base),
+                fallbacks: None,
+            },
+        ),
         provider: None,
         response_format: Some(ResponseFormatParam::PerAgent(per_agent)),
         seed: Some(33),

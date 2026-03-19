@@ -2,13 +2,13 @@ use crate::{HttpClient, HttpError};
 
 pub async fn get_completion_votes(
     client: &HttpClient,
-    id: &str, // vector completion ID
+    request: &super::request::GetCompletionVotesRequest,
 ) -> Result<super::response::CompletionVotes, HttpError> {
     client
         .send_unary(
             reqwest::Method::GET,
-            &format!("vector/completions/{}", id),
-            None::<String>,
+            "vector/completions/votes",
+            Some(request),
         )
         .await
 }

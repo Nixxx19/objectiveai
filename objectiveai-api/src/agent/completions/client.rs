@@ -17,12 +17,19 @@ pub fn response_id(created: u64) -> String {
 
 // ---------------------------------------------------------------------------
 
-pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> {
+/// A shared, re-awaitable handle to an agent's MCP connections.
+/// Uses `Arc<crate::mcp::Error>` so the result is `Clone` (required by `Shared`).
+pub type McpHandle = futures::future::Shared<
+    tokio::sync::oneshot::Receiver<
+        Result<Arc<Vec<Arc<crate::mcp::Connection>>>, Arc<crate::mcp::Error>>
+    >
+>;
+
+pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> {
     /// MCP Client
     pub mcp_client: Arc<crate::mcp::Client>,
-    /// Caching fetcher for Swarm LLM definitions.
-    pub agent_fetcher:
-        Arc<super::super::fetcher::CachingFetcher<CTXEXT, FAGENT>>,
+    /// Retrieve router for resolving remote agent references.
+    pub retrieve_router: Arc<crate::retrieval::retrieve::Router<RETRG, RETRF, RETRM, CTXEXT>>,
     /// Handler for tracking usage after completion.
     pub usage_handler: Arc<CUSG>,
     /// Upstream client for Openrouter agents.
@@ -48,12 +55,13 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> {
     pub first_chunk_timeout: Duration,
     /// Maximum wait time between subsequent chunks in a streaming response.
     pub other_chunk_timeout: Duration,
+    _marker: std::marker::PhantomData<CTXEXT>,
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> {
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> {
     pub fn new(
         mcp_client: Arc<crate::mcp::Client>,
-        agent_fetcher: Arc<super::super::fetcher::CachingFetcher<CTXEXT, FAGENT>>,
+        retrieve_router: Arc<crate::retrieval::retrieve::Router<RETRG, RETRF, RETRM, CTXEXT>>,
         usage_handler: Arc<CUSG>,
         openrouter: Arc<OPENROUTER>,
         claude_agent_sdk: Arc<CLAUDEAGENTSDK>,
@@ -69,7 +77,7 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Client<CTXEXT, OPEN
     ) -> Self {
         Self {
             mcp_client,
-            agent_fetcher,
+            retrieve_router,
             usage_handler,
             openrouter,
             claude_agent_sdk,
@@ -82,17 +90,18 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Client<CTXEXT, OPEN
             backoff_max_elapsed_time,
             first_chunk_timeout,
             other_chunk_timeout,
+            _marker: std::marker::PhantomData,
         }
     }
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Clone
-    for Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> Clone
+    for Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG>
 {
     fn clone(&self) -> Self {
         Self {
             mcp_client: self.mcp_client.clone(),
-            agent_fetcher: self.agent_fetcher.clone(),
+            retrieve_router: self.retrieve_router.clone(),
             usage_handler: self.usage_handler.clone(),
             openrouter: self.openrouter.clone(),
             claude_agent_sdk: self.claude_agent_sdk.clone(),
@@ -105,17 +114,20 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Clone
             backoff_max_elapsed_time: self.backoff_max_elapsed_time,
             first_chunk_timeout: self.first_chunk_timeout,
             other_chunk_timeout: self.other_chunk_timeout,
+            _marker: std::marker::PhantomData,
         }
     }
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
     OPENROUTER: super::UpstreamClient<objectiveai::agent::openrouter::Agent> + Send + Sync + 'static,
     CLAUDEAGENTSDK: super::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> + Send + Sync + 'static,
     MOCK: super::UpstreamClient<objectiveai::agent::mock::Agent> + Send + Sync + 'static,
-    FAGENT: super::super::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    RETRG: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRF: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRM: crate::retrieval::retrieve::Client<CTXEXT>,
     CUSG: super::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
 {
     /// Creates a unary agent completion, tracking usage after completion.
@@ -269,72 +281,65 @@ where
             .as_secs();
         let id = response_id(created);
 
-        // 1. Resolve agents concurrently (borrows continuation temporarily).
-        let handles = self.resolve_agents(ctx.clone(), &params, continuation.as_ref());
-
-        // 2. Extract continuation items (moves continuation).
-        let (mut cont_items_or, mut cont_items_cas, mut cont_items_mock) = match continuation {
-            Some(super::Continuation::Openrouter { items, .. }) => (items, vec![], vec![]),
-            Some(super::Continuation::ClaudeAgentSdk { items, .. }) => (vec![], items, vec![]),
-            Some(super::Continuation::Mock { items, .. }) => (vec![], vec![], items),
-            None => (vec![], vec![], vec![]),
+        // 1. Resolve agent + spawn MCP connections (skip if continuation).
+        // 2. Extract continuation items.
+        let (mut cont_items_or, mut cont_items_cas, mut cont_items_mock, attempts) = match continuation {
+            Some(super::Continuation::Openrouter { items, agent, mcp_connections }) => {
+                let attempts = vec![AgentAttempt {
+                    agent: objectiveai::agent::InlineAgent::Openrouter(agent),
+                    mcp: AgentMcp::Ready(mcp_connections),
+                }];
+                (items, vec![], vec![], attempts)
+            }
+            Some(super::Continuation::ClaudeAgentSdk { items, agent, mcp_connections }) => {
+                let attempts = vec![AgentAttempt {
+                    agent: objectiveai::agent::InlineAgent::ClaudeAgentSdk(agent),
+                    mcp: AgentMcp::Ready(mcp_connections),
+                }];
+                (vec![], items, vec![], attempts)
+            }
+            Some(super::Continuation::Mock { items, agent, mcp_connections }) => {
+                let attempts = vec![AgentAttempt {
+                    agent: objectiveai::agent::InlineAgent::Mock(agent),
+                    mcp: AgentMcp::Ready(mcp_connections),
+                }];
+                (vec![], vec![], items, attempts)
+            }
+            None => {
+                let agent_wf = self.retrieve_router.get_agent(&ctx, params.agent.clone()).await
+                    .map_err(|e| super::Error::InvalidAgent(e.message.to_string()))?;
+                let mcp_handles = self.resolve_agents_mcp_connections(
+                    &agent_wf,
+                    params.mcp_server_authorization.as_ref(),
+                );
+                let inline = agent_wf.inline();
+                let mut agents: Vec<objectiveai::agent::InlineAgent> = vec![inline.inner.clone()];
+                if let Some(fallbacks) = &inline.fallbacks {
+                    agents.extend(fallbacks.iter().cloned());
+                }
+                let attempts = agents.into_iter().zip(mcp_handles).map(|(agent, handle)| {
+                    AgentAttempt { agent, mcp: AgentMcp::Handle(handle) }
+                }).collect();
+                (vec![], vec![], vec![], attempts)
+            }
         };
 
-        // 3. Prepare lazy resolution slots.
+        // 3. Build the list of (InlineAgent, MCP connections) to try.
         //
-        // Handles are awaited lazily in order: agent 1 is resolved and
-        // tried before agent 2 is ever awaited. On subsequent backoff
-        // iterations, already-resolved agents are retried directly.
-        //
-        // `None` = agent not applicable (e.g. missing MCP authorization).
-        // `Failed(e)` = resolution error, preserved for final error reporting.
-        enum AgentSlot {
-            Pending(
-                tokio::task::JoinHandle<
-                    Result<
-                        Option<(
-                            objectiveai::agent::Agent,
-                            Vec<Arc<crate::mcp::Connection>>,
-                        )>,
-                        super::Error,
-                    >,
-                >,
-            ),
-            Resolved(
-                objectiveai::agent::Agent,
-                Vec<Arc<crate::mcp::Connection>>,
-            ),
-            Failed(super::Error),
+        // For continuations, we have a single agent with existing connections.
+        // For fresh requests, we have primary + fallbacks with spawned MCP handles.
+        struct AgentAttempt {
+            agent: objectiveai::agent::InlineAgent,
+            mcp: AgentMcp,
+        }
+        enum AgentMcp {
+            /// Already connected (from continuation).
+            Ready(Arc<Vec<Arc<crate::mcp::Connection>>>),
+            /// Spawned, await lazily. None = skip (missing MCP auth).
+            Handle(Option<McpHandle>),
         }
 
-        let mut slots: Vec<Option<AgentSlot>> =
-            handles.into_iter().map(|h| Some(AgentSlot::Pending(h))).collect();
-
-        /// Drain `Failed` errors from slots into `errors`.
-        fn collect_slot_errors(
-            slots: &mut [Option<AgentSlot>],
-            errors: &mut Vec<super::Error>,
-        ) {
-            for slot in slots.iter_mut() {
-                if matches!(slot, Some(AgentSlot::Failed(_))) {
-                    let Some(AgentSlot::Failed(e)) = slot.take() else {
-                        unreachable!()
-                    };
-                    errors.push(e);
-                }
-            }
-        }
-
-        /// Return an appropriate error from a non-empty error vec.
-        fn into_error(errors: Vec<super::Error>) -> super::Error {
-            if errors.len() == 1 {
-                errors.into_iter().next().unwrap()
-            } else {
-                super::Error::MultipleErrors(errors)
-            }
-        }
-
-        // 4. Backoff retry loop — try each agent in order.
+        // 3. Backoff retry loop — try each agent in order.
         let mut backoff = backoff::ExponentialBackoff {
             current_interval: self.backoff_current_interval,
             initial_interval: self.backoff_initial_interval,
@@ -348,32 +353,22 @@ where
 
         loop {
             let mut errors: Vec<super::Error> = Vec::new();
-            let mut any_resolved = false;
 
-            for slot in &mut slots {
-                let Some(inner) = slot else { continue };
-
-                // Lazily resolve pending slots.
-                if matches!(inner, AgentSlot::Pending(_)) {
-                    let Some(AgentSlot::Pending(handle)) = slot.take() else {
-                        unreachable!()
-                    };
-                    match handle.await.expect("resolve_agent task panicked") {
-                        Ok(Some((agent, conns))) => {
-                            *slot = Some(AgentSlot::Resolved(agent, conns));
-                        }
-                        Ok(None) => continue, // not applicable, slot stays None
-                        Err(e) => {
-                            *slot = Some(AgentSlot::Failed(e));
-                            continue;
+            for attempt in &attempts {
+                // Await MCP connections for THIS agent only.
+                let mcp_connections: Arc<Vec<Arc<crate::mcp::Connection>>> = match &attempt.mcp {
+                    AgentMcp::Ready(conns) => conns.clone(),
+                    AgentMcp::Handle(None) => continue, // skip — missing MCP auth
+                    AgentMcp::Handle(Some(handle)) => {
+                        match handle.clone().await.expect("MCP connection task panicked") {
+                            Ok(conns) => conns,
+                            Err(mcp_err) => {
+                                errors.push(super::Error::McpConnectionArc(mcp_err));
+                                continue;
+                            }
                         }
                     }
-                }
-
-                let Some(AgentSlot::Resolved(agent, mcp_connections)) = slot else {
-                    continue;
                 };
-                any_resolved = true;
 
                 // a. List MCP tools for each connection.
                 let mut mcp_tools = Vec::new();
@@ -396,18 +391,18 @@ where
                 }
 
                 // b. Resolve response format for this agent.
-                let response_format = resolve_response_format(agent.id(), &params);
+                let response_format = resolve_response_format(attempt.agent.id(), &params);
 
                 // c. Resolve tools.
                 let (tool_names, tool_map) = super::tool::resolve_tools(
-                    mcp_connections,
+                    &mcp_connections,
                     &mcp_tools,
                     invention_tools.as_deref(),
                     response_format.as_ref(),
                 );
 
                 // d. Get BYOK for this agent's upstream.
-                let byok = ctx.get_upstream_byok(agent.base().upstream()).await;
+                let byok = ctx.get_upstream_byok(attempt.agent.base().upstream()).await;
 
                 // e. BYOK strategy: try with key first, then without.
                 let byok_attempts: Vec<Option<&str>> = match &byok {
@@ -416,16 +411,16 @@ where
                 };
 
                 let agent_transform = transform_messages.as_ref().and_then(|tm| {
-                    tm.get(agent.id()).map(|f| f.as_ref())
+                    tm.get(attempt.agent.id()).map(|f| f.as_ref())
                 });
 
                 for byok_attempt in &byok_attempts {
-                    let err = match agent {
-                        objectiveai::agent::Agent::Openrouter(or_agent) => {
+                    let err = match &attempt.agent {
+                        objectiveai::agent::InlineAgent::Openrouter(or_agent) => {
                             let a = or_agent.clone();
                             let c = mcp_connections.clone();
                             match self.run_agent_loop(
-                                self.openrouter.clone(), or_agent, &params, mcp_connections,
+                                self.openrouter.clone(), or_agent, &params, &mcp_connections,
                                 invention_tools.as_deref(), &tool_names, &tool_map,
                                 &mut cont_items_or, &id, created,
                                 *byok_attempt, ctx.cost_multiplier,
@@ -433,7 +428,7 @@ where
                                     items, agent: a, mcp_connections: c,
                                 },
                                 |e| super::Error::UpstreamOpenrouter(Box::new(e)),
-                                objectiveai::agent::AgentBaseRef::Openrouter(&or_agent.base),
+                                objectiveai::agent::InlineAgentRef::Openrouter(&or_agent.base),
                                 invention_done.clone(),
                                 agent_transform,
                             ).await {
@@ -441,11 +436,11 @@ where
                                 Err(e) => e,
                             }
                         }
-                        objectiveai::agent::Agent::ClaudeAgentSdk(cas_agent) => {
+                        objectiveai::agent::InlineAgent::ClaudeAgentSdk(cas_agent) => {
                             let a = cas_agent.clone();
                             let c = mcp_connections.clone();
                             match self.run_agent_loop(
-                                self.claude_agent_sdk.clone(), cas_agent, &params, mcp_connections,
+                                self.claude_agent_sdk.clone(), cas_agent, &params, &mcp_connections,
                                 invention_tools.as_deref(), &tool_names, &tool_map,
                                 &mut cont_items_cas, &id, created,
                                 *byok_attempt, ctx.cost_multiplier,
@@ -453,7 +448,7 @@ where
                                     items, agent: a, mcp_connections: c,
                                 },
                                 |e| super::Error::UpstreamClaudeAgentSdk(Box::new(e)),
-                                objectiveai::agent::AgentBaseRef::ClaudeAgentSdk(&cas_agent.base),
+                                objectiveai::agent::InlineAgentRef::ClaudeAgentSdk(&cas_agent.base),
                                 invention_done.clone(),
                                 agent_transform,
                             ).await {
@@ -461,11 +456,11 @@ where
                                 Err(e) => e,
                             }
                         }
-                        objectiveai::agent::Agent::Mock(mock_agent) => {
+                        objectiveai::agent::InlineAgent::Mock(mock_agent) => {
                             let a = mock_agent.clone();
                             let c = mcp_connections.clone();
                             match self.run_agent_loop(
-                                self.mock.clone(), mock_agent, &params, mcp_connections,
+                                self.mock.clone(), mock_agent, &params, &mcp_connections,
                                 invention_tools.as_deref(), &tool_names, &tool_map,
                                 &mut cont_items_mock, &id, created,
                                 *byok_attempt, ctx.cost_multiplier,
@@ -473,7 +468,7 @@ where
                                     items, agent: a, mcp_connections: c,
                                 },
                                 |e| super::Error::UpstreamMock(Box::new(e)),
-                                objectiveai::agent::AgentBaseRef::Mock(&mock_agent.base),
+                                objectiveai::agent::InlineAgentRef::Mock(&mock_agent.base),
                                 invention_done.clone(),
                                 agent_transform,
                             ).await {
@@ -487,20 +482,18 @@ where
             }
 
             // All agents failed this round — apply backoff or give up.
-            if !any_resolved {
-                collect_slot_errors(&mut slots, &mut errors);
-                return Err(if errors.is_empty() {
-                    super::Error::NoAgentsResolved
-                } else {
-                    into_error(errors)
-                });
+            if errors.is_empty() {
+                return Err(super::Error::NoAgentsResolved);
             }
             use backoff::backoff::Backoff;
             match backoff.next_backoff() {
                 Some(d) => tokio::time::sleep(d).await,
                 None => {
-                    collect_slot_errors(&mut slots, &mut errors);
-                    return Err(into_error(errors));
+                    return Err(if errors.len() == 1 {
+                        errors.into_iter().next().unwrap()
+                    } else {
+                        super::Error::MultipleErrors(errors)
+                    });
                 }
             }
         }
@@ -532,7 +525,7 @@ where
         cost_multiplier: rust_decimal::Decimal,
         wrap_continuation: impl FnOnce(Vec<super::ContinuationItem<U::State>>) -> CONT + Send + 'static,
         map_upstream_err: impl Fn(U::Error) -> super::Error + Send + 'static,
-        agent_base: objectiveai::agent::AgentBaseRef<'_>,
+        agent_base: objectiveai::agent::InlineAgentRef<'_>,
         invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         transform_messages: Option<&(dyn Fn(Vec<objectiveai::agent::completions::message::Message>) -> Vec<objectiveai::agent::completions::message::Message> + Send + Sync)>,
     ) -> Result<
@@ -806,145 +799,100 @@ where
     /// stored in it directly (single-element vec, no spawned tasks).
     ///
     /// Otherwise, for each agent in `params` (primary + fallbacks), spawns a
-    /// tokio task that calls [`resolve_agent`](Self::resolve_agent). Returns
-    /// `Ok(None)` for agents that are skipped (continuation mismatch or
-    /// missing MCP authorization).
-    pub fn resolve_agents(
+    /// Spawns MCP connections for all agents (primary + fallbacks) simultaneously.
+    ///
+    /// This is non-async — it spawns tasks immediately and returns handles.
+    /// No network waiting happens here. The backoff/retry loop awaits each
+    /// handle lazily as it tries each agent.
+    ///
+    /// Each `Option<McpHandle>` is `None` if the agent requires MCP auth
+    /// that wasn't provided (agent will be skipped).
+    pub fn resolve_agents_mcp_connections(
         &self,
-        ctx: ctx::Context<CTXEXT>,
-        params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
-        continuation: Option<
-            &super::Continuation<
-                OPENROUTER::State,
-                CLAUDEAGENTSDK::State,
-                MOCK::State,
-            >,
-        >,
-    ) -> Vec<
-        tokio::task::JoinHandle<
-            Result<
-                Option<(objectiveai::agent::Agent, Vec<Arc<crate::mcp::Connection>>)>,
-                super::Error,
-            >,
-        >,
-    > {
-        // If continuation is provided, return its agent and connections directly.
-        if let Some(cont) = continuation {
-            let (agent, mcp_connections) = match cont {
-                super::Continuation::Openrouter { agent, mcp_connections, .. } => {
-                    (objectiveai::agent::Agent::Openrouter(agent.clone()), mcp_connections.clone())
-                }
-                super::Continuation::ClaudeAgentSdk { agent, mcp_connections, .. } => {
-                    (objectiveai::agent::Agent::ClaudeAgentSdk(agent.clone()), mcp_connections.clone())
-                }
-                super::Continuation::Mock { agent, mcp_connections, .. } => {
-                    (objectiveai::agent::Agent::Mock(agent.clone()), mcp_connections.clone())
-                }
-            };
-            return vec![tokio::spawn(async move {
-                Ok(Some((agent, mcp_connections)))
-            })];
-        }
+        agent: &objectiveai::agent::AgentWithFallbacks,
+        mcp_server_authorization: Option<&indexmap::IndexMap<String, String>>,
+    ) -> Vec<Option<McpHandle>> {
+        let inline = agent.inline();
+        let mut handles = Vec::with_capacity(
+            1 + inline.fallbacks.as_ref().map_or(0, |f| f.len()),
+        );
 
-        let request_agents = std::iter::once(&params.agent)
-            .chain(params.agents.iter().flatten());
+        // Primary
+        handles.push(self.spawn_agent_mcp_connections(&inline.inner, mcp_server_authorization));
 
-        let mcp_server_authorization = params.mcp_server_authorization.clone();
-        let mut handles = Vec::new();
-
-        for request_agent in request_agents {
-            let request_agent = request_agent.clone();
-            let ctx = ctx.clone();
-            let client = self.clone();
-            let mcp_server_authorization = mcp_server_authorization.clone();
-
-            handles.push(tokio::spawn(async move {
-                client
-                    .resolve_agent(
-                        ctx,
-                        &request_agent,
-                        mcp_server_authorization.as_ref(),
-                        None,
-                    )
-                    .await
-            }));
+        // Fallbacks
+        if let Some(fallbacks) = &inline.fallbacks {
+            for fallback in fallbacks {
+                handles.push(self.spawn_agent_mcp_connections(fallback, mcp_server_authorization));
+            }
         }
 
         handles
     }
 
-    /// Resolves a request agent (inline or by ID) into a validated Agent
+    /// Resolves a request agent (inline or remote reference) into a validated Agent
     /// and connects to its MCP servers.
     ///
     /// Returns `Ok(None)` if:
     /// - The agent's upstream kind doesn't match the continuation
     /// - An MCP server requires authorization but none was provided
-    pub async fn resolve_agent(
+    /// Spawns MCP server connections for a single agent.
+    ///
+    /// Returns `None` synchronously if an MCP server requires authorization
+    /// but none was provided (agent should be skipped).
+    /// Returns `Some(Shared<...>)` that can be awaited multiple times (for
+    /// backoff retries). The task is spawned immediately — no network
+    /// waiting happens here.
+    pub fn spawn_agent_mcp_connections(
         &self,
-        ctx: ctx::Context<CTXEXT>,
-        agent: &objectiveai::agent::completions::request::Agent,
+        agent: &objectiveai::agent::InlineAgent,
         mcp_server_authorization: Option<&indexmap::IndexMap<String, String>>,
-        continuation: Option<objectiveai::agent::Upstream>,
-    ) -> Result<
-        Option<(objectiveai::agent::Agent, Vec<Arc<crate::mcp::Connection>>)>,
-        super::Error,
-    > {
-        use objectiveai::agent::completions::request::Agent as RequestAgent;
-
-        let agent = match agent {
-            RequestAgent::Provided(base) => {
-                // Check upstream kind before validation so that a
-                // continuation mismatch returns None instead of an error.
-                if let Some(expected) = continuation {
-                    if base.upstream() != expected {
-                        return Ok(None);
-                    }
-                }
-                objectiveai::agent::Agent::try_from(base.clone())
-                    .map_err(super::Error::InvalidAgent)?
-            }
-            RequestAgent::Id(id) => {
-                match self.agent_fetcher.fetch(ctx, id).await.map_err(super::Error::Fetch)? {
-                    Some((agent, _created)) => {
-                        if let Some(expected) = continuation {
-                            if agent.base().upstream() != expected {
-                                return Ok(None);
-                            }
-                        }
-                        agent
-                    }
-                    None => return Err(super::Error::AgentNotFound(id.clone())),
-                }
-            }
-        };
-
-        // Connect to MCP servers concurrently.
-        let mcp_connections = match agent.base().mcp_servers() {
+    ) -> Option<McpHandle> {
+        match agent.base().mcp_servers() {
             Some(servers) if !servers.is_empty() => {
-                let mut futs = Vec::with_capacity(servers.len());
+                // Pre-check authorization synchronously — if any server
+                // requires auth and we don't have it, skip this agent entirely.
+                let mut connect_args = Vec::with_capacity(servers.len());
                 for server in servers {
                     let authorization = if server.authorization {
                         match mcp_server_authorization.and_then(|m| m.get(&server.url)) {
                             Some(auth) => Some(auth.clone()),
-                            None => return Ok(None),
+                            None => return None, // skip agent
                         }
                     } else {
                         None
                     };
-                    futs.push(self.mcp_client.connect(server.url.clone(), authorization));
+                    connect_args.push((server.url.clone(), authorization));
                 }
 
-                let results = futures::future::join_all(futs).await;
-                let mut connections = Vec::with_capacity(results.len());
-                for result in results {
-                    connections.push(result.map_err(super::Error::McpConnection)?);
-                }
-                connections
+                let (tx, rx) = tokio::sync::oneshot::channel();
+                let mcp_client = self.mcp_client.clone();
+                tokio::spawn(async move {
+                    let mut futs = Vec::with_capacity(connect_args.len());
+                    for (url, auth) in connect_args {
+                        futs.push(mcp_client.connect(url, auth));
+                    }
+                    let results = futures::future::join_all(futs).await;
+                    let mut connections = Vec::with_capacity(results.len());
+                    for result in results {
+                        match result {
+                            Ok(conn) => connections.push(conn),
+                            Err(e) => {
+                                let _ = tx.send(Err(Arc::new(e)));
+                                return;
+                            }
+                        }
+                    }
+                    let _ = tx.send(Ok(Arc::new(connections)));
+                });
+                Some(futures::FutureExt::shared(rx))
             }
-            _ => Vec::new(),
-        };
-
-        Ok(Some((agent, mcp_connections)))
+            _ => {
+                let (tx, rx) = tokio::sync::oneshot::channel();
+                let _ = tx.send(Ok(Arc::new(Vec::new())));
+                Some(futures::FutureExt::shared(rx))
+            }
+        }
     }
 }
 

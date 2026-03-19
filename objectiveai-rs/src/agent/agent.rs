@@ -3,25 +3,27 @@
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
-/// The base configuration for an Agent (without computed ID).
+// ── Pre-validation types (no computed ID) ──────────────────────────
+
+/// The base inline configuration for an Agent (without computed ID or metadata).
 ///
 /// This is an untagged enum that dispatches to the per-upstream AgentBase.
 /// Deserialization tries each variant in order until one matches.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(untagged)]
-#[schemars(rename = "agent.AgentBase")]
-pub enum AgentBase {
+#[schemars(rename = "agent.InlineAgentBase")]
+pub enum InlineAgentBase {
     Openrouter(super::openrouter::AgentBase),
     ClaudeAgentSdk(super::claude_agent_sdk::AgentBase),
     Mock(super::mock::AgentBase),
 }
 
-impl AgentBase {
-    pub fn as_ref(&self) -> AgentBaseRef<'_> {
+impl InlineAgentBase {
+    pub fn as_ref(&self) -> InlineAgentRef<'_> {
         match self {
-            AgentBase::Openrouter(b) => AgentBaseRef::Openrouter(b),
-            AgentBase::ClaudeAgentSdk(b) => AgentBaseRef::ClaudeAgentSdk(b),
-            AgentBase::Mock(b) => AgentBaseRef::Mock(b),
+            InlineAgentBase::Openrouter(b) => InlineAgentRef::Openrouter(b),
+            InlineAgentBase::ClaudeAgentSdk(b) => InlineAgentRef::ClaudeAgentSdk(b),
+            InlineAgentBase::Mock(b) => InlineAgentRef::Mock(b),
         }
     }
 
@@ -43,86 +45,227 @@ impl AgentBase {
 
     pub fn prepare(&mut self) {
         match self {
-            AgentBase::Openrouter(b) => b.prepare(),
-            AgentBase::ClaudeAgentSdk(b) => b.prepare(),
-            AgentBase::Mock(b) => b.prepare(),
+            InlineAgentBase::Openrouter(b) => b.prepare(),
+            InlineAgentBase::ClaudeAgentSdk(b) => b.prepare(),
+            InlineAgentBase::Mock(b) => b.prepare(),
         }
     }
 
     pub fn validate(&self) -> Result<(), String> {
         match self {
-            AgentBase::Openrouter(b) => b.validate(),
-            AgentBase::ClaudeAgentSdk(b) => b.validate(),
-            AgentBase::Mock(b) => b.validate(),
+            InlineAgentBase::Openrouter(b) => b.validate(),
+            InlineAgentBase::ClaudeAgentSdk(b) => b.validate(),
+            InlineAgentBase::Mock(b) => b.validate(),
         }
     }
 
     pub fn id(&self) -> String {
         match self {
-            AgentBase::Openrouter(b) => b.id(),
-            AgentBase::ClaudeAgentSdk(b) => b.id(),
-            AgentBase::Mock(b) => b.id(),
+            InlineAgentBase::Openrouter(b) => b.id(),
+            InlineAgentBase::ClaudeAgentSdk(b) => b.id(),
+            InlineAgentBase::Mock(b) => b.id(),
         }
     }
 
-}
-
-/// A borrowed reference into an [`AgentBase`] variant.
-#[derive(Clone, Copy, Debug)]
-pub enum AgentBaseRef<'a> {
-    Openrouter(&'a super::openrouter::AgentBase),
-    ClaudeAgentSdk(&'a super::claude_agent_sdk::AgentBase),
-    Mock(&'a super::mock::AgentBase),
-}
-
-impl<'a> AgentBaseRef<'a> {
-    pub fn to_owned(self) -> AgentBase {
+    /// Validates and converts to an [`InlineAgent`] with computed ID.
+    pub fn convert(self) -> Result<InlineAgent, String> {
         match self {
-            AgentBaseRef::Openrouter(b) => AgentBase::Openrouter(b.clone()),
-            AgentBaseRef::ClaudeAgentSdk(b) => {
-                AgentBase::ClaudeAgentSdk(b.clone())
+            InlineAgentBase::Openrouter(b) => Ok(InlineAgent::Openrouter(b.try_into()?)),
+            InlineAgentBase::ClaudeAgentSdk(b) => {
+                Ok(InlineAgent::ClaudeAgentSdk(b.try_into()?))
             }
-            AgentBaseRef::Mock(b) => AgentBase::Mock(b.clone()),
+            InlineAgentBase::Mock(b) => Ok(InlineAgent::Mock(b.try_into()?)),
+        }
+    }
+}
+
+/// A remote agent base definition with metadata.
+///
+/// Like [`InlineAgentBase`] but includes a description field for remote storage.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "agent.RemoteAgentBase")]
+pub struct RemoteAgentBase {
+    pub description: String,
+    #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<InlineAgentBase>")]
+    pub inner: InlineAgentBase,
+}
+
+impl RemoteAgentBase {
+    pub fn as_ref(&self) -> InlineAgentRef<'_> {
+        self.inner.as_ref()
+    }
+
+    pub fn model(&self) -> &str {
+        self.inner.model()
+    }
+
+    pub fn upstream(&self) -> super::Upstream {
+        self.inner.upstream()
+    }
+
+    pub fn output_mode(&self) -> super::OutputMode {
+        self.inner.output_mode()
+    }
+
+    pub fn mcp_servers(&self) -> Option<&super::McpServers> {
+        self.inner.mcp_servers()
+    }
+
+    pub fn prepare(&mut self) {
+        self.inner.prepare()
+    }
+
+    pub fn validate(&self) -> Result<(), String> {
+        self.inner.validate()
+    }
+
+    pub fn id(&self) -> String {
+        self.inner.id()
+    }
+
+    /// Validates and converts to a [`RemoteAgent`] with computed ID.
+    pub fn convert(self) -> Result<RemoteAgent, String> {
+        Ok(RemoteAgent {
+            description: self.description,
+            inner: self.inner.convert()?,
+        })
+    }
+}
+
+/// An Agent base definition, either remote (with metadata) or inline.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+#[schemars(rename = "agent.AgentBase")]
+pub enum AgentBase {
+    Remote(RemoteAgentBase),
+    Inline(InlineAgentBase),
+}
+
+impl AgentBase {
+    pub fn as_ref(&self) -> InlineAgentRef<'_> {
+        match self {
+            AgentBase::Remote(r) => r.as_ref(),
+            AgentBase::Inline(i) => i.as_ref(),
         }
     }
 
-    pub fn model(&self) -> &'a str {
+    pub fn model(&self) -> &str {
         match self {
-            AgentBaseRef::Openrouter(b) => &b.model,
-            AgentBaseRef::ClaudeAgentSdk(b) => &b.model,
-            AgentBaseRef::Mock(_) => super::mock::AgentBase::model(),
+            AgentBase::Remote(r) => r.model(),
+            AgentBase::Inline(i) => i.model(),
         }
     }
 
     pub fn upstream(&self) -> super::Upstream {
         match self {
-            AgentBaseRef::Openrouter(_) => super::Upstream::Openrouter,
-            AgentBaseRef::ClaudeAgentSdk(_) => super::Upstream::ClaudeAgentSdk,
-            AgentBaseRef::Mock(_) => super::Upstream::Mock,
+            AgentBase::Remote(r) => r.upstream(),
+            AgentBase::Inline(i) => i.upstream(),
         }
     }
 
     pub fn output_mode(&self) -> super::OutputMode {
         match self {
-            AgentBaseRef::Openrouter(b) => b.output_mode.into(),
-            AgentBaseRef::ClaudeAgentSdk(b) => b.output_mode.into(),
-            AgentBaseRef::Mock(b) => b.output_mode.into(),
+            AgentBase::Remote(r) => r.output_mode(),
+            AgentBase::Inline(i) => i.output_mode(),
+        }
+    }
+
+    pub fn mcp_servers(&self) -> Option<&super::McpServers> {
+        match self {
+            AgentBase::Remote(r) => r.mcp_servers(),
+            AgentBase::Inline(i) => i.mcp_servers(),
+        }
+    }
+
+    pub fn prepare(&mut self) {
+        match self {
+            AgentBase::Remote(r) => r.prepare(),
+            AgentBase::Inline(i) => i.prepare(),
+        }
+    }
+
+    pub fn validate(&self) -> Result<(), String> {
+        match self {
+            AgentBase::Remote(r) => r.validate(),
+            AgentBase::Inline(i) => i.validate(),
+        }
+    }
+
+    pub fn id(&self) -> String {
+        match self {
+            AgentBase::Remote(r) => r.id(),
+            AgentBase::Inline(i) => i.id(),
+        }
+    }
+
+    /// Validates and converts to an [`Agent`] with computed ID.
+    pub fn convert(self) -> Result<Agent, String> {
+        match self {
+            AgentBase::Remote(r) => Ok(Agent::Remote(r.convert()?)),
+            AgentBase::Inline(i) => Ok(Agent::Inline(i.convert()?)),
+        }
+    }
+}
+
+// ── Ref types ──────────────────────────────────────────────────────
+
+/// A borrowed reference into an [`InlineAgentBase`] variant.
+#[derive(Clone, Copy, Debug)]
+pub enum InlineAgentRef<'a> {
+    Openrouter(&'a super::openrouter::AgentBase),
+    ClaudeAgentSdk(&'a super::claude_agent_sdk::AgentBase),
+    Mock(&'a super::mock::AgentBase),
+}
+
+impl<'a> InlineAgentRef<'a> {
+    pub fn to_owned(self) -> InlineAgentBase {
+        match self {
+            InlineAgentRef::Openrouter(b) => InlineAgentBase::Openrouter(b.clone()),
+            InlineAgentRef::ClaudeAgentSdk(b) => {
+                InlineAgentBase::ClaudeAgentSdk(b.clone())
+            }
+            InlineAgentRef::Mock(b) => InlineAgentBase::Mock(b.clone()),
+        }
+    }
+
+    pub fn model(&self) -> &'a str {
+        match self {
+            InlineAgentRef::Openrouter(b) => &b.model,
+            InlineAgentRef::ClaudeAgentSdk(b) => &b.model,
+            InlineAgentRef::Mock(_) => super::mock::AgentBase::model(),
+        }
+    }
+
+    pub fn upstream(&self) -> super::Upstream {
+        match self {
+            InlineAgentRef::Openrouter(_) => super::Upstream::Openrouter,
+            InlineAgentRef::ClaudeAgentSdk(_) => super::Upstream::ClaudeAgentSdk,
+            InlineAgentRef::Mock(_) => super::Upstream::Mock,
+        }
+    }
+
+    pub fn output_mode(&self) -> super::OutputMode {
+        match self {
+            InlineAgentRef::Openrouter(b) => b.output_mode.into(),
+            InlineAgentRef::ClaudeAgentSdk(b) => b.output_mode.into(),
+            InlineAgentRef::Mock(b) => b.output_mode.into(),
         }
     }
 
     pub fn mcp_servers(&self) -> Option<&'a super::McpServers> {
         match self {
-            AgentBaseRef::Openrouter(b) => b.mcp_servers.as_ref(),
-            AgentBaseRef::ClaudeAgentSdk(b) => b.mcp_servers.as_ref(),
-            AgentBaseRef::Mock(_) => None,
+            InlineAgentRef::Openrouter(b) => b.mcp_servers.as_ref(),
+            InlineAgentRef::ClaudeAgentSdk(b) => b.mcp_servers.as_ref(),
+            InlineAgentRef::Mock(_) => None,
         }
     }
 
     pub fn top_logprobs(&self) -> Option<u64> {
         match self {
-            AgentBaseRef::Openrouter(b) => b.top_logprobs,
-            AgentBaseRef::ClaudeAgentSdk(_) => None,
-            AgentBaseRef::Mock(b) => b.top_logprobs,
+            InlineAgentRef::Openrouter(b) => b.top_logprobs,
+            InlineAgentRef::ClaudeAgentSdk(_) => None,
+            InlineAgentRef::Mock(b) => b.top_logprobs,
         }
     }
 
@@ -131,47 +274,49 @@ impl<'a> AgentBaseRef<'a> {
         messages: Vec<super::completions::message::Message>,
     ) -> Vec<super::completions::message::Message> {
         match self {
-            AgentBaseRef::Openrouter(b) => b.merged_messages(messages),
-            AgentBaseRef::ClaudeAgentSdk(b) => b.merged_messages(messages),
-            AgentBaseRef::Mock(b) => b.merged_messages(messages),
+            InlineAgentRef::Openrouter(b) => b.merged_messages(messages),
+            InlineAgentRef::ClaudeAgentSdk(b) => b.merged_messages(messages),
+            InlineAgentRef::Mock(b) => b.merged_messages(messages),
         }
     }
 }
 
-/// A validated Agent with its computed content-addressed ID.
+// ── Post-validation types (with computed ID) ───────────────────────
+
+/// A validated inline Agent with its computed content-addressed ID.
 ///
 /// This is an untagged enum that dispatches to the per-upstream Agent.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "agent.Agent")]
-pub enum Agent {
+#[schemars(rename = "agent.InlineAgent")]
+pub enum InlineAgent {
     Openrouter(super::openrouter::Agent),
     ClaudeAgentSdk(super::claude_agent_sdk::Agent),
     Mock(super::mock::Agent),
 }
 
-impl Agent {
+impl InlineAgent {
     pub fn id(&self) -> &str {
         match self {
-            Agent::Openrouter(a) => &a.id,
-            Agent::ClaudeAgentSdk(a) => &a.id,
-            Agent::Mock(a) => &a.id,
+            InlineAgent::Openrouter(a) => &a.id,
+            InlineAgent::ClaudeAgentSdk(a) => &a.id,
+            InlineAgent::Mock(a) => &a.id,
         }
     }
 
-    pub fn base(&self) -> AgentBaseRef<'_> {
+    pub fn base(&self) -> InlineAgentRef<'_> {
         match self {
-            Agent::Openrouter(a) => AgentBaseRef::Openrouter(&a.base),
-            Agent::ClaudeAgentSdk(a) => AgentBaseRef::ClaudeAgentSdk(&a.base),
-            Agent::Mock(a) => AgentBaseRef::Mock(&a.base),
+            InlineAgent::Openrouter(a) => InlineAgentRef::Openrouter(&a.base),
+            InlineAgent::ClaudeAgentSdk(a) => InlineAgentRef::ClaudeAgentSdk(&a.base),
+            InlineAgent::Mock(a) => InlineAgentRef::Mock(&a.base),
         }
     }
 
-    pub fn into_base(self) -> AgentBase {
+    pub fn into_base(self) -> InlineAgentBase {
         match self {
-            Agent::Openrouter(a) => AgentBase::Openrouter(a.base),
-            Agent::ClaudeAgentSdk(a) => AgentBase::ClaudeAgentSdk(a.base),
-            Agent::Mock(a) => AgentBase::Mock(a.base),
+            InlineAgent::Openrouter(a) => InlineAgentBase::Openrouter(a.base),
+            InlineAgent::ClaudeAgentSdk(a) => InlineAgentBase::ClaudeAgentSdk(a.base),
+            InlineAgent::Mock(a) => InlineAgentBase::Mock(a.base),
         }
     }
 
@@ -180,56 +325,126 @@ impl Agent {
     }
 }
 
-impl TryFrom<AgentBase> for Agent {
-    type Error = String;
-    fn try_from(base: AgentBase) -> Result<Self, Self::Error> {
-        match base {
-            AgentBase::Openrouter(b) => Ok(Agent::Openrouter(b.try_into()?)),
-            AgentBase::ClaudeAgentSdk(b) => {
-                Ok(Agent::ClaudeAgentSdk(b.try_into()?))
-            }
-            AgentBase::Mock(b) => Ok(Agent::Mock(b.try_into()?)),
+/// A validated remote Agent with metadata and computed content-addressed ID.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "agent.RemoteAgent")]
+pub struct RemoteAgent {
+    pub description: String,
+    #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<InlineAgent>")]
+    pub inner: InlineAgent,
+}
+
+impl RemoteAgent {
+    pub fn id(&self) -> &str {
+        self.inner.id()
+    }
+
+    pub fn base(&self) -> InlineAgentRef<'_> {
+        self.inner.base()
+    }
+
+    pub fn into_base(self) -> RemoteAgentBase {
+        RemoteAgentBase {
+            description: self.description,
+            inner: self.inner.into_base(),
         }
     }
-}
 
-/// Wrapper that adds fallback agents and a count to any agent type.
-///
-/// Used to specify how many instances of an agent to include in an swarm,
-/// along with fallback agents to try if the primary fails.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "agent.WithFallbacksAndCount.{T}")]
-pub struct WithFallbacksAndCount<T> {
-    /// Number of instances of this agent in the swarm. Defaults to 1.
-    #[serde(default = "WithFallbacksAndCount::<T>::default_count")]
-    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
-    pub count: u64,
-    /// The primary agent configuration.
-    #[serde(flatten)]
-    #[schemars(schema_with = "crate::flatten_schema::<T>")]
-    pub inner: T,
-    /// Fallback agents to try if the primary fails.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub fallbacks: Option<Vec<T>>,
-}
-
-impl<T> WithFallbacksAndCount<T> {
-    fn default_count() -> u64 {
-        1
+    pub fn top_logprobs(&self) -> Option<u64> {
+        self.inner.top_logprobs()
     }
 }
 
-/// An [`AgentBase`] with optional fallbacks and count (pre-validation).
-pub type AgentBaseWithFallbacksAndCount = WithFallbacksAndCount<AgentBase>;
+/// A validated Agent, either remote (with metadata) or inline.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+#[schemars(rename = "agent.Agent")]
+pub enum Agent {
+    Remote(RemoteAgent),
+    Inline(InlineAgent),
+}
 
-/// A validated [`Agent`] with optional fallbacks and count.
-pub type AgentWithFallbacksAndCount = WithFallbacksAndCount<Agent>;
+impl Agent {
+    pub fn id(&self) -> &str {
+        match self {
+            Agent::Remote(a) => a.inner.id(),
+            Agent::Inline(a) => a.id(),
+        }
+    }
 
-impl AgentWithFallbacksAndCount {
+    pub fn base(&self) -> InlineAgentRef<'_> {
+        match self {
+            Agent::Remote(a) => a.inner.base(),
+            Agent::Inline(a) => a.base(),
+        }
+    }
+
+    pub fn into_base(self) -> AgentBase {
+        match self {
+            Agent::Remote(a) => AgentBase::Remote(RemoteAgentBase {
+                description: a.description,
+                inner: a.inner.into_base(),
+            }),
+            Agent::Inline(a) => AgentBase::Inline(a.into_base()),
+        }
+    }
+
+    pub fn top_logprobs(&self) -> Option<u64> {
+        self.base().top_logprobs()
+    }
+}
+
+// ── WithFallbacks types ────────────────────────────────────────────
+
+/// An [`InlineAgentBase`] with optional fallbacks (no description).
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[schemars(rename = "agent.InlineAgentBaseWithFallbacks")]
+pub struct InlineAgentBaseWithFallbacks {
+    /// The primary agent configuration.
+    #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<InlineAgentBase>")]
+    pub inner: InlineAgentBase,
+    /// Fallback agents to try if the primary fails.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fallbacks: Option<Vec<InlineAgentBase>>,
+}
+
+impl InlineAgentBaseWithFallbacks {
+    /// Validates and converts to an [`InlineAgentWithFallbacks`] with computed IDs.
+    pub fn convert(self) -> Result<InlineAgentWithFallbacks, String> {
+        let inner = self.inner.convert()?;
+        let fallbacks = match self.fallbacks {
+            Some(fallbacks) if !fallbacks.is_empty() => {
+                let mut converted = Vec::with_capacity(fallbacks.len());
+                for fallback in fallbacks {
+                    converted.push(fallback.convert()?);
+                }
+                Some(converted)
+            }
+            _ => None,
+        };
+        Ok(InlineAgentWithFallbacks { inner, fallbacks })
+    }
+}
+
+/// A validated [`InlineAgent`] with optional fallbacks (no description).
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "agent.InlineAgentWithFallbacks")]
+pub struct InlineAgentWithFallbacks {
+    /// The primary agent configuration.
+    #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<InlineAgent>")]
+    pub inner: InlineAgent,
+    /// Fallback agents to try if the primary fails.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fallbacks: Option<Vec<InlineAgent>>,
+}
+
+impl InlineAgentWithFallbacks {
     /// Returns the concatenated IDs of the primary agent and all fallbacks.
     ///
-    /// Used by [`Swarm`](crate::swarm::Swarm) to compute its own
-    /// content-addressed ID.
+    /// Used by swarms to compute their content-addressed ID.
     pub fn full_id(&self) -> String {
         match &self.fallbacks {
             Some(fallbacks) => {
@@ -246,20 +461,6 @@ impl AgentWithFallbacksAndCount {
         }
     }
 
-    /// Converts to a base variant, stripping the computed IDs.
-    pub fn into_base(self) -> AgentBaseWithFallbacksAndCount {
-        AgentBaseWithFallbacksAndCount {
-            count: self.count,
-            inner: self.inner.into_base(),
-            fallbacks: self.fallbacks.map(|fallbacks| {
-                fallbacks
-                    .into_iter()
-                    .map(|fallback| fallback.into_base())
-                    .collect()
-            }),
-        }
-    }
-
     /// Returns an iterator over the IDs of the primary agent and all fallbacks.
     pub fn ids(&self) -> impl Iterator<Item = &str> {
         std::iter::once(self.inner.id()).chain(
@@ -270,30 +471,155 @@ impl AgentWithFallbacksAndCount {
     }
 }
 
-impl TryFrom<AgentBaseWithFallbacksAndCount> for AgentWithFallbacksAndCount {
-    type Error = String;
-    fn try_from(
-        AgentBaseWithFallbacksAndCount {
-            count,
-            inner: base_inner,
-            fallbacks: base_fallbacks,
-        }: AgentBaseWithFallbacksAndCount,
-    ) -> Result<Self, Self::Error> {
-        let inner = base_inner.try_into()?;
-        let fallbacks = match base_fallbacks {
-            Some(base_fallbacks) if base_fallbacks.len() > 0 => {
-                let mut fallbacks = Vec::with_capacity(base_fallbacks.len());
-                for base_fallback in base_fallbacks {
-                    fallbacks.push(base_fallback.try_into()?);
-                }
-                Some(fallbacks)
-            }
-            _ => None,
-        };
-        Ok(AgentWithFallbacksAndCount {
-            count,
-            inner,
-            fallbacks,
+/// A remote agent base definition with description and optional fallbacks.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "agent.RemoteAgentBaseWithFallbacks")]
+pub struct RemoteAgentBaseWithFallbacks {
+    pub description: String,
+    #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<InlineAgentBaseWithFallbacks>")]
+    pub inner: InlineAgentBaseWithFallbacks,
+}
+
+impl RemoteAgentBaseWithFallbacks {
+    /// Validates and converts to a [`RemoteAgentWithFallbacks`].
+    pub fn convert(self) -> Result<RemoteAgentWithFallbacks, String> {
+        Ok(RemoteAgentWithFallbacks {
+            description: self.description,
+            inner: self.inner.convert()?,
         })
     }
+}
+
+/// A validated remote agent with description and optional fallbacks.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "agent.RemoteAgentWithFallbacks")]
+pub struct RemoteAgentWithFallbacks {
+    pub description: String,
+    #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<InlineAgentWithFallbacks>")]
+    pub inner: InlineAgentWithFallbacks,
+}
+
+impl RemoteAgentWithFallbacks {
+    /// Returns the concatenated IDs of the primary agent and all fallbacks.
+    pub fn full_id(&self) -> String {
+        self.inner.full_id()
+    }
+
+    /// Returns an iterator over the IDs of the primary agent and all fallbacks.
+    pub fn ids(&self) -> impl Iterator<Item = &str> {
+        self.inner.ids()
+    }
+}
+
+/// A validated agent with optional fallbacks, either remote (with description) or inline.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+#[schemars(rename = "agent.AgentWithFallbacks")]
+pub enum AgentWithFallbacks {
+    Remote(RemoteAgentWithFallbacks),
+    Inline(InlineAgentWithFallbacks),
+}
+
+impl AgentWithFallbacks {
+    /// Returns the inner `InlineAgentWithFallbacks` regardless of variant.
+    pub fn inline(&self) -> &InlineAgentWithFallbacks {
+        match self {
+            AgentWithFallbacks::Remote(a) => &a.inner,
+            AgentWithFallbacks::Inline(a) => a,
+        }
+    }
+
+    /// Returns the primary agent.
+    pub fn agent(&self) -> &InlineAgent {
+        &self.inline().inner
+    }
+
+    /// Returns the fallback agents.
+    pub fn fallbacks(&self) -> Option<&Vec<InlineAgent>> {
+        self.inline().fallbacks.as_ref()
+    }
+
+    /// Returns the concatenated IDs of the primary agent and all fallbacks.
+    pub fn full_id(&self) -> String {
+        self.inline().full_id()
+    }
+
+    /// Returns an iterator over the IDs of the primary agent and all fallbacks.
+    pub fn ids(&self) -> impl Iterator<Item = &str> {
+        self.inline().ids()
+    }
+
+    pub fn id(&self) -> &str {
+        self.agent().id()
+    }
+
+    pub fn base(&self) -> InlineAgentRef<'_> {
+        self.agent().base()
+    }
+
+    pub fn top_logprobs(&self) -> Option<u64> {
+        self.agent().top_logprobs()
+    }
+}
+
+// ── InlineAgentBaseWithFallbacksOrRemote ─────────────────────────────────
+
+/// An agent specification that is either an inline agent base with fallbacks
+/// or a remote path reference.
+///
+/// Used in swarm definitions to allow agents to be specified inline
+/// (with optional fallbacks) or resolved from a remote source via a
+/// hashmap during conversion.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[serde(untagged)]
+#[schemars(rename = "agent.InlineAgentBaseWithFallbacksOrRemote")]
+pub enum InlineAgentBaseWithFallbacksOrRemote {
+    AgentBase(InlineAgentBaseWithFallbacks),
+    Remote(crate::RemotePath),
+}
+
+/// Like [`InlineAgentBaseWithFallbacksOrRemote`] but with optional commit.
+/// Used in request types where commit resolution happens server-side.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+#[schemars(rename = "agent.InlineAgentBaseWithFallbacksOrRemoteCommitOptional")]
+pub enum InlineAgentBaseWithFallbacksOrRemoteCommitOptional {
+    AgentBase(InlineAgentBaseWithFallbacks),
+    Remote(crate::RemotePathCommitOptional),
+}
+
+// ── WithCount types (for swarm agent slots) ────────────────────────
+
+fn default_count() -> u64 {
+    1
+}
+
+/// An [`InlineAgentBaseWithFallbacksOrRemote`] with a count
+/// (pre-validation swarm agent slot).
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[schemars(rename = "agent.InlineAgentBaseWithFallbacksOrRemoteWithCount")]
+pub struct InlineAgentBaseWithFallbacksOrRemoteWithCount {
+    /// Number of instances of this agent in the swarm. Defaults to 1.
+    #[serde(default = "default_count")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
+    pub count: u64,
+    /// The agent configuration.
+    #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<InlineAgentBaseWithFallbacksOrRemote>")]
+    pub inner: InlineAgentBaseWithFallbacksOrRemote,
+}
+
+/// An [`AgentWithFallbacks`] with a count (post-validation swarm agent slot).
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "agent.AgentWithFallbacksWithCount")]
+pub struct AgentWithFallbacksWithCount {
+    /// Number of instances of this agent in the swarm. Defaults to 1.
+    #[serde(default = "default_count")]
+    pub count: u64,
+    /// The validated agent configuration.
+    #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<AgentWithFallbacks>")]
+    pub inner: AgentWithFallbacks,
 }

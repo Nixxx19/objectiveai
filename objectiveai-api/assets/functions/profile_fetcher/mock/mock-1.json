@@ -1,13 +1,11 @@
 {
   "description": "Single mock agent, equal weight.",
-  "swarm": {
-    "agents": [
-      {
-        "upstream": "mock",
-        "output_mode": "instruction",
-        "count": 1
-      }
-    ]
-  },
-  "profile": [1.0]
+  "agents": [
+    {
+      "upstream": "mock",
+      "output_mode": "instruction",
+      "count": 1
+    }
+  ],
+  "weights": [1.0]
 }

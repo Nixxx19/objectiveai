@@ -28,14 +28,7 @@ pub struct VectorCompletionCreateParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<agent::completions::request::Provider>,
     /// The Swarm of agents to use.
-    pub swarm: super::Swarm,
-    /// The profile weights for each agent in the swarm.
-    ///
-    /// Must have the same length as the total agent count in the swarm.
-    /// Can be either:
-    /// - A vector of decimals (legacy representation), or
-    /// - A vector of objects with `weight` and optional `invert` fields.
-    pub profile: super::Profile,
+    pub swarm: crate::swarm::InlineSwarmBaseOrRemoteCommitOptional,
     /// Random seed for deterministic results.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub seed: Option<i64>,

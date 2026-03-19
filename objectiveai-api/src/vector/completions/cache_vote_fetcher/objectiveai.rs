@@ -25,8 +25,7 @@ where
     async fn fetch(
         &self,
         ctx: ctx::Context<CTXEXT>,
-        agent: &objectiveai::agent::completions::request::Agent,
-        agents: Option<&[objectiveai::agent::completions::request::Agent]>,
+        agent: &objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote,
         messages: &[objectiveai::agent::completions::message::Message],
         responses: &[objectiveai::agent::completions::message::RichContent],
     ) -> Result<
@@ -37,7 +36,6 @@ where
         let request = objectiveai::vector::completions::cache::request::CacheVoteRequest::Ref(
             objectiveai::vector::completions::cache::request::CacheVoteRequestRef {
                 agent,
-                agents,
                 messages,
                 responses,
             },

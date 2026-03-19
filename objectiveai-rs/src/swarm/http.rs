@@ -5,36 +5,29 @@ use crate::{HttpClient, HttpError};
 /// Lists all Swarms that have been used.
 pub async fn list_swarms(
     client: &HttpClient,
-) -> Result<super::response::ListSwarm, HttpError> {
+    params: super::request::ListSwarmsRequest,
+) -> Result<super::response::ListSwarmResponse, HttpError> {
     client
-        .send_unary(reqwest::Method::GET, "swarms", None::<String>)
+        .send_unary(reqwest::Method::GET, "swarms/list", Some(params))
         .await
 }
 
-/// Retrieves a specific Swarm by its content-addressed ID.
+/// Retrieves a specific Swarm.
 pub async fn get_swarm(
     client: &HttpClient,
-    swarm_id: &str,
-) -> Result<super::response::GetSwarm, HttpError> {
+    params: super::request::GetSwarmRequest,
+) -> Result<super::response::GetSwarmResponse, HttpError> {
     client
-        .send_unary(
-            reqwest::Method::GET,
-            &format!("swarms/{}", swarm_id),
-            None::<String>,
-        )
+        .send_unary(reqwest::Method::GET, "swarms", Some(params))
         .await
 }
 
 /// Retrieves usage statistics for a specific Swarm.
 pub async fn get_swarm_usage(
     client: &HttpClient,
-    swarm_id: &str,
-) -> Result<super::response::UsageSwarm, HttpError> {
+    params: super::request::GetSwarmRequest,
+) -> Result<super::response::UsageSwarmResponse, HttpError> {
     client
-        .send_unary(
-            reqwest::Method::GET,
-            &format!("swarms/{}/usage", swarm_id),
-            None::<String>,
-        )
+        .send_unary(reqwest::Method::GET, "swarms/usage", Some(params))
         .await
 }

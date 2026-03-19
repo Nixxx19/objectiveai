@@ -6,33 +6,21 @@ use schemars::JsonSchema;
 
 /// Response from listing functions.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.ListFunction")]
-pub struct ListFunction {
+#[schemars(rename = "functions.ListFunctionResponse")]
+pub struct ListFunctionResponse {
     /// List of available functions.
     pub data: Vec<ListFunctionItem>,
 }
 
 /// A function in a list response.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.ListFunctionItem")]
-pub struct ListFunctionItem {
-    /// The remote source where the function is hosted.
-    pub remote: functions::Remote,
-    /// Repository owner.
-    pub owner: String,
-    /// Repository name.
-    pub repository: String,
-    /// Git commit SHA.
-    pub commit: String,
-}
+pub type ListFunctionItem = crate::RemotePath;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.GetFunction")]
-pub struct GetFunction {
-    pub remote: functions::Remote,
-    pub owner: String,
-    pub repository: String,
-    pub commit: String,
+#[schemars(rename = "functions.GetFunctionResponse")]
+pub struct GetFunctionResponse {
+    #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
+    pub path: crate::RemotePath,
     #[serde(flatten)]
     #[schemars(schema_with = "crate::flatten_schema::<functions::RemoteFunction>")]
     pub inner: functions::RemoteFunction,
@@ -40,8 +28,8 @@ pub struct GetFunction {
 
 /// Usage statistics for a function.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.UsageFunction")]
-pub struct UsageFunction {
+#[schemars(rename = "functions.UsageFunctionResponse")]
+pub struct UsageFunctionResponse {
     /// Total number of requests made with this function.
     pub requests: u64,
     /// Total completion tokens used.
@@ -55,8 +43,8 @@ pub struct UsageFunction {
 
 /// Response from listing function-profile pairs.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.ListFunctionProfilePair")]
-pub struct ListFunctionProfilePair {
+#[schemars(rename = "functions.ListFunctionProfilePairResponse")]
+pub struct ListFunctionProfilePairResponse {
     /// List of available function-profile pairs.
     pub data: Vec<ListFunctionProfilePairItem>,
 }
@@ -73,18 +61,18 @@ pub struct ListFunctionProfilePairItem {
 
 /// Response from getting a function-profile pair.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.GetFunctionProfilePair")]
-pub struct GetFunctionProfilePair {
+#[schemars(rename = "functions.GetFunctionProfilePairResponse")]
+pub struct GetFunctionProfilePairResponse {
     /// The function.
-    pub function: GetFunction,
+    pub function: GetFunctionResponse,
     /// The profile.
-    pub profile: functions::profiles::response::GetProfile,
+    pub profile: functions::profiles::response::GetProfileResponse,
 }
 
 /// Usage statistics for a function-profile pair.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.UsageFunctionProfilePair")]
-pub struct UsageFunctionProfilePair {
+#[schemars(rename = "functions.UsageFunctionProfilePairResponse")]
+pub struct UsageFunctionProfilePairResponse {
     /// Total number of requests made with this function-profile pair.
     pub requests: u64,
     /// Total completion tokens used.

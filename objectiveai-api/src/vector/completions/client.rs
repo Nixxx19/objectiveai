@@ -39,12 +39,11 @@ pub(super) fn invert_and_l1_normalize(mut xs: Vec<Decimal>) -> Vec<Decimal> {
 ///
 /// Orchestrates multiple LLM agent completions to vote on response options,
 /// combining their votes using weights to produce final scores.
-pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG, FENS, FVVOTE, FCVOTE, VUSG> {
+pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG, FVVOTE, FCVOTE, VUSG> {
     /// The underlying agent completion client.
-    pub agent_client: Arc<agent::completions::Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG>>,
-    /// Fetcher for Swarm definitions.
-    pub swarm_fetcher:
-        Arc<crate::swarm::fetcher::CachingFetcher<CTXEXT, FENS>>,
+    pub agent_client: Arc<agent::completions::Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG>>,
+    /// Retrieve router for resolving swarms and agents.
+    pub retrieve_router: Arc<crate::retrieval::retrieve::Router<RETRG, RETRF, RETRM, CTXEXT>>,
     /// Fetcher for votes from historical completions.
     pub completion_votes_fetcher: Arc<FVVOTE>,
     /// Fetcher for votes from the global cache.
@@ -53,22 +52,20 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG, FENS,
     pub usage_handler: Arc<VUSG>,
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG, FENS, FVVOTE, FCVOTE, VUSG>
-    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG, FENS, FVVOTE, FCVOTE, VUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG, FVVOTE, FCVOTE, VUSG>
+    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG, FVVOTE, FCVOTE, VUSG>
 {
     /// Creates a new vector completion client.
     pub fn new(
-        agent_client: Arc<agent::completions::Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG>>,
-        swarm_fetcher: Arc<
-            crate::swarm::fetcher::CachingFetcher<CTXEXT, FENS>,
-        >,
+        agent_client: Arc<agent::completions::Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG>>,
+        retrieve_router: Arc<crate::retrieval::retrieve::Router<RETRG, RETRF, RETRM, CTXEXT>>,
         completion_votes_fetcher: Arc<FVVOTE>,
         cache_vote_fetcher: Arc<FCVOTE>,
         usage_handler: Arc<VUSG>,
     ) -> Self {
         Self {
             agent_client,
-            swarm_fetcher,
+            retrieve_router,
             completion_votes_fetcher,
             cache_vote_fetcher,
             usage_handler,
@@ -76,16 +73,17 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG, FENS, FVVOTE, FCVO
     }
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG, FENS, FVVOTE, FCVOTE, VUSG>
-    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG, FENS, FVVOTE, FCVOTE, VUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG, FVVOTE, FCVOTE, VUSG>
+    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG, FVVOTE, FCVOTE, VUSG>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
     OPENROUTER: agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent> + Send + Sync + 'static,
     CLAUDEAGENTSDK: agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> + Send + Sync + 'static,
     MOCK: agent::completions::UpstreamClient<objectiveai::agent::mock::Agent> + Send + Sync + 'static,
-    FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    RETRG: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRF: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRM: crate::retrieval::retrieve::Client<CTXEXT>,
     ACUSG: agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
-    FENS: crate::swarm::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FVVOTE: super::completion_votes_fetcher::Fetcher<CTXEXT>
         + Send
         + Sync
@@ -180,16 +178,17 @@ where
     }
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG, FENS, FVVOTE, FCVOTE, VUSG>
-    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG, FENS, FVVOTE, FCVOTE, VUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG, FVVOTE, FCVOTE, VUSG>
+    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG, FVVOTE, FCVOTE, VUSG>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
     OPENROUTER: agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent> + Send + Sync + 'static,
     CLAUDEAGENTSDK: agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> + Send + Sync + 'static,
     MOCK: agent::completions::UpstreamClient<objectiveai::agent::mock::Agent> + Send + Sync + 'static,
-    FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    RETRG: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRF: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRM: crate::retrieval::retrieve::Client<CTXEXT>,
     ACUSG: agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
-    FENS: crate::swarm::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FVVOTE: super::completion_votes_fetcher::Fetcher<CTXEXT>
         + Send
         + Sync
@@ -226,56 +225,14 @@ where
             ));
         }
 
-        // validate credits + fetch swarm if needed + fetch retry votes if needed
-        let (swarm, mut static_votes, profile) = match (
-            &request.swarm,
-            &request.retry,
-        ) {
-            (
-                objectiveai::vector::completions::request::Swarm::Id(
-                    swarm_id,
-                ),
-                Some(retry),
-            ) => {
-                let (swarm, mut votes) = tokio::try_join!(
-                    self.swarm_fetcher.fetch(ctx.clone(), swarm_id).map(
-                        |result| {
-                            match result {
-                                Ok(Some((swarm, _))) => Ok(swarm),
-                                Ok(None) => Err(super::Error::SwarmNotFound),
-                                Err(e) => Err(super::Error::FetchSwarm(e)),
-                            }
-                        }
-                    ),
-                    self.completion_votes_fetcher
-                        .fetch(ctx.clone(), retry)
-                        .map(|result| {
-                            match result {
-                                Ok(Some(votes)) => Ok(votes),
-                                Ok(None) => Err(super::Error::RetryNotFound),
-                                Err(e) => Err(super::Error::FetchRetry(e)),
-                            }
-                        }),
-                )?;
-                votes.iter_mut().for_each(|vote| {
-                    vote.retry = Some(true);
-                    vote.from_cache = Some(true);
-                    vote.completion_index = None;
-                });
-                (swarm, votes, request.profile.clone())
-            }
-            (
-                objectiveai::vector::completions::request::Swarm::Provided(
-                    swarm_base,
-                ),
-                Some(retry),
-            ) => {
-                let (swarm, aligned_profile) =
-                    objectiveai::swarm::Swarm::try_from_with_profile(
-                        swarm_base.clone(),
-                        request.profile.clone(),
-                    )
-                    .map_err(super::Error::InvalidSwarm)?;
+        // resolve and convert swarm via retrieve router
+        let swarm = self.retrieve_router.get_swarm(&ctx, request.swarm.clone()).await
+            .map_err(|e| super::Error::InvalidSwarm(e.message.to_string()))?
+            .into_inline();
+
+        // fetch retry votes if needed
+        let mut static_votes = match &request.retry {
+            Some(retry) => {
                 let mut votes = self
                     .completion_votes_fetcher
                     .fetch(ctx.clone(), retry)
@@ -290,71 +247,22 @@ where
                     vote.from_cache = Some(true);
                     vote.completion_index = None;
                 });
-                (swarm, votes, aligned_profile)
+                votes
             }
-            (
-                objectiveai::vector::completions::request::Swarm::Id(
-                    swarm_id,
-                ),
-                None,
-            ) => {
-                let swarm = self
-                    .swarm_fetcher
-                    .fetch(ctx.clone(), swarm_id)
-                    .map(|result| match result {
-                        Ok(Some((swarm, _))) => Ok(swarm),
-                        Ok(None) => Err(super::Error::SwarmNotFound),
-                        Err(e) => Err(super::Error::FetchSwarm(e)),
-                    })
-                    .await?;
-                (swarm, Vec::new(), request.profile.clone())
-            }
-            (
-                objectiveai::vector::completions::request::Swarm::Provided(
-                    swarm_base,
-                ),
-                None,
-            ) => {
-                let (swarm, aligned_profile) =
-                    objectiveai::swarm::Swarm::try_from_with_profile(
-                        swarm_base.clone(),
-                        request.profile.clone(),
-                    )
-                    .map_err(super::Error::InvalidSwarm)?;
-                (swarm, Vec::new(), aligned_profile)
-            }
+            None => Vec::new(),
         };
 
         // prune votes that don't match responses length
         static_votes.retain(|vote| vote.vote.len() == request_responses_len);
 
-        // normalize profile into (weight, invert) pairs
-        let profile_pairs: Vec<(Decimal, bool)> =
-            profile.to_weights_and_invert();
-
-        // validate profile
-        if profile_pairs.len() != swarm.agents.len() {
-            return Err(super::Error::InvalidProfile(
-                "profile length must match swarm length".to_string(),
+        // extract profile weights from swarm (already validated during conversion)
+        let agent_count = swarm.agents.len();
+        if agent_count == 0 {
+            return Err(super::Error::InvalidSwarm(
+                "swarm must have at least one agent".to_string(),
             ));
         }
-        let mut positive_weight_count = 0;
-        for (weight, _) in &profile_pairs {
-            if *weight > Decimal::ZERO {
-                if *weight > Decimal::ONE || *weight < Decimal::ZERO {
-                    return Err(super::Error::InvalidProfile(
-                        "profile weights must be between 0 and 1".to_string(),
-                    ));
-                } else if *weight > Decimal::ZERO {
-                    positive_weight_count += 1;
-                }
-            }
-        }
-        if positive_weight_count < 1 {
-            return Err(super::Error::InvalidProfile(
-                "profile must have one or more positive weights".to_string(),
-            ));
-        }
+        let profile_pairs: Vec<(Decimal, bool)> = swarm.weights.to_weights_and_invert();
 
         // compute hash IDs
         let prompt_id = {
@@ -416,26 +324,31 @@ where
         // fetch from cache if requested
         if request.from_cache.is_some_and(|bool| bool) {
             // collect agent refs so they're owned here
-            let mut agent_refs = Vec::with_capacity(llms.len());
+            let mut agent_refs: Vec<objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote> =
+                Vec::with_capacity(llms.len());
             for (_, _, agent, _, _) in &llms {
-                let primary = objectiveai::agent::completions::request::Agent::Provided(
-                    agent.inner.base().to_owned(),
-                );
-                let fallbacks = agent.fallbacks.as_ref().map(|fallbacks| {
-                    fallbacks
-                        .iter()
-                        .map(|fallback| objectiveai::agent::completions::request::Agent::Provided(
-                            fallback.base().to_owned(),
-                        ))
-                        .collect::<Vec<_>>()
+                let inline_wf = match &agent.inner {
+                    objectiveai::agent::AgentWithFallbacks::Remote(r) => &r.inner,
+                    objectiveai::agent::AgentWithFallbacks::Inline(i) => i,
+                };
+                let primary_base = inline_wf.inner.base().to_owned();
+                let fallback_bases = inline_wf.fallbacks.as_ref().map(|fbs| {
+                    fbs.iter().map(|fb| fb.base().to_owned()).collect()
                 });
-                agent_refs.push((primary, fallbacks));
+                agent_refs.push(
+                    objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
+                        objectiveai::agent::InlineAgentBaseWithFallbacks {
+                            inner: primary_base,
+                            fallbacks: fallback_bases,
+                        },
+                    ),
+                );
             }
             // execute the futures
             let mut futs = Vec::with_capacity(llms.len());
             for (
                 (flat_swarm_index, swarm_index, _, weight, _),
-                (primary, fallbacks),
+                agent_ref,
             ) in llms.iter().zip(agent_refs.iter())
             {
                 let cache_vote_fetcher = self.cache_vote_fetcher.clone();
@@ -445,8 +358,7 @@ where
                 futs.push(async move {
                     match cache_vote_fetcher.fetch(
                         ctx,
-                        primary,
-                        fallbacks.as_deref(),
+                        agent_ref,
                         &request.messages,
                         &request.responses,
                     ).await {
@@ -657,7 +569,7 @@ where
         created: u64,
         swarm: String,
         indexer: Arc<ChoiceIndexer>,
-        agent: objectiveai::agent::AgentWithFallbacksAndCount,
+        agent: objectiveai::agent::AgentWithFallbacksWithCount,
         swarm_index: usize,
         flat_swarm_index: usize,
         flat_swarm_len: usize,
@@ -669,7 +581,7 @@ where
     ) -> impl Stream<Item = objectiveai::vector::completions::response::streaming::VectorCompletionChunk> + Send + 'static
     {
         use objectiveai::agent::completions::message::{
-            Message, UserMessage, RichContent, RichContentPart,
+            Message, UserMessage, RichContent,
         };
 
         let request_responses_len = request.responses.len();
@@ -678,9 +590,9 @@ where
         let mut vector_pfx_data: HashMap<String, super::PfxData> = HashMap::new();
         let mut vector_pfx_indices: HashMap<String, Vec<(String, usize)>> = HashMap::new();
         {
-            for a in std::iter::once(&agent.inner).chain(
-                agent.fallbacks
-                    .iter()
+            for a in std::iter::once(agent.inner.agent()).chain(
+                agent.inner.fallbacks()
+                    .into_iter()
                     .flat_map(|fallbacks| fallbacks.iter()),
             ) {
                 let agent_id = a.id().to_string();
@@ -737,10 +649,10 @@ where
         };
 
         // Extract synthetic_reasoning from the primary agent
-        let synthetic_reasoning = match &agent.inner {
-            objectiveai::agent::Agent::Openrouter(a) => a.base.synthetic_reasoning.unwrap_or(false),
-            objectiveai::agent::Agent::ClaudeAgentSdk(a) => a.base.synthetic_reasoning.unwrap_or(false),
-            objectiveai::agent::Agent::Mock(_) => false,
+        let synthetic_reasoning = match agent.inner.agent() {
+            objectiveai::agent::InlineAgent::Openrouter(a) => a.base.synthetic_reasoning.unwrap_or(false),
+            objectiveai::agent::InlineAgent::ClaudeAgentSdk(a) => a.base.synthetic_reasoning.unwrap_or(false),
+            objectiveai::agent::InlineAgent::Mock(_) => false,
         };
 
         // Build per-agent response formats for json_schema and tool_call modes
@@ -773,17 +685,18 @@ where
         let primary_id = agent.inner.id().to_string();
 
         // Build the AgentCompletionCreateParams (messages are NOT modified here)
+        let inline_wf = agent.inner.inline();
         let agent_params = Arc::new(objectiveai::agent::completions::request::AgentCompletionCreateParams {
             messages: request.messages.clone(),
             provider: request.provider.clone(),
-            agent: objectiveai::agent::completions::request::Agent::Provided(
-                agent.inner.base().to_owned(),
+            agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+                objectiveai::agent::InlineAgentBaseWithFallbacks {
+                    inner: inline_wf.inner.clone().into_base(),
+                    fallbacks: inline_wf.fallbacks.as_ref().map(|fbs| {
+                        fbs.iter().map(|fb| fb.clone().into_base()).collect()
+                    }),
+                },
             ),
-            agents: agent.fallbacks.as_ref().map(|fbs| {
-                fbs.iter()
-                    .map(|fb| objectiveai::agent::completions::request::Agent::Provided(fb.base().to_owned()))
-                    .collect()
-            }),
             response_format: response_format.clone(),
             seed: request.seed.map(|s| per_agent_seed(s, &primary_id, flat_swarm_index, &prompt_id, &responses_ids)),
             stream: Some(false),

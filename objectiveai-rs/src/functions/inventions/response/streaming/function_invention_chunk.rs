@@ -12,7 +12,7 @@ pub struct FunctionInventionChunk {
     pub state: Option<functions::inventions::State>,
     // yielded at the end
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub path: Option<functions::RemoteFunctionPath>,
+    pub path: Option<crate::RemotePath>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub function: Option<functions::FullRemoteFunction>,
     #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]

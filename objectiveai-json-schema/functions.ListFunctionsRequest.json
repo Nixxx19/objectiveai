@@ -1,0 +1,18 @@
+{
+  "title": "functions.ListFunctionsRequest",
+  "description": "Query parameters for the list functions endpoint.",
+  "type": "object",
+  "properties": {
+    "source": {
+      "description": "Optional source filter for listing functions.",
+      "anyOf": [
+        {
+          "$ref": "functions.ListFunctionsSource"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

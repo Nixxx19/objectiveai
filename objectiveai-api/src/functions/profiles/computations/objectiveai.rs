@@ -26,7 +26,7 @@ where
         &self,
         ctx: ctx::Context<CTXEXT>,
         request: Arc<
-            objectiveai::functions::profiles::computations::request::Request,
+            objectiveai::functions::profiles::computations::request::FunctionProfileComputationCreateParams,
         >,
     ) -> Result<
         objectiveai::functions::profiles::computations::response::unary::FunctionProfileComputation,
@@ -45,7 +45,7 @@ where
         &self,
         ctx: ctx::Context<CTXEXT>,
         request: Arc<
-            objectiveai::functions::profiles::computations::request::Request,
+            objectiveai::functions::profiles::computations::request::FunctionProfileComputationCreateParams,
         >,
     ) -> Result<
         impl Stream<Item = Result<

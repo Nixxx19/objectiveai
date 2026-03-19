@@ -70,8 +70,8 @@ pub fn validateAgent(agent: JsValue) -> Result<String, JsValue> {
         serde_wasm_bindgen::from_value(agent)?;
     // prepare, validate, and compute ID
     let agent: objectiveai::agent::Agent = agent_base
-        .try_into()
-        .map_err(|e: String| JsValue::from_str(&e))?;
+        .convert()
+        .map_err(|e| JsValue::from_str(&e))?;
     // serialize
     serde_json::to_string(&agent).map_err(|e| JsValue::from_str(&e.to_string()))
 }
@@ -95,14 +95,20 @@ pub fn validateAgent(agent: JsValue) -> Result<String, JsValue> {
 /// Returns an error string if any LLM validation fails or the swarm
 /// structure is invalid.
 #[wasm_bindgen]
-pub fn validateSwarm(swarm: JsValue) -> Result<String, JsValue> {
+pub fn validateSwarm(swarm: JsValue, remote_agents: JsValue) -> Result<String, JsValue> {
     // deserialize
     let swarm_base: objectiveai::swarm::SwarmBase =
         serde_wasm_bindgen::from_value(swarm)?;
+    let remote_agents: Option<std::collections::HashMap<String, objectiveai::agent::RemoteAgentWithFallbacks>> =
+        if remote_agents.is_undefined() || remote_agents.is_null() {
+            None
+        } else {
+            Some(serde_wasm_bindgen::from_value(remote_agents)?)
+        };
     // prepare, validate, and compute ID
     let swarm: objectiveai::swarm::Swarm = swarm_base
-        .try_into()
-        .map_err(|e: String| JsValue::from_str(&e))?;
+        .convert(remote_agents.as_ref())
+        .map_err(|e| JsValue::from_str(&e))?;
     // serialize
     serde_json::to_string(&swarm).map_err(|e| JsValue::from_str(&e.to_string()))
 }

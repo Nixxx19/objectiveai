@@ -1,35 +1,30 @@
 import { ObjectiveAI, type RequestOptions } from "../client";
-import type { SwarmListSwarm } from "./listSwarm";
-import type { SwarmGetSwarm } from "./getSwarm";
-import type { SwarmUsageSwarm } from "./usageSwarm";
+import type { RemotePathCommitOptional } from "../remotePathCommitOptional";
+import type { SwarmListSwarmsRequest } from "./listSwarmsRequest";
+import type { SwarmListSwarmResponse } from "./listSwarmResponse";
+import type { SwarmGetSwarmResponse } from "./getSwarmResponse";
+import type { SwarmUsageSwarmResponse } from "./usageSwarmResponse";
 
 export function swarmListSwarms(
   client: ObjectiveAI,
+  params: SwarmListSwarmsRequest,
   options?: RequestOptions,
-): Promise<SwarmListSwarm> {
-  return client.get_unary<SwarmListSwarm>("/swarms", undefined, options);
+): Promise<SwarmListSwarmResponse> {
+  return client.get_unary<SwarmListSwarmResponse>("swarms/list", params, options);
 }
 
 export function swarmGetSwarm(
   client: ObjectiveAI,
-  swarmId: string,
+  params: RemotePathCommitOptional,
   options?: RequestOptions,
-): Promise<SwarmGetSwarm> {
-  return client.get_unary<SwarmGetSwarm>(
-    `/swarms/${swarmId}`,
-    undefined,
-    options,
-  );
+): Promise<SwarmGetSwarmResponse> {
+  return client.get_unary<SwarmGetSwarmResponse>("swarms", params, options);
 }
 
 export function swarmGetSwarmUsage(
   client: ObjectiveAI,
-  swarmId: string,
+  params: RemotePathCommitOptional,
   options?: RequestOptions,
-): Promise<SwarmUsageSwarm> {
-  return client.get_unary<SwarmUsageSwarm>(
-    `/swarms/${swarmId}/usage`,
-    undefined,
-    options,
-  );
+): Promise<SwarmUsageSwarmResponse> {
+  return client.get_unary<SwarmUsageSwarmResponse>("swarms/usage", params, options);
 }

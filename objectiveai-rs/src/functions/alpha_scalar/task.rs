@@ -97,7 +97,7 @@ impl LeafTaskExpression {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "functions.alpha_scalar.ScalarFunctionTaskExpression")]
 pub struct ScalarFunctionTaskExpression {
-    pub remote: functions::Remote,
+    pub remote: crate::Remote,
     pub owner: String,
     pub repository: String,
     pub commit: String,
@@ -164,7 +164,7 @@ impl PlaceholderScalarFunctionTaskExpression {
 
     pub fn replace(
         self,
-        path: &functions::RemoteFunctionPath,
+        path: &crate::RemotePath,
     ) -> ScalarFunctionTaskExpression {
         ScalarFunctionTaskExpression {
             remote: path.remote,

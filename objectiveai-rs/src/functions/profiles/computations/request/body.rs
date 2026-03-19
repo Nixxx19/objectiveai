@@ -1,32 +1,27 @@
-use crate::{agent, functions, vector};
+use crate::{agent, functions};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
+/// Parameters for creating a function profile computation.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.profiles.computations.request.FunctionInlineRequestBody")]
-pub struct FunctionInlineRequestBody {
-    pub function: functions::InlineFunction,
-    #[serde(flatten)]
-    pub base: FunctionRemoteRequestBody,
-}
+#[schemars(rename = "functions.profiles.computations.request.FunctionProfileComputationCreateParams")]
+pub struct FunctionProfileComputationCreateParams {
+    /// The function to compute a profile for (inline definition or remote path).
+    pub function: functions::FullInlineFunctionOrRemoteCommitOptional,
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.profiles.computations.request.FunctionRemoteRequestBody")]
-pub struct FunctionRemoteRequestBody {
-    // if present, retries vector completions from previous request
+    // --- Caching and retry options ---
     #[serde(skip_serializing_if = "Option::is_none")]
     pub retry_token: Option<String>,
-    // if true, vector completions use cached votes when available
     #[serde(skip_serializing_if = "Option::is_none")]
     pub from_cache: Option<bool>,
 
-    // core config
+    // --- Core configuration ---
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_retries: Option<u64>,
     pub n: u64,
     pub dataset: Vec<super::DatasetItem>,
-    pub swarm: vector::completions::request::Swarm,
+    pub swarm: crate::swarm::InlineSwarmBaseOrRemoteCommitOptional,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<agent::completions::request::Provider>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -34,9 +29,7 @@ pub struct FunctionRemoteRequestBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stream: Option<bool>,
 
-    // MCP server authorization
-    /// Map from MCP server URL to authorization header value.
+    // --- MCP server authorization ---
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mcp_server_authorization: Option<IndexMap<String, String>>,
-
 }

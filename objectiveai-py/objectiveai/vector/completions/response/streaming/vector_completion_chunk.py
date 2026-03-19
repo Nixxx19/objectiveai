@@ -18,10 +18,10 @@ Each chunk contains incremental updates to the completion. Use the
 
     completions: list[AgentCompletionChunk] = Field(..., description='Incremental agent completion chunks from each agent.')
     created: int = Field(..., description='Unix timestamp when the completion was created.', ge=0, le=18446744073709551615)
-    swarm: str = Field(..., description='ID of the swarm used for this completion.')
     id: str = Field(..., description='Unique identifier for this vector completion.')
     object: Object = Field(..., description='Object type identifier (`"vector.completion.chunk"`).')
     scores: list[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]] = Field(..., description='Current weighted scores. Updated as new votes arrive.')
+    swarm: str = Field(..., description='ID of the swarm used for this completion.')
     usage: Optional[Usage] = Field(None, description='Aggregated usage statistics. Typically present only in the final chunk.')
     votes: list[Vote] = Field(..., description='Votes received so far. New votes are appended in subsequent chunks.')
     weights: list[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]] = Field(..., description='Current weight distribution across responses. Updated as new votes arrive.')

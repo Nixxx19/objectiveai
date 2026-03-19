@@ -6,14 +6,12 @@ use schemars::JsonSchema;
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.inventions.recursive.request.FunctionInventionRecursiveCreateParams")]
 pub struct FunctionInventionRecursiveCreateParams {
-    pub remote: functions::Remote,
+    pub remote: crate::Remote,
     pub name: String,
     pub state: functions::inventions::ParamsState,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<agent::completions::request::Provider>,
-    pub agent: agent::completions::request::Agent,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub agents: Option<Vec<agent::completions::request::Agent>>,
+    pub agent: agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub seed: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]

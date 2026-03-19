@@ -65,33 +65,33 @@ fn validate_name(name: &str) -> Result<(), super::Error> {
 ///
 /// Orchestrates the multi-step invention flow: essay, input schema,
 /// essay tasks, tasks, description, and readme generation.
-pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM> {
+pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM> {
     pub agent_client: Arc<
         crate::agent::completions::Client<
-            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG,
+            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG,
         >,
     >,
     pub github_client: Arc<crate::github::Client>,
     pub filesystem_client: Arc<crate::filesystem::Client>,
-    pub function_fetcher:
-        Arc<crate::functions::function_fetcher::FetcherRouter<FFNG, FFNF, FFNM>>,
+    pub retrieve_router:
+        Arc<crate::retrieval::retrieve::Router<FFNG, FFNF, FFNM, CTXEXT>>,
     pub usage_handler: Arc<IUSG>,
     pub persist: bool,
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM>
-    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM>
+    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM>
 {
     pub fn new(
         agent_client: Arc<
             crate::agent::completions::Client<
-                CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG,
+                CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG,
             >,
         >,
         github_client: Arc<crate::github::Client>,
         filesystem_client: Arc<crate::filesystem::Client>,
-        function_fetcher: Arc<
-            crate::functions::function_fetcher::FetcherRouter<FFNG, FFNF, FFNM>,
+        retrieve_router: Arc<
+            crate::retrieval::retrieve::Router<FFNG, FFNF, FFNM, CTXEXT>,
         >,
         usage_handler: Arc<IUSG>,
         persist: bool,
@@ -100,7 +100,7 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, F
             agent_client,
             github_client,
             filesystem_client,
-            function_fetcher,
+            retrieve_router,
             usage_handler,
             persist,
         }
@@ -120,8 +120,8 @@ type Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK> =
         >>::State,
     >;
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM>
-    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM>
+    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
     OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent>
@@ -137,12 +137,14 @@ where
         + Send
         + Sync
         + 'static,
-    FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    RETRG: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRF: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRM: crate::retrieval::retrieve::Client<CTXEXT>,
     CUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
     IUSG: super::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
-    FFNG: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    FFNF: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    FFNM: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FFNG: crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
+    FFNF: crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
+    FFNM: crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
 {
     pub async fn create_unary_handle_usage(
         self: Arc<Self>,
@@ -298,10 +300,7 @@ where
         // If the initial state has tasks, fetch all referenced child functions
         // and validate the initial state against them.
         let children = if let Some(full_fn) = state.build_function() {
-            let transpiled = full_fn.transpile();
-            let children = self.function_fetcher
-                .fetch_recursive(&ctx, &transpiled)
-                .await
+            let children = self.retrieve_router.get_function_recursive(&ctx, full_fn).await
                 .map_err(super::Error::FunctionFetch)?;
             Some(children)
         } else {
@@ -352,7 +351,7 @@ where
         };
 
         // GitHub remote: validate token and check permissions.
-        if matches!(remote, objectiveai::functions::Remote::Github) {
+        if matches!(remote, objectiveai::Remote::Github) {
             let scopes = self
                 .github_client
                 .validate_token(ctx)
@@ -378,7 +377,7 @@ where
         }
 
         let exists = match remote {
-            objectiveai::functions::Remote::Github => {
+            objectiveai::Remote::Github => {
                 let (owner, repo) = if let Some((o, r)) = name.split_once('/') {
                     (o, r)
                 } else {
@@ -389,15 +388,15 @@ where
                     .repository_exists(ctx, owner, repo)
                     .await?
             }
-            objectiveai::functions::Remote::Filesystem => {
+            objectiveai::Remote::Filesystem => {
                 let (owner, repo) = if let Some((o, r)) = name.split_once('/') {
                     (o, r)
                 } else {
                     return Ok(());
                 };
-                self.filesystem_client.repository_exists(crate::filesystem::Kind::Functions, owner, repo)
+                self.filesystem_client.repository_exists(crate::retrieval::Kind::Functions, owner, repo)
             }
-            objectiveai::functions::Remote::Mock => false,
+            objectiveai::Remote::Mock => false,
         };
 
         if exists {
@@ -412,11 +411,11 @@ where
 // Step orchestration
 // ---------------------------------------------------------------------------
 
-fn run_all_steps<T, CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG>(
+fn run_all_steps<T, CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG>(
     state_val: T,
     agent_client: Arc<
         crate::agent::completions::Client<
-            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG,
+            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG,
         >,
     >,
     github_client: Arc<crate::github::Client>,
@@ -443,7 +442,9 @@ where
         + Send
         + Sync
         + 'static,
-    FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    RETRG: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRF: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRM: crate::retrieval::retrieve::Client<CTXEXT>,
     CUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
 {
     Box::pin(async_stream::stream! {
@@ -893,7 +894,7 @@ where
                 let name = &T::params(&state).name;
                 let description = extract_description(&final_state);
                 match remote {
-                    objectiveai::functions::Remote::Filesystem => {
+                    objectiveai::Remote::Filesystem => {
                         match publish_filesystem(
                             &filesystem_client, name, &publish_files,
                         ) {
@@ -901,7 +902,7 @@ where
                             Err(e) => (None, Some(e)),
                         }
                     }
-                    objectiveai::functions::Remote::Github => {
+                    objectiveai::Remote::Github => {
                         match publish_github(
                             &github_client, &filesystem_client,
                             &ctx, name, &description, &publish_files,
@@ -910,7 +911,7 @@ where
                             Err(e) => (None, Some(e)),
                         }
                     }
-                    objectiveai::functions::Remote::Mock => (None, None),
+                    objectiveai::Remote::Mock => (None, None),
                 }
             } else {
                 (None, None)
@@ -1001,7 +1002,7 @@ pub(crate) fn publish_filesystem(
     filesystem_client: &crate::filesystem::Client,
     name: &str,
     files: &[(&'static str, String)],
-) -> Result<objectiveai::functions::RemoteFunctionPath, super::Error> {
+) -> Result<objectiveai::RemotePath, super::Error> {
     let (owner, repo) = name.split_once('/')
         .ok_or_else(|| super::Error::InvalidName(
             format!("name must be 'owner/repository', got '{}'", name),
@@ -1012,10 +1013,10 @@ pub(crate) fn publish_filesystem(
         .collect();
 
     let commit = filesystem_client
-        .publish(crate::filesystem::Kind::Functions, owner, repo, &file_refs, &format!("publish {}", name))?;
+        .publish(crate::retrieval::Kind::Functions, owner, repo, &file_refs, &format!("publish {}", name))?;
 
-    Ok(objectiveai::functions::RemoteFunctionPath {
-        remote: objectiveai::functions::Remote::Filesystem,
+    Ok(objectiveai::RemotePath {
+        remote: objectiveai::Remote::Filesystem,
         owner: owner.to_string(),
         repository: repo.to_string(),
         commit,
@@ -1033,7 +1034,7 @@ pub(crate) async fn publish_github<CTXEXT: ctx::ContextExt + Send + Sync>(
     name: &str,
     description: &str,
     files: &[(&'static str, String)],
-) -> Result<objectiveai::functions::RemoteFunctionPath, super::Error> {
+) -> Result<objectiveai::RemotePath, super::Error> {
     let file_refs: Vec<(&str, &str)> = files.iter()
         .map(|(n, c)| (*n, c.as_str()))
         .collect();
@@ -1072,7 +1073,6 @@ fn build_agent_params(
         messages,
         provider: request.provider.clone(),
         agent: request.agent.clone(),
-        agents: request.agents.clone(),
         response_format: None,
         seed: request.seed,
         stream: Some(true),
@@ -1090,10 +1090,10 @@ fn user_message(prompt: &str) -> objectiveai::agent::completions::message::UserM
     }
 }
 
-fn run_step<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG>(
+fn run_step<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG>(
     agent_client: Arc<
         crate::agent::completions::Client<
-            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG,
+            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG,
         >,
     >,
     ctx: ctx::Context<CTXEXT>,
@@ -1127,7 +1127,9 @@ where
         + Send
         + Sync
         + 'static,
-    FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    RETRG: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRF: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRM: crate::retrieval::retrieve::Client<CTXEXT>,
     CUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
 {
     Box::pin(async_stream::stream! {

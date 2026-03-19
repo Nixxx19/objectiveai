@@ -1,31 +1,30 @@
 import { ObjectiveAI, type RequestOptions } from "../client";
-import type { AgentListAgent } from "./listAgent";
-import type { AgentGetAgent } from "./getAgent";
-import type { AgentUsageAgent } from "./usageAgent";
+import type { RemotePathCommitOptional } from "../remotePathCommitOptional";
+import type { AgentListAgentsRequest } from "./listAgentsRequest";
+import type { AgentListAgentResponse } from "./listAgentResponse";
+import type { AgentGetAgentResponse } from "./getAgentResponse";
+import type { AgentUsageAgentResponse } from "./usageAgentResponse";
 
 export function agentListAgents(
   client: ObjectiveAI,
+  params: AgentListAgentsRequest,
   options?: RequestOptions,
-): Promise<AgentListAgent> {
-  return client.get_unary<AgentListAgent>("/agents", undefined, options);
+): Promise<AgentListAgentResponse> {
+  return client.get_unary<AgentListAgentResponse>("agents/list", params, options);
 }
 
 export function agentGetAgent(
   client: ObjectiveAI,
-  agentId: string,
+  params: RemotePathCommitOptional,
   options?: RequestOptions,
-): Promise<AgentGetAgent> {
-  return client.get_unary<AgentGetAgent>(`/agents/${agentId}`, undefined, options);
+): Promise<AgentGetAgentResponse> {
+  return client.get_unary<AgentGetAgentResponse>("agents", params, options);
 }
 
 export function agentGetAgentUsage(
   client: ObjectiveAI,
-  agentId: string,
+  params: RemotePathCommitOptional,
   options?: RequestOptions,
-): Promise<AgentUsageAgent> {
-  return client.get_unary<AgentUsageAgent>(
-    `/agents/${agentId}/usage`,
-    undefined,
-    options,
-  );
+): Promise<AgentUsageAgentResponse> {
+  return client.get_unary<AgentUsageAgentResponse>("agents/usage", params, options);
 }

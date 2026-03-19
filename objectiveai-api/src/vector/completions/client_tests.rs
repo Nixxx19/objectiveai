@@ -16,41 +16,51 @@ use crate::ctx;
 // Stubs — never actually called since we always provide inline mock agents.
 // ---------------------------------------------------------------------------
 
-struct StubAgentFetcher;
+struct StubRetrieveClient;
 
 #[async_trait::async_trait]
-impl crate::agent::fetcher::Fetcher<ctx::DefaultContextExt> for StubAgentFetcher {
-    async fn fetch(
+impl crate::retrieval::retrieve::Client<ctx::DefaultContextExt> for StubRetrieveClient {
+    async fn get_agent(
         &self,
-        _ctx: ctx::Context<ctx::DefaultContextExt>,
-        _id: &str,
-    ) -> Result<
-        Option<(objectiveai::agent::Agent, u64)>,
-        objectiveai::error::ResponseError,
-    > {
-        Err(objectiveai::error::ResponseError {
-            code: 501,
-            message: serde_json::json!("stub agent fetcher should not be called"),
-        })
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::agent::RemoteAgentBaseWithFallbacks>, objectiveai::error::ResponseError> {
+        unimplemented!()
     }
-}
 
-struct StubSwarmFetcher;
-
-#[async_trait::async_trait]
-impl crate::swarm::fetcher::Fetcher<ctx::DefaultContextExt> for StubSwarmFetcher {
-    async fn fetch(
+    async fn get_swarm(
         &self,
-        _ctx: ctx::Context<ctx::DefaultContextExt>,
-        _id: &str,
-    ) -> Result<
-        Option<(objectiveai::swarm::Swarm, u64)>,
-        objectiveai::error::ResponseError,
-    > {
-        Err(objectiveai::error::ResponseError {
-            code: 501,
-            message: serde_json::json!("stub swarm fetcher should not be called"),
-        })
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::swarm::RemoteSwarmBase>, objectiveai::error::ResponseError> {
+        unimplemented!()
+    }
+
+    async fn get_function(
+        &self,
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::functions::FullRemoteFunction>, objectiveai::error::ResponseError> {
+        unimplemented!()
+    }
+
+    async fn get_profile(
+        &self,
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::functions::RemoteProfile>, objectiveai::error::ResponseError> {
+        unimplemented!()
+    }
+
+    async fn resolve_latest_commit(
+        &self,
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _kind: crate::retrieval::Kind,
+        _remote: objectiveai::Remote,
+        _owner: &str,
+        _repository: &str,
+    ) -> Result<Option<String>, objectiveai::error::ResponseError> {
+        unimplemented!()
     }
 }
 
@@ -81,8 +91,7 @@ impl super::cache_vote_fetcher::Fetcher<ctx::DefaultContextExt>
     async fn fetch(
         &self,
         _ctx: ctx::Context<ctx::DefaultContextExt>,
-        _agent: &objectiveai::agent::completions::request::Agent,
-        _agents: Option<&[objectiveai::agent::completions::request::Agent]>,
+        _agent: &objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote,
         _messages: &[objectiveai::agent::completions::message::Message],
         _responses: &[objectiveai::agent::completions::message::RichContent],
     ) -> Result<
@@ -120,6 +129,106 @@ impl super::usage_handler::UsageHandler<ctx::DefaultContextExt>
         _request: Arc<objectiveai::vector::completions::request::VectorCompletionCreateParams>,
         _response: objectiveai::vector::completions::response::unary::VectorCompletion,
     ) {
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Shared helpers for constructing clients
+// ---------------------------------------------------------------------------
+
+fn make_retrieve_router() -> Arc<crate::retrieval::retrieve::Router<StubRetrieveClient, StubRetrieveClient, StubRetrieveClient, ctx::DefaultContextExt>> {
+    Arc::new(crate::retrieval::retrieve::Router::new(
+        Arc::new(StubRetrieveClient),
+        Arc::new(StubRetrieveClient),
+        Arc::new(StubRetrieveClient),
+    ))
+}
+
+fn make_agent_client(
+    retrieve_router: &Arc<crate::retrieval::retrieve::Router<StubRetrieveClient, StubRetrieveClient, StubRetrieveClient, ctx::DefaultContextExt>>,
+) -> Arc<crate::agent::completions::Client<ctx::DefaultContextExt, UnimplementedUpstreamClient, UnimplementedUpstreamClient, crate::agent::completions::mock::Client, StubRetrieveClient, StubRetrieveClient, StubRetrieveClient, StubAgentUsageHandler>> {
+    Arc::new(crate::agent::completions::Client::new(
+        Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        retrieve_router.clone(),
+        Arc::new(StubAgentUsageHandler),
+        Arc::new(UnimplementedUpstreamClient),
+        Arc::new(UnimplementedUpstreamClient),
+        Arc::new(crate::agent::completions::mock::Client {
+            delay: Duration::ZERO,
+            max_tool_calls: 1000,
+        }),
+        Duration::ZERO,
+        Duration::ZERO,
+        0.0,
+        1.0,
+        Duration::ZERO,
+        Duration::ZERO,
+        Duration::from_millis(1),
+        Duration::from_millis(1),
+    ))
+}
+
+type TestVectorClient = super::Client<
+    ctx::DefaultContextExt,
+    UnimplementedUpstreamClient,
+    UnimplementedUpstreamClient,
+    crate::agent::completions::mock::Client,
+    StubRetrieveClient,
+    StubRetrieveClient,
+    StubRetrieveClient,
+    StubAgentUsageHandler,
+    StubCompletionVotesFetcher,
+    StubCacheVoteFetcher,
+    StubVectorUsageHandler,
+>;
+
+fn make_vector_client() -> Arc<TestVectorClient> {
+    let retrieve_router = make_retrieve_router();
+    let agent_client = make_agent_client(&retrieve_router);
+    Arc::new(super::Client {
+        agent_client,
+        retrieve_router,
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    })
+}
+
+/// Helper to construct a mock agent for swarms.
+fn mock_agent(
+    output_mode: MockOutputMode,
+    count: u64,
+    top_logprobs: Option<u64>,
+    error: Option<bool>,
+    fallbacks: Option<Vec<objectiveai::agent::InlineAgentBase>>,
+) -> objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
+    objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
+        count,
+        inner: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase {
+                    upstream: MockUpstream::Mock,
+                    output_mode,
+                    top_logprobs,
+                    error,
+                    invention: None,
+                }),
+                fallbacks,
+            },
+        ),
     }
 }
 
@@ -180,49 +289,7 @@ fn assert_snapshot(json: &str, path: &str, expected: &str) {
 /// Single mock agent, 2 responses, instruction mode, seed 42.
 #[tokio::test]
 async fn test_single_agent_2_responses_instruction_seed_42() {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let client = Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
+    let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
@@ -231,24 +298,14 @@ async fn test_single_agent_2_responses_instruction_seed_42() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 1,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                    fallbacks: None,
-                }],
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::Instruction, 1, None, None, None)],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(42),
         stream: None,
         responses: vec![
@@ -280,49 +337,7 @@ async fn test_single_agent_2_responses_instruction_seed_42() {
 /// Single mock agent, 3 responses, instruction mode, seed 42.
 #[tokio::test]
 async fn test_single_agent_3_responses_instruction_seed_42() {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let client = Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
+    let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
@@ -331,24 +346,14 @@ async fn test_single_agent_3_responses_instruction_seed_42() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 1,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                    fallbacks: None,
-                }],
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::Instruction, 1, None, None, None)],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(42),
         stream: None,
         responses: vec![
@@ -381,49 +386,7 @@ async fn test_single_agent_3_responses_instruction_seed_42() {
 /// Two mock agents with equal weights, seed 42.
 #[tokio::test]
 async fn test_two_agents_equal_weights_seed_42() {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let client = Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
+    let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
@@ -432,24 +395,14 @@ async fn test_two_agents_equal_weights_seed_42() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 2,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                    fallbacks: None,
-                }],
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::Instruction, 2, None, None, None)],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(42),
         stream: None,
         responses: vec![
@@ -481,49 +434,7 @@ async fn test_two_agents_equal_weights_seed_42() {
 /// Two different mock agent definitions with unequal weights (0.8 / 0.2), seed 42.
 #[tokio::test]
 async fn test_two_agents_unequal_weights_seed_42() {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let client = Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
+    let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
@@ -532,38 +443,18 @@ async fn test_two_agents_unequal_weights_seed_42() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
                 agents: vec![
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
+                    mock_agent(MockOutputMode::Instruction, 1, None, None, None),
+                    mock_agent(MockOutputMode::Instruction, 1, None, None, None),
                 ],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::new(8, 1),
+                    Decimal::new(2, 1),
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::new(8, 1),
-            Decimal::new(2, 1),
-        ]),
         seed: Some(42),
         stream: None,
         responses: vec![
@@ -595,49 +486,7 @@ async fn test_two_agents_unequal_weights_seed_42() {
 /// Three agents (via count=3), 4 responses, seed 99.
 #[tokio::test]
 async fn test_three_agents_4_responses_seed_99() {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let client = Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
+    let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
@@ -646,24 +495,14 @@ async fn test_three_agents_4_responses_seed_99() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 3,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                    fallbacks: None,
-                }],
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::Instruction, 3, None, None, None)],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(99),
         stream: None,
         responses: vec![
@@ -697,49 +536,7 @@ async fn test_three_agents_4_responses_seed_99() {
 /// Invert vote with single agent, seed 42.
 #[tokio::test]
 async fn test_invert_vote_seed_42() {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let client = Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
+    let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
@@ -748,27 +545,17 @@ async fn test_invert_vote_seed_42() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 1,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                    fallbacks: None,
-                }],
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::Instruction, 1, None, None, None)],
+                weights: Some(objectiveai::Weights::Entries(vec![
+                    objectiveai::WeightsEntry {
+                        weight: Decimal::ONE,
+                        invert: Some(true),
+                    },
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Entries(vec![
-            objectiveai::vector::completions::request::ProfileEntry {
-                weight: Decimal::ONE,
-                invert: Some(true),
-            },
-        ]),
         seed: Some(42),
         stream: None,
         responses: vec![
@@ -800,78 +587,23 @@ async fn test_invert_vote_seed_42() {
 /// Same seed produces same result (deterministic).
 #[tokio::test]
 async fn test_deterministic_same_seed() {
-    let make_client = || {
-        let agent_client = Arc::new(crate::agent::completions::Client {
-            mcp_client: Arc::new(crate::mcp::Client::new(
-                reqwest::Client::new(),
-                None,
-                None,
-                None,
-                Duration::ZERO,
-                Duration::ZERO,
-                Duration::ZERO,
-                0.0,
-                1.0,
-                Duration::ZERO,
-                Duration::ZERO,
-                Duration::from_millis(1),
-            )),
-            agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-                Arc::new(StubAgentFetcher),
-            )),
-            usage_handler: Arc::new(StubAgentUsageHandler),
-            openrouter: Arc::new(UnimplementedUpstreamClient),
-            claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-            mock: Arc::new(crate::agent::completions::mock::Client {
-                delay: Duration::ZERO,
-                max_tool_calls: 1000,
-            }),
-            backoff_current_interval: Duration::ZERO,
-            backoff_initial_interval: Duration::ZERO,
-            backoff_randomization_factor: 0.0,
-            backoff_multiplier: 1.0,
-            backoff_max_interval: Duration::ZERO,
-            backoff_max_elapsed_time: Duration::ZERO,
-            first_chunk_timeout: Duration::from_millis(1),
-            other_chunk_timeout: Duration::from_millis(1),
-        });
-        Arc::new(super::Client {
-            agent_client,
-            swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-                Arc::new(StubSwarmFetcher),
-            )),
-            completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-            cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-            usage_handler: Arc::new(StubVectorUsageHandler),
-        })
-    };
     let make_request = || {
         Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
             retry: None,
             from_cache: None,
-                messages: vec![Message::User(UserMessage {
+            messages: vec![Message::User(UserMessage {
                 content: RichContent::Text("Pick one".to_string()),
                 name: None,
             })],
             provider: None,
-            swarm: objectiveai::vector::completions::request::Swarm::Provided(
-                objectiveai::swarm::SwarmBase {
-                    agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 2,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    }],
+            swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+                objectiveai::swarm::InlineSwarmBase {
+                    agents: vec![mock_agent(MockOutputMode::Instruction, 2, None, None, None)],
+                    weights: Some(objectiveai::Weights::Weights(vec![
+                        Decimal::ONE,
+                    ])),
                 },
             ),
-            profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-                Decimal::ONE,
-            ]),
             seed: Some(42),
             stream: None,
             responses: vec![
@@ -883,7 +615,7 @@ async fn test_deterministic_same_seed() {
         })
     };
 
-    let run = |client: Arc<super::Client<_, _, _, _, _, _, _, _, _, _>>, request| async move {
+    let run = |client: Arc<TestVectorClient>, request| async move {
         let stream = client
             .create_streaming(
                 ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new()),
@@ -894,8 +626,8 @@ async fn test_deterministic_same_seed() {
         normalize(run_and_check(Box::pin(stream)).await)
     };
 
-    let result1 = run(make_client(), make_request()).await;
-    let result2 = run(make_client(), make_request()).await;
+    let result1 = run(make_vector_client(), make_request()).await;
+    let result2 = run(make_vector_client(), make_request()).await;
 
     let json1 = serde_json::to_string_pretty(&result1).unwrap();
     let json2 = serde_json::to_string_pretty(&result2).unwrap();
@@ -905,78 +637,24 @@ async fn test_deterministic_same_seed() {
 /// Different seeds produce different results.
 #[tokio::test]
 async fn test_different_seeds_differ() {
-    let client = {
-        let agent_client = Arc::new(crate::agent::completions::Client {
-            mcp_client: Arc::new(crate::mcp::Client::new(
-                reqwest::Client::new(),
-                None,
-                None,
-                None,
-                Duration::ZERO,
-                Duration::ZERO,
-                Duration::ZERO,
-                0.0,
-                1.0,
-                Duration::ZERO,
-                Duration::ZERO,
-                Duration::from_millis(1),
-            )),
-            agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-                Arc::new(StubAgentFetcher),
-            )),
-            usage_handler: Arc::new(StubAgentUsageHandler),
-            openrouter: Arc::new(UnimplementedUpstreamClient),
-            claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-            mock: Arc::new(crate::agent::completions::mock::Client {
-                delay: Duration::ZERO,
-                max_tool_calls: 1000,
-            }),
-            backoff_current_interval: Duration::ZERO,
-            backoff_initial_interval: Duration::ZERO,
-            backoff_randomization_factor: 0.0,
-            backoff_multiplier: 1.0,
-            backoff_max_interval: Duration::ZERO,
-            backoff_max_elapsed_time: Duration::ZERO,
-            first_chunk_timeout: Duration::from_millis(1),
-            other_chunk_timeout: Duration::from_millis(1),
-        });
-        Arc::new(super::Client {
-            agent_client,
-            swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-                Arc::new(StubSwarmFetcher),
-            )),
-            completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-            cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-            usage_handler: Arc::new(StubVectorUsageHandler),
-        })
-    };
+    let client = make_vector_client();
     let make_request = |seed: i64| {
         Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
             retry: None,
             from_cache: None,
-                messages: vec![Message::User(UserMessage {
+            messages: vec![Message::User(UserMessage {
                 content: RichContent::Text("Pick one".to_string()),
                 name: None,
             })],
             provider: None,
-            swarm: objectiveai::vector::completions::request::Swarm::Provided(
-                objectiveai::swarm::SwarmBase {
-                    agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    }],
+            swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+                objectiveai::swarm::InlineSwarmBase {
+                    agents: vec![mock_agent(MockOutputMode::Instruction, 1, None, None, None)],
+                    weights: Some(objectiveai::Weights::Weights(vec![
+                        Decimal::ONE,
+                    ])),
                 },
             ),
-            profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-                Decimal::ONE,
-            ]),
             seed: Some(seed),
             stream: None,
             responses: vec![
@@ -987,7 +665,7 @@ async fn test_different_seeds_differ() {
         })
     };
 
-    let run = |client: Arc<super::Client<_, _, _, _, _, _, _, _, _, _>>, request| async move {
+    let run = |client: Arc<TestVectorClient>, request| async move {
         let stream = client
             .create_streaming(
                 ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new()),
@@ -1009,49 +687,7 @@ async fn test_different_seeds_differ() {
 /// Many responses (25) to test deep prefix tree, seed 42.
 #[tokio::test]
 async fn test_many_responses_deep_prefix_tree_seed_42() {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let client = Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
+    let client = make_vector_client();
     let responses: Vec<RichContent> = (0..25)
         .map(|i| RichContent::Text(format!("Response {}", i)))
         .collect();
@@ -1063,24 +699,14 @@ async fn test_many_responses_deep_prefix_tree_seed_42() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 1,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                    fallbacks: None,
-                }],
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::Instruction, 1, None, None, None)],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(42),
         stream: None,
         responses,
@@ -1109,49 +735,7 @@ async fn test_many_responses_deep_prefix_tree_seed_42() {
 /// Single agent with json_schema output mode, seed 77.
 #[tokio::test]
 async fn test_json_schema_single_agent_seed_77() {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let client = Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
+    let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
@@ -1160,24 +744,14 @@ async fn test_json_schema_single_agent_seed_77() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 1,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                        upstream: MockUpstream::Mock,
-                        output_mode: MockOutputMode::JsonSchema,
-                        top_logprobs: None,
-                        error: None,
-                        invention: None,
-                    }),
-                    fallbacks: None,
-                }],
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::JsonSchema, 1, None, None, None)],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(77),
         stream: None,
         responses: vec![
@@ -1210,49 +784,7 @@ async fn test_json_schema_single_agent_seed_77() {
 /// Single agent with tool_call output mode, seed 55.
 #[tokio::test]
 async fn test_tool_call_single_agent_seed_55() {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let client = Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
+    let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
@@ -1261,24 +793,14 @@ async fn test_tool_call_single_agent_seed_55() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 1,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                        upstream: MockUpstream::Mock,
-                        output_mode: MockOutputMode::ToolCall,
-                        top_logprobs: None,
-                        error: None,
-                        invention: None,
-                    }),
-                    fallbacks: None,
-                }],
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::ToolCall, 1, None, None, None)],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(55),
         stream: None,
         responses: vec![
@@ -1310,49 +832,7 @@ async fn test_tool_call_single_agent_seed_55() {
 /// Single error agent — completion should contain an error, no votes.
 #[tokio::test]
 async fn test_error_agent_skipped_seed_42() {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let client = Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
+    let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
@@ -1361,24 +841,14 @@ async fn test_error_agent_skipped_seed_42() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 1,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                        upstream: MockUpstream::Mock,
-                        output_mode: MockOutputMode::Instruction,
-                        top_logprobs: None,
-                        error: Some(true),
-                        invention: None,
-                    }),
-                    fallbacks: None,
-                }],
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::Instruction, 1, None, Some(true), None)],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(42),
         stream: None,
         responses: vec![
@@ -1410,49 +880,7 @@ async fn test_error_agent_skipped_seed_42() {
 /// Mixed output modes: instruction + json_schema + tool_call agents, seed 88.
 #[tokio::test]
 async fn test_mixed_output_modes_seed_88() {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let client = Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
+    let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
@@ -1461,50 +889,20 @@ async fn test_mixed_output_modes_seed_88() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
                 agents: vec![
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::JsonSchema,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::ToolCall,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
+                    mock_agent(MockOutputMode::Instruction, 1, None, None, None),
+                    mock_agent(MockOutputMode::JsonSchema, 1, None, None, None),
+                    mock_agent(MockOutputMode::ToolCall, 1, None, None, None),
                 ],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::new(4, 1),
+                    Decimal::new(3, 1),
+                    Decimal::new(3, 1),
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::new(4, 1),
-            Decimal::new(3, 1),
-            Decimal::new(3, 1),
-        ]),
         seed: Some(88),
         stream: None,
         responses: vec![
@@ -1537,49 +935,7 @@ async fn test_mixed_output_modes_seed_88() {
 /// Image responses with instruction mode, seed 33.
 #[tokio::test]
 async fn test_image_responses_instruction_seed_33() {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let client = Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
+    let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
@@ -1588,24 +944,14 @@ async fn test_image_responses_instruction_seed_33() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 1,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                        upstream: MockUpstream::Mock,
-                        output_mode: MockOutputMode::Instruction,
-                        top_logprobs: None,
-                        error: None,
-                        invention: None,
-                    }),
-                    fallbacks: None,
-                }],
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::Instruction, 1, None, None, None)],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(33),
         stream: None,
         responses: vec![
@@ -1662,49 +1008,7 @@ async fn test_image_responses_instruction_seed_33() {
 /// Video and file responses with json_schema mode, seed 66.
 #[tokio::test]
 async fn test_video_and_file_responses_seed_66() {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let client = Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
+    let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
@@ -1720,24 +1024,14 @@ async fn test_video_and_file_responses_seed_66() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 1,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                        upstream: MockUpstream::Mock,
-                        output_mode: MockOutputMode::JsonSchema,
-                        top_logprobs: None,
-                        error: None,
-                        invention: None,
-                    }),
-                    fallbacks: None,
-                }],
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::JsonSchema, 1, None, None, None)],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(66),
         stream: None,
         responses: vec![
@@ -1801,49 +1095,7 @@ async fn test_video_and_file_responses_seed_66() {
 /// Three distinct agent definitions (instruction, json_schema, tool_call), seed 11.
 #[tokio::test]
 async fn test_three_different_agents_seed_11() {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let client = Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
+    let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
@@ -1860,50 +1112,20 @@ async fn test_three_different_agents_seed_11() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
                 agents: vec![
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::JsonSchema,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::ToolCall,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
+                    mock_agent(MockOutputMode::Instruction, 1, None, None, None),
+                    mock_agent(MockOutputMode::JsonSchema, 1, None, None, None),
+                    mock_agent(MockOutputMode::ToolCall, 1, None, None, None),
                 ],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::new(5, 1),
+                    Decimal::new(3, 1),
+                    Decimal::new(2, 1),
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::new(5, 1),
-            Decimal::new(3, 1),
-            Decimal::new(2, 1),
-        ]),
         seed: Some(11),
         stream: None,
         responses: vec![
@@ -1937,49 +1159,7 @@ async fn test_three_different_agents_seed_11() {
 /// Json_schema mode with 8 responses, seed 22.
 #[tokio::test]
 async fn test_json_schema_many_responses_seed_22() {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let client = Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
+    let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
@@ -1988,24 +1168,14 @@ async fn test_json_schema_many_responses_seed_22() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 2,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                        upstream: MockUpstream::Mock,
-                        output_mode: MockOutputMode::JsonSchema,
-                        top_logprobs: None,
-                        error: None,
-                        invention: None,
-                    }),
-                    fallbacks: None,
-                }],
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::JsonSchema, 2, None, None, None)],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(22),
         stream: None,
         responses: vec![
@@ -2043,49 +1213,7 @@ async fn test_json_schema_many_responses_seed_22() {
 /// Two tool_call agents with image message, seed 44.
 #[tokio::test]
 async fn test_tool_call_two_agents_seed_44() {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let client = Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
+    let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
@@ -2102,38 +1230,18 @@ async fn test_tool_call_two_agents_seed_44() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
                 agents: vec![
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::ToolCall,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::ToolCall,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
+                    mock_agent(MockOutputMode::ToolCall, 1, None, None, None),
+                    mock_agent(MockOutputMode::ToolCall, 1, None, None, None),
                 ],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::new(6, 1),
+                    Decimal::new(4, 1),
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::new(6, 1),
-            Decimal::new(4, 1),
-        ]),
         seed: Some(44),
         stream: None,
         responses: vec![
@@ -2181,49 +1289,7 @@ async fn test_tool_call_two_agents_seed_44() {
 /// One error agent + two healthy agents (json_schema, instruction), seed 99.
 #[tokio::test]
 async fn test_error_and_healthy_agents_seed_99() {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let client = Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
+    let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
@@ -2242,50 +1308,20 @@ async fn test_error_and_healthy_agents_seed_99() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
                 agents: vec![
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: None,
-                            error: Some(true),
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::JsonSchema,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
+                    mock_agent(MockOutputMode::Instruction, 1, None, Some(true), None),
+                    mock_agent(MockOutputMode::JsonSchema, 1, None, None, None),
+                    mock_agent(MockOutputMode::Instruction, 1, None, None, None),
                 ],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::new(3, 1),
+                    Decimal::new(4, 1),
+                    Decimal::new(3, 1),
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::new(3, 1),
-            Decimal::new(4, 1),
-            Decimal::new(3, 1),
-        ]),
         seed: Some(99),
         stream: None,
         responses: vec![
@@ -2338,49 +1374,7 @@ async fn test_error_and_healthy_agents_seed_99() {
 /// Only the final chunk should carry usage; all earlier chunks should have usage: None.
 #[tokio::test]
 async fn test_only_final_chunk_has_usage() {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let client = Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
+    let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
@@ -2389,24 +1383,14 @@ async fn test_only_final_chunk_has_usage() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 2,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                        upstream: MockUpstream::Mock,
-                        output_mode: MockOutputMode::Instruction,
-                        top_logprobs: None,
-                        error: None,
-                        invention: None,
-                    }),
-                    fallbacks: None,
-                }],
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::Instruction, 2, None, None, None)],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(42),
         stream: None,
         responses: vec![
@@ -2431,63 +1415,8 @@ async fn test_only_final_chunk_has_usage() {
 // ---------------------------------------------------------------------------
 
 /// Helper to build a client for error tests (no snapshot needed).
-fn make_error_test_client() -> Arc<
-    super::Client<
-        ctx::DefaultContextExt,
-        UnimplementedUpstreamClient,
-        UnimplementedUpstreamClient,
-        crate::agent::completions::mock::Client,
-        StubAgentFetcher,
-        StubAgentUsageHandler,
-        StubSwarmFetcher,
-        StubCompletionVotesFetcher,
-        StubCacheVoteFetcher,
-        StubVectorUsageHandler,
-    >,
-> {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
-            reqwest::Client::new(),
-            None,
-            None,
-            None,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            1.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_millis(1),
-        )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    Arc::new(super::Client {
-        agent_client,
-        swarm_fetcher: Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-            Arc::new(StubSwarmFetcher),
-        )),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    })
+fn make_error_test_client() -> Arc<TestVectorClient> {
+    make_vector_client()
 }
 
 /// Zero responses → ExpectedTwoOrMoreRequestVectorResponses(0).
@@ -2502,24 +1431,14 @@ async fn test_error_zero_responses() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 1,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                        upstream: MockUpstream::Mock,
-                        output_mode: MockOutputMode::Instruction,
-                        top_logprobs: None,
-                        error: None,
-                        invention: None,
-                    }),
-                    fallbacks: None,
-                }],
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::Instruction, 1, None, None, None)],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(42),
         stream: None,
         responses: vec![],
@@ -2553,24 +1472,14 @@ async fn test_error_one_response() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 1,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                        upstream: MockUpstream::Mock,
-                        output_mode: MockOutputMode::JsonSchema,
-                        top_logprobs: None,
-                        error: None,
-                        invention: None,
-                    }),
-                    fallbacks: None,
-                }],
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::JsonSchema, 1, None, None, None)],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(42),
         stream: None,
         responses: vec![
@@ -2606,38 +1515,18 @@ async fn test_error_invalid_swarm_all_count_zero() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
                 agents: vec![
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 0,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 0,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::ToolCall,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
+                    mock_agent(MockOutputMode::Instruction, 0, None, None, None),
+                    mock_agent(MockOutputMode::ToolCall, 0, None, None, None),
                 ],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::new(5, 1),
+                    Decimal::new(5, 1),
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::new(5, 1),
-            Decimal::new(5, 1),
-        ]),
         seed: Some(42),
         stream: None,
         responses: vec![
@@ -2674,12 +1563,12 @@ async fn test_error_invalid_swarm_empty_agents() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
                 agents: vec![],
+                weights: Some(objectiveai::Weights::Weights(vec![])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![]),
         seed: Some(42),
         stream: None,
         responses: vec![
@@ -2716,37 +1605,17 @@ async fn test_error_invalid_swarm_profile_length_mismatch() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
                 agents: vec![
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::JsonSchema,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
+                    mock_agent(MockOutputMode::Instruction, 1, None, None, None),
+                    mock_agent(MockOutputMode::JsonSchema, 1, None, None, None),
                 ],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(42),
         stream: None,
         responses: vec![
@@ -2783,45 +1652,25 @@ async fn test_error_invalid_swarm_conflicting_invert() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
                 agents: vec![
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
+                    mock_agent(MockOutputMode::Instruction, 1, None, None, None),
                     // Same agent definition — will be merged, but conflicting invert flags
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: None,
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
+                    mock_agent(MockOutputMode::Instruction, 1, None, None, None),
                 ],
+                weights: Some(objectiveai::Weights::Entries(vec![
+                    objectiveai::WeightsEntry {
+                        weight: Decimal::new(5, 1),
+                        invert: Some(false),
+                    },
+                    objectiveai::WeightsEntry {
+                        weight: Decimal::new(5, 1),
+                        invert: Some(true),
+                    },
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Entries(vec![
-            objectiveai::vector::completions::request::ProfileEntry {
-                weight: Decimal::new(5, 1),
-                invert: Some(false),
-            },
-            objectiveai::vector::completions::request::ProfileEntry {
-                weight: Decimal::new(5, 1),
-                invert: Some(true),
-            },
-        ]),
         seed: Some(42),
         stream: None,
         responses: vec![
@@ -2846,7 +1695,7 @@ async fn test_error_invalid_swarm_conflicting_invert() {
     );
 }
 
-/// All profile weights are zero → InvalidProfile("profile must have one or more positive weights").
+/// All weights are zero → error during swarm conversion.
 #[tokio::test]
 async fn test_error_invalid_profile_all_zero_weights() {
     let client = make_error_test_client();
@@ -2858,24 +1707,14 @@ async fn test_error_invalid_profile_all_zero_weights() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 1,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                        upstream: MockUpstream::Mock,
-                        output_mode: MockOutputMode::ToolCall,
-                        top_logprobs: None,
-                        error: None,
-                        invention: None,
-                    }),
-                    fallbacks: None,
-                }],
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::ToolCall, 1, None, None, None)],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ZERO,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ZERO,
-        ]),
         seed: Some(42),
         stream: None,
         responses: vec![
@@ -2895,7 +1734,7 @@ async fn test_error_invalid_profile_all_zero_weights() {
         .expect("should fail with all-zero weights");
     let msg = err.to_string();
     assert!(
-        msg.contains("invalid profile") && msg.contains("one or more positive"),
+        msg.contains("at least one positive"),
         "unexpected error: {msg}"
     );
 }
@@ -2916,38 +1755,18 @@ async fn test_logprobs_json_schema_2_agents_seed_42() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
                 agents: vec![
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::JsonSchema,
-                            top_logprobs: Some(5),
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::JsonSchema,
-                            top_logprobs: Some(5),
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
+                    mock_agent(MockOutputMode::JsonSchema, 1, Some(5), None, None),
+                    mock_agent(MockOutputMode::JsonSchema, 1, Some(5), None, None),
                 ],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::new(6, 1),
+                    Decimal::new(4, 1),
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::new(6, 1),
-            Decimal::new(4, 1),
-        ]),
         seed: Some(42),
         stream: None,
         responses: vec![
@@ -2988,50 +1807,20 @@ async fn test_logprobs_json_schema_3_agents_unequal_seed_77() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
                 agents: vec![
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::JsonSchema,
-                            top_logprobs: Some(10),
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::JsonSchema,
-                            top_logprobs: Some(10),
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::JsonSchema,
-                            top_logprobs: Some(10),
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
+                    mock_agent(MockOutputMode::JsonSchema, 1, Some(10), None, None),
+                    mock_agent(MockOutputMode::JsonSchema, 1, Some(10), None, None),
+                    mock_agent(MockOutputMode::JsonSchema, 1, Some(10), None, None),
                 ],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::new(5, 1),
+                    Decimal::new(3, 1),
+                    Decimal::new(2, 1),
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::new(5, 1),
-            Decimal::new(3, 1),
-            Decimal::new(2, 1),
-        ]),
         seed: Some(77),
         stream: None,
         responses: vec![
@@ -3073,24 +1862,14 @@ async fn test_logprobs_tool_call_single_agent_seed_55() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 1,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                        upstream: MockUpstream::Mock,
-                        output_mode: MockOutputMode::ToolCall,
-                        top_logprobs: Some(3),
-                        error: None,
-                        invention: None,
-                    }),
-                    fallbacks: None,
-                }],
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::ToolCall, 1, Some(3), None, None)],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(55),
         stream: None,
         responses: vec![
@@ -3130,30 +1909,22 @@ async fn test_logprobs_error_with_fallback_seed_99() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 1,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                        upstream: MockUpstream::Mock,
-                        output_mode: MockOutputMode::JsonSchema,
-                        top_logprobs: Some(8),
-                        error: Some(true),
-                        invention: None,
-                    }),
-                    fallbacks: Some(vec![objectiveai::agent::AgentBase::Mock(MockAgentBase {
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::JsonSchema, 1, Some(8), Some(true), Some(vec![
+                    objectiveai::agent::InlineAgentBase::Mock(MockAgentBase {
                         upstream: MockUpstream::Mock,
                         output_mode: MockOutputMode::JsonSchema,
                         top_logprobs: Some(8),
                         error: None,
                         invention: None,
-                    })]),
-                }],
+                    }),
+                ]))],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(99),
         stream: None,
         responses: vec![
@@ -3194,30 +1965,22 @@ async fn test_logprobs_all_errors_seed_42() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 1,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                        upstream: MockUpstream::Mock,
-                        output_mode: MockOutputMode::JsonSchema,
-                        top_logprobs: Some(5),
-                        error: Some(true),
-                        invention: None,
-                    }),
-                    fallbacks: Some(vec![objectiveai::agent::AgentBase::Mock(MockAgentBase {
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::JsonSchema, 1, Some(5), Some(true), Some(vec![
+                    objectiveai::agent::InlineAgentBase::Mock(MockAgentBase {
                         upstream: MockUpstream::Mock,
                         output_mode: MockOutputMode::ToolCall,
                         top_logprobs: Some(3),
                         error: Some(true),
                         invention: None,
-                    })]),
-                }],
+                    }),
+                ]))],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(42),
         stream: None,
         responses: vec![
@@ -3258,24 +2021,14 @@ async fn test_logprobs_instruction_seed_33() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
-                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                    count: 1,
-                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                        upstream: MockUpstream::Mock,
-                        output_mode: MockOutputMode::Instruction,
-                        top_logprobs: Some(2),
-                        error: None,
-                        invention: None,
-                    }),
-                    fallbacks: None,
-                }],
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
+                agents: vec![mock_agent(MockOutputMode::Instruction, 1, Some(2), None, None)],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::ONE,
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::ONE,
-        ]),
         seed: Some(33),
         stream: None,
         responses: vec![
@@ -3315,59 +2068,31 @@ async fn test_logprobs_mixed_modes_with_fallback_seed_88() {
             name: None,
         })],
         provider: None,
-        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-            objectiveai::swarm::SwarmBase {
+        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+            objectiveai::swarm::InlineSwarmBase {
                 agents: vec![
                     // JsonSchema agent with logprobs.
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::JsonSchema,
-                            top_logprobs: Some(6),
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
+                    mock_agent(MockOutputMode::JsonSchema, 1, Some(6), None, None),
                     // ToolCall agent with logprobs.
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::ToolCall,
-                            top_logprobs: Some(4),
-                            error: None,
-                            invention: None,
-                        }),
-                        fallbacks: None,
-                    },
+                    mock_agent(MockOutputMode::ToolCall, 1, Some(4), None, None),
                     // Error primary, healthy instruction fallback with logprobs.
-                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
-                            upstream: MockUpstream::Mock,
-                            output_mode: MockOutputMode::Instruction,
-                            top_logprobs: Some(3),
-                            error: Some(true),
-                            invention: None,
-                        }),
-                        fallbacks: Some(vec![objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                    mock_agent(MockOutputMode::Instruction, 1, Some(3), Some(true), Some(vec![
+                        objectiveai::agent::InlineAgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
                             top_logprobs: Some(3),
                             error: None,
                             invention: None,
-                        })]),
-                    },
+                        }),
+                    ])),
                 ],
+                weights: Some(objectiveai::Weights::Weights(vec![
+                    Decimal::new(4, 1),
+                    Decimal::new(4, 1),
+                    Decimal::new(2, 1),
+                ])),
             },
         ),
-        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
-            Decimal::new(4, 1),
-            Decimal::new(4, 1),
-            Decimal::new(2, 1),
-        ]),
         seed: Some(88),
         stream: None,
         responses: vec![

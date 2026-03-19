@@ -1,15 +1,12 @@
 {
   "title": "agent.AgentBase",
-  "description": "The base configuration for an Agent (without computed ID).\n\nThis is an untagged enum that dispatches to the per-upstream AgentBase.\nDeserialization tries each variant in order until one matches.",
+  "description": "An Agent base definition, either remote (with metadata) or inline.",
   "anyOf": [
     {
-      "$ref": "agent.openrouter.AgentBase"
+      "$ref": "agent.RemoteAgentBase"
     },
     {
-      "$ref": "agent.claude_agent_sdk.AgentBase"
-    },
-    {
-      "$ref": "agent.mock.AgentBase"
+      "$ref": "agent.InlineAgentBase"
     }
   ]
 }

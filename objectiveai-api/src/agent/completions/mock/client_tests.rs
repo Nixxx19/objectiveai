@@ -6,7 +6,7 @@ use futures::StreamExt;
 
 use objectiveai::agent::completions::message::RichContent;
 use objectiveai::agent::completions::request::{
-    AgentCompletionCreateParams, Agent as AgentParam, ResponseFormat,
+    AgentCompletionCreateParams, ResponseFormat,
     ResponseFormatParam,
 };
 use objectiveai::agent::completions::response::streaming::{
@@ -36,9 +36,13 @@ fn agent_with_top_logprobs(n: u64) -> Agent {
 fn default_params_with_seed(seed: i64) -> AgentCompletionCreateParams {
     AgentCompletionCreateParams {
         messages: vec![],
-        agent: AgentParam::Id("mock".into()),
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
         provider: None,
-        agents: None,
         response_format: None,
         seed: Some(seed),
         stream: None,

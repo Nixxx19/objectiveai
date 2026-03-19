@@ -7,3 +7,8 @@ export * from "./functions/index";
 export * from "./swarm/index";
 export * from "./vector/index";
 export * from "./prefixedUuid";
+export * from "./remote";
+export * from "./remotePath";
+export * from "./remotePathCommitOptional";
+export * from "./weights";
+export * from "./weightsEntry";

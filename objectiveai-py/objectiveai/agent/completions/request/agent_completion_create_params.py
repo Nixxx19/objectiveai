@@ -4,17 +4,16 @@ from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
 from objectiveai.agent.completions.message.message import Message
-from objectiveai.agent.completions.request.agent import Agent
 from objectiveai.agent.completions.request.provider import Provider
 from objectiveai.agent.completions.request.response_format_param import ResponseFormatParam
+from objectiveai.agent.inline_agent_base_with_fallbacks_or_remote_commit_optional import InlineAgentBaseWithFallbacksOrRemoteCommitOptional
 
 
 class AgentCompletionCreateParams(BaseModel):
     """Parameters for creating a agent completion."""
     model_config = ConfigDict(title='agent.completions.request.AgentCompletionCreateParams')
 
-    agent: Agent = Field(..., description='The agent to use (inline Agent or stored ID).')
-    agents: Optional[list[Agent]] = Field(None, description='Alternative agents to try if the primary agent fails.')
+    agent: InlineAgentBaseWithFallbacksOrRemoteCommitOptional = Field(..., description='The agent to use (inline Agent or stored ID).')
     mcp_server_authorization: Optional[dict[str, str]] = Field(None, description='Map from MCP server URL to authorization header value.')
     messages: list[Message] = Field(..., description='The conversation messages.')
     provider: Optional[Provider] = Field(None, description='Provider routing preferences.')

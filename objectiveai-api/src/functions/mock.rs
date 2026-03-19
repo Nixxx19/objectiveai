@@ -1,6 +1,36 @@
-//! Shared mock data for Functions and Profiles.
+//! Shared mock data for Agents, Swarms, Functions, and Profiles.
 //!
-//! Provides embedded JSON fixtures used by both the fetchers and list clients.
+//! Provides embedded JSON fixtures used by the retrieval module.
+
+/// Returns a mock Agent by owner/repository/commit.
+pub fn get_agent(
+    _owner: &str,
+    _repository: &str,
+    _commit: Option<&str>,
+) -> Option<objectiveai::agent::RemoteAgentBaseWithFallbacks> {
+    // No mock agent fixtures yet.
+    None
+}
+
+/// Lists all mock Agents.
+pub fn list_agents() -> objectiveai::agent::response::ListAgentResponse {
+    objectiveai::agent::response::ListAgentResponse { data: vec![] }
+}
+
+/// Returns a mock Swarm by owner/repository/commit.
+pub fn get_swarm(
+    _owner: &str,
+    _repository: &str,
+    _commit: Option<&str>,
+) -> Option<objectiveai::swarm::RemoteSwarmBase> {
+    // No mock swarm fixtures yet.
+    None
+}
+
+/// Lists all mock Swarms.
+pub fn list_swarms() -> objectiveai::swarm::response::ListSwarmResponse {
+    objectiveai::swarm::response::ListSwarmResponse { data: vec![] }
+}
 
 /// Returns a mock Function by owner/repository/commit.
 ///
@@ -68,12 +98,12 @@ const FUNCTION_REPOSITORIES: &[&str] = &[
 ];
 
 /// Lists all mock Functions.
-pub fn list_functions() -> objectiveai::functions::response::ListFunction {
-    objectiveai::functions::response::ListFunction {
+pub fn list_functions() -> objectiveai::functions::response::ListFunctionResponse {
+    objectiveai::functions::response::ListFunctionResponse {
         data: FUNCTION_REPOSITORIES
             .iter()
-            .map(|repo| objectiveai::functions::response::ListFunctionItem {
-                remote: objectiveai::functions::Remote::Mock,
+            .map(|repo| objectiveai::RemotePath {
+                remote: objectiveai::Remote::Mock,
                 owner: "mock".to_string(),
                 repository: repo.to_string(),
                 commit: "mock".to_string(),
@@ -158,12 +188,12 @@ const PROFILE_REPOSITORIES: &[&str] = &[
 ];
 
 /// Lists all mock Profiles.
-pub fn list_profiles() -> objectiveai::functions::profiles::response::ListProfile {
-    objectiveai::functions::profiles::response::ListProfile {
+pub fn list_profiles() -> objectiveai::functions::profiles::response::ListProfileResponse {
+    objectiveai::functions::profiles::response::ListProfileResponse {
         data: PROFILE_REPOSITORIES
             .iter()
-            .map(|repo| objectiveai::functions::profiles::response::ListProfileItem {
-                remote: objectiveai::functions::Remote::Mock,
+            .map(|repo| objectiveai::RemotePath {
+                remote: objectiveai::Remote::Mock,
                 owner: "mock".to_string(),
                 repository: repo.to_string(),
                 commit: "mock".to_string(),

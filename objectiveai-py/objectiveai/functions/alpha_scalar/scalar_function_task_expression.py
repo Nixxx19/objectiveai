@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
 from objectiveai.functions.expression.expression import Expression
-from objectiveai.functions.remote import Remote
+from objectiveai.remote import Remote
 
 
 class ScalarFunctionTaskExpression(BaseModel):

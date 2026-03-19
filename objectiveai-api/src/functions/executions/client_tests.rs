@@ -6,56 +6,78 @@ use std::time::Duration;
 use rust_decimal::Decimal;
 
 use objectiveai::functions::executions::request::{
-    FunctionRemoteProfileRemoteRequestBody, FunctionRemoteProfileRemoteRequestPath, Request,
-    Strategy,
+    FunctionExecutionCreateParams, Strategy,
 };
 use objectiveai::functions::executions::response::unary::FunctionExecution;
 use objectiveai::functions::expression::InputValue;
-use objectiveai::functions::Remote;
 use objectiveai::error::StatusError;
 
 use crate::agent::completions::UnimplementedUpstreamClient;
 use crate::ctx;
-use crate::functions;
 
 // ---------------------------------------------------------------------------
 // Stubs
 // ---------------------------------------------------------------------------
 
-struct StubAgentFetcher;
+struct StubRetrieveClient;
 
 #[async_trait::async_trait]
-impl crate::agent::fetcher::Fetcher<ctx::DefaultContextExt> for StubAgentFetcher {
-    async fn fetch(
+impl crate::retrieval::retrieve::Client<ctx::DefaultContextExt> for StubRetrieveClient {
+    async fn get_agent(
         &self,
-        _ctx: ctx::Context<ctx::DefaultContextExt>,
-        _id: &str,
-    ) -> Result<
-        Option<(objectiveai::agent::Agent, u64)>,
-        objectiveai::error::ResponseError,
-    > {
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::agent::RemoteAgentBaseWithFallbacks>, objectiveai::error::ResponseError> {
         Err(objectiveai::error::ResponseError {
             code: 501,
-            message: serde_json::json!("stub agent fetcher should not be called"),
+            message: serde_json::json!("stub retrieve client should not be called"),
         })
     }
-}
 
-struct StubSwarmFetcher;
-
-#[async_trait::async_trait]
-impl crate::swarm::fetcher::Fetcher<ctx::DefaultContextExt> for StubSwarmFetcher {
-    async fn fetch(
+    async fn get_swarm(
         &self,
-        _ctx: ctx::Context<ctx::DefaultContextExt>,
-        _id: &str,
-    ) -> Result<
-        Option<(objectiveai::swarm::Swarm, u64)>,
-        objectiveai::error::ResponseError,
-    > {
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::swarm::RemoteSwarmBase>, objectiveai::error::ResponseError> {
         Err(objectiveai::error::ResponseError {
             code: 501,
-            message: serde_json::json!("stub swarm fetcher should not be called"),
+            message: serde_json::json!("stub retrieve client should not be called"),
+        })
+    }
+
+    async fn get_function(
+        &self,
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::functions::FullRemoteFunction>, objectiveai::error::ResponseError> {
+        Err(objectiveai::error::ResponseError {
+            code: 501,
+            message: serde_json::json!("stub retrieve client should not be called"),
+        })
+    }
+
+    async fn get_profile(
+        &self,
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::functions::RemoteProfile>, objectiveai::error::ResponseError> {
+        Err(objectiveai::error::ResponseError {
+            code: 501,
+            message: serde_json::json!("stub retrieve client should not be called"),
+        })
+    }
+
+    async fn resolve_latest_commit(
+        &self,
+        _ctx: &ctx::Context<ctx::DefaultContextExt>,
+        _kind: crate::retrieval::Kind,
+        _remote: objectiveai::Remote,
+        _owner: &str,
+        _repository: &str,
+    ) -> Result<Option<String>, objectiveai::error::ResponseError> {
+        Err(objectiveai::error::ResponseError {
+            code: 501,
+            message: serde_json::json!("stub retrieve client should not be called"),
         })
     }
 }
@@ -87,8 +109,7 @@ impl crate::vector::completions::cache_vote_fetcher::Fetcher<ctx::DefaultContext
     async fn fetch(
         &self,
         _ctx: ctx::Context<ctx::DefaultContextExt>,
-        _agent: &objectiveai::agent::completions::request::Agent,
-        _agents: Option<&[objectiveai::agent::completions::request::Agent]>,
+        _agent: &objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote,
         _messages: &[objectiveai::agent::completions::message::Message],
         _responses: &[objectiveai::agent::completions::message::RichContent],
     ) -> Result<
@@ -136,95 +157,9 @@ impl super::usage_handler::UsageHandler<ctx::DefaultContextExt> for StubFunction
     async fn handle_usage(
         &self,
         _ctx: ctx::Context<ctx::DefaultContextExt>,
-        _request: Arc<Request>,
+        _request: Arc<FunctionExecutionCreateParams>,
         _response: FunctionExecution,
     ) {
-    }
-}
-
-struct StubFunctionGithubFetcher;
-
-#[async_trait::async_trait]
-impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt> for StubFunctionGithubFetcher {
-    async fn fetch(
-        &self,
-        _ctx: ctx::Context<ctx::DefaultContextExt>,
-        _owner: &str,
-        _repository: &str,
-        _commit: Option<&str>,
-    ) -> Result<
-        Option<functions::function_fetcher::FullGetFunction>,
-        objectiveai::error::ResponseError,
-    > {
-        Err(objectiveai::error::ResponseError {
-            code: 501,
-            message: serde_json::json!("stub github function fetcher should not be called"),
-        })
-    }
-}
-
-struct StubProfileGithubFetcher;
-
-#[async_trait::async_trait]
-impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt> for StubProfileGithubFetcher {
-    async fn fetch(
-        &self,
-        _ctx: ctx::Context<ctx::DefaultContextExt>,
-        _owner: &str,
-        _repository: &str,
-        _commit: Option<&str>,
-    ) -> Result<
-        Option<objectiveai::functions::profiles::response::GetProfile>,
-        objectiveai::error::ResponseError,
-    > {
-        Err(objectiveai::error::ResponseError {
-            code: 501,
-            message: serde_json::json!("stub github profile fetcher should not be called"),
-        })
-    }
-}
-
-struct StubFilesystemFetcher;
-
-#[async_trait::async_trait]
-impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt> for StubFilesystemFetcher {
-    async fn fetch(
-        &self,
-        _ctx: ctx::Context<ctx::DefaultContextExt>,
-        _owner: &str,
-        _repository: &str,
-        _commit: Option<&str>,
-    ) -> Result<
-        Option<functions::function_fetcher::FullGetFunction>,
-        objectiveai::error::ResponseError,
-    > {
-        Err(objectiveai::error::ResponseError {
-            code: 501,
-            message: serde_json::json!("stub filesystem function fetcher should not be called"),
-        })
-    }
-}
-
-struct StubFilesystemProfileFetcher;
-
-#[async_trait::async_trait]
-impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
-    for StubFilesystemProfileFetcher
-{
-    async fn fetch(
-        &self,
-        _ctx: ctx::Context<ctx::DefaultContextExt>,
-        _owner: &str,
-        _repository: &str,
-        _commit: Option<&str>,
-    ) -> Result<
-        Option<objectiveai::functions::profiles::response::GetProfile>,
-        objectiveai::error::ResponseError,
-    > {
-        Err(objectiveai::error::ResponseError {
-            code: 501,
-            message: serde_json::json!("stub filesystem profile fetcher should not be called"),
-        })
     }
 }
 
@@ -237,24 +172,24 @@ type TestClient = super::Client<
     UnimplementedUpstreamClient,
     UnimplementedUpstreamClient,
     crate::agent::completions::mock::Client,
-    StubAgentFetcher,
     StubAgentUsageHandler,
-    StubSwarmFetcher,
     StubCompletionVotesFetcher,
     StubCacheVoteFetcher,
     StubVectorUsageHandler,
-    StubFunctionGithubFetcher,
-    StubFilesystemFetcher,
-    functions::function_fetcher::mock::MockFetcher,
-    StubProfileGithubFetcher,
-    StubFilesystemProfileFetcher,
-    functions::profile_fetcher::mock::MockFetcher,
+    StubRetrieveClient,
+    StubRetrieveClient,
+    crate::retrieval::retrieve::mock::MockClient,
     StubFunctionUsageHandler,
 >;
 
 fn make_client() -> Arc<TestClient> {
-    let agent_client = Arc::new(crate::agent::completions::Client {
-        mcp_client: Arc::new(crate::mcp::Client::new(
+    let retrieve_router = Arc::new(crate::retrieval::retrieve::Router::new(
+        Arc::new(StubRetrieveClient),
+        Arc::new(StubRetrieveClient),
+        Arc::new(crate::retrieval::retrieve::mock::MockClient),
+    ));
+    let agent_client = Arc::new(crate::agent::completions::Client::new(
+        Arc::new(crate::mcp::Client::new(
             reqwest::Client::new(),
             None,
             None,
@@ -268,51 +203,34 @@ fn make_client() -> Arc<TestClient> {
             Duration::ZERO,
             Duration::from_millis(1),
         )),
-        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
-            Arc::new(StubAgentFetcher),
-        )),
-        usage_handler: Arc::new(StubAgentUsageHandler),
-        openrouter: Arc::new(UnimplementedUpstreamClient),
-        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::Client {
+        retrieve_router.clone(),
+        Arc::new(StubAgentUsageHandler),
+        Arc::new(UnimplementedUpstreamClient),
+        Arc::new(UnimplementedUpstreamClient),
+        Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
             max_tool_calls: 1000,
         }),
-        backoff_current_interval: Duration::ZERO,
-        backoff_initial_interval: Duration::ZERO,
-        backoff_randomization_factor: 0.0,
-        backoff_multiplier: 1.0,
-        backoff_max_interval: Duration::ZERO,
-        backoff_max_elapsed_time: Duration::ZERO,
-        first_chunk_timeout: Duration::from_millis(1),
-        other_chunk_timeout: Duration::from_millis(1),
-    });
-    let swarm_fetcher = Arc::new(crate::swarm::fetcher::CachingFetcher::new(
-        Arc::new(StubSwarmFetcher),
+        Duration::ZERO,
+        Duration::ZERO,
+        0.0,
+        1.0,
+        Duration::ZERO,
+        Duration::ZERO,
+        Duration::from_millis(1),
+        Duration::from_millis(1),
     ));
-    let vector_client = Arc::new(crate::vector::completions::Client {
-        agent_client: agent_client.clone(),
-        swarm_fetcher: swarm_fetcher.clone(),
-        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
-        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
-        usage_handler: Arc::new(StubVectorUsageHandler),
-    });
-    let function_fetcher = Arc::new(functions::function_fetcher::FetcherRouter::new(
-        Arc::new(StubFunctionGithubFetcher),
-        Arc::new(StubFilesystemFetcher),
-        Arc::new(functions::function_fetcher::mock::MockFetcher),
-    ));
-    let profile_fetcher = Arc::new(functions::profile_fetcher::FetcherRouter::new(
-        Arc::new(StubProfileGithubFetcher),
-        Arc::new(StubFilesystemProfileFetcher),
-        Arc::new(functions::profile_fetcher::mock::MockFetcher),
+    let vector_client = Arc::new(crate::vector::completions::Client::new(
+        agent_client.clone(),
+        retrieve_router.clone(),
+        Arc::new(StubCompletionVotesFetcher),
+        Arc::new(StubCacheVoteFetcher),
+        Arc::new(StubVectorUsageHandler),
     ));
     Arc::new(super::Client::new(
         agent_client,
-        swarm_fetcher,
         vector_client,
-        function_fetcher,
-        profile_fetcher,
+        retrieve_router,
         Arc::new(StubFunctionUsageHandler),
     ))
 }
@@ -322,29 +240,33 @@ fn make_request(
     profile_repo: &str,
     input: InputValue,
     seed: i64,
-) -> Arc<Request> {
-    Arc::new(Request::FunctionRemoteProfileRemote {
-        path: FunctionRemoteProfileRemoteRequestPath {
-            fremote: Remote::Mock,
-            fowner: "mock".to_string(),
-            frepository: function_repo.to_string(),
-            fcommit: Some("mock".to_string()),
-            premote: Remote::Mock,
-            powner: "mock".to_string(),
-            prepository: profile_repo.to_string(),
-            pcommit: Some("mock".to_string()),
-        },
-        body: FunctionRemoteProfileRemoteRequestBody {
-            retry_token: None,
-            from_cache: None,
-            reasoning: None,
-            strategy: None,
-            input,
-            provider: None,
-            seed: Some(seed),
-            stream: None,
-            mcp_server_authorization: None,
-        },
+) -> Arc<FunctionExecutionCreateParams> {
+    Arc::new(FunctionExecutionCreateParams {
+        function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
+            objectiveai::RemotePathCommitOptional {
+                remote: objectiveai::Remote::Mock,
+                owner: "mock".to_string(),
+                repository: function_repo.to_string(),
+                commit: Some("mock".to_string()),
+            },
+        ),
+        profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
+            objectiveai::RemotePathCommitOptional {
+                remote: objectiveai::Remote::Mock,
+                owner: "mock".to_string(),
+                repository: profile_repo.to_string(),
+                commit: Some("mock".to_string()),
+            },
+        ),
+        retry_token: None,
+        from_cache: None,
+        reasoning: None,
+        strategy: None,
+        input,
+        provider: None,
+        seed: Some(seed),
+        stream: None,
+        mcp_server_authorization: None,
     })
 }
 
@@ -359,7 +281,7 @@ fn check_created(expected: &std::cell::Cell<Option<u64>>, i: usize, created: u64
     }
 }
 
-async fn run_execution(client: &Arc<TestClient>, request: Arc<Request>) -> FunctionExecution {
+async fn run_execution(client: &Arc<TestClient>, request: Arc<FunctionExecutionCreateParams>) -> FunctionExecution {
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
     let stream = client
         .clone()
@@ -1092,29 +1014,45 @@ async fn test_mock_21_vector_super_branch_context_seed_42() {
 // Error tests
 // ===========================================================================
 
-/// Helper: create a request with custom body fields.
-fn make_request_with_body(
+/// Helper: create a request with custom fields.
+fn make_request_with_overrides(
     function_repo: &str,
     profile_repo: &str,
-    body: FunctionRemoteProfileRemoteRequestBody,
-) -> Arc<Request> {
-    Arc::new(Request::FunctionRemoteProfileRemote {
-        path: FunctionRemoteProfileRemoteRequestPath {
-            fremote: Remote::Mock,
-            fowner: "mock".to_string(),
-            frepository: function_repo.to_string(),
-            fcommit: Some("mock".to_string()),
-            premote: Remote::Mock,
-            powner: "mock".to_string(),
-            prepository: profile_repo.to_string(),
-            pcommit: Some("mock".to_string()),
-        },
-        body,
-    })
+    overrides: impl FnOnce(&mut FunctionExecutionCreateParams),
+) -> Arc<FunctionExecutionCreateParams> {
+    let mut params = FunctionExecutionCreateParams {
+        function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
+            objectiveai::RemotePathCommitOptional {
+                remote: objectiveai::Remote::Mock,
+                owner: "mock".to_string(),
+                repository: function_repo.to_string(),
+                commit: Some("mock".to_string()),
+            },
+        ),
+        profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
+            objectiveai::RemotePathCommitOptional {
+                remote: objectiveai::Remote::Mock,
+                owner: "mock".to_string(),
+                repository: profile_repo.to_string(),
+                commit: Some("mock".to_string()),
+            },
+        ),
+        retry_token: None,
+        from_cache: None,
+        reasoning: None,
+        strategy: None,
+        input: InputValue::Object(indexmap::indexmap! {}),
+        provider: None,
+        seed: Some(42),
+        stream: None,
+        mcp_server_authorization: None,
+    };
+    overrides(&mut params);
+    Arc::new(params)
 }
 
 /// Helper: expect create_streaming to return Err with a specific status code.
-async fn expect_err(client: &Arc<TestClient>, request: Arc<Request>, expected_status: u16) -> super::Error {
+async fn expect_err(client: &Arc<TestClient>, request: Arc<FunctionExecutionCreateParams>, expected_status: u16) -> super::Error {
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
     match client.clone().create_streaming(ctx, request).await {
         Ok(_) => panic!("expected create_streaming to fail, but it succeeded"),
@@ -1127,7 +1065,7 @@ async fn expect_err(client: &Arc<TestClient>, request: Arc<Request>, expected_st
 
 /// Helper: run execution and return the aggregated result (for tests where
 /// the stream succeeds but the response contains error fields).
-async fn run_execution_allow_error(client: &Arc<TestClient>, request: Arc<Request>) -> FunctionExecution {
+async fn run_execution_allow_error(client: &Arc<TestClient>, request: Arc<FunctionExecutionCreateParams>) -> FunctionExecution {
     run_execution(client, request).await
 }
 
@@ -1139,21 +1077,14 @@ async fn run_execution_allow_error(client: &Arc<TestClient>, request: Arc<Reques
 #[tokio::test]
 async fn test_error_1_1_invalid_retry_token() {
     let client = make_client();
-    let request = make_request_with_body(
+    let request = make_request_with_overrides(
         "mock-1",
         "mock-1",
-        FunctionRemoteProfileRemoteRequestBody {
-            retry_token: Some("not-a-valid-retry-token!!!".to_string()),
-            from_cache: None,
-            reasoning: None,
-            strategy: None,
-            input: InputValue::Object(indexmap::indexmap! {
+        |p| {
+            p.retry_token = Some("not-a-valid-retry-token!!!".to_string());
+            p.input = InputValue::Object(indexmap::indexmap! {
                 "text".into() => InputValue::String("test".into()),
-            }),
-            provider: None,
-            seed: Some(42),
-            stream: None,
-            mcp_server_authorization: None,
+            });
         },
     );
     let err = expect_err(&client, request, 400).await;
@@ -1164,21 +1095,14 @@ async fn test_error_1_1_invalid_retry_token() {
 #[tokio::test]
 async fn test_error_1_3_scalar_function_swiss_strategy() {
     let client = make_client();
-    let request = make_request_with_body(
+    let request = make_request_with_overrides(
         "mock-1",
         "mock-1",
-        FunctionRemoteProfileRemoteRequestBody {
-            retry_token: None,
-            from_cache: None,
-            reasoning: None,
-            strategy: Some(Strategy::SwissSystem { pool: None, rounds: None }),
-            input: InputValue::Object(indexmap::indexmap! {
+        |p| {
+            p.strategy = Some(Strategy::SwissSystem { pool: None, rounds: None });
+            p.input = InputValue::Object(indexmap::indexmap! {
                 "text".into() => InputValue::String("test".into()),
-            }),
-            provider: None,
-            seed: Some(42),
-            stream: None,
-            mcp_server_authorization: None,
+            });
         },
     );
     let err = expect_err(&client, request, 400).await;
@@ -1189,25 +1113,18 @@ async fn test_error_1_3_scalar_function_swiss_strategy() {
 #[tokio::test]
 async fn test_error_1_4_invalid_strategy_pool() {
     let client = make_client();
-    let request = make_request_with_body(
+    let request = make_request_with_overrides(
         "mock-4",
         "mock-4",
-        FunctionRemoteProfileRemoteRequestBody {
-            retry_token: None,
-            from_cache: None,
-            reasoning: None,
-            strategy: Some(Strategy::SwissSystem { pool: Some(1), rounds: Some(3) }),
-            input: InputValue::Object(indexmap::indexmap! {
+        |p| {
+            p.strategy = Some(Strategy::SwissSystem { pool: Some(1), rounds: Some(3) });
+            p.input = InputValue::Object(indexmap::indexmap! {
                 "items".into() => InputValue::Array(vec![
                     InputValue::String("A".into()),
                     InputValue::String("B".into()),
                     InputValue::String("C".into()),
                 ]),
-            }),
-            provider: None,
-            seed: Some(42),
-            stream: None,
-            mcp_server_authorization: None,
+            });
         },
     );
     let err = expect_err(&client, request, 400).await;
@@ -1224,7 +1141,7 @@ async fn test_error_2_1_function_not_found() {
     let client = make_client();
     let request = make_request("mock-nonexistent", "mock-1", InputValue::Object(indexmap::indexmap! {}), 42);
     let err = expect_err(&client, request, 404).await;
-    assert!(matches!(err, super::Error::FunctionNotFound), "expected FunctionNotFound, got: {err}");
+    assert!(matches!(err, super::Error::FetchFunction(_)), "expected FetchFunction, got: {err}");
 }
 
 /// 2.3: ProfileNotFound — non-existent mock profile repository.
@@ -1240,7 +1157,7 @@ async fn test_error_2_3_profile_not_found() {
         42,
     );
     let err = expect_err(&client, request, 404).await;
-    assert!(matches!(err, super::Error::ProfileNotFound), "expected ProfileNotFound, got: {err}");
+    assert!(matches!(err, super::Error::FetchProfile(_)), "expected FetchProfile, got: {err}");
 }
 
 /// 2.5: InputSchemaMismatch — wrong input shape for mock-1.
@@ -1340,21 +1257,8 @@ async fn test_error_2_17_bad_task_expression() {
     assert!(matches!(err, super::Error::InvalidAppExpression(_)), "expected InvalidAppExpression, got: {err}");
 }
 
-/// 2.19: FetchSwarm — string swarm ID hits StubSwarmFetcher (returns 501).
-#[tokio::test]
-async fn test_error_2_19_fetch_swarm() {
-    let client = make_client();
-    let request = make_request(
-        "mock-1",
-        "mock-err-15",
-        InputValue::Object(indexmap::indexmap! {
-            "text".into() => InputValue::String("test".into()),
-        }),
-        42,
-    );
-    let err = expect_err(&client, request, 501).await;
-    assert!(matches!(err, super::Error::FetchSwarm(_)), "expected FetchSwarm, got: {err}");
-}
+// 2.19: FetchSwarm — removed. Remote swarm references within profiles no longer exist;
+// swarm is always inline on the profile (RemoteSwarmBase).
 
 /// 2.20: InvalidSwarm — 1 agent but 2 profile weights.
 #[tokio::test]
@@ -1385,7 +1289,7 @@ async fn test_error_2_21_recursive_function_not_found() {
         42,
     );
     let err = expect_err(&client, request, 404).await;
-    assert!(matches!(err, super::Error::FunctionNotFound), "expected FunctionNotFound, got: {err}");
+    assert!(matches!(err, super::Error::FetchFunction(_)), "expected FetchFunction, got: {err}");
 }
 
 /// 2.22: Recursive ProfileNotFound — tasks profile references mock-999.
@@ -1402,7 +1306,7 @@ async fn test_error_2_22_recursive_profile_not_found() {
         42,
     );
     let err = expect_err(&client, request, 404).await;
-    assert!(matches!(err, super::Error::ProfileNotFound), "expected ProfileNotFound, got: {err}");
+    assert!(matches!(err, super::Error::FetchProfile(_)), "expected FetchProfile, got: {err}");
 }
 
 /// 2.23: Recursive InputSchemaMismatch — wrong input for sub-function.
@@ -1628,32 +1532,27 @@ async fn test_error_4_7_output_returns_none() {
 #[tokio::test]
 async fn test_error_6_1_reasoning_agent_error() {
     let client = make_client();
-    let request = make_request_with_body(
+    let request = make_request_with_overrides(
         "mock-1",
         "mock-1",
-        FunctionRemoteProfileRemoteRequestBody {
-            retry_token: None,
-            from_cache: None,
-            reasoning: Some(objectiveai::functions::executions::request::Reasoning {
-                agent: objectiveai::agent::completions::request::Agent::Provided(
-                    objectiveai::agent::AgentBase::Mock(objectiveai::agent::mock::AgentBase {
-                        upstream: objectiveai::agent::mock::Upstream::Mock,
-                        output_mode: objectiveai::agent::mock::OutputMode::Instruction,
-                        top_logprobs: None,
-                        error: Some(true),
-                        invention: None,
-                    }),
+        |p| {
+            p.reasoning = Some(objectiveai::functions::executions::request::Reasoning {
+                agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+                    objectiveai::agent::InlineAgentBaseWithFallbacks {
+                        inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase {
+                            upstream: objectiveai::agent::mock::Upstream::Mock,
+                            output_mode: objectiveai::agent::mock::OutputMode::Instruction,
+                            top_logprobs: None,
+                            error: Some(true),
+                            invention: None,
+                        }),
+                        fallbacks: None,
+                    },
                 ),
-                agents: None,
-            }),
-            strategy: None,
-            input: InputValue::Object(indexmap::indexmap! {
+            });
+            p.input = InputValue::Object(indexmap::indexmap! {
                 "text".into() => InputValue::String("test".into()),
-            }),
-            provider: None,
-            seed: Some(42),
-            stream: None,
-            mcp_server_authorization: None,
+            });
         },
     );
     // The stream succeeds but the reasoning chunk will have an error.

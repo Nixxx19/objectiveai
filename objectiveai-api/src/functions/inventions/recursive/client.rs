@@ -32,22 +32,22 @@ pub fn recursive_invention_response_id(created: u64) -> String {
 /// then spawns child inventions for each placeholder task, recursing
 /// based on depth. All child streams are merged concurrently — no waiting,
 /// no collecting.
-pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM, RIUSG> {
+pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM, RIUSG> {
     pub invention_client: Arc<
         crate::functions::inventions::Client<
-            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM,
+            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM,
         >,
     >,
     pub usage_handler: Arc<RIUSG>,
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM, RIUSG>
-    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM, RIUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM, RIUSG>
+    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM, RIUSG>
 {
     pub fn new(
         invention_client: Arc<
             crate::functions::inventions::Client<
-                CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM,
+                CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM,
             >,
         >,
         usage_handler: Arc<RIUSG>,
@@ -59,8 +59,8 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, F
     }
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM, RIUSG>
-    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM, RIUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM, RIUSG>
+    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM, RIUSG>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
     OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent>
@@ -76,12 +76,14 @@ where
         + Send
         + Sync
         + 'static,
-    FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    RETRG: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRF: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRM: crate::retrieval::retrieve::Client<CTXEXT>,
     CUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
     IUSG: crate::functions::inventions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
-    FFNG: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    FFNF: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    FFNM: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FFNG: crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
+    FFNF: crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
+    FFNM: crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
     RIUSG: super::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
 {
     pub async fn create_unary_handle_usage(
@@ -247,10 +249,10 @@ where
 /// 5. Merges all child streams via `select_all` and yields their chunks.
 /// 6. After all children complete, replaces placeholders with the invented
 ///    function paths.
-fn run_recursive<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM>(
+fn run_recursive<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM>(
     invention_client: Arc<
         crate::functions::inventions::Client<
-            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM,
+            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM,
         >,
     >,
     ctx: ctx::Context<CTXEXT>,
@@ -276,12 +278,14 @@ where
         + Send
         + Sync
         + 'static,
-    FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    RETRG: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRF: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRM: crate::retrieval::retrieve::Client<CTXEXT>,
     CUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
     IUSG: crate::functions::inventions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
-    FFNG: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    FFNF: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    FFNM: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FFNG: crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
+    FFNF: crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
+    FFNM: crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
 {
     Box::pin(async_stream::stream! {
         // Build the single-level invention request from the recursive params.
@@ -292,7 +296,6 @@ where
                 state: request.state.clone(),
                 provider: request.provider.clone(),
                 agent: request.agent.clone(),
-                agents: request.agents.clone(),
                 seed: request.seed,
                 stream: request.stream,
                 max_step_retries: request.max_step_retries,
@@ -340,7 +343,7 @@ where
 
         // Stream the single-level invention, wrapping each chunk.
         let mut final_state: Option<objectiveai::functions::inventions::State> = None;
-        let mut final_path: Option<objectiveai::functions::RemoteFunctionPath> = None;
+        let mut final_path: Option<objectiveai::RemotePath> = None;
         let mut saved_function: Option<objectiveai::functions::FullRemoteFunction> = None;
         let mut had_error = false;
 
@@ -405,8 +408,7 @@ where
                     state: child_state,
                     provider: request.provider.clone(),
                     agent: request.agent.clone(),
-                    agents: request.agents.clone(),
-                    seed: request.seed,
+                        seed: request.seed,
                     stream: request.stream,
                     max_step_retries: request.max_step_retries,
                     mcp_server_authorization: request.mcp_server_authorization.clone(),
@@ -427,7 +429,7 @@ where
 
         // Merge all child streams, yield chunks immediately, and collect
         // child invention paths for placeholder replacement.
-        let mut child_paths: Vec<objectiveai::functions::RemoteFunctionPath> = Vec::new();
+        let mut child_paths: Vec<objectiveai::RemotePath> = Vec::new();
         let mut merged = futures::stream::select_all(child_streams);
         while let Some(chunk) = merged.next().await {
             // Collect paths from child inventions as they complete.
@@ -505,7 +507,7 @@ where
         let description = crate::functions::inventions::extract_description(&state);
 
         let (updated_path, publish_error) = match request.remote {
-            objectiveai::functions::Remote::Filesystem => {
+            objectiveai::Remote::Filesystem => {
                 match crate::functions::inventions::publish_filesystem(
                     &invention_client.filesystem_client, name, &publish_files,
                 ) {
@@ -513,7 +515,7 @@ where
                     Err(e) => (None, Some(e)),
                 }
             }
-            objectiveai::functions::Remote::Github => {
+            objectiveai::Remote::Github => {
                 match crate::functions::inventions::publish_github(
                     &invention_client.github_client,
                     &invention_client.filesystem_client,
@@ -524,7 +526,7 @@ where
                     Err(e) => (None, Some(e)),
                 }
             }
-            objectiveai::functions::Remote::Mock => (None, None),
+            objectiveai::Remote::Mock => (None, None),
         };
 
         // Yield the post-replacement function. On publish failure, fall back

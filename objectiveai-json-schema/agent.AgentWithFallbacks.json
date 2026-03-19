@@ -1,0 +1,12 @@
+{
+  "title": "agent.AgentWithFallbacks",
+  "description": "A validated agent with optional fallbacks, either remote (with description) or inline.",
+  "anyOf": [
+    {
+      "$ref": "agent.RemoteAgentWithFallbacks"
+    },
+    {
+      "$ref": "agent.InlineAgentWithFallbacks"
+    }
+  ]
+}

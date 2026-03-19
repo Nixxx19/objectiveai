@@ -3,7 +3,7 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.functions.inline_auto_profile import InlineAutoProfile
+from objectiveai.swarm.inline_swarm_base import InlineSwarmBase
 
 
 class InlineProfileVariant1(RootModel):
@@ -13,7 +13,7 @@ class InlineProfileVariant1(RootModel):
 
 class InlineProfileVariant2(RootModel):
     """Auto profile that applies a single swarm+weights to all vector completion tasks."""
-    root: InlineAutoProfile
+    root: InlineSwarmBase
 
 
 class InlineProfile(RootModel):

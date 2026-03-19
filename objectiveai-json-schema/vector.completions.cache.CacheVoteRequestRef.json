@@ -3,20 +3,7 @@
   "type": "object",
   "properties": {
     "agent": {
-      "$ref": "agent.completions.request.Agent"
-    },
-    "agents": {
-      "anyOf": [
-        {
-          "type": "array",
-          "items": {
-            "$ref": "agent.completions.request.Agent"
-          }
-        },
-        {
-          "type": "null"
-        }
-      ]
+      "$ref": "agent.InlineAgentBaseWithFallbacksOrRemote"
     },
     "messages": {
       "type": "array",

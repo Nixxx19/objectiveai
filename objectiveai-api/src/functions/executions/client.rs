@@ -308,25 +308,17 @@ pub struct Client<
     OPENROUTER,
     CLAUDEAGENTSDK,
     MOCK,
-    FAGENT,
     ACUSG,
-    FENS,
     FVVOTE,
     FCVOTE,
     VUSG,
-    FFNG,
-    FFNF,
-    FFNM,
-    FPFLG,
-    FPFLF,
-    FPFLM,
+    RETRG,
+    RETRF,
+    RETRM,
     FUSG,
 > {
     /// Agent completions client for reasoning summaries.
-    pub agent_client: Arc<crate::agent::completions::Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG>>,
-    /// Fetcher for Swarm definitions.
-    pub swarm_fetcher:
-        Arc<crate::swarm::fetcher::CachingFetcher<CTXEXT, FENS>>,
+    pub agent_client: Arc<crate::agent::completions::Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG>>,
     /// Vector completions client for executing Vector Completion tasks.
     pub vector_client: Arc<
         vector::completions::Client<
@@ -334,20 +326,18 @@ pub struct Client<
             OPENROUTER,
             CLAUDEAGENTSDK,
             MOCK,
-            FAGENT,
+            RETRG,
+            RETRF,
+            RETRM,
             ACUSG,
-            FENS,
             FVVOTE,
             FCVOTE,
             VUSG,
         >,
     >,
-    /// Fetcher for Function definitions.
-    pub function_fetcher:
-        Arc<functions::function_fetcher::FetcherRouter<FFNG, FFNF, FFNM>>,
-    /// Fetcher for Profile definitions.
-    pub profile_fetcher:
-        Arc<functions::profile_fetcher::FetcherRouter<FPFLG, FPFLF, FPFLM>>,
+    /// Router for fetching Function and Profile definitions.
+    pub retrieve_router:
+        Arc<crate::retrieval::retrieve::Router<RETRG, RETRF, RETRM, CTXEXT>>,
     /// Handler for recording usage after execution.
     pub usage_handler: Arc<FUSG>,
 }
@@ -357,18 +347,13 @@ impl<
     OPENROUTER,
     CLAUDEAGENTSDK,
     MOCK,
-    FAGENT,
     ACUSG,
-    FENS,
     FVVOTE,
     FCVOTE,
     VUSG,
-    FFNG,
-    FFNF,
-    FFNM,
-    FPFLG,
-    FPFLF,
-    FPFLM,
+    RETRG,
+    RETRF,
+    RETRM,
     FUSG,
 >
     Client<
@@ -376,55 +361,43 @@ impl<
         OPENROUTER,
         CLAUDEAGENTSDK,
         MOCK,
-        FAGENT,
         ACUSG,
-        FENS,
         FVVOTE,
         FCVOTE,
         VUSG,
-        FFNG,
-        FFNF,
-        FFNM,
-        FPFLG,
-        FPFLF,
-        FPFLM,
+        RETRG,
+        RETRF,
+        RETRM,
         FUSG,
     >
 {
     /// Creates a new Function execution client.
     pub fn new(
-        agent_client: Arc<crate::agent::completions::Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG>>,
-        swarm_fetcher: Arc<
-            crate::swarm::fetcher::CachingFetcher<CTXEXT, FENS>,
-        >,
+        agent_client: Arc<crate::agent::completions::Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG>>,
         vector_client: Arc<
             vector::completions::Client<
                 CTXEXT,
                 OPENROUTER,
                 CLAUDEAGENTSDK,
                 MOCK,
-                FAGENT,
+                RETRG,
+                RETRF,
+                RETRM,
                 ACUSG,
-                FENS,
                 FVVOTE,
                 FCVOTE,
                 VUSG,
             >,
         >,
-        function_fetcher: Arc<
-            functions::function_fetcher::FetcherRouter<FFNG, FFNF, FFNM>,
-        >,
-        profile_fetcher: Arc<
-            functions::profile_fetcher::FetcherRouter<FPFLG, FPFLF, FPFLM>,
+        retrieve_router: Arc<
+            crate::retrieval::retrieve::Router<RETRG, RETRF, RETRM, CTXEXT>,
         >,
         usage_handler: Arc<FUSG>,
     ) -> Self {
         Self {
             agent_client,
-            swarm_fetcher,
             vector_client,
-            function_fetcher,
-            profile_fetcher,
+            retrieve_router,
             usage_handler,
         }
     }
@@ -435,18 +408,13 @@ impl<
     OPENROUTER,
     CLAUDEAGENTSDK,
     MOCK,
-    FAGENT,
     ACUSG,
-    FENS,
     FVVOTE,
     FCVOTE,
     VUSG,
-    FFNG,
-    FFNF,
-    FFNM,
-    FPFLG,
-    FPFLF,
-    FPFLM,
+    RETRG,
+    RETRF,
+    RETRM,
     FUSG,
 >
     Client<
@@ -454,18 +422,13 @@ impl<
         OPENROUTER,
         CLAUDEAGENTSDK,
         MOCK,
-        FAGENT,
         ACUSG,
-        FENS,
         FVVOTE,
         FCVOTE,
         VUSG,
-        FFNG,
-        FFNF,
-        FFNM,
-        FPFLG,
-        FPFLF,
-        FPFLM,
+        RETRG,
+        RETRF,
+        RETRM,
         FUSG,
     >
 where
@@ -473,13 +436,11 @@ where
     OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent> + Send + Sync + 'static,
     CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> + Send + Sync + 'static,
     MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent> + Send + Sync + 'static,
-    FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     ACUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT>
         + Send
         + Sync
         + 'static,
-    FENS: crate::swarm::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    FVVOTE: vector::completions::completion_votes_fetcher::Fetcher<CTXEXT>
+        FVVOTE: vector::completions::completion_votes_fetcher::Fetcher<CTXEXT>
         + Send
         + Sync
         + 'static,
@@ -491,12 +452,9 @@ where
         + Send
         + Sync
         + 'static,
-    FFNG: functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    FFNF: functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    FFNM: functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    FPFLG: functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    FPFLF: functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    FPFLM: functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    RETRG: crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
+    RETRF: crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
+    RETRM: crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
     FUSG: super::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
 {
     /// Executes a Function and returns the complete response.
@@ -505,7 +463,7 @@ where
     pub async fn create_unary_handle_usage(
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT>,
-        request: Arc<objectiveai::functions::executions::request::Request>,
+        request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
     ) -> Result<
         objectiveai::functions::executions::response::unary::FunctionExecution,
         super::Error,
@@ -530,7 +488,7 @@ where
     pub async fn create_streaming_handle_usage(
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT>,
-        request: Arc<objectiveai::functions::executions::request::Request>,
+        request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
     ) -> Result<
         impl Stream<Item = objectiveai::functions::executions::response::streaming::FunctionExecutionChunk>
         + Send
@@ -589,18 +547,13 @@ impl<
     OPENROUTER,
     CLAUDEAGENTSDK,
     MOCK,
-    FAGENT,
     ACUSG,
-    FENS,
     FVVOTE,
     FCVOTE,
     VUSG,
-    FFNG,
-    FFNF,
-    FFNM,
-    FPFLG,
-    FPFLF,
-    FPFLM,
+    RETRG,
+    RETRF,
+    RETRM,
     FUSG,
 >
     Client<
@@ -608,18 +561,13 @@ impl<
         OPENROUTER,
         CLAUDEAGENTSDK,
         MOCK,
-        FAGENT,
         ACUSG,
-        FENS,
         FVVOTE,
         FCVOTE,
         VUSG,
-        FFNG,
-        FFNF,
-        FFNM,
-        FPFLG,
-        FPFLF,
-        FPFLM,
+        RETRG,
+        RETRF,
+        RETRM,
         FUSG,
     >
 where
@@ -627,13 +575,11 @@ where
     OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent> + Send + Sync + 'static,
     CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> + Send + Sync + 'static,
     MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent> + Send + Sync + 'static,
-    FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     ACUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT>
         + Send
         + Sync
         + 'static,
-    FENS: crate::swarm::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    FVVOTE: vector::completions::completion_votes_fetcher::Fetcher<CTXEXT>
+        FVVOTE: vector::completions::completion_votes_fetcher::Fetcher<CTXEXT>
         + Send
         + Sync
         + 'static,
@@ -645,12 +591,9 @@ where
         + Send
         + Sync
         + 'static,
-    FFNG: functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    FFNF: functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    FFNM: functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    FPFLG: functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    FPFLF: functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    FPFLM: functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    RETRG: crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
+    RETRF: crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
+    RETRM: crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
     FUSG: Send + Sync + 'static,
 {
     /// Executes a Function with streaming output.
@@ -661,7 +604,7 @@ where
     pub async fn create_streaming(
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT>,
-        request: Arc<objectiveai::functions::executions::request::Request>,
+        request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
     ) -> Result<
         impl Stream<Item = objectiveai::functions::executions::response::streaming::FunctionExecutionChunk>
         + Send
@@ -676,7 +619,6 @@ where
 
         // parse retry token if provided
         let retry_token = request
-            .base()
             .retry_token
             .as_ref()
             .map(|token_str| {
@@ -689,7 +631,11 @@ where
             .map(Arc::new);
 
         // validate that input_split and input_merge are present if strategy is Swiss
-        match (&request.base().strategy, request.inline_function()) {
+        let inline_function = match &request.function {
+            objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Inline(f) => Some(f.clone().transpile()),
+            _ => None,
+        };
+        match (&request.strategy, &inline_function) {
             (
                 Some(
                     objectiveai::functions::executions::request::Strategy::SwissSystem {
@@ -718,17 +664,21 @@ where
             _ => { }
         }
 
-        // fetch function flat task profile + latest function/profile versions if publishing
-        let mut ftp = self
-            .fetch_function_flat_task_profile(
-                ctx.clone(),
-                request.clone(),
+        // fetch function flat task profile
+        let mut ftp = functions::get_flat_task_profile(
+                &ctx,
+                Vec::new(),
+                request.function.clone(),
+                request.profile.clone(),
+                request.input.clone(),
                 None,
+                false,
+                self.retrieve_router.clone(),
             )
             .await?;
 
         // validate that ftp type is Vector if strategy is Swiss
-        match (&request.base().strategy, &ftp.r#type) {
+        match (&request.strategy, &ftp.r#type) {
             (
                 Some(
                     objectiveai::functions::executions::request::Strategy::SwissSystem {
@@ -749,7 +699,7 @@ where
         let description = ftp.description.take();
 
         // reasonong data
-        let reasoning = request.base().reasoning.is_some();
+        let reasoning = request.reasoning.is_some();
         let mut reasoning_data = if reasoning {
             Some((
                 HashMap::<
@@ -850,7 +800,7 @@ where
                 pool,
                 rounds,
             }
-        ) = &request.base().strategy {
+        ) = &request.strategy {
             // take and unwrap input_split and input_merge
             let (input_split, input_merge) = match &ftp.r#type {
                 functions::FunctionType::Vector {
@@ -878,7 +828,7 @@ where
             let split_input: Vec<objectiveai::functions::expression::InputValue> = input_split.compile_one(
                 &objectiveai::functions::expression::Params::Ref(
                     objectiveai::functions::expression::ParamsRef {
-                        input: &request.base().input,
+                        input: &request.input,
                         output: None,
                         map: None,
                     }
@@ -908,10 +858,15 @@ where
                         }
                     )
                 )?;
-                ftp_futs.push(self.fetch_function_flat_task_profile(
-                    ctx.clone(),
-                    request.clone(),
-                    Some(joined_input),
+                ftp_futs.push(functions::get_flat_task_profile(
+                    &ctx,
+                    Vec::new(),
+                    request.function.clone(),
+                    request.profile.clone(),
+                    joined_input,
+                    None,
+                    false,
+                    self.retrieve_router.clone(),
                 ));
             }
             let mut ftps = futures::future::try_join_all(ftp_futs).await?;
@@ -1222,10 +1177,15 @@ where
                                     break 'rounds;
                                 }
                             };
-                            ftp_futs.push(self.fetch_function_flat_task_profile(
-                                ctx.clone(),
-                                request.clone(),
-                                Some(joined_input),
+                            ftp_futs.push(functions::get_flat_task_profile(
+                                &ctx,
+                                Vec::new(),
+                                request.function.clone(),
+                                request.profile.clone(),
+                                joined_input,
+                                None,
+                                false,
+                                self.retrieve_router.clone(),
                             ));
                         }
 
@@ -1317,8 +1277,7 @@ where
                     // unpack reasoning params
                     let objectiveai::functions::executions::request::Reasoning {
                         agent,
-                        agents,
-                    } = request.base().reasoning.as_ref().unwrap();
+                    } = request.reasoning.as_ref().unwrap();
 
                     // iterate over vector completion chunks
                     for (_, (round, pool_idx, mut vector_completion)) in vector_completions.into_iter() {
@@ -1401,7 +1360,6 @@ where
                         ctx,
                         request.clone(),
                         agent.clone(),
-                        agents.clone(),
                         description,
                         objectiveai::functions::expression::TaskOutputOwned::Vector(final_output.clone()),
                         confidence_responses,
@@ -1524,8 +1482,7 @@ where
                     // unpack reasoning data
                     let objectiveai::functions::executions::request::Reasoning {
                         agent,
-                        agents,
-                    } = request.base().reasoning.as_ref().unwrap();
+                    } = request.reasoning.as_ref().unwrap();
                     let (
                         vector_completions,
                         (
@@ -1621,7 +1578,6 @@ where
                         ctx,
                         request.clone(),
                         agent.clone(),
-                        agents.clone(),
                         description,
                         final_chunk.output.clone().expect("missing output").output,
                         confidence_responses,
@@ -1665,131 +1621,10 @@ where
         }
     }
 
-    async fn fetch_function_flat_task_profile(
-        &self,
-        ctx: ctx::Context<CTXEXT>,
-        request: Arc<objectiveai::functions::executions::request::Request>,
-        input: Option<objectiveai::functions::expression::InputValue>,
-    ) -> Result<functions::FunctionFlatTaskProfile, super::Error> {
-        match &*request {
-            objectiveai::functions::executions::request::Request::FunctionInlineProfileInline {
-                body,
-            } => {
-                functions::get_flat_task_profile(
-                    ctx,
-                    Vec::new(),
-                    functions::FunctionParam::FetchedOrInline {
-                        full_id: None,
-                        function: objectiveai::functions::Function::Inline(
-                            body.function.clone(),
-                        ),
-                    },
-                    functions::ProfileParam::FetchedOrInline {
-                        full_id: None,
-                        profile: objectiveai::functions::Profile::Inline(
-                            body.profile.clone(),
-                        ),
-                    },
-                    input.unwrap_or_else(|| body.base.input.clone()),
-                    None, // Root-level function has no parent task output expression
-                    false, // Root-level function has no invert flag
-                    self.function_fetcher.clone(),
-                    self.profile_fetcher.clone(),
-                    self.swarm_fetcher.clone(),
-                )
-                .await
-            }
-            objectiveai::functions::executions::request::Request::FunctionInlineProfileRemote {
-                path,
-                body,
-            } => {
-                functions::get_flat_task_profile(
-                    ctx,
-                    Vec::new(),
-                    functions::FunctionParam::FetchedOrInline {
-                        full_id: None,
-                        function: objectiveai::functions::Function::Inline(
-                            body.function.clone(),
-                        ),
-                    },
-                    functions::ProfileParam::Remote {
-                        remote: path.premote,
-                        owner: path.powner.clone(),
-                        repository: path.prepository.clone(),
-                        commit: path.pcommit.clone(),
-                    },
-                    input.unwrap_or_else(|| body.base.input.clone()),
-                    None, // Root-level function has no parent task output expression
-                    false, // Root-level function has no invert flag
-                    self.function_fetcher.clone(),
-                    self.profile_fetcher.clone(),
-                    self.swarm_fetcher.clone(),
-                )
-                .await
-            }
-            objectiveai::functions::executions::request::Request::FunctionRemoteProfileInline {
-                path,
-                body,
-            } => {
-                functions::get_flat_task_profile(
-                    ctx,
-                    Vec::new(),
-                    functions::FunctionParam::Remote {
-                        remote: path.fremote,
-                        owner: path.fowner.clone(),
-                        repository: path.frepository.clone(),
-                        commit: path.fcommit.clone(),
-                    },
-                    functions::ProfileParam::FetchedOrInline {
-                        full_id: None,
-                        profile: objectiveai::functions::Profile::Inline(
-                            body.profile.clone(),
-                        ),
-                    },
-                    input.unwrap_or_else(|| body.base.input.clone()),
-                    None, // Root-level function has no parent task output expression
-                    false, // Root-level function has no invert flag
-                    self.function_fetcher.clone(),
-                    self.profile_fetcher.clone(),
-                    self.swarm_fetcher.clone(),
-                )
-                .await
-            }
-            objectiveai::functions::executions::request::Request::FunctionRemoteProfileRemote {
-                path,
-                body
-            } => {
-                functions::get_flat_task_profile(
-                    ctx,
-                    Vec::new(),
-                    functions::FunctionParam::Remote {
-                        remote: path.fremote,
-                        owner: path.fowner.clone(),
-                        repository: path.frepository.clone(),
-                        commit: path.fcommit.clone(),
-                    },
-                    functions::ProfileParam::Remote {
-                        remote: path.premote,
-                        owner: path.powner.clone(),
-                        repository: path.prepository.clone(),
-                        commit: path.pcommit.clone(),
-                    },
-                    input.unwrap_or_else(|| body.input.clone()),
-                    None, // Root-level function has no parent task output expression
-                    false, // Root-level function has no invert flag
-                    self.function_fetcher.clone(),
-                    self.profile_fetcher.clone(),
-                    self.swarm_fetcher.clone(),
-                )
-                .await
-            }
-        }
-    }
-
     fn execute_ftp_streaming(
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT>,
-        request: Arc<objectiveai::functions::executions::request::Request>,
+        request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
         root_retry_token: Option<
             Arc<objectiveai::functions::executions::RetryToken>,
         >,
@@ -1949,7 +1784,7 @@ where
     fn execute_map_function_ftp_streaming(
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT>,
-        request: Arc<objectiveai::functions::executions::request::Request>,
+        request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
         root_retry_token: Option<
             Arc<objectiveai::functions::executions::RetryToken>,
         >,
@@ -2078,7 +1913,7 @@ where
     fn execute_function_ftp_streaming(
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT>,
-        request: Arc<objectiveai::functions::executions::request::Request>,
+        request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
         root_retry_token: Option<
             Arc<objectiveai::functions::executions::RetryToken>,
         >,
@@ -2429,7 +2264,7 @@ where
     async fn execute_map_vector_ftp_streaming(
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT>,
-        request: Arc<objectiveai::functions::executions::request::Request>,
+        request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
         root_retry_token: Option<
             Arc<objectiveai::functions::executions::RetryToken>,
         >,
@@ -2514,7 +2349,7 @@ where
     async fn execute_vector_ftp_streaming(
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT>,
-        request: Arc<objectiveai::functions::executions::request::Request>,
+        request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
         root_retry_token: Option<
             Arc<objectiveai::functions::executions::RetryToken>,
         >,
@@ -2522,7 +2357,7 @@ where
         task_index: u64,
         choice_indexer: Arc<ChoiceIndexer>,
     ) -> impl Stream<Item = FtpStreamChunk> + Send + 'static {
-        let request_base = request.base();
+        let request_base = &*request;
         let retry_token = root_retry_token
             .and_then(|rt| rt.0.get(task_index as usize).cloned())
             .flatten();
@@ -2537,11 +2372,10 @@ where
                         retry: retry_token.clone(),
                         from_cache: request_base.from_cache,
                         messages: ftp.messages,
-                        provider: request_base.provider,
-                        swarm: objectiveai::vector::completions::request::Swarm::Provided(
-                            ftp.swarm,
+                        provider: request_base.provider.clone(),
+                        swarm: objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(
+                            ftp.swarm.into_base(),
                         ),
-                        profile: ftp.profile,
                         seed: request_base.seed,
                         stream: request_base.stream,
                         responses: ftp.responses,
@@ -2639,9 +2473,8 @@ where
     async fn create_reasoning_summary_streaming(
         &self,
         ctx: ctx::Context<CTXEXT>,
-        request: Arc<objectiveai::functions::executions::request::Request>,
-        agent: objectiveai::agent::completions::request::Agent,
-        agents: Option<Vec<objectiveai::agent::completions::request::Agent>>,
+        request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
         description: Option<String>,
         output: objectiveai::functions::expression::TaskOutputOwned,
         confidence_responses: Vec<ConfidenceResponse>,
@@ -2659,7 +2492,7 @@ where
                 None => "The user provided the following input to an ObjectiveAI Function\n".to_string(),
             },
         });
-        parts.extend(request.base().input.clone().to_rich_content_parts(0));
+        parts.extend(request.input.clone().to_rich_content_parts(0));
         parts.push(objectiveai::agent::completions::message::RichContentPart::Text {
             text: match output {
                 objectiveai::functions::expression::TaskOutputOwned::Scalar(scalar) => {
@@ -2751,13 +2584,12 @@ where
                                 name: None,
                             },
                         )],
-                        provider: request.base().provider,
+                        provider: request.provider.clone(),
                         agent,
-                        agents,
                         response_format: None,
-                        seed: request.base().seed,
+                        seed: request.seed,
                         stream: Some(true),
-                        mcp_server_authorization: request.base().mcp_server_authorization.clone(),
+                        mcp_server_authorization: request.mcp_server_authorization.clone(),
                     },
                 ),
                 None,

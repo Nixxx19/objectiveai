@@ -34,42 +34,28 @@ pub struct Context<CTXEXT> {
     github_authorization_cached: OnceCell<Option<Arc<String>>>,
     /// Cached resolved MCP authorization (self + BYOK merged).
     mcp_authorization_cached: OnceCell<Option<Arc<HashMap<String, String>>>>,
-    /// Cache for swarm fetches, keyed by swarm ID.
-    pub swarm_cache: Arc<
-        DashMap<
-            String,
-            Shared<
-                tokio::sync::oneshot::Receiver<
-                    Result<
-                        Option<(objectiveai::swarm::Swarm, u64)>,
-                        objectiveai::error::ResponseError,
-                    >,
-                >,
-            >,
-        >,
-    >,
-    /// Cache for agent fetches, keyed by agent ID.
+    /// Cache for agent fetches, keyed by RemotePath.
     pub agent_cache: Arc<
         DashMap<
-            String,
+            objectiveai::RemotePath,
             Shared<
                 tokio::sync::oneshot::Receiver<
                     Result<
-                        Option<(objectiveai::agent::Agent, u64)>,
+                        Option<objectiveai::agent::RemoteAgentBaseWithFallbacks>,
                         objectiveai::error::ResponseError,
                     >,
                 >,
             >,
         >,
     >,
-    /// Cache for latest commit fetches, keyed by (remote, owner, repository).
-    pub latest_commit_cache: Arc<
+    /// Cache for swarm fetches, keyed by RemotePath.
+    pub swarm_cache: Arc<
         DashMap<
-            (objectiveai::functions::Remote, String, String),
+            objectiveai::RemotePath,
             Shared<
                 tokio::sync::oneshot::Receiver<
                     Result<
-                        Option<String>,
+                        Option<objectiveai::swarm::RemoteSwarmBase>,
                         objectiveai::error::ResponseError,
                     >,
                 >,
@@ -79,7 +65,7 @@ pub struct Context<CTXEXT> {
     /// Cache for function fetches, keyed by (remote, owner, repository, commit).
     pub function_cache: Arc<
         DashMap<
-            (objectiveai::functions::Remote, String, String, String),
+            (objectiveai::Remote, String, String, String),
             Shared<
                 tokio::sync::oneshot::Receiver<
                     Result<
@@ -93,11 +79,25 @@ pub struct Context<CTXEXT> {
     /// Cache for profile fetches, keyed by (remote, owner, repository, commit).
     pub profile_cache: Arc<
         DashMap<
-            (objectiveai::functions::Remote, String, String, String),
+            (objectiveai::Remote, String, String, String),
             Shared<
                 tokio::sync::oneshot::Receiver<
                     Result<
                         Option<objectiveai::functions::RemoteProfile>,
+                        objectiveai::error::ResponseError,
+                    >,
+                >,
+            >,
+        >,
+    >,
+    /// Cache for latest commit fetches, keyed by (remote, owner, repository).
+    pub latest_commit_cache: Arc<
+        DashMap<
+            (objectiveai::Remote, String, String),
+            Shared<
+                tokio::sync::oneshot::Receiver<
+                    Result<
+                        Option<String>,
                         objectiveai::error::ResponseError,
                     >,
                 >,

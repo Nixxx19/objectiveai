@@ -771,7 +771,7 @@ impl AlphaVectorBranchState {
 
     pub fn replace_placeholders(
         &mut self,
-        paths: &[crate::functions::RemoteFunctionPath],
+        paths: &[crate::RemotePath],
     ) {
         let tasks = match self.tasks.take() {
             Some(tasks) => tasks,
@@ -897,7 +897,7 @@ impl super::InventionState for AlphaVectorBranchState {
 
     fn replace_placeholders(
         this: &Arc<Mutex<Self>>,
-        paths: &[crate::functions::RemoteFunctionPath],
+        paths: &[crate::RemotePath],
     ) {
         this.lock().unwrap().replace_placeholders(paths);
     }

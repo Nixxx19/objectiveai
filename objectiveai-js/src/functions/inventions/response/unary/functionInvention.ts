@@ -7,7 +7,7 @@ import { FunctionsFullRemoteFunctionSchema } from "../../../fullRemoteFunction";
 import { FunctionsInventionsResponseUnaryAgentCompletionSchema } from "./agentCompletion";
 import { FunctionsInventionsResponseUnaryObjectSchema } from "./object";
 import { FunctionsInventionsStateStateSchema } from "../../state/state";
-import { FunctionsRemoteFunctionPathSchema } from "../../../remoteFunctionPath";
+import { RemotePathSchema } from "../../../../remotePath";
 
 export const FunctionsInventionsResponseUnaryFunctionInventionSchema = z.object({
   completions: z.array(FunctionsInventionsResponseUnaryAgentCompletionSchema),
@@ -16,7 +16,7 @@ export const FunctionsInventionsResponseUnaryFunctionInventionSchema = z.object(
   function: FunctionsFullRemoteFunctionSchema.nullable().optional(),
   id: z.string(),
   object: FunctionsInventionsResponseUnaryObjectSchema,
-  path: FunctionsRemoteFunctionPathSchema.nullable().optional(),
+  path: RemotePathSchema.nullable().optional(),
   state: FunctionsInventionsStateStateSchema,
   usage: AgentCompletionsResponseUsageSchema,
 }).meta({ title: "functions.inventions.response.unary.FunctionInvention" });

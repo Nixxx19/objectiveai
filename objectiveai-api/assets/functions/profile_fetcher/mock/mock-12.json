@@ -1,17 +1,15 @@
 {
   "description": "Two agents for vector branch with logprobs.",
-  "swarm": {
-    "agents": [
-      {
-        "upstream": "mock",
-        "output_mode": "json_schema",
-        "top_logprobs": 7
-      },
-      {
-        "upstream": "mock",
-        "output_mode": "json_schema"
-      }
-    ]
-  },
-  "profile": [0.7, 0.3]
+  "agents": [
+    {
+      "upstream": "mock",
+      "output_mode": "json_schema",
+      "top_logprobs": 7
+    },
+    {
+      "upstream": "mock",
+      "output_mode": "json_schema"
+    }
+  ],
+  "weights": [0.7, 0.3]
 }

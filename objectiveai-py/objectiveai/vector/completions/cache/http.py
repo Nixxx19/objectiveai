@@ -6,19 +6,23 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from objectiveai.client import ObjectiveAI
-    from objectiveai.vector.completions.cache import CacheVoteRequest, CompletionVotes
-    from objectiveai.vector.completions.response import Vote
+    from objectiveai.vector.completions.cache import (
+        CacheVote,
+        CacheVoteRequest,
+        CompletionVotes,
+        GetCompletionVotesRequest,
+    )
 
 
 async def get_completion_votes(
-    client: ObjectiveAI, completion_id: str,
+    client: ObjectiveAI, params: GetCompletionVotesRequest,
 ) -> CompletionVotes:
     """Retrieve votes for a specific vector completion."""
-    return await client.get_unary(f"vector/completions/{completion_id}")
+    return await client.get_unary("vector/completions/votes", params)
 
 
 async def get_cache_vote(
-    client: ObjectiveAI, body: CacheVoteRequest,
-) -> Vote:
+    client: ObjectiveAI, params: CacheVoteRequest,
+) -> CacheVote:
     """Retrieve a cached vote."""
-    return await client.get_unary("vector/completions/cache", body)
+    return await client.get_unary("vector/completions/cache", params)

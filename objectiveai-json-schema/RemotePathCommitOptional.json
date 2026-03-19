@@ -1,0 +1,25 @@
+{
+  "title": "RemotePathCommitOptional",
+  "type": "object",
+  "properties": {
+    "commit": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "owner": {
+      "type": "string"
+    },
+    "remote": {
+      "$ref": "Remote"
+    },
+    "repository": {
+      "type": "string"
+    }
+  }
+}

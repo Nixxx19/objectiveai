@@ -19,12 +19,12 @@ agent completions that produced those votes."""
 
     completions: list[AgentCompletion] = Field(..., description='The underlying agent completions from each agent in the swarm.')
     created: int = Field(..., description='Unix timestamp when the completion was created.', ge=0, le=18446744073709551615)
-    swarm: str = Field(..., description='ID of the swarm used for this completion.')
     error: Optional[ResponseError] = None
     id: str = Field(..., description='Unique identifier for this vector completion.')
     index: int = Field(..., ge=0, le=18446744073709551615)
     object: Object = Field(..., description='Object type identifier (`"vector.completion"`).')
     scores: list[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]] = Field(..., description='Final weighted scores for each response option. Sums to 1.')
+    swarm: str = Field(..., description='ID of the swarm used for this completion.')
     task_index: int = Field(..., ge=0, le=18446744073709551615)
     task_path: list[Annotated[int, Field(ge=0, le=18446744073709551615)]]
     usage: Usage = Field(..., description='Aggregated token and cost usage across all completions.')

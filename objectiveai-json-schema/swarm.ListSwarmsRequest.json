@@ -1,0 +1,18 @@
+{
+  "title": "swarm.ListSwarmsRequest",
+  "description": "Query parameters for the list swarms endpoint.",
+  "type": "object",
+  "properties": {
+    "source": {
+      "description": "Optional source filter for listing swarms.",
+      "anyOf": [
+        {
+          "$ref": "swarm.ListSwarmsSource"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

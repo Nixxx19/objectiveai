@@ -21,27 +21,11 @@ if TYPE_CHECKING:
 async def compute_profile(
     client: ObjectiveAI,
     params: FunctionProfileComputationCreateParams,
-    *,
-    fremote: str | None = None,
-    fowner: str | None = None,
-    frepository: str | None = None,
-    fcommit: str | None = None,
 ) -> Union[FunctionProfileComputation, Stream[FunctionProfileComputationChunk]]:
     """Compute a profile for a function.
 
-    Path is built from the remote source arguments. If none are provided,
-    uses the inline computation path. If ``params.stream`` is true, returns
-    a streaming response.
+    If ``params.stream`` is true, returns a streaming response.
     """
-    if fremote and fowner and frepository:
-        parts = [f"functions/{fremote}/{fowner}/{frepository}"]
-        if fcommit:
-            parts.append(fcommit)
-        parts.append("profiles/compute")
-        path = "/".join(parts)
-    else:
-        path = "functions/profiles/compute"
-
     if getattr(params, "stream", None):
-        return await client.post_streaming(path, params)
-    return await client.post_unary(path, params)
+        return await client.post_streaming("functions/profiles/compute", params)
+    return await client.post_unary("functions/profiles/compute", params)

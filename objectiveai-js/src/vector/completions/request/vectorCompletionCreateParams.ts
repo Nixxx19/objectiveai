@@ -4,19 +4,17 @@ import { z } from "zod";
 import { AgentCompletionsMessageMessageSchema } from "../../../agent/completions/message/message";
 import { AgentCompletionsMessageRichContentSchema } from "../../../agent/completions/message/richContent";
 import { AgentCompletionsRequestProviderSchema } from "../../../agent/completions/request/provider";
-import { VectorCompletionsRequestProfileSchema } from "./profile";
-import { VectorCompletionsRequestSwarmSchema } from "./swarm";
+import { SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema } from "../../../swarm/inlineSwarmBaseOrRemoteCommitOptional";
 
 export const VectorCompletionsRequestVectorCompletionCreateParamsSchema = z.object({
   from_cache: z.boolean().nullable().describe("If true, uses cached votes when available.").optional(),
   mcp_server_authorization: z.record(z.string(), z.string()).nullable().describe("Map from MCP server URL to authorization header value.").optional(),
   messages: z.array(AgentCompletionsMessageMessageSchema).describe("The conversation messages (the prompt)."),
-  profile: VectorCompletionsRequestProfileSchema.describe("The profile weights for each agent in the swarm.\n\nMust have the same length as the total agent count in the swarm.\nCan be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields."),
   provider: AgentCompletionsRequestProviderSchema.nullable().describe("Provider routing preferences.").optional(),
   responses: z.array(AgentCompletionsMessageRichContentSchema).describe("The possible responses the LLMs can vote for."),
   retry: z.string().nullable().describe("If present, reuses votes from a previous request with this ID.").optional(),
   seed: z.number().int().min(-9223372036854776000).max(9223372036854776000).nullable().describe("Random seed for deterministic results.").optional(),
   stream: z.boolean().nullable().describe("Whether to stream the response.").optional(),
-  swarm: VectorCompletionsRequestSwarmSchema.describe("The Swarm of agents to use."),
+  swarm: SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema.describe("The Swarm of agents to use."),
 }).describe("Parameters for creating a vector completion.\n\nVector completions run multiple agent completions (one per LLM in the\nswarm), force each to vote for one of the predefined responses, and\ncombine votes using the provided profile weights to produce final scores.").meta({ title: "vector.completions.request.VectorCompletionCreateParams" });
 export type VectorCompletionsRequestVectorCompletionCreateParams = z.infer<typeof VectorCompletionsRequestVectorCompletionCreateParamsSchema>;
