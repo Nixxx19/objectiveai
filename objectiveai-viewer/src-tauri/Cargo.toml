@@ -1,0 +1,20 @@
+[package]
+name = "objectiveai-viewer"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "objectiveai_viewer_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "objectiveai-viewer"
+path = "src/main.rs"
+
+[dependencies]
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+tauri = "2.10.3"
+
+[build-dependencies]
+tauri-build = "2.5.6"
