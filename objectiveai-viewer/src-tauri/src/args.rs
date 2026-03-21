@@ -1,7 +1,7 @@
 use clap::Parser;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum Request {
     Execution(objectiveai::functions::executions::request::FunctionExecutionCreateParams),
