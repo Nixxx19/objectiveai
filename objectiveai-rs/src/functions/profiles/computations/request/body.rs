@@ -1,5 +1,4 @@
 use crate::{agent, functions};
-use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
@@ -29,7 +28,4 @@ pub struct FunctionProfileComputationCreateParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stream: Option<bool>,
 
-    // --- MCP server authorization ---
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub mcp_server_authorization: Option<IndexMap<String, String>>,
 }

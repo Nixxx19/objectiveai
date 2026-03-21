@@ -1,5 +1,4 @@
 use crate::{agent, functions};
-use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
@@ -23,7 +22,4 @@ pub struct FunctionInventionRecursiveCreateParams {
     /// Defaults to 3 if not specified.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_step_retries: Option<u32>,
-    /// Map from MCP server URL to authorization header value.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub mcp_server_authorization: Option<IndexMap<String, String>>,
 }

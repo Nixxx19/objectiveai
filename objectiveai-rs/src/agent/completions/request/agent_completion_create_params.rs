@@ -1,6 +1,5 @@
 //! Agent completion request parameters.
 
-use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
@@ -24,10 +23,5 @@ pub struct AgentCompletionCreateParams {
     /// Whether to stream the response.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stream: Option<bool>,
-
-    // --- MCP server authorization ---
-    /// Map from MCP server URL to authorization header value.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub mcp_server_authorization: Option<IndexMap<String, String>>,
 
 }
