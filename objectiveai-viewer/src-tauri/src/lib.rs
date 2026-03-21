@@ -1,4 +1,5 @@
 pub mod args;
+pub mod chunk;
 
 #[tauri::command]
 fn get_request(state: tauri::State<'_, args::Request>) -> &args::Request {
