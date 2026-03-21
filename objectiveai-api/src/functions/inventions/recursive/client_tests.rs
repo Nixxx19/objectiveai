@@ -53,14 +53,12 @@ impl crate::retrieval::retrieve::Client<ctx::DefaultContextExt> for StubRetrieve
     ) -> Result<Option<objectiveai::functions::RemoteProfile>, objectiveai::error::ResponseError> {
         unimplemented!()
     }
-    async fn resolve_latest_commit(
+    async fn resolve_latest(
         &self,
         _ctx: &ctx::Context<ctx::DefaultContextExt>,
         _kind: crate::retrieval::Kind,
-        _remote: objectiveai::Remote,
-        _owner: &str,
-        _repository: &str,
-    ) -> Result<Option<String>, objectiveai::error::ResponseError> {
+        _path: &objectiveai::RemotePathCommitOptional,
+    ) -> Result<Option<objectiveai::RemotePath>, objectiveai::error::ResponseError> {
         unimplemented!()
     }
 }
@@ -239,7 +237,6 @@ fn make_request(state: ParamsState, seed: i64) -> Arc<FunctionInventionRecursive
         seed: Some(seed),
         stream: Some(true),
         max_step_retries: Some(1),
-        mcp_server_authorization: None,
     })
 }
 

@@ -33,14 +33,13 @@ pub trait Client<CTXEXT>: Send + Sync + 'static {
         path: &objectiveai::RemotePath,
     ) -> Result<Option<objectiveai::functions::RemoteProfile>, ResponseError>;
 
-    /// Resolves the latest commit for a given owner/repository.
-    /// Used by the router when `RemotePathCommitOptional` has no commit.
-    async fn resolve_latest_commit(
+    /// Resolves a `RemotePathCommitOptional` to a full `RemotePath`.
+    /// For sources with commits (Github, Filesystem), resolves the latest commit if missing.
+    /// For Mock, returns a `RemotePath::Mock` directly.
+    async fn resolve_latest(
         &self,
         ctx: &ctx::Context<CTXEXT>,
         kind: crate::retrieval::Kind,
-        remote: objectiveai::Remote,
-        owner: &str,
-        repository: &str,
-    ) -> Result<Option<String>, ResponseError>;
+        path: &objectiveai::RemotePathCommitOptional,
+    ) -> Result<Option<objectiveai::RemotePath>, ResponseError>;
 }

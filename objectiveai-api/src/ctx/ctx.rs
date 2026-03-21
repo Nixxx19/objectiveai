@@ -62,10 +62,10 @@ pub struct Context<CTXEXT> {
             >,
         >,
     >,
-    /// Cache for function fetches, keyed by (remote, owner, repository, commit).
+    /// Cache for function fetches, keyed by RemotePath.
     pub function_cache: Arc<
         DashMap<
-            (objectiveai::Remote, String, String, String),
+            objectiveai::RemotePath,
             Shared<
                 tokio::sync::oneshot::Receiver<
                     Result<
@@ -76,10 +76,10 @@ pub struct Context<CTXEXT> {
             >,
         >,
     >,
-    /// Cache for profile fetches, keyed by (remote, owner, repository, commit).
+    /// Cache for profile fetches, keyed by RemotePath.
     pub profile_cache: Arc<
         DashMap<
-            (objectiveai::Remote, String, String, String),
+            objectiveai::RemotePath,
             Shared<
                 tokio::sync::oneshot::Receiver<
                     Result<
@@ -90,14 +90,14 @@ pub struct Context<CTXEXT> {
             >,
         >,
     >,
-    /// Cache for latest commit fetches, keyed by (remote, owner, repository).
-    pub latest_commit_cache: Arc<
+    /// Cache for resolve_latest fetches, keyed by RemotePathCommitOptional.
+    pub remote_latest_cache: Arc<
         DashMap<
-            (objectiveai::Remote, String, String),
+            objectiveai::RemotePathCommitOptional,
             Shared<
                 tokio::sync::oneshot::Receiver<
                     Result<
-                        Option<String>,
+                        Option<objectiveai::RemotePath>,
                         objectiveai::error::ResponseError,
                     >,
                 >,
@@ -119,7 +119,7 @@ impl<CTXEXT> Clone for Context<CTXEXT> {
             mcp_authorization_cached: OnceCell::new(),
             swarm_cache: self.swarm_cache.clone(),
             agent_cache: self.agent_cache.clone(),
-            latest_commit_cache: self.latest_commit_cache.clone(),
+            remote_latest_cache: self.remote_latest_cache.clone(),
             function_cache: self.function_cache.clone(),
             profile_cache: self.profile_cache.clone(),
         }
@@ -169,7 +169,7 @@ impl<CTXEXT> Context<CTXEXT> {
             mcp_authorization_cached: OnceCell::new(),
             swarm_cache: Arc::new(DashMap::new()),
             agent_cache: Arc::new(DashMap::new()),
-            latest_commit_cache: Arc::new(DashMap::new()),
+            remote_latest_cache: Arc::new(DashMap::new()),
             function_cache: Arc::new(DashMap::new()),
             profile_cache: Arc::new(DashMap::new()),
         }

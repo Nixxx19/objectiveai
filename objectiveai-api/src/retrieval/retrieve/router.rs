@@ -25,6 +25,7 @@ impl<G, F, M, CTXEXT> Router<G, F, M, CTXEXT> {
     }
 }
 
+
 impl<G, F, M, CTXEXT> Router<G, F, M, CTXEXT>
 where
     G: super::Client<CTXEXT>,
@@ -47,42 +48,27 @@ where
         kind: crate::retrieval::Kind,
         path: &objectiveai::RemotePathCommitOptional,
     ) -> Result<Option<objectiveai::RemotePath>, ResponseError> {
-        let commit = match &path.commit {
-            Some(c) => c.clone(),
-            None => {
-                let cache_key = (path.remote, path.owner.clone(), path.repository.clone());
-                let shared = ctx
-                    .latest_commit_cache
-                    .entry(cache_key)
-                    .or_insert_with(|| {
-                        let (tx, rx) = tokio::sync::oneshot::channel();
-                        let router = self.clone();
-                        let remote = path.remote;
-                        let owner = path.owner.clone();
-                        let repository = path.repository.clone();
-                        let ctx = ctx.clone();
-                        tokio::spawn(async move {
-                            let result = router
-                                .source(remote)
-                                .resolve_latest_commit(&ctx, kind, remote, &owner, &repository)
-                                .await;
-                            let _ = tx.send(result);
-                        });
-                        rx.shared()
-                    })
-                    .clone();
-                match shared.await.unwrap()? {
-                    Some(c) => c,
-                    None => return Ok(None),
-                }
-            }
-        };
-        Ok(Some(objectiveai::RemotePath {
-            remote: path.remote,
-            owner: path.owner.clone(),
-            repository: path.repository.clone(),
-            commit,
-        }))
+        let remote = path.remote();
+        let cache_key = path.clone();
+        let path_clone = path.clone();
+        let shared = ctx
+            .remote_latest_cache
+            .entry(cache_key)
+            .or_insert_with(|| {
+                let (tx, rx) = tokio::sync::oneshot::channel();
+                let router = self.clone();
+                let ctx = ctx.clone();
+                tokio::spawn(async move {
+                    let result = router
+                        .source(remote)
+                        .resolve_latest(&ctx, kind, &path_clone)
+                        .await;
+                    let _ = tx.send(result);
+                });
+                rx.shared()
+            })
+            .clone();
+        shared.await.unwrap()
     }
 
     // ── Agent ──────────────────────────────────────────────────────
@@ -122,10 +108,11 @@ where
             .or_insert_with(|| {
                 let (tx, rx) = tokio::sync::oneshot::channel();
                 let router = self.clone();
+                let remote = path.remote();
                 let path = path.clone();
                 let ctx = ctx.clone();
                 tokio::spawn(async move {
-                    let result = router.source(path.remote).get_agent(&ctx, &path).await;
+                    let result = router.source(remote).get_agent(&ctx, &path).await;
                     let _ = tx.send(result);
                 });
                 rx.shared()
@@ -191,10 +178,11 @@ where
             .or_insert_with(|| {
                 let (tx, rx) = tokio::sync::oneshot::channel();
                 let router = self.clone();
+                let remote = path.remote();
                 let path = path.clone();
                 let ctx = ctx.clone();
                 tokio::spawn(async move {
-                    let result = router.source(path.remote).get_swarm(&ctx, &path).await;
+                    let result = router.source(remote).get_swarm(&ctx, &path).await;
                     let _ = tx.send(result);
                 });
                 rx.shared()
@@ -251,22 +239,18 @@ where
         let Some(path) = self.resolve_path(ctx, crate::retrieval::Kind::Functions, params).await? else {
             return Ok(None);
         };
-        let cache_key = (
-            path.remote,
-            path.owner.clone(),
-            path.repository.clone(),
-            path.commit.clone(),
-        );
+        let cache_key = path.clone();
         let shared = ctx
             .function_cache
             .entry(cache_key)
             .or_insert_with(|| {
                 let (tx, rx) = tokio::sync::oneshot::channel();
                 let router = self.clone();
+                let remote = path.remote();
                 let path = path.clone();
                 let ctx = ctx.clone();
                 tokio::spawn(async move {
-                    let result = router.source(path.remote).get_function(&ctx, &path).await;
+                    let result = router.source(remote).get_function(&ctx, &path).await;
                     let _ = tx.send(result);
                 });
                 rx.shared()
@@ -288,7 +272,7 @@ where
             objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(params.clone()),
         ).await?;
         let inner = match result {
-            objectiveai::functions::FullFunction::Remote(r) => r.transpile(),
+            objectiveai::functions::FullFunction::Remote(r) => r,
             objectiveai::functions::FullFunction::Inline(_) => unreachable!(),
         };
         Ok(objectiveai::functions::response::GetFunctionResponse { path, inner })
@@ -298,47 +282,44 @@ where
     ///
     /// Iterates over the function's task expressions, finds ScalarFunction and
     /// VectorFunction tasks (which reference remote functions), and fetches each
-    /// concurrently. Returns a HashMap keyed by `"{owner}/{repository}/{commit}"`.
+    /// concurrently. Returns a HashMap keyed by the path's key string.
     pub async fn get_function_recursive(
         self: &Arc<Self>,
         ctx: &ctx::Context<CTXEXT>,
         function: objectiveai::functions::FullRemoteFunction,
-    ) -> Result<std::collections::HashMap<String, objectiveai::functions::RemoteFunction>, ResponseError> {
+    ) -> Result<std::collections::HashMap<String, objectiveai::functions::FullRemoteFunction>, ResponseError> {
         let transpiled = function.transpile();
         let mut futs: Vec<(String, _)> = Vec::new();
 
         for task_expr in transpiled.tasks() {
-            let (remote, owner, repository, commit) = match task_expr {
+            let path = match task_expr {
                 objectiveai::functions::TaskExpression::ScalarFunction(t) => {
-                    (t.remote, t.owner.clone(), t.repository.clone(), t.commit.clone())
+                    t.path.clone()
                 }
                 objectiveai::functions::TaskExpression::VectorFunction(t) => {
-                    (t.remote, t.owner.clone(), t.repository.clone(), t.commit.clone())
+                    t.path.clone()
                 }
                 _ => continue,
             };
-            let url = format!("{}/{}/{}", owner, repository, commit);
+            let key = path.key();
             let params = objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
-                objectiveai::RemotePathCommitOptional {
-                    remote, owner, repository, commit: Some(commit),
-                },
+                path.into(),
             );
             let router = self.clone();
             let ctx = ctx.clone();
-            futs.push((url, tokio::spawn(async move {
+            futs.push((key, tokio::spawn(async move {
                 router.get_function(&ctx, params).await
             })));
         }
 
         let mut children = std::collections::HashMap::new();
-        for (url, handle) in futs {
+        for (key, handle) in futs {
             let full_fn = handle.await.expect("get_function task panicked")?;
             match full_fn {
                 objectiveai::functions::FullFunction::Remote(r) => {
-                    children.insert(url, r.transpile());
+                    children.insert(key, r);
                 }
                 objectiveai::functions::FullFunction::Inline(_) => {
-                    // Remote references always resolve to remote functions.
                     unreachable!()
                 }
             }
@@ -377,27 +358,23 @@ where
         let Some(path) = self.resolve_path(ctx, crate::retrieval::Kind::Profiles, params).await? else {
             return Ok(None);
         };
-        let cache_key = (
-            path.remote,
-            path.owner.clone(),
-            path.repository.clone(),
-            path.commit.clone(),
-        );
+        let cache_key = path.clone();
         let shared = ctx
             .profile_cache
             .entry(cache_key)
             .or_insert_with(|| {
                 let (tx, rx) = tokio::sync::oneshot::channel();
                 let router = self.clone();
+                let remote = path.remote();
                 let path = path.clone();
                 let ctx = ctx.clone();
                 tokio::spawn(async move {
                     // Try profile.json first
-                    let result = router.source(path.remote).get_profile(&ctx, &path).await;
+                    let result = router.source(remote).get_profile(&ctx, &path).await;
                     let result = match &result {
                         Ok(None) => {
                             // Fallback: try swarm.json (a swarm definition is a valid Auto profile)
-                            match router.source(path.remote).get_swarm(&ctx, &path).await {
+                            match router.source(remote).get_swarm(&ctx, &path).await {
                                 Ok(Some(swarm)) => Ok(Some(
                                     objectiveai::functions::RemoteProfile::Auto(swarm),
                                 )),

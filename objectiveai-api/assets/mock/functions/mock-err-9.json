@@ -1,6 +1,6 @@
 {
   "type": "alpha.scalar.branch.function",
-  "description": "Error test: bad input for sub-function.",
+  "description": "Error test: branch references nonexistent sub-function.",
   "input_schema": {
     "type": "object",
     "properties": {
@@ -12,10 +12,8 @@
     {
       "type": "alpha.scalar.function",
       "remote": "mock",
-      "owner": "mock",
-      "repository": "mock-1",
-      "commit": "mock",
-      "input": { "$starlark": "{'wrong_field': input['text']}" }
+      "name": "mock-999",
+      "input": { "$starlark": "{'text': input['text']}" }
     }
   ]
 }

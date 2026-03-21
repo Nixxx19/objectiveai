@@ -1015,8 +1015,7 @@ pub(crate) fn publish_filesystem(
     let commit = filesystem_client
         .publish(crate::retrieval::Kind::Functions, owner, repo, &file_refs, &format!("publish {}", name))?;
 
-    Ok(objectiveai::RemotePath {
-        remote: objectiveai::Remote::Filesystem,
+    Ok(objectiveai::RemotePath::Filesystem {
         owner: owner.to_string(),
         repository: repo.to_string(),
         commit,
@@ -1076,7 +1075,6 @@ fn build_agent_params(
         response_format: None,
         seed: request.seed,
         stream: Some(true),
-        mcp_server_authorization: request.mcp_server_authorization.clone(),
     }
 }
 

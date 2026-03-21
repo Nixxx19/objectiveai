@@ -70,8 +70,8 @@ impl FlatTaskProfile {
 pub struct FunctionFlatTaskProfile {
     pub path: Vec<u64>,
     pub description: Option<String>,
-    pub full_function_id: Option<(objectiveai::Remote, String, String, String)>,
-    pub full_profile_id: Option<(objectiveai::Remote, String, String, String)>,
+    pub function_path: Option<objectiveai::RemotePath>,
+    pub profile_path: Option<objectiveai::RemotePath>,
     pub input: objectiveai::functions::expression::InputValue,
     pub tasks: Vec<Option<FlatTaskProfile>>,
     pub profile: Vec<rust_decimal::Decimal>,
@@ -235,23 +235,39 @@ where
     CTXEXT: Send + Sync + 'static,
 {
     // 1. Fetch function + profile concurrently via router.
-    let (full_function, profile) = {
+    let (function, function_path, profile, profile_path) = {
         let rr = retrieve_router.clone();
-        let (f, p) = tokio::try_join!(
-            async { rr.get_function(ctx, function).await.map_err(super::executions::Error::FetchFunction) },
-            async { rr.get_profile(ctx, profile).await.map_err(super::executions::Error::FetchProfile) },
-        )?;
-        (f, p)
-    };
-
-    // Transpile to standard Function.
-    let function = match full_function {
-        objectiveai::functions::FullFunction::Remote(r) => {
-            objectiveai::functions::Function::Remote(r.transpile())
-        }
-        objectiveai::functions::FullFunction::Inline(i) => {
-            objectiveai::functions::Function::Inline(i.transpile())
-        }
+        let func_fut = async {
+            match function {
+                objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Inline(inline) => {
+                    let f = objectiveai::functions::Function::Inline(inline.transpile());
+                    Ok::<_, super::executions::Error>((f, None))
+                }
+                objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(remote) => {
+                    let resp = rr.endpoint_get_function(ctx, &remote).await
+                        .map_err(super::executions::Error::FetchFunction)?;
+                    let f = objectiveai::functions::Function::Remote(resp.inner.transpile());
+                    Ok((f, Some(resp.path)))
+                }
+            }
+        };
+        let rr2 = retrieve_router.clone();
+        let prof_fut = async {
+            match profile {
+                objectiveai::functions::InlineProfileOrRemoteCommitOptional::Inline(inline) => {
+                    let p = objectiveai::functions::Profile::Inline(inline);
+                    Ok((p, None))
+                }
+                objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(remote) => {
+                    let resp = rr2.endpoint_get_profile(ctx, &remote).await
+                        .map_err(super::executions::Error::FetchProfile)?;
+                    let p = objectiveai::functions::Profile::Remote(resp.inner);
+                    Ok((p, Some(resp.path)))
+                }
+            }
+        };
+        let ((f, fp), (p, pp)) = tokio::try_join!(func_fut, prof_fut)?;
+        (f, fp, p, pp)
     };
 
     // 2. Validate input.
@@ -365,12 +381,12 @@ where
         match task {
             // ── Function tasks (recursive) ───────────────────────
             objectiveai::functions::CompiledTask::One(
-                objectiveai::functions::Task::ScalarFunction(objectiveai::functions::ScalarFunctionTask { remote, owner, repository, commit, input, output })
+                objectiveai::functions::Task::ScalarFunction(objectiveai::functions::ScalarFunctionTask { path, input, output })
             ) | objectiveai::functions::CompiledTask::One(
-                objectiveai::functions::Task::VectorFunction(objectiveai::functions::VectorFunctionTask { remote, owner, repository, commit, input, output })
+                objectiveai::functions::Task::VectorFunction(objectiveai::functions::VectorFunctionTask { path, input, output })
             ) => {
                 let function_param = objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
-                    objectiveai::RemotePathCommitOptional { remote, owner, repository, commit: Some(commit) },
+                    path.into(),
                 );
                 let profile_param = resolve_child_profile(&task_profile, &auto_swarm)?;
                 let effective_invert = profile_invert_flags[i];
@@ -458,13 +474,13 @@ where
                     let mut futs = Vec::with_capacity(tasks.len());
                     for (j, task) in tasks.into_iter().enumerate() {
                         let mut tp = task_path.clone(); tp.push(j as u64);
-                        let (remote, owner, repository, commit, input, _output) = match task {
-                            objectiveai::functions::Task::ScalarFunction(t) => (t.remote, t.owner, t.repository, t.commit, t.input, t.output),
-                            objectiveai::functions::Task::VectorFunction(t) => (t.remote, t.owner, t.repository, t.commit, t.input, t.output),
+                        let (path, input, _output) = match task {
+                            objectiveai::functions::Task::ScalarFunction(t) => (t.path, t.input, t.output),
+                            objectiveai::functions::Task::VectorFunction(t) => (t.path, t.input, t.output),
                             _ => unreachable!(),
                         };
                         let function_param = objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
-                            objectiveai::RemotePathCommitOptional { remote, owner, repository, commit: Some(commit) },
+                            path.into(),
                         );
                         let profile_param = resolve_child_profile(&task_profile, &auto_swarm)?;
                         futs.push(get_flat_task_profile(ctx, tp, function_param, profile_param, input, None, false, retrieve_router.clone()));
@@ -510,8 +526,8 @@ where
     Ok(FunctionFlatTaskProfile {
         path,
         description,
-        full_function_id: None,
-        full_profile_id: None,
+        function_path,
+        profile_path,
         input,
         tasks,
         profile: profile_weights,
@@ -531,12 +547,7 @@ fn resolve_child_profile(
     match task_profile {
         Some(objectiveai::functions::TaskProfile::Remote(path)) => {
             Ok(objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
-                objectiveai::RemotePathCommitOptional {
-                    remote: path.remote,
-                    owner: path.owner.clone(),
-                    repository: path.repository.clone(),
-                    commit: Some(path.commit.clone()),
-                },
+                path.clone().into(),
             ))
         }
         Some(objectiveai::functions::TaskProfile::Inline(profile)) => {

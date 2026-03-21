@@ -299,7 +299,6 @@ where
                 seed: request.seed,
                 stream: request.stream,
                 max_step_retries: request.max_step_retries,
-                mcp_server_authorization: request.mcp_server_authorization.clone(),
             },
         );
 
@@ -411,7 +410,6 @@ where
                         seed: request.seed,
                     stream: request.stream,
                     max_step_retries: request.max_step_retries,
-                    mcp_server_authorization: request.mcp_server_authorization.clone(),
                 },
             );
 

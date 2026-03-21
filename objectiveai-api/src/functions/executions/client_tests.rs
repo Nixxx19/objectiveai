@@ -67,14 +67,12 @@ impl crate::retrieval::retrieve::Client<ctx::DefaultContextExt> for StubRetrieve
         })
     }
 
-    async fn resolve_latest_commit(
+    async fn resolve_latest(
         &self,
         _ctx: &ctx::Context<ctx::DefaultContextExt>,
         _kind: crate::retrieval::Kind,
-        _remote: objectiveai::Remote,
-        _owner: &str,
-        _repository: &str,
-    ) -> Result<Option<String>, objectiveai::error::ResponseError> {
+        _path: &objectiveai::RemotePathCommitOptional,
+    ) -> Result<Option<objectiveai::RemotePath>, objectiveai::error::ResponseError> {
         Err(objectiveai::error::ResponseError {
             code: 501,
             message: serde_json::json!("stub retrieve client should not be called"),
@@ -243,19 +241,13 @@ fn make_request(
 ) -> Arc<FunctionExecutionCreateParams> {
     Arc::new(FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional {
-                remote: objectiveai::Remote::Mock,
-                owner: "mock".to_string(),
-                repository: function_repo.to_string(),
-                commit: Some("mock".to_string()),
+            objectiveai::RemotePathCommitOptional::Mock {
+                name: function_repo.to_string(),
             },
         ),
         profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional {
-                remote: objectiveai::Remote::Mock,
-                owner: "mock".to_string(),
-                repository: profile_repo.to_string(),
-                commit: Some("mock".to_string()),
+            objectiveai::RemotePathCommitOptional::Mock {
+                name: profile_repo.to_string(),
             },
         ),
         retry_token: None,
@@ -266,7 +258,6 @@ fn make_request(
         provider: None,
         seed: Some(seed),
         stream: None,
-        mcp_server_authorization: None,
     })
 }
 
@@ -1022,19 +1013,13 @@ fn make_request_with_overrides(
 ) -> Arc<FunctionExecutionCreateParams> {
     let mut params = FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional {
-                remote: objectiveai::Remote::Mock,
-                owner: "mock".to_string(),
-                repository: function_repo.to_string(),
-                commit: Some("mock".to_string()),
+            objectiveai::RemotePathCommitOptional::Mock {
+                name: function_repo.to_string(),
             },
         ),
         profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional {
-                remote: objectiveai::Remote::Mock,
-                owner: "mock".to_string(),
-                repository: profile_repo.to_string(),
-                commit: Some("mock".to_string()),
+            objectiveai::RemotePathCommitOptional::Mock {
+                name: profile_repo.to_string(),
             },
         ),
         retry_token: None,
@@ -1045,7 +1030,6 @@ fn make_request_with_overrides(
         provider: None,
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     };
     overrides(&mut params);
     Arc::new(params)

@@ -966,13 +966,8 @@ where
             let mut round_outputs: Vec<Vec<rust_decimal::Decimal>> = Vec::with_capacity(rounds as usize);
 
             // identifiers
-            let function =
-                ftp.full_function_id.map(|(remote, owner, repository, commit)| {
-                    format!("{}/{}/{}/{}", remote, owner, repository, commit)
-                });
-            let profile = ftp.full_profile_id.map(|(remote, owner, repository, commit)| {
-                format!("{}/{}/{}/{}", remote, owner, repository, commit)
-            });
+            let function = ftp.function_path;
+            let profile = ftp.profile_path;
 
             // track whether child errors occurred
             let mut tasks_errors = false;
@@ -2065,16 +2060,8 @@ where
             objectiveai::agent::completions::response::Usage::default();
 
         // identifiers
-        let function =
-            ftp.full_function_id
-                .map(|(remote, owner, repository, commit)| {
-                    format!("{}/{}/{}/{}", remote, owner, repository, commit)
-                });
-        let profile =
-            ftp.full_profile_id
-                .map(|(remote, owner, repository, commit)| {
-                    format!("{}/{}/{}/{}", remote, owner, repository, commit)
-                });
+        let function = ftp.function_path;
+        let profile = ftp.profile_path;
 
         // return stream, yielding chunks and updating retry token and output
         async_stream::stream! {
@@ -2379,7 +2366,6 @@ where
                         seed: request_base.seed,
                         stream: request_base.stream,
                         responses: ftp.responses,
-                        mcp_server_authorization: request_base.mcp_server_authorization.clone(),
                     },
                 ),
             )
@@ -2589,7 +2575,6 @@ where
                         response_format: None,
                         seed: request.seed,
                         stream: Some(true),
-                        mcp_server_authorization: request.mcp_server_authorization.clone(),
                     },
                 ),
                 None,

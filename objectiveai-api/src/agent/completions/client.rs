@@ -19,9 +19,10 @@ pub fn response_id(created: u64) -> String {
 
 /// A shared, re-awaitable handle to an agent's MCP connections.
 /// Uses `Arc<crate::mcp::Error>` so the result is `Clone` (required by `Shared`).
+/// `Ok(None)` means the agent should be skipped (e.g. missing MCP auth).
 pub type McpHandle = futures::future::Shared<
     tokio::sync::oneshot::Receiver<
-        Result<Arc<Vec<Arc<crate::mcp::Connection>>>, Arc<crate::mcp::Error>>
+        Result<Option<Arc<Vec<Arc<crate::mcp::Connection>>>>, Arc<crate::mcp::Error>>
     >
 >;
 
@@ -310,7 +311,7 @@ where
                     .map_err(|e| super::Error::InvalidAgent(e.message.to_string()))?;
                 let mcp_handles = self.resolve_agents_mcp_connections(
                     &agent_wf,
-                    params.mcp_server_authorization.as_ref(),
+                    &ctx,
                 );
                 let inline = agent_wf.inline();
                 let mut agents: Vec<objectiveai::agent::InlineAgent> = vec![inline.inner.clone()];
@@ -335,8 +336,8 @@ where
         enum AgentMcp {
             /// Already connected (from continuation).
             Ready(Arc<Vec<Arc<crate::mcp::Connection>>>),
-            /// Spawned, await lazily. None = skip (missing MCP auth).
-            Handle(Option<McpHandle>),
+            /// Spawned, await lazily.
+            Handle(McpHandle),
         }
 
         // 3. Backoff retry loop — try each agent in order.
@@ -358,10 +359,10 @@ where
                 // Await MCP connections for THIS agent only.
                 let mcp_connections: Arc<Vec<Arc<crate::mcp::Connection>>> = match &attempt.mcp {
                     AgentMcp::Ready(conns) => conns.clone(),
-                    AgentMcp::Handle(None) => continue, // skip — missing MCP auth
-                    AgentMcp::Handle(Some(handle)) => {
+                    AgentMcp::Handle(handle) => {
                         match handle.clone().await.expect("MCP connection task panicked") {
-                            Ok(conns) => conns,
+                            Ok(Some(conns)) => conns,
+                            Ok(None) => continue, // skip — missing MCP auth
                             Err(mcp_err) => {
                                 errors.push(super::Error::McpConnectionArc(mcp_err));
                                 continue;
@@ -805,25 +806,23 @@ where
     /// No network waiting happens here. The backoff/retry loop awaits each
     /// handle lazily as it tries each agent.
     ///
-    /// Each `Option<McpHandle>` is `None` if the agent requires MCP auth
-    /// that wasn't provided (agent will be skipped).
     pub fn resolve_agents_mcp_connections(
         &self,
         agent: &objectiveai::agent::AgentWithFallbacks,
-        mcp_server_authorization: Option<&indexmap::IndexMap<String, String>>,
-    ) -> Vec<Option<McpHandle>> {
+        ctx: &crate::ctx::Context<CTXEXT>,
+    ) -> Vec<McpHandle> {
         let inline = agent.inline();
         let mut handles = Vec::with_capacity(
             1 + inline.fallbacks.as_ref().map_or(0, |f| f.len()),
         );
 
         // Primary
-        handles.push(self.spawn_agent_mcp_connections(&inline.inner, mcp_server_authorization));
+        handles.push(self.spawn_agent_mcp_connections(&inline.inner, ctx));
 
         // Fallbacks
         if let Some(fallbacks) = &inline.fallbacks {
             for fallback in fallbacks {
-                handles.push(self.spawn_agent_mcp_connections(fallback, mcp_server_authorization));
+                handles.push(self.spawn_agent_mcp_connections(fallback, ctx));
             }
         }
 
@@ -846,28 +845,31 @@ where
     pub fn spawn_agent_mcp_connections(
         &self,
         agent: &objectiveai::agent::InlineAgent,
-        mcp_server_authorization: Option<&indexmap::IndexMap<String, String>>,
-    ) -> Option<McpHandle> {
+        ctx: &crate::ctx::Context<CTXEXT>,
+    ) -> McpHandle {
         match agent.base().mcp_servers() {
             Some(servers) if !servers.is_empty() => {
-                // Pre-check authorization synchronously — if any server
-                // requires auth and we don't have it, skip this agent entirely.
-                let mut connect_args = Vec::with_capacity(servers.len());
-                for server in servers {
-                    let authorization = if server.authorization {
-                        match mcp_server_authorization.and_then(|m| m.get(&server.url)) {
-                            Some(auth) => Some(auth.clone()),
-                            None => return None, // skip agent
-                        }
-                    } else {
-                        None
-                    };
-                    connect_args.push((server.url.clone(), authorization));
-                }
-
+                let server_urls: Vec<_> = servers.iter().map(|s| (s.url.clone(), s.authorization)).collect();
                 let (tx, rx) = tokio::sync::oneshot::channel();
                 let mcp_client = self.mcp_client.clone();
+                let ctx = ctx.clone();
                 tokio::spawn(async move {
+                    let mcp_auth = ctx.mcp_authorization().await;
+                    let mut connect_args = Vec::with_capacity(server_urls.len());
+                    for (url, requires_auth) in &server_urls {
+                        let authorization = if *requires_auth {
+                            match mcp_auth.as_ref().and_then(|m| m.get(url)) {
+                                Some(auth) => Some(auth.clone()),
+                                None => {
+                                    let _ = tx.send(Ok(None)); // skip agent
+                                    return;
+                                }
+                            }
+                        } else {
+                            None
+                        };
+                        connect_args.push((url.clone(), authorization));
+                    }
                     let mut futs = Vec::with_capacity(connect_args.len());
                     for (url, auth) in connect_args {
                         futs.push(mcp_client.connect(url, auth));
@@ -883,14 +885,14 @@ where
                             }
                         }
                     }
-                    let _ = tx.send(Ok(Arc::new(connections)));
+                    let _ = tx.send(Ok(Some(Arc::new(connections))));
                 });
-                Some(futures::FutureExt::shared(rx))
+                futures::FutureExt::shared(rx)
             }
             _ => {
                 let (tx, rx) = tokio::sync::oneshot::channel();
-                let _ = tx.send(Ok(Arc::new(Vec::new())));
-                Some(futures::FutureExt::shared(rx))
+                let _ = tx.send(Ok(Some(Arc::new(Vec::new()))));
+                futures::FutureExt::shared(rx)
             }
         }
     }

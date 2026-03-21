@@ -14,6 +14,20 @@ impl GithubClient {
     }
 }
 
+/// Extracts (owner, repository, commit) from a RemotePath.
+/// Panics on Mock variant (mock paths should not reach the GitHub client).
+fn github_fields(path: &objectiveai::RemotePath) -> (&str, &str, &str) {
+    match path {
+        objectiveai::RemotePath::Github { owner, repository, commit }
+        | objectiveai::RemotePath::Filesystem { owner, repository, commit } => {
+            (owner, repository, commit)
+        }
+        objectiveai::RemotePath::Mock { .. } => {
+            unreachable!("mock paths should not reach the GitHub client")
+        }
+    }
+}
+
 #[async_trait::async_trait]
 impl<CTXEXT> super::super::Client<CTXEXT> for GithubClient
 where
@@ -24,8 +38,9 @@ where
         ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
     ) -> Result<Option<objectiveai::agent::RemoteAgentBaseWithFallbacks>, ResponseError> {
+        let (owner, repository, commit) = github_fields(path);
         self.client
-            .read_json(ctx, &path.owner, &path.repository, &path.commit, "agent.json")
+            .read_json(ctx, owner, repository, commit, "agent.json")
             .await
             .map_err(|e| ResponseError::from(&e))
     }
@@ -35,8 +50,9 @@ where
         ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
     ) -> Result<Option<objectiveai::swarm::RemoteSwarmBase>, ResponseError> {
+        let (owner, repository, commit) = github_fields(path);
         self.client
-            .read_json(ctx, &path.owner, &path.repository, &path.commit, "swarm.json")
+            .read_json(ctx, owner, repository, commit, "swarm.json")
             .await
             .map_err(|e| ResponseError::from(&e))
     }
@@ -46,8 +62,9 @@ where
         ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
     ) -> Result<Option<objectiveai::functions::FullRemoteFunction>, ResponseError> {
+        let (owner, repository, commit) = github_fields(path);
         self.client
-            .read_json(ctx, &path.owner, &path.repository, &path.commit, "function.json")
+            .read_json(ctx, owner, repository, commit, "function.json")
             .await
             .map_err(|e| ResponseError::from(&e))
     }
@@ -57,23 +74,38 @@ where
         ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
     ) -> Result<Option<objectiveai::functions::RemoteProfile>, ResponseError> {
+        let (owner, repository, commit) = github_fields(path);
         self.client
-            .read_json(ctx, &path.owner, &path.repository, &path.commit, "profile.json")
+            .read_json(ctx, owner, repository, commit, "profile.json")
             .await
             .map_err(|e| ResponseError::from(&e))
     }
 
-    async fn resolve_latest_commit(
+    async fn resolve_latest(
         &self,
         ctx: &ctx::Context<CTXEXT>,
         _kind: crate::retrieval::Kind,
-        _remote: objectiveai::Remote,
-        owner: &str,
-        repository: &str,
-    ) -> Result<Option<String>, ResponseError> {
-        self.client
-            .fetch_latest_commit(ctx, owner, repository)
-            .await
-            .map_err(|e| ResponseError::from(&e))
+        path: &objectiveai::RemotePathCommitOptional,
+    ) -> Result<Option<objectiveai::RemotePath>, ResponseError> {
+        match path {
+            objectiveai::RemotePathCommitOptional::Github { owner, repository, commit } => {
+                let resolved_commit = match commit {
+                    Some(c) => c.clone(),
+                    None => {
+                        match self.client.fetch_latest_commit(ctx, owner, repository).await {
+                            Ok(Some(c)) => c,
+                            Ok(None) => return Ok(None),
+                            Err(e) => return Err(ResponseError::from(&e)),
+                        }
+                    }
+                };
+                Ok(Some(objectiveai::RemotePath::Github {
+                    owner: owner.clone(),
+                    repository: repository.clone(),
+                    commit: resolved_commit,
+                }))
+            }
+            _ => Ok(None),
+        }
     }
 }

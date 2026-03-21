@@ -46,7 +46,6 @@ fn default_params_with_seed(seed: i64) -> AgentCompletionCreateParams {
         response_format: None,
         seed: Some(seed),
         stream: None,
-        mcp_server_authorization: None,
     }
 }
 

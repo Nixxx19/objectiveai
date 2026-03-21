@@ -521,8 +521,7 @@ impl Client {
 
         let _ = self.update_description(ctx, &owner, &repo, description).await;
 
-        Ok(objectiveai::RemotePath {
-            remote: objectiveai::Remote::Github,
+        Ok(objectiveai::RemotePath::Github {
             owner,
             repository: repo,
             commit: commit_sha,

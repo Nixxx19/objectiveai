@@ -32,7 +32,6 @@ fn default_params() -> AgentCompletionCreateParams {
         response_format: None,
         seed: None,
         stream: None,
-        mcp_server_authorization: None,
     }
 }
 

@@ -1,6 +1,6 @@
 {
   "type": "alpha.vector.branch.function",
-  "description": "Vector branch with skip on one vector sub-function.",
+  "description": "Vector branch with mixed tasks and skip conditions.",
   "input_schema": {
     "context": {
       "type": "object",
@@ -8,7 +8,7 @@
         "query": {
           "type": "string"
         },
-        "include_quality": {
+        "deep": {
           "type": "boolean"
         }
       },
@@ -20,11 +20,17 @@
   },
   "tasks": [
     {
+      "type": "alpha.scalar.function",
+      "remote": "mock",
+      "name": "mock-1",
+      "input": {
+        "$starlark": "{'text': input['context']['query']}"
+      }
+    },
+    {
       "type": "alpha.vector.function",
       "remote": "mock",
-      "owner": "mock",
-      "repository": "mock-4",
-      "commit": "mock",
+      "name": "mock-4",
       "input": {
         "items": {
           "$starlark": "input['items']"
@@ -32,13 +38,22 @@
       }
     },
     {
+      "type": "alpha.scalar.function",
+      "remote": "mock",
+      "name": "mock-6",
+      "skip": {
+        "$starlark": "not input['context'].get('deep', False)"
+      },
+      "input": {
+        "$starlark": "{'subject': input['context']['query'], 'body': input['context']['query']}"
+      }
+    },
+    {
       "type": "alpha.vector.function",
       "remote": "mock",
-      "owner": "mock",
-      "repository": "mock-5",
-      "commit": "mock",
+      "name": "mock-5",
       "skip": {
-        "$starlark": "not input['context'].get('include_quality', False)"
+        "$starlark": "not input['context'].get('deep', False)"
       },
       "input": {
         "context": {

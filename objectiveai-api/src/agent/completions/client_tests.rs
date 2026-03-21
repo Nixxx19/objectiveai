@@ -67,14 +67,12 @@ impl crate::retrieval::retrieve::Client<ctx::DefaultContextExt> for StubRetrieve
         })
     }
 
-    async fn resolve_latest_commit(
+    async fn resolve_latest(
         &self,
         _ctx: &ctx::Context<ctx::DefaultContextExt>,
         _kind: crate::retrieval::Kind,
-        _remote: objectiveai::Remote,
-        _owner: &str,
-        _repository: &str,
-    ) -> Result<Option<String>, objectiveai::error::ResponseError> {
+        _path: &objectiveai::RemotePathCommitOptional,
+    ) -> Result<Option<objectiveai::RemotePath>, objectiveai::error::ResponseError> {
         Err(objectiveai::error::ResponseError {
             code: 501,
             message: serde_json::json!("stub retrieve client should not be called"),
@@ -239,7 +237,6 @@ async fn test_basic_mock_agent_seed_42() {
         response_format: None,
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -272,7 +269,6 @@ async fn test_basic_mock_agent_seed_123() {
         response_format: None,
         seed: Some(123),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -304,7 +300,6 @@ async fn test_deterministic_with_same_seed() {
         response_format: None,
         seed: Some(77),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let client_a = make_client();
@@ -345,7 +340,6 @@ async fn test_different_seeds_differ() {
         response_format: None,
         seed: Some(1),
         stream: None,
-        mcp_server_authorization: None,
     });
     let params_b = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -359,7 +353,6 @@ async fn test_different_seeds_differ() {
         response_format: None,
         seed: Some(2),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let client_a = make_client();
@@ -412,7 +405,6 @@ async fn test_mock_agent_with_error() {
         response_format: None,
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let result = client
@@ -440,7 +432,6 @@ async fn test_with_single_user_message() {
         response_format: None,
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -482,7 +473,6 @@ async fn test_with_developer_and_user_messages() {
         response_format: None,
         seed: Some(99),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -515,7 +505,6 @@ async fn test_json_object_response_format() {
         response_format: Some(ResponseFormatParam::Single(ResponseFormat::JsonObject)),
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -556,7 +545,6 @@ async fn test_json_schema_response_format() {
         })),
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -589,7 +577,6 @@ async fn test_text_response_format() {
         response_format: Some(ResponseFormatParam::Single(ResponseFormat::Text)),
         seed: Some(77),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -624,7 +611,6 @@ async fn test_grammar_response_format_rejected() {
         })),
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let result = client
@@ -649,7 +635,6 @@ async fn test_python_response_format_rejected() {
         response_format: Some(ResponseFormatParam::Single(ResponseFormat::Python)),
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let result = client
@@ -684,7 +669,6 @@ async fn test_required_tool_call_response_format() {
         })),
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -728,7 +712,6 @@ async fn test_optional_tool_call_response_format() {
         })),
         seed: Some(200),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -788,7 +771,6 @@ async fn test_with_invention_tools() {
         response_format: None,
         seed: Some(88),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -844,7 +826,6 @@ async fn test_invention_tools_with_tool_call_response_format() {
         })),
         seed: Some(150),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -890,7 +871,6 @@ async fn test_invention_tool_returns_error() {
         response_format: None,
         seed: Some(88),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -932,7 +912,6 @@ async fn test_multiple_user_messages() {
         response_format: None,
         seed: Some(55),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -968,7 +947,6 @@ async fn test_mock_agent_error_false_succeeds() {
         response_format: None,
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -1001,7 +979,6 @@ async fn test_final_item_is_mock_continuation() {
         response_format: None,
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -1043,7 +1020,6 @@ async fn test_per_agent_response_format() {
         response_format: Some(ResponseFormatParam::PerAgent(per_agent)),
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -1082,7 +1058,6 @@ async fn test_per_agent_response_format_unknown_id() {
         response_format: Some(ResponseFormatParam::PerAgent(per_agent)),
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -1137,7 +1112,6 @@ async fn test_json_schema_nested_object() {
         })),
         seed: Some(99),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -1175,7 +1149,6 @@ async fn test_fallback_agent_on_error() {
         response_format: None,
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -1216,7 +1189,6 @@ async fn test_all_agents_error() {
         response_format: None,
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let result = client
@@ -1250,7 +1222,6 @@ async fn test_multiple_fallback_agents() {
         response_format: None,
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -1285,7 +1256,6 @@ async fn test_with_mock_continuation() {
         response_format: None,
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let continuation = crate::agent::completions::Continuation::Mock {
@@ -1326,7 +1296,6 @@ async fn test_stream_yields_chunks_before_state() {
         response_format: None,
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -1359,7 +1328,6 @@ async fn test_large_seed_value() {
         response_format: None,
         seed: Some(u64::MAX as i64),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -1392,7 +1360,6 @@ async fn test_seed_zero() {
         response_format: None,
         seed: Some(0),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -1467,7 +1434,6 @@ async fn test_logprobs_basic_seed_42() {
         response_format: None,
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -1521,7 +1487,6 @@ async fn test_logprobs_json_schema_nested() {
         })),
         seed: Some(77),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -1584,7 +1549,6 @@ async fn test_logprobs_with_invention_tools() {
         response_format: None,
         seed: Some(88),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -1637,7 +1601,6 @@ async fn test_logprobs_with_continuation() {
         response_format: None,
         seed: Some(42),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let continuation = crate::agent::completions::Continuation::Mock {
@@ -1690,7 +1653,6 @@ async fn test_logprobs_fallback_agent() {
         response_format: None,
         seed: Some(55),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client
@@ -1737,7 +1699,6 @@ async fn test_logprobs_per_agent_json_object() {
         response_format: Some(ResponseFormatParam::PerAgent(per_agent)),
         seed: Some(33),
         stream: None,
-        mcp_server_authorization: None,
     });
 
     let stream = client

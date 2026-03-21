@@ -1,6 +1,6 @@
 {
   "type": "alpha.scalar.branch.function",
-  "description": "Scalar branch combining spam and importance classifiers.",
+  "description": "Scalar super branch with two scalar branch sub-functions.",
   "input_schema": {
     "type": "object",
     "properties": {
@@ -17,21 +17,17 @@
     {
       "type": "alpha.scalar.function",
       "remote": "mock",
-      "owner": "mock",
-      "repository": "mock-1",
-      "commit": "mock",
+      "name": "mock-9",
       "input": {
-        "$starlark": "{'text': input['text']}"
+        "$starlark": "{'text': input['text'], 'subject': input['subject']}"
       }
     },
     {
       "type": "alpha.scalar.function",
       "remote": "mock",
-      "owner": "mock",
-      "repository": "mock-6",
-      "commit": "mock",
+      "name": "mock-10",
       "input": {
-        "$starlark": "{'subject': input['subject'], 'body': input['text']}"
+        "$starlark": "{'text': input['text']}"
       }
     }
   ]

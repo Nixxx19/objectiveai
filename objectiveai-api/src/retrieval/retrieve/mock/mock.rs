@@ -15,11 +15,7 @@ where
         _ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
     ) -> Result<Option<objectiveai::agent::RemoteAgentBaseWithFallbacks>, ResponseError> {
-        Ok(crate::functions::mock::get_agent(
-            &path.owner,
-            &path.repository,
-            Some(&path.commit),
-        ))
+        Ok(crate::functions::mock::get_agent(path.name()))
     }
 
     async fn get_swarm(
@@ -27,11 +23,7 @@ where
         _ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
     ) -> Result<Option<objectiveai::swarm::RemoteSwarmBase>, ResponseError> {
-        Ok(crate::functions::mock::get_swarm(
-            &path.owner,
-            &path.repository,
-            Some(&path.commit),
-        ))
+        Ok(crate::functions::mock::get_swarm(path.name()))
     }
 
     async fn get_function(
@@ -39,11 +31,7 @@ where
         _ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
     ) -> Result<Option<objectiveai::functions::FullRemoteFunction>, ResponseError> {
-        Ok(crate::functions::mock::get_function(
-            &path.owner,
-            &path.repository,
-            Some(&path.commit),
-        ))
+        Ok(crate::functions::mock::get_function(path.name()))
     }
 
     async fn get_profile(
@@ -51,25 +39,20 @@ where
         _ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
     ) -> Result<Option<objectiveai::functions::RemoteProfile>, ResponseError> {
-        Ok(crate::functions::mock::get_profile(
-            &path.owner,
-            &path.repository,
-            Some(&path.commit),
-        ))
+        Ok(crate::functions::mock::get_profile(path.name()))
     }
 
-    async fn resolve_latest_commit(
+    async fn resolve_latest(
         &self,
         _ctx: &ctx::Context<CTXEXT>,
         _kind: crate::retrieval::Kind,
-        _remote: objectiveai::Remote,
-        owner: &str,
-        _repository: &str,
-    ) -> Result<Option<String>, ResponseError> {
-        if owner == "mock" {
-            Ok(Some("mock".to_string()))
-        } else {
-            Ok(None)
+        path: &objectiveai::RemotePathCommitOptional,
+    ) -> Result<Option<objectiveai::RemotePath>, ResponseError> {
+        match path {
+            objectiveai::RemotePathCommitOptional::Mock { name } => {
+                Ok(Some(objectiveai::RemotePath::Mock { name: name.clone() }))
+            }
+            _ => Ok(None),
         }
     }
 }
