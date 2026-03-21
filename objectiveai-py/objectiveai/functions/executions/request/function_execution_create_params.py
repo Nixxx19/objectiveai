@@ -18,7 +18,6 @@ class FunctionExecutionCreateParams(BaseModel):
     from_cache: Optional[bool] = None
     function: FullInlineFunctionOrRemoteCommitOptional = Field(..., description='The function to execute (inline definition or remote path).')
     input: InputValue
-    mcp_server_authorization: Optional[dict[str, str]] = None
     profile: InlineProfileOrRemoteCommitOptional = Field(..., description='The profile to use (inline definition or remote path).')
     provider: Optional[Provider] = None
     reasoning: Optional[Reasoning] = None

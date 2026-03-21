@@ -9,6 +9,7 @@ from objectiveai.functions.executions.response.output import Output
 from objectiveai.functions.executions.response.streaming.object import Object
 from objectiveai.functions.executions.response.streaming.reasoning_summary_chunk import ReasoningSummaryChunk
 from objectiveai.functions.executions.response.streaming.task_chunk import TaskChunk
+from objectiveai.remote_path import RemotePath
 
 
 class FunctionExecutionChunk(BaseModel):
@@ -17,13 +18,13 @@ class FunctionExecutionChunk(BaseModel):
     created: int = Field(..., ge=0, le=18446744073709551615)
     dataset: int = Field(..., ge=0, le=18446744073709551615)
     error: Optional[ResponseError] = None
-    function: Optional[str] = None
+    function: Optional[RemotePath] = None
     id: str
     index: int = Field(..., ge=0, le=18446744073709551615)
     n: int = Field(..., ge=0, le=18446744073709551615)
     object: Object
     output: Optional[Output] = None
-    profile: Optional[str] = None
+    profile: Optional[RemotePath] = None
     reasoning: Optional[ReasoningSummaryChunk] = None
     retry: int = Field(..., ge=0, le=18446744073709551615)
     retry_token: Optional[str] = None

@@ -8,6 +8,7 @@ from objectiveai.functions.inline_tasks_profile import InlineTasksProfile
 from objectiveai.functions.profiles.computations.response.fitting_stats import FittingStats
 from objectiveai.functions.profiles.computations.response.streaming.function_execution_chunk import FunctionExecutionChunk
 from objectiveai.functions.profiles.computations.response.streaming.object import Object
+from objectiveai.remote_path import RemotePath
 
 
 class FunctionProfileComputationChunk(BaseModel):
@@ -17,7 +18,7 @@ class FunctionProfileComputationChunk(BaseModel):
     executions: list[FunctionExecutionChunk]
     executions_errors: Optional[bool] = None
     fitting_stats: Optional[FittingStats] = None
-    function: Optional[str] = None
+    function: Optional[RemotePath] = None
     id: str
     object: Object
     profile: Optional[InlineTasksProfile] = None

@@ -14,7 +14,6 @@ class AgentCompletionCreateParams(BaseModel):
     model_config = ConfigDict(title='agent.completions.request.AgentCompletionCreateParams')
 
     agent: InlineAgentBaseWithFallbacksOrRemoteCommitOptional = Field(..., description='The agent to use (inline Agent or stored ID).')
-    mcp_server_authorization: Optional[dict[str, str]] = Field(None, description='Map from MCP server URL to authorization header value.')
     messages: list[Message] = Field(..., description='The conversation messages.')
     provider: Optional[Provider] = Field(None, description='Provider routing preferences.')
     response_format: Optional[ResponseFormatParam] = Field(None, description='Output format constraints (text, JSON, or JSON schema).')

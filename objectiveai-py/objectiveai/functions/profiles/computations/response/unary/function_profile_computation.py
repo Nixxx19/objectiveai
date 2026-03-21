@@ -8,6 +8,7 @@ from objectiveai.functions.inline_tasks_profile import InlineTasksProfile
 from objectiveai.functions.profiles.computations.response.fitting_stats import FittingStats
 from objectiveai.functions.profiles.computations.response.unary.function_execution import FunctionExecution
 from objectiveai.functions.profiles.computations.response.unary.object import Object
+from objectiveai.remote_path import RemotePath
 
 
 class FunctionProfileComputation(BaseModel):
@@ -17,7 +18,7 @@ class FunctionProfileComputation(BaseModel):
     executions: list[FunctionExecution]
     executions_errors: bool
     fitting_stats: FittingStats
-    function: Optional[str] = None
+    function: Optional[RemotePath] = None
     id: str
     object: Object
     profile: InlineTasksProfile

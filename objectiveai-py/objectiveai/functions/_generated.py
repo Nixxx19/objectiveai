@@ -3,6 +3,7 @@
 from .alpha_inline_function import AlphaInlineFunction, AlphaInlineFunctionVariant1, AlphaInlineFunctionVariant2  # noqa: F401
 from .alpha_remote_function import AlphaRemoteFunction, AlphaRemoteFunctionVariant1, AlphaRemoteFunctionVariant2  # noqa: F401
 from .compiled_task import CompiledTask, CompiledTaskVariant1, CompiledTaskVariant2  # noqa: F401
+from .full_function import FullFunction, FullFunctionVariant1, FullFunctionVariant2  # noqa: F401
 from .full_inline_function import FullInlineFunction, FullInlineFunctionVariant1, FullInlineFunctionVariant2  # noqa: F401
 from .full_inline_function_or_remote_commit_optional import FullInlineFunctionOrRemoteCommitOptional, FullInlineFunctionOrRemoteCommitOptionalVariant1, FullInlineFunctionOrRemoteCommitOptionalVariant2  # noqa: F401
 from .full_remote_function import FullRemoteFunction, FullRemoteFunctionVariant1, FullRemoteFunctionVariant2  # noqa: F401
@@ -10,7 +11,7 @@ from .function import Function, FunctionVariant1, FunctionVariant2  # noqa: F401
 from .function_type import FunctionType  # noqa: F401
 from .get_function_profile_pair_response import GetFunctionProfilePairResponse  # noqa: F401
 from .get_function_profile_pair_usage_request import GetFunctionProfilePairUsageRequest  # noqa: F401
-from .get_function_response import GetFunctionResponse  # noqa: F401
+from .get_function_response import GetFunctionResponse, GetFunctionResponseVariant1, GetFunctionResponseVariant2, GetFunctionResponseVariant3  # noqa: F401
 from .inline_function import InlineFunction, InlineFunctionVariant1, InlineFunctionVariant2  # noqa: F401
 from .inline_profile import InlineProfile, InlineProfileVariant1, InlineProfileVariant2  # noqa: F401
 from .inline_profile_or_remote_commit_optional import InlineProfileOrRemoteCommitOptional, InlineProfileOrRemoteCommitOptionalVariant1, InlineProfileOrRemoteCommitOptionalVariant2  # noqa: F401
@@ -30,14 +31,14 @@ from .profile import Profile, ProfileVariant1, ProfileVariant2  # noqa: F401
 from .remote_function import RemoteFunction, RemoteFunctionVariant1, RemoteFunctionVariant2  # noqa: F401
 from .remote_profile import RemoteProfile, RemoteProfileVariant1, RemoteProfileVariant2  # noqa: F401
 from .remote_tasks_profile import RemoteTasksProfile  # noqa: F401
-from .scalar_function_task import ScalarFunctionTask  # noqa: F401
-from .scalar_function_task_expression import ScalarFunctionTaskExpression, ScalarFunctionTaskExpressionInputVariant1, ScalarFunctionTaskExpressionInputVariant2  # noqa: F401
-from .task import Task, TaskVariant1, TaskVariant2, TaskVariant3, TaskVariant4, TaskVariant5  # noqa: F401
-from .task_expression import TaskExpression, TaskExpressionVariant1, TaskExpressionVariant2, TaskExpressionVariant3, TaskExpressionVariant4, TaskExpressionVariant5  # noqa: F401
+from .scalar_function_task import ScalarFunctionTask, ScalarFunctionTaskVariant1, ScalarFunctionTaskVariant2, ScalarFunctionTaskVariant3  # noqa: F401
+from .scalar_function_task_expression import ScalarFunctionTaskExpression, ScalarFunctionTaskExpressionVariant1, ScalarFunctionTaskExpressionVariant1Input, ScalarFunctionTaskExpressionVariant1InputVariant1, ScalarFunctionTaskExpressionVariant1InputVariant2, ScalarFunctionTaskExpressionVariant2, ScalarFunctionTaskExpressionVariant2Input, ScalarFunctionTaskExpressionVariant2InputVariant1, ScalarFunctionTaskExpressionVariant2InputVariant2, ScalarFunctionTaskExpressionVariant3, ScalarFunctionTaskExpressionVariant3Input, ScalarFunctionTaskExpressionVariant3InputVariant1, ScalarFunctionTaskExpressionVariant3InputVariant2  # noqa: F401
+from .task import Task, TaskVariant1, TaskVariant1Variant1, TaskVariant1Variant2, TaskVariant1Variant3, TaskVariant2, TaskVariant2Variant1, TaskVariant2Variant2, TaskVariant2Variant3, TaskVariant3, TaskVariant4, TaskVariant5  # noqa: F401
+from .task_expression import TaskExpression, TaskExpressionVariant1, TaskExpressionVariant1Variant1, TaskExpressionVariant1Variant1Input, TaskExpressionVariant1Variant1InputVariant1, TaskExpressionVariant1Variant1InputVariant2, TaskExpressionVariant1Variant2, TaskExpressionVariant1Variant2Input, TaskExpressionVariant1Variant2InputVariant1, TaskExpressionVariant1Variant2InputVariant2, TaskExpressionVariant1Variant3, TaskExpressionVariant1Variant3Input, TaskExpressionVariant1Variant3InputVariant1, TaskExpressionVariant1Variant3InputVariant2, TaskExpressionVariant2, TaskExpressionVariant2Variant1, TaskExpressionVariant2Variant1Input, TaskExpressionVariant2Variant1InputVariant1, TaskExpressionVariant2Variant1InputVariant2, TaskExpressionVariant2Variant2, TaskExpressionVariant2Variant2Input, TaskExpressionVariant2Variant2InputVariant1, TaskExpressionVariant2Variant2InputVariant2, TaskExpressionVariant2Variant3, TaskExpressionVariant2Variant3Input, TaskExpressionVariant2Variant3InputVariant1, TaskExpressionVariant2Variant3InputVariant2, TaskExpressionVariant3, TaskExpressionVariant4, TaskExpressionVariant5  # noqa: F401
 from .task_profile import TaskProfile, TaskProfileVariant1, TaskProfileVariant2, TaskProfileVariant3  # noqa: F401
 from .usage_function_profile_pair_response import UsageFunctionProfilePairResponse  # noqa: F401
 from .usage_function_response import UsageFunctionResponse  # noqa: F401
 from .vector_completion_task import VectorCompletionTask  # noqa: F401
 from .vector_completion_task_expression import VectorCompletionTaskExpression, VectorCompletionTaskExpressionMessagesItemVariant1, VectorCompletionTaskExpressionMessagesItemVariant2, VectorCompletionTaskExpressionMessagesVariant1, VectorCompletionTaskExpressionMessagesVariant2, VectorCompletionTaskExpressionResponsesItemVariant1, VectorCompletionTaskExpressionResponsesItemVariant2, VectorCompletionTaskExpressionResponsesVariant1, VectorCompletionTaskExpressionResponsesVariant2  # noqa: F401
-from .vector_function_task import VectorFunctionTask  # noqa: F401
-from .vector_function_task_expression import VectorFunctionTaskExpression, VectorFunctionTaskExpressionInputVariant1, VectorFunctionTaskExpressionInputVariant2  # noqa: F401
+from .vector_function_task import VectorFunctionTask, VectorFunctionTaskVariant1, VectorFunctionTaskVariant2, VectorFunctionTaskVariant3  # noqa: F401
+from .vector_function_task_expression import VectorFunctionTaskExpression, VectorFunctionTaskExpressionVariant1, VectorFunctionTaskExpressionVariant1Input, VectorFunctionTaskExpressionVariant1InputVariant1, VectorFunctionTaskExpressionVariant1InputVariant2, VectorFunctionTaskExpressionVariant2, VectorFunctionTaskExpressionVariant2Input, VectorFunctionTaskExpressionVariant2InputVariant1, VectorFunctionTaskExpressionVariant2InputVariant2, VectorFunctionTaskExpressionVariant3, VectorFunctionTaskExpressionVariant3Input, VectorFunctionTaskExpressionVariant3InputVariant1, VectorFunctionTaskExpressionVariant3InputVariant2  # noqa: F401

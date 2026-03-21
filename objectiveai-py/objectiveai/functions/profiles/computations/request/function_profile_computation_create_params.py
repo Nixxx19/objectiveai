@@ -17,7 +17,6 @@ class FunctionProfileComputationCreateParams(BaseModel):
     from_cache: Optional[bool] = None
     function: FullInlineFunctionOrRemoteCommitOptional = Field(..., description='The function to compute a profile for (inline definition or remote path).')
     max_retries: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = None
-    mcp_server_authorization: Optional[dict[str, str]] = None
     n: int = Field(..., ge=0, le=18446744073709551615)
     provider: Optional[Provider] = None
     retry_token: Optional[str] = None

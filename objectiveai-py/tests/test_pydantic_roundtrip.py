@@ -404,11 +404,7 @@ def _convert_expanded_ref_model(cls: type, root_title: str, expanded_ref: str) -
                 local_props[name] = all_props[name]
         if local_props:
             result["properties"] = local_props
-    elif variants:
-        first_variant = variants[0]
-        local_props = _convert_local_properties(first_variant, root_title)
-        if local_props:
-            result["properties"] = local_props
+    # No local_prop_names means no local properties — just $ref, no properties block
 
     return result
 

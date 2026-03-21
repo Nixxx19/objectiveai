@@ -8,6 +8,7 @@ from objectiveai.error.response_error import ResponseError
 from objectiveai.functions.executions.response.output import Output
 from objectiveai.functions.executions.response.streaming.object import Object
 from objectiveai.functions.executions.response.streaming.reasoning_summary_chunk import ReasoningSummaryChunk
+from objectiveai.remote_path import RemotePath
 
 
 class FunctionExecutionTaskChunk(BaseModel):
@@ -15,12 +16,12 @@ class FunctionExecutionTaskChunk(BaseModel):
 
     created: int = Field(..., ge=0, le=18446744073709551615)
     error: Optional[ResponseError] = None
-    function: Optional[str] = None
+    function: Optional[RemotePath] = None
     id: str
     index: int = Field(..., ge=0, le=18446744073709551615)
     object: Object
     output: Optional[Output] = None
-    profile: Optional[str] = None
+    profile: Optional[RemotePath] = None
     reasoning: Optional[ReasoningSummaryChunk] = None
     retry_token: Optional[str] = None
     swiss_pool_index: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = None

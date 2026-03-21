@@ -18,7 +18,6 @@ combine votes using the provided profile weights to produce final scores."""
     model_config = ConfigDict(title='vector.completions.request.VectorCompletionCreateParams')
 
     from_cache: Optional[bool] = Field(None, description='If true, uses cached votes when available.')
-    mcp_server_authorization: Optional[dict[str, str]] = Field(None, description='Map from MCP server URL to authorization header value.')
     messages: list[Message] = Field(..., description='The conversation messages (the prompt).')
     provider: Optional[Provider] = Field(None, description='Provider routing preferences.')
     responses: list[RichContent] = Field(..., description='The possible responses the LLMs can vote for.')

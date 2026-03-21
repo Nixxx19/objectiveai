@@ -6,8 +6,8 @@ from objectiveai.functions.executions.response.streaming import FunctionExecutio
 from tests.http_test_util import HttpTestCase, http_test_suite, ASSETS_DIR
 
 
-def mock_remote(repo: str) -> dict:
-    return {"remote": "mock", "owner": "mock", "repository": repo, "commit": "mock"}
+def mock_remote(name: str) -> dict:
+    return {"remote": "mock", "name": name}
 
 
 globals().update(http_test_suite(

@@ -5,3 +5,4 @@ from .cache_vote_request import CacheVoteRequest, CacheVoteRequestVariant1, Cach
 from .cache_vote_request_owned import CacheVoteRequestOwned  # noqa: F401
 from .cache_vote_request_ref import CacheVoteRequestRef  # noqa: F401
 from .completion_votes import CompletionVotes  # noqa: F401
+from .get_completion_votes_request import GetCompletionVotesRequest  # noqa: F401

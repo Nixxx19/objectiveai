@@ -9,6 +9,7 @@ from objectiveai.functions.executions.response.output import Output
 from objectiveai.functions.executions.response.unary.object import Object
 from objectiveai.functions.executions.response.unary.reasoning_summary import ReasoningSummary
 from objectiveai.functions.executions.response.unary.task import Task
+from objectiveai.remote_path import RemotePath
 
 
 class FunctionExecution(BaseModel):
@@ -17,11 +18,11 @@ class FunctionExecution(BaseModel):
 
     created: int = Field(..., description='Unix timestamp when the execution was created.', ge=0, le=18446744073709551615)
     error: Optional[ResponseError] = Field(None, description='Error details if the execution failed.')
-    function: Optional[str] = Field(None, description='ID of the function used (if remote).')
+    function: Optional[RemotePath] = Field(None, description='The function used (if remote).')
     id: str = Field(..., description='Unique identifier for this execution.')
     object: Object = Field(..., description='Object type identifier.')
     output: Output = Field(..., description='The final output (scalar or vector score).')
-    profile: Optional[str] = Field(None, description='ID of the profile used (if remote).')
+    profile: Optional[RemotePath] = Field(None, description='The profile used (if remote).')
     reasoning: Optional[ReasoningSummary] = Field(None, description='Reasoning summary if reasoning was enabled.')
     retry_token: Optional[str] = Field(None, description='Token for retrying this execution with cached votes.')
     tasks: list[Task] = Field(..., description='Results from each task in the function.')
