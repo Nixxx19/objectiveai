@@ -111,7 +111,7 @@ impl State {
     /// are not valid for the provided input schema.
     pub fn validate_initial_state(
         &self,
-        children: Option<&std::collections::HashMap<String, crate::functions::RemoteFunction>>,
+        children: Option<&std::collections::HashMap<String, crate::functions::FullRemoteFunction>>,
     ) -> Result<(), String> {
         match self {
             State::AlphaScalarBranch(s) => s.validate_initial_state(children),

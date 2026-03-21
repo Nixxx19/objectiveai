@@ -22,8 +22,8 @@ pub struct GetFunctionResponse {
     #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
     pub path: crate::RemotePath,
     #[serde(flatten)]
-    #[schemars(schema_with = "crate::flatten_schema::<functions::RemoteFunction>")]
-    pub inner: functions::RemoteFunction,
+    #[schemars(schema_with = "crate::flatten_schema::<functions::FullRemoteFunction>")]
+    pub inner: functions::FullRemoteFunction,
 }
 
 /// Usage statistics for a function.

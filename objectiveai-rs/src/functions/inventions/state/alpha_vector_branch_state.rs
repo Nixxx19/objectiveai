@@ -38,7 +38,7 @@ impl AlphaVectorBranchState {
     /// they are valid for the input schema.
     pub fn validate_initial_state(
         &self,
-        children: Option<&std::collections::HashMap<String, crate::functions::RemoteFunction>>,
+        children: Option<&std::collections::HashMap<String, crate::functions::FullRemoteFunction>>,
     ) -> Result<(), String> {
         if let Some(ref input_schema) = self.input_schema {
             let transpiled = input_schema.clone().transpile();

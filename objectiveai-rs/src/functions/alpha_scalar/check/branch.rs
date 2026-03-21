@@ -30,7 +30,7 @@ use crate::functions::check::example_inputs;
 /// This checker validates the remaining runtime concerns.
 pub fn check_alpha_branch_scalar_function(
     function: &RemoteFunction,
-    children: Option<&HashMap<String, crate::functions::RemoteFunction>>,
+    children: Option<&HashMap<String, crate::functions::FullRemoteFunction>>,
     seed: Option<i64>,
 ) -> Result<(), String> {
     let (description, input_schema, tasks) = match function {
@@ -80,6 +80,10 @@ pub fn check_alpha_branch_scalar_function(
         None => StdRng::from_os_rng(),
     };
 
+    let transpiled_children = children.map(|c| {
+        c.iter().map(|(k, v)| (k.clone(), v.clone().transpile())).collect::<HashMap<_, _>>()
+    });
+
     for ref input in example_inputs::generate_seeded(input_schema, StdRng::seed_from_u64(rng.random::<u64>())) {
         count += 1;
         let input_label = serde_json::to_string(input).unwrap_or_default();
@@ -87,7 +91,7 @@ pub fn check_alpha_branch_scalar_function(
             &input_label,
             &transpiled,
             input,
-            children,
+            transpiled_children.as_ref(),
         )?;
 
         // Output expression distribution check (once per task)

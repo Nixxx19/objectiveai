@@ -36,7 +36,7 @@ use crate::functions::check::example_inputs;
 /// This checker validates the remaining runtime concerns.
 pub fn check_alpha_branch_vector_function(
     function: &RemoteFunction,
-    children: Option<&HashMap<String, crate::functions::RemoteFunction>>,
+    children: Option<&HashMap<String, crate::functions::FullRemoteFunction>>,
     seed: Option<i64>,
 ) -> Result<(), String> {
     let (description, input_schema, tasks) = match function {
@@ -146,6 +146,10 @@ pub fn check_alpha_branch_vector_function(
     let mut seen_dist_tasks: HashSet<(usize, usize)> = HashSet::new();
     let mut count = 0usize;
 
+    let transpiled_children = children.map(|c| {
+        c.iter().map(|(k, v)| (k.clone(), v.clone().transpile())).collect::<HashMap<_, _>>()
+    });
+
     let mut rng = match seed {
         Some(s) => StdRng::seed_from_u64(s as u64),
         None => StdRng::from_os_rng(),
@@ -163,7 +167,7 @@ pub fn check_alpha_branch_vector_function(
             &input_label,
             &transpiled,
             input,
-            children,
+            transpiled_children.as_ref(),
         )?;
 
         // Output expression distribution check (once per task+length pair)
@@ -318,7 +322,7 @@ pub fn check_alpha_branch_vector_function(
                     &merged_label,
                     &transpiled,
                     &merged,
-                    children,
+                    transpiled_children.as_ref(),
                 )?;
             }
         }
