@@ -381,13 +381,13 @@ pub fn alphaCheckLeafScalarFunction(function: JsValue) -> Result<(), JsValue> {
 
 /// Alpha check for a branch scalar function (depth > 0, scalar output).
 ///
-/// `children` is an optional map of child function name → RemoteFunction for
+/// `children` is an optional map of child function name → FullRemoteFunction for
 /// validating placeholder task inputs against child function input schemas.
 #[wasm_bindgen]
 pub fn alphaCheckBranchScalarFunction(function: JsValue, children: JsValue) -> Result<(), JsValue> {
     let function: objectiveai::functions::alpha_scalar::RemoteFunction =
         serde_wasm_bindgen::from_value(function)?;
-    let children: Option<std::collections::HashMap<String, objectiveai::functions::RemoteFunction>> =
+    let children: Option<std::collections::HashMap<String, objectiveai::functions::FullRemoteFunction>> =
         if children.is_undefined() || children.is_null() {
             None
         } else {
@@ -408,13 +408,13 @@ pub fn alphaCheckLeafVectorFunction(function: JsValue) -> Result<(), JsValue> {
 
 /// Alpha check for a branch vector function (depth > 0, vector output).
 ///
-/// `children` is an optional map of child function name → RemoteFunction for
+/// `children` is an optional map of child function name → FullRemoteFunction for
 /// validating placeholder task inputs against child function input schemas.
 #[wasm_bindgen]
 pub fn alphaCheckBranchVectorFunction(function: JsValue, children: JsValue) -> Result<(), JsValue> {
     let function: objectiveai::functions::alpha_vector::RemoteFunction =
         serde_wasm_bindgen::from_value(function)?;
-    let children: Option<std::collections::HashMap<String, objectiveai::functions::RemoteFunction>> =
+    let children: Option<std::collections::HashMap<String, objectiveai::functions::FullRemoteFunction>> =
         if children.is_undefined() || children.is_null() {
             None
         } else {

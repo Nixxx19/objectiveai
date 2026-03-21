@@ -212,7 +212,7 @@ fn alpha_check_branch_scalar_function(
     children: Option<&Bound<'_, PyAny>>,
 ) -> PyResult<()> {
     let function: objectiveai::functions::alpha_scalar::RemoteFunction = from_py(function)?;
-    let children: Option<std::collections::HashMap<String, objectiveai::functions::RemoteFunction>> =
+    let children: Option<std::collections::HashMap<String, objectiveai::functions::FullRemoteFunction>> =
         match children {
             Some(c) => Some(from_py(c)?),
             None => None,
@@ -240,7 +240,7 @@ fn alpha_check_branch_vector_function(
     children: Option<&Bound<'_, PyAny>>,
 ) -> PyResult<()> {
     let function: objectiveai::functions::alpha_vector::RemoteFunction = from_py(function)?;
-    let children: Option<std::collections::HashMap<String, objectiveai::functions::RemoteFunction>> =
+    let children: Option<std::collections::HashMap<String, objectiveai::functions::FullRemoteFunction>> =
         match children {
             Some(c) => Some(from_py(c)?),
             None => None,

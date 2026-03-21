@@ -441,7 +441,7 @@ pub unsafe extern "C" fn objectiveai_alpha_check_branch_scalar_function(
             let function: objectiveai::functions::alpha_scalar::RemoteFunction =
                 from_json(function_in, function_in_len)?;
             let children: Option<
-                std::collections::HashMap<String, objectiveai::functions::RemoteFunction>,
+                std::collections::HashMap<String, objectiveai::functions::FullRemoteFunction>,
             > = if children_in.is_null() || children_in_len == 0 {
                 None
             } else {
@@ -497,7 +497,7 @@ pub unsafe extern "C" fn objectiveai_alpha_check_branch_vector_function(
             let function: objectiveai::functions::alpha_vector::RemoteFunction =
                 from_json(function_in, function_in_len)?;
             let children: Option<
-                std::collections::HashMap<String, objectiveai::functions::RemoteFunction>,
+                std::collections::HashMap<String, objectiveai::functions::FullRemoteFunction>,
             > = if children_in.is_null() || children_in_len == 0 {
                 None
             } else {
