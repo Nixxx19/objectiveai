@@ -1,11 +1,19 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import type {
+  FunctionsExecutionsRequestFunctionExecutionCreateParams,
+  FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams,
+} from "objectiveai";
+
+type Request =
+  | FunctionsExecutionsRequestFunctionExecutionCreateParams
+  | FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams;
 
 function App() {
-  const [request, setRequest] = useState<unknown>(null);
+  const [request, setRequest] = useState<Request | null>(null);
 
   useEffect(() => {
-    invoke("get_request").then(setRequest);
+    invoke<Request>("get_request").then(setRequest);
   }, []);
 
   return (
