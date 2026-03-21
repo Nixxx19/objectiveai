@@ -6,13 +6,14 @@ import { FunctionsInlineTasksProfileSchema } from "../../../../inlineTasksProfil
 import { FunctionsProfilesComputationsResponseFittingStatsSchema } from "../fittingStats";
 import { FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema } from "./functionExecution";
 import { FunctionsProfilesComputationsResponseUnaryObjectSchema } from "./object";
+import { RemotePathSchema } from "../../../../../remotePath";
 
 export const FunctionsProfilesComputationsResponseUnaryFunctionProfileComputationSchema = z.object({
   created: z.number().int().min(0).max(18446744073709552000),
   executions: z.array(FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema),
   executions_errors: z.boolean(),
   fitting_stats: FunctionsProfilesComputationsResponseFittingStatsSchema,
-  function: z.string().nullable().optional(),
+  function: RemotePathSchema.nullable().optional(),
   id: z.string(),
   object: FunctionsProfilesComputationsResponseUnaryObjectSchema,
   profile: FunctionsInlineTasksProfileSchema,

@@ -8,7 +8,6 @@ import { AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema } from ".
 
 export const AgentCompletionsRequestAgentCompletionCreateParamsSchema = z.object({
   agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema.describe("The agent to use (inline Agent or stored ID)."),
-  mcp_server_authorization: z.record(z.string(), z.string()).nullable().describe("Map from MCP server URL to authorization header value.").optional(),
   messages: z.array(AgentCompletionsMessageMessageSchema).describe("The conversation messages."),
   provider: AgentCompletionsRequestProviderSchema.nullable().describe("Provider routing preferences.").optional(),
   response_format: AgentCompletionsRequestResponseFormatParamSchema.nullable().describe("Output format constraints (text, JSON, or JSON schema).").optional(),

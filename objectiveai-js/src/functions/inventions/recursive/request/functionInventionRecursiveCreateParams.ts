@@ -9,7 +9,6 @@ import { RemoteSchema } from "../../../../remote";
 export const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema = z.object({
   agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema,
   max_step_retries: z.number().int().min(0).max(4294967295).nullable().describe("Maximum number of retries per invention step.\nEach step is one agent completion (which itself may loop internally\nvia tool calls). If the step's validation still fails after the\nagent loop ends, the step is retried up to this many times.\nDefaults to 3 if not specified.").optional(),
-  mcp_server_authorization: z.record(z.string(), z.string()).nullable().describe("Map from MCP server URL to authorization header value.").optional(),
   name: z.string(),
   provider: AgentCompletionsRequestProviderSchema.nullable().optional(),
   remote: RemoteSchema,

@@ -8,10 +8,10 @@ import {
 import type { FunctionsExecutionsResponseStreamingFunctionExecutionChunk } from "./response/streaming/functionExecutionChunk";
 import type { FunctionsExecutionsResponseUnaryFunctionExecution } from "./response/unary/functionExecution";
 
-function executionBody(repo: string): { function: object; profile: object } {
+function executionBody(name: string): { function: object; profile: object } {
   return {
-    function: { remote: "mock", owner: "mock", repository: repo, commit: "mock" },
-    profile: { remote: "mock", owner: "mock", repository: repo, commit: "mock" },
+    function: { remote: "mock", name },
+    profile: { remote: "mock", name },
   };
 }
 

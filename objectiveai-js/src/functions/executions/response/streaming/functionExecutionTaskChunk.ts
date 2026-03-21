@@ -7,16 +7,17 @@ import { FunctionsExecutionsResponseOutputSchema, type FunctionsExecutionsRespon
 import { FunctionsExecutionsResponseStreamingObjectSchema, type FunctionsExecutionsResponseStreamingObject } from "./object";
 import { FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema, type FunctionsExecutionsResponseStreamingReasoningSummaryChunk } from "./reasoningSummaryChunk";
 import { FunctionsExecutionsResponseStreamingTaskChunkSchema, type FunctionsExecutionsResponseStreamingTaskChunk } from "./taskChunk";
+import { RemotePathSchema, type RemotePath } from "../../../../remotePath";
 
 export interface FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk {
   created: number;
   error?: (ErrorResponseError) | null;
-  function?: (string) | null;
+  function?: (RemotePath) | null;
   id: string;
   index: number;
   object: FunctionsExecutionsResponseStreamingObject;
   output?: (FunctionsExecutionsResponseOutput) | null;
-  profile?: (string) | null;
+  profile?: (RemotePath) | null;
   reasoning?: (FunctionsExecutionsResponseStreamingReasoningSummaryChunk) | null;
   retry_token?: (string) | null;
   swiss_pool_index?: (number) | null;
@@ -30,12 +31,12 @@ export interface FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk 
 export const FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema: z.ZodType<FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk> = z.object({
   created: z.number().int().min(0).max(18446744073709552000),
   error: ErrorResponseErrorSchema.nullable().optional(),
-  function: z.string().nullable().optional(),
+  function: RemotePathSchema.nullable().optional(),
   id: z.string(),
   index: z.number().int().min(0).max(18446744073709552000),
   object: FunctionsExecutionsResponseStreamingObjectSchema,
   output: FunctionsExecutionsResponseOutputSchema.nullable().optional(),
-  profile: z.string().nullable().optional(),
+  profile: RemotePathSchema.nullable().optional(),
   reasoning: FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema.nullable().optional(),
   retry_token: z.string().nullable().optional(),
   swiss_pool_index: z.number().int().min(0).max(18446744073709552000).nullable().optional(),

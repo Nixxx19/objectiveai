@@ -10,6 +10,7 @@ export * from "./profiles/index";
 export * from "./alphaInlineFunction";
 export * from "./alphaRemoteFunction";
 export * from "./compiledTask";
+export * from "./fullFunction";
 export * from "./fullInlineFunction";
 export * from "./fullInlineFunctionOrRemoteCommitOptional";
 export * from "./fullRemoteFunction";

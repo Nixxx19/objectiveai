@@ -7,15 +7,16 @@ import { FunctionsExecutionsResponseOutputSchema } from "../output";
 import { FunctionsExecutionsResponseStreamingObjectSchema } from "./object";
 import { FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema } from "./reasoningSummaryChunk";
 import { FunctionsExecutionsResponseStreamingTaskChunkSchema } from "./taskChunk";
+import { RemotePathSchema } from "../../../../remotePath";
 
 export const FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema = z.object({
   created: z.number().int().min(0).max(18446744073709552000),
   error: ErrorResponseErrorSchema.nullable().optional(),
-  function: z.string().nullable().optional(),
+  function: RemotePathSchema.nullable().optional(),
   id: z.string(),
   object: FunctionsExecutionsResponseStreamingObjectSchema,
   output: FunctionsExecutionsResponseOutputSchema.nullable().optional(),
-  profile: z.string().nullable().optional(),
+  profile: RemotePathSchema.nullable().optional(),
   reasoning: FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema.nullable().optional(),
   retry_token: z.string().nullable().optional(),
   tasks: z.array(FunctionsExecutionsResponseStreamingTaskChunkSchema),

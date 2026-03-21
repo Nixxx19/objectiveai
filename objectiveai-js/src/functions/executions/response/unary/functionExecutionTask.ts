@@ -7,16 +7,17 @@ import { FunctionsExecutionsResponseOutputSchema, type FunctionsExecutionsRespon
 import { FunctionsExecutionsResponseUnaryObjectSchema, type FunctionsExecutionsResponseUnaryObject } from "./object";
 import { FunctionsExecutionsResponseUnaryReasoningSummarySchema, type FunctionsExecutionsResponseUnaryReasoningSummary } from "./reasoningSummary";
 import { FunctionsExecutionsResponseUnaryTaskSchema, type FunctionsExecutionsResponseUnaryTask } from "./task";
+import { RemotePathSchema, type RemotePath } from "../../../../remotePath";
 
 export interface FunctionsExecutionsResponseUnaryFunctionExecutionTask {
   created: number;
   error?: (ErrorResponseError) | null;
-  function?: (string) | null;
+  function?: (RemotePath) | null;
   id: string;
   index: number;
   object: FunctionsExecutionsResponseUnaryObject;
   output: FunctionsExecutionsResponseOutput;
-  profile?: (string) | null;
+  profile?: (RemotePath) | null;
   reasoning?: (FunctionsExecutionsResponseUnaryReasoningSummary) | null;
   retry_token?: (string) | null;
   swiss_pool_index?: (number) | null;
@@ -30,12 +31,12 @@ export interface FunctionsExecutionsResponseUnaryFunctionExecutionTask {
 export const FunctionsExecutionsResponseUnaryFunctionExecutionTaskSchema: z.ZodType<FunctionsExecutionsResponseUnaryFunctionExecutionTask> = z.object({
   created: z.number().int().min(0).max(18446744073709552000).describe("Unix timestamp when the execution was created."),
   error: ErrorResponseErrorSchema.nullable().describe("Error details if the execution failed.").optional(),
-  function: z.string().nullable().describe("ID of the function used (if remote).").optional(),
+  function: RemotePathSchema.nullable().describe("The function used (if remote).").optional(),
   id: z.string().describe("Unique identifier for this execution."),
   index: z.number().int().min(0).max(18446744073709552000),
   object: FunctionsExecutionsResponseUnaryObjectSchema.describe("Object type identifier."),
   output: FunctionsExecutionsResponseOutputSchema.describe("The final output (scalar or vector score)."),
-  profile: z.string().nullable().describe("ID of the profile used (if remote).").optional(),
+  profile: RemotePathSchema.nullable().describe("The profile used (if remote).").optional(),
   reasoning: FunctionsExecutionsResponseUnaryReasoningSummarySchema.nullable().describe("Reasoning summary if reasoning was enabled.").optional(),
   retry_token: z.string().nullable().describe("Token for retrying this execution with cached votes.").optional(),
   swiss_pool_index: z.number().int().min(0).max(18446744073709552000).nullable().optional(),

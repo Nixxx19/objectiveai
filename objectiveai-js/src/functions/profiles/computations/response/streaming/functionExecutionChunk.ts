@@ -7,18 +7,19 @@ import { FunctionsExecutionsResponseOutputSchema } from "../../../../executions/
 import { FunctionsExecutionsResponseStreamingObjectSchema } from "../../../../executions/response/streaming/object";
 import { FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema } from "../../../../executions/response/streaming/reasoningSummaryChunk";
 import { FunctionsExecutionsResponseStreamingTaskChunkSchema } from "../../../../executions/response/streaming/taskChunk";
+import { RemotePathSchema } from "../../../../../remotePath";
 
 export const FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema = z.object({
   created: z.number().int().min(0).max(18446744073709552000),
   dataset: z.number().int().min(0).max(18446744073709552000),
   error: ErrorResponseErrorSchema.nullable().optional(),
-  function: z.string().nullable().optional(),
+  function: RemotePathSchema.nullable().optional(),
   id: z.string(),
   index: z.number().int().min(0).max(18446744073709552000),
   n: z.number().int().min(0).max(18446744073709552000),
   object: FunctionsExecutionsResponseStreamingObjectSchema,
   output: FunctionsExecutionsResponseOutputSchema.nullable().optional(),
-  profile: z.string().nullable().optional(),
+  profile: RemotePathSchema.nullable().optional(),
   reasoning: FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema.nullable().optional(),
   retry: z.number().int().min(0).max(18446744073709552000),
   retry_token: z.string().nullable().optional(),

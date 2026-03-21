@@ -11,7 +11,6 @@ export const FunctionsProfilesComputationsRequestFunctionProfileComputationCreat
   from_cache: z.boolean().nullable().optional(),
   function: FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema.describe("The function to compute a profile for (inline definition or remote path)."),
   max_retries: z.number().int().min(0).max(18446744073709552000).nullable().optional(),
-  mcp_server_authorization: z.record(z.string(), z.string()).nullable().optional(),
   n: z.number().int().min(0).max(18446744073709552000),
   provider: AgentCompletionsRequestProviderSchema.nullable().optional(),
   retry_token: z.string().nullable().optional(),

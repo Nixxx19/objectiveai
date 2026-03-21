@@ -8,7 +8,6 @@ import { SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema } from "../../../swarm
 
 export const VectorCompletionsRequestVectorCompletionCreateParamsSchema = z.object({
   from_cache: z.boolean().nullable().describe("If true, uses cached votes when available.").optional(),
-  mcp_server_authorization: z.record(z.string(), z.string()).nullable().describe("Map from MCP server URL to authorization header value.").optional(),
   messages: z.array(AgentCompletionsMessageMessageSchema).describe("The conversation messages (the prompt)."),
   provider: AgentCompletionsRequestProviderSchema.nullable().describe("Provider routing preferences.").optional(),
   responses: z.array(AgentCompletionsMessageRichContentSchema).describe("The possible responses the LLMs can vote for."),

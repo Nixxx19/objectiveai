@@ -3,14 +3,10 @@
 import { z } from "zod";
 import { FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema } from "./expression/vectorFunctionInputValueExpression";
 import { FunctionsExpressionExpressionSchema } from "../expression/expression";
-import { RemoteSchema } from "../../remote";
+import { RemotePathSchema } from "../../remotePath";
 
-export const FunctionsAlphaVectorVectorFunctionTaskExpressionSchema = z.object({
-  commit: z.string(),
+export const FunctionsAlphaVectorVectorFunctionTaskExpressionSchema = RemotePathSchema.and(z.object({
   input: FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema,
-  owner: z.string(),
-  remote: RemoteSchema,
-  repository: z.string(),
   skip: FunctionsExpressionExpressionSchema.nullable().optional(),
-}).meta({ title: "functions.alpha_vector.VectorFunctionTaskExpression" });
+})).meta({ title: "functions.alpha_vector.VectorFunctionTaskExpression" });
 export type FunctionsAlphaVectorVectorFunctionTaskExpression = z.infer<typeof FunctionsAlphaVectorVectorFunctionTaskExpressionSchema>;

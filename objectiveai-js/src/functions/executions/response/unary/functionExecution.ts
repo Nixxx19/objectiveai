@@ -7,15 +7,16 @@ import { FunctionsExecutionsResponseOutputSchema } from "../output";
 import { FunctionsExecutionsResponseUnaryObjectSchema } from "./object";
 import { FunctionsExecutionsResponseUnaryReasoningSummarySchema } from "./reasoningSummary";
 import { FunctionsExecutionsResponseUnaryTaskSchema } from "./task";
+import { RemotePathSchema } from "../../../../remotePath";
 
 export const FunctionsExecutionsResponseUnaryFunctionExecutionSchema = z.object({
   created: z.number().int().min(0).max(18446744073709552000).describe("Unix timestamp when the execution was created."),
   error: ErrorResponseErrorSchema.nullable().describe("Error details if the execution failed.").optional(),
-  function: z.string().nullable().describe("ID of the function used (if remote).").optional(),
+  function: RemotePathSchema.nullable().describe("The function used (if remote).").optional(),
   id: z.string().describe("Unique identifier for this execution."),
   object: FunctionsExecutionsResponseUnaryObjectSchema.describe("Object type identifier."),
   output: FunctionsExecutionsResponseOutputSchema.describe("The final output (scalar or vector score)."),
-  profile: z.string().nullable().describe("ID of the profile used (if remote).").optional(),
+  profile: RemotePathSchema.nullable().describe("The profile used (if remote).").optional(),
   reasoning: FunctionsExecutionsResponseUnaryReasoningSummarySchema.nullable().describe("Reasoning summary if reasoning was enabled.").optional(),
   retry_token: z.string().nullable().describe("Token for retrying this execution with cached votes.").optional(),
   tasks: z.array(FunctionsExecutionsResponseUnaryTaskSchema).describe("Results from each task in the function."),

@@ -6,13 +6,14 @@ import { FunctionsInlineTasksProfileSchema } from "../../../../inlineTasksProfil
 import { FunctionsProfilesComputationsResponseFittingStatsSchema } from "../fittingStats";
 import { FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema } from "./functionExecutionChunk";
 import { FunctionsProfilesComputationsResponseStreamingObjectSchema } from "./object";
+import { RemotePathSchema } from "../../../../../remotePath";
 
 export const FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema = z.object({
   created: z.number().int().min(0).max(18446744073709552000),
   executions: z.array(FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema),
   executions_errors: z.boolean().nullable().optional(),
   fitting_stats: FunctionsProfilesComputationsResponseFittingStatsSchema.nullable().optional(),
-  function: z.string().nullable().optional(),
+  function: RemotePathSchema.nullable().optional(),
   id: z.string(),
   object: FunctionsProfilesComputationsResponseStreamingObjectSchema,
   profile: FunctionsInlineTasksProfileSchema.nullable().optional(),

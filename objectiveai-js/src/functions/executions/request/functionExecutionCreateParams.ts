@@ -12,7 +12,6 @@ export const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema = z.o
   from_cache: z.boolean().nullable().optional(),
   function: FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema.describe("The function to execute (inline definition or remote path)."),
   input: FunctionsExpressionInputValueSchema,
-  mcp_server_authorization: z.record(z.string(), z.string()).nullable().optional(),
   profile: FunctionsInlineProfileOrRemoteCommitOptionalSchema.describe("The profile to use (inline definition or remote path)."),
   provider: AgentCompletionsRequestProviderSchema.nullable().optional(),
   reasoning: FunctionsExecutionsRequestReasoningSchema.nullable().optional(),
