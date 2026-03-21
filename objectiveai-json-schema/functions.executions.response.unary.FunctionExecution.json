@@ -21,10 +21,10 @@
       ]
     },
     "function": {
-      "description": "ID of the function used (if remote).",
+      "description": "The function used (if remote).",
       "anyOf": [
         {
-          "type": "string"
+          "$ref": "RemotePath"
         },
         {
           "type": "null"
@@ -44,10 +44,10 @@
       "$ref": "functions.executions.response.Output"
     },
     "profile": {
-      "description": "ID of the profile used (if remote).",
+      "description": "The profile used (if remote).",
       "anyOf": [
         {
-          "type": "string"
+          "$ref": "RemotePath"
         },
         {
           "type": "null"

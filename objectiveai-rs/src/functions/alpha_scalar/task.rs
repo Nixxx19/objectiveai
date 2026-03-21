@@ -98,6 +98,7 @@ impl LeafTaskExpression {
 #[schemars(rename = "functions.alpha_scalar.ScalarFunctionTaskExpression")]
 pub struct ScalarFunctionTaskExpression {
     #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
     pub path: crate::RemotePath,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skip: Option<functions::expression::Expression>,

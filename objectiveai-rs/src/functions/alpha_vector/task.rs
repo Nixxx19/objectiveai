@@ -128,6 +128,7 @@ impl LeafTaskExpression {
 #[schemars(rename = "functions.alpha_vector.ScalarFunctionTaskExpression")]
 pub struct ScalarFunctionTaskExpression {
     #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
     pub path: crate::RemotePath,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skip: Option<functions::expression::Expression>,
@@ -159,6 +160,7 @@ impl ScalarFunctionTaskExpression {
 #[schemars(rename = "functions.alpha_vector.VectorFunctionTaskExpression")]
 pub struct VectorFunctionTaskExpression {
     #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
     pub path: crate::RemotePath,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skip: Option<functions::expression::Expression>,

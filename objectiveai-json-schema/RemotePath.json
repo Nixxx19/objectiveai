@@ -1,18 +1,59 @@
 {
   "title": "RemotePath",
-  "type": "object",
-  "properties": {
-    "commit": {
-      "type": "string"
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "commit": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "remote": {
+          "type": "string",
+          "enum": [
+            "github"
+          ]
+        },
+        "repository": {
+          "type": "string"
+        }
+      }
     },
-    "owner": {
-      "type": "string"
+    {
+      "type": "object",
+      "properties": {
+        "commit": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "remote": {
+          "type": "string",
+          "enum": [
+            "filesystem"
+          ]
+        },
+        "repository": {
+          "type": "string"
+        }
+      }
     },
-    "remote": {
-      "$ref": "Remote"
-    },
-    "repository": {
-      "type": "string"
+    {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "remote": {
+          "type": "string",
+          "enum": [
+            "mock"
+          ]
+        }
+      }
     }
-  }
+  ]
 }

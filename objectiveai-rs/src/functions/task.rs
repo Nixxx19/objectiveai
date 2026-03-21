@@ -171,6 +171,7 @@ impl Task {
 #[schemars(rename = "functions.ScalarFunctionTaskExpression")]
 pub struct ScalarFunctionTaskExpression {
     #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
     pub path: crate::RemotePath,
 
     /// If this expression evaluates to true, skip the task. Receives: `input`.
@@ -229,6 +230,7 @@ impl ScalarFunctionTaskExpression {
 #[schemars(rename = "functions.ScalarFunctionTask")]
 pub struct ScalarFunctionTask {
     #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
     pub path: crate::RemotePath,
     /// The resolved input to pass to the function.
     pub input: super::expression::InputValue,
@@ -269,6 +271,7 @@ impl ScalarFunctionTask {
 #[schemars(rename = "functions.VectorFunctionTaskExpression")]
 pub struct VectorFunctionTaskExpression {
     #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
     pub path: crate::RemotePath,
 
     /// If this expression evaluates to true, skip the task. Receives: `input`.
@@ -327,6 +330,7 @@ impl VectorFunctionTaskExpression {
 #[schemars(rename = "functions.VectorFunctionTask")]
 pub struct VectorFunctionTask {
     #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
     pub path: crate::RemotePath,
     /// The resolved input to pass to the function.
     pub input: super::expression::InputValue,
