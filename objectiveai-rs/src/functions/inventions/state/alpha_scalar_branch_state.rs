@@ -778,7 +778,7 @@ impl AlphaScalarBranchState {
                 .map(|task| match task {
                     functions::alpha_scalar::BranchTaskExpression::PlaceholderScalarFunction(t) => {
                         match paths.iter().find(|p| {
-                            p.repository == t.params.name
+                            p.name() == t.params.name
                         }) {
                             Some(path) => functions::alpha_scalar::BranchTaskExpression::ScalarFunction(
                                 t.replace(path),

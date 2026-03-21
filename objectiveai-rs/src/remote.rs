@@ -17,26 +17,6 @@ pub enum Remote {
     Mock,
 }
 
-impl Remote {
-    pub fn url(&self, owner: &str, repository: &str, commit: &str) -> String {
-        match self {
-            Remote::Github => format!(
-                "[{}](https://github.com/{}/{}/commit/{})",
-                repository, owner, repository, commit
-            ),
-            Remote::Filesystem => {
-                format!(
-                    "[{}](file://{}/{}) ({})",
-                    repository, owner, repository, commit
-                )
-            }
-            Remote::Mock => {
-                format!("[{}](mock://{}/{}) ({})", repository, owner, repository, commit)
-            }
-        }
-    }
-}
-
 impl fmt::Display for Remote {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -48,19 +28,114 @@ impl fmt::Display for Remote {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash, JsonSchema, arbitrary::Arbitrary)]
+#[serde(tag = "remote", rename_all = "snake_case")]
 #[schemars(rename = "RemotePath")]
-pub struct RemotePath {
-    pub remote: Remote,
-    pub owner: String,
-    pub repository: String,
-    pub commit: String,
+pub enum RemotePath {
+    Github {
+        owner: String,
+        repository: String,
+        commit: String,
+    },
+    Filesystem {
+        owner: String,
+        repository: String,
+        commit: String,
+    },
+    Mock {
+        name: String,
+    },
+}
+
+impl RemotePath {
+    pub fn remote(&self) -> Remote {
+        match self {
+            RemotePath::Github { .. } => Remote::Github,
+            RemotePath::Filesystem { .. } => Remote::Filesystem,
+            RemotePath::Mock { .. } => Remote::Mock,
+        }
+    }
+
+    pub fn name(&self) -> &str {
+        match self {
+            RemotePath::Github { repository, .. } => repository,
+            RemotePath::Filesystem { repository, .. } => repository,
+            RemotePath::Mock { name } => name,
+        }
+    }
+
+    pub fn key(&self) -> String {
+        match self {
+            RemotePath::Github { owner, repository, commit } => {
+                format!("{}/{}/{}/{}", self.remote(), owner, repository, commit)
+            }
+            RemotePath::Filesystem { owner, repository, commit } => {
+                format!("{}/{}/{}/{}", self.remote(), owner, repository, commit)
+            }
+            RemotePath::Mock { name } => {
+                format!("{}/{}", self.remote(), name)
+            }
+        }
+    }
+
+    pub fn url(&self) -> String {
+        match self {
+            RemotePath::Github { owner, repository, commit } => format!(
+                "[{}](https://github.com/{}/{}/commit/{})",
+                repository, owner, repository, commit
+            ),
+            RemotePath::Filesystem { owner, repository, commit } => format!(
+                "[{}](file://{}/{}) ({})",
+                repository, owner, repository, commit
+            ),
+            RemotePath::Mock { name } => format!(
+                "[{}](mock://{})",
+                name, name
+            ),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash, JsonSchema, arbitrary::Arbitrary)]
+#[serde(tag = "remote", rename_all = "snake_case")]
 #[schemars(rename = "RemotePathCommitOptional")]
-pub struct RemotePathCommitOptional {
-    pub remote: Remote,
-    pub owner: String,
-    pub repository: String,
-    pub commit: Option<String>,
+pub enum RemotePathCommitOptional {
+    Github {
+        owner: String,
+        repository: String,
+        commit: Option<String>,
+    },
+    Filesystem {
+        owner: String,
+        repository: String,
+        commit: Option<String>,
+    },
+    Mock {
+        name: String,
+    },
+}
+
+impl RemotePathCommitOptional {
+    pub fn remote(&self) -> Remote {
+        match self {
+            RemotePathCommitOptional::Github { .. } => Remote::Github,
+            RemotePathCommitOptional::Filesystem { .. } => Remote::Filesystem,
+            RemotePathCommitOptional::Mock { .. } => Remote::Mock,
+        }
+    }
+}
+
+impl From<RemotePath> for RemotePathCommitOptional {
+    fn from(path: RemotePath) -> Self {
+        match path {
+            RemotePath::Github { owner, repository, commit } => {
+                RemotePathCommitOptional::Github { owner, repository, commit: Some(commit) }
+            }
+            RemotePath::Filesystem { owner, repository, commit } => {
+                RemotePathCommitOptional::Filesystem { owner, repository, commit: Some(commit) }
+            }
+            RemotePath::Mock { name } => {
+                RemotePathCommitOptional::Mock { name }
+            }
+        }
+    }
 }

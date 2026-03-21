@@ -127,10 +127,8 @@ impl LeafTaskExpression {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "functions.alpha_vector.ScalarFunctionTaskExpression")]
 pub struct ScalarFunctionTaskExpression {
-    pub remote: crate::Remote,
-    pub owner: String,
-    pub repository: String,
-    pub commit: String,
+    #[serde(flatten)]
+    pub path: crate::RemotePath,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skip: Option<functions::expression::Expression>,
     pub input: super::expression::ScalarFunctionInputValueExpression,
@@ -138,15 +136,12 @@ pub struct ScalarFunctionTaskExpression {
 
 impl ScalarFunctionTaskExpression {
     pub fn url(&self) -> String {
-        self.remote.url(&self.owner, &self.repository, &self.commit)
+        self.path.url()
     }
 
     pub fn transpile(self) -> functions::ScalarFunctionTaskExpression {
         functions::ScalarFunctionTaskExpression {
-            remote: self.remote,
-            owner: self.owner,
-            repository: self.repository,
-            commit: self.commit,
+            path: self.path,
             skip: self.skip,
             map: None,
             input:
@@ -163,10 +158,8 @@ impl ScalarFunctionTaskExpression {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "functions.alpha_vector.VectorFunctionTaskExpression")]
 pub struct VectorFunctionTaskExpression {
-    pub remote: crate::Remote,
-    pub owner: String,
-    pub repository: String,
-    pub commit: String,
+    #[serde(flatten)]
+    pub path: crate::RemotePath,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skip: Option<functions::expression::Expression>,
     pub input: super::expression::VectorFunctionInputValueExpression,
@@ -174,15 +167,12 @@ pub struct VectorFunctionTaskExpression {
 
 impl VectorFunctionTaskExpression {
     pub fn url(&self) -> String {
-        self.remote.url(&self.owner, &self.repository, &self.commit)
+        self.path.url()
     }
 
     pub fn transpile(self) -> functions::VectorFunctionTaskExpression {
         functions::VectorFunctionTaskExpression {
-            remote: self.remote,
-            owner: self.owner,
-            repository: self.repository,
-            commit: self.commit,
+            path: self.path,
             skip: self.skip,
             map: None,
             input: self.input.transpile(),
@@ -232,10 +222,7 @@ impl PlaceholderScalarFunctionTaskExpression {
         path: &crate::RemotePath,
     ) -> ScalarFunctionTaskExpression {
         ScalarFunctionTaskExpression {
-            remote: path.remote,
-            owner: path.owner.clone(),
-            repository: path.repository.clone(),
-            commit: path.commit.clone(),
+            path: path.clone(),
             skip: self.skip,
             input: self.input,
         }
@@ -319,10 +306,7 @@ impl PlaceholderVectorFunctionTaskExpression {
         path: &crate::RemotePath,
     ) -> VectorFunctionTaskExpression {
         VectorFunctionTaskExpression {
-            remote: path.remote,
-            owner: path.owner.clone(),
-            repository: path.repository.clone(),
-            commit: path.commit.clone(),
+            path: path.clone(),
             skip: self.skip,
             input: self.input,
         }

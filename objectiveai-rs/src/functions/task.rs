@@ -170,14 +170,8 @@ impl Task {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "functions.ScalarFunctionTaskExpression")]
 pub struct ScalarFunctionTaskExpression {
-    /// The remote source where the function is hosted.
-    pub remote: crate::Remote,
-    /// Repository owner.
-    pub owner: String,
-    /// Repository name.
-    pub repository: String,
-    /// Git commit SHA for the function version.
-    pub commit: String,
+    #[serde(flatten)]
+    pub path: crate::RemotePath,
 
     /// If this expression evaluates to true, skip the task. Receives: `input`.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -213,7 +207,7 @@ pub struct ScalarFunctionTaskExpression {
 
 impl ScalarFunctionTaskExpression {
     pub fn url(&self) -> String {
-        self.remote.url(&self.owner, &self.repository, &self.commit)
+        self.path.url()
     }
 
     /// Compiles the expression into a concrete [`ScalarFunctionTask`].
@@ -223,10 +217,7 @@ impl ScalarFunctionTaskExpression {
     ) -> Result<ScalarFunctionTask, super::expression::ExpressionError> {
         let input = self.input.compile_one(params)?.compile(params)?;
         Ok(ScalarFunctionTask {
-            remote: self.remote,
-            owner: self.owner,
-            repository: self.repository,
-            commit: self.commit,
+            path: self.path,
             input,
             output: self.output,
         })
@@ -237,14 +228,8 @@ impl ScalarFunctionTaskExpression {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.ScalarFunctionTask")]
 pub struct ScalarFunctionTask {
-    /// The remote source where the function is hosted.
-    pub remote: crate::Remote,
-    /// Repository owner.
-    pub owner: String,
-    /// Repository name.
-    pub repository: String,
-    /// Git commit SHA for the function version.
-    pub commit: String,
+    #[serde(flatten)]
+    pub path: crate::RemotePath,
     /// The resolved input to pass to the function.
     pub input: super::expression::InputValue,
     /// Expression to transform the task result into a valid function output.
@@ -257,7 +242,7 @@ pub struct ScalarFunctionTask {
 
 impl ScalarFunctionTask {
     pub fn url(&self) -> String {
-        self.remote.url(&self.owner, &self.repository, &self.commit)
+        self.path.url()
     }
 
     pub fn compile_output(
@@ -283,14 +268,8 @@ impl ScalarFunctionTask {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "functions.VectorFunctionTaskExpression")]
 pub struct VectorFunctionTaskExpression {
-    /// The remote source where the function is hosted.
-    pub remote: crate::Remote,
-    /// Repository owner.
-    pub owner: String,
-    /// Repository name.
-    pub repository: String,
-    /// Git commit SHA for the function version.
-    pub commit: String,
+    #[serde(flatten)]
+    pub path: crate::RemotePath,
 
     /// If this expression evaluates to true, skip the task. Receives: `input`.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -326,7 +305,7 @@ pub struct VectorFunctionTaskExpression {
 
 impl VectorFunctionTaskExpression {
     pub fn url(&self) -> String {
-        self.remote.url(&self.owner, &self.repository, &self.commit)
+        self.path.url()
     }
 
     /// Compiles the expression into a concrete [`VectorFunctionTask`].
@@ -336,10 +315,7 @@ impl VectorFunctionTaskExpression {
     ) -> Result<VectorFunctionTask, super::expression::ExpressionError> {
         let input = self.input.compile_one(params)?.compile(params)?;
         Ok(VectorFunctionTask {
-            remote: self.remote,
-            owner: self.owner,
-            repository: self.repository,
-            commit: self.commit,
+            path: self.path,
             input,
             output: self.output,
         })
@@ -350,14 +326,8 @@ impl VectorFunctionTaskExpression {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.VectorFunctionTask")]
 pub struct VectorFunctionTask {
-    /// The remote source where the function is hosted.
-    pub remote: crate::Remote,
-    /// Repository owner.
-    pub owner: String,
-    /// Repository name.
-    pub repository: String,
-    /// Git commit SHA for the function version.
-    pub commit: String,
+    #[serde(flatten)]
+    pub path: crate::RemotePath,
     /// The resolved input to pass to the function.
     pub input: super::expression::InputValue,
     /// Expression to transform the task result into a valid function output.
@@ -370,7 +340,7 @@ pub struct VectorFunctionTask {
 
 impl VectorFunctionTask {
     pub fn url(&self) -> String {
-        self.remote.url(&self.owner, &self.repository, &self.commit)
+        self.path.url()
     }
 
     pub fn compile_output(

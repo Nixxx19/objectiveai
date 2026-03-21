@@ -225,8 +225,7 @@ stream_push_test!(
             id: "fic-5".into(),
             completions: vec![],
             state: None,
-            path: Some(crate::RemotePath {
-                remote: crate::Remote::Github,
+            path: Some(crate::RemotePath::Github {
                 owner: "owner-a".into(),
                 repository: "repo-a".into(),
                 commit: "aaa111".into(),
@@ -241,8 +240,7 @@ stream_push_test!(
             id: "fic-5".into(),
             completions: vec![],
             state: None,
-            path: Some(crate::RemotePath {
-                remote: crate::Remote::Github,
+            path: Some(crate::RemotePath::Github {
                 owner: "owner-b".into(),
                 repository: "repo-b".into(),
                 commit: "abc123".into(),
@@ -258,8 +256,7 @@ stream_push_test!(
         id: "fic-5".into(),
         completions: vec![],
         state: None,
-        path: Some(crate::RemotePath {
-            remote: crate::Remote::Github,
+        path: Some(crate::RemotePath::Github {
             owner: "owner-b".into(),
             repository: "repo-b".into(),
             commit: "abc123".into(),

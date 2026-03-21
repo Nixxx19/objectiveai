@@ -15,7 +15,7 @@ pub struct FunctionProfileComputation {
     pub fitting_stats: response::FittingStats,
     pub retry_token: Option<String>,
     pub created: u64,
-    pub function: Option<String>,
+    pub function: Option<crate::RemotePath>,
     pub object: super::Object,
     pub usage: agent::completions::response::Usage,
 }

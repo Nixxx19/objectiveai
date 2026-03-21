@@ -237,17 +237,17 @@ fn convert_agent_slot(
             Ok(agent::AgentWithFallbacks::Inline(base_with_fallbacks.convert()?))
         }
         agent::InlineAgentBaseWithFallbacksOrRemote::Remote(path) => {
+            let key = path.key();
             let remote_agents = remote_agents.ok_or_else(|| {
                 format!(
-                    "remote agent reference '{}/{}/{}' but no agents hashmap provided",
-                    path.owner, path.repository, path.commit
+                    "remote agent reference '{}' but no agents hashmap provided",
+                    key
                 )
             })?;
-            let key = format!("{}/{}/{}", path.owner, path.repository, path.commit);
             let agent = remote_agents.get(&key).ok_or_else(|| {
                 format!(
-                    "remote agent '{}/{}/{}' not found in agents hashmap",
-                    path.owner, path.repository, path.commit
+                    "remote agent '{}' not found in agents hashmap",
+                    key
                 )
             })?;
             Ok(agent::AgentWithFallbacks::Remote(agent.clone()))

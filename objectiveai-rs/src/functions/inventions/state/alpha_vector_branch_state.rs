@@ -783,7 +783,7 @@ impl AlphaVectorBranchState {
                 .map(|task| match task {
                     functions::alpha_vector::BranchTaskExpression::PlaceholderScalarFunction(t) => {
                         match paths.iter().find(|p| {
-                            p.repository == t.params.name
+                            p.name() == t.params.name
                         }) {
                             Some(path) => functions::alpha_vector::BranchTaskExpression::ScalarFunction(
                                 t.replace(path),
@@ -793,7 +793,7 @@ impl AlphaVectorBranchState {
                     }
                     functions::alpha_vector::BranchTaskExpression::PlaceholderVectorFunction(t) => {
                         match paths.iter().find(|p| {
-                            p.repository == t.params.name
+                            p.name() == t.params.name
                         }) {
                             Some(path) => functions::alpha_vector::BranchTaskExpression::VectorFunction(
                                 t.replace(path),

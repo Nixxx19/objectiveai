@@ -27,10 +27,10 @@ pub struct FunctionExecution {
     pub retry_token: Option<String>,
     /// Unix timestamp when the execution was created.
     pub created: u64,
-    /// ID of the function used (if remote).
-    pub function: Option<String>,
-    /// ID of the profile used (if remote).
-    pub profile: Option<String>,
+    /// The function used (if remote).
+    pub function: Option<crate::RemotePath>,
+    /// The profile used (if remote).
+    pub profile: Option<crate::RemotePath>,
     /// Object type identifier.
     pub object: super::Object,
     /// Aggregated token and cost usage.

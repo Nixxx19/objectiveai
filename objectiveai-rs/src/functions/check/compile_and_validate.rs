@@ -158,7 +158,7 @@ fn validate_compiled_task(
         }
         Task::ScalarFunction(t) => {
             if let Some(children) = children {
-                let key = format!("{}/{}/{}", t.owner, t.repository, t.commit);
+                let key = t.path.key();
                 let child = children.get(&key).ok_or_else(|| {
                     format!(
                         "CV06: {}: referenced scalar.function '{}' not found in children",
@@ -179,7 +179,7 @@ fn validate_compiled_task(
         }
         Task::VectorFunction(t) => {
             if let Some(children) = children {
-                let key = format!("{}/{}/{}", t.owner, t.repository, t.commit);
+                let key = t.path.key();
                 let child = children.get(&key).ok_or_else(|| {
                     format!(
                         "CV08: {}: referenced vector.function '{}' not found in children",
@@ -370,9 +370,7 @@ fn task_output_shape(
         }
         Task::VectorFunction(t) => {
             let Some(n) = resolve_vector_function_output_length(
-                &t.owner,
-                &t.repository,
-                &t.commit,
+                &t.path,
                 &t.input,
                 children,
                 location,
@@ -437,9 +435,7 @@ fn mapped_task_output_shape(
                 match task {
                     Task::VectorFunction(t) => {
                         let Some(n) = resolve_vector_function_output_length(
-                            &t.owner,
-                            &t.repository,
-                            &t.commit,
+                            &t.path,
                             &t.input,
                             children,
                             location,
@@ -553,14 +549,12 @@ fn random_scores(n: usize, rng: &mut impl Rng) -> Vec<Decimal> {
 /// child function and compiling its output_length expression with the task input.
 /// Returns `None` if children is `None` (output validation is skipped).
 fn resolve_vector_function_output_length(
-    owner: &str,
-    repository: &str,
-    commit: &str,
+    path: &crate::RemotePath,
     task_input: &crate::functions::expression::InputValue,
     children: Option<&HashMap<String, RemoteFunction>>,
     location: &str,
 ) -> Result<Option<u64>, String> {
-    let key = format!("{}/{}/{}", owner, repository, commit);
+    let key = path.key();
     let Some(children) = children else {
         return Ok(None); // skip output validation without children
     };

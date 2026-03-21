@@ -20,7 +20,7 @@ pub struct FunctionProfileComputationChunk {
     pub retry_token: Option<String>,
     #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub created: u64,
-    pub function: Option<String>,
+    pub function: Option<crate::RemotePath>,
     pub object: super::Object,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub usage: Option<agent::completions::response::Usage>,
