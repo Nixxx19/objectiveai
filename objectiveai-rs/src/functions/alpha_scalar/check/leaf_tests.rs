@@ -11,7 +11,7 @@ use crate::functions::expression::{
     ObjectInputSchema, StringInputSchema,
 };
 use crate::functions::alpha_scalar::check::check_alpha_leaf_scalar_function;
-use crate::util::index_map;
+use crate::test_util::index_map;
 
 fn test(f: &RemoteFunction) {
     check_alpha_leaf_scalar_function(f, None).unwrap();

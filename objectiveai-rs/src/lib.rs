@@ -42,6 +42,7 @@ pub mod prefixed_uuid;
 mod remote;
 pub mod vector;
 mod weights;
+mod util;
 
 pub use remote::*;
 pub use weights::*;
@@ -50,7 +51,13 @@ pub use weights::*;
 mod tests;
 
 #[cfg(test)]
-mod util;
+mod test_util;
+
+#[cfg(feature = "config")]
+mod config;
+
+#[cfg(feature = "config")]
+pub use config::*;
 
 #[cfg(feature = "http")]
 mod http;

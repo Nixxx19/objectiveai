@@ -10,7 +10,7 @@ use crate::functions::expression::{
     Expression, IntegerInputSchema, ObjectInputSchema, StringInputSchema,
 };
 use crate::functions::alpha_scalar::check::check_alpha_branch_scalar_function;
-use crate::util::index_map;
+use crate::test_util::index_map;
 
 fn test(f: &RemoteFunction) {
     check_alpha_branch_scalar_function(f, None, None).unwrap();

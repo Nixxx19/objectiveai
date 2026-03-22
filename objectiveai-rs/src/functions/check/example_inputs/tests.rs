@@ -6,7 +6,7 @@ mod tests {
         ObjectInputSchema, StringInputSchema, VideoInputSchema,
     };
     use crate::functions::check::example_inputs;
-    use crate::util::index_map;
+    use crate::test_util::index_map;
 
     fn test(schema: &InputSchema, expected_perms: usize) {
         let perms = example_inputs::permutations(schema);
