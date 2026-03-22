@@ -46,16 +46,31 @@ impl Client {
         &self,
         ctx: &ctx::Context<CTXEXT>,
     ) -> objectiveai::HttpClient {
+        let (
+            x_github_authorization,
+            x_openrouter_authorization,
+            x_mcp_authorization,
+        ) = tokio::join!(
+            ctx.github_authorization(),
+            ctx.get_upstream_byok(objectiveai::agent::Upstream::Openrouter),
+            ctx.mcp_authorization(),
+        );
+
+        let api_key = match ctx.objectiveai_authorization() {
+            Some(token) => Some(token.clone()),
+            None => self.api_key.as_ref().map(|k| std::sync::Arc::new(k.clone())),
+        };
+
         objectiveai::HttpClient {
             http_client: self.http_client.clone(),
             api_base: self.api_base.clone(),
-            api_key: self.api_key.clone(),
+            api_key,
             user_agent: self.user_agent.clone(),
             x_title: self.x_title.clone(),
             referer: self.referer.clone(),
-            x_github_authorization: ctx.github_authorization().await,
-            x_openrouter_authorization: ctx.get_upstream_byok(objectiveai::agent::Upstream::Openrouter).await,
-            x_mcp_authorization: ctx.mcp_authorization().await,
+            x_github_authorization,
+            x_openrouter_authorization,
+            x_mcp_authorization,
         }
     }
 }

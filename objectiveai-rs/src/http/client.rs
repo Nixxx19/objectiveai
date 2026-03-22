@@ -31,7 +31,7 @@ pub struct HttpClient {
     /// Base URL for API requests. Defaults to `https://api.objective-ai.io`.
     pub api_base: String,
     /// API key for authentication. Sent as `Bearer` token in `Authorization` header.
-    pub api_key: Option<String>,
+    pub api_key: Option<std::sync::Arc<String>>,
     /// Value for the `User-Agent` header.
     pub user_agent: Option<String>,
     /// Value for the `X-Title` header.
@@ -74,7 +74,7 @@ impl HttpClient {
                 Some(base) => base.into(),
                 None => "https://api.objective-ai.io".to_string(),
             },
-            api_key: api_key.map(Into::into),
+            api_key: api_key.map(|k| std::sync::Arc::new(k.into())),
             user_agent: user_agent.map(Into::into),
             x_title: x_title.map(Into::into),
             referer: referer.map(Into::into),
@@ -98,8 +98,9 @@ impl HttpClient {
         );
         let mut request = self.http_client.request(method, &url);
         if let Some(api_key) = &self.api_key {
+            let key = api_key.strip_prefix("Bearer ").unwrap_or(api_key);
             request =
-                request.header("authorization", format!("Bearer {}", api_key));
+                request.header("authorization", format!("Bearer {}", key));
         }
         if let Some(user_agent) = &self.user_agent {
             request = request.header("user-agent", user_agent);

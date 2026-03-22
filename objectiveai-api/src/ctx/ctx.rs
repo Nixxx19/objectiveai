@@ -28,6 +28,8 @@ pub struct Context<CTXEXT> {
     github_authorization: Option<Arc<String>>,
     /// Per-request MCP authorization headers.
     mcp_authorization: Option<Arc<HashMap<String, String>>>,
+    /// Per-request ObjectiveAI authorization token.
+    objectiveai_authorization: Option<Arc<String>>,
     /// Cached resolved OpenRouter authorization (self + BYOK).
     openrouter_authorization_cached: OnceCell<Option<Arc<String>>>,
     /// Cached resolved GitHub authorization (self + BYOK).
@@ -114,6 +116,7 @@ impl<CTXEXT> Clone for Context<CTXEXT> {
             openrouter_authorization: self.openrouter_authorization.clone(),
             github_authorization: self.github_authorization.clone(),
             mcp_authorization: self.mcp_authorization.clone(),
+            objectiveai_authorization: self.objectiveai_authorization.clone(),
             openrouter_authorization_cached: OnceCell::new(),
             github_authorization_cached: OnceCell::new(),
             mcp_authorization_cached: OnceCell::new(),
@@ -134,6 +137,7 @@ impl<CTXEXT> Context<CTXEXT> {
     /// - `X-OPENROUTER-AUTHORIZATION` / `OPENROUTER-AUTHORIZATION`: OpenRouter API key
     /// - `X-GITHUB-AUTHORIZATION` / `GITHUB-AUTHORIZATION`: GitHub token
     /// - `X-MCP-AUTHORIZATION` / `MCP-AUTHORIZATION`: JSON-encoded `HashMap<String, String>`
+    /// - `X-OBJECTIVEAI-AUTHORIZATION` / `AUTHORIZATION`: ObjectiveAI API key
     pub fn new(
         ext: Arc<CTXEXT>,
         cost_multiplier: rust_decimal::Decimal,
@@ -158,12 +162,19 @@ impl<CTXEXT> Context<CTXEXT> {
             .and_then(|s| serde_json::from_str::<HashMap<String, String>>(s).ok())
             .map(Arc::new);
 
+        let objectiveai_authorization = headers
+            .get("X-OBJECTIVEAI-AUTHORIZATION")
+            .or_else(|| headers.get("AUTHORIZATION"))
+            .and_then(|v| v.to_str().ok())
+            .map(|s| Arc::new(s.to_owned()));
+
         Self {
             ext,
             cost_multiplier,
             openrouter_authorization,
             github_authorization,
             mcp_authorization,
+            objectiveai_authorization,
             openrouter_authorization_cached: OnceCell::new(),
             github_authorization_cached: OnceCell::new(),
             mcp_authorization_cached: OnceCell::new(),
@@ -173,6 +184,13 @@ impl<CTXEXT> Context<CTXEXT> {
             function_cache: Arc::new(DashMap::new()),
             profile_cache: Arc::new(DashMap::new()),
         }
+    }
+}
+
+impl<CTXEXT> Context<CTXEXT> {
+    /// Returns the per-request ObjectiveAI authorization token, if present.
+    pub fn objectiveai_authorization(&self) -> Option<&Arc<String>> {
+        self.objectiveai_authorization.as_ref()
     }
 }
 
