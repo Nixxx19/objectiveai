@@ -79,6 +79,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     document.documentElement.dataset.theme = newTheme;
   };
 
+  const isHome = pathname === '/';
   const isActive = (path: string) => pathname.startsWith(path);
 
   const navLinks = [
@@ -100,7 +101,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           padding: isMobile ? '12px 0' : '16px 0',
           display: 'flex',
           alignItems: 'center',
-          background: 'var(--page-bg)',
+          background: isHome ? 'transparent' : 'var(--page-bg)',
         }}
       >
         <div style={{

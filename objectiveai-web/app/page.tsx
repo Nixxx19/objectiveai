@@ -7,18 +7,18 @@ import { Functions } from "objectiveai";
 import { createPublicClient } from "../lib/client";
 import { deriveCategory, deriveDisplayName } from "../lib/objectiveai";
 import { useResponsive } from "../hooks/useResponsive";
+import PromptBlock from "../components/PromptBlock";
 
 // Lazy-load the 3D hero scene (heavy, uses WebGL)
 const HeroScene = dynamic(() => import("@/components/hero3d/HeroScene"), {
   ssr: false,
-  loading: () => null, // Fallback handled inside HeroScene itself
+  loading: () => null,
 });
 
 // =============================================================================
 // FEATURED FUNCTIONS CONFIGURATION
 // =============================================================================
 const FEATURED_COUNT = 3;
-const INSTALL_COMMAND = "npm i -g @objectiveai/cli";
 
 interface FeaturedFunction {
   slug: string;
@@ -28,49 +28,12 @@ interface FeaturedFunction {
   tags: string[];
 }
 
-function CopyIcon({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-    </svg>
-  );
-}
-
-function CheckIcon({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
-
 export default function Home() {
   const { isMobile } = useResponsive();
-  const [copied, setCopied] = useState(false);
   const [slots, setSlots] = useState<(FeaturedFunction | null)[]>(
     Array.from({ length: FEATURED_COUNT }, () => null)
   );
   const [isListLoading, setIsListLoading] = useState(true);
-
-  // Copy install command
-  const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(INSTALL_COMMAND);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Fallback for older browsers
-      const textarea = document.createElement("textarea");
-      textarea.value = INSTALL_COMMAND;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  }, []);
 
   // Fetch functions from API — progressive loading
   useEffect(() => {
@@ -148,54 +111,25 @@ export default function Home() {
       gap: isMobile ? '80px' : '120px',
       paddingBottom: '60px',
     }}>
-      {/* Hero Section — Thinker + Atmospheric Flow into Hyperprompt */}
+      {/* Hero Section */}
       <section className="hero">
-        {/* Atmospheric glow */}
-        <div className="hero-atmosphere" />
-
-        {/* 3D Thinker Council Scene */}
-        <div className="hero-scene-wrap">
-          <HeroScene />
+        <div className="heroTop">
+          <div className="heroText">
+            <h1 className="heroTagline">Your agent&apos;s advisory board.</h1>
+            <p className="heroSubtitle">
+              Ensembles of LLMs that deliberate, vote, and score
+              — so your agent decides with confidence.
+            </p>
+          </div>
+          <div className="heroVisual">
+            <HeroScene />
+          </div>
         </div>
-
-        {/* Copy + Terminal Command */}
-        <div className="hero-content">
-          <h1 className="hero-tagline">
-            <span>Score everything.</span>
-            <span>Rank everything.</span>
-            <span>Simulate anyone.</span>
-          </h1>
-
-          <p className="hero-description">
-            Ensembles of LLMs vote on your inputs to produce objective, weighted scores. Build scoring pipelines from your terminal.
-          </p>
-
-          {/* Terminal install command */}
-          <div className="hero-terminal">
-            <span className="terminal-prompt">$</span>
-            <code>{INSTALL_COMMAND}</code>
-            <button
-              className={`hero-terminal-copy ${copied ? "copied" : ""}`}
-              onClick={handleCopy}
-              aria-label="Copy install command"
-            >
-              {copied ? <CheckIcon size={14} /> : <CopyIcon size={14} />}
-            </button>
-          </div>
-
-          <div className="hero-ctas">
-            <a
-              href="https://github.com/ObjectiveAI/objectiveai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="pillBtn"
-            >
-              GitHub
-            </a>
-            <Link href="/functions" className="pillBtnGhost" style={{ textDecoration: 'none' }}>
-              Browse Functions
-            </Link>
-          </div>
+        <div className="heroBottom">
+          <PromptBlock />
+          <Link href="/functions" className="pillBtnGhost" style={{ textDecoration: 'none' }}>
+            Browse Functions
+          </Link>
         </div>
       </section>
 
@@ -228,7 +162,7 @@ export default function Home() {
                 gap: '6px',
               }}
             >
-              View all <span>→</span>
+              View all <span>&rarr;</span>
             </Link>
           </div>
 
@@ -307,7 +241,7 @@ export default function Home() {
                     alignItems: 'center',
                     gap: '4px',
                   }}>
-                    Open <span>→</span>
+                    Open <span>&rarr;</span>
                   </div>
                 </div>
               </Link>
@@ -340,7 +274,7 @@ export default function Home() {
                     fontWeight: 500,
                   }}
                 >
-                  Browse all functions →
+                  Browse all functions &rarr;
                 </Link>
               </div>
             )}
