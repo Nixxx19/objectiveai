@@ -57,7 +57,7 @@ struct Config {
     openrouter_api_base: String,
     #[envconfig(from = "OPENROUTER_API_KEY")]
     openrouter_api_key: Option<String>,
-    #[envconfig(from = "CLAUDE_AGENT_SDK", default = "0")]
+    #[envconfig(from = "CLAUDE_AGENT_SDK", default = "1")]
     claude_agent_sdk: String,
     #[envconfig(from = "USER_AGENT")]
     user_agent: Option<String>,
@@ -338,7 +338,10 @@ async fn main() {
             x_title,
             referer: http_referer,
         }),
-        Arc::new(agent::completions::claude_agent_sdk::Client::new(user_agent)),
+        Arc::new(agent::completions::claude_agent_sdk::Client::new(user_agent, {
+            let v = claude_agent_sdk.trim();
+            !v.is_empty() && v != "0" && !v.eq_ignore_ascii_case("false")
+        })),
         Arc::new(agent::completions::mock::Client {
             delay: std::time::Duration::from_millis(mock_delay_ms),
             max_tool_calls: mock_max_tool_calls,

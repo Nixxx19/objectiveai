@@ -20,14 +20,16 @@ use crate::util::StreamOnce;
 #[derive(Debug, Clone)]
 pub struct Client {
     pub user_agent: Option<String>,
+    pub enabled: bool,
     sdk_path: Arc<std::sync::OnceLock<String>>,
     next_id: Arc<AtomicU64>,
 }
 
 impl Client {
-    pub fn new(user_agent: Option<String>) -> Self {
+    pub fn new(user_agent: Option<String>, enabled: bool) -> Self {
         Self {
             user_agent,
+            enabled,
             sdk_path: Arc::new(std::sync::OnceLock::new()),
             next_id: Arc::new(AtomicU64::new(0)),
         }
@@ -107,6 +109,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
         >,
     > + Send
     + 'static {
+        let enabled = self.enabled;
         let tools_enabled = _tools_enabled;
         let has_tools = !tool_names.is_empty();
         let is_byok = byok.is_some();
@@ -120,6 +123,10 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
         let client = self.clone();
 
         async move {
+            if !enabled {
+                return Err(super::Error::NotEnabled);
+            }
+
             if is_byok {
                 return Err(super::Error::InvalidByok);
             }

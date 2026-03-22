@@ -32,6 +32,9 @@ pub enum Error {
 
     #[error("Claude Agent SDK does not support disabling tools")]
     ToolsNotAllowed,
+
+    #[error("Claude Agent SDK is not enabled")]
+    NotEnabled,
 }
 
 impl objectiveai::error::StatusError for Error {
@@ -43,6 +46,7 @@ impl objectiveai::error::StatusError for Error {
             Self::InvalidMessages(_) => 400,
             Self::UnsupportedResponseFormat => 400,
             Self::ToolsNotAllowed => 400,
+            Self::NotEnabled => 400,
             Self::Spawn(_) => 500,
             Self::Io(_) => 500,
             Self::Json(_) => 500,
