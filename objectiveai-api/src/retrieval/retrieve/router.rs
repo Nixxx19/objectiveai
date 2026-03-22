@@ -143,6 +143,7 @@ where
     // ── Swarm ─────────────────────────────────────────────────────
 
     /// Resolve a swarm: inline converts directly, remote fetches and converts.
+    /// Remote agent references in the swarm's agents list are resolved automatically.
     pub async fn get_swarm(
         self: &Arc<Self>,
         ctx: &ctx::Context<CTXEXT>,
@@ -150,15 +151,60 @@ where
     ) -> Result<objectiveai::swarm::Swarm, ResponseError> {
         match params {
             objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::SwarmBase(base) => {
-                let converted = base.convert(None).map_err(|e| bad_request(&e))?;
+                let converted = self.resolve_swarm_base(ctx, base).await?;
                 Ok(objectiveai::swarm::Swarm::Inline(converted))
             }
             objectiveai::swarm::InlineSwarmBaseOrRemoteCommitOptional::Remote(remote) => {
                 let base = self.fetch_swarm_base(ctx, &remote).await?
                     .ok_or_else(|| not_found("swarm"))?;
-                let converted = base.convert(None).map_err(|e| bad_request(&e))?;
-                Ok(objectiveai::swarm::Swarm::Remote(converted))
+                let converted = self.resolve_swarm_base(ctx, base.inner).await?;
+                Ok(objectiveai::swarm::Swarm::Remote(objectiveai::swarm::RemoteSwarm {
+                    description: base.description,
+                    inner: converted,
+                }))
             }
+        }
+    }
+
+    /// Resolve remote agent references in a swarm base and convert it.
+    /// All remote agents are fetched concurrently.
+    async fn resolve_swarm_base(
+        self: &Arc<Self>,
+        ctx: &ctx::Context<CTXEXT>,
+        base: objectiveai::swarm::InlineSwarmBase,
+    ) -> Result<objectiveai::swarm::InlineSwarm, ResponseError> {
+        // Collect unique remote agent paths to fetch.
+        let mut unique_paths: indexmap::IndexMap<String, objectiveai::RemotePathCommitOptional> =
+            indexmap::IndexMap::new();
+        for agent_slot in &base.agents {
+            if let objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote::Remote(path) =
+                &agent_slot.inner
+            {
+                let key = path.key();
+                unique_paths
+                    .entry(key)
+                    .or_insert_with(|| path.clone().into());
+            }
+        }
+
+        // Fetch all remote agents concurrently.
+        if !unique_paths.is_empty() {
+            let futs: Vec<_> = unique_paths
+                .iter()
+                .map(|(key, path)| {
+                    let key = key.clone();
+                    async move {
+                        let agent_base = self.fetch_agent_base(ctx, path).await?
+                            .ok_or_else(|| not_found("agent"))?;
+                        Ok::<_, ResponseError>((key, agent_base))
+                    }
+                })
+                .collect();
+            let results = futures::future::try_join_all(futs).await?;
+            let remote_agents: std::collections::HashMap<_, _> = results.into_iter().collect();
+            base.convert(Some(&remote_agents)).map_err(|e| bad_request(&e))
+        } else {
+            base.convert(None).map_err(|e| bad_request(&e))
         }
     }
 

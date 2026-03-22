@@ -38,7 +38,7 @@ impl FlatTaskProfile {
     pub fn task_index_len(&self) -> usize {
         match self {
             Self::Function(f) => f.task_index_len(),
-            Self::MapFunction(mf) => mf.functions.len().max(1),
+            Self::MapFunction(mf) => mf.task_index_len(),
             Self::VectorCompletion(_) => 1,
             Self::MapVectorCompletion(mvc) => mvc.vector_completions.len().max(1),
             Self::PlaceholderScalarFunction(_) => 1,
@@ -399,7 +399,7 @@ where
             objectiveai::functions::CompiledTask::One(
                 objectiveai::functions::Task::VectorCompletion(vc_task)
             ) => {
-                let swarm_base = resolve_vc_swarm_base(&task_profile, &auto_swarm)?;
+                let swarm_base = resolve_vc_swarm_base(ctx, &task_profile, &auto_swarm, &retrieve_router).await?;
                 flat_tasks_or_futs.push(TaskFut::VectorTaskFut(Box::pin(
                     resolve_vc_flat_task_profile(ctx, task_path, vc_task, swarm_base, profile_invert_flags[i], &retrieve_router)
                 )));
@@ -464,7 +464,7 @@ where
                     for (j, task) in tasks.into_iter().enumerate() {
                         let mut tp = task_path.clone(); tp.push(j as u64);
                         let vc_task = match task { objectiveai::functions::Task::VectorCompletion(t) => t, _ => unreachable!() };
-                        let swarm_base = resolve_vc_swarm_base(&task_profile, &auto_swarm)?;
+                        let swarm_base = resolve_vc_swarm_base(ctx, &task_profile, &auto_swarm, &retrieve_router).await?;
                         vc_futs.push(resolve_vc_flat_task_profile(ctx, tp, vc_task, swarm_base, map_invert, &retrieve_router));
                     }
                     flat_tasks_or_futs.push(TaskFut::MapVectorTaskFut((
@@ -603,19 +603,54 @@ where
     })
 }
 
-/// Extracts the swarm base for a vector completion task (synchronous — no awaiting).
-fn resolve_vc_swarm_base(
+/// Extracts the swarm base for a vector completion task.
+/// Supports inline auto profiles, auto mode fallback, and remote profile/swarm references.
+async fn resolve_vc_swarm_base<CTXEXT>(
+    ctx: &ctx::Context<CTXEXT>,
     task_profile: &Option<objectiveai::functions::TaskProfile>,
     auto_swarm: &Option<objectiveai::swarm::InlineSwarmBase>,
-) -> Result<objectiveai::swarm::InlineSwarmBase, super::executions::Error> {
+    retrieve_router: &Arc<
+        crate::retrieval::retrieve::Router<
+            impl crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
+            impl crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
+            impl crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
+            CTXEXT,
+        >,
+    >,
+) -> Result<objectiveai::swarm::InlineSwarmBase, super::executions::Error>
+where
+    CTXEXT: Send + Sync + 'static,
+{
     match task_profile {
         Some(objectiveai::functions::TaskProfile::Inline(
             objectiveai::functions::InlineProfile::Auto(auto),
         )) => Ok(auto.clone()),
-        None => Ok(auto_swarm.as_ref().expect("auto_swarm must be Some in auto mode").clone()),
-        _ => Err(super::executions::Error::InvalidProfile(
-            "expected Auto profile for vector completion task".to_string()
+        Some(objectiveai::functions::TaskProfile::Inline(
+            objectiveai::functions::InlineProfile::Tasks(_),
+        )) => Err(super::executions::Error::InvalidProfile(
+            "expected Auto (swarm) profile for vector completion task, got inline Tasks".to_string()
         )),
+        Some(objectiveai::functions::TaskProfile::Remote(path)) => {
+            let remote = objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
+                path.clone().into(),
+            );
+            let profile = retrieve_router.get_profile(ctx, remote).await
+                .map_err(super::executions::Error::FetchProfile)?;
+            match profile {
+                objectiveai::functions::Profile::Remote(objectiveai::functions::RemoteProfile::Auto(swarm_base)) => Ok(swarm_base.inner),
+                objectiveai::functions::Profile::Remote(objectiveai::functions::RemoteProfile::Tasks(_)) => Err(super::executions::Error::InvalidProfile(
+                    "expected Auto (swarm) profile for vector completion task, got remote Tasks".to_string()
+                )),
+                objectiveai::functions::Profile::Inline(objectiveai::functions::InlineProfile::Auto(swarm_base)) => Ok(swarm_base),
+                objectiveai::functions::Profile::Inline(objectiveai::functions::InlineProfile::Tasks(_)) => Err(super::executions::Error::InvalidProfile(
+                    "expected Auto (swarm) profile for vector completion task, got inline Tasks".to_string()
+                )),
+            }
+        }
+        Some(objectiveai::functions::TaskProfile::Placeholder {}) => Err(super::executions::Error::InvalidProfile(
+            "expected Auto profile for vector completion task, got Placeholder".to_string()
+        )),
+        None => Ok(auto_swarm.as_ref().expect("auto_swarm must be Some in auto mode").clone()),
     }
 }
 

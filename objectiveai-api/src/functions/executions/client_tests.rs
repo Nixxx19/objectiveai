@@ -1001,6 +1001,131 @@ async fn test_mock_21_vector_super_branch_context_seed_42() {
     );
 }
 
+// ---------------------------------------------------------------------------
+// Mapped function tasks (MapFunction) — exercises task_index_len for mapped branches
+// ---------------------------------------------------------------------------
+
+/// mock-22: Scalar mapped branch (2 items) + 2 VCs, seed 42.
+#[tokio::test]
+async fn test_mock_22_scalar_mapped_branch_2_items_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-22",
+        "mock-22",
+        InputValue::Object(indexmap::indexmap! {
+            "items".into() => InputValue::Array(vec![
+                InputValue::String("Alpha".into()),
+                InputValue::String("Beta".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_22_scalar_mapped_branch_2_items_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_22_scalar_mapped_branch_2_items_seed_42.json"),
+    );
+}
+
+/// mock-22: Scalar mapped branch (2 items) + 2 VCs, seed 123.
+#[tokio::test]
+async fn test_mock_22_scalar_mapped_branch_2_items_seed_123() {
+    let client = make_client();
+    let request = make_request(
+        "mock-22",
+        "mock-22",
+        InputValue::Object(indexmap::indexmap! {
+            "items".into() => InputValue::Array(vec![
+                InputValue::String("Alpha".into()),
+                InputValue::String("Beta".into()),
+            ]),
+        }),
+        123,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_22_scalar_mapped_branch_2_items_seed_123.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_22_scalar_mapped_branch_2_items_seed_123.json"),
+    );
+}
+
+/// mock-23: Scalar mapped branch (3 items) + 3 VCs, seed 42.
+#[tokio::test]
+async fn test_mock_23_scalar_mapped_branch_3_items_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-23",
+        "mock-23",
+        InputValue::Object(indexmap::indexmap! {
+            "items".into() => InputValue::Array(vec![
+                InputValue::String("A".into()),
+                InputValue::String("B".into()),
+                InputValue::String("C".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_23_scalar_mapped_branch_3_items_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_23_scalar_mapped_branch_3_items_seed_42.json"),
+    );
+}
+
+/// mock-23: Scalar mapped branch (2 items) + 3 VCs, seed 42.
+#[tokio::test]
+async fn test_mock_23_scalar_mapped_branch_2_items_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-23",
+        "mock-23",
+        InputValue::Object(indexmap::indexmap! {
+            "items".into() => InputValue::Array(vec![
+                InputValue::String("A".into()),
+                InputValue::String("B".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_23_scalar_mapped_branch_2_items_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_23_scalar_mapped_branch_2_items_seed_42.json"),
+    );
+}
+
+/// mock-24: Scalar mapped branch (2 items) + function task + 2 VCs, seed 42.
+#[tokio::test]
+async fn test_mock_24_scalar_mapped_branch_with_func_2_items_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-24",
+        "mock-24",
+        InputValue::Object(indexmap::indexmap! {
+            "items".into() => InputValue::Array(vec![
+                InputValue::String("Alpha".into()),
+                InputValue::String("Beta".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_24_scalar_mapped_branch_with_func_2_items_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_24_scalar_mapped_branch_with_func_2_items_seed_42.json"),
+    );
+}
+
 // ===========================================================================
 // Error tests
 // ===========================================================================

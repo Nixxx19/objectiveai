@@ -4,28 +4,68 @@
 
 /// Returns a mock Agent by name.
 pub fn get_agent(
-    _name: &str,
+    name: &str,
 ) -> Option<objectiveai::agent::RemoteAgentBaseWithFallbacks> {
-    // No mock agent fixtures yet.
-    None
+    let json = get_agent_json(name)?;
+    Some(serde_json::from_str(json).expect("invalid mock agent JSON"))
 }
+
+/// Returns mock Agent JSON by name.
+fn get_agent_json(name: &str) -> Option<&'static str> {
+    match name {
+        "mock-agent-1" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/agents/mock-agent-1.json"))),
+        "mock-agent-2" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/agents/mock-agent-2.json"))),
+        "mock-agent-3" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/agents/mock-agent-3.json"))),
+        "mock-agent-4" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/agents/mock-agent-4.json"))),
+        _ => None,
+    }
+}
+
+/// All mock Agent names.
+const AGENT_REPOSITORIES: &[&str] = &["mock-agent-1", "mock-agent-2", "mock-agent-3", "mock-agent-4"];
 
 /// Lists all mock Agents.
 pub fn list_agents() -> objectiveai::agent::response::ListAgentResponse {
-    objectiveai::agent::response::ListAgentResponse { data: vec![] }
+    objectiveai::agent::response::ListAgentResponse {
+        data: AGENT_REPOSITORIES
+            .iter()
+            .map(|name| objectiveai::RemotePath::Mock {
+                name: name.to_string(),
+            })
+            .collect(),
+    }
 }
 
 /// Returns a mock Swarm by name.
 pub fn get_swarm(
-    _name: &str,
+    name: &str,
 ) -> Option<objectiveai::swarm::RemoteSwarmBase> {
-    // No mock swarm fixtures yet.
-    None
+    let json = get_swarm_json(name)?;
+    Some(serde_json::from_str(json).expect("invalid mock swarm JSON"))
 }
+
+/// Returns mock Swarm JSON by name.
+fn get_swarm_json(name: &str) -> Option<&'static str> {
+    match name {
+        "mock-swarm-1" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/swarms/mock-swarm-1.json"))),
+        "mock-swarm-2" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/swarms/mock-swarm-2.json"))),
+        _ => None,
+    }
+}
+
+/// All mock Swarm names.
+const SWARM_REPOSITORIES: &[&str] = &["mock-swarm-1", "mock-swarm-2"];
 
 /// Lists all mock Swarms.
 pub fn list_swarms() -> objectiveai::swarm::response::ListSwarmResponse {
-    objectiveai::swarm::response::ListSwarmResponse { data: vec![] }
+    objectiveai::swarm::response::ListSwarmResponse {
+        data: SWARM_REPOSITORIES
+            .iter()
+            .map(|name| objectiveai::RemotePath::Mock {
+                name: name.to_string(),
+            })
+            .collect(),
+    }
 }
 
 /// Returns a mock Function by name.
@@ -60,6 +100,9 @@ fn get_function_json(repository: &str) -> Option<&'static str> {
         "mock-19" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-19.json"))),
         "mock-20" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-20.json"))),
         "mock-21" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-21.json"))),
+        "mock-22" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-22.json"))),
+        "mock-23" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-23.json"))),
+        "mock-24" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-24.json"))),
         "mock-err-1" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-err-1.json"))),
         "mock-err-2" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-err-2.json"))),
         "mock-err-3" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-err-3.json"))),
@@ -80,7 +123,7 @@ const FUNCTION_REPOSITORIES: &[&str] = &[
     "mock-6", "mock-7", "mock-8", "mock-9", "mock-10",
     "mock-11", "mock-12", "mock-13", "mock-14", "mock-15",
     "mock-16", "mock-17", "mock-18", "mock-19", "mock-20",
-    "mock-21",
+    "mock-21", "mock-22", "mock-23", "mock-24",
     "mock-err-1", "mock-err-2", "mock-err-3", "mock-err-4", "mock-err-5",
     "mock-err-6", "mock-err-7", "mock-err-8", "mock-err-9", "mock-err-10",
 ];
@@ -129,6 +172,9 @@ fn get_profile_json(repository: &str) -> Option<&'static str> {
         "mock-19" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-19.json"))),
         "mock-20" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-20.json"))),
         "mock-21" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-21.json"))),
+        "mock-22" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-22.json"))),
+        "mock-23" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-23.json"))),
+        "mock-24" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-24.json"))),
         "mock-err-1" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-err-1.json"))),
         "mock-err-2" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-err-2.json"))),
         "mock-err-3" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-err-3.json"))),
@@ -157,7 +203,7 @@ const PROFILE_REPOSITORIES: &[&str] = &[
     "mock-6", "mock-7", "mock-8", "mock-9", "mock-10",
     "mock-11", "mock-12", "mock-13", "mock-14", "mock-15",
     "mock-16", "mock-17", "mock-18", "mock-19", "mock-20",
-    "mock-21",
+    "mock-21", "mock-22", "mock-23", "mock-24",
     "mock-err-1", "mock-err-2", "mock-err-3", "mock-err-4", "mock-err-5",
     "mock-err-6", "mock-err-7", "mock-err-8", "mock-err-9", "mock-err-10",
     "mock-err-11", "mock-err-12", "mock-err-13", "mock-err-14", "mock-err-15",

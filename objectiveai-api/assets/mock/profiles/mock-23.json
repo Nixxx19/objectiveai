@@ -1,0 +1,16 @@
+{
+  "description": "Mapped branch + 3 VCs with remote swarms and remote agents.",
+  "tasks": [
+    {
+      "tasks": [
+        {"remote": "mock", "name": "mock-swarm-1"},
+        {"remote": "mock", "name": "mock-swarm-2"}
+      ],
+      "weights": [0.6, 0.4]
+    },
+    {"remote": "mock", "name": "mock-swarm-1"},
+    {"remote": "mock", "name": "mock-swarm-1"},
+    {"remote": "mock", "name": "mock-swarm-1"}
+  ],
+  "weights": [0.4, 0.2, 0.2, 0.2]
+}
