@@ -1570,21 +1570,7 @@ async fn test_error_2_8_placeholder_for_function_task() {
     assert!(matches!(err, super::Error::InvalidProfile(_)), "expected InvalidProfile, got: {err}");
 }
 
-/// 2.9: InvalidProfile — Remote profile for VC task.
-#[tokio::test]
-async fn test_error_2_9_remote_for_vc_task() {
-    let client = make_client();
-    let request = make_request(
-        "mock-1",
-        "mock-err-14",
-        InputValue::Object(indexmap::indexmap! {
-            "text".into() => InputValue::String("test".into()),
-        }),
-        42,
-    );
-    let err = expect_err(&client, request, 400).await;
-    assert!(matches!(err, super::Error::InvalidProfile(_)), "expected InvalidProfile, got: {err}");
-}
+// 2.9: Removed — Remote profile for VC task is now supported (resolves via swarm fallback).
 
 /// 2.17: InvalidAppExpression — task expression references missing key.
 #[tokio::test]
