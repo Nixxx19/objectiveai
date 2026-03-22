@@ -103,6 +103,7 @@ fn get_function_json(repository: &str) -> Option<&'static str> {
         "mock-22" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-22.json"))),
         "mock-23" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-23.json"))),
         "mock-24" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-24.json"))),
+        "mock-25" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-25.json"))),
         "mock-err-1" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-err-1.json"))),
         "mock-err-2" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-err-2.json"))),
         "mock-err-3" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-err-3.json"))),
@@ -123,7 +124,7 @@ const FUNCTION_REPOSITORIES: &[&str] = &[
     "mock-6", "mock-7", "mock-8", "mock-9", "mock-10",
     "mock-11", "mock-12", "mock-13", "mock-14", "mock-15",
     "mock-16", "mock-17", "mock-18", "mock-19", "mock-20",
-    "mock-21", "mock-22", "mock-23", "mock-24",
+    "mock-21", "mock-22", "mock-23", "mock-24", "mock-25",
     "mock-err-1", "mock-err-2", "mock-err-3", "mock-err-4", "mock-err-5",
     "mock-err-6", "mock-err-7", "mock-err-8", "mock-err-9", "mock-err-10",
 ];

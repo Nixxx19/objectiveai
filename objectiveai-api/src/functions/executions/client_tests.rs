@@ -1002,6 +1002,142 @@ async fn test_mock_21_vector_super_branch_context_seed_42() {
 }
 
 // ---------------------------------------------------------------------------
+// Placeholder function tasks
+// ---------------------------------------------------------------------------
+
+/// Inline scalar function with only placeholder tasks, inline auto profile.
+#[tokio::test]
+async fn test_inline_scalar_placeholder_seed_42() {
+    let client = make_client();
+    let request = Arc::new(FunctionExecutionCreateParams {
+        function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Inline(
+            objectiveai::functions::FullInlineFunction::Standard(
+                objectiveai::functions::InlineFunction::Scalar {
+                    tasks: vec![
+                        objectiveai::functions::TaskExpression::PlaceholderScalarFunction(
+                            objectiveai::functions::PlaceholderScalarFunctionTaskExpression {
+                                input_schema: serde_json::from_value(serde_json::json!({
+                                    "type": "object",
+                                    "properties": { "text": { "type": "string" } },
+                                    "required": ["text"]
+                                })).unwrap(),
+                                skip: None,
+                                map: None,
+                                input: objectiveai::functions::expression::WithExpression::Expression(
+                                    objectiveai::functions::expression::Expression::Starlark(
+                                        "{'text': input['text']}".to_string(),
+                                    ),
+                                ),
+                                output: objectiveai::functions::expression::Expression::Special(
+                                    objectiveai::functions::expression::Special::Output,
+                                ),
+                            },
+                        ),
+                        objectiveai::functions::TaskExpression::PlaceholderScalarFunction(
+                            objectiveai::functions::PlaceholderScalarFunctionTaskExpression {
+                                input_schema: serde_json::from_value(serde_json::json!({
+                                    "type": "object",
+                                    "properties": { "text": { "type": "string" } },
+                                    "required": ["text"]
+                                })).unwrap(),
+                                skip: None,
+                                map: None,
+                                input: objectiveai::functions::expression::WithExpression::Expression(
+                                    objectiveai::functions::expression::Expression::Starlark(
+                                        "{'text': input['text']}".to_string(),
+                                    ),
+                                ),
+                                output: objectiveai::functions::expression::Expression::Special(
+                                    objectiveai::functions::expression::Special::Output,
+                                ),
+                            },
+                        ),
+                    ],
+                },
+            ),
+        ),
+        profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Inline(
+            objectiveai::functions::InlineProfile::Auto(
+                objectiveai::swarm::InlineSwarmBase {
+                    agents: vec![
+                        objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
+                            count: 1,
+                            inner: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
+                                objectiveai::agent::InlineAgentBaseWithFallbacks {
+                                    inner: objectiveai::agent::InlineAgentBase::Mock(
+                                        objectiveai::agent::mock::AgentBase {
+                                            upstream: objectiveai::agent::mock::Upstream::Mock,
+                                            output_mode: objectiveai::agent::mock::OutputMode::Instruction,
+                                            top_logprobs: None,
+                                            error: None,
+                                            invention: None,
+                                        },
+                                    ),
+                                    fallbacks: None,
+                                },
+                            ),
+                        },
+                    ],
+                    weights: Some(objectiveai::Weights::Weights(vec![Decimal::ONE])),
+                },
+            ),
+        ),
+        retry_token: None,
+        from_cache: None,
+        reasoning: None,
+        strategy: None,
+        input: InputValue::Object(indexmap::indexmap! {
+            "text".into() => InputValue::String("Hello world".into()),
+        }),
+        provider: None,
+        seed: Some(42),
+        stream: None,
+    });
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/inline_scalar_placeholder_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/inline_scalar_placeholder_seed_42.json"),
+    );
+}
+
+/// mock-25: Remote scalar function with only placeholder tasks, remote swarm profile.
+#[tokio::test]
+async fn test_mock_25_scalar_placeholder_remote_swarm_seed_42() {
+    let client = make_client();
+    let request = Arc::new(FunctionExecutionCreateParams {
+        function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
+            objectiveai::RemotePathCommitOptional::Mock {
+                name: "mock-25".to_string(),
+            },
+        ),
+        profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
+            objectiveai::RemotePathCommitOptional::Mock {
+                name: "mock-swarm-1".to_string(),
+            },
+        ),
+        retry_token: None,
+        from_cache: None,
+        reasoning: None,
+        strategy: None,
+        input: InputValue::Object(indexmap::indexmap! {
+            "text".into() => InputValue::String("Hello world".into()),
+        }),
+        provider: None,
+        seed: Some(42),
+        stream: None,
+    });
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_25_scalar_placeholder_remote_swarm_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_25_scalar_placeholder_remote_swarm_seed_42.json"),
+    );
+}
+
+// ---------------------------------------------------------------------------
 // Mapped function tasks (MapFunction) — exercises task_index_len for mapped branches
 // ---------------------------------------------------------------------------
 
