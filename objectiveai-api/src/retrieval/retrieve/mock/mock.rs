@@ -15,7 +15,11 @@ where
         _ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
     ) -> Result<Option<objectiveai::agent::RemoteAgentBaseWithFallbacks>, ResponseError> {
-        Ok(crate::functions::mock::get_agent(path.name()))
+        let name = match path {
+            objectiveai::RemotePath::Mock { name } => name,
+            _ => return Ok(None),
+        };
+        Ok(crate::mock::get_agent(name))
     }
 
     async fn get_swarm(
@@ -23,7 +27,11 @@ where
         _ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
     ) -> Result<Option<objectiveai::swarm::RemoteSwarmBase>, ResponseError> {
-        Ok(crate::functions::mock::get_swarm(path.name()))
+        let name = match path {
+            objectiveai::RemotePath::Mock { name } => name,
+            _ => return Ok(None),
+        };
+        Ok(crate::mock::get_swarm(name))
     }
 
     async fn get_function(
@@ -31,7 +39,11 @@ where
         _ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
     ) -> Result<Option<objectiveai::functions::FullRemoteFunction>, ResponseError> {
-        Ok(crate::functions::mock::get_function(path.name()))
+        let name = match path {
+            objectiveai::RemotePath::Mock { name } => name,
+            _ => return Ok(None),
+        };
+        Ok(crate::mock::get_function(name))
     }
 
     async fn get_profile(
@@ -39,7 +51,11 @@ where
         _ctx: &ctx::Context<CTXEXT>,
         path: &objectiveai::RemotePath,
     ) -> Result<Option<objectiveai::functions::RemoteProfile>, ResponseError> {
-        Ok(crate::functions::mock::get_profile(path.name()))
+        let name = match path {
+            objectiveai::RemotePath::Mock { name } => name,
+            _ => return Ok(None),
+        };
+        Ok(crate::mock::get_profile(name))
     }
 
     async fn resolve_latest(

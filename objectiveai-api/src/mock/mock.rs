@@ -2,6 +2,14 @@
 //!
 //! Provides embedded JSON fixtures used by the retrieval module.
 
+/// Returns true if the name exists in any mock repository (agents, swarms, functions, profiles).
+pub fn exists(name: &str) -> bool {
+    AGENT_REPOSITORIES.contains(&name)
+        || SWARM_REPOSITORIES.contains(&name)
+        || FUNCTION_REPOSITORIES.contains(&name)
+        || PROFILE_REPOSITORIES.contains(&name)
+}
+
 /// Returns a mock Agent by name.
 pub fn get_agent(
     name: &str,

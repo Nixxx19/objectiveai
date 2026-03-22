@@ -39,6 +39,8 @@ pub mod retrieval;
 pub mod util;
 /// Vector completions for scoring and ranking responses.
 pub mod vector;
+/// Mock
+pub mod mock;
 
 #[cfg(test)]
 pub(crate) mod stream_harness;

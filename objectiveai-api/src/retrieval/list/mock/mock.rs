@@ -14,28 +14,28 @@ where
         &self,
         _ctx: &ctx::Context<CTXEXT>,
     ) -> Result<objectiveai::agent::response::ListAgentResponse, ResponseError> {
-        Ok(crate::functions::mock::list_agents())
+        Ok(crate::mock::list_agents())
     }
 
     async fn list_swarms(
         &self,
         _ctx: &ctx::Context<CTXEXT>,
     ) -> Result<objectiveai::swarm::response::ListSwarmResponse, ResponseError> {
-        Ok(crate::functions::mock::list_swarms())
+        Ok(crate::mock::list_swarms())
     }
 
     async fn list_functions(
         &self,
         _ctx: &ctx::Context<CTXEXT>,
     ) -> Result<objectiveai::functions::response::ListFunctionResponse, ResponseError> {
-        Ok(crate::functions::mock::list_functions())
+        Ok(crate::mock::list_functions())
     }
 
     async fn list_profiles(
         &self,
         _ctx: &ctx::Context<CTXEXT>,
     ) -> Result<objectiveai::functions::profiles::response::ListProfileResponse, ResponseError> {
-        Ok(crate::functions::mock::list_profiles())
+        Ok(crate::mock::list_profiles())
     }
 
     async fn list_function_profile_pairs(

@@ -396,7 +396,7 @@ where
                 };
                 self.filesystem_client.repository_exists(crate::retrieval::Kind::Functions, owner, repo)
             }
-            objectiveai::Remote::Mock => false,
+            objectiveai::Remote::Mock => crate::mock::exists(name),
         };
 
         if exists {
