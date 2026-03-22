@@ -142,6 +142,17 @@ Available variables during compilation:
 - `map`: Current map index, 0-based integer (only in mapped task context)
 - `output`: Raw task result (only in task output expressions)
 
+## Rust Coding Conventions
+
+### `mod.rs` Files
+
+`mod.rs` files must contain **only** module declarations and re-export globs — no functions, structs, enums, traits, impls, or other definitions. Every module declaration must be one of:
+
+- **`pub mod foo;`** — the module is public directly.
+- **`mod foo; pub use foo::*;`** — the module is private, but its contents are re-exported publicly via a glob.
+
+There is no third option. Every entry in `mod.rs` is either `pub mod` or private `mod` + `pub use`.
+
 ## Conventions
 
 ### Test Failures
