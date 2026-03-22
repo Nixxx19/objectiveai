@@ -202,6 +202,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                 .stdin(std::process::Stdio::null())
                 .stdout(std::process::Stdio::piped())
                 .stderr(std::process::Stdio::piped());
+            cmd.env_remove("CLAUDECODE");
             if let Some(ref sp) = sdk_path {
                 cmd.env("CLAUDE_AGENT_SDK_PATH", sp);
             }
