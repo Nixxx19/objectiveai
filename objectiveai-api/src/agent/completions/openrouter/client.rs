@@ -232,8 +232,8 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
         agent: &objectiveai::agent::openrouter::Agent,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         messages: &[objectiveai::agent::completions::message::Message],
-        mcp_connections: &[Arc<crate::mcp::Connection>],
-        invention_tools: Option<
+        _mcp_connections: &[Arc<crate::mcp::Connection>],
+        _invention_tools: Option<
             &[objectiveai::functions::inventions::InventionTool],
         >,
         tool_names: &[String],
