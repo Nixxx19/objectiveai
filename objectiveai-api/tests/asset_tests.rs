@@ -196,6 +196,101 @@ fn collect_include_str_paths(src_dir: &Path, manifest_dir: &Path) -> HashSet<Pat
     paths
 }
 
+/// Asserts that within each mock category (agents, swarms, functions, profiles),
+/// no two JSON files are duplicates. Comparison strips the root-level `description`
+/// field, then deep-sorts the value into a canonical form (objects sorted by key,
+/// arrays sorted by serialized representation, depth-first).
+#[test]
+fn no_duplicate_mock_fixtures() {
+    let mock_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/mock");
+
+    let categories = ["agents", "functions", "profiles", "swarms"];
+    let mut all_violations = Vec::new();
+
+    for category in &categories {
+        let dir = mock_dir.join(category);
+        if !dir.exists() {
+            continue;
+        }
+
+        let mut seen: Vec<(serde_json::Value, String)> = Vec::new();
+        for entry in std::fs::read_dir(&dir).unwrap() {
+            let entry = entry.unwrap();
+            let path = entry.path();
+            if path.extension().and_then(|x| x.to_str()) != Some("json") {
+                continue;
+            }
+            let content = std::fs::read_to_string(&path).unwrap();
+            let mut value: serde_json::Value = serde_json::from_str(&content)
+                .unwrap_or_else(|e| panic!("invalid JSON in {}: {e}", path.display()));
+
+            // Strip root-level description only.
+            if let Some(obj) = value.as_object_mut() {
+                obj.remove("description");
+            }
+
+            let canonical = deep_sort(value);
+            let filename = path.file_name().unwrap().to_string_lossy().to_string();
+            seen.push((canonical, filename));
+        }
+
+        // Find duplicates.
+        for i in 0..seen.len() {
+            for j in (i + 1)..seen.len() {
+                if seen[i].0 == seen[j].0 {
+                    all_violations.push(format!(
+                        "{}/{} == {}/{}",
+                        category, seen[i].1, category, seen[j].1,
+                    ));
+                }
+            }
+        }
+    }
+
+    assert!(
+        all_violations.is_empty(),
+        "duplicate mock fixtures (ignoring root description):\n  {}",
+        all_violations.join("\n  "),
+    );
+}
+
+/// Recursively sorts a JSON value into a canonical form (depth-first).
+/// Objects: sorted by key (converted from Map to a sorted Vec of pairs stored
+/// as a JSON array of `[key, value]` pairs for deterministic equality).
+/// Arrays: each element is deep-sorted first, then the array is sorted by
+/// the serialized string representation of each element.
+fn deep_sort(value: serde_json::Value) -> serde_json::Value {
+    match value {
+        serde_json::Value::Object(map) => {
+            // Sort entries by key, deep-sort each value.
+            let mut entries: Vec<(String, serde_json::Value)> = map
+                .into_iter()
+                .map(|(k, v)| (k, deep_sort(v)))
+                .collect();
+            entries.sort_by(|a, b| a.0.cmp(&b.0));
+            // Rebuild as an ordered array of [key, value] pairs for deterministic comparison.
+            serde_json::Value::Array(
+                entries
+                    .into_iter()
+                    .map(|(k, v)| serde_json::json!([k, v]))
+                    .collect(),
+            )
+        }
+        serde_json::Value::Array(arr) => {
+            // Deep-sort each element first, then sort the array by serialized form.
+            let mut sorted: Vec<serde_json::Value> =
+                arr.into_iter().map(deep_sort).collect();
+            sorted.sort_by(|a, b| {
+                serde_json::to_string(a)
+                    .unwrap_or_default()
+                    .cmp(&serde_json::to_string(b).unwrap_or_default())
+            });
+            serde_json::Value::Array(sorted)
+        }
+        other => other,
+    }
+}
+
 fn format_paths(paths: &[PathBuf]) -> String {
     paths
         .iter()

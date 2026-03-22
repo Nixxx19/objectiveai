@@ -413,7 +413,7 @@ async fn test_mock_4_vector_ranker_seed_42() {
     let client = make_client();
     let request = make_request(
         "mock-4",
-        "mock-4",
+        "mock-1",
         InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array(vec![
                 InputValue::String("Apple".into()),
@@ -465,7 +465,7 @@ async fn test_mock_6_scalar_system_message_seed_42() {
     let client = make_client();
     let request = make_request(
         "mock-6",
-        "mock-6",
+        "mock-1",
         InputValue::Object(indexmap::indexmap! {
             "subject".into() => InputValue::String("Meeting tomorrow".into()),
             "body".into() => InputValue::String("Don't forget the meeting at 3pm.".into()),
@@ -1150,7 +1150,7 @@ async fn test_mock_4_vector_swiss_default_20_items_seed_7() {
             objectiveai::RemotePathCommitOptional::Mock { name: "mock-4".to_string() },
         ),
         profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional::Mock { name: "mock-4".to_string() },
+            objectiveai::RemotePathCommitOptional::Mock { name: "mock-1".to_string() },
         ),
         retry_token: None,
         from_cache: None,
@@ -1344,7 +1344,7 @@ async fn test_mock_24_scalar_mapped_branch_with_func_2_items_seed_42() {
     let client = make_client();
     let request = make_request(
         "mock-24",
-        "mock-24",
+        "mock-23",
         InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array(vec![
                 InputValue::String("Alpha".into()),
@@ -1460,7 +1460,7 @@ async fn test_error_1_4_invalid_strategy_pool() {
     let client = make_client();
     let request = make_request_with_overrides(
         "mock-4",
-        "mock-4",
+        "mock-1",
         |p| {
             p.strategy = Some(Strategy::SwissSystem { pool: Some(1), rounds: Some(3) });
             p.input = InputValue::Object(indexmap::indexmap! {
@@ -1578,7 +1578,7 @@ async fn test_error_2_17_bad_task_expression() {
     let client = make_client();
     let request = make_request(
         "mock-err-8",
-        "mock-err-8",
+        "mock-err-1",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
         }),
@@ -1646,7 +1646,7 @@ async fn test_error_2_23_recursive_input_schema_mismatch() {
     let client = make_client();
     let request = make_request(
         "mock-err-10",
-        "mock-err-10",
+        "mock-err-9",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
         }),
@@ -1729,7 +1729,7 @@ async fn test_error_4_2_scalar_output_out_of_range() {
     let client = make_client();
     let request = make_request(
         "mock-err-2",
-        "mock-err-2",
+        "mock-err-1",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
         }),
@@ -1750,7 +1750,7 @@ async fn test_error_4_3_scalar_got_vector() {
     let client = make_client();
     let request = make_request(
         "mock-err-3",
-        "mock-err-3",
+        "mock-err-1",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
         }),
@@ -1771,7 +1771,7 @@ async fn test_error_4_4_vector_output_bad_sum() {
     let client = make_client();
     let request = make_request(
         "mock-err-4",
-        "mock-err-4",
+        "mock-err-1",
         InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array(vec![
                 InputValue::String("A".into()),
@@ -1795,7 +1795,7 @@ async fn test_error_4_5_vector_got_scalar() {
     let client = make_client();
     let request = make_request(
         "mock-err-5",
-        "mock-err-5",
+        "mock-err-1",
         InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array(vec![
                 InputValue::String("A".into()),
@@ -1819,7 +1819,7 @@ async fn test_error_4_6_output_vectors_variant() {
     let client = make_client();
     let request = make_request(
         "mock-err-6",
-        "mock-err-6",
+        "mock-err-1",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
         }),
@@ -1840,7 +1840,7 @@ async fn test_error_4_7_output_returns_none() {
     let client = make_client();
     let request = make_request(
         "mock-err-7",
-        "mock-err-7",
+        "mock-err-1",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
         }),
