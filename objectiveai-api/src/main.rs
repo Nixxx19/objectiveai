@@ -170,6 +170,8 @@ struct Config {
     fetch_github_token: Option<String>,
     #[envconfig(from = "PUBLISH_GITHUB_TOKEN")]
     publish_github_token: Option<String>,
+    #[envconfig(from = "CONFIG_BASE_DIR")]
+    config_base_dir: Option<String>,
     #[envconfig(from = "FILESYSTEM_COMMIT_AUTHOR_NAME", default = "ObjectiveAI")]
     filesystem_commit_author_name: String,
     #[envconfig(from = "FILESYSTEM_COMMIT_AUTHOR_EMAIL", default = "admin@objective-ai.io")]
@@ -223,6 +225,7 @@ async fn main() {
         mcp_call_timeout,
         fetch_github_token,
         publish_github_token,
+        config_base_dir,
         filesystem_commit_author_name,
         filesystem_commit_author_email,
         mock_delay_ms,
@@ -275,10 +278,12 @@ async fn main() {
     ));
 
     // Filesystem base directory for local function/profile repositories
-    let filesystem_base_dir = dirs::home_dir()
-        .unwrap_or_else(|| std::path::PathBuf::from("."))
-        .join(".objectiveai")
-        .join("functions");
+    let filesystem_base_dir = match config_base_dir {
+        Some(dir) => std::path::PathBuf::from(dir),
+        None => dirs::home_dir()
+            .unwrap_or_else(|| std::path::PathBuf::from("."))
+            .join(".objectiveai"),
+    };
 
     let filesystem_client = Arc::new(filesystem::Client::new(
         filesystem_base_dir,
