@@ -326,8 +326,8 @@ fn assert_snapshot(json: &str, path: &str, expected: &str) {
 async fn test_mock_1_scalar_leaf_binary_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-1",
-        "mock-1",
+        "binary-classifier",
+        "solo-instruction",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("Hello world".into()),
         }),
@@ -347,8 +347,8 @@ async fn test_mock_1_scalar_leaf_binary_seed_42() {
 async fn test_mock_2_scalar_skip_false_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-2",
-        "mock-2",
+        "spam-with-optional-sentiment",
+        "instruction-and-schema",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("Buy cheap watches now!!!".into()),
             "include_sentiment".into() => InputValue::Boolean(false),
@@ -369,8 +369,8 @@ async fn test_mock_2_scalar_skip_false_seed_42() {
 async fn test_mock_2_scalar_skip_true_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-2",
-        "mock-2",
+        "spam-with-optional-sentiment",
+        "instruction-and-schema",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("I love this product!".into()),
             "include_sentiment".into() => InputValue::Boolean(true),
@@ -391,8 +391,8 @@ async fn test_mock_2_scalar_skip_true_seed_42() {
 async fn test_mock_3_scalar_5way_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-3",
-        "mock-3",
+        "five-star-rating",
+        "triple-mode",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("The food was amazing".into()),
         }),
@@ -412,8 +412,8 @@ async fn test_mock_3_scalar_5way_seed_42() {
 async fn test_mock_4_vector_ranker_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-4",
-        "mock-1",
+        "item-ranker",
+        "solo-instruction",
         InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array(vec![
                 InputValue::String("Apple".into()),
@@ -437,8 +437,8 @@ async fn test_mock_4_vector_ranker_seed_42() {
 async fn test_mock_5_vector_context_multi_task_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-5",
-        "mock-5",
+        "contextual-ranker",
+        "contextual-duo",
         InputValue::Object(indexmap::indexmap! {
             "context".into() => InputValue::Object(indexmap::indexmap! {
                 "query".into() => InputValue::String("best fruit".into()),
@@ -464,8 +464,8 @@ async fn test_mock_5_vector_context_multi_task_seed_42() {
 async fn test_mock_6_scalar_system_message_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-6",
-        "mock-1",
+        "email-importance",
+        "solo-instruction",
         InputValue::Object(indexmap::indexmap! {
             "subject".into() => InputValue::String("Meeting tomorrow".into()),
             "body".into() => InputValue::String("Don't forget the meeting at 3pm.".into()),
@@ -490,8 +490,8 @@ async fn test_mock_6_scalar_system_message_seed_42() {
 async fn test_mock_7_vector_5_criteria_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-7",
-        "mock-7",
+        "five-criteria-ranker",
+        "schema-heavy-trio",
         InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array(vec![
                 InputValue::String("Option A".into()),
@@ -515,8 +515,8 @@ async fn test_mock_7_vector_5_criteria_seed_42() {
 async fn test_mock_8_vector_context_skip_false_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-8",
-        "mock-8",
+        "strict-contextual-ranker",
+        "logprobs-and-tool",
         InputValue::Object(indexmap::indexmap! {
             "context".into() => InputValue::Object(indexmap::indexmap! {
                 "query".into() => InputValue::String("best answer".into()),
@@ -543,8 +543,8 @@ async fn test_mock_8_vector_context_skip_false_seed_42() {
 async fn test_mock_8_vector_context_skip_true_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-8",
-        "mock-8",
+        "strict-contextual-ranker",
+        "logprobs-and-tool",
         InputValue::Object(indexmap::indexmap! {
             "context".into() => InputValue::Object(indexmap::indexmap! {
                 "query".into() => InputValue::String("best answer".into()),
@@ -575,8 +575,8 @@ async fn test_mock_8_vector_context_skip_true_seed_42() {
 async fn test_mock_9_scalar_branch_2_tasks_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-9",
-        "mock-9",
+        "spam-importance-branch",
+        "schema-logprobs-solo",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("Important project update".into()),
             "subject".into() => InputValue::String("Project update".into()),
@@ -597,8 +597,8 @@ async fn test_mock_9_scalar_branch_2_tasks_seed_42() {
 async fn test_mock_10_scalar_branch_3_tasks_error_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-10",
-        "mock-10",
+        "triple-classifier-branch",
+        "trio-with-error-agent",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("Great service!".into()),
         }),
@@ -618,8 +618,8 @@ async fn test_mock_10_scalar_branch_3_tasks_error_seed_42() {
 async fn test_mock_11_scalar_branch_skip_false_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-11",
-        "mock-11",
+        "classifier-with-optional-sentiment",
+        "tool-and-schema",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("Check this out".into()),
             "include_sentiment".into() => InputValue::Boolean(false),
@@ -640,8 +640,8 @@ async fn test_mock_11_scalar_branch_skip_false_seed_42() {
 async fn test_mock_11_scalar_branch_skip_true_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-11",
-        "mock-11",
+        "classifier-with-optional-sentiment",
+        "tool-and-schema",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("Check this out".into()),
             "include_sentiment".into() => InputValue::Boolean(true),
@@ -666,8 +666,8 @@ async fn test_mock_11_scalar_branch_skip_true_seed_42() {
 async fn test_mock_12_vector_branch_2_vector_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-12",
-        "mock-12",
+        "dual-ranker-branch",
+        "logprobs-duo",
         InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array(vec![
                 InputValue::String("Red".into()),
@@ -691,8 +691,8 @@ async fn test_mock_12_vector_branch_2_vector_seed_42() {
 async fn test_mock_13_vector_branch_mixed_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-13",
-        "mock-13",
+        "mixed-scalar-vector-branch",
+        "schema-solo",
         InputValue::Object(indexmap::indexmap! {
             "context".into() => InputValue::Object(indexmap::indexmap! {
                 "query".into() => InputValue::String("favorite color".into()),
@@ -718,8 +718,8 @@ async fn test_mock_13_vector_branch_mixed_seed_42() {
 async fn test_mock_14_vector_branch_skip_false_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-14",
-        "mock-14",
+        "ranker-with-optional-quality",
+        "trio-with-error-instruction",
         InputValue::Object(indexmap::indexmap! {
             "context".into() => InputValue::Object(indexmap::indexmap! {
                 "query".into() => InputValue::String("rank these".into()),
@@ -746,8 +746,8 @@ async fn test_mock_14_vector_branch_skip_false_seed_42() {
 async fn test_mock_14_vector_branch_skip_true_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-14",
-        "mock-14",
+        "ranker-with-optional-quality",
+        "trio-with-error-instruction",
         InputValue::Object(indexmap::indexmap! {
             "context".into() => InputValue::Object(indexmap::indexmap! {
                 "query".into() => InputValue::String("rank these".into()),
@@ -774,8 +774,8 @@ async fn test_mock_14_vector_branch_skip_true_seed_42() {
 async fn test_mock_15_vector_branch_3_vector_logprobs_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-15",
-        "mock-15",
+        "triple-ranker-branch",
+        "high-logprobs-duo",
         InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array(vec![
                 InputValue::String("Alpha".into()),
@@ -798,8 +798,8 @@ async fn test_mock_15_vector_branch_3_vector_logprobs_seed_42() {
 async fn test_mock_16_vector_branch_4_tasks_error_logprobs_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-16",
-        "mock-16",
+        "four-way-vector-branch",
+        "quad-with-error",
         InputValue::Object(indexmap::indexmap! {
             "context".into() => InputValue::Object(indexmap::indexmap! {
                 "text".into() => InputValue::String("Evaluate these options".into()),
@@ -826,8 +826,8 @@ async fn test_mock_16_vector_branch_4_tasks_error_logprobs_seed_42() {
 async fn test_mock_17_vector_branch_mixed_skip_false_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-17",
-        "mock-17",
+        "deep-optional-mixed-branch",
+        "max-logprobs-duo",
         InputValue::Object(indexmap::indexmap! {
             "context".into() => InputValue::Object(indexmap::indexmap! {
                 "query".into() => InputValue::String("compare these".into()),
@@ -854,8 +854,8 @@ async fn test_mock_17_vector_branch_mixed_skip_false_seed_42() {
 async fn test_mock_17_vector_branch_mixed_skip_true_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-17",
-        "mock-17",
+        "deep-optional-mixed-branch",
+        "max-logprobs-duo",
         InputValue::Object(indexmap::indexmap! {
             "context".into() => InputValue::Object(indexmap::indexmap! {
                 "query".into() => InputValue::String("compare these".into()),
@@ -886,8 +886,8 @@ async fn test_mock_17_vector_branch_mixed_skip_true_seed_42() {
 async fn test_mock_18_scalar_super_branch_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-18",
-        "mock-18",
+        "nested-scalar-super-branch",
+        "expanded-nested-scalar",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("Hello world".into()),
             "subject".into() => InputValue::String("greeting".into()),
@@ -908,8 +908,8 @@ async fn test_mock_18_scalar_super_branch_seed_42() {
 async fn test_mock_19_scalar_super_branch_skip_false_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-19",
-        "mock-19",
+        "skipable-nested-scalar-branch",
+        "mixed-nested-with-skip",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("Test input".into()),
             "subject".into() => InputValue::String("testing".into()),
@@ -931,8 +931,8 @@ async fn test_mock_19_scalar_super_branch_skip_false_seed_42() {
 async fn test_mock_19_scalar_super_branch_skip_true_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-19",
-        "mock-19",
+        "skipable-nested-scalar-branch",
+        "mixed-nested-with-skip",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("Test input".into()),
             "subject".into() => InputValue::String("testing".into()),
@@ -954,8 +954,8 @@ async fn test_mock_19_scalar_super_branch_skip_true_seed_42() {
 async fn test_mock_20_vector_super_branch_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-20",
-        "mock-20",
+        "nested-vector-super-branch",
+        "nested-vector-inline-remote",
         InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array(vec![
                 InputValue::String("Alpha".into()),
@@ -979,8 +979,8 @@ async fn test_mock_20_vector_super_branch_seed_42() {
 async fn test_mock_21_vector_super_branch_context_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-21",
-        "mock-21",
+        "contextual-nested-vector-branch",
+        "deep-nested-vector",
         InputValue::Object(indexmap::indexmap! {
             "context".into() => InputValue::Object(indexmap::indexmap! {
                 "text".into() => InputValue::String("rank these options".into()),
@@ -1109,12 +1109,12 @@ async fn test_mock_25_scalar_placeholder_remote_swarm_seed_42() {
     let request = Arc::new(FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
             objectiveai::RemotePathCommitOptional::Mock {
-                name: "mock-25".to_string(),
+                name: "dual-placeholder".to_string(),
             },
         ),
         profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
             objectiveai::RemotePathCommitOptional::Mock {
-                name: "mock-swarm-1".to_string(),
+                name: "schema-and-tool".to_string(),
             },
         ),
         retry_token: None,
@@ -1147,10 +1147,10 @@ async fn test_mock_4_vector_swiss_default_20_items_seed_7() {
     let client = make_client();
     let request = Arc::new(FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional::Mock { name: "mock-4".to_string() },
+            objectiveai::RemotePathCommitOptional::Mock { name: "item-ranker".to_string() },
         ),
         profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional::Mock { name: "mock-1".to_string() },
+            objectiveai::RemotePathCommitOptional::Mock { name: "solo-instruction".to_string() },
         ),
         retry_token: None,
         from_cache: None,
@@ -1178,10 +1178,10 @@ async fn test_mock_5_vector_swiss_pool5_rounds3_20_items_seed_7() {
     let client = make_client();
     let request = Arc::new(FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional::Mock { name: "mock-5".to_string() },
+            objectiveai::RemotePathCommitOptional::Mock { name: "contextual-ranker".to_string() },
         ),
         profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional::Mock { name: "mock-5".to_string() },
+            objectiveai::RemotePathCommitOptional::Mock { name: "contextual-duo".to_string() },
         ),
         retry_token: None,
         from_cache: None,
@@ -1212,10 +1212,10 @@ async fn test_mock_7_vector_swiss_pool4_rounds3_20_items_seed_7() {
     let client = make_client();
     let request = Arc::new(FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional::Mock { name: "mock-7".to_string() },
+            objectiveai::RemotePathCommitOptional::Mock { name: "five-criteria-ranker".to_string() },
         ),
         profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional::Mock { name: "mock-7".to_string() },
+            objectiveai::RemotePathCommitOptional::Mock { name: "schema-heavy-trio".to_string() },
         ),
         retry_token: None,
         from_cache: None,
@@ -1246,8 +1246,8 @@ async fn test_mock_7_vector_swiss_pool4_rounds3_20_items_seed_7() {
 async fn test_mock_22_scalar_mapped_branch_2_items_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-22",
-        "mock-22",
+        "mapped-branch-with-votes",
+        "remote-swarm-mapped-branch",
         InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array(vec![
                 InputValue::String("Alpha".into()),
@@ -1270,8 +1270,8 @@ async fn test_mock_22_scalar_mapped_branch_2_items_seed_42() {
 async fn test_mock_22_scalar_mapped_branch_2_items_seed_123() {
     let client = make_client();
     let request = make_request(
-        "mock-22",
-        "mock-22",
+        "mapped-branch-with-votes",
+        "remote-swarm-mapped-branch",
         InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array(vec![
                 InputValue::String("Alpha".into()),
@@ -1294,8 +1294,8 @@ async fn test_mock_22_scalar_mapped_branch_2_items_seed_123() {
 async fn test_mock_23_scalar_mapped_branch_3_items_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-23",
-        "mock-23",
+        "mapped-branch-with-classifiers",
+        "remote-swarm-classifiers",
         InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array(vec![
                 InputValue::String("A".into()),
@@ -1319,8 +1319,8 @@ async fn test_mock_23_scalar_mapped_branch_3_items_seed_42() {
 async fn test_mock_23_scalar_mapped_branch_2_items_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-23",
-        "mock-23",
+        "mapped-branch-with-classifiers",
+        "remote-swarm-classifiers",
         InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array(vec![
                 InputValue::String("A".into()),
@@ -1343,8 +1343,8 @@ async fn test_mock_23_scalar_mapped_branch_2_items_seed_42() {
 async fn test_mock_24_scalar_mapped_branch_with_func_2_items_seed_42() {
     let client = make_client();
     let request = make_request(
-        "mock-24",
-        "mock-23",
+        "mapped-branch-mixed-tasks",
+        "remote-swarm-classifiers",
         InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array(vec![
                 InputValue::String("Alpha".into()),
@@ -1423,8 +1423,8 @@ async fn run_execution_allow_error(client: &Arc<TestClient>, request: Arc<Functi
 async fn test_error_1_1_invalid_retry_token() {
     let client = make_client();
     let request = make_request_with_overrides(
-        "mock-1",
-        "mock-1",
+        "binary-classifier",
+        "solo-instruction",
         |p| {
             p.retry_token = Some("not-a-valid-retry-token!!!".to_string());
             p.input = InputValue::Object(indexmap::indexmap! {
@@ -1441,8 +1441,8 @@ async fn test_error_1_1_invalid_retry_token() {
 async fn test_error_1_3_scalar_function_swiss_strategy() {
     let client = make_client();
     let request = make_request_with_overrides(
-        "mock-1",
-        "mock-1",
+        "binary-classifier",
+        "solo-instruction",
         |p| {
             p.strategy = Some(Strategy::SwissSystem { pool: None, rounds: None });
             p.input = InputValue::Object(indexmap::indexmap! {
@@ -1459,8 +1459,8 @@ async fn test_error_1_3_scalar_function_swiss_strategy() {
 async fn test_error_1_4_invalid_strategy_pool() {
     let client = make_client();
     let request = make_request_with_overrides(
-        "mock-4",
-        "mock-1",
+        "item-ranker",
+        "solo-instruction",
         |p| {
             p.strategy = Some(Strategy::SwissSystem { pool: Some(1), rounds: Some(3) });
             p.input = InputValue::Object(indexmap::indexmap! {
@@ -1484,7 +1484,7 @@ async fn test_error_1_4_invalid_strategy_pool() {
 #[tokio::test]
 async fn test_error_2_1_function_not_found() {
     let client = make_client();
-    let request = make_request("mock-nonexistent", "mock-1", InputValue::Object(indexmap::indexmap! {}), 42);
+    let request = make_request("mock-nonexistent", "solo-instruction", InputValue::Object(indexmap::indexmap! {}), 42);
     let err = expect_err(&client, request, 404).await;
     assert!(matches!(err, super::Error::FetchFunction(_)), "expected FetchFunction, got: {err}");
 }
@@ -1494,7 +1494,7 @@ async fn test_error_2_1_function_not_found() {
 async fn test_error_2_3_profile_not_found() {
     let client = make_client();
     let request = make_request(
-        "mock-1",
+        "binary-classifier",
         "mock-nonexistent",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
@@ -1510,8 +1510,8 @@ async fn test_error_2_3_profile_not_found() {
 async fn test_error_2_5_input_schema_mismatch() {
     let client = make_client();
     let request = make_request(
-        "mock-1",
-        "mock-1",
+        "binary-classifier",
+        "solo-instruction",
         InputValue::Object(indexmap::indexmap! {
             "wrong_field".into() => InputValue::String("test".into()),
         }),
@@ -1526,8 +1526,8 @@ async fn test_error_2_5_input_schema_mismatch() {
 async fn test_error_2_6_tasks_length_mismatch() {
     let client = make_client();
     let request = make_request(
-        "mock-1",
-        "mock-err-11",
+        "binary-classifier",
+        "two-task-tasks",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
         }),
@@ -1542,8 +1542,8 @@ async fn test_error_2_6_tasks_length_mismatch() {
 async fn test_error_2_7_weights_length_mismatch() {
     let client = make_client();
     let request = make_request(
-        "mock-1",
-        "mock-err-12",
+        "binary-classifier",
+        "error-weights-length-mismatch",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
         }),
@@ -1558,8 +1558,8 @@ async fn test_error_2_7_weights_length_mismatch() {
 async fn test_error_2_8_placeholder_for_function_task() {
     let client = make_client();
     let request = make_request(
-        "mock-9",
-        "mock-err-13",
+        "spam-importance-branch",
+        "placeholder-and-remote-tasks",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
             "subject".into() => InputValue::String("test".into()),
@@ -1577,8 +1577,8 @@ async fn test_error_2_8_placeholder_for_function_task() {
 async fn test_error_2_17_bad_task_expression() {
     let client = make_client();
     let request = make_request(
-        "mock-err-8",
-        "mock-err-1",
+        "error-missing-input-key",
+        "baseline-auto",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
         }),
@@ -1596,8 +1596,8 @@ async fn test_error_2_17_bad_task_expression() {
 async fn test_error_2_20_invalid_swarm() {
     let client = make_client();
     let request = make_request(
-        "mock-1",
-        "mock-err-16",
+        "binary-classifier",
+        "error-weight-count-mismatch",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
         }),
@@ -1612,8 +1612,8 @@ async fn test_error_2_20_invalid_swarm() {
 async fn test_error_2_21_recursive_function_not_found() {
     let client = make_client();
     let request = make_request(
-        "mock-err-9",
-        "mock-err-9",
+        "error-missing-sub-function",
+        "baseline-tasks",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
         }),
@@ -1628,8 +1628,8 @@ async fn test_error_2_21_recursive_function_not_found() {
 async fn test_error_2_22_recursive_profile_not_found() {
     let client = make_client();
     let request = make_request(
-        "mock-9",
-        "mock-err-17",
+        "spam-importance-branch",
+        "dangling-and-valid-tasks",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
             "subject".into() => InputValue::String("test".into()),
@@ -1645,8 +1645,8 @@ async fn test_error_2_22_recursive_profile_not_found() {
 async fn test_error_2_23_recursive_input_schema_mismatch() {
     let client = make_client();
     let request = make_request(
-        "mock-err-10",
-        "mock-err-9",
+        "error-wrong-sub-input",
+        "baseline-tasks",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
         }),
@@ -1666,8 +1666,8 @@ async fn test_error_2_23_recursive_input_schema_mismatch() {
 async fn test_error_3_1_all_agents_error() {
     let client = make_client();
     let request = make_request(
-        "mock-1",
-        "mock-err-18",
+        "binary-classifier",
+        "error-all-agents-fail",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
         }),
@@ -1707,8 +1707,8 @@ async fn test_error_3_1_all_agents_error() {
 async fn test_error_4_1_output_expression_fails() {
     let client = make_client();
     let request = make_request(
-        "mock-err-1",
-        "mock-err-1",
+        "error-bad-output-field",
+        "baseline-auto",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
         }),
@@ -1728,8 +1728,8 @@ async fn test_error_4_1_output_expression_fails() {
 async fn test_error_4_2_scalar_output_out_of_range() {
     let client = make_client();
     let request = make_request(
-        "mock-err-2",
-        "mock-err-1",
+        "error-scalar-out-of-range",
+        "baseline-auto",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
         }),
@@ -1749,8 +1749,8 @@ async fn test_error_4_2_scalar_output_out_of_range() {
 async fn test_error_4_3_scalar_got_vector() {
     let client = make_client();
     let request = make_request(
-        "mock-err-3",
-        "mock-err-1",
+        "error-scalar-returns-vector",
+        "baseline-auto",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
         }),
@@ -1770,8 +1770,8 @@ async fn test_error_4_3_scalar_got_vector() {
 async fn test_error_4_4_vector_output_bad_sum() {
     let client = make_client();
     let request = make_request(
-        "mock-err-4",
-        "mock-err-1",
+        "error-vector-bad-sum",
+        "baseline-auto",
         InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array(vec![
                 InputValue::String("A".into()),
@@ -1794,8 +1794,8 @@ async fn test_error_4_4_vector_output_bad_sum() {
 async fn test_error_4_5_vector_got_scalar() {
     let client = make_client();
     let request = make_request(
-        "mock-err-5",
-        "mock-err-1",
+        "error-vector-returns-scalar",
+        "baseline-auto",
         InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array(vec![
                 InputValue::String("A".into()),
@@ -1818,8 +1818,8 @@ async fn test_error_4_5_vector_got_scalar() {
 async fn test_error_4_6_output_vectors_variant() {
     let client = make_client();
     let request = make_request(
-        "mock-err-6",
-        "mock-err-1",
+        "error-nested-list-output",
+        "baseline-auto",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
         }),
@@ -1839,8 +1839,8 @@ async fn test_error_4_6_output_vectors_variant() {
 async fn test_error_4_7_output_returns_none() {
     let client = make_client();
     let request = make_request(
-        "mock-err-7",
-        "mock-err-1",
+        "error-none-output",
+        "baseline-auto",
         InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("test".into()),
         }),
@@ -1864,8 +1864,8 @@ async fn test_error_4_7_output_returns_none() {
 async fn test_error_6_1_reasoning_agent_error() {
     let client = make_client();
     let request = make_request_with_overrides(
-        "mock-1",
-        "mock-1",
+        "binary-classifier",
+        "solo-instruction",
         |p| {
             p.reasoning = Some(objectiveai::functions::executions::request::Reasoning {
                 agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(

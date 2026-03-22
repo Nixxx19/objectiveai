@@ -21,16 +21,16 @@ pub fn get_agent(
 /// Returns mock Agent JSON by name.
 fn get_agent_json(name: &str) -> Option<&'static str> {
     match name {
-        "mock-agent-1" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/agents/mock-agent-1.json"))),
-        "mock-agent-2" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/agents/mock-agent-2.json"))),
-        "mock-agent-3" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/agents/mock-agent-3.json"))),
-        "mock-agent-4" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/agents/mock-agent-4.json"))),
+        "schema-logprobs" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/agents/schema-logprobs.json"))),
+        "instruction" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/agents/instruction.json"))),
+        "tool-call" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/agents/tool-call.json"))),
+        "instruction-logprobs" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/agents/instruction-logprobs.json"))),
         _ => None,
     }
 }
 
 /// All mock Agent names.
-const AGENT_REPOSITORIES: &[&str] = &["mock-agent-1", "mock-agent-2", "mock-agent-3", "mock-agent-4"];
+const AGENT_REPOSITORIES: &[&str] = &["schema-logprobs", "instruction", "tool-call", "instruction-logprobs"];
 
 /// Lists all mock Agents.
 pub fn list_agents() -> objectiveai::agent::response::ListAgentResponse {
@@ -55,14 +55,14 @@ pub fn get_swarm(
 /// Returns mock Swarm JSON by name.
 fn get_swarm_json(name: &str) -> Option<&'static str> {
     match name {
-        "mock-swarm-1" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/swarms/mock-swarm-1.json"))),
-        "mock-swarm-2" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/swarms/mock-swarm-2.json"))),
+        "schema-and-tool" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/swarms/schema-and-tool.json"))),
+        "instruction-duo" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/swarms/instruction-duo.json"))),
         _ => None,
     }
 }
 
 /// All mock Swarm names.
-const SWARM_REPOSITORIES: &[&str] = &["mock-swarm-1", "mock-swarm-2"];
+const SWARM_REPOSITORIES: &[&str] = &["schema-and-tool", "instruction-duo"];
 
 /// Lists all mock Swarms.
 pub fn list_swarms() -> objectiveai::swarm::response::ListSwarmResponse {
@@ -87,54 +87,64 @@ pub fn get_function(
 /// Returns mock Function JSON by repository name.
 fn get_function_json(repository: &str) -> Option<&'static str> {
     match repository {
-        "mock-1" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-1.json"))),
-        "mock-2" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-2.json"))),
-        "mock-3" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-3.json"))),
-        "mock-4" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-4.json"))),
-        "mock-5" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-5.json"))),
-        "mock-6" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-6.json"))),
-        "mock-7" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-7.json"))),
-        "mock-8" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-8.json"))),
-        "mock-9" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-9.json"))),
-        "mock-10" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-10.json"))),
-        "mock-11" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-11.json"))),
-        "mock-12" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-12.json"))),
-        "mock-13" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-13.json"))),
-        "mock-14" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-14.json"))),
-        "mock-15" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-15.json"))),
-        "mock-16" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-16.json"))),
-        "mock-17" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-17.json"))),
-        "mock-18" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-18.json"))),
-        "mock-19" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-19.json"))),
-        "mock-20" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-20.json"))),
-        "mock-21" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-21.json"))),
-        "mock-22" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-22.json"))),
-        "mock-23" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-23.json"))),
-        "mock-24" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-24.json"))),
-        "mock-25" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-25.json"))),
-        "mock-err-1" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-err-1.json"))),
-        "mock-err-2" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-err-2.json"))),
-        "mock-err-3" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-err-3.json"))),
-        "mock-err-4" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-err-4.json"))),
-        "mock-err-5" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-err-5.json"))),
-        "mock-err-6" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-err-6.json"))),
-        "mock-err-7" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-err-7.json"))),
-        "mock-err-8" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-err-8.json"))),
-        "mock-err-9" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-err-9.json"))),
-        "mock-err-10" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mock-err-10.json"))),
+        "binary-classifier" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/binary-classifier.json"))),
+        "spam-with-optional-sentiment" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/spam-with-optional-sentiment.json"))),
+        "five-star-rating" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/five-star-rating.json"))),
+        "item-ranker" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/item-ranker.json"))),
+        "contextual-ranker" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/contextual-ranker.json"))),
+        "email-importance" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/email-importance.json"))),
+        "five-criteria-ranker" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/five-criteria-ranker.json"))),
+        "strict-contextual-ranker" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/strict-contextual-ranker.json"))),
+        "spam-importance-branch" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/spam-importance-branch.json"))),
+        "triple-classifier-branch" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/triple-classifier-branch.json"))),
+        "classifier-with-optional-sentiment" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/classifier-with-optional-sentiment.json"))),
+        "dual-ranker-branch" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/dual-ranker-branch.json"))),
+        "mixed-scalar-vector-branch" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mixed-scalar-vector-branch.json"))),
+        "ranker-with-optional-quality" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/ranker-with-optional-quality.json"))),
+        "triple-ranker-branch" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/triple-ranker-branch.json"))),
+        "four-way-vector-branch" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/four-way-vector-branch.json"))),
+        "deep-optional-mixed-branch" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/deep-optional-mixed-branch.json"))),
+        "nested-scalar-super-branch" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/nested-scalar-super-branch.json"))),
+        "skipable-nested-scalar-branch" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/skipable-nested-scalar-branch.json"))),
+        "nested-vector-super-branch" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/nested-vector-super-branch.json"))),
+        "contextual-nested-vector-branch" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/contextual-nested-vector-branch.json"))),
+        "mapped-branch-with-votes" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mapped-branch-with-votes.json"))),
+        "mapped-branch-with-classifiers" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mapped-branch-with-classifiers.json"))),
+        "mapped-branch-mixed-tasks" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/mapped-branch-mixed-tasks.json"))),
+        "dual-placeholder" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/dual-placeholder.json"))),
+        "error-bad-output-field" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/error-bad-output-field.json"))),
+        "error-scalar-out-of-range" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/error-scalar-out-of-range.json"))),
+        "error-scalar-returns-vector" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/error-scalar-returns-vector.json"))),
+        "error-vector-bad-sum" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/error-vector-bad-sum.json"))),
+        "error-vector-returns-scalar" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/error-vector-returns-scalar.json"))),
+        "error-nested-list-output" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/error-nested-list-output.json"))),
+        "error-none-output" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/error-none-output.json"))),
+        "error-missing-input-key" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/error-missing-input-key.json"))),
+        "error-missing-sub-function" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/error-missing-sub-function.json"))),
+        "error-wrong-sub-input" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/error-wrong-sub-input.json"))),
         _ => None,
     }
 }
 
 /// All mock Function repository names.
 const FUNCTION_REPOSITORIES: &[&str] = &[
-    "mock-1", "mock-2", "mock-3", "mock-4", "mock-5",
-    "mock-6", "mock-7", "mock-8", "mock-9", "mock-10",
-    "mock-11", "mock-12", "mock-13", "mock-14", "mock-15",
-    "mock-16", "mock-17", "mock-18", "mock-19", "mock-20",
-    "mock-21", "mock-22", "mock-23", "mock-24", "mock-25",
-    "mock-err-1", "mock-err-2", "mock-err-3", "mock-err-4", "mock-err-5",
-    "mock-err-6", "mock-err-7", "mock-err-8", "mock-err-9", "mock-err-10",
+    "binary-classifier", "spam-with-optional-sentiment", "five-star-rating",
+    "item-ranker", "contextual-ranker", "email-importance",
+    "five-criteria-ranker", "strict-contextual-ranker",
+    "spam-importance-branch", "triple-classifier-branch",
+    "classifier-with-optional-sentiment", "dual-ranker-branch",
+    "mixed-scalar-vector-branch", "ranker-with-optional-quality",
+    "triple-ranker-branch", "four-way-vector-branch",
+    "deep-optional-mixed-branch", "nested-scalar-super-branch",
+    "skipable-nested-scalar-branch", "nested-vector-super-branch",
+    "contextual-nested-vector-branch",
+    "mapped-branch-with-votes", "mapped-branch-with-classifiers",
+    "mapped-branch-mixed-tasks", "dual-placeholder",
+    "error-bad-output-field", "error-scalar-out-of-range",
+    "error-scalar-returns-vector", "error-vector-bad-sum",
+    "error-vector-returns-scalar", "error-nested-list-output",
+    "error-none-output", "error-missing-input-key",
+    "error-missing-sub-function", "error-wrong-sub-input",
 ];
 
 /// Lists all mock Functions.
@@ -160,50 +170,56 @@ pub fn get_profile(
 /// Returns mock Profile JSON by repository name.
 fn get_profile_json(repository: &str) -> Option<&'static str> {
     match repository {
-        "mock-1" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-1.json"))),
-        "mock-2" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-2.json"))),
-        "mock-3" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-3.json"))),
-        "mock-5" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-5.json"))),
-        "mock-7" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-7.json"))),
-        "mock-8" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-8.json"))),
-        "mock-9" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-9.json"))),
-        "mock-10" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-10.json"))),
-        "mock-11" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-11.json"))),
-        "mock-12" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-12.json"))),
-        "mock-13" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-13.json"))),
-        "mock-14" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-14.json"))),
-        "mock-15" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-15.json"))),
-        "mock-16" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-16.json"))),
-        "mock-17" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-17.json"))),
-        "mock-18" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-18.json"))),
-        "mock-19" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-19.json"))),
-        "mock-20" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-20.json"))),
-        "mock-21" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-21.json"))),
-        "mock-22" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-22.json"))),
-        "mock-23" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-23.json"))),
-        "mock-err-1" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-err-1.json"))),
-        "mock-err-9" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-err-9.json"))),
-        "mock-err-11" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-err-11.json"))),
-        "mock-err-12" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-err-12.json"))),
-        "mock-err-13" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-err-13.json"))),
-        "mock-err-15" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-err-15.json"))),
-        "mock-err-16" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-err-16.json"))),
-        "mock-err-17" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-err-17.json"))),
-        "mock-err-18" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mock-err-18.json"))),
+        "solo-instruction" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/solo-instruction.json"))),
+        "instruction-and-schema" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/instruction-and-schema.json"))),
+        "triple-mode" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/triple-mode.json"))),
+        "contextual-duo" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/contextual-duo.json"))),
+        "schema-heavy-trio" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/schema-heavy-trio.json"))),
+        "logprobs-and-tool" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/logprobs-and-tool.json"))),
+        "schema-logprobs-solo" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/schema-logprobs-solo.json"))),
+        "trio-with-error-agent" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/trio-with-error-agent.json"))),
+        "tool-and-schema" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/tool-and-schema.json"))),
+        "logprobs-duo" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/logprobs-duo.json"))),
+        "schema-solo" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/schema-solo.json"))),
+        "trio-with-error-instruction" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/trio-with-error-instruction.json"))),
+        "high-logprobs-duo" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/high-logprobs-duo.json"))),
+        "quad-with-error" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/quad-with-error.json"))),
+        "max-logprobs-duo" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/max-logprobs-duo.json"))),
+        "expanded-nested-scalar" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/expanded-nested-scalar.json"))),
+        "mixed-nested-with-skip" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/mixed-nested-with-skip.json"))),
+        "nested-vector-inline-remote" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/nested-vector-inline-remote.json"))),
+        "deep-nested-vector" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/deep-nested-vector.json"))),
+        "remote-swarm-mapped-branch" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/remote-swarm-mapped-branch.json"))),
+        "remote-swarm-classifiers" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/remote-swarm-classifiers.json"))),
+        "baseline-auto" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/baseline-auto.json"))),
+        "baseline-tasks" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/baseline-tasks.json"))),
+        "two-task-tasks" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/two-task-tasks.json"))),
+        "error-weights-length-mismatch" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/error-weights-length-mismatch.json"))),
+        "placeholder-and-remote-tasks" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/placeholder-and-remote-tasks.json"))),
+        "error-dangling-swarm-ref" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/error-dangling-swarm-ref.json"))),
+        "error-weight-count-mismatch" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/error-weight-count-mismatch.json"))),
+        "dangling-and-valid-tasks" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/dangling-and-valid-tasks.json"))),
+        "error-all-agents-fail" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/profiles/error-all-agents-fail.json"))),
         _ => None,
     }
 }
 
 /// All mock Profile repository names.
 const PROFILE_REPOSITORIES: &[&str] = &[
-    "mock-1", "mock-2", "mock-3", "mock-5",
-    "mock-7", "mock-8", "mock-9", "mock-10",
-    "mock-11", "mock-12", "mock-13", "mock-14", "mock-15",
-    "mock-16", "mock-17", "mock-18", "mock-19", "mock-20",
-    "mock-21", "mock-22", "mock-23",
-    "mock-err-1", "mock-err-9",
-    "mock-err-11", "mock-err-12", "mock-err-13", "mock-err-15",
-    "mock-err-16", "mock-err-17", "mock-err-18",
+    "solo-instruction", "instruction-and-schema", "triple-mode",
+    "contextual-duo", "schema-heavy-trio", "logprobs-and-tool",
+    "schema-logprobs-solo", "trio-with-error-agent",
+    "tool-and-schema", "logprobs-duo", "schema-solo",
+    "trio-with-error-instruction", "high-logprobs-duo",
+    "quad-with-error", "max-logprobs-duo",
+    "expanded-nested-scalar", "mixed-nested-with-skip",
+    "nested-vector-inline-remote", "deep-nested-vector",
+    "remote-swarm-mapped-branch", "remote-swarm-classifiers",
+    "baseline-auto", "baseline-tasks",
+    "two-task-tasks", "error-weights-length-mismatch",
+    "placeholder-and-remote-tasks", "error-dangling-swarm-ref",
+    "error-weight-count-mismatch", "dangling-and-valid-tasks",
+    "error-all-agents-fail",
 ];
 
 /// Lists all mock Profiles.
