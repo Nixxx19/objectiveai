@@ -795,6 +795,7 @@ where
         //
         // Only the first round uses retry tokens; subsequent rounds do not.
         // Errors from subsequent rounds are included in the final output chunk.
+        let choice_indexer = Arc::new(ChoiceIndexer::new(0));
         if let Some(
             objectiveai::functions::executions::request::Strategy::SwissSystem {
                 pool,
@@ -913,7 +914,7 @@ where
                             completion_index_map,
                         );
                     }
-                    index_maps.insert((1, pool_idx), ftp_index_map);
+                    index_maps.insert((0, pool_idx), ftp_index_map);
                 }
 
                 (
@@ -976,15 +977,20 @@ where
                 // track errors from subsequent rounds to include in final output
                 let mut subsequent_round_error: Option<objectiveai::error::ResponseError> = None;
 
-                'rounds: for current_round in 1..=rounds {
-                    let is_first_round = current_round == 1;
-                    let is_last_round = current_round == rounds;
+                // monotonic task index across all pools and rounds
+                let mut swiss_task_index: u64 = 0;
+
+                'rounds: for current_round in 0..rounds {
+                    let is_first_round = current_round == 0;
+                    let is_last_round = current_round == rounds - 1;
 
                     // run all pools for this round
                     let mut streams = Vec::with_capacity(ftps.len());
 
                     for (i, ftp) in ftps.drain(..).enumerate() {
                         let task_index_len = ftp.task_index_len();
+                        let pool_task_index = swiss_task_index;
+                        swiss_task_index += 1;
 
                         streams.push((
                             i,
@@ -1002,8 +1008,8 @@ where
                                 },
                                 ftp,
                                 created,
-                                0,
-                                Arc::new(ChoiceIndexer::new(0)),
+                                pool_task_index,
+                                choice_indexer.clone(),
                                 Some(current_round as u64),
                                 Some(i as u64),
                             ).boxed(),
@@ -1421,7 +1427,7 @@ where
                     ftp,
                     created,
                     0,
-                    Arc::new(ChoiceIndexer::new(0)),
+                    choice_indexer,
                     None,
                     None,
                 );

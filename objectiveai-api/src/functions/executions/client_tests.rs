@@ -1138,6 +1138,106 @@ async fn test_mock_25_scalar_placeholder_remote_swarm_seed_42() {
 }
 
 // ---------------------------------------------------------------------------
+// SwissSystem strategy tests
+// ---------------------------------------------------------------------------
+
+/// mock-4: Vector ranker with 20 items, SwissSystem with default pool/rounds, seed 7.
+#[tokio::test]
+async fn test_mock_4_vector_swiss_default_20_items_seed_7() {
+    let client = make_client();
+    let request = Arc::new(FunctionExecutionCreateParams {
+        function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
+            objectiveai::RemotePathCommitOptional::Mock { name: "mock-4".to_string() },
+        ),
+        profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
+            objectiveai::RemotePathCommitOptional::Mock { name: "mock-4".to_string() },
+        ),
+        retry_token: None,
+        from_cache: None,
+        reasoning: None,
+        strategy: Some(Strategy::SwissSystem { pool: None, rounds: None }),
+        input: InputValue::Object(indexmap::indexmap! {
+            "items".into() => InputValue::Array((0..20).map(|i| InputValue::String(format!("Item{i}"))).collect()),
+        }),
+        provider: None,
+        seed: Some(7),
+        stream: None,
+    });
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_4_vector_swiss_default_20_items_seed_7.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_4_vector_swiss_default_20_items_seed_7.json"),
+    );
+}
+
+/// mock-5: Vector ranker with context and 20 items, SwissSystem pool=5 rounds=3, seed 7.
+#[tokio::test]
+async fn test_mock_5_vector_swiss_pool5_rounds3_20_items_seed_7() {
+    let client = make_client();
+    let request = Arc::new(FunctionExecutionCreateParams {
+        function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
+            objectiveai::RemotePathCommitOptional::Mock { name: "mock-5".to_string() },
+        ),
+        profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
+            objectiveai::RemotePathCommitOptional::Mock { name: "mock-5".to_string() },
+        ),
+        retry_token: None,
+        from_cache: None,
+        reasoning: None,
+        strategy: Some(Strategy::SwissSystem { pool: Some(5), rounds: Some(3) }),
+        input: InputValue::Object(indexmap::indexmap! {
+            "context".into() => InputValue::Object(indexmap::indexmap! {
+                "query".into() => InputValue::String("rank these items".into()),
+            }),
+            "items".into() => InputValue::Array((0..20).map(|i| InputValue::String(format!("Item{i}"))).collect()),
+        }),
+        provider: None,
+        seed: Some(7),
+        stream: None,
+    });
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_5_vector_swiss_pool5_rounds3_20_items_seed_7.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_5_vector_swiss_pool5_rounds3_20_items_seed_7.json"),
+    );
+}
+
+/// mock-7: Vector ranker with 5 criteria and 20 items, SwissSystem pool=4 rounds=3, seed 7.
+#[tokio::test]
+async fn test_mock_7_vector_swiss_pool4_rounds3_20_items_seed_7() {
+    let client = make_client();
+    let request = Arc::new(FunctionExecutionCreateParams {
+        function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
+            objectiveai::RemotePathCommitOptional::Mock { name: "mock-7".to_string() },
+        ),
+        profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
+            objectiveai::RemotePathCommitOptional::Mock { name: "mock-7".to_string() },
+        ),
+        retry_token: None,
+        from_cache: None,
+        reasoning: None,
+        strategy: Some(Strategy::SwissSystem { pool: Some(4), rounds: Some(3) }),
+        input: InputValue::Object(indexmap::indexmap! {
+            "items".into() => InputValue::Array((0..20).map(|i| InputValue::String(format!("Item{i}"))).collect()),
+        }),
+        provider: None,
+        seed: Some(7),
+        stream: None,
+    });
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_7_vector_swiss_pool4_rounds3_20_items_seed_7.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_7_vector_swiss_pool4_rounds3_20_items_seed_7.json"),
+    );
+}
+
+// ---------------------------------------------------------------------------
 // Mapped function tasks (MapFunction) — exercises task_index_len for mapped branches
 // ---------------------------------------------------------------------------
 

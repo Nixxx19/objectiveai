@@ -8,7 +8,7 @@ use super::Client;
 use crate::agent::completions::upstream_client::UpstreamClient;
 
 fn default_client() -> Client {
-    Client::new(None)
+    Client::new(None, true)
 }
 
 fn default_agent() -> Agent {
