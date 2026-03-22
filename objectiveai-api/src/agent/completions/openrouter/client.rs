@@ -18,7 +18,7 @@ pub struct Client {
     /// Base URL for the OpenRouter API.
     pub api_base: String,
     /// API key for authentication with OpenRouter.
-    pub api_key: String,
+    pub api_key: Option<String>,
     /// Optional User-Agent header value.
     pub user_agent: Option<String>,
     /// Optional X-Title header value.
@@ -286,7 +286,10 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
                     tools_enabled,
                 );
 
-            let api_key = byok.as_deref().unwrap_or(&client.api_key);
+            let api_key = match byok.as_deref().or(client.api_key.as_deref()) {
+                Some(key) => key,
+                None => return Err(super::Error::MissingApiKey),
+            };
             let event_source =
                 client.create_streaming_event_source(api_key, &request);
 

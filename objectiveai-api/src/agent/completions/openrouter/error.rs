@@ -43,6 +43,10 @@ pub enum Error {
     /// Tools are not allowed but response format requires a tool call.
     #[error("tools not allowed but response format requires a tool call")]
     ToolsNotAllowedWithRequiredToolCall,
+
+    /// No API key available (neither BYOK nor server-side).
+    #[error("missing API key: no BYOK provided and no server-side OpenRouter API key configured")]
+    MissingApiKey,
 }
 
 impl objectiveai::error::StatusError for Error {
@@ -61,6 +65,7 @@ impl objectiveai::error::StatusError for Error {
             Self::StreamError(_) => 500,
             Self::EmptyStream => 500,
             Self::ToolsNotAllowedWithRequiredToolCall => 400,
+            Self::MissingApiKey => 401,
         }
     }
 
@@ -96,6 +101,10 @@ impl objectiveai::error::StatusError for Error {
                 Self::ToolsNotAllowedWithRequiredToolCall => serde_json::json!({
                     "kind": "tools_not_allowed",
                     "error": "tools not allowed but response format requires a tool call",
+                }),
+                Self::MissingApiKey => serde_json::json!({
+                    "kind": "missing_api_key",
+                    "error": "no BYOK provided and no server-side OpenRouter API key configured",
                 }),
             },
         }))

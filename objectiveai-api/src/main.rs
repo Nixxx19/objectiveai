@@ -332,13 +332,13 @@ async fn main() {
         Arc::new(agent::completions::usage_handler::LogUsageHandler),
         Arc::new(agent::completions::openrouter::Client {
             http_client,
-            api_base: openrouter_api_base.clone(),
-            api_key: openrouter_api_key.clone().unwrap_or_default(),
-            user_agent,
+            api_base: openrouter_api_base,
+            api_key: openrouter_api_key,
+            user_agent: user_agent.clone(),
             x_title,
             referer: http_referer,
         }),
-        Arc::new(agent::completions::claude_agent_sdk::Client::new(None)),
+        Arc::new(agent::completions::claude_agent_sdk::Client::new(user_agent)),
         Arc::new(agent::completions::mock::Client {
             delay: std::time::Duration::from_millis(mock_delay_ms),
             max_tool_calls: mock_max_tool_calls,
