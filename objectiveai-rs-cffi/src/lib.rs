@@ -138,7 +138,7 @@ pub unsafe extern "C" fn objectiveai_validate_swarm(
         run(json_out, json_out_len, || {
             let base: objectiveai::swarm::SwarmBase = from_json(json_in, json_in_len)?;
             let remote_agents: Option<
-                std::collections::HashMap<String, objectiveai::agent::RemoteAgentWithFallbacks>,
+                std::collections::HashMap<String, objectiveai::agent::RemoteAgentBaseWithFallbacks>,
             > = if remote_agents_in.is_null() || remote_agents_in_len == 0 {
                 None
             } else {

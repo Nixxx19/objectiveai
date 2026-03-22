@@ -48,7 +48,7 @@ fn validate_agent(py: Python<'_>, agent: &Bound<'_, PyAny>) -> PyResult<Py<PyAny
 #[pyo3(signature = (swarm, remote_agents=None))]
 fn validate_swarm(py: Python<'_>, swarm: &Bound<'_, PyAny>, remote_agents: Option<&Bound<'_, PyAny>>) -> PyResult<Py<PyAny>> {
     let swarm_base: objectiveai::swarm::SwarmBase = from_py(swarm)?;
-    let remote_agents: Option<std::collections::HashMap<String, objectiveai::agent::RemoteAgentWithFallbacks>> =
+    let remote_agents: Option<std::collections::HashMap<String, objectiveai::agent::RemoteAgentBaseWithFallbacks>> =
         match remote_agents {
             Some(ra) => Some(from_py(ra)?),
             None => None,

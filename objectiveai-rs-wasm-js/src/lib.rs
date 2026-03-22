@@ -99,7 +99,7 @@ pub fn validateSwarm(swarm: JsValue, remote_agents: JsValue) -> Result<String, J
     // deserialize
     let swarm_base: objectiveai::swarm::SwarmBase =
         serde_wasm_bindgen::from_value(swarm)?;
-    let remote_agents: Option<std::collections::HashMap<String, objectiveai::agent::RemoteAgentWithFallbacks>> =
+    let remote_agents: Option<std::collections::HashMap<String, objectiveai::agent::RemoteAgentBaseWithFallbacks>> =
         if remote_agents.is_undefined() || remote_agents.is_null() {
             None
         } else {

@@ -32,7 +32,7 @@ impl InlineSwarmBase {
     /// Remote agent references are resolved from the provided hashmap.
     pub fn convert(
         self,
-        remote_agents: Option<&HashMap<String, agent::RemoteAgentWithFallbacks>>,
+        remote_agents: Option<&HashMap<String, agent::RemoteAgentBaseWithFallbacks>>,
     ) -> Result<InlineSwarm, String> {
         convert_base(self.agents, self.weights, remote_agents)
     }
@@ -55,7 +55,7 @@ impl RemoteSwarmBase {
     /// Validates and converts to a [`RemoteSwarm`] with computed ID.
     pub fn convert(
         self,
-        remote_agents: Option<&HashMap<String, agent::RemoteAgentWithFallbacks>>,
+        remote_agents: Option<&HashMap<String, agent::RemoteAgentBaseWithFallbacks>>,
     ) -> Result<RemoteSwarm, String> {
         Ok(RemoteSwarm {
             description: self.description,
@@ -77,7 +77,7 @@ impl SwarmBase {
     /// Validates and converts to a [`Swarm`] with computed ID.
     pub fn convert(
         self,
-        remote_agents: Option<&HashMap<String, agent::RemoteAgentWithFallbacks>>,
+        remote_agents: Option<&HashMap<String, agent::RemoteAgentBaseWithFallbacks>>,
     ) -> Result<Swarm, String> {
         match self {
             SwarmBase::Remote(r) => Ok(Swarm::Remote(r.convert(remote_agents)?)),
@@ -230,7 +230,7 @@ fn validate_agent_fallbacks(agent: &agent::AgentWithFallbacks) -> Result<(), Str
 /// Converts an agent slot (inline or remote reference) to a validated agent.
 fn convert_agent_slot(
     slot: agent::InlineAgentBaseWithFallbacksOrRemote,
-    remote_agents: Option<&HashMap<String, agent::RemoteAgentWithFallbacks>>,
+    remote_agents: Option<&HashMap<String, agent::RemoteAgentBaseWithFallbacks>>,
 ) -> Result<agent::AgentWithFallbacks, String> {
     match slot {
         agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(base_with_fallbacks) => {
@@ -244,13 +244,13 @@ fn convert_agent_slot(
                     key
                 )
             })?;
-            let agent = remote_agents.get(&key).ok_or_else(|| {
+            let agent_base = remote_agents.get(&key).ok_or_else(|| {
                 format!(
                     "remote agent '{}' not found in agents hashmap",
                     key
                 )
             })?;
-            Ok(agent::AgentWithFallbacks::Remote(agent.clone()))
+            Ok(agent::AgentWithFallbacks::Remote(agent_base.clone().convert()?))
         }
     }
 }
@@ -261,7 +261,7 @@ fn convert_agent_slot(
 fn convert_base(
     agents: Vec<agent::InlineAgentBaseWithFallbacksOrRemoteWithCount>,
     weights: Option<Weights>,
-    remote_agents: Option<&HashMap<String, agent::RemoteAgentWithFallbacks>>,
+    remote_agents: Option<&HashMap<String, agent::RemoteAgentBaseWithFallbacks>>,
 ) -> Result<InlineSwarm, String> {
     // Resolve weights: use provided or default to uniform
     let weight_pairs: Vec<(Decimal, bool)> = match &weights {
