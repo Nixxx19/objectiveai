@@ -12,16 +12,18 @@ where
 {
     fn handle_usage(
         &self,
-        _ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT>,
         _request: Arc<objectiveai::agent::completions::request::AgentCompletionCreateParams>,
         response: objectiveai::agent::completions::response::unary::AgentCompletion,
     ) -> impl std::future::Future<Output = ()> + Send + 'static {
         async move {
-            println!(
-                "[{}] cost: {}",
-                response.id.as_str(),
-                response.usage.total_cost,
-            );
+            if !ctx.suppress_output {
+                println!(
+                    "[{}] cost: {}",
+                    response.id.as_str(),
+                    response.usage.total_cost,
+                );
+            }
         }
     }
 }

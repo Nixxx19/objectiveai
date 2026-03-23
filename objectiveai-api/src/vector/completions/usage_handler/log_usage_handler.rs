@@ -13,14 +13,16 @@ where
 {
     async fn handle_usage(
         &self,
-        _ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT>,
         _request: Arc<objectiveai::vector::completions::request::VectorCompletionCreateParams>,
         response: objectiveai::vector::completions::response::unary::VectorCompletion,
     ) {
-        println!(
-            "[{}] cost: {}",
-            response.id.as_str(),
-            response.usage.total_cost,
-        );
+        if !ctx.suppress_output {
+            println!(
+                "[{}] cost: {}",
+                response.id.as_str(),
+                response.usage.total_cost,
+            );
+        }
     }
 }

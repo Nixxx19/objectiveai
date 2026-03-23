@@ -18,7 +18,6 @@ impl ResponseErrorExt for objectiveai::error::ResponseError {
         let status = axum::http::StatusCode::from_u16(self.code)
             .unwrap_or(axum::http::StatusCode::INTERNAL_SERVER_ERROR);
         let body = serde_json::to_string(&self).unwrap_or_default();
-        println!("ResponseError: {}", body);
         (status, body).into_response()
     }
 }

@@ -11,14 +11,16 @@ where
 {
     async fn handle_usage(
         &self,
-        _ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT>,
         _request: Arc<objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams>,
         response: objectiveai::functions::inventions::recursive::response::unary::FunctionInventionRecursive,
     ) {
-        println!(
-            "[{}] cost: {}",
-            response.id.as_str(),
-            response.usage.total_cost,
-        );
+        if !ctx.suppress_output {
+            println!(
+                "[{}] cost: {}",
+                response.id.as_str(),
+                response.usage.total_cost,
+            );
+        }
     }
 }
