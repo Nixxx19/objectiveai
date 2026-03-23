@@ -322,7 +322,7 @@ pub struct Config {
     pub suppress_output: bool,
 }
 
-pub async fn setup(config: Config) -> (tokio::net::TcpListener, axum::Router) {
+pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, axum::Router)> {
     let Config {
         objectiveai_api_base,
         objectiveai_api_key,
@@ -960,24 +960,23 @@ pub async fn setup(config: Config) -> (tokio::net::TcpListener, axum::Router) {
 
     let listener =
         tokio::net::TcpListener::bind(format!("{}:{}", address, port))
-            .await
-            .unwrap();
+            .await?;
 
-    (listener, app)
+    Ok((listener, app))
 }
 
-pub async fn serve(listener: tokio::net::TcpListener, app: axum::Router) {
-    axum::serve(listener, app).await.unwrap();
+pub async fn serve(listener: tokio::net::TcpListener, app: axum::Router) -> std::io::Result<()> {
+    axum::serve(listener, app).await
 }
 
-pub async fn run(config: Config) {
+pub async fn run(config: Config) -> std::io::Result<()> {
     let suppress_output = config.suppress_output;
-    let (listener, app) = setup(config).await;
+    let (listener, app) = setup(config).await?;
     if !suppress_output {
-        let addr = listener.local_addr().unwrap();
+        let addr = listener.local_addr()?;
         eprintln!("listening on {addr}");
     }
-    serve(listener, app).await;
+    serve(listener, app).await
 }
 
 // Create Context
