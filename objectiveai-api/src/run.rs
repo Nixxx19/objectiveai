@@ -169,6 +169,7 @@ impl EnvConfigBuilder {
             mock_max_tool_calls: self.mock_max_tool_calls,
             address: self.address,
             port: self.port,
+            suppress_output: None,
         }
     }
 }
@@ -214,6 +215,7 @@ pub struct ConfigBuilder {
     pub mock_max_tool_calls: Option<u32>,
     pub address: Option<String>,
     pub port: Option<u16>,
+    pub suppress_output: Option<bool>,
 }
 
 impl Envconfig for ConfigBuilder {
@@ -272,6 +274,7 @@ impl ConfigBuilder {
             mock_max_tool_calls: self.mock_max_tool_calls.unwrap_or(1000),
             address: self.address.unwrap_or_else(|| "0.0.0.0".to_string()),
             port: self.port.unwrap_or(5000),
+            suppress_output: self.suppress_output.unwrap_or(false),
         }
     }
 }
@@ -316,9 +319,10 @@ pub struct Config {
     pub mock_max_tool_calls: u32,
     pub address: String,
     pub port: u16,
+    pub suppress_output: bool,
 }
 
-pub async fn run(config: Config) {
+pub async fn setup(config: Config) -> (tokio::net::TcpListener, axum::Router) {
     let Config {
         objectiveai_api_base,
         objectiveai_api_key,
@@ -359,6 +363,7 @@ pub async fn run(config: Config) {
         mock_max_tool_calls,
         address,
         port,
+        suppress_output,
     } = config;
 
     // HTTP Client
@@ -571,7 +576,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(body): Json<
                     objectiveai::agent::completions::request::AgentCompletionCreateParams,
                 >| {
-                    create_agent_completion(agent_completions_client, headers, body)
+                    create_agent_completion(agent_completions_client, headers, suppress_output, body)
                 }
             }),
         )
@@ -583,7 +588,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(body): Json<
                     objectiveai::vector::completions::request::VectorCompletionCreateParams,
                 >| {
-                    create_vector_completion(vector_completions_client, headers, body)
+                    create_vector_completion(vector_completions_client, headers, suppress_output, body)
                 }
             }),
         )
@@ -599,6 +604,7 @@ pub async fn run(config: Config) {
                     get_vector_completion_votes(
                         vector_completions_cache_client,
                         headers,
+                        suppress_output,
                         body,
                     )
                 }
@@ -616,6 +622,7 @@ pub async fn run(config: Config) {
                     get_vector_cache_vote(
                         vector_completions_cache_client,
                         headers,
+                        suppress_output,
                         body,
                     )
                 }
@@ -629,7 +636,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(params): Json<
                     objectiveai::functions::request::ListFunctionsRequest,
                 >| {
-                    list_functions(list_router, headers, params)
+                    list_functions(list_router, headers, suppress_output, params)
                 }
             }),
         )
@@ -641,7 +648,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(params): Json<
                     objectiveai::RemotePathCommitOptional,
                 >| {
-                    get_function(retrieve_router, headers, params)
+                    get_function(retrieve_router, headers, suppress_output, params)
                 }
             }),
         )
@@ -653,7 +660,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(params): Json<
                     objectiveai::functions::request::GetFunctionRequest,
                 >| {
-                    get_function_usage(usage_router, headers, params)
+                    get_function_usage(usage_router, headers, suppress_output, params)
                 }
             }),
         )
@@ -668,6 +675,7 @@ pub async fn run(config: Config) {
                     execute_function(
                         function_executions_client,
                         headers,
+                        suppress_output,
                         body,
                     )
                 }
@@ -681,7 +689,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(params): Json<
                     objectiveai::functions::profiles::request::ListProfilesRequest,
                 >| {
-                    list_profiles(list_router, headers, params)
+                    list_profiles(list_router, headers, suppress_output, params)
                 }
             }),
         )
@@ -693,7 +701,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(params): Json<
                     objectiveai::RemotePathCommitOptional,
                 >| {
-                    get_profile(retrieve_router, headers, params)
+                    get_profile(retrieve_router, headers, suppress_output, params)
                 }
             }),
         )
@@ -705,7 +713,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(params): Json<
                     objectiveai::functions::profiles::request::GetProfileRequest,
                 >| {
-                    get_profile_usage(usage_router, headers, params)
+                    get_profile_usage(usage_router, headers, suppress_output, params)
                 }
             }),
         )
@@ -717,7 +725,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(params): Json<
                     objectiveai::functions::request::ListFunctionProfilePairsRequest,
                 >| {
-                    list_function_profile_pairs(list_router, headers, params)
+                    list_function_profile_pairs(list_router, headers, suppress_output, params)
                 }
             }),
         )
@@ -729,7 +737,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(params): Json<
                     objectiveai::functions::request::GetFunctionProfilePairUsageRequest,
                 >| {
-                    get_function_profile_pair_usage(usage_router, headers, params)
+                    get_function_profile_pair_usage(usage_router, headers, suppress_output, params)
                 }
             }),
         )
@@ -741,7 +749,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(body): Json<
                     objectiveai::functions::inventions::request::FunctionInventionCreateParams,
                 >| {
-                    create_function_invention(function_inventions_client, headers, body)
+                    create_function_invention(function_inventions_client, headers, suppress_output, body)
                 }
             }),
         )
@@ -757,6 +765,7 @@ pub async fn run(config: Config) {
                     create_function_invention_recursive(
                         function_inventions_recursive_client,
                         headers,
+                        suppress_output,
                         body,
                     )
                 }
@@ -774,6 +783,7 @@ pub async fn run(config: Config) {
                     create_profile_computation(
                         profile_computations_client,
                         headers,
+                        suppress_output,
                         body,
                     )
                 }
@@ -787,7 +797,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(body): Json<
                     objectiveai::auth::request::CreateApiKeyRequest,
                 >| {
-                    create_api_key(auth_client, headers, body)
+                    create_api_key(auth_client, headers, suppress_output, body)
                 }
             }),
         )
@@ -799,7 +809,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(body): Json<
                     objectiveai::auth::request::CreateOpenRouterByokApiKeyRequest,
                 >| {
-                    create_openrouter_byok_api_key(auth_client, headers, body)
+                    create_openrouter_byok_api_key(auth_client, headers, suppress_output, body)
                 }
             }),
         )
@@ -811,7 +821,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(body): Json<
                     objectiveai::auth::request::DisableApiKeyRequest,
                 >| {
-                    disable_api_key(auth_client, headers, body)
+                    disable_api_key(auth_client, headers, suppress_output, body)
                 }
             }),
         )
@@ -821,7 +831,7 @@ pub async fn run(config: Config) {
             axum::routing::delete({
                 let auth_client = auth_client.clone();
                 move |headers: axum::http::HeaderMap| {
-                    delete_openrouter_byok_api_key(auth_client, headers)
+                    delete_openrouter_byok_api_key(auth_client, headers, suppress_output)
                 }
             }),
         )
@@ -831,7 +841,7 @@ pub async fn run(config: Config) {
             axum::routing::get({
                 let auth_client = auth_client.clone();
                 move |headers: axum::http::HeaderMap| {
-                    list_api_keys(auth_client, headers)
+                    list_api_keys(auth_client, headers, suppress_output)
                 }
             }),
         )
@@ -841,7 +851,7 @@ pub async fn run(config: Config) {
             axum::routing::get({
                 let auth_client = auth_client.clone();
                 move |headers: axum::http::HeaderMap| {
-                    get_openrouter_byok_api_key(auth_client, headers)
+                    get_openrouter_byok_api_key(auth_client, headers, suppress_output)
                 }
             }),
         )
@@ -851,7 +861,7 @@ pub async fn run(config: Config) {
             axum::routing::get({
                 let auth_client = auth_client.clone();
                 move |headers: axum::http::HeaderMap| {
-                    get_credits(auth_client, headers)
+                    get_credits(auth_client, headers, suppress_output)
                 }
             }),
         )
@@ -863,7 +873,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(params): Json<
                     objectiveai::swarm::request::ListSwarmsRequest,
                 >| {
-                    list_swarms(list_router, headers, params)
+                    list_swarms(list_router, headers, suppress_output, params)
                 }
             }),
         )
@@ -875,7 +885,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(params): Json<
                     objectiveai::RemotePathCommitOptional,
                 >| {
-                    get_swarm(retrieve_router, headers, params)
+                    get_swarm(retrieve_router, headers, suppress_output, params)
                 }
             }),
         )
@@ -887,7 +897,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(params): Json<
                     objectiveai::swarm::request::GetSwarmRequest,
                 >| {
-                    get_swarm_usage(usage_router, headers, params)
+                    get_swarm_usage(usage_router, headers, suppress_output, params)
                 }
             }),
         )
@@ -899,7 +909,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(params): Json<
                     objectiveai::agent::request::ListAgentsRequest,
                 >| {
-                    list_agents(list_router, headers, params)
+                    list_agents(list_router, headers, suppress_output, params)
                 }
             }),
         )
@@ -911,7 +921,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(params): Json<
                     objectiveai::RemotePathCommitOptional,
                 >| {
-                    get_agent(retrieve_router, headers, params)
+                    get_agent(retrieve_router, headers, suppress_output, params)
                 }
             }),
         )
@@ -923,7 +933,7 @@ pub async fn run(config: Config) {
                 move |headers: axum::http::HeaderMap, Json(params): Json<
                     objectiveai::agent::request::GetAgentRequest,
                 >| {
-                    get_agent_usage(usage_router, headers, params)
+                    get_agent_usage(usage_router, headers, suppress_output, params)
                 }
             }),
         )
@@ -932,10 +942,10 @@ pub async fn run(config: Config) {
             "/error",
             axum::routing::post({
                 let error_client = Arc::new(crate::error::Client::new());
-                move |Json(body): Json<
+                move |headers: axum::http::HeaderMap, Json(body): Json<
                     objectiveai::error::request::ErrorCreateParams,
                 >| {
-                    create_error(error_client, body)
+                    create_error(error_client, headers, suppress_output, body)
                 }
             }),
         )
@@ -953,16 +963,30 @@ pub async fn run(config: Config) {
             .await
             .unwrap();
 
-    eprintln!("listening on {}:{}", address, port);
+    (listener, app)
+}
+
+pub async fn serve(listener: tokio::net::TcpListener, app: axum::Router) {
     axum::serve(listener, app).await.unwrap();
+}
+
+pub async fn run(config: Config) {
+    let suppress_output = config.suppress_output;
+    let (listener, app) = setup(config).await;
+    if !suppress_output {
+        let addr = listener.local_addr().unwrap();
+        eprintln!("listening on {addr}");
+    }
+    serve(listener, app).await;
 }
 
 // Create Context
 
-fn context(headers: &axum::http::HeaderMap) -> ctx::Context<ctx::DefaultContextExt> {
+fn context(headers: &axum::http::HeaderMap, suppress_output: bool) -> ctx::Context<ctx::DefaultContextExt> {
     ctx::Context::new(
         Arc::new(ctx::DefaultContextExt),
         rust_decimal::Decimal::ONE,
+        suppress_output,
         headers,
     )
 }
@@ -1008,9 +1032,10 @@ async fn create_agent_completion(
         >,
     >,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     body: objectiveai::agent::completions::request::AgentCompletionCreateParams,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     if body.stream.unwrap_or(false) {
         match client
             .create_streaming_handle_usage(
@@ -1117,9 +1142,10 @@ async fn create_vector_completion(
         >,
     >,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     body: objectiveai::vector::completions::request::VectorCompletionCreateParams,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     if body.stream.unwrap_or(false) {
         match client
             .create_streaming_handle_usage(ctx, Arc::new(body))
@@ -1153,9 +1179,10 @@ async fn create_vector_completion(
 async fn list_functions(
     list_router: Arc<ListRouter>,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     params: objectiveai::functions::request::ListFunctionsRequest,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     let source = params.source.map(|s| match s {
         objectiveai::functions::request::ListFunctionsSource::All => retrieval::list::SourceFilter::All,
         objectiveai::functions::request::ListFunctionsSource::Mock => retrieval::list::SourceFilter::Mock,
@@ -1171,9 +1198,10 @@ async fn list_functions(
 async fn get_function_usage(
     usage_router: Arc<UsageRouter>,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     params: objectiveai::functions::request::GetFunctionRequest,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match usage_router.get_function_usage(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1239,9 +1267,10 @@ async fn execute_function(
         >,
     >,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     request: objectiveai::functions::executions::request::FunctionExecutionCreateParams,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     if request.stream.unwrap_or(false) {
         match client
             .create_streaming_handle_usage(ctx, Arc::new(request))
@@ -1278,9 +1307,10 @@ async fn execute_function(
 async fn list_profiles(
     list_router: Arc<ListRouter>,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     params: objectiveai::functions::profiles::request::ListProfilesRequest,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     let source = params.source.map(|s| match s {
         objectiveai::functions::profiles::request::ListProfilesSource::All => retrieval::list::SourceFilter::All,
         objectiveai::functions::profiles::request::ListProfilesSource::Mock => retrieval::list::SourceFilter::Mock,
@@ -1296,9 +1326,10 @@ async fn list_profiles(
 async fn get_profile_usage(
     usage_router: Arc<UsageRouter>,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     params: objectiveai::functions::profiles::request::GetProfileRequest,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match usage_router.get_profile_usage(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1310,9 +1341,10 @@ async fn get_profile_usage(
 async fn list_function_profile_pairs(
     list_router: Arc<ListRouter>,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     _params: objectiveai::functions::request::ListFunctionProfilePairsRequest,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match list_router.list_function_profile_pairs(&ctx).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1322,9 +1354,10 @@ async fn list_function_profile_pairs(
 async fn get_function_profile_pair_usage(
     usage_router: Arc<UsageRouter>,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     params: objectiveai::functions::request::GetFunctionProfilePairUsageRequest,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match usage_router.get_function_profile_pair_usage(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1350,9 +1383,10 @@ async fn get_vector_completion_votes(
         >,
     >,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     body: objectiveai::vector::completions::cache::request::GetCompletionVotesRequest,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match client.fetch_completion_votes(ctx, &body.id).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1376,9 +1410,10 @@ async fn get_vector_cache_vote(
         >,
     >,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     body: objectiveai::vector::completions::cache::request::CacheVoteRequestOwned,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match client
         .fetch_cache_vote(
             ctx,
@@ -1398,9 +1433,10 @@ async fn get_vector_cache_vote(
 async fn get_function(
     retrieve_router: Arc<RetrieveRouter>,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     params: objectiveai::RemotePathCommitOptional,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match retrieve_router.endpoint_get_function(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1412,9 +1448,10 @@ async fn get_function(
 async fn get_profile(
     retrieve_router: Arc<RetrieveRouter>,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     params: objectiveai::RemotePathCommitOptional,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match retrieve_router.endpoint_get_profile(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1434,9 +1471,10 @@ async fn create_profile_computation(
     // using a concrete type for client instead
     client: Arc<functions::profiles::computations::ObjectiveAiClient>,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     request: objectiveai::functions::profiles::computations::request::FunctionProfileComputationCreateParams,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     if request.stream.unwrap_or(false) {
         match client.create_streaming(ctx, Arc::new(request)).await {
             Ok(stream) => Sse::new(
@@ -1474,9 +1512,10 @@ async fn create_api_key(
         impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
     >,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     body: objectiveai::auth::request::CreateApiKeyRequest,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match client.create_api_key(ctx, body).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1488,9 +1527,10 @@ async fn create_openrouter_byok_api_key(
         impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
     >,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     body: objectiveai::auth::request::CreateOpenRouterByokApiKeyRequest,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match client.create_openrouter_byok_api_key(ctx, body).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1502,9 +1542,10 @@ async fn disable_api_key(
         impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
     >,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     body: objectiveai::auth::request::DisableApiKeyRequest,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match client.disable_api_key(ctx, body).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1516,8 +1557,9 @@ async fn delete_openrouter_byok_api_key(
         impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
     >,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match client.delete_openrouter_byok_api_key(ctx).await {
         Ok(()) => axum::http::StatusCode::OK.into_response(),
         Err(e) => e.into_response(),
@@ -1529,8 +1571,9 @@ async fn list_api_keys(
         impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
     >,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match client.list_api_keys(ctx).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1542,8 +1585,9 @@ async fn get_openrouter_byok_api_key(
         impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
     >,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match client.get_openrouter_byok_api_key(ctx).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1555,8 +1599,9 @@ async fn get_credits(
         impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
     >,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match client.get_credits(ctx).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1568,9 +1613,10 @@ async fn get_credits(
 async fn list_swarms(
     list_router: Arc<ListRouter>,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     params: objectiveai::swarm::request::ListSwarmsRequest,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     let source = params.source.map(|s| match s {
         objectiveai::swarm::request::ListSwarmsSource::All => retrieval::list::SourceFilter::All,
         objectiveai::swarm::request::ListSwarmsSource::Mock => retrieval::list::SourceFilter::Mock,
@@ -1586,9 +1632,10 @@ async fn list_swarms(
 async fn get_swarm(
     retrieve_router: Arc<RetrieveRouter>,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     params: objectiveai::RemotePathCommitOptional,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match retrieve_router.endpoint_get_swarm(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1598,9 +1645,10 @@ async fn get_swarm(
 async fn get_swarm_usage(
     usage_router: Arc<UsageRouter>,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     params: objectiveai::swarm::request::GetSwarmRequest,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match usage_router.get_swarm_usage(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1612,9 +1660,10 @@ async fn get_swarm_usage(
 async fn list_agents(
     list_router: Arc<ListRouter>,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     params: objectiveai::agent::request::ListAgentsRequest,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     let source = params.source.map(|s| match s {
         objectiveai::agent::request::ListAgentsSource::All => retrieval::list::SourceFilter::All,
         objectiveai::agent::request::ListAgentsSource::Mock => retrieval::list::SourceFilter::Mock,
@@ -1630,9 +1679,10 @@ async fn list_agents(
 async fn get_agent(
     retrieve_router: Arc<RetrieveRouter>,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     params: objectiveai::RemotePathCommitOptional,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match retrieve_router.endpoint_get_agent(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1642,9 +1692,10 @@ async fn get_agent(
 async fn get_agent_usage(
     usage_router: Arc<UsageRouter>,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     params: objectiveai::agent::request::GetAgentRequest,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     match usage_router.get_agent_usage(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1708,9 +1759,10 @@ async fn create_function_invention(
         >,
     >,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     body: objectiveai::functions::inventions::request::FunctionInventionCreateParams,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     if body.stream.unwrap_or(false) {
         match client
             .create_streaming_handle_usage(ctx, Arc::new(body))
@@ -1805,9 +1857,10 @@ async fn create_function_invention_recursive(
         >,
     >,
     headers: axum::http::HeaderMap,
+    suppress_output: bool,
     body: objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams,
 ) -> axum::response::Response {
-    let ctx = context(&headers);
+    let ctx = context(&headers, suppress_output);
     if body.stream.unwrap_or(false) {
         match client
             .create_streaming_handle_usage(ctx, Arc::new(body))
@@ -1843,10 +1896,13 @@ async fn create_function_invention_recursive(
 
 async fn create_error(
     client: Arc<crate::error::Client>,
+    headers: axum::http::HeaderMap,
+    suppress_output: bool,
     body: objectiveai::error::request::ErrorCreateParams,
 ) -> axum::response::Response {
+    let ctx = context(&headers, suppress_output);
     if body.stream.unwrap_or(false) {
-        match client.create_streaming(&body) {
+        match client.create_streaming(&ctx, &body) {
             Ok(stream) => Sse::new(
                 stream
                     .map(|result| {
@@ -1868,7 +1924,7 @@ async fn create_error(
             Err(e) => e.into_response(),
         }
     } else {
-        match client.create_unary(&body) {
+        match client.create_unary(&ctx, &body) {
             Ok(r) => Json(r).into_response(),
             Err(e) => e.into_response(),
         }

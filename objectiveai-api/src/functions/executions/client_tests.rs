@@ -273,7 +273,7 @@ fn check_created(expected: &std::cell::Cell<Option<u64>>, i: usize, created: u64
 }
 
 async fn run_execution(client: &Arc<TestClient>, request: Arc<FunctionExecutionCreateParams>) -> FunctionExecution {
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new());
     let stream = client
         .clone()
         .create_streaming(ctx, request)
@@ -1398,7 +1398,7 @@ fn make_request_with_overrides(
 
 /// Helper: expect create_streaming to return Err with a specific status code.
 async fn expect_err(client: &Arc<TestClient>, request: Arc<FunctionExecutionCreateParams>, expected_status: u16) -> super::Error {
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new());
     match client.clone().create_streaming(ctx, request).await {
         Ok(_) => panic!("expected create_streaming to fail, but it succeeded"),
         Err(err) => {

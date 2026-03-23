@@ -151,6 +151,7 @@ fn make_ctx() -> ctx::Context<ctx::DefaultContextExt> {
     ctx::Context::new(
         Arc::new(ctx::DefaultContextExt),
         rust_decimal::Decimal::ONE,
+        false,
         &axum::http::HeaderMap::new(),
     )
 }

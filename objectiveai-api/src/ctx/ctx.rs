@@ -22,6 +22,8 @@ pub struct Context<CTXEXT> {
     pub ext: Arc<CTXEXT>,
     /// Multiplier applied to costs for this request.
     pub cost_multiplier: rust_decimal::Decimal,
+    /// Whether to suppress output (eprintln, logging, etc).
+    pub suppress_output: bool,
     /// Per-request OpenRouter authorization token.
     openrouter_authorization: Option<Arc<String>>,
     /// Per-request GitHub authorization token.
@@ -113,6 +115,7 @@ impl<CTXEXT> Clone for Context<CTXEXT> {
         Self {
             ext: self.ext.clone(),
             cost_multiplier: self.cost_multiplier,
+            suppress_output: self.suppress_output,
             openrouter_authorization: self.openrouter_authorization.clone(),
             github_authorization: self.github_authorization.clone(),
             mcp_authorization: self.mcp_authorization.clone(),
@@ -141,6 +144,7 @@ impl<CTXEXT> Context<CTXEXT> {
     pub fn new(
         ext: Arc<CTXEXT>,
         cost_multiplier: rust_decimal::Decimal,
+        suppress_output: bool,
         headers: &axum::http::HeaderMap,
     ) -> Self {
         let openrouter_authorization = headers
@@ -171,6 +175,7 @@ impl<CTXEXT> Context<CTXEXT> {
         Self {
             ext,
             cost_multiplier,
+            suppress_output,
             openrouter_authorization,
             github_authorization,
             mcp_authorization,
