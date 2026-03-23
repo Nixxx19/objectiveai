@@ -23,12 +23,7 @@ impl ConfigClient {
     pub fn read(&self) -> Result<super::Config, super::ConfigError> {
         let path = self.config_path();
         if !path.exists() {
-            return Ok(super::Config {
-                authorization: None,
-                agents: None,
-                swarms: None,
-                functions: None,
-            });
+            return Ok(super::Config::default());
         }
         let file = std::fs::File::open(&path)
             .map_err(|e| super::ConfigError::Read(path.clone(), e))?;

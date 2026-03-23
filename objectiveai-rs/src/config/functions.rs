@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct FunctionsConfig {
     #[serde(skip_serializing_if = "FunctionsInventionsConfig::is_none")]
     pub inventions: Option<FunctionsInventionsConfig>,
@@ -11,10 +11,6 @@ pub struct FunctionsConfig {
 }
 
 impl FunctionsConfig {
-    pub fn new() -> Self {
-        Self { inventions: None, profiles: None, favorites: None }
-    }
-
     pub fn is_empty(&self) -> bool {
         self.inventions.as_ref().is_none_or(|cfg| cfg.is_empty())
     }
@@ -24,11 +20,11 @@ impl FunctionsConfig {
     }
 
     pub fn inventions(&mut self) -> &mut FunctionsInventionsConfig {
-        self.inventions.get_or_insert_with(FunctionsInventionsConfig::new)
+        self.inventions.get_or_insert_with(FunctionsInventionsConfig::default)
     }
 
     pub fn profiles(&mut self) -> &mut FunctionsProfilesConfig {
-        self.profiles.get_or_insert_with(FunctionsProfilesConfig::new)
+        self.profiles.get_or_insert_with(FunctionsProfilesConfig::default)
     }
 
     pub fn get_favorites(&self) -> &[super::Favorite] {
@@ -57,16 +53,12 @@ impl FunctionsConfig {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct FunctionsInventionsConfig {
     pub remote: Option<crate::Remote>,
 }
 
 impl FunctionsInventionsConfig {
-    pub fn new() -> Self {
-        Self { remote: None }
-    }
-
     pub fn is_empty(&self) -> bool {
         self.remote.is_none()
     }
@@ -88,17 +80,13 @@ impl FunctionsInventionsConfig {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct FunctionsProfilesConfig {
     #[serde(skip_serializing_if = "crate::util::vec_is_none_or_empty")]
     pub favorites: Option<Vec<super::Favorite>>,
 }
 
 impl FunctionsProfilesConfig {
-    pub fn new() -> Self {
-        Self { favorites: None }
-    }
-
     pub fn is_empty(&self) -> bool {
         crate::util::vec_is_none_or_empty(&self.favorites)
     }

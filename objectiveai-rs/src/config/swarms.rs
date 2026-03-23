@@ -1,16 +1,12 @@
 use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SwarmsConfig {
     #[serde(skip_serializing_if = "crate::util::vec_is_none_or_empty")]
     pub favorites: Option<Vec<super::Favorite>>,
 }
 
 impl SwarmsConfig {
-    pub fn new() -> Self {
-        Self { favorites: None }
-    }
-
     pub fn is_empty(&self) -> bool {
         crate::util::vec_is_none_or_empty(&self.favorites)
     }

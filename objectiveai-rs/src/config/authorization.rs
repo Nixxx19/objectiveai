@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 use indexmap::IndexMap;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct AuthorizationConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub objectiveai: Option<String>,
@@ -14,15 +14,6 @@ pub struct AuthorizationConfig {
 }
 
 impl AuthorizationConfig {
-    pub fn new() -> Self {
-        Self {
-            objectiveai: None,
-            openrouter: None,
-            github: None,
-            mcp: None,
-        }
-    }
-
     pub fn is_empty(&self) -> bool {
         self.objectiveai.is_none() &&
             self.openrouter.is_none() &&
