@@ -2,7 +2,6 @@ mod config;
 mod error;
 mod favorite;
 mod api;
-mod authorization;
 mod agents;
 mod swarms;
 mod functions;
@@ -29,11 +28,6 @@ enum Commands {
         #[command(subcommand)]
         command: api::Commands,
     },
-    /// Authorization management
-    Authorization {
-        #[command(subcommand)]
-        command: authorization::Commands,
-    },
     /// Agents management
     Agents {
         #[command(subcommand)]
@@ -55,7 +49,6 @@ impl Commands {
     pub async fn handle(self) -> Result<Output, error::Error> {
         match self {
             Commands::Api { command } => command.handle(),
-            Commands::Authorization { command } => command.handle(),
             Commands::Agents { command } => command.handle(),
             Commands::Swarms { command } => command.handle(),
             Commands::Functions { command } => command.handle(),

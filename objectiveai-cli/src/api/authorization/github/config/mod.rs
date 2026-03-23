@@ -12,9 +12,9 @@ impl Commands {
     pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
         let (client, mut config) = crate::config::read()?;
         match self {
-            Commands::Get => Ok(crate::Output::ConfigGet(crate::config::format_value(&config.authorization().get_github()))),
+            Commands::Get => Ok(crate::Output::ConfigGet(crate::config::format_value(&config.api().authorization().get_github()))),
             Commands::Set { value } => {
-                config.authorization().set_github(value);
+                config.api().authorization().set_github(value);
                 crate::config::write(&client, &config)?;
                 Ok(crate::Output::ConfigSet)
             }

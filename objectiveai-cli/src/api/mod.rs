@@ -2,6 +2,7 @@ pub mod config;
 pub mod mode;
 pub mod remote;
 pub mod local;
+pub mod authorization;
 
 use clap::Subcommand;
 
@@ -27,6 +28,11 @@ pub enum Commands {
         #[command(subcommand)]
         command: local::Commands,
     },
+    /// Authorization management
+    Authorization {
+        #[command(subcommand)]
+        command: authorization::Commands,
+    },
 }
 
 impl Commands {
@@ -36,6 +42,7 @@ impl Commands {
             Commands::Mode { command } => command.handle(),
             Commands::Remote { command } => command.handle(),
             Commands::Local { command } => command.handle(),
+            Commands::Authorization { command } => command.handle(),
         }
     }
 }

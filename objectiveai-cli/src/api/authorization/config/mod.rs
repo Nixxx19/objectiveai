@@ -10,7 +10,7 @@ impl Commands {
     pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
         let (_, mut config) = crate::config::read()?;
         match self {
-            Commands::Get { filter } => crate::config::format_jq(config.authorization().jq(&crate::config::filter(filter))),
+            Commands::Get { filter } => crate::config::format_jq(config.api().authorization().jq(&crate::config::filter(filter))),
         }
     }
 }

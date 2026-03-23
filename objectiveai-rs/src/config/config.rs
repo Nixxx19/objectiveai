@@ -4,8 +4,6 @@ use serde::{Serialize, Deserialize};
 pub struct Config {
     #[serde(skip_serializing_if = "super::ApiConfig::is_none")]
     pub api: Option<super::ApiConfig>,
-    #[serde(skip_serializing_if = "super::AuthorizationConfig::is_none")]
-    pub authorization: Option<super::AuthorizationConfig>,
     #[serde(skip_serializing_if = "super::AgentsConfig::is_none")]
     pub agents: Option<super::AgentsConfig>,
     #[serde(skip_serializing_if = "super::SwarmsConfig::is_none")]
@@ -17,10 +15,6 @@ pub struct Config {
 impl Config {
     pub fn api(&mut self) -> &mut super::ApiConfig {
         self.api.get_or_insert_with(super::ApiConfig::default)
-    }
-
-    pub fn authorization(&mut self) -> &mut super::AuthorizationConfig {
-        self.authorization.get_or_insert_with(super::AuthorizationConfig::default)
     }
 
     pub fn agents(&mut self) -> &mut super::AgentsConfig {

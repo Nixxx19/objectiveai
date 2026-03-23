@@ -8,6 +8,8 @@ pub struct ApiConfig {
     pub remote: Option<RemoteApiConfig>,
     #[serde(skip_serializing_if = "LocalApiConfig::is_none")]
     pub local: Option<LocalApiConfig>,
+    #[serde(skip_serializing_if = "ApiAuthorizationConfig::is_none")]
+    pub authorization: Option<ApiAuthorizationConfig>,
 }
 
 impl ApiConfig {
@@ -25,6 +27,10 @@ impl ApiConfig {
 
     pub fn local(&mut self) -> &mut LocalApiConfig {
         self.local.get_or_insert_with(LocalApiConfig::default)
+    }
+
+    pub fn authorization(&mut self) -> &mut ApiAuthorizationConfig {
+        self.authorization.get_or_insert_with(ApiAuthorizationConfig::default)
     }
 
     pub fn get_mode(&self) -> ApiMode {
@@ -240,6 +246,73 @@ impl LocalApiConfig {
 
     pub fn set_commit_author_email(&mut self, value: impl Into<String>) {
         self.commit_author_email = Some(value.into());
+    }
+
+    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
+        super::jq::run_jq(self, filter)
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ApiAuthorizationConfig {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub objectiveai: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub openrouter: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub github: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mcp: Option<indexmap::IndexMap<String, String>>,
+}
+
+impl ApiAuthorizationConfig {
+    pub fn is_empty(&self) -> bool {
+        self.objectiveai.is_none() &&
+            self.openrouter.is_none() &&
+            self.github.is_none() &&
+            self.mcp.as_ref().is_none_or(|mcp| mcp.is_empty())
+    }
+
+    pub fn is_none(this: &Option<Self>) -> bool {
+        this.as_ref().is_none_or(|cfg| cfg.is_empty())
+    }
+
+    pub fn get_objectiveai(&self) -> Option<&str> {
+        self.objectiveai.as_deref()
+    }
+
+    pub fn set_objectiveai(&mut self, value: impl Into<String>) {
+        self.objectiveai = Some(value.into());
+    }
+
+    pub fn get_openrouter(&self) -> Option<&str> {
+        self.openrouter.as_deref()
+    }
+
+    pub fn set_openrouter(&mut self, value: impl Into<String>) {
+        self.openrouter = Some(value.into());
+    }
+
+    pub fn get_github(&self) -> Option<&str> {
+        self.github.as_deref()
+    }
+
+    pub fn set_github(&mut self, value: impl Into<String>) {
+        self.github = Some(value.into());
+    }
+
+    pub fn add_mcp(&mut self, key: impl Into<String>, value: impl Into<String>) {
+        self.mcp.get_or_insert_with(indexmap::IndexMap::new).insert(key.into(), value.into());
+    }
+
+    pub fn get_mcp(&self) -> Option<&indexmap::IndexMap<String, String>> {
+        self.mcp.as_ref()
+    }
+
+    pub fn del_mcp(&mut self, key: &str) {
+        if let Some(mcp) = &mut self.mcp {
+            mcp.shift_remove(key);
+        }
     }
 
     pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
