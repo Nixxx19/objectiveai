@@ -666,7 +666,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         )
         // Function Executions - create
         .route(
-            "/functions",
+            "/functions/executions",
             axum::routing::post({
                 let function_executions_client = function_executions_client.clone();
                 move |headers: axum::http::HeaderMap, Json(body): Json<

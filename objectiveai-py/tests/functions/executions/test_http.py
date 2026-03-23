@@ -12,7 +12,7 @@ def mock_remote(name: str) -> dict:
 
 globals().update(http_test_suite(
     name="function executions http",
-    endpoint="/functions",
+    endpoint="/functions/executions",
     snapshots_dir=ASSETS_DIR / "functions" / "executions" / "client_tests",
     chunk_cls=FunctionExecutionChunk,
     chunk_to_unary=objectiveai_pyo3.function_execution_chunk_to_unary,

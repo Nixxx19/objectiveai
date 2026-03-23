@@ -17,7 +17,7 @@ function executionBody(name: string): { function: object; profile: object } {
 
 httpTestSuite<FunctionsExecutionsResponseStreamingFunctionExecutionChunk, FunctionsExecutionsResponseUnaryFunctionExecution>({
   name: "functions executions http",
-  endpoint: "/functions",
+  endpoint: "/functions/executions",
   snapshotsDir: path.resolve(__dirname, "../../../../objectiveai-api/assets/functions/executions/client_tests"),
   merge: functionsExecutionsResponseStreamingFunctionExecutionChunkMerged,
   chunkToUnary: wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkToUnary,

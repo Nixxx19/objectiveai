@@ -21,5 +21,5 @@ async def create_function_execution(
     If ``params.stream`` is true, returns a streaming response.
     """
     if getattr(params, "stream", None):
-        return await client.post_streaming("functions", params)
-    return await client.post_unary("functions", params)
+        return await client.post_streaming("functions/executions", params)
+    return await client.post_unary("functions/executions", params)

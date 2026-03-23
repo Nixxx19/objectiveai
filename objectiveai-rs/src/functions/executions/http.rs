@@ -10,7 +10,7 @@ pub async fn create_function_execution_unary(
 ) -> Result<super::response::unary::FunctionExecution, HttpError> {
     params.stream = None;
     client
-        .send_unary(reqwest::Method::POST, "functions", Some(params))
+        .send_unary(reqwest::Method::POST, "functions/executions", Some(params))
         .await
 }
 
@@ -32,6 +32,6 @@ pub async fn create_function_execution_streaming(
 > {
     params.stream = Some(true);
     client
-        .send_streaming(reqwest::Method::POST, "functions", Some(params))
+        .send_streaming(reqwest::Method::POST, "functions/executions", Some(params))
         .await
 }

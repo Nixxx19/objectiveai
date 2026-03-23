@@ -24,13 +24,13 @@ export function functionsExecutionsCreateFunctionExecution(
 > {
   if (body.stream) {
     return client.post_streaming<FunctionsExecutionsResponseStreamingFunctionExecutionChunk>(
-      "functions",
+      "functions/executions",
       body,
       options,
     );
   }
   return client.post_unary<FunctionsExecutionsResponseUnaryFunctionExecution>(
-    "functions",
+    "functions/executions",
     body,
     options,
   );
