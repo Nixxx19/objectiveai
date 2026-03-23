@@ -172,10 +172,10 @@ struct Config {
     publish_github_token: Option<String>,
     #[envconfig(from = "CONFIG_BASE_DIR")]
     config_base_dir: Option<String>,
-    #[envconfig(from = "FILESYSTEM_COMMIT_AUTHOR_NAME", default = "ObjectiveAI")]
-    filesystem_commit_author_name: String,
-    #[envconfig(from = "FILESYSTEM_COMMIT_AUTHOR_EMAIL", default = "admin@objective-ai.io")]
-    filesystem_commit_author_email: String,
+    #[envconfig(from = "COMMIT_AUTHOR_NAME", default = "ObjectiveAI")]
+    commit_author_name: String,
+    #[envconfig(from = "COMMIT_AUTHOR_EMAIL", default = "admin@objective-ai.io")]
+    commit_author_email: String,
     #[envconfig(from = "MOCK_DELAY_MS", default = "0")]
     mock_delay_ms: u64,
     #[envconfig(from = "MOCK_MAX_TOOL_CALLS", default = "1000")]
@@ -226,8 +226,8 @@ async fn main() {
         fetch_github_token,
         publish_github_token,
         config_base_dir,
-        filesystem_commit_author_name,
-        filesystem_commit_author_email,
+        commit_author_name,
+        commit_author_email,
         mock_delay_ms,
         mock_max_tool_calls,
         address,
@@ -287,8 +287,8 @@ async fn main() {
 
     let filesystem_client = Arc::new(filesystem::Client::new(
         filesystem_base_dir,
-        filesystem_commit_author_name,
-        filesystem_commit_author_email,
+        commit_author_name,
+        commit_author_email,
     ));
 
 
