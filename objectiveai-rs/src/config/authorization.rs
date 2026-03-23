@@ -53,6 +53,10 @@ impl AuthorizationConfig {
         self.mcp.get_or_insert_with(IndexMap::new).insert(key.into(), value.into());
     }
 
+    pub fn get_mcp(&self) -> Option<&indexmap::IndexMap<String, String>> {
+        self.mcp.as_ref()
+    }
+
     pub fn del_mcp(&mut self, key: &str) {
         if let Some(mcp) = &mut self.mcp {
             mcp.shift_remove(key);

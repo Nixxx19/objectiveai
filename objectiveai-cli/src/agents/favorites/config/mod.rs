@@ -1,0 +1,44 @@
+use clap::Subcommand;
+
+#[derive(Subcommand)]
+pub enum Commands {
+    /// Get all favorites
+    Get,
+    /// Add a favorite
+    Add {
+        #[command(subcommand)]
+        command: crate::favorite::AddFavorite,
+    },
+    /// Delete a favorite by index
+    Del { index: usize },
+    /// Edit a favorite
+    Edit {
+        #[command(flatten)]
+        args: crate::favorite::EditFavorite,
+    },
+}
+
+impl Commands {
+    pub fn handle(self) -> Result<Option<String>, crate::error::Error> {
+        let (client, mut config) = crate::config::read()?;
+        match self {
+            Commands::Get => Ok(Some(crate::config::format_value(&config.agents().get_favorites()))),
+            Commands::Add { command } => {
+                config.agents().add_favorite(command.into());
+                crate::config::write(&client, &config)?;
+                Ok(None)
+            }
+            Commands::Del { index } => {
+                config.agents().del_favorite(index)?;
+                crate::config::write(&client, &config)?;
+                Ok(None)
+            }
+            Commands::Edit { args } => {
+                let favorite = config.agents().edit_favorite(args.index)?;
+                args.apply(favorite);
+                crate::config::write(&client, &config)?;
+                Ok(None)
+            }
+        }
+    }
+}

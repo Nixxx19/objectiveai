@@ -44,12 +44,10 @@ impl FunctionsConfig {
         Ok(())
     }
 
-    pub fn edit_favorite(&mut self, index: usize, note: String) -> Result<(), super::ConfigError> {
+    pub fn edit_favorite(&mut self, index: usize) -> Result<&mut super::Favorite, super::ConfigError> {
         let favorites = self.favorites.as_mut().ok_or(super::ConfigError::IndexOutOfBounds(index, 0))?;
         let len = favorites.len();
-        let favorite = favorites.get_mut(index).ok_or(super::ConfigError::IndexOutOfBounds(index, len))?;
-        favorite.note = note;
-        Ok(())
+        favorites.get_mut(index).ok_or(super::ConfigError::IndexOutOfBounds(index, len))
     }
 
     pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
@@ -120,12 +118,10 @@ impl FunctionsProfilesConfig {
         Ok(())
     }
 
-    pub fn edit_favorite(&mut self, index: usize, note: String) -> Result<(), super::ConfigError> {
+    pub fn edit_favorite(&mut self, index: usize) -> Result<&mut super::Favorite, super::ConfigError> {
         let favorites = self.favorites.as_mut().ok_or(super::ConfigError::IndexOutOfBounds(index, 0))?;
         let len = favorites.len();
-        let favorite = favorites.get_mut(index).ok_or(super::ConfigError::IndexOutOfBounds(index, len))?;
-        favorite.note = note;
-        Ok(())
+        favorites.get_mut(index).ok_or(super::ConfigError::IndexOutOfBounds(index, len))
     }
 
     pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
