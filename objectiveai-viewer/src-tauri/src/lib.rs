@@ -1,5 +1,6 @@
 pub mod args;
 pub mod chunk;
+pub mod functions;
 
 use std::io::BufRead;
 use tauri::Emitter;
