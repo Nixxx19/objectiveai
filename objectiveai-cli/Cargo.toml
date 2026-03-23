@@ -3,12 +3,17 @@ name = "objectiveai-cli"
 version = "2.0.0"
 edition = "2024"
 
+[features]
+default = ["viewer"]
+viewer = ["dep:objectiveai-viewer"]
+
 [dependencies]
 objectiveai = { path = "../objectiveai-rs", version = "2.0.0" }
+objectiveai-api = { path = "../objectiveai-api", version = "2.0.0" }
+objectiveai-viewer = { path = "../objectiveai-viewer/src-tauri", version = "2.0.0", optional = true }
 clap = { version = "4.6.0", features = ["derive"] }
 ratatui = "0.30.0"
 tokio = { version = "1.50.0", features = ["full"] }
 serde_json = "1.0.149"
 serde = "1.0.228"
 thiserror = "2.0.18"
-objectiveai-api = { version = "2.0.0", path = "../objectiveai-api" }
