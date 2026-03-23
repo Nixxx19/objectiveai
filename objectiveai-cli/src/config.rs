@@ -15,9 +15,9 @@ pub fn write(client: &ConfigClient, config: &Config) -> Result<(), crate::error:
     Ok(())
 }
 
-pub fn format_jq(results: Result<Vec<serde_json::Value>, ConfigError>) -> Result<Option<String>, crate::error::Error> {
+pub fn format_jq(results: Result<Vec<serde_json::Value>, ConfigError>) -> Result<crate::Output, crate::error::Error> {
     let results = results?;
-    Ok(Some(match results.len() {
+    Ok(crate::Output::ConfigGet(match results.len() {
         0 => serde_json::to_string(&serde_json::Value::Null).unwrap(),
         1 => serde_json::to_string(&results[0]).unwrap(),
         _ => serde_json::to_string(&results).unwrap(),

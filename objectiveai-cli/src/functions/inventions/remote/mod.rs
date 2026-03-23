@@ -27,7 +27,7 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn handle(self) -> Result<Option<String>, crate::error::Error> {
+    pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
         match self {
             Commands::Config { command } => command.handle(),
         }

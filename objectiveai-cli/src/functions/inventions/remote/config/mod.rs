@@ -12,14 +12,14 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn handle(self) -> Result<Option<String>, crate::error::Error> {
+    pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
         let (client, mut config) = crate::config::read()?;
         match self {
-            Commands::Get => Ok(Some(crate::config::format_value(&config.functions().inventions().get_remote()))),
+            Commands::Get => Ok(crate::Output::ConfigGet(crate::config::format_value(&config.functions().inventions().get_remote()))),
             Commands::Set { value } => {
                 config.functions().inventions().set_remote(value.into())?;
                 crate::config::write(&client, &config)?;
-                Ok(None)
+                Ok(crate::Output::ConfigSet)
             }
         }
     }

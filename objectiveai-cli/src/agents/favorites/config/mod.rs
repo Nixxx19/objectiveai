@@ -19,25 +19,25 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn handle(self) -> Result<Option<String>, crate::error::Error> {
+    pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
         let (client, mut config) = crate::config::read()?;
         match self {
-            Commands::Get => Ok(Some(crate::config::format_value(&config.agents().get_favorites()))),
+            Commands::Get => Ok(crate::Output::ConfigGet(crate::config::format_value(&config.agents().get_favorites()))),
             Commands::Add { command } => {
                 config.agents().add_favorite(command.into());
                 crate::config::write(&client, &config)?;
-                Ok(None)
+                Ok(crate::Output::ConfigSet)
             }
             Commands::Del { index } => {
                 config.agents().del_favorite(index)?;
                 crate::config::write(&client, &config)?;
-                Ok(None)
+                Ok(crate::Output::ConfigSet)
             }
             Commands::Edit { args } => {
                 let favorite = config.agents().edit_favorite(args.index)?;
                 args.apply(favorite);
                 crate::config::write(&client, &config)?;
-                Ok(None)
+                Ok(crate::Output::ConfigSet)
             }
         }
     }

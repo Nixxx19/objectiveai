@@ -17,6 +17,11 @@ struct Cli {
     command: Commands,
 }
 
+pub enum Output {
+    ConfigGet(String),
+    ConfigSet,
+}
+
 #[derive(Subcommand)]
 enum Commands {
     /// API configuration and operations
@@ -47,7 +52,7 @@ enum Commands {
 }
 
 impl Commands {
-    pub fn handle(self) -> Result<Option<String>, error::Error> {
+    pub async fn handle(self) -> Result<Output, error::Error> {
         match self {
             Commands::Api { command } => command.handle(),
             Commands::Authorization { command } => command.handle(),
@@ -58,14 +63,15 @@ impl Commands {
     }
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let cli = Cli::parse();
 
-    match cli.command.handle() {
-        Ok(Some(output)) => println!("{output}"),
-        Ok(None) => {}
+    match cli.command.handle().await {
+        Ok(Output::ConfigGet(output)) => println!("{output}"),
+        Ok(Output::ConfigSet) => println!("ok"),
         Err(e) => {
-            eprintln!("Error: {e}");
+            eprintln!("error: {e}");
             std::process::exit(1);
         }
     }
