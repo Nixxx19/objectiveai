@@ -39,4 +39,8 @@ impl SwarmsConfig {
         favorite.note = note;
         Ok(())
     }
+
+    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
+        super::jq::run_jq(self, filter)
+    }
 }

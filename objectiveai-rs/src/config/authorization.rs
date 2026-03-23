@@ -58,4 +58,8 @@ impl AuthorizationConfig {
             mcp.shift_remove(key);
         }
     }
+
+    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
+        super::jq::run_jq(self, filter)
+    }
 }

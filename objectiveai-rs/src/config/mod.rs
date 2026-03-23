@@ -7,6 +7,7 @@ mod agents;
 mod swarms;
 mod favorite;
 mod error;
+mod jq;
 
 pub use client::*;
 pub use config::*;

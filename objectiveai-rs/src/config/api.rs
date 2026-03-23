@@ -2,8 +2,8 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ApiConfig {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub mode: Option<ApiMode>,
+    #[serde(default)]
+    pub mode: ApiMode,
     #[serde(skip_serializing_if = "RemoteApiConfig::is_none")]
     pub remote: Option<RemoteApiConfig>,
     #[serde(skip_serializing_if = "LocalApiConfig::is_none")]
@@ -12,9 +12,7 @@ pub struct ApiConfig {
 
 impl ApiConfig {
     pub fn is_empty(&self) -> bool {
-        self.mode.is_none()
-            && self.remote.as_ref().is_none_or(|cfg| cfg.is_empty())
-            && self.local.as_ref().is_none_or(|cfg| cfg.is_empty())
+        false
     }
 
     pub fn is_none(this: &Option<Self>) -> bool {
@@ -30,11 +28,15 @@ impl ApiConfig {
     }
 
     pub fn get_mode(&self) -> ApiMode {
-        self.mode.unwrap_or_default()
+        self.mode
     }
 
     pub fn set_mode(&mut self, mode: ApiMode) {
-        self.mode = Some(mode);
+        self.mode = mode;
+    }
+
+    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
+        super::jq::run_jq(self, filter)
     }
 }
 
@@ -111,6 +113,10 @@ impl RemoteApiConfig {
 
     pub fn set_http_referer(&mut self, value: impl Into<String>) {
         self.http_referer = Some(value.into());
+    }
+
+    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
+        super::jq::run_jq(self, filter)
     }
 }
 
@@ -234,5 +240,9 @@ impl LocalApiConfig {
 
     pub fn set_commit_author_email(&mut self, value: impl Into<String>) {
         self.commit_author_email = Some(value.into());
+    }
+
+    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
+        super::jq::run_jq(self, filter)
     }
 }

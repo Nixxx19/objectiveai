@@ -51,6 +51,10 @@ impl FunctionsConfig {
         favorite.note = note;
         Ok(())
     }
+
+    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
+        super::jq::run_jq(self, filter)
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -77,6 +81,10 @@ impl FunctionsInventionsConfig {
         }
         self.remote = Some(remote);
         Ok(())
+    }
+
+    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
+        super::jq::run_jq(self, filter)
     }
 }
 
@@ -118,5 +126,9 @@ impl FunctionsProfilesConfig {
         let favorite = favorites.get_mut(index).ok_or(super::ConfigError::IndexOutOfBounds(index, len))?;
         favorite.note = note;
         Ok(())
+    }
+
+    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
+        super::jq::run_jq(self, filter)
     }
 }
