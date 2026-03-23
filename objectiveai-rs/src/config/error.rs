@@ -12,4 +12,10 @@ pub enum ConfigError {
     Serialize(serde_json::Error),
     #[error("failed to write config file {0}: {1}")]
     Write(std::path::PathBuf, std::io::Error),
+    #[error("jq parse error: {0}")]
+    JqParse(String),
+    #[error("jq compile error: {0}")]
+    JqCompile(String),
+    #[error("jq runtime error: {0}")]
+    JqRuntime(String),
 }
