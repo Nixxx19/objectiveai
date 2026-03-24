@@ -524,8 +524,8 @@ where
         let (updated_path, publish_error) = match request.remote {
             objectiveai::Remote::Filesystem => {
                 match crate::functions::inventions::publish_filesystem(
-                    &invention_client.filesystem_client, name, &publish_files,
-                ) {
+                    &invention_client.filesystem_client, &ctx, name, &publish_files,
+                ).await {
                     Ok(path) => (Some(path), None),
                     Err(e) => (None, Some(e)),
                 }

@@ -16,18 +16,29 @@ pub struct Client {
     /// The underlying HTTP client.
     pub http_client: reqwest::Client,
     /// Base URL for the OpenRouter API.
-    pub api_base: String,
+    pub address: String,
     /// API key for authentication with OpenRouter.
-    pub api_key: Option<String>,
-    /// Optional User-Agent header value.
-    pub user_agent: Option<String>,
-    /// Optional X-Title header value.
-    pub x_title: Option<String>,
-    /// Optional Referer header value (sent as both referer and http-referer).
-    pub referer: Option<String>,
+    pub authorization: Option<String>,
+    /// User-Agent header value.
+    pub user_agent: String,
+    /// X-Title header value.
+    pub x_title: String,
+    /// Referer header value (sent as both referer and http-referer).
+    pub http_referer: String,
 }
 
 impl Client {
+    pub fn new(
+        http_client: reqwest::Client,
+        address: String,
+        authorization: Option<String>,
+        user_agent: String,
+        x_title: String,
+        http_referer: String,
+    ) -> Self {
+        Self { http_client, address, authorization, user_agent, x_title, http_referer }
+    }
+
     /// Creates an SSE EventSource for the streaming request.
     fn create_streaming_event_source(
         &self,
@@ -36,23 +47,16 @@ impl Client {
     ) -> EventSource {
         let mut http_request = self
             .http_client
-            .post(format!("{}/chat/completions", self.api_base))
+            .post(format!("{}/chat/completions", self.address))
             .header("authorization", if api_key.starts_with("Bearer ") {
                 api_key.to_string()
             } else {
                 format!("Bearer {}", api_key)
-            });
-        if let Some(ref user_agent) = self.user_agent {
-            http_request = http_request.header("user-agent", user_agent);
-        }
-        if let Some(ref x_title) = self.x_title {
-            http_request = http_request.header("x-title", x_title);
-        }
-        if let Some(ref referer) = self.referer {
-            http_request = http_request
-                .header("referer", referer)
-                .header("http-referer", referer);
-        }
+            })
+            .header("user-agent", &self.user_agent)
+            .header("x-title", &self.x_title)
+            .header("referer", &self.http_referer)
+            .header("http-referer", &self.http_referer);
         http_request.json(request).eventsource().unwrap()
     }
 
@@ -286,7 +290,7 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
                     tools_enabled,
                 );
 
-            let api_key = match byok.as_deref().or(client.api_key.as_deref()) {
+            let api_key = match byok.as_deref().or(client.authorization.as_deref()) {
                 Some(key) => key,
                 None => return Err(super::Error::MissingApiKey),
             };

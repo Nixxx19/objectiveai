@@ -24,28 +24,36 @@ pub struct Context<CTXEXT> {
     pub cost_multiplier: rust_decimal::Decimal,
     /// Whether to suppress output (eprintln, logging, etc).
     pub suppress_output: bool,
+    /// Per-request ObjectiveAI authorization token.
+    objectiveai_authorization: Option<Arc<String>>,
     /// Per-request OpenRouter authorization token.
     openrouter_authorization: Option<Arc<String>>,
     /// Per-request GitHub authorization token.
     github_authorization: Option<Arc<String>>,
     /// Per-request MCP authorization headers.
     mcp_authorization: Option<Arc<HashMap<String, String>>>,
-    /// Per-request ObjectiveAI authorization token.
-    objectiveai_authorization: Option<Arc<String>>,
-    /// Per-request ObjectiveAI signature.
-    objectiveai_signature: Option<Arc<String>>,
-    /// Per-request ObjectiveAI viewer address.
-    objectiveai_viewer_address: Option<Arc<String>>,
-    /// Cached resolved OpenRouter authorization (self + BYOK).
+    /// Per-request viewer signature.
+    viewer_signature: Option<Arc<String>>,
+    /// Per-request viewer address.
+    viewer_address: Option<Arc<String>>,
+    /// Per-request commit author name.
+    commit_author_name: Option<Arc<String>>,
+    /// Per-request commit author email.
+    commit_author_email: Option<Arc<String>>,
+    /// Cached resolved OpenRouter authorization (self + ext).
     openrouter_authorization_cached: Arc<OnceCell<Option<Arc<String>>>>,
-    /// Cached resolved GitHub authorization (self + BYOK).
+    /// Cached resolved GitHub authorization (self + ext).
     github_authorization_cached: Arc<OnceCell<Option<Arc<String>>>>,
-    /// Cached resolved MCP authorization (self + BYOK merged).
+    /// Cached resolved MCP authorization (self + ext merged).
     mcp_authorization_cached: Arc<OnceCell<Option<Arc<HashMap<String, String>>>>>,
-    /// Cached resolved ObjectiveAI signature (self + BYOK).
-    objectiveai_signature_cached: Arc<OnceCell<Option<Arc<String>>>>,
-    /// Cached resolved ObjectiveAI viewer address (self + BYOK).
-    objectiveai_viewer_address_cached: Arc<OnceCell<Option<Arc<String>>>>,
+    /// Cached resolved viewer signature (self + ext).
+    viewer_signature_cached: Arc<OnceCell<Option<Arc<String>>>>,
+    /// Cached resolved viewer address (self + ext).
+    viewer_address_cached: Arc<OnceCell<Option<Arc<String>>>>,
+    /// Cached resolved commit author name (self + ext).
+    commit_author_name_cached: Arc<OnceCell<Option<Arc<String>>>>,
+    /// Cached resolved commit author email (self + ext).
+    commit_author_email_cached: Arc<OnceCell<Option<Arc<String>>>>,
     /// Cache for agent fetches, keyed by RemotePath.
     pub agent_cache: Arc<
         DashMap<
@@ -124,17 +132,21 @@ impl<CTXEXT> Clone for Context<CTXEXT> {
             ext: self.ext.clone(),
             cost_multiplier: self.cost_multiplier,
             suppress_output: self.suppress_output,
+            objectiveai_authorization: self.objectiveai_authorization.clone(),
             openrouter_authorization: self.openrouter_authorization.clone(),
             github_authorization: self.github_authorization.clone(),
             mcp_authorization: self.mcp_authorization.clone(),
-            objectiveai_authorization: self.objectiveai_authorization.clone(),
-            objectiveai_signature: self.objectiveai_signature.clone(),
-            objectiveai_viewer_address: self.objectiveai_viewer_address.clone(),
+            viewer_signature: self.viewer_signature.clone(),
+            viewer_address: self.viewer_address.clone(),
+            commit_author_name: self.commit_author_name.clone(),
+            commit_author_email: self.commit_author_email.clone(),
             openrouter_authorization_cached: self.openrouter_authorization_cached.clone(),
             github_authorization_cached: self.github_authorization_cached.clone(),
             mcp_authorization_cached: self.mcp_authorization_cached.clone(),
-            objectiveai_signature_cached: self.objectiveai_signature_cached.clone(),
-            objectiveai_viewer_address_cached: self.objectiveai_viewer_address_cached.clone(),
+            viewer_signature_cached: self.viewer_signature_cached.clone(),
+            viewer_address_cached: self.viewer_address_cached.clone(),
+            commit_author_name_cached: self.commit_author_name_cached.clone(),
+            commit_author_email_cached: self.commit_author_email_cached.clone(),
             swarm_cache: self.swarm_cache.clone(),
             agent_cache: self.agent_cache.clone(),
             function_cache: self.function_cache.clone(),
@@ -159,6 +171,13 @@ impl<CTXEXT> Context<CTXEXT> {
         suppress_output: bool,
         headers: &axum::http::HeaderMap,
     ) -> Self {
+        let objectiveai_authorization = headers
+            .get("X-OBJECTIVEAI-AUTHORIZATION")
+            .or_else(|| headers.get("OBJECTIVEAI-AUTHORIZATION"))
+            .or_else(|| headers.get("AUTHORIZATION"))
+            .and_then(|v| v.to_str().ok())
+            .map(|s| Arc::new(s.to_owned()));
+
         let openrouter_authorization = headers
             .get("X-OPENROUTER-AUTHORIZATION")
             .or_else(|| headers.get("OPENROUTER-AUTHORIZATION"))
@@ -178,20 +197,29 @@ impl<CTXEXT> Context<CTXEXT> {
             .and_then(|s| serde_json::from_str::<HashMap<String, String>>(s).ok())
             .map(Arc::new);
 
-        let objectiveai_authorization = headers
-            .get("X-OBJECTIVEAI-AUTHORIZATION")
-            .or_else(|| headers.get("OBJECTIVEAI-AUTHORIZATION"))
-            .or_else(|| headers.get("AUTHORIZATION"))
+        let viewer_signature = headers
+            .get("X-VIEWER-SIGNATURE")
+            .or_else(|| headers.get("VIEWER-SIGNATURE"))
+            .or_else(|| headers.get("X-OBJECTIVEAI-SIGNATURE"))
+            .or_else(|| headers.get("OBJECTIVEAI-SIGNATURE"))
             .and_then(|v| v.to_str().ok())
             .map(|s| Arc::new(s.to_owned()));
 
-        let objectiveai_signature = headers
-            .get("X-OBJECTIVEAI-SIGNATURE")
+        let viewer_address = headers
+            .get("X-VIEWER-ADDRESS")
+            .or_else(|| headers.get("VIEWER-ADDRESS"))
             .and_then(|v| v.to_str().ok())
             .map(|s| Arc::new(s.to_owned()));
 
-        let objectiveai_viewer_address = headers
-            .get("X-OBJECTIVEAI-VIEWER-ADDRESS")
+        let commit_author_name = headers
+            .get("X-COMMIT-AUTHOR-NAME")
+            .or_else(|| headers.get("COMMIT-AUTHOR-NAME"))
+            .and_then(|v| v.to_str().ok())
+            .map(|s| Arc::new(s.to_owned()));
+
+        let commit_author_email = headers
+            .get("X-COMMIT-AUTHOR-EMAIL")
+            .or_else(|| headers.get("COMMIT-AUTHOR-EMAIL"))
             .and_then(|v| v.to_str().ok())
             .map(|s| Arc::new(s.to_owned()));
 
@@ -203,13 +231,17 @@ impl<CTXEXT> Context<CTXEXT> {
             github_authorization,
             mcp_authorization,
             objectiveai_authorization,
-            objectiveai_signature,
-            objectiveai_viewer_address,
+            viewer_signature,
+            viewer_address,
+            commit_author_name,
+            commit_author_email,
             openrouter_authorization_cached: Arc::new(OnceCell::new()),
             github_authorization_cached: Arc::new(OnceCell::new()),
             mcp_authorization_cached: Arc::new(OnceCell::new()),
-            objectiveai_signature_cached: Arc::new(OnceCell::new()),
-            objectiveai_viewer_address_cached: Arc::new(OnceCell::new()),
+            viewer_signature_cached: Arc::new(OnceCell::new()),
+            viewer_address_cached: Arc::new(OnceCell::new()),
+            commit_author_name_cached: Arc::new(OnceCell::new()),
+            commit_author_email_cached: Arc::new(OnceCell::new()),
             swarm_cache: Arc::new(DashMap::new()),
             agent_cache: Arc::new(DashMap::new()),
             function_cache: Arc::new(DashMap::new()),
@@ -232,7 +264,7 @@ impl<CTXEXT: super::ContextExt> Context<CTXEXT> {
     /// Only OpenRouter is supported. Returns `None` for other upstreams.
     /// Checks the per-request token first, falls back to the BYOK token
     /// from the context extension. Result is cached for subsequent calls.
-    pub async fn get_upstream_byok(
+    pub async fn upstream_authorization(
         &self,
         upstream: objectiveai::agent::Upstream,
     ) -> Option<Arc<String>> {
@@ -241,7 +273,7 @@ impl<CTXEXT: super::ContextExt> Context<CTXEXT> {
         }
         self.openrouter_authorization_cached
             .get_or_init(|| async {
-                match (&self.openrouter_authorization, self.ext.get_openrouter_byok().await) {
+                match (&self.openrouter_authorization, self.ext.openrouter_authorization().await) {
                     (Some(self_token), _) => Some(self_token.clone()),
                     (None, byok) => byok,
                 }
@@ -257,7 +289,7 @@ impl<CTXEXT: super::ContextExt> Context<CTXEXT> {
     pub async fn github_authorization(&self) -> Option<Arc<String>> {
         self.github_authorization_cached
             .get_or_init(|| async {
-                match (&self.github_authorization, self.ext.get_github_byok().await) {
+                match (&self.github_authorization, self.ext.github_authorization().await) {
                     (Some(self_token), _) => Some(self_token.clone()),
                     (None, byok) => byok,
                 }
@@ -274,14 +306,14 @@ impl<CTXEXT: super::ContextExt> Context<CTXEXT> {
     pub async fn mcp_authorization(&self) -> Option<Arc<HashMap<String, String>>> {
         self.mcp_authorization_cached
             .get_or_init(|| async {
-                let byok = self.ext.get_mcp_byok().await;
+                let byok: Option<Arc<HashMap<String, String>>> = self.ext.mcp_authorization().await;
                 match (&self.mcp_authorization, byok) {
                     (None, None) => None,
                     (Some(self_headers), None) => Some(self_headers.clone()),
                     (None, Some(byok_headers)) => Some(byok_headers),
                     (Some(self_headers), Some(byok_headers)) => {
-                        let mut merged = (*byok_headers).clone();
-                        for (k, v) in self_headers.iter() {
+                        let mut merged: HashMap<String, String> = (**self_headers).clone();
+                        for (k, v) in byok_headers.iter() {
                             merged.insert(k.clone(), v.clone());
                         }
                         Some(Arc::new(merged))
@@ -296,10 +328,10 @@ impl<CTXEXT: super::ContextExt> Context<CTXEXT> {
     ///
     /// Checks the per-request signature first, falls back to the BYOK signature
     /// from the context extension. Result is cached for subsequent calls.
-    pub async fn objectiveai_signature(&self) -> Option<Arc<String>> {
-        self.objectiveai_signature_cached
+    pub async fn viewer_signature(&self) -> Option<Arc<String>> {
+        self.viewer_signature_cached
             .get_or_init(|| async {
-                match (&self.objectiveai_signature, self.ext.get_objectiveai_signature().await) {
+                match (&self.viewer_signature, self.ext.viewer_signature().await) {
                     (Some(self_sig), _) => Some(self_sig.clone()),
                     (None, byok) => byok,
                 }
@@ -312,12 +344,44 @@ impl<CTXEXT: super::ContextExt> Context<CTXEXT> {
     ///
     /// Checks the per-request address first, falls back to the BYOK address
     /// from the context extension. Result is cached for subsequent calls.
-    pub async fn objectiveai_viewer_address(&self) -> Option<Arc<String>> {
-        self.objectiveai_viewer_address_cached
+    pub async fn viewer_address(&self) -> Option<Arc<String>> {
+        self.viewer_address_cached
             .get_or_init(|| async {
-                match (&self.objectiveai_viewer_address, self.ext.get_objectiveai_viewer_address().await) {
+                match (&self.viewer_address, self.ext.viewer_address().await) {
                     (Some(self_addr), _) => Some(self_addr.clone()),
                     (None, byok) => byok,
+                }
+            })
+            .await
+            .clone()
+    }
+
+    /// Returns the resolved commit author name.
+    ///
+    /// Checks the per-request name first, falls back to the ext.
+    /// Result is cached for subsequent calls.
+    pub async fn commit_author_name(&self) -> Option<Arc<String>> {
+        self.commit_author_name_cached
+            .get_or_init(|| async {
+                match (&self.commit_author_name, self.ext.commit_author_name().await) {
+                    (Some(self_name), _) => Some(self_name.clone()),
+                    (None, ext) => ext,
+                }
+            })
+            .await
+            .clone()
+    }
+
+    /// Returns the resolved commit author email.
+    ///
+    /// Checks the per-request email first, falls back to the ext.
+    /// Result is cached for subsequent calls.
+    pub async fn commit_author_email(&self) -> Option<Arc<String>> {
+        self.commit_author_email_cached
+            .get_or_init(|| async {
+                match (&self.commit_author_email, self.ext.commit_author_email().await) {
+                    (Some(self_email), _) => Some(self_email.clone()),
+                    (None, ext) => ext,
                 }
             })
             .await

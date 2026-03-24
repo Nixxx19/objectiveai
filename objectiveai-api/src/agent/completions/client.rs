@@ -29,6 +29,8 @@ pub type McpHandle = futures::future::Shared<
 pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> {
     /// MCP Client
     pub mcp_client: Arc<crate::mcp::Client>,
+    /// Default MCP authorization headers (used when ctx doesn't provide them).
+    pub mcp_authorization: Option<Arc<std::collections::HashMap<String, String>>>,
     /// Retrieve router for resolving remote agent references.
     pub retrieve_router: Arc<crate::retrieval::retrieve::Router<RETRG, RETRF, RETRM, CTXEXT>>,
     /// Handler for tracking usage after completion.
@@ -62,6 +64,7 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM,
 impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> {
     pub fn new(
         mcp_client: Arc<crate::mcp::Client>,
+        mcp_authorization: Option<Arc<std::collections::HashMap<String, String>>>,
         retrieve_router: Arc<crate::retrieval::retrieve::Router<RETRG, RETRF, RETRM, CTXEXT>>,
         usage_handler: Arc<CUSG>,
         openrouter: Arc<OPENROUTER>,
@@ -78,6 +81,7 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> Client
     ) -> Self {
         Self {
             mcp_client,
+            mcp_authorization,
             retrieve_router,
             usage_handler,
             openrouter,
@@ -102,6 +106,7 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> Clone
     fn clone(&self) -> Self {
         Self {
             mcp_client: self.mcp_client.clone(),
+            mcp_authorization: self.mcp_authorization.clone(),
             retrieve_router: self.retrieve_router.clone(),
             usage_handler: self.usage_handler.clone(),
             openrouter: self.openrouter.clone(),
@@ -403,7 +408,7 @@ where
                 );
 
                 // d. Get BYOK for this agent's upstream.
-                let byok = ctx.get_upstream_byok(attempt.agent.base().upstream()).await;
+                let byok = ctx.upstream_authorization(attempt.agent.base().upstream()).await;
 
                 // e. BYOK strategy: try with key first, then without.
                 let byok_attempts: Vec<Option<&str>> = match &byok {
@@ -852,13 +857,16 @@ where
                 let server_urls: Vec<_> = servers.iter().map(|s| (s.url.clone(), s.authorization)).collect();
                 let (tx, rx) = tokio::sync::oneshot::channel();
                 let mcp_client = self.mcp_client.clone();
+                let self_mcp_auth = self.mcp_authorization.clone();
                 let ctx = ctx.clone();
                 tokio::spawn(async move {
                     let mcp_auth = ctx.mcp_authorization().await;
                     let mut connect_args = Vec::with_capacity(server_urls.len());
                     for (url, requires_auth) in &server_urls {
                         let authorization = if *requires_auth {
-                            match mcp_auth.as_ref().and_then(|m| m.get(url)) {
+                            match mcp_auth.as_ref().and_then(|m| m.get(url))
+                                .or_else(|| self_mcp_auth.as_ref().and_then(|m| m.get(url)))
+                            {
                                 Some(auth) => Some(auth.clone()),
                                 None => {
                                     let _ = tx.send(Ok(None)); // skip agent

@@ -19,14 +19,14 @@ use crate::util::StreamOnce;
 /// package and passes it to spawned Node.js subprocesses via an environment variable.
 #[derive(Debug, Clone)]
 pub struct Client {
-    pub user_agent: Option<String>,
+    pub user_agent: String,
     pub enabled: bool,
     sdk_path: Arc<std::sync::OnceLock<String>>,
     next_id: Arc<AtomicU64>,
 }
 
 impl Client {
-    pub fn new(user_agent: Option<String>, enabled: bool) -> Self {
+    pub fn new(user_agent: String, enabled: bool) -> Self {
         Self {
             user_agent,
             enabled,
@@ -159,7 +159,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                 agent.base.thinking,
                 &mcp_connections,
                 invention_server.as_ref(),
-                client.user_agent.as_deref(),
+                Some(client.user_agent.as_str()),
             )?;
 
             // Compute assistant_index from continuation.

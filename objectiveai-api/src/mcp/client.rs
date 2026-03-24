@@ -13,11 +13,11 @@ pub struct Client {
     /// HTTP client for making requests.
     pub http_client: reqwest::Client,
     /// User-Agent header value.
-    pub user_agent: Option<String>,
+    pub user_agent: String,
     /// X-Title header value.
-    pub x_title: Option<String>,
+    pub x_title: String,
     /// Referer header value.
-    pub referer: Option<String>,
+    pub http_referer: String,
     /// Timeout for the initial connection (initialize request).
     pub connect_timeout: Duration,
 
@@ -41,9 +41,9 @@ impl Client {
     /// Creates a new MCP client.
     pub fn new(
         http_client: reqwest::Client,
-        user_agent: Option<String>,
-        x_title: Option<String>,
-        referer: Option<String>,
+        user_agent: String,
+        x_title: String,
+        http_referer: String,
         connect_timeout: Duration,
         backoff_current_interval: Duration,
         backoff_initial_interval: Duration,
@@ -57,7 +57,7 @@ impl Client {
             http_client,
             user_agent,
             x_title,
-            referer,
+            http_referer,
             connect_timeout,
             backoff_current_interval,
             backoff_initial_interval,
@@ -104,15 +104,10 @@ impl Client {
         if let Some(auth) = &authorization {
             request = request.header("Authorization", auth);
         }
-        if let Some(ua) = &self.user_agent {
-            request = request.header("User-Agent", ua);
-        }
-        if let Some(title) = &self.x_title {
-            request = request.header("X-Title", title);
-        }
-        if let Some(referer) = &self.referer {
-            request = request.header("Referer", referer);
-        }
+        request = request.header("User-Agent", &self.user_agent);
+        request = request.header("X-Title", &self.x_title);
+        request = request.header("Referer", &self.http_referer);
+        request = request.header("HTTP-Referer", &self.http_referer);
 
         let response =
             request.send().await.map_err(super::Error::Connection)?;
@@ -154,7 +149,7 @@ impl Client {
             authorization,
             self.user_agent.clone(),
             self.x_title.clone(),
-            self.referer.clone(),
+            self.http_referer.clone(),
             self.backoff_current_interval,
             self.backoff_initial_interval,
             self.backoff_randomization_factor,

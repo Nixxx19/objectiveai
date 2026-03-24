@@ -112,9 +112,9 @@ fn make_client() -> super::Client<
     super::Client::new(
         Arc::new(crate::mcp::Client::new(
             reqwest::Client::new(),
-            None,
-            None,
-            None,
+            String::new(),
+            String::new(),
+            String::new(),
             Duration::ZERO,
             Duration::ZERO,
             Duration::ZERO,
@@ -124,6 +124,7 @@ fn make_client() -> super::Client<
             Duration::ZERO,
             Duration::from_millis(1),
         )),
+        None, // mcp_authorization
         Arc::new(crate::retrieval::retrieve::Router::new(
             Arc::new(StubRetrieveClient),
             Arc::new(StubRetrieveClient),

@@ -43,26 +43,36 @@ type UsageRouter = retrieval::usage::Router<
 
 #[derive(Envconfig)]
 struct EnvConfigBuilder {
-    #[envconfig(from = "OBJECTIVEAI_API_BASE")]
-    objectiveai_api_base: Option<String>,
-    #[envconfig(from = "OBJECTIVEAI_API_KEY")]
-    objectiveai_api_key: Option<String>,
-    #[envconfig(from = "OPENROUTER_API_BASE")]
-    openrouter_api_base: Option<String>,
-    #[envconfig(from = "OPENROUTER_API_KEY")]
-    openrouter_api_key: Option<String>,
-    #[envconfig(from = "CLAUDE_AGENT_SDK")]
-    claude_agent_sdk: Option<String>,
-    #[envconfig(from = "VIEWER_API_BASE")]
-    viewer_api_base: Option<String>,
-    #[envconfig(from = "VIEWER_API_SIGNATURE")]
-    viewer_api_signature: Option<String>,
+    // -- HttpClient fields (identical order across all 3 structs) --
+    #[envconfig(from = "OBJECTIVEAI_ADDRESS")]
+    objectiveai_address: Option<String>,
+    #[envconfig(from = "OBJECTIVEAI_AUTHORIZATION")]
+    objectiveai_authorization: Option<String>,
+    #[envconfig(from = "OPENROUTER_ADDRESS")]
+    openrouter_address: Option<String>,
+    #[envconfig(from = "OPENROUTER_AUTHORIZATION")]
+    openrouter_authorization: Option<String>,
+    #[envconfig(from = "GITHUB_AUTHORIZATION")]
+    github_authorization: Option<String>,
+    #[envconfig(from = "MCP_AUTHORIZATION")]
+    mcp_authorization: Option<String>,
+    #[envconfig(from = "VIEWER_ADDRESS")]
+    viewer_address: Option<String>,
+    #[envconfig(from = "VIEWER_SIGNATURE")]
+    viewer_signature: Option<String>,
     #[envconfig(from = "USER_AGENT")]
     user_agent: Option<String>,
     #[envconfig(from = "HTTP_REFERER")]
     http_referer: Option<String>,
     #[envconfig(from = "X_TITLE")]
     x_title: Option<String>,
+    #[envconfig(from = "COMMIT_AUTHOR_NAME")]
+    commit_author_name: Option<String>,
+    #[envconfig(from = "COMMIT_AUTHOR_EMAIL")]
+    commit_author_email: Option<String>,
+    // -- Other fields --
+    #[envconfig(from = "CLAUDE_AGENT_SDK")]
+    claude_agent_sdk: Option<String>,
     #[envconfig(from = "AGENT_COMPLETIONS_BACKOFF_CURRENT_INTERVAL")]
     agent_completions_backoff_current_interval: Option<u64>,
     #[envconfig(from = "AGENT_COMPLETIONS_BACKOFF_INITIAL_INTERVAL")]
@@ -119,16 +129,8 @@ struct EnvConfigBuilder {
     mcp_connect_timeout: Option<u64>,
     #[envconfig(from = "MCP_CALL_TIMEOUT")]
     mcp_call_timeout: Option<u64>,
-    #[envconfig(from = "FETCH_GITHUB_TOKEN")]
-    fetch_github_token: Option<String>,
-    #[envconfig(from = "PUBLISH_GITHUB_TOKEN")]
-    publish_github_token: Option<String>,
     #[envconfig(from = "CONFIG_BASE_DIR")]
     config_base_dir: Option<String>,
-    #[envconfig(from = "COMMIT_AUTHOR_NAME")]
-    commit_author_name: Option<String>,
-    #[envconfig(from = "COMMIT_AUTHOR_EMAIL")]
-    commit_author_email: Option<String>,
     #[envconfig(from = "MOCK_DELAY_MS")]
     mock_delay_ms: Option<u64>,
     #[envconfig(from = "MOCK_MAX_TOOL_CALLS")]
@@ -146,16 +148,22 @@ impl EnvConfigBuilder {
             !v.is_empty() && v != "0" && !v.eq_ignore_ascii_case("false")
         }
         ConfigBuilder {
-            objectiveai_api_base: self.objectiveai_api_base,
-            objectiveai_api_key: self.objectiveai_api_key,
-            openrouter_api_base: self.openrouter_api_base,
-            openrouter_api_key: self.openrouter_api_key,
-            claude_agent_sdk: self.claude_agent_sdk.map(|s| parse_bool(&s)),
-            viewer_api_base: self.viewer_api_base,
-            viewer_api_signature: self.viewer_api_signature,
+            // -- HttpClient fields --
+            objectiveai_address: self.objectiveai_address,
+            objectiveai_authorization: self.objectiveai_authorization,
+            openrouter_address: self.openrouter_address,
+            openrouter_authorization: self.openrouter_authorization,
+            github_authorization: self.github_authorization,
+            mcp_authorization: self.mcp_authorization,
+            viewer_address: self.viewer_address,
+            viewer_signature: self.viewer_signature,
             user_agent: self.user_agent,
             http_referer: self.http_referer,
             x_title: self.x_title,
+            commit_author_name: self.commit_author_name,
+            commit_author_email: self.commit_author_email,
+            // -- Other fields --
+            claude_agent_sdk: self.claude_agent_sdk.map(|s| parse_bool(&s)),
             agent_completions_backoff_current_interval: self.agent_completions_backoff_current_interval,
             agent_completions_backoff_initial_interval: self.agent_completions_backoff_initial_interval,
             agent_completions_backoff_randomization_factor: self.agent_completions_backoff_randomization_factor,
@@ -184,11 +192,7 @@ impl EnvConfigBuilder {
             agent_completions_other_chunk_timeout: self.agent_completions_other_chunk_timeout,
             mcp_connect_timeout: self.mcp_connect_timeout,
             mcp_call_timeout: self.mcp_call_timeout,
-            fetch_github_token: self.fetch_github_token,
-            publish_github_token: self.publish_github_token,
             config_base_dir: self.config_base_dir,
-            commit_author_name: self.commit_author_name,
-            commit_author_email: self.commit_author_email,
             mock_delay_ms: self.mock_delay_ms,
             mock_max_tool_calls: self.mock_max_tool_calls,
             address: self.address,
@@ -200,16 +204,22 @@ impl EnvConfigBuilder {
 
 #[derive(Default)]
 pub struct ConfigBuilder {
-    pub objectiveai_api_base: Option<String>,
-    pub objectiveai_api_key: Option<String>,
-    pub openrouter_api_base: Option<String>,
-    pub openrouter_api_key: Option<String>,
-    pub claude_agent_sdk: Option<bool>,
-    pub viewer_api_base: Option<String>,
-    pub viewer_api_signature: Option<String>,
+    // -- HttpClient fields (identical order across all 3 structs) --
+    pub objectiveai_address: Option<String>,
+    pub objectiveai_authorization: Option<String>,
+    pub openrouter_address: Option<String>,
+    pub openrouter_authorization: Option<String>,
+    pub github_authorization: Option<String>,
+    pub mcp_authorization: Option<String>,
+    pub viewer_address: Option<String>,
+    pub viewer_signature: Option<String>,
     pub user_agent: Option<String>,
     pub http_referer: Option<String>,
     pub x_title: Option<String>,
+    pub commit_author_name: Option<String>,
+    pub commit_author_email: Option<String>,
+    // -- Other fields --
+    pub claude_agent_sdk: Option<bool>,
     pub agent_completions_backoff_current_interval: Option<u64>,
     pub agent_completions_backoff_initial_interval: Option<u64>,
     pub agent_completions_backoff_randomization_factor: Option<f64>,
@@ -238,11 +248,7 @@ pub struct ConfigBuilder {
     pub agent_completions_other_chunk_timeout: Option<u64>,
     pub mcp_connect_timeout: Option<u64>,
     pub mcp_call_timeout: Option<u64>,
-    pub fetch_github_token: Option<String>,
-    pub publish_github_token: Option<String>,
     pub config_base_dir: Option<String>,
-    pub commit_author_name: Option<String>,
-    pub commit_author_email: Option<String>,
     pub mock_delay_ms: Option<u64>,
     pub mock_max_tool_calls: Option<u32>,
     pub address: Option<String>,
@@ -268,16 +274,22 @@ impl Envconfig for ConfigBuilder {
 impl ConfigBuilder {
     pub fn build(self) -> Config {
         Config {
-            objectiveai_api_base: self.objectiveai_api_base.unwrap_or_else(|| "https://api.objective-ai.io".to_string()),
-            objectiveai_api_key: self.objectiveai_api_key,
-            openrouter_api_base: self.openrouter_api_base.unwrap_or_else(|| "https://openrouter.ai/api/v1".to_string()),
-            openrouter_api_key: self.openrouter_api_key,
+            // -- HttpClient fields --
+            objectiveai_address: self.objectiveai_address.unwrap_or_else(|| "https://api.objective-ai.io".to_string()),
+            objectiveai_authorization: self.objectiveai_authorization,
+            openrouter_address: self.openrouter_address.unwrap_or_else(|| "https://openrouter.ai/api/v1".to_string()),
+            openrouter_authorization: self.openrouter_authorization,
+            github_authorization: self.github_authorization,
+            mcp_authorization: self.mcp_authorization,
+            viewer_address: self.viewer_address,
+            viewer_signature: self.viewer_signature,
+            user_agent: self.user_agent.unwrap_or_else(|| "objectiveai-ai<admin@objectiveai-ai.io>".to_string()),
+            http_referer: self.http_referer.unwrap_or_else(|| "https://objectiveai-ai.io/".to_string()),
+            x_title: self.x_title.unwrap_or_else(|| "ObjectiveAI".to_string()),
+            commit_author_name: self.commit_author_name.unwrap_or_else(|| "ObjectiveAI".to_string()),
+            commit_author_email: self.commit_author_email.unwrap_or_else(|| "admin@objective-ai.io".to_string()),
+            // -- Other fields --
             claude_agent_sdk: self.claude_agent_sdk.unwrap_or(true),
-            viewer_api_base: self.viewer_api_base,
-            viewer_api_signature: self.viewer_api_signature,
-            user_agent: self.user_agent,
-            http_referer: self.http_referer,
-            x_title: self.x_title,
             agent_completions_backoff_current_interval: self.agent_completions_backoff_current_interval.unwrap_or(100),
             agent_completions_backoff_initial_interval: self.agent_completions_backoff_initial_interval.unwrap_or(100),
             agent_completions_backoff_randomization_factor: self.agent_completions_backoff_randomization_factor.unwrap_or(0.5),
@@ -306,11 +318,7 @@ impl ConfigBuilder {
             agent_completions_other_chunk_timeout: self.agent_completions_other_chunk_timeout.unwrap_or(30000),
             mcp_connect_timeout: self.mcp_connect_timeout.unwrap_or(30000),
             mcp_call_timeout: self.mcp_call_timeout.unwrap_or(30000),
-            fetch_github_token: self.fetch_github_token,
-            publish_github_token: self.publish_github_token,
             config_base_dir: self.config_base_dir,
-            commit_author_name: self.commit_author_name.unwrap_or_else(|| "ObjectiveAI".to_string()),
-            commit_author_email: self.commit_author_email.unwrap_or_else(|| "admin@objective-ai.io".to_string()),
             mock_delay_ms: self.mock_delay_ms.unwrap_or(0),
             mock_max_tool_calls: self.mock_max_tool_calls.unwrap_or(1000),
             address: self.address.unwrap_or_else(|| "0.0.0.0".to_string()),
@@ -321,16 +329,22 @@ impl ConfigBuilder {
 }
 
 pub struct Config {
-    pub objectiveai_api_base: String,
-    pub objectiveai_api_key: Option<String>,
-    pub openrouter_api_base: String,
-    pub openrouter_api_key: Option<String>,
+    // -- HttpClient fields (identical order across all 3 structs) --
+    pub objectiveai_address: String,
+    pub objectiveai_authorization: Option<String>,
+    pub openrouter_address: String,
+    pub openrouter_authorization: Option<String>,
+    pub github_authorization: Option<String>,
+    pub mcp_authorization: Option<String>,
+    pub viewer_address: Option<String>,
+    pub viewer_signature: Option<String>,
+    pub user_agent: String,
+    pub http_referer: String,
+    pub x_title: String,
+    pub commit_author_name: String,
+    pub commit_author_email: String,
+    // -- Other fields --
     pub claude_agent_sdk: bool,
-    pub viewer_api_base: Option<String>,
-    pub viewer_api_signature: Option<String>,
-    pub user_agent: Option<String>,
-    pub http_referer: Option<String>,
-    pub x_title: Option<String>,
     pub agent_completions_backoff_current_interval: u64,
     pub agent_completions_backoff_initial_interval: u64,
     pub agent_completions_backoff_randomization_factor: f64,
@@ -359,11 +373,7 @@ pub struct Config {
     pub agent_completions_other_chunk_timeout: u64,
     pub mcp_connect_timeout: u64,
     pub mcp_call_timeout: u64,
-    pub fetch_github_token: Option<String>,
-    pub publish_github_token: Option<String>,
     pub config_base_dir: Option<String>,
-    pub commit_author_name: String,
-    pub commit_author_email: String,
     pub mock_delay_ms: u64,
     pub mock_max_tool_calls: u32,
     pub address: String,
@@ -373,16 +383,22 @@ pub struct Config {
 
 pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, axum::Router)> {
     let Config {
-        objectiveai_api_base,
-        objectiveai_api_key,
-        openrouter_api_base,
-        openrouter_api_key,
-        claude_agent_sdk,
-        viewer_api_base: viewer_api_base,
-        viewer_api_signature: viewer_api_signature,
+        // -- HttpClient fields --
+        objectiveai_address,
+        objectiveai_authorization,
+        openrouter_address,
+        openrouter_authorization,
+        github_authorization,
+        mcp_authorization,
+        viewer_address,
+        viewer_signature,
         user_agent,
         http_referer,
         x_title,
+        commit_author_name,
+        commit_author_email,
+        // -- Other fields --
+        claude_agent_sdk,
         agent_completions_backoff_current_interval,
         agent_completions_backoff_initial_interval,
         agent_completions_backoff_randomization_factor,
@@ -401,21 +417,17 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         github_backoff_multiplier,
         github_backoff_max_interval,
         github_backoff_max_elapsed_time,
-        viewer_backoff_current_interval: viewer_backoff_current_interval,
-        viewer_backoff_initial_interval: viewer_backoff_initial_interval,
-        viewer_backoff_randomization_factor: viewer_backoff_randomization_factor,
-        viewer_backoff_multiplier: viewer_backoff_multiplier,
-        viewer_backoff_max_interval: viewer_backoff_max_interval,
-        viewer_backoff_max_elapsed_time: viewer_backoff_max_elapsed_time,
+        viewer_backoff_current_interval,
+        viewer_backoff_initial_interval,
+        viewer_backoff_randomization_factor,
+        viewer_backoff_multiplier,
+        viewer_backoff_max_interval,
+        viewer_backoff_max_elapsed_time,
         agent_completions_first_chunk_timeout,
         agent_completions_other_chunk_timeout,
         mcp_connect_timeout,
         mcp_call_timeout,
-        fetch_github_token,
-        publish_github_token,
         config_base_dir,
-        commit_author_name,
-        commit_author_email,
         mock_delay_ms,
         mock_max_tool_calls,
         address,
@@ -429,8 +441,8 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
     // Viewer Client
     let viewer_client = Arc::new(viewer::Client::<ctx::DefaultContextExt>::new(
         http_client.clone(),
-        viewer_api_base,
-        viewer_api_signature,
+        viewer_address.clone(),
+        viewer_signature.clone(),
         std::time::Duration::from_millis(viewer_backoff_current_interval),
         std::time::Duration::from_millis(viewer_backoff_initial_interval),
         viewer_backoff_randomization_factor,
@@ -439,14 +451,26 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         std::time::Duration::from_millis(viewer_backoff_max_elapsed_time),
     ));
 
+    // Parse MCP authorization (shared between objectiveai_http and agent_completions clients)
+    let mcp_authorization: Option<Arc<std::collections::HashMap<String, String>>> = mcp_authorization
+        .and_then(|s| serde_json::from_str(&s).ok())
+        .map(Arc::new);
+
     // ObjectiveAI HTTP Client
     let objectiveai_http_client = Arc::new(objectiveai_http::Client::new(
         http_client.clone(),
-        Some(objectiveai_api_base),
-        objectiveai_api_key,
+        objectiveai_address,
+        objectiveai_authorization,
         user_agent.clone(),
         x_title.clone(),
         http_referer.clone(),
+        github_authorization.as_ref().map(|s| Arc::new(s.clone())),
+        openrouter_authorization.as_ref().map(|s| Arc::new(s.clone())),
+        mcp_authorization.clone(),
+        viewer_signature.as_ref().map(|s| Arc::new(s.clone())),
+        viewer_address.as_ref().map(|s| Arc::new(s.clone())),
+        Some(Arc::new(commit_author_name.clone())),
+        Some(Arc::new(commit_author_email.clone())),
     ));
 
     // Vector Completion Votes Fetcher
@@ -466,8 +490,8 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
     // GitHub Client
     let github_client = Arc::new(github::Client::new(
         http_client.clone(),
-        fetch_github_token,
-        publish_github_token,
+        github_authorization.clone(),
+        true, // allow_publish_without_byok
         user_agent.clone(),
         x_title.clone(),
         http_referer.clone(),
@@ -530,16 +554,17 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
     // Agent Completions Client
     let agent_completions_client = Arc::new(agent::completions::Client::new(
         mcp_client.clone(),
+        mcp_authorization.clone(),
         retrieve_router.clone(),
         Arc::new(agent::completions::usage_handler::LogUsageHandler),
-        Arc::new(agent::completions::openrouter::Client {
+        Arc::new(agent::completions::openrouter::Client::new(
             http_client,
-            api_base: openrouter_api_base,
-            api_key: openrouter_api_key,
-            user_agent: user_agent.clone(),
-            x_title,
-            referer: http_referer,
-        }),
+            openrouter_address,
+            openrouter_authorization,
+            user_agent.clone(),
+            x_title.clone(),
+            http_referer.clone(),
+        )),
         Arc::new(agent::completions::claude_agent_sdk::Client::new(user_agent, claude_agent_sdk)),
         Arc::new(agent::completions::mock::Client {
             delay: std::time::Duration::from_millis(mock_delay_ms),

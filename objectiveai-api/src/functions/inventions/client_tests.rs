@@ -125,9 +125,9 @@ fn make_client() -> Arc<TestClient> {
     let agent_client = Arc::new(crate::agent::completions::Client::new(
         Arc::new(crate::mcp::Client::new(
             reqwest::Client::new(),
-            None,
-            None,
-            None,
+            String::new(),
+            String::new(),
+            String::new(),
             Duration::ZERO,
             Duration::ZERO,
             Duration::ZERO,
@@ -137,6 +137,7 @@ fn make_client() -> Arc<TestClient> {
             Duration::ZERO,
             Duration::from_millis(1),
         )),
+        None, // mcp_authorization
         retrieve_router.clone(),
         Arc::new(StubAgentUsageHandler),
         Arc::new(UnimplementedUpstreamClient),
@@ -157,10 +158,10 @@ fn make_client() -> Arc<TestClient> {
     let github_client = Arc::new(crate::github::Client::new(
         reqwest::Client::new(),
         None,
-        None,
-        None,
-        None,
-        None,
+        false,
+        String::new(),
+        String::new(),
+        String::new(),
         Duration::ZERO,
         Duration::ZERO,
         0.0,

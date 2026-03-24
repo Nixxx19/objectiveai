@@ -896,8 +896,8 @@ where
                 match remote {
                     objectiveai::Remote::Filesystem => {
                         match publish_filesystem(
-                            &filesystem_client, name, &publish_files,
-                        ) {
+                            &filesystem_client, &ctx, name, &publish_files,
+                        ).await {
                             Ok(path) => (Some(path), None),
                             Err(e) => (None, Some(e)),
                         }
@@ -998,8 +998,9 @@ pub(crate) fn extract_description(state: &objectiveai::functions::inventions::St
 ///
 /// `name` is `"owner/repository"`. Creates/resets the git repo, writes files,
 /// and commits.
-pub(crate) fn publish_filesystem(
+pub(crate) async fn publish_filesystem<CTXEXT: crate::ctx::ContextExt>(
     filesystem_client: &crate::filesystem::Client,
+    ctx: &crate::ctx::Context<CTXEXT>,
     name: &str,
     files: &[(&'static str, String)],
 ) -> Result<objectiveai::RemotePath, super::Error> {
@@ -1013,7 +1014,7 @@ pub(crate) fn publish_filesystem(
         .collect();
 
     let commit = filesystem_client
-        .publish(crate::retrieval::Kind::Functions, owner, repo, &file_refs, &format!("publish {}", name))?;
+        .publish(ctx, crate::retrieval::Kind::Functions, owner, repo, &file_refs, &format!("publish {}", name)).await?;
 
     Ok(objectiveai::RemotePath::Filesystem {
         owner: owner.to_string(),

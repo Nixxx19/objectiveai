@@ -52,15 +52,10 @@ impl From<&crate::mcp::Connection> for McpHttpServerConfig {
         if let Some(auth) = &conn.authorization {
             headers.insert("Authorization".to_string(), auth.clone());
         }
-        if let Some(ua) = &conn.user_agent {
-            headers.insert("User-Agent".to_string(), ua.clone());
-        }
-        if let Some(title) = &conn.x_title {
-            headers.insert("X-Title".to_string(), title.clone());
-        }
-        if let Some(referer) = &conn.referer {
-            headers.insert("Referer".to_string(), referer.clone());
-        }
+        headers.insert("User-Agent".to_string(), conn.user_agent.clone());
+        headers.insert("X-Title".to_string(), conn.x_title.clone());
+        headers.insert("Referer".to_string(), conn.http_referer.clone());
+        headers.insert("HTTP-Referer".to_string(), conn.http_referer.clone());
 
         McpHttpServerConfig {
             r#type: McpHttpServerConfigType::Http,

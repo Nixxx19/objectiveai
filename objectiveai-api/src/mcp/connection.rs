@@ -20,9 +20,9 @@ pub struct Connection {
     pub url: String,
     pub session_id: String,
     pub authorization: Option<String>,
-    pub user_agent: Option<String>,
-    pub x_title: Option<String>,
-    pub referer: Option<String>,
+    pub user_agent: String,
+    pub x_title: String,
+    pub http_referer: String,
 
     pub backoff_current_interval: Duration,
     pub backoff_initial_interval: Duration,
@@ -54,9 +54,9 @@ impl Connection {
             url,
             session_id: String::new(),
             authorization: None,
-            user_agent: None,
-            x_title: None,
-            referer: None,
+            user_agent: String::new(),
+            x_title: String::new(),
+            http_referer: String::new(),
             backoff_current_interval: Duration::from_millis(500),
             backoff_initial_interval: Duration::from_millis(500),
             backoff_randomization_factor: 0.5,
@@ -101,9 +101,9 @@ impl Connection {
         url: String,
         session_id: String,
         authorization: Option<String>,
-        user_agent: Option<String>,
-        x_title: Option<String>,
-        referer: Option<String>,
+        user_agent: String,
+        x_title: String,
+        http_referer: String,
         backoff_current_interval: Duration,
         backoff_initial_interval: Duration,
         backoff_randomization_factor: f64,
@@ -120,7 +120,7 @@ impl Connection {
             authorization,
             user_agent,
             x_title,
-            referer,
+            http_referer,
             backoff_current_interval,
             backoff_initial_interval,
             backoff_randomization_factor,
@@ -207,15 +207,10 @@ impl Connection {
         if let Some(auth) = &self.authorization {
             request = request.header("Authorization", auth);
         }
-        if let Some(ua) = &self.user_agent {
-            request = request.header("User-Agent", ua);
-        }
-        if let Some(title) = &self.x_title {
-            request = request.header("X-Title", title);
-        }
-        if let Some(referer) = &self.referer {
-            request = request.header("Referer", referer);
-        }
+        request = request.header("User-Agent", &self.user_agent);
+        request = request.header("X-Title", &self.x_title);
+        request = request.header("Referer", &self.http_referer);
+        request = request.header("HTTP-Referer", &self.http_referer);
         request
     }
 
@@ -600,15 +595,10 @@ impl Connection {
         if let Some(auth) = &self.authorization {
             request = request.header("Authorization", auth);
         }
-        if let Some(ua) = &self.user_agent {
-            request = request.header("User-Agent", ua);
-        }
-        if let Some(title) = &self.x_title {
-            request = request.header("X-Title", title);
-        }
-        if let Some(referer) = &self.referer {
-            request = request.header("Referer", referer);
-        }
+        request = request.header("User-Agent", &self.user_agent);
+        request = request.header("X-Title", &self.x_title);
+        request = request.header("Referer", &self.http_referer);
+        request = request.header("HTTP-Referer", &self.http_referer);
         request
     }
 

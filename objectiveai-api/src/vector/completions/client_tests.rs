@@ -148,9 +148,9 @@ fn make_agent_client(
     Arc::new(crate::agent::completions::Client::new(
         Arc::new(crate::mcp::Client::new(
             reqwest::Client::new(),
-            None,
-            None,
-            None,
+            String::new(),
+            String::new(),
+            String::new(),
             Duration::ZERO,
             Duration::ZERO,
             Duration::ZERO,
@@ -160,6 +160,7 @@ fn make_agent_client(
             Duration::ZERO,
             Duration::from_millis(1),
         )),
+        None, // mcp_authorization
         retrieve_router.clone(),
         Arc::new(StubAgentUsageHandler),
         Arc::new(UnimplementedUpstreamClient),

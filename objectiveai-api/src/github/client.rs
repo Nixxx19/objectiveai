@@ -5,13 +5,13 @@ use std::time::Duration;
 #[derive(Debug, Clone)]
 pub struct Client {
     pub http_client: reqwest::Client,
-    /// Token used for fetching from GitHub (read-only).
-    pub fetch_github_token: Option<String>,
-    /// Token used for publishing to GitHub (requires repo scope).
-    pub publish_github_token: Option<String>,
-    pub user_agent: Option<String>,
-    pub x_title: Option<String>,
-    pub referer: Option<String>,
+    /// GitHub authorization token.
+    pub authorization: Option<String>,
+    pub user_agent: String,
+    pub x_title: String,
+    pub http_referer: String,
+    /// If false, require_authorization will reject requests that don't have a per-request BYOK token.
+    pub allow_publish_without_byok: bool,
     pub backoff_current_interval: Duration,
     pub backoff_initial_interval: Duration,
     pub backoff_randomization_factor: f64,
@@ -23,11 +23,11 @@ pub struct Client {
 impl Client {
     pub fn new(
         http_client: reqwest::Client,
-        fetch_github_token: Option<String>,
-        publish_github_token: Option<String>,
-        user_agent: Option<String>,
-        x_title: Option<String>,
-        referer: Option<String>,
+        authorization: Option<String>,
+        allow_publish_without_byok: bool,
+        user_agent: String,
+        x_title: String,
+        http_referer: String,
         backoff_current_interval: Duration,
         backoff_initial_interval: Duration,
         backoff_randomization_factor: f64,
@@ -37,11 +37,11 @@ impl Client {
     ) -> Self {
         Self {
             http_client,
-            fetch_github_token,
-            publish_github_token,
+            authorization,
+            allow_publish_without_byok,
             user_agent,
             x_title,
-            referer,
+            http_referer,
             backoff_current_interval,
             backoff_initial_interval,
             backoff_randomization_factor,
@@ -63,28 +63,30 @@ impl Client {
         }
     }
 
-    /// Resolves the fetch token: per-request header → BYOK → self.fetch_github_token.
-    async fn resolve_fetch_token<CTXEXT: ctx::ContextExt>(
+    /// Resolves the authorization token: per-request header → ext → self.authorization.
+    async fn resolve_authorization<CTXEXT: ctx::ContextExt>(
         &self,
         ctx: &ctx::Context<CTXEXT>,
     ) -> Option<Arc<String>> {
         if let Some(token) = ctx.github_authorization().await {
             return Some(token);
         }
-        self.fetch_github_token
-            .as_ref()
-            .map(|t| Arc::new(t.clone()))
+        self.authorization.as_ref().map(|t| Arc::new(t.clone()))
     }
 
-    /// Resolves the publish token: per-request header → BYOK → self.publish_github_token.
-    async fn resolve_publish_token<CTXEXT: ctx::ContextExt>(
+    /// Resolves the authorization token, returning an error if none is available.
+    /// If `allow_publish_without_byok` is false, only the per-request ctx token is accepted.
+    async fn require_authorization<CTXEXT: ctx::ContextExt>(
         &self,
         ctx: &ctx::Context<CTXEXT>,
     ) -> Result<Arc<String>, super::Error> {
         if let Some(token) = ctx.github_authorization().await {
             return Ok(token);
         }
-        self.publish_github_token
+        if !self.allow_publish_without_byok {
+            return Err(super::Error::MissingPublishToken);
+        }
+        self.authorization
             .as_ref()
             .map(|t| Arc::new(t.clone()))
             .ok_or(super::Error::MissingPublishToken)
@@ -102,17 +104,11 @@ impl Client {
                 ensure_bearer(token),
             );
         }
-        if let Some(user_agent) = &self.user_agent {
-            req = req.header("user-agent", user_agent);
-        }
-        if let Some(x_title) = &self.x_title {
-            req = req.header("x-title", x_title);
-        }
-        if let Some(referer) = &self.referer {
-            req = req
-                .header("referer", referer)
-                .header("http-referer", referer);
-        }
+        req = req.header("user-agent", &self.user_agent);
+        req = req.header("x-title", &self.x_title);
+        req = req
+            .header("referer", &self.http_referer)
+            .header("http-referer", &self.http_referer);
         req
     }
 
@@ -129,7 +125,7 @@ impl Client {
         struct Commit {
             sha: String,
         }
-        let token = self.resolve_fetch_token(ctx).await;
+        let token = self.resolve_authorization(ctx).await;
         let token_str: Option<&str> = token.as_deref().map(|s| s.as_str());
         let http_request = self.request_headers(
             self.http_client
@@ -181,7 +177,7 @@ impl Client {
     where
         T: serde::de::DeserializeOwned,
     {
-        let token = self.resolve_fetch_token(ctx).await;
+        let token = self.resolve_authorization(ctx).await;
         let token_str: Option<&str> = token.as_deref().map(|s| s.as_str());
         backoff::future::retry(self.backoff(), || async {
             match self.fetch_file_raw::<T>(token_str, owner, repository, commit, path).await {
@@ -287,7 +283,7 @@ impl Client {
         owner: &str,
         repository: &str,
     ) -> Result<bool, super::Error> {
-        let token = self.resolve_publish_token(ctx).await?;
+        let token = self.require_authorization(ctx).await?;
         let req = self.request_headers(
             self.http_client
                 .get(format!("https://api.github.com/repos/{}/{}", owner, repository))
@@ -318,7 +314,7 @@ impl Client {
         &self,
         ctx: &ctx::Context<CTXEXT>,
     ) -> Result<Vec<String>, super::Error> {
-        let token = self.resolve_publish_token(ctx).await?;
+        let token = self.require_authorization(ctx).await?;
         let req = self.request_headers(
             self.http_client
                 .get("https://api.github.com/user")
@@ -356,7 +352,7 @@ impl Client {
         &self,
         ctx: &ctx::Context<CTXEXT>,
     ) -> Result<String, super::Error> {
-        let token = self.resolve_publish_token(ctx).await?;
+        let token = self.require_authorization(ctx).await?;
         let req = self.request_headers(
             self.http_client
                 .get("https://api.github.com/user")
@@ -400,7 +396,7 @@ impl Client {
         name: &str,
         description: &str,
     ) -> Result<String, super::Error> {
-        let token = self.resolve_publish_token(ctx).await?;
+        let token = self.require_authorization(ctx).await?;
         let req = self.request_headers(
             self.http_client
                 .post("https://api.github.com/user/repos")
@@ -441,7 +437,7 @@ impl Client {
         repository: &str,
         description: &str,
     ) -> Result<(), super::Error> {
-        let token = self.resolve_publish_token(ctx).await?;
+        let token = self.require_authorization(ctx).await?;
         let req = self.request_headers(
             self.http_client
                 .patch(format!("https://api.github.com/repos/{}/{}", owner, repository))
@@ -487,37 +483,24 @@ impl Client {
             self.create_repository(ctx, &repo, description).await?;
         }
 
-        let token = self.resolve_publish_token(ctx).await?;
+        let token = self.require_authorization(ctx).await?;
         let bare_token = strip_bearer(&token).to_string();
         let remote_url = format!("https://github.com/{}/{}.git", owner, repo);
         let commit_message = format!("Publish {}", name);
 
-        let fs = filesystem_client.clone();
-        let owner_clone = owner.clone();
-        let repo_clone = repo.clone();
-        let files_owned: Vec<(String, String)> = files
-            .iter()
-            .map(|(n, c)| (n.to_string(), c.to_string()))
-            .collect();
-
-        let commit_sha = tokio::task::spawn_blocking(move || -> Result<String, crate::filesystem::Error> {
-            let file_refs: Vec<(&str, &str)> = files_owned
-                .iter()
-                .map(|(n, c)| (n.as_str(), c.as_str()))
-                .collect();
-            fs.publish_and_push(
+        let commit_sha = filesystem_client
+            .publish_and_push(
+                ctx,
                 crate::retrieval::Kind::Functions,
-                &owner_clone,
-                &repo_clone,
-                &file_refs,
+                &owner,
+                &repo,
+                files,
                 &commit_message,
                 &remote_url,
                 &bare_token,
             )
-        })
-        .await
-        .map_err(super::Error::Join)?
-        .map_err(super::Error::Filesystem)?;
+            .await
+            .map_err(super::Error::Filesystem)?;
 
         let _ = self.update_description(ctx, &owner, &repo, description).await;
 

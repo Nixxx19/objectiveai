@@ -119,14 +119,25 @@ impl Client {
     /// or resets the git repository, writes files, and commits.
     ///
     /// Returns the commit SHA on success.
-    pub fn publish(
+    pub async fn publish<CTXEXT: crate::ctx::ContextExt>(
         &self,
+        ctx: &crate::ctx::Context<CTXEXT>,
         kind: Kind,
         owner: &str,
         repository: &str,
         files: &[(&str, &str)],
         commit_message: &str,
     ) -> Result<String, super::Error> {
+        let (ctx_name, ctx_email) = tokio::join!(
+            ctx.commit_author_name(),
+            ctx.commit_author_email(),
+        );
+        let commit_author_name = ctx_name
+            .map(|a| a.to_string())
+            .unwrap_or_else(|| self.commit_author_name.clone());
+        let commit_author_email = ctx_email
+            .map(|a| a.to_string())
+            .unwrap_or_else(|| self.commit_author_email.clone());
         let repo_path = self.repo_path(kind, owner, repository);
 
         // Create directory recursively if needed.
@@ -178,7 +189,7 @@ impl Client {
         let tree = repo.find_tree(tree_oid)?;
 
         // Create commit.
-        let sig = git2::Signature::now(&self.commit_author_name, &self.commit_author_email)?;
+        let sig = git2::Signature::now(&commit_author_name, &commit_author_email)?;
         let parents: Vec<&git2::Commit> = parent.iter().collect();
         let commit_oid = repo.commit(
             Some("HEAD"),
@@ -198,8 +209,9 @@ impl Client {
     /// and pushes the commit using the provided token for authentication.
     ///
     /// Returns the commit SHA on success.
-    pub fn publish_and_push(
+    pub async fn publish_and_push<CTXEXT: crate::ctx::ContextExt>(
         &self,
+        ctx: &crate::ctx::Context<CTXEXT>,
         kind: Kind,
         owner: &str,
         repository: &str,
@@ -208,6 +220,16 @@ impl Client {
         remote_url: &str,
         token: &str,
     ) -> Result<String, super::Error> {
+        let (ctx_name, ctx_email) = tokio::join!(
+            ctx.commit_author_name(),
+            ctx.commit_author_email(),
+        );
+        let commit_author_name = ctx_name
+            .map(|a| a.to_string())
+            .unwrap_or_else(|| self.commit_author_name.clone());
+        let commit_author_email = ctx_email
+            .map(|a| a.to_string())
+            .unwrap_or_else(|| self.commit_author_email.clone());
         let repo_path = self.repo_path(kind, owner, repository);
 
         // Create directory recursively if needed.
@@ -289,7 +311,7 @@ impl Client {
         let tree = repo.find_tree(tree_oid)?;
 
         // Create commit.
-        let sig = git2::Signature::now(&self.commit_author_name, &self.commit_author_email)?;
+        let sig = git2::Signature::now(&commit_author_name, &commit_author_email)?;
         let parents: Vec<&git2::Commit> = parent.iter().collect();
         let commit_oid = repo.commit(
             Some("HEAD"), &sig, &sig, commit_message, &tree, &parents,

@@ -11,7 +11,7 @@ pub struct Client<CTXEXT> {
 impl<CTXEXT: ctx::ContextExt + Send + Sync + 'static> Client<CTXEXT> {
     pub fn new(
         http_client: reqwest::Client,
-        viewer_address: Option<String>,
+        address: Option<String>,
         signature: Option<String>,
         backoff_current_interval: Duration,
         backoff_initial_interval: Duration,
@@ -22,7 +22,7 @@ impl<CTXEXT: ctx::ContextExt + Send + Sync + 'static> Client<CTXEXT> {
     ) -> Self {
         let (tx, mut rx) = mpsc::unbounded_channel::<(ctx::Context<CTXEXT>, super::request::Request)>();
 
-        let default_address = viewer_address.map(Arc::new);
+        let default_address = address.map(Arc::new);
         let default_signature = signature.map(Arc::new);
 
         tokio::spawn(async move {
@@ -32,8 +32,8 @@ impl<CTXEXT: ctx::ContextExt + Send + Sync + 'static> Client<CTXEXT> {
                 // If ctx has no address, use default address with default signature.
                 // If both are None, skip.
                 // If address resolves first to None, signature future is dropped.
-                let addr_fut = ctx.objectiveai_viewer_address();
-                let sig_fut = ctx.objectiveai_signature();
+                let addr_fut = ctx.viewer_address();
+                let sig_fut = ctx.viewer_signature();
                 tokio::pin!(addr_fut);
                 tokio::pin!(sig_fut);
 
@@ -100,7 +100,7 @@ impl<CTXEXT: ctx::ContextExt + Send + Sync + 'static> Client<CTXEXT> {
                                 .body(body.clone());
 
                             if let Some(sig) = signature {
-                                req = req.header("X-OBJECTIVEAI-SIGNATURE", sig.as_str());
+                                req = req.header("X-VIEWER-SIGNATURE", sig.as_str());
                             }
 
                             let response = req.send().await
