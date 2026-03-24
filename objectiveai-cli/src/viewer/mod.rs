@@ -1,5 +1,6 @@
 pub mod config;
-pub mod secret;
+pub mod mode;
+pub mod local;
 
 use clap::Subcommand;
 
@@ -10,10 +11,15 @@ pub enum Commands {
         #[command(subcommand)]
         command: config::Commands,
     },
-    /// Viewer secret
-    Secret {
+    /// Viewer mode (disabled or local)
+    Mode {
         #[command(subcommand)]
-        command: secret::Commands,
+        command: mode::Commands,
+    },
+    /// Local viewer configuration
+    Local {
+        #[command(subcommand)]
+        command: local::Commands,
     },
 }
 
@@ -21,7 +27,8 @@ impl Commands {
     pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
         match self {
             Commands::Config { command } => command.handle(),
-            Commands::Secret { command } => command.handle(),
+            Commands::Mode { command } => command.handle(),
+            Commands::Local { command } => command.handle(),
         }
     }
 }

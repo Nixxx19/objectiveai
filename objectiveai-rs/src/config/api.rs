@@ -4,10 +4,10 @@ use serde::{Serialize, Deserialize};
 pub struct ApiConfig {
     #[serde(default)]
     pub mode: ApiMode,
-    #[serde(skip_serializing_if = "RemoteApiConfig::is_none")]
-    pub remote: Option<RemoteApiConfig>,
-    #[serde(skip_serializing_if = "LocalApiConfig::is_none")]
-    pub local: Option<LocalApiConfig>,
+    #[serde(skip_serializing_if = "ApiRemoteConfig::is_none")]
+    pub remote: Option<ApiRemoteConfig>,
+    #[serde(skip_serializing_if = "ApiLocalConfig::is_none")]
+    pub local: Option<ApiLocalConfig>,
     #[serde(skip_serializing_if = "ApiHeadersConfig::is_none")]
     pub headers: Option<ApiHeadersConfig>,
 }
@@ -21,12 +21,12 @@ impl ApiConfig {
         this.as_ref().is_none_or(|cfg| cfg.is_empty())
     }
 
-    pub fn remote(&mut self) -> &mut RemoteApiConfig {
-        self.remote.get_or_insert_with(RemoteApiConfig::default)
+    pub fn remote(&mut self) -> &mut ApiRemoteConfig {
+        self.remote.get_or_insert_with(ApiRemoteConfig::default)
     }
 
-    pub fn local(&mut self) -> &mut LocalApiConfig {
-        self.local.get_or_insert_with(LocalApiConfig::default)
+    pub fn local(&mut self) -> &mut ApiLocalConfig {
+        self.local.get_or_insert_with(ApiLocalConfig::default)
     }
 
     pub fn headers(&mut self) -> &mut ApiHeadersConfig {
@@ -55,12 +55,12 @@ pub enum ApiMode {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct RemoteApiConfig {
+pub struct ApiRemoteConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub objectiveai_address: Option<String>,
 }
 
-impl RemoteApiConfig {
+impl ApiRemoteConfig {
     pub fn is_empty(&self) -> bool {
         self.objectiveai_address.is_none()
     }
@@ -83,12 +83,12 @@ impl RemoteApiConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct LocalApiConfig {
+pub struct ApiLocalConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub claude_agent_sdk: Option<bool>,
 }
 
-impl LocalApiConfig {
+impl ApiLocalConfig {
     pub fn is_empty(&self) -> bool {
         self.claude_agent_sdk.is_none()
     }
