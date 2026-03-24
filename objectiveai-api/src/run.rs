@@ -219,8 +219,9 @@ pub struct ConfigBuilder {
 }
 
 impl Envconfig for ConfigBuilder {
+    #[allow(deprecated)]
     fn init() -> Result<Self, envconfig::Error> {
-        EnvConfigBuilder::init_from_env().map(|e| e.build())
+        EnvConfigBuilder::init().map(|e| e.build())
     }
 
     fn init_from_env() -> Result<Self, envconfig::Error> {
