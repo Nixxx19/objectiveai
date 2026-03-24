@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::mpsc;
 
@@ -10,6 +11,8 @@ pub struct Client<CTXEXT: ctx::ContextExt + Send + Sync + 'static> {
 impl<CTXEXT: ctx::ContextExt + Send + Sync + 'static> Client<CTXEXT> {
     pub fn new(
         http_client: reqwest::Client,
+        viewer_address: Option<String>,
+        signature: Option<String>,
         backoff_current_interval: Duration,
         backoff_initial_interval: Duration,
         backoff_randomization_factor: f64,
@@ -19,14 +22,46 @@ impl<CTXEXT: ctx::ContextExt + Send + Sync + 'static> Client<CTXEXT> {
     ) -> Self {
         let (tx, mut rx) = mpsc::unbounded_channel::<(ctx::Context<CTXEXT>, super::request::Request)>();
 
+        let default_address = viewer_address.map(Arc::new);
+        let default_signature = signature.map(Arc::new);
+
         tokio::spawn(async move {
             while let Some((ctx, request)) = rx.recv().await {
-                let address = match ctx.objectiveai_viewer_address().await {
-                    Some(addr) => addr,
-                    None => continue,
-                };
+                // Resolve address and signature concurrently via select.
+                // If ctx provides an address, use it with ctx signature.
+                // If ctx has no address, use default address with default signature.
+                // If both are None, skip.
+                // If address resolves first to None, signature future is dropped.
+                let addr_fut = ctx.objectiveai_viewer_address();
+                let sig_fut = ctx.objectiveai_signature();
+                tokio::pin!(addr_fut);
+                tokio::pin!(sig_fut);
 
-                let signature = ctx.objectiveai_signature().await;
+                let (address, signature) = tokio::select! {
+                    biased;
+                    addr = &mut addr_fut => {
+                        match addr {
+                            Some(addr) => {
+                                let sig = sig_fut.await;
+                                (addr, sig)
+                            }
+                            None => match &default_address {
+                                Some(addr) => (addr.clone(), default_signature.clone()),
+                                None => continue,
+                            },
+                        }
+                    }
+                    sig = &mut sig_fut => {
+                        let addr = addr_fut.await;
+                        match addr {
+                            Some(addr) => (addr, sig),
+                            None => match &default_address {
+                                Some(addr) => (addr.clone(), default_signature.clone()),
+                                None => continue,
+                            },
+                        }
+                    }
+                };
 
                 let url = match &request {
                     super::request::Request::FunctionExecution(_) => {
