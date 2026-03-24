@@ -4,7 +4,7 @@ use tokio::sync::mpsc;
 
 use crate::ctx;
 
-pub struct Client<CTXEXT: ctx::ContextExt + Send + Sync + 'static> {
+pub struct Client<CTXEXT> {
     tx: mpsc::UnboundedSender<(ctx::Context<CTXEXT>, super::request::Request)>,
 }
 

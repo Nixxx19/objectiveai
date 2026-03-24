@@ -213,8 +213,20 @@ fn make_client() -> Arc<TestClient> {
         Arc::new(StubInventionUsageHandler),
         true,
     ));
+    let viewer_client = Arc::new(crate::viewer::Client::new(
+        reqwest::Client::new(),
+        None,
+        None,
+        Duration::ZERO,
+        Duration::ZERO,
+        0.0,
+        1.0,
+        Duration::ZERO,
+        Duration::ZERO,
+    ));
     Arc::new(super::Client::new(
         invention_client,
+        viewer_client,
         Arc::new(StubRecursiveUsageHandler),
     ))
 }

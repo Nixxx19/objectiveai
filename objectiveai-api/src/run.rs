@@ -610,6 +610,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
     let function_inventions_recursive_client =
         Arc::new(functions::inventions::recursive::Client::new(
             function_inventions_client.clone(),
+            viewer_client.clone(),
             Arc::new(
                 functions::inventions::recursive::usage_handler::LogUsageHandler,
             ),
@@ -620,6 +621,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         Arc::new(functions::executions::Client::new(
             agent_completions_client.clone(),
             vector_completions_client.clone(),
+            viewer_client.clone(),
             retrieve_router.clone(),
             Arc::new(functions::executions::usage_handler::LogUsageHandler),
         ));

@@ -38,6 +38,7 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM,
             CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM,
         >,
     >,
+    pub viewer_client: Arc<crate::viewer::Client<CTXEXT>>,
     pub usage_handler: Arc<RIUSG>,
 }
 
@@ -50,10 +51,12 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, 
                 CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM,
             >,
         >,
+        viewer_client: Arc<crate::viewer::Client<CTXEXT>>,
         usage_handler: Arc<RIUSG>,
     ) -> Self {
         Self {
             invention_client,
+            viewer_client,
             usage_handler,
         }
     }

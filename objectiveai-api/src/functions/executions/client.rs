@@ -335,6 +335,8 @@ pub struct Client<
             VUSG,
         >,
     >,
+    /// Viewer client for streaming events to the viewer.
+    pub viewer_client: Arc<crate::viewer::Client<CTXEXT>>,
     /// Router for fetching Function and Profile definitions.
     pub retrieve_router:
         Arc<crate::retrieval::retrieve::Router<RETRG, RETRF, RETRM, CTXEXT>>,
@@ -389,6 +391,7 @@ impl<
                 VUSG,
             >,
         >,
+        viewer_client: Arc<crate::viewer::Client<CTXEXT>>,
         retrieve_router: Arc<
             crate::retrieval::retrieve::Router<RETRG, RETRF, RETRM, CTXEXT>,
         >,
@@ -397,6 +400,7 @@ impl<
         Self {
             agent_client,
             vector_client,
+            viewer_client,
             retrieve_router,
             usage_handler,
         }

@@ -225,9 +225,21 @@ fn make_client() -> Arc<TestClient> {
         Arc::new(StubCacheVoteFetcher),
         Arc::new(StubVectorUsageHandler),
     ));
+    let viewer_client = Arc::new(crate::viewer::Client::new(
+        reqwest::Client::new(),
+        None,
+        None,
+        Duration::ZERO,
+        Duration::ZERO,
+        0.0,
+        1.0,
+        Duration::ZERO,
+        Duration::ZERO,
+    ));
     Arc::new(super::Client::new(
         agent_client,
         vector_client,
+        viewer_client,
         retrieve_router,
         Arc::new(StubFunctionUsageHandler),
     ))
@@ -272,6 +284,14 @@ fn check_created(expected: &std::cell::Cell<Option<u64>>, i: usize, created: u64
     }
 }
 
+fn check_id(expected: &std::cell::RefCell<Option<String>>, i: usize, id: &str) {
+    let mut exp = expected.borrow_mut();
+    match &*exp {
+        None => *exp = Some(id.to_string()),
+        Some(exp) => assert_eq!(id, exp, "chunk {i} has id {id:?}, expected {exp:?}"),
+    }
+}
+
 async fn run_execution(client: &Arc<TestClient>, request: Arc<FunctionExecutionCreateParams>) -> FunctionExecution {
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new());
     let stream = client
@@ -280,20 +300,24 @@ async fn run_execution(client: &Arc<TestClient>, request: Arc<FunctionExecutionC
         .await
         .expect("create_streaming should succeed");
     let expected_created = std::cell::Cell::new(None);
+    let expected_id = std::cell::RefCell::new(None);
     let agg = crate::stream_harness::consume_stream(
         Box::pin(stream),
         |agg, c| agg.push(c),
         |i, chunk| {
+            check_id(&expected_id, i, &chunk.id);
             check_created(&expected_created, i, chunk.created);
             assert!(chunk.tasks.len() <= 1, "chunk {i} has {} tasks, expected at most 1", chunk.tasks.len());
             assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
         },
         |i, chunk| {
+            check_id(&expected_id, i, &chunk.id);
             check_created(&expected_created, i, chunk.created);
             assert!(chunk.tasks.len() <= 1, "chunk {i} has {} tasks, expected at most 1", chunk.tasks.len());
             assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
         },
         |i, chunk| {
+            check_id(&expected_id, i, &chunk.id);
             check_created(&expected_created, i, chunk.created);
             assert!(chunk.usage.is_some(), "final chunk {i} has no usage, expected Some");
         },
