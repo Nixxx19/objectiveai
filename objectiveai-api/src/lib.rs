@@ -41,6 +41,8 @@ pub mod util;
 pub mod vector;
 /// Mock
 pub mod mock;
+/// Viewer client for streaming events to the Tauri viewer.
+pub mod viewer;
 /// Server runner
 mod run;
 

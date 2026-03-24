@@ -21,4 +21,8 @@ impl super::ContextExt for DefaultContextExt {
     async fn get_objectiveai_signature(&self) -> Option<std::sync::Arc<String>> {
         None
     }
+
+    async fn get_objectiveai_viewer_address(&self) -> Option<std::sync::Arc<String>> {
+        None
+    }
 }

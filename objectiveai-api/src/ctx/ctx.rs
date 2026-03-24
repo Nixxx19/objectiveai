@@ -34,6 +34,8 @@ pub struct Context<CTXEXT> {
     objectiveai_authorization: Option<Arc<String>>,
     /// Per-request ObjectiveAI signature.
     objectiveai_signature: Option<Arc<String>>,
+    /// Per-request ObjectiveAI viewer address.
+    objectiveai_viewer_address: Option<Arc<String>>,
     /// Cached resolved OpenRouter authorization (self + BYOK).
     openrouter_authorization_cached: Arc<OnceCell<Option<Arc<String>>>>,
     /// Cached resolved GitHub authorization (self + BYOK).
@@ -42,6 +44,8 @@ pub struct Context<CTXEXT> {
     mcp_authorization_cached: Arc<OnceCell<Option<Arc<HashMap<String, String>>>>>,
     /// Cached resolved ObjectiveAI signature (self + BYOK).
     objectiveai_signature_cached: Arc<OnceCell<Option<Arc<String>>>>,
+    /// Cached resolved ObjectiveAI viewer address (self + BYOK).
+    objectiveai_viewer_address_cached: Arc<OnceCell<Option<Arc<String>>>>,
     /// Cache for agent fetches, keyed by RemotePath.
     pub agent_cache: Arc<
         DashMap<
@@ -125,10 +129,12 @@ impl<CTXEXT> Clone for Context<CTXEXT> {
             mcp_authorization: self.mcp_authorization.clone(),
             objectiveai_authorization: self.objectiveai_authorization.clone(),
             objectiveai_signature: self.objectiveai_signature.clone(),
+            objectiveai_viewer_address: self.objectiveai_viewer_address.clone(),
             openrouter_authorization_cached: self.openrouter_authorization_cached.clone(),
             github_authorization_cached: self.github_authorization_cached.clone(),
             mcp_authorization_cached: self.mcp_authorization_cached.clone(),
             objectiveai_signature_cached: self.objectiveai_signature_cached.clone(),
+            objectiveai_viewer_address_cached: self.objectiveai_viewer_address_cached.clone(),
             swarm_cache: self.swarm_cache.clone(),
             agent_cache: self.agent_cache.clone(),
             function_cache: self.function_cache.clone(),
@@ -184,6 +190,11 @@ impl<CTXEXT> Context<CTXEXT> {
             .and_then(|v| v.to_str().ok())
             .map(|s| Arc::new(s.to_owned()));
 
+        let objectiveai_viewer_address = headers
+            .get("X-OBJECTIVEAI-VIEWER-ADDRESS")
+            .and_then(|v| v.to_str().ok())
+            .map(|s| Arc::new(s.to_owned()));
+
         Self {
             ext,
             cost_multiplier,
@@ -193,10 +204,12 @@ impl<CTXEXT> Context<CTXEXT> {
             mcp_authorization,
             objectiveai_authorization,
             objectiveai_signature,
+            objectiveai_viewer_address,
             openrouter_authorization_cached: Arc::new(OnceCell::new()),
             github_authorization_cached: Arc::new(OnceCell::new()),
             mcp_authorization_cached: Arc::new(OnceCell::new()),
             objectiveai_signature_cached: Arc::new(OnceCell::new()),
+            objectiveai_viewer_address_cached: Arc::new(OnceCell::new()),
             swarm_cache: Arc::new(DashMap::new()),
             agent_cache: Arc::new(DashMap::new()),
             function_cache: Arc::new(DashMap::new()),
@@ -288,6 +301,22 @@ impl<CTXEXT: super::ContextExt> Context<CTXEXT> {
             .get_or_init(|| async {
                 match (&self.objectiveai_signature, self.ext.get_objectiveai_signature().await) {
                     (Some(self_sig), _) => Some(self_sig.clone()),
+                    (None, byok) => byok,
+                }
+            })
+            .await
+            .clone()
+    }
+
+    /// Returns the resolved ObjectiveAI viewer address.
+    ///
+    /// Checks the per-request address first, falls back to the BYOK address
+    /// from the context extension. Result is cached for subsequent calls.
+    pub async fn objectiveai_viewer_address(&self) -> Option<Arc<String>> {
+        self.objectiveai_viewer_address_cached
+            .get_or_init(|| async {
+                match (&self.objectiveai_viewer_address, self.ext.get_objectiveai_viewer_address().await) {
+                    (Some(self_addr), _) => Some(self_addr.clone()),
                     (None, byok) => byok,
                 }
             })

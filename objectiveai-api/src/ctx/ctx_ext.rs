@@ -20,4 +20,7 @@ pub trait ContextExt {
 
     /// Returns the user's BYOK ObjectiveAI signature.
     async fn get_objectiveai_signature(&self) -> Option<std::sync::Arc<String>>;
+
+    /// Returns the ObjectiveAI viewer address (e.g. "http://localhost:5001").
+    async fn get_objectiveai_viewer_address(&self) -> Option<std::sync::Arc<String>>;
 }
