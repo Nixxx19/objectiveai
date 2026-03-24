@@ -12,64 +12,95 @@ from objectiveai.stream import Stream
 
 T = TypeVar("T")
 
-DEFAULT_API_BASE = "https://api.objective-ai.io"
+DEFAULT_ADDRESS = "https://api.objective-ai.io"
 
 
 class ObjectiveAI:
     """Client for the ObjectiveAI API.
 
     Args:
-        api_key: API key for authentication.
-            Falls back to ``OBJECTIVEAI_API_KEY`` env var.
-        api_base: Base URL for the API.
-            Falls back to ``OBJECTIVEAI_API_BASE`` env var,
+        address: Base URL for the API.
+            Falls back to ``OBJECTIVEAI_ADDRESS`` env var,
             then ``https://api.objective-ai.io``.
+        authorization: API key for authentication.
+            Falls back to ``OBJECTIVEAI_AUTHORIZATION`` env var.
         user_agent: ``User-Agent`` header.
             Falls back to ``USER_AGENT`` env var.
-        x_title: ``X-Title`` header.
-            Falls back to ``X_TITLE`` env var.
         http_referer: ``HTTP-Referer`` header.
             Falls back to ``HTTP_REFERER`` env var.
+        x_title: ``X-Title`` header.
+            Falls back to ``X_TITLE`` env var.
         x_github_authorization: ``X-GITHUB-AUTHORIZATION`` header
             for GitHub-hosted function/profile access.
         x_openrouter_authorization: ``X-OPENROUTER-AUTHORIZATION`` header
             for BYOK (Bring Your Own Key) support.
         x_mcp_authorization: Map from MCP server URL to authorization
             header value, sent as ``X-MCP-AUTHORIZATION``.
+        x_viewer_signature: ``X-VIEWER-SIGNATURE`` header
+            for viewer authentication.
+        x_viewer_address: ``X-VIEWER-ADDRESS`` header
+            for viewer address.
+        x_commit_author_name: ``X-COMMIT-AUTHOR-NAME`` header
+            for commit author name.
+        x_commit_author_email: ``X-COMMIT-AUTHOR-EMAIL`` header
+            for commit author email.
         timeout: Request timeout in seconds (default 60).
 
     Usage::
 
         from objectiveai import ObjectiveAI
 
-        client = ObjectiveAI(api_key="apk_...")
+        client = ObjectiveAI(authorization="apk_...")
     """
 
     def __init__(
         self,
         *,
-        api_key: str | None = None,
-        api_base: str | None = None,
+        address: str | None = None,
+        authorization: str | None = None,
         user_agent: str | None = None,
-        x_title: str | None = None,
         http_referer: str | None = None,
+        x_title: str | None = None,
         x_github_authorization: str | None = None,
         x_openrouter_authorization: str | None = None,
         x_mcp_authorization: dict[str, str] | None = None,
+        x_viewer_signature: str | None = None,
+        x_viewer_address: str | None = None,
+        x_commit_author_name: str | None = None,
+        x_commit_author_email: str | None = None,
         timeout: float = 60.0,
     ) -> None:
-        self.api_key = api_key or os.environ.get("OBJECTIVEAI_API_KEY")
-        self.api_base = (
-            api_base
-            or os.environ.get("OBJECTIVEAI_API_BASE")
-            or DEFAULT_API_BASE
+        self.address = (
+            address
+            or os.environ.get("OBJECTIVEAI_ADDRESS")
+            or DEFAULT_ADDRESS
         )
+        self.authorization = authorization or os.environ.get("OBJECTIVEAI_AUTHORIZATION")
         self.user_agent = user_agent or os.environ.get("USER_AGENT")
-        self.x_title = x_title or os.environ.get("X_TITLE")
         self.http_referer = http_referer or os.environ.get("HTTP_REFERER")
-        self.x_github_authorization = x_github_authorization
-        self.x_openrouter_authorization = x_openrouter_authorization
-        self.x_mcp_authorization = x_mcp_authorization
+        self.x_title = x_title or os.environ.get("X_TITLE")
+        self.x_github_authorization = x_github_authorization or os.environ.get("GITHUB_AUTHORIZATION")
+        self.x_openrouter_authorization = x_openrouter_authorization or os.environ.get("OPENROUTER_AUTHORIZATION")
+        if x_mcp_authorization is not None:
+            self.x_mcp_authorization = x_mcp_authorization
+        else:
+            raw = os.environ.get("MCP_AUTHORIZATION")
+            if raw:
+                try:
+                    import json
+                    parsed = json.loads(raw)
+                    if isinstance(parsed, dict):
+                        self.x_mcp_authorization = parsed
+                    else:
+                        self.x_mcp_authorization = None
+                except (json.JSONDecodeError, TypeError):
+                    self.x_mcp_authorization = None
+            else:
+                self.x_mcp_authorization = None
+        self.x_viewer_signature = x_viewer_signature or os.environ.get("VIEWER_SIGNATURE")
+        self.x_viewer_address = x_viewer_address or os.environ.get("VIEWER_ADDRESS")
+        self.x_commit_author_name = x_commit_author_name or os.environ.get("COMMIT_AUTHOR_NAME")
+        self.x_commit_author_email = x_commit_author_email or os.environ.get("COMMIT_AUTHOR_EMAIL")
         self.timeout = timeout
 
     def _build_headers(
@@ -79,14 +110,14 @@ class ObjectiveAI:
         """Build headers for a request."""
         headers: dict[str, str] = {"Content-Type": "application/json"}
 
-        if self.api_key:
-            headers["Authorization"] = f"Bearer {self.api_key}"
+        if self.authorization:
+            headers["Authorization"] = f"Bearer {self.authorization}"
         if self.user_agent:
             headers["User-Agent"] = self.user_agent
-        if self.x_title:
-            headers["X-Title"] = self.x_title
         if self.http_referer:
             headers["HTTP-Referer"] = self.http_referer
+        if self.x_title:
+            headers["X-Title"] = self.x_title
         if self.x_github_authorization:
             headers["X-GITHUB-AUTHORIZATION"] = self.x_github_authorization
         if self.x_openrouter_authorization:
@@ -94,6 +125,14 @@ class ObjectiveAI:
         if self.x_mcp_authorization:
             import json
             headers["X-MCP-AUTHORIZATION"] = json.dumps(self.x_mcp_authorization)
+        if self.x_viewer_signature:
+            headers["X-VIEWER-SIGNATURE"] = self.x_viewer_signature
+        if self.x_viewer_address:
+            headers["X-VIEWER-ADDRESS"] = self.x_viewer_address
+        if self.x_commit_author_name:
+            headers["X-COMMIT-AUTHOR-NAME"] = self.x_commit_author_name
+        if self.x_commit_author_email:
+            headers["X-COMMIT-AUTHOR-EMAIL"] = self.x_commit_author_email
 
         if extra_headers:
             headers.update(extra_headers)
@@ -102,7 +141,7 @@ class ObjectiveAI:
 
     def _build_url(self, path: str) -> str:
         """Build the full URL for a path."""
-        base = self.api_base.rstrip("/")
+        base = self.address.rstrip("/")
         if not path.startswith("/"):
             path = f"/{path}"
         return f"{base}{path}"

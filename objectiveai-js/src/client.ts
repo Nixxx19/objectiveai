@@ -20,28 +20,28 @@ function readEnv(env: string): string | undefined {
  */
 export const ObjectiveAIOptionsSchema = z
   .object({
-    apiKey: z
-      .string()
-      .nullish()
-      .describe("API key for authentication. Falls back to OBJECTIVEAI_API_KEY env var."),
-    apiBase: z
+    address: z
       .string()
       .nullish()
       .describe(
-        "Base URL for the API. Falls back to OBJECTIVEAI_API_BASE env var, then https://api.objective-ai.io",
+        "Base URL for the API. Falls back to OBJECTIVEAI_ADDRESS env var, then https://api.objective-ai.io",
       ),
+    authorization: z
+      .string()
+      .nullish()
+      .describe("API key for authentication. Falls back to OBJECTIVEAI_AUTHORIZATION env var."),
     userAgent: z
       .string()
       .nullish()
       .describe("User-Agent header. Falls back to USER_AGENT env var."),
-    xTitle: z
-      .string()
-      .nullish()
-      .describe("X-Title header. Falls back to X_TITLE env var."),
     httpReferer: z
       .string()
       .nullish()
       .describe("HTTP-Referer header. Falls back to HTTP_REFERER env var."),
+    xTitle: z
+      .string()
+      .nullish()
+      .describe("X-Title header. Falls back to X_TITLE env var."),
     xGithubAuthorization: z
       .string()
       .nullish()
@@ -54,6 +54,22 @@ export const ObjectiveAIOptionsSchema = z
       .record(z.string(), z.string())
       .nullish()
       .describe("X-MCP-AUTHORIZATION header (JSON-encoded map of MCP authorization headers)."),
+    xViewerSignature: z
+      .string()
+      .nullish()
+      .describe("X-VIEWER-SIGNATURE header for viewer authentication."),
+    xViewerAddress: z
+      .string()
+      .nullish()
+      .describe("X-VIEWER-ADDRESS header for viewer address."),
+    xCommitAuthorName: z
+      .string()
+      .nullish()
+      .describe("X-COMMIT-AUTHOR-NAME header for commit author name."),
+    xCommitAuthorEmail: z
+      .string()
+      .nullish()
+      .describe("X-COMMIT-AUTHOR-EMAIL header for commit author email."),
   })
   .describe("Options for the ObjectiveAI client.");
 export type ObjectiveAIOptions = z.infer<typeof ObjectiveAIOptionsSchema>;
@@ -83,33 +99,53 @@ export type RequestOptions = z.infer<typeof RequestOptionsSchema>;
  * ObjectiveAI API client.
  */
 export class ObjectiveAI {
-  readonly apiKey: string | undefined;
-  readonly apiBase: string;
+  readonly address: string;
+  readonly authorization: string | undefined;
   readonly userAgent: string | undefined;
-  readonly xTitle: string | undefined;
   readonly httpReferer: string | undefined;
+  readonly xTitle: string | undefined;
   readonly xGithubAuthorization: string | undefined;
   readonly xOpenrouterAuthorization: string | undefined;
   readonly xMcpAuthorization: Record<string, string> | undefined;
+  readonly xViewerSignature: string | undefined;
+  readonly xViewerAddress: string | undefined;
+  readonly xCommitAuthorName: string | undefined;
+  readonly xCommitAuthorEmail: string | undefined;
 
   constructor(options?: ObjectiveAIOptions | null) {
-    this.apiKey =
-      options?.apiKey ?? readEnv("OBJECTIVEAI_API_KEY") ?? undefined;
-    this.apiBase =
-      options?.apiBase ??
-      readEnv("OBJECTIVEAI_API_BASE") ??
+    this.address =
+      options?.address ??
+      readEnv("OBJECTIVEAI_ADDRESS") ??
       "https://api.objective-ai.io";
+    this.authorization =
+      options?.authorization ?? readEnv("OBJECTIVEAI_AUTHORIZATION") ?? undefined;
     this.userAgent =
       options?.userAgent ?? readEnv("USER_AGENT") ?? undefined;
-    this.xTitle = options?.xTitle ?? readEnv("X_TITLE") ?? undefined;
     this.httpReferer =
       options?.httpReferer ?? readEnv("HTTP_REFERER") ?? undefined;
+    this.xTitle = options?.xTitle ?? readEnv("X_TITLE") ?? undefined;
     this.xGithubAuthorization =
-      options?.xGithubAuthorization ?? undefined;
+      options?.xGithubAuthorization ?? readEnv("GITHUB_AUTHORIZATION") ?? undefined;
     this.xOpenrouterAuthorization =
-      options?.xOpenrouterAuthorization ?? undefined;
+      options?.xOpenrouterAuthorization ?? readEnv("OPENROUTER_AUTHORIZATION") ?? undefined;
     this.xMcpAuthorization =
-      options?.xMcpAuthorization ?? undefined;
+      options?.xMcpAuthorization ?? (() => {
+        const raw = readEnv("MCP_AUTHORIZATION");
+        if (!raw) return undefined;
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed;
+        } catch {}
+        return undefined;
+      })();
+    this.xViewerSignature =
+      options?.xViewerSignature ?? readEnv("VIEWER_SIGNATURE") ?? undefined;
+    this.xViewerAddress =
+      options?.xViewerAddress ?? readEnv("VIEWER_ADDRESS") ?? undefined;
+    this.xCommitAuthorName =
+      options?.xCommitAuthorName ?? readEnv("COMMIT_AUTHOR_NAME") ?? undefined;
+    this.xCommitAuthorEmail =
+      options?.xCommitAuthorEmail ?? readEnv("COMMIT_AUTHOR_EMAIL") ?? undefined;
   }
 
   /**
@@ -121,17 +157,17 @@ export class ObjectiveAI {
     // Set default headers
     headers.set("Content-Type", "application/json");
 
-    if (this.apiKey) {
-      headers.set("Authorization", `Bearer ${this.apiKey}`);
+    if (this.authorization) {
+      headers.set("Authorization", `Bearer ${this.authorization}`);
     }
     if (this.userAgent) {
       headers.set("User-Agent", this.userAgent);
     }
-    if (this.xTitle) {
-      headers.set("X-Title", this.xTitle);
-    }
     if (this.httpReferer) {
       headers.set("HTTP-Referer", this.httpReferer);
+    }
+    if (this.xTitle) {
+      headers.set("X-Title", this.xTitle);
     }
     if (this.xGithubAuthorization) {
       headers.set("X-GITHUB-AUTHORIZATION", this.xGithubAuthorization);
@@ -141,6 +177,18 @@ export class ObjectiveAI {
     }
     if (this.xMcpAuthorization) {
       headers.set("X-MCP-AUTHORIZATION", JSON.stringify(this.xMcpAuthorization));
+    }
+    if (this.xViewerSignature) {
+      headers.set("X-VIEWER-SIGNATURE", this.xViewerSignature);
+    }
+    if (this.xViewerAddress) {
+      headers.set("X-VIEWER-ADDRESS", this.xViewerAddress);
+    }
+    if (this.xCommitAuthorName) {
+      headers.set("X-COMMIT-AUTHOR-NAME", this.xCommitAuthorName);
+    }
+    if (this.xCommitAuthorEmail) {
+      headers.set("X-COMMIT-AUTHOR-EMAIL", this.xCommitAuthorEmail);
     }
 
     // Merge in request-specific headers
@@ -166,9 +214,9 @@ export class ObjectiveAI {
    * Build the full URL for a path.
    */
   private buildUrl(path: string): string {
-    const base = this.apiBase.endsWith("/")
-      ? this.apiBase.slice(0, -1)
-      : this.apiBase;
+    const base = this.address.endsWith("/")
+      ? this.address.slice(0, -1)
+      : this.address;
     const normalizedPath = path.startsWith("/") ? path : `/${path}`;
     return `${base}${normalizedPath}`;
   }
