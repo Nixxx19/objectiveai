@@ -10,9 +10,9 @@ impl Commands {
     pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
         let (client, mut config) = crate::config::read()?;
         match self {
-            Commands::Get => Ok(crate::Output::ConfigGet(crate::config::format_value(&config.api().headers().get_objectiveai_authorization()))),
+            Commands::Get => Ok(crate::Output::ConfigGet(crate::config::format_value(&config.api().headers().get_x_commit_author_name()))),
             Commands::Set { value } => {
-                config.api().headers().set_objectiveai_authorization(value);
+                config.api().headers().set_x_commit_author_name(value);
                 crate::config::write(&client, &config)?;
                 Ok(crate::Output::ConfigSet)
             }

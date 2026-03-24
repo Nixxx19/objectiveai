@@ -14,14 +14,14 @@ impl Commands {
     pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
         let (client, mut config) = crate::config::read()?;
         match self {
-            Commands::Get => Ok(crate::Output::ConfigGet(crate::config::format_value(&config.api().headers().get_mcp_authorization()))),
+            Commands::Get => Ok(crate::Output::ConfigGet(crate::config::format_value(&config.api().headers().get_x_mcp_authorization()))),
             Commands::Add { key, value } => {
-                config.api().headers().add_mcp_authorization(key, value);
+                config.api().headers().add_x_mcp_authorization(key, value);
                 crate::config::write(&client, &config)?;
                 Ok(crate::Output::ConfigSet)
             }
             Commands::Del { key } => {
-                config.api().headers().del_mcp_authorization(&key);
+                config.api().headers().del_x_mcp_authorization(&key);
                 crate::config::write(&client, &config)?;
                 Ok(crate::Output::ConfigSet)
             }
