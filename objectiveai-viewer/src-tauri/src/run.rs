@@ -109,6 +109,8 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
     Ok((listener, app, rx))
 }
 
+/// Must be called on the main thread. Tauri's event loop panics otherwise.
+/// Spawn `setup` and other async work on tokio tasks instead.
 pub async fn serve(listener: tokio::net::TcpListener, app: axum::Router, mut rx: EventReceiver) -> std::io::Result<()> {
     tokio::spawn(async move {
         axum::serve(listener, app).await
