@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -11,7 +12,7 @@ pub struct ResponseError {
 pub struct FunctionExecutionCreateParams {
     pub id: String,
     #[serde(flatten)]
-    pub inner: objectiveai::functions::executions::request::FunctionExecutionCreateParams,
+    pub inner: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -26,7 +27,7 @@ pub enum FunctionExecutionRequest {
 pub struct FunctionInventionRecursiveCreateParams {
     pub id: String,
     #[serde(flatten)]
-    pub inner: objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams,
+    pub inner: Arc<objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

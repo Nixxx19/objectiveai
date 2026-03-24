@@ -126,7 +126,7 @@ impl<CTXEXT: ctx::ContextExt + Send + Sync + 'static> Client<CTXEXT> {
         &self,
         ctx: ctx::Context<CTXEXT>,
         id: String,
-        request: objectiveai::functions::executions::request::FunctionExecutionCreateParams,
+        request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
     ) {
         self.tx.send((ctx, super::request::Request::FunctionExecution(
             super::request::FunctionExecutionRequest::Begin(super::request::FunctionExecutionCreateParams {
@@ -150,12 +150,12 @@ impl<CTXEXT: ctx::ContextExt + Send + Sync + 'static> Client<CTXEXT> {
         &self,
         ctx: ctx::Context<CTXEXT>,
         id: String,
-        error: objectiveai::error::ResponseError,
+        error: &crate::functions::executions::Error,
     ) {
         self.tx.send((ctx, super::request::Request::FunctionExecution(
             super::request::FunctionExecutionRequest::Error(super::request::ResponseError {
                 id,
-                inner: error,
+                inner: objectiveai::error::ResponseError::from(error),
             }),
         ))).ok();
     }
@@ -164,7 +164,7 @@ impl<CTXEXT: ctx::ContextExt + Send + Sync + 'static> Client<CTXEXT> {
         &self,
         ctx: ctx::Context<CTXEXT>,
         id: String,
-        request: objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams,
+        request: Arc<objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams>,
     ) {
         self.tx.send((ctx, super::request::Request::FunctionInventionRecursive(
             super::request::FunctionInventionRecursiveRequest::Begin(super::request::FunctionInventionRecursiveCreateParams {
@@ -188,12 +188,12 @@ impl<CTXEXT: ctx::ContextExt + Send + Sync + 'static> Client<CTXEXT> {
         &self,
         ctx: ctx::Context<CTXEXT>,
         id: String,
-        error: objectiveai::error::ResponseError,
+        error: &crate::functions::inventions::recursive::Error,
     ) {
         self.tx.send((ctx, super::request::Request::FunctionInventionRecursive(
             super::request::FunctionInventionRecursiveRequest::Error(super::request::ResponseError {
                 id,
-                inner: error,
+                inner: objectiveai::error::ResponseError::from(error),
             }),
         ))).ok();
     }
