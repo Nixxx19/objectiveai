@@ -1,9 +1,19 @@
 use axum::Json;
+use axum::body::Bytes;
+use axum::extract::State;
+use axum::http::{HeaderMap, StatusCode};
+use axum::middleware::{self, Next};
 use envconfig::Envconfig;
+use hmac::{Hmac, Mac};
 use serde::Serialize;
+use sha2::Sha256;
+use subtle::ConstantTimeEq;
+use std::sync::Arc;
 use tauri::Emitter;
 use tokio::sync::mpsc;
 use crate::functions;
+
+type HmacSha256 = Hmac<Sha256>;
 
 #[derive(Envconfig)]
 struct EnvConfigBuilder {
@@ -11,6 +21,8 @@ struct EnvConfigBuilder {
     address: Option<String>,
     #[envconfig(from = "PORT")]
     port: Option<u16>,
+    #[envconfig(from = "OBJECTIVEAI_VIEWER_SECRET")]
+    secret: Option<String>,
 }
 
 impl EnvConfigBuilder {
@@ -19,6 +31,7 @@ impl EnvConfigBuilder {
             address: self.address,
             port: self.port,
             suppress_output: None,
+            secret: self.secret,
         }
     }
 }
@@ -28,6 +41,7 @@ pub struct ConfigBuilder {
     pub address: Option<String>,
     pub port: Option<u16>,
     pub suppress_output: Option<bool>,
+    pub secret: Option<String>,
 }
 
 impl Envconfig for ConfigBuilder {
@@ -51,6 +65,7 @@ impl ConfigBuilder {
             address: self.address.unwrap_or_else(|| "0.0.0.0".to_string()),
             port: self.port.unwrap_or(5001),
             suppress_output: self.suppress_output.unwrap_or(false),
+            secret: self.secret,
         }
     }
 }
@@ -59,10 +74,12 @@ pub struct Config {
     pub address: String,
     pub port: u16,
     pub suppress_output: bool,
+    pub secret: Option<String>,
 }
 
 pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, axum::Router, EventReceiver)> {
     let (tx, rx) = mpsc::unbounded_channel::<Event>();
+    let secret = config.secret.map(Arc::new);
 
     let app = axum::Router::new()
         .route(
@@ -71,7 +88,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                 let tx = tx.clone();
                 move |Json(request): Json<functions::executions::request::Request>| async move {
                     tx.send(Event::FunctionsExecutions(request)).ok();
-                    axum::http::StatusCode::OK
+                    StatusCode::OK
                 }
             }),
         )
@@ -81,10 +98,11 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                 let tx = tx.clone();
                 move |Json(request): Json<functions::inventions::recursive::request::Request>| async move {
                     tx.send(Event::FunctionsInventionsRecursive(request)).ok();
-                    axum::http::StatusCode::OK
+                    StatusCode::OK
                 }
             }),
-        );
+        )
+        .layer(middleware::from_fn_with_state(secret, signature_middleware));
 
     let listener = tokio::net::TcpListener::bind(format!("{}:{}", config.address, config.port)).await?;
 
@@ -120,6 +138,42 @@ pub async fn run(config: Config) -> std::io::Result<()> {
         eprintln!("listening on {addr}");
     }
     serve(listener, app, rx).await
+}
+
+async fn signature_middleware(
+    State(secret): State<Option<Arc<String>>>,
+    headers: HeaderMap,
+    body: Bytes,
+    next: Next,
+) -> Result<axum::response::Response, StatusCode> {
+    if let Some(secret) = &secret {
+        let signature = headers
+            .get("X-OBJECTIVEAI-SIGNATURE")
+            .and_then(|v| v.to_str().ok())
+            .ok_or(StatusCode::UNAUTHORIZED)?;
+        if !verify_signature(secret, &body, signature) {
+            return Err(StatusCode::UNAUTHORIZED);
+        }
+    }
+    let request = axum::http::Request::builder()
+        .body(axum::body::Body::from(body))
+        .unwrap();
+    Ok(next.run(request).await)
+}
+
+fn verify_signature(secret: &str, body: &[u8], signature_header: &str) -> bool {
+    let Some(hex_sig) = signature_header.strip_prefix("sha256=") else {
+        return false;
+    };
+    let Ok(sig_bytes) = hex::decode(hex_sig) else {
+        return false;
+    };
+    let Ok(mut mac) = HmacSha256::new_from_slice(secret.as_bytes()) else {
+        return false;
+    };
+    mac.update(body);
+    let expected = mac.finalize().into_bytes();
+    expected.ct_eq(&sig_bytes).into()
 }
 
 #[derive(Clone, Serialize)]
