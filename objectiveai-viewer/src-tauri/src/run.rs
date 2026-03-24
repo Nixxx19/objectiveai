@@ -21,7 +21,7 @@ struct EnvConfigBuilder {
     address: Option<String>,
     #[envconfig(from = "PORT")]
     port: Option<u16>,
-    #[envconfig(from = "OBJECTIVEAI_VIEWER_SECRET")]
+    #[envconfig(from = "VIEWER_SECRET")]
     secret: Option<String>,
 }
 
@@ -150,7 +150,10 @@ async fn signature_middleware(
 ) -> Result<axum::response::Response, StatusCode> {
     if let Some(secret) = &secret {
         let signature = headers
-            .get("X-OBJECTIVEAI-SIGNATURE")
+            .get("X-VIEWER-SIGNATURE")
+            .or_else(|| headers.get("VIEWER-SIGNATURE"))
+            .or_else(|| headers.get("X-OBJECTIVEAI-SIGNATURE"))
+            .or_else(|| headers.get("OBJECTIVEAI-SIGNATURE"))
             .and_then(|v| v.to_str().ok())
             .ok_or(StatusCode::UNAUTHORIZED)?;
         if !verify_signature(secret, &body, signature) {
