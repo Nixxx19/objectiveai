@@ -1,8 +1,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use clap::Parser;
+use envconfig::Envconfig;
 
-fn main() {
-    let args = objectiveai_viewer::args::Args::parse();
-    objectiveai_viewer::run(args)
+#[tokio::main]
+async fn main() {
+    let _ = dotenv::dotenv();
+    let config = objectiveai_viewer::ConfigBuilder::init_from_env().unwrap().build();
+    objectiveai_viewer::run(config).await.unwrap();
 }
