@@ -17,4 +17,8 @@ impl super::ContextExt for DefaultContextExt {
     ) -> Option<std::sync::Arc<std::collections::HashMap<String, String>>> {
         None
     }
+
+    async fn get_objectiveai_signature(&self) -> Option<std::sync::Arc<String>> {
+        None
+    }
 }

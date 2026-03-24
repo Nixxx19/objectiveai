@@ -17,4 +17,7 @@ pub trait ContextExt {
     async fn get_mcp_byok(
         &self,
     ) -> Option<std::sync::Arc<std::collections::HashMap<String, String>>>;
+
+    /// Returns the user's BYOK ObjectiveAI signature.
+    async fn get_objectiveai_signature(&self) -> Option<std::sync::Arc<String>>;
 }

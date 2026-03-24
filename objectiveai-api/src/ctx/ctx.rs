@@ -32,12 +32,16 @@ pub struct Context<CTXEXT> {
     mcp_authorization: Option<Arc<HashMap<String, String>>>,
     /// Per-request ObjectiveAI authorization token.
     objectiveai_authorization: Option<Arc<String>>,
+    /// Per-request ObjectiveAI signature.
+    objectiveai_signature: Option<Arc<String>>,
     /// Cached resolved OpenRouter authorization (self + BYOK).
-    openrouter_authorization_cached: OnceCell<Option<Arc<String>>>,
+    openrouter_authorization_cached: Arc<OnceCell<Option<Arc<String>>>>,
     /// Cached resolved GitHub authorization (self + BYOK).
-    github_authorization_cached: OnceCell<Option<Arc<String>>>,
+    github_authorization_cached: Arc<OnceCell<Option<Arc<String>>>>,
     /// Cached resolved MCP authorization (self + BYOK merged).
-    mcp_authorization_cached: OnceCell<Option<Arc<HashMap<String, String>>>>,
+    mcp_authorization_cached: Arc<OnceCell<Option<Arc<HashMap<String, String>>>>>,
+    /// Cached resolved ObjectiveAI signature (self + BYOK).
+    objectiveai_signature_cached: Arc<OnceCell<Option<Arc<String>>>>,
     /// Cache for agent fetches, keyed by RemotePath.
     pub agent_cache: Arc<
         DashMap<
@@ -120,14 +124,16 @@ impl<CTXEXT> Clone for Context<CTXEXT> {
             github_authorization: self.github_authorization.clone(),
             mcp_authorization: self.mcp_authorization.clone(),
             objectiveai_authorization: self.objectiveai_authorization.clone(),
-            openrouter_authorization_cached: OnceCell::new(),
-            github_authorization_cached: OnceCell::new(),
-            mcp_authorization_cached: OnceCell::new(),
+            objectiveai_signature: self.objectiveai_signature.clone(),
+            openrouter_authorization_cached: self.openrouter_authorization_cached.clone(),
+            github_authorization_cached: self.github_authorization_cached.clone(),
+            mcp_authorization_cached: self.mcp_authorization_cached.clone(),
+            objectiveai_signature_cached: self.objectiveai_signature_cached.clone(),
             swarm_cache: self.swarm_cache.clone(),
             agent_cache: self.agent_cache.clone(),
-            remote_latest_cache: self.remote_latest_cache.clone(),
             function_cache: self.function_cache.clone(),
             profile_cache: self.profile_cache.clone(),
+            remote_latest_cache: self.remote_latest_cache.clone(),
         }
     }
 }
@@ -168,7 +174,13 @@ impl<CTXEXT> Context<CTXEXT> {
 
         let objectiveai_authorization = headers
             .get("X-OBJECTIVEAI-AUTHORIZATION")
+            .or_else(|| headers.get("OBJECTIVEAI-AUTHORIZATION"))
             .or_else(|| headers.get("AUTHORIZATION"))
+            .and_then(|v| v.to_str().ok())
+            .map(|s| Arc::new(s.to_owned()));
+
+        let objectiveai_signature = headers
+            .get("X-OBJECTIVEAI-SIGNATURE")
             .and_then(|v| v.to_str().ok())
             .map(|s| Arc::new(s.to_owned()));
 
@@ -180,14 +192,16 @@ impl<CTXEXT> Context<CTXEXT> {
             github_authorization,
             mcp_authorization,
             objectiveai_authorization,
-            openrouter_authorization_cached: OnceCell::new(),
-            github_authorization_cached: OnceCell::new(),
-            mcp_authorization_cached: OnceCell::new(),
+            objectiveai_signature,
+            openrouter_authorization_cached: Arc::new(OnceCell::new()),
+            github_authorization_cached: Arc::new(OnceCell::new()),
+            mcp_authorization_cached: Arc::new(OnceCell::new()),
+            objectiveai_signature_cached: Arc::new(OnceCell::new()),
             swarm_cache: Arc::new(DashMap::new()),
             agent_cache: Arc::new(DashMap::new()),
-            remote_latest_cache: Arc::new(DashMap::new()),
             function_cache: Arc::new(DashMap::new()),
             profile_cache: Arc::new(DashMap::new()),
+            remote_latest_cache: Arc::new(DashMap::new()),
         }
     }
 }
@@ -259,6 +273,22 @@ impl<CTXEXT: super::ContextExt> Context<CTXEXT> {
                         }
                         Some(Arc::new(merged))
                     }
+                }
+            })
+            .await
+            .clone()
+    }
+
+    /// Returns the resolved ObjectiveAI signature.
+    ///
+    /// Checks the per-request signature first, falls back to the BYOK signature
+    /// from the context extension. Result is cached for subsequent calls.
+    pub async fn objectiveai_signature(&self) -> Option<Arc<String>> {
+        self.objectiveai_signature_cached
+            .get_or_init(|| async {
+                match (&self.objectiveai_signature, self.ext.get_objectiveai_signature().await) {
+                    (Some(self_sig), _) => Some(self_sig.clone()),
+                    (None, byok) => byok,
                 }
             })
             .await
