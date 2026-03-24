@@ -1,9 +1,16 @@
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FunctionExecutionCreateParams {
+    pub id: String,
+    #[serde(flatten)]
+    pub inner: objectiveai::functions::executions::request::FunctionExecutionCreateParams,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Request {
-    Begin(objectiveai::functions::executions::request::FunctionExecutionCreateParams),
+    Begin(FunctionExecutionCreateParams),
     Continue(objectiveai::functions::executions::response::streaming::FunctionExecutionChunk),
-    Error(objectiveai::error::ResponseError),
+    Error(crate::response_error::ResponseError),
 }
