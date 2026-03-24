@@ -179,6 +179,13 @@ where
             .as_secs();
         let id = recursive_invention_response_id(created);
 
+        // send begin to viewer
+        self.viewer_client.send_function_invention_recursive_begin(
+            ctx.clone(),
+            id.clone(),
+            request.clone(),
+        );
+
         let is_scalar = match &request.state {
             objectiveai::functions::inventions::state::ParamsState::AlphaScalarBranch(_)
             | objectiveai::functions::inventions::state::ParamsState::AlphaScalarLeaf(_)
@@ -192,6 +199,9 @@ where
         };
 
         let choice_indexer = Arc::new(ChoiceIndexer::new(0));
+
+        let viewer_client = self.viewer_client.clone();
+        let viewer_ctx = ctx.clone();
 
         let inner = run_recursive(
             self.invention_client.clone(),
@@ -237,6 +247,10 @@ where
                     usage: Some(accumulated_usage),
                 };
             });
+
+        let stream = stream.inspect(move |chunk| {
+            viewer_client.send_function_invention_recursive_continue(viewer_ctx.clone(), chunk.clone());
+        });
 
         Ok(stream)
     }
