@@ -9,16 +9,10 @@ use futures::{Stream, StreamExt};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, hash::Hasher, sync::Arc, time};
 
-/// Generates a unique response ID for scalar Function executions.
-pub fn scalar_response_id(created: u64) -> String {
+/// Generates a unique response ID for Function executions.
+pub fn response_id(created: u64) -> String {
     let uuid = uuid::Uuid::new_v4();
-    format!("sclfnc-{}-{}", uuid.simple(), created)
-}
-
-/// Generates a unique response ID for vector Function executions.
-pub fn vector_response_id(created: u64) -> String {
-    let uuid = uuid::Uuid::new_v4();
-    format!("vctfnc-{}-{}", uuid.simple(), created)
+    format!("fnexec-{}-{}", uuid.simple(), created)
 }
 
 /// Computes the final function output as a weighted average of task outputs.
@@ -933,7 +927,7 @@ where
             // identify the completion and get response type
             let (response_id, object) = match ftp.r#type {
                 functions::FunctionType::Vector { .. } => (
-                    vector_response_id(created),
+                    response_id(created),
                     objectiveai::functions::executions::response::streaming::Object::VectorFunctionExecutionChunk,
                 ),
                 _ => unreachable!(),
@@ -1932,11 +1926,11 @@ where
         // identify the completion and get response type
         let (response_id, object) = match ftp.r#type {
             functions::FunctionType::Scalar => (
-                scalar_response_id(created),
+                response_id(created),
                 objectiveai::functions::executions::response::streaming::Object::ScalarFunctionExecutionChunk,
             ),
             functions::FunctionType::Vector { .. } => (
-                vector_response_id(created),
+                response_id(created),
                 objectiveai::functions::executions::response::streaming::Object::VectorFunctionExecutionChunk,
             ),
         };
