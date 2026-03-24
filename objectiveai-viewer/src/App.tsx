@@ -1,105 +1,185 @@
 import { useEffect, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import type {
-  FunctionsExecutionsRequestFunctionExecutionCreateParams,
-  FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams,
-  FunctionsExecutionsResponseStreamingFunctionExecutionChunk,
-  FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk,
-  ErrorResponseError,
-} from "objectiveai";
+import { z } from "zod";
 import {
+  FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema,
+  FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema,
+  FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema,
+  FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema,
+  ErrorResponseErrorSchema,
   functionsExecutionsResponseStreamingFunctionExecutionChunkMerged,
   functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged,
 } from "objectiveai";
+import type {
+  FunctionsExecutionsResponseStreamingFunctionExecutionChunk,
+  FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk,
+} from "objectiveai";
 
-type Request =
-  | FunctionsExecutionsRequestFunctionExecutionCreateParams
-  | FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams;
+// Extended schemas with required id
+const FunctionExecutionCreateParamsSchema = FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema.extend({
+  id: z.string(),
+});
+type FunctionExecutionCreateParams = z.infer<typeof FunctionExecutionCreateParamsSchema>;
 
-type ResponseChunk =
-  | FunctionsExecutionsResponseStreamingFunctionExecutionChunk
-  | FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk;
+const FunctionInventionRecursiveCreateParamsSchema = FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema.extend({
+  id: z.string(),
+});
+type FunctionInventionRecursiveCreateParams = z.infer<typeof FunctionInventionRecursiveCreateParamsSchema>;
 
-type Chunk = ResponseChunk | ErrorResponseError;
+const ResponseErrorSchema = ErrorResponseErrorSchema.extend({
+  id: z.string(),
+});
+type ResponseError = z.infer<typeof ResponseErrorSchema>;
 
-function isError(chunk: Chunk): chunk is ErrorResponseError {
-  return "code" in chunk && !("object" in chunk);
+// Classified incoming event
+type FunctionExecutionEvent =
+  | { type: "begin"; data: FunctionExecutionCreateParams }
+  | { type: "chunk"; data: FunctionsExecutionsResponseStreamingFunctionExecutionChunk }
+  | { type: "error"; data: ResponseError };
+
+type FunctionInventionRecursiveEvent =
+  | { type: "begin"; data: FunctionInventionRecursiveCreateParams }
+  | { type: "chunk"; data: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk }
+  | { type: "error"; data: ResponseError };
+
+// Entry in the list
+interface FunctionExecutionEntry {
+  kind: "execution";
+  id: string;
+  request: FunctionExecutionCreateParams;
+  chunk: FunctionsExecutionsResponseStreamingFunctionExecutionChunk | null;
+  error: ResponseError | null;
 }
 
-function isExecutionChunk(
-  chunk: ResponseChunk,
-): chunk is FunctionsExecutionsResponseStreamingFunctionExecutionChunk {
-  return (
-    chunk.object === "scalar.function.execution.chunk" ||
-    chunk.object === "vector.function.execution.chunk"
-  );
+interface FunctionInventionRecursiveEntry {
+  kind: "invention";
+  id: string;
+  request: FunctionInventionRecursiveCreateParams;
+  chunk: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk | null;
+  error: ResponseError | null;
 }
 
-function isInventionChunk(
-  chunk: ResponseChunk,
-): chunk is FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk {
-  return (
-    chunk.object === "alpha.scalar.function.invention.recursive.chunk" ||
-    chunk.object === "alpha.vector.function.invention.recursive.chunk"
-  );
+type Entry = FunctionExecutionEntry | FunctionInventionRecursiveEntry;
+
+function classifyFunctionExecution(payload: unknown): FunctionExecutionEvent | null {
+  const beginParse = FunctionExecutionCreateParamsSchema.safeParse(payload);
+  if (beginParse.success) return { type: "begin", data: beginParse.data };
+  const errorParse = ResponseErrorSchema.safeParse(payload);
+  if (errorParse.success) return { type: "error", data: errorParse.data };
+  const chunkParse = FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema.safeParse(payload);
+  if (chunkParse.success) return { type: "chunk", data: chunkParse.data };
+  return null;
+}
+
+function classifyFunctionInventionRecursive(payload: unknown): FunctionInventionRecursiveEvent | null {
+  const beginParse = FunctionInventionRecursiveCreateParamsSchema.safeParse(payload);
+  if (beginParse.success) return { type: "begin", data: beginParse.data };
+  const errorParse = ResponseErrorSchema.safeParse(payload);
+  if (errorParse.success) return { type: "error", data: errorParse.data };
+  const chunkParse = FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema.safeParse(payload);
+  if (chunkParse.success) return { type: "chunk", data: chunkParse.data };
+  return null;
+}
+
+function EntryView({ entry }: { entry: Entry }) {
+  if (entry.error) {
+    return <pre style={{ color: "red" }}>{JSON.stringify(entry.error, null, 2)}</pre>;
+  }
+  if (entry.chunk) {
+    return <pre>{JSON.stringify(entry.chunk, null, 2)}</pre>;
+  }
+  return <pre style={{ color: "gray" }}>{JSON.stringify(entry.request, null, 2)}</pre>;
 }
 
 function App() {
-  const [request, setRequest] = useState<Request | null>(null);
-  const [chunk, setChunk] = useState<ResponseChunk | null>(null);
-  const [error, setError] = useState<ErrorResponseError | null>(null);
+  const [entries, setEntries] = useState<Entry[]>([]);
 
   useEffect(() => {
-    invoke<Request>("get_request").then(setRequest);
-  }, []);
+    const unlistenExecution = listen<unknown>("functions-executions", (event) => {
+      const classified = classifyFunctionExecution(event.payload);
+      if (!classified) return;
 
-  useEffect(() => {
-    if (!request) return;
-
-    const isExecution = "function" in request && "profile" in request;
-
-    const unlisten = listen<Chunk>("chunk", (event) => {
-      const incoming = event.payload;
-
-      if (isError(incoming)) {
-        setError(incoming);
-        return;
-      }
-
-      if (isExecution) {
-        if (!isExecutionChunk(incoming)) {
-          setError({ code: 500, message: "Expected execution chunk but got invention chunk" });
-          return;
+      setEntries((prev) => {
+        switch (classified.type) {
+          case "begin":
+            return [...prev, {
+              kind: "execution",
+              id: classified.data.id,
+              request: classified.data,
+              chunk: null,
+              error: null,
+            }];
+          case "error": {
+            const id = classified.data.id;
+            if (!prev.some((e) => e.id === id)) return prev;
+            return prev.map((e) =>
+              e.id === id ? { ...e, error: classified.data } : e
+            );
+          }
+          case "chunk": {
+            const id = classified.data.id;
+            if (!prev.some((e) => e.id === id && e.kind === "execution")) return prev;
+            return prev.map((e) => {
+              if (e.id !== id || e.kind !== "execution") return e;
+              const [merged] = e.chunk
+                ? functionsExecutionsResponseStreamingFunctionExecutionChunkMerged(e.chunk, classified.data)
+                : [classified.data, true];
+              return { ...e, chunk: merged };
+            });
+          }
         }
-        setChunk((prev) => {
-          if (!prev || !isExecutionChunk(prev)) return incoming;
-          const [merged] = functionsExecutionsResponseStreamingFunctionExecutionChunkMerged(prev, incoming);
-          return merged;
-        });
-      } else {
-        if (!isInventionChunk(incoming)) {
-          setError({ code: 500, message: "Expected invention chunk but got execution chunk" });
-          return;
+      });
+    });
+
+    const unlistenInvention = listen<unknown>("functions-inventions-recursive", (event) => {
+      const classified = classifyFunctionInventionRecursive(event.payload);
+      if (!classified) return;
+
+      setEntries((prev) => {
+        switch (classified.type) {
+          case "begin":
+            return [...prev, {
+              kind: "invention",
+              id: classified.data.id,
+              request: classified.data,
+              chunk: null,
+              error: null,
+            }];
+          case "error": {
+            const id = classified.data.id;
+            if (!prev.some((e) => e.id === id)) return prev;
+            return prev.map((e) =>
+              e.id === id ? { ...e, error: classified.data } : e
+            );
+          }
+          case "chunk": {
+            const id = classified.data.id;
+            if (!prev.some((e) => e.id === id && e.kind === "invention")) return prev;
+            return prev.map((e) => {
+              if (e.id !== id || e.kind !== "invention") return e;
+              const [merged] = e.chunk
+                ? functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged(e.chunk, classified.data)
+                : [classified.data, true];
+              return { ...e, chunk: merged };
+            });
+          }
         }
-        setChunk((prev) => {
-          if (!prev || !isInventionChunk(prev)) return incoming;
-          const [merged] = functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged(prev, incoming);
-          return merged;
-        });
-      }
+      });
     });
 
     return () => {
-      unlisten.then((fn) => fn());
+      unlistenExecution.then((fn) => fn());
+      unlistenInvention.then((fn) => fn());
     };
-  }, [request]);
+  }, []);
 
   return (
     <main className="container">
       <h1>ObjectiveAI Viewer</h1>
-      {error && <pre style={{ color: "red" }}>{JSON.stringify(error, null, 2)}</pre>}
-      <pre>{chunk ? JSON.stringify(chunk, null, 2) : "Waiting for chunks..."}</pre>
+      {entries.length === 0 && <p>Waiting for requests...</p>}
+      {entries.map((entry) => (
+        <EntryView key={entry.id} entry={entry} />
+      ))}
     </main>
   );
 }
