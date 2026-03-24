@@ -615,6 +615,25 @@ where
             .unwrap()
             .as_secs();
 
+        // generate response id
+        let response_id = response_id(created);
+
+        // send begin to viewer
+        self.viewer_client.send_function_execution_begin(
+            ctx.clone(),
+            response_id.clone(),
+            request.clone(),
+        );
+
+        // helper: send error to viewer and return it
+        let send_err = |e: super::Error| -> super::Error {
+            self.viewer_client.send_function_execution_error(
+                ctx.clone(),
+                response_id.clone(),
+                &e,
+            );
+            e
+        };
         // parse retry token if provided
         let retry_token = request
             .retry_token
@@ -625,7 +644,7 @@ where
                 )
                 .ok_or(super::Error::InvalidRetryToken)
             })
-            .transpose()?
+            .transpose().map_err(&send_err)?
             .map(Arc::new);
 
         // validate that input_split and input_merge are present if strategy is Swiss
@@ -654,10 +673,10 @@ where
                 ),
                 Some(_)
             ) => {
-                return Err(super::Error::InvalidFunctionForStrategy(
+                return Err(send_err(super::Error::InvalidFunctionForStrategy(
                     "With 'swiss_system' strategy, Inline Function must be vector with both `input_split` and `input_merge` present."
                         .to_string(),
-                ));
+                )));
             }
             _ => { }
         }
@@ -673,7 +692,7 @@ where
                 false,
                 self.retrieve_router.clone(),
             )
-            .await?;
+            .await.map_err(&send_err)?;
 
         // validate that ftp type is Vector if strategy is Swiss
         match (&request.strategy, &ftp.r#type) {
@@ -685,10 +704,10 @@ where
                 ),
                 functions::FunctionType::Scalar,
             ) => {
-                return Err(super::Error::InvalidFunctionForStrategy(
+                return Err(send_err(super::Error::InvalidFunctionForStrategy(
                     "With 'swiss_system' strategy, Function must be of type 'vector'."
                         .to_string(),
-                ));
+                )));
             }
             _ => { }
         }
@@ -794,6 +813,8 @@ where
         // Only the first round uses retry tokens; subsequent rounds do not.
         // Errors from subsequent rounds are included in the final output chunk.
         let choice_indexer = Arc::new(ChoiceIndexer::new(0));
+        let viewer_client = self.viewer_client.clone();
+        let viewer_ctx = ctx.clone();
         if let Some(
             objectiveai::functions::executions::request::Strategy::SwissSystem {
                 pool,
@@ -817,10 +838,10 @@ where
             let pool = pool.unwrap_or(10);
             let rounds = rounds.unwrap_or(3);
             if pool <= 1 || rounds == 0 {
-                return Err(super::Error::InvalidStrategy(
+                return Err(send_err(super::Error::InvalidStrategy(
                     "For 'swiss_system' strategy, 'pool' must be > 1 and 'rounds' must be > 0."
                         .to_string(),
-                ));
+                )));
             }
 
             // split input
@@ -832,7 +853,7 @@ where
                         map: None,
                     }
                 ),
-            )?;
+            ).map_err(super::Error::from).map_err(&send_err)?;
 
             // fetch initial FTPs
             let mut ftp_futs = Vec::with_capacity(split_input.len() / pool + 1);
@@ -856,7 +877,7 @@ where
                             map: None,
                         }
                     )
-                )?;
+                ).map_err(super::Error::from).map_err(&send_err)?;
                 ftp_futs.push(functions::get_flat_task_profile(
                     &ctx,
                     Vec::new(),
@@ -868,7 +889,7 @@ where
                     self.retrieve_router.clone(),
                 ));
             }
-            let mut ftps = futures::future::try_join_all(ftp_futs).await?;
+            let mut ftps = futures::future::try_join_all(ftp_futs).await.map_err(&send_err)?;
 
             // setup reasoning data for Swiss system
             let (mut swiss_vector_completions, mut swiss_index_maps, swiss_confidence_responses) = if reasoning {
@@ -924,12 +945,10 @@ where
                 (None, None, None)
             };
 
-            // identify the completion and get response type
-            let (response_id, object) = match ftp.r#type {
-                functions::FunctionType::Vector { .. } => (
-                    response_id(created),
+            // identify the response type
+            let object = match ftp.r#type {
+                functions::FunctionType::Vector { .. } =>
                     objectiveai::functions::executions::response::streaming::Object::VectorFunctionExecutionChunk,
-                ),
                 _ => unreachable!(),
             };
 
@@ -1005,6 +1024,7 @@ where
                                     None
                                 },
                                 ftp,
+                                None,
                                 created,
                                 pool_task_index,
                                 choice_indexer.clone(),
@@ -1413,7 +1433,9 @@ where
                     object,
                     usage: Some(usage),
                 };
-            }))
+            }.inspect(move |chunk| {
+                viewer_client.send_function_execution_continue(viewer_ctx.clone(), chunk.clone());
+            })))
         } else {
             // get function stream
             let stream = self
@@ -1423,6 +1445,7 @@ where
                     request.clone(),
                     retry_token,
                     ftp,
+                    Some(response_id.clone()),
                     created,
                     0,
                     choice_indexer,
@@ -1616,7 +1639,9 @@ where
                     // yield final chunk
                     yield final_chunk;
                 }
-            }))
+            }.inspect(move |chunk| {
+                viewer_client.send_function_execution_continue(viewer_ctx.clone(), chunk.clone());
+            })))
         }
     }
 
@@ -1642,6 +1667,7 @@ where
                     request,
                     root_retry_token,
                     function_ftp,
+                    None,
                     created,
                     task_index,
                     choice_indexer,
@@ -1828,6 +1854,7 @@ where
                     request.clone(),
                     root_retry_token.clone(),
                     ftp,
+                    None,
                     created,
                     task_index + outer_task_indices[i],
                     choice_indexer.clone(),
@@ -1917,6 +1944,7 @@ where
             Arc<objectiveai::functions::executions::RetryToken>,
         >,
         ftp: functions::FunctionFlatTaskProfile,
+        response_id: Option<String>,
         created: u64,
         task_index: u64,
         choice_indexer: Arc<ChoiceIndexer>,
@@ -1924,15 +1952,12 @@ where
         swiss_pool_index: Option<u64>,
     ) -> impl Stream<Item = FtpStreamChunk> + Send + 'static {
         // identify the completion and get response type
-        let (response_id, object) = match ftp.r#type {
-            functions::FunctionType::Scalar => (
-                response_id(created),
+        let response_id = response_id.unwrap_or_else(|| self::response_id(created));
+        let object = match ftp.r#type {
+            functions::FunctionType::Scalar =>
                 objectiveai::functions::executions::response::streaming::Object::ScalarFunctionExecutionChunk,
-            ),
-            functions::FunctionType::Vector { .. } => (
-                response_id(created),
+            functions::FunctionType::Vector { .. } =>
                 objectiveai::functions::executions::response::streaming::Object::VectorFunctionExecutionChunk,
-            ),
         };
 
         // initialize task indices
