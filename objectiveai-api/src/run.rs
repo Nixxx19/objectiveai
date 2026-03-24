@@ -15,7 +15,7 @@ use crate::{
     filesystem,
     functions::{self, profiles::computations::Client},
     github, mcp, objectiveai_http,
-    retrieval,
+    retrieval, viewer,
     util::StreamOnce,
     vector,
 };
@@ -53,6 +53,10 @@ struct EnvConfigBuilder {
     openrouter_api_key: Option<String>,
     #[envconfig(from = "CLAUDE_AGENT_SDK")]
     claude_agent_sdk: Option<String>,
+    #[envconfig(from = "VIEWER_API_BASE")]
+    viewer_api_base: Option<String>,
+    #[envconfig(from = "VIEWER_API_SIGNATURE")]
+    viewer_api_signature: Option<String>,
     #[envconfig(from = "USER_AGENT")]
     user_agent: Option<String>,
     #[envconfig(from = "HTTP_REFERER")]
@@ -95,6 +99,18 @@ struct EnvConfigBuilder {
     github_backoff_max_interval: Option<u64>,
     #[envconfig(from = "GITHUB_BACKOFF_MAX_ELAPSED_TIME")]
     github_backoff_max_elapsed_time: Option<u64>,
+    #[envconfig(from = "VIEWER_BACKOFF_CURRENT_INTERVAL")]
+    viewer_backoff_current_interval: Option<u64>,
+    #[envconfig(from = "VIEWER_BACKOFF_INITIAL_INTERVAL")]
+    viewer_backoff_initial_interval: Option<u64>,
+    #[envconfig(from = "VIEWER_BACKOFF_RANDOMIZATION_FACTOR")]
+    viewer_backoff_randomization_factor: Option<f64>,
+    #[envconfig(from = "VIEWER_BACKOFF_MULTIPLIER")]
+    viewer_backoff_multiplier: Option<f64>,
+    #[envconfig(from = "VIEWER_BACKOFF_MAX_INTERVAL")]
+    viewer_backoff_max_interval: Option<u64>,
+    #[envconfig(from = "VIEWER_BACKOFF_MAX_ELAPSED_TIME")]
+    viewer_backoff_max_elapsed_time: Option<u64>,
     #[envconfig(from = "AGENT_COMPLETIONS_FIRST_CHUNK_TIMEOUT")]
     agent_completions_first_chunk_timeout: Option<u64>,
     #[envconfig(from = "AGENT_COMPLETIONS_OTHER_CHUNK_TIMEOUT")]
@@ -135,6 +151,8 @@ impl EnvConfigBuilder {
             openrouter_api_base: self.openrouter_api_base,
             openrouter_api_key: self.openrouter_api_key,
             claude_agent_sdk: self.claude_agent_sdk.map(|s| parse_bool(&s)),
+            viewer_api_base: self.viewer_api_base,
+            viewer_api_signature: self.viewer_api_signature,
             user_agent: self.user_agent,
             http_referer: self.http_referer,
             x_title: self.x_title,
@@ -156,6 +174,12 @@ impl EnvConfigBuilder {
             github_backoff_multiplier: self.github_backoff_multiplier,
             github_backoff_max_interval: self.github_backoff_max_interval,
             github_backoff_max_elapsed_time: self.github_backoff_max_elapsed_time,
+            viewer_backoff_current_interval: self.viewer_backoff_current_interval,
+            viewer_backoff_initial_interval: self.viewer_backoff_initial_interval,
+            viewer_backoff_randomization_factor: self.viewer_backoff_randomization_factor,
+            viewer_backoff_multiplier: self.viewer_backoff_multiplier,
+            viewer_backoff_max_interval: self.viewer_backoff_max_interval,
+            viewer_backoff_max_elapsed_time: self.viewer_backoff_max_elapsed_time,
             agent_completions_first_chunk_timeout: self.agent_completions_first_chunk_timeout,
             agent_completions_other_chunk_timeout: self.agent_completions_other_chunk_timeout,
             mcp_connect_timeout: self.mcp_connect_timeout,
@@ -181,6 +205,8 @@ pub struct ConfigBuilder {
     pub openrouter_api_base: Option<String>,
     pub openrouter_api_key: Option<String>,
     pub claude_agent_sdk: Option<bool>,
+    pub viewer_api_base: Option<String>,
+    pub viewer_api_signature: Option<String>,
     pub user_agent: Option<String>,
     pub http_referer: Option<String>,
     pub x_title: Option<String>,
@@ -202,6 +228,12 @@ pub struct ConfigBuilder {
     pub github_backoff_multiplier: Option<f64>,
     pub github_backoff_max_interval: Option<u64>,
     pub github_backoff_max_elapsed_time: Option<u64>,
+    pub viewer_backoff_current_interval: Option<u64>,
+    pub viewer_backoff_initial_interval: Option<u64>,
+    pub viewer_backoff_randomization_factor: Option<f64>,
+    pub viewer_backoff_multiplier: Option<f64>,
+    pub viewer_backoff_max_interval: Option<u64>,
+    pub viewer_backoff_max_elapsed_time: Option<u64>,
     pub agent_completions_first_chunk_timeout: Option<u64>,
     pub agent_completions_other_chunk_timeout: Option<u64>,
     pub mcp_connect_timeout: Option<u64>,
@@ -241,6 +273,8 @@ impl ConfigBuilder {
             openrouter_api_base: self.openrouter_api_base.unwrap_or_else(|| "https://openrouter.ai/api/v1".to_string()),
             openrouter_api_key: self.openrouter_api_key,
             claude_agent_sdk: self.claude_agent_sdk.unwrap_or(true),
+            viewer_api_base: self.viewer_api_base,
+            viewer_api_signature: self.viewer_api_signature,
             user_agent: self.user_agent,
             http_referer: self.http_referer,
             x_title: self.x_title,
@@ -262,6 +296,12 @@ impl ConfigBuilder {
             github_backoff_multiplier: self.github_backoff_multiplier.unwrap_or(1.5),
             github_backoff_max_interval: self.github_backoff_max_interval.unwrap_or(1000),
             github_backoff_max_elapsed_time: self.github_backoff_max_elapsed_time.unwrap_or(40000),
+            viewer_backoff_current_interval: self.viewer_backoff_current_interval.unwrap_or(100),
+            viewer_backoff_initial_interval: self.viewer_backoff_initial_interval.unwrap_or(100),
+            viewer_backoff_randomization_factor: self.viewer_backoff_randomization_factor.unwrap_or(0.5),
+            viewer_backoff_multiplier: self.viewer_backoff_multiplier.unwrap_or(1.5),
+            viewer_backoff_max_interval: self.viewer_backoff_max_interval.unwrap_or(1000),
+            viewer_backoff_max_elapsed_time: self.viewer_backoff_max_elapsed_time.unwrap_or(40000),
             agent_completions_first_chunk_timeout: self.agent_completions_first_chunk_timeout.unwrap_or(60000),
             agent_completions_other_chunk_timeout: self.agent_completions_other_chunk_timeout.unwrap_or(30000),
             mcp_connect_timeout: self.mcp_connect_timeout.unwrap_or(30000),
@@ -286,6 +326,8 @@ pub struct Config {
     pub openrouter_api_base: String,
     pub openrouter_api_key: Option<String>,
     pub claude_agent_sdk: bool,
+    pub viewer_api_base: Option<String>,
+    pub viewer_api_signature: Option<String>,
     pub user_agent: Option<String>,
     pub http_referer: Option<String>,
     pub x_title: Option<String>,
@@ -307,6 +349,12 @@ pub struct Config {
     pub github_backoff_multiplier: f64,
     pub github_backoff_max_interval: u64,
     pub github_backoff_max_elapsed_time: u64,
+    pub viewer_backoff_current_interval: u64,
+    pub viewer_backoff_initial_interval: u64,
+    pub viewer_backoff_randomization_factor: f64,
+    pub viewer_backoff_multiplier: f64,
+    pub viewer_backoff_max_interval: u64,
+    pub viewer_backoff_max_elapsed_time: u64,
     pub agent_completions_first_chunk_timeout: u64,
     pub agent_completions_other_chunk_timeout: u64,
     pub mcp_connect_timeout: u64,
@@ -330,6 +378,8 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         openrouter_api_base,
         openrouter_api_key,
         claude_agent_sdk,
+        viewer_api_base: viewer_api_base,
+        viewer_api_signature: viewer_api_signature,
         user_agent,
         http_referer,
         x_title,
@@ -351,6 +401,12 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         github_backoff_multiplier,
         github_backoff_max_interval,
         github_backoff_max_elapsed_time,
+        viewer_backoff_current_interval: viewer_backoff_current_interval,
+        viewer_backoff_initial_interval: viewer_backoff_initial_interval,
+        viewer_backoff_randomization_factor: viewer_backoff_randomization_factor,
+        viewer_backoff_multiplier: viewer_backoff_multiplier,
+        viewer_backoff_max_interval: viewer_backoff_max_interval,
+        viewer_backoff_max_elapsed_time: viewer_backoff_max_elapsed_time,
         agent_completions_first_chunk_timeout,
         agent_completions_other_chunk_timeout,
         mcp_connect_timeout,
@@ -369,6 +425,19 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
 
     // HTTP Client
     let http_client = reqwest::Client::new();
+
+    // Viewer Client
+    let viewer_client = Arc::new(viewer::Client::<ctx::DefaultContextExt>::new(
+        http_client.clone(),
+        viewer_api_base,
+        viewer_api_signature,
+        std::time::Duration::from_millis(viewer_backoff_current_interval),
+        std::time::Duration::from_millis(viewer_backoff_initial_interval),
+        viewer_backoff_randomization_factor,
+        viewer_backoff_multiplier,
+        std::time::Duration::from_millis(viewer_backoff_max_interval),
+        std::time::Duration::from_millis(viewer_backoff_max_elapsed_time),
+    ));
 
     // ObjectiveAI HTTP Client
     let objectiveai_http_client = Arc::new(objectiveai_http::Client::new(
