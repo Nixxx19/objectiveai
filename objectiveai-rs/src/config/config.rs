@@ -10,6 +10,8 @@ pub struct Config {
     pub swarms: Option<super::SwarmsConfig>,
     #[serde(skip_serializing_if = "super::FunctionsConfig::is_none")]
     pub functions: Option<super::FunctionsConfig>,
+    #[serde(skip_serializing_if = "super::ViewerConfig::is_none")]
+    pub viewer: Option<super::ViewerConfig>,
 }
 
 impl Config {
@@ -27,6 +29,10 @@ impl Config {
 
     pub fn functions(&mut self) -> &mut super::FunctionsConfig {
         self.functions.get_or_insert_with(super::FunctionsConfig::default)
+    }
+
+    pub fn viewer(&mut self) -> &mut super::ViewerConfig {
+        self.viewer.get_or_insert_with(super::ViewerConfig::default)
     }
 
     pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {

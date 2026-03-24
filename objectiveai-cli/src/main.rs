@@ -5,6 +5,7 @@ mod api;
 mod agents;
 mod swarms;
 mod functions;
+mod viewer;
 
 use clap::{Parser, Subcommand};
 
@@ -43,6 +44,11 @@ enum Commands {
         #[command(subcommand)]
         command: functions::Commands,
     },
+    /// Viewer management
+    Viewer {
+        #[command(subcommand)]
+        command: viewer::Commands,
+    },
 }
 
 impl Commands {
@@ -52,6 +58,7 @@ impl Commands {
             Commands::Agents { command } => command.handle(),
             Commands::Swarms { command } => command.handle(),
             Commands::Functions { command } => command.handle(),
+            Commands::Viewer { command } => command.handle(),
         }
     }
 }

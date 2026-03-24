@@ -1,19 +1,19 @@
 pub mod config;
-pub mod claude_agent_sdk;
+pub mod secret;
 
 use clap::Subcommand;
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Local API configuration
+    /// Viewer configuration
     Config {
         #[command(subcommand)]
         command: config::Commands,
     },
-    /// Claude Agent SDK enabled
-    ClaudeAgentSdk {
+    /// Viewer secret
+    Secret {
         #[command(subcommand)]
-        command: claude_agent_sdk::Commands,
+        command: secret::Commands,
     },
 }
 
@@ -21,7 +21,7 @@ impl Commands {
     pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
         match self {
             Commands::Config { command } => command.handle(),
-            Commands::ClaudeAgentSdk { command } => command.handle(),
+            Commands::Secret { command } => command.handle(),
         }
     }
 }
