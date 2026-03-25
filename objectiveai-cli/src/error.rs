@@ -10,4 +10,6 @@ pub enum Error {
     ViewerSecretSignatureConfigMismatch,
     #[error("VIEWER_SECRET env var set without VIEWER_SIGNATURE, or vice versa")]
     ViewerSecretSignatureEnvMismatch,
+    #[error("{0}")]
+    Http(#[from] objectiveai::HttpError),
 }

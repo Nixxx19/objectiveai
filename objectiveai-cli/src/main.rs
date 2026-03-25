@@ -1,5 +1,6 @@
 mod config;
 mod error;
+mod path;
 mod favorite;
 mod api;
 mod agents;
@@ -56,9 +57,9 @@ impl Commands {
     pub async fn handle(self) -> Result<Output, error::Error> {
         match self {
             Commands::Api { command } => command.handle(),
-            Commands::Agents { command } => command.handle(),
-            Commands::Swarms { command } => command.handle(),
-            Commands::Functions { command } => command.handle(),
+            Commands::Agents { command } => command.handle().await,
+            Commands::Swarms { command } => command.handle().await,
+            Commands::Functions { command } => command.handle().await,
             Commands::Viewer { command } => command.handle(),
         }
     }
