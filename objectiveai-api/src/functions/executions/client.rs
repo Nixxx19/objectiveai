@@ -798,21 +798,43 @@ where
             None
         };
 
-        // Swiss System Strategy
+        // ── Swiss System Strategy ──────────────────────────────────────
         //
-        // A tournament-style ranking algorithm for vector functions:
+        // A tournament-style ranking algorithm for vector functions that avoids
+        // the O(N²) cost of comparing all items simultaneously. Instead of one
+        // large vector completion over all N items, items are split into small
+        // pools and scored across multiple rounds.
         //
-        // 1. Splits input into pools of `pool` size (or pool+1 when len % pool == 1
-        //    to avoid single-item trailing chunks)
-        // 2. Each pool must have at least 2 items, except when the original input
-        //    itself has only 1 item (user's choice)
-        // 3. Runs each round, accumulating scores for each item
-        // 4. After each round, re-sorts items by cumulative scores and re-pools
-        // 5. Final output is the average of scores from all rounds, mapped back
-        //    to original input order
+        // Overview:
+        //   1. `input_split` breaks the original input into N individual sub-inputs.
+        //   2. Sub-inputs are grouped into pools of `pool` size. If len % pool == 1,
+        //      pools are sized pool+1 instead to avoid single-item trailing chunks
+        //      (a single item can't be meaningfully scored against itself).
+        //   3. `input_merge` reconstitutes each pool's sub-inputs into a single
+        //      well-formed input for the function.
+        //   4. A flat task profile is compiled per pool (same function & profile,
+        //      different input). Function/profile fetches hit the per-request
+        //      dedup cache after the first call — only expression compilation
+        //      (which is input-dependent) is repeated.
+        //   5. All pools within a round execute concurrently via `select_all`.
+        //   6. After each round, scores are mapped back to original indices,
+        //      cumulative scores are updated, and items are re-sorted so that
+        //      similarly-ranked items compete in the next round — this is the
+        //      core Swiss System property.
+        //   7. After all rounds, the final output is the normalized average of
+        //      per-round scores, in original input order.
         //
-        // Only the first round uses retry tokens; subsequent rounds do not.
-        // Errors from subsequent rounds are included in the final output chunk.
+        // Retry tokens are only captured from the first round. Errors in
+        // subsequent rounds are non-fatal: they're stored and included in the
+        // final output chunk rather than aborting the entire execution.
+        //
+        // Index tracking:
+        //   - `current_to_original`: maps current sorted position → original index.
+        //     Updated after each round's re-sort.
+        //   - `pool_chunk_sizes`: sizes of each pool in the current round, used to
+        //     map pool-local indices back to positions in the sorted order.
+        //   - `cumulative_scores`: running total per original index, used for
+        //     re-sorting between rounds.
         let choice_indexer = Arc::new(ChoiceIndexer::new(0));
         let viewer_client = self.viewer_client.clone();
         let viewer_ctx = ctx.clone();
@@ -845,7 +867,8 @@ where
                 )));
             }
 
-            // split input
+            // Split the original input into N individual sub-inputs (one per item to rank).
+            // e.g., for 20 items with pool=5, this produces 20 sub-inputs.
             let split_input: Vec<objectiveai::functions::expression::InputValue> = input_split.compile_one(
                 &objectiveai::functions::expression::Params::Ref(
                     objectiveai::functions::expression::ParamsRef {
@@ -856,7 +879,10 @@ where
                 ),
             ).map_err(super::Error::from).map_err(&send_err)?;
 
-            // fetch initial FTPs
+            // ── Round 1: build flat task profiles per pool ──────────────
+            // Group sub-inputs into pool-sized chunks, merge each chunk back
+            // into a single input via `input_merge`, and compile a flat task
+            // profile for each pool. All pools are compiled concurrently.
             let mut ftp_futs = Vec::with_capacity(split_input.len() / pool + 1);
             let mut pool_chunk_sizes: Vec<usize> = Vec::with_capacity(split_input.len() / pool + 1);
             let chunks = split_input.chunks(
@@ -999,11 +1025,16 @@ where
                 // monotonic task index across all pools and rounds
                 let mut swiss_task_index: u64 = 0;
 
+                // ── Main round loop ────────────────────────────────────
+                // Each iteration: execute all pools, collect scores, re-sort
+                // items by cumulative score, re-pool for the next round.
                 'rounds: for current_round in 0..rounds {
                     let is_first_round = current_round == 0;
                     let is_last_round = current_round == rounds - 1;
 
-                    // run all pools for this round
+                    // Execute all pools for this round concurrently. Each pool
+                    // produces a stream of chunks (vector completion results,
+                    // function execution chunks, retry tokens).
                     let mut streams = Vec::with_capacity(ftps.len());
 
                     for (i, ftp) in ftps.drain(..).enumerate() {
@@ -1123,7 +1154,10 @@ where
                         }
                     }
 
-                    // map pool outputs back to original indices and update cumulative scores
+                    // ── Score remapping ────────────────────────────────────
+                    // Pool outputs are in sorted order (after round 1). Map each
+                    // score back to its original index using `current_to_original`,
+                    // then accumulate into `cumulative_scores` for re-sorting.
                     let mut this_round_scores: Vec<rust_decimal::Decimal> =
                         vec![rust_decimal::Decimal::ZERO; num_items];
 
@@ -1144,9 +1178,12 @@ where
                     }
                     round_outputs.push(this_round_scores);
 
-                    // if not last round, re-sort and prepare next round
+                    // ── Re-sort and re-pool for next round ─────────────────
+                    // Sort items by cumulative score (descending) so similarly-
+                    // ranked items land in the same pool. This is the Swiss System
+                    // property: strong items compete with strong, weak with weak,
+                    // producing more informative comparisons each round.
                     if !is_last_round {
-                        // create sorted indices by cumulative score (descending), with original index as tie-breaker
                         let mut sorted_indices: Vec<usize> = (0..num_items).collect();
                         sorted_indices.sort_by(|&a, &b| {
                             cumulative_scores[b].cmp(&cumulative_scores[a])
@@ -1269,7 +1306,9 @@ where
                     }
                 }
 
-                // compute final output: average scores across rounds, in original order
+                // ── Final output ──────────────────────────────────────────
+                // Average each item's scores across all rounds, then normalize
+                // to sum to 1. Scores are already indexed by original position.
                 let num_rounds = round_outputs.len();
                 let mut final_output: Vec<rust_decimal::Decimal> = vec![rust_decimal::Decimal::ZERO; num_items];
 
@@ -1292,7 +1331,10 @@ where
                     }
                 }
 
-                // handle reasoning for Swiss system
+                // ── Reasoning summary ─────────────────────────────────────
+                // If reasoning was requested, aggregate confidence scores and
+                // reasoning text from all vector completion chunks across all
+                // rounds, then generate a summary via a chat completion.
                 if let (Some(vector_completions), Some(index_maps), Some(mut confidence_responses)) =
                     (swiss_vector_completions, swiss_index_maps, swiss_confidence_responses)
                 {
