@@ -300,7 +300,7 @@ where
         // If the initial state has tasks, fetch all referenced child functions
         // and validate the initial state against them.
         let children = if let Some(full_fn) = state.build_function() {
-            let children = self.retrieve_router.get_function_recursive(&ctx, full_fn).await
+            let children = self.retrieve_router.get_function_tasks(&ctx, objectiveai::functions::FullFunction::Remote(full_fn)).await
                 .map_err(super::Error::FunctionFetch)?;
             Some(children)
         } else {

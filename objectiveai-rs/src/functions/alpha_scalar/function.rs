@@ -21,6 +21,20 @@ pub enum RemoteFunction {
 }
 
 impl RemoteFunction {
+    pub fn tasks(&self) -> &[super::BranchTaskExpression] {
+        match self {
+            RemoteFunction::Branch { tasks, .. } => tasks,
+            RemoteFunction::Leaf { .. } => &[],
+        }
+    }
+
+    pub fn remotes(&self) -> impl Iterator<Item = &crate::RemotePath> {
+        self.tasks().iter().filter_map(|task| match task {
+            super::BranchTaskExpression::ScalarFunction(t) => Some(&t.path),
+            _ => None,
+        })
+    }
+
     pub fn transpile(self) -> functions::RemoteFunction {
         match self {
             RemoteFunction::Branch {
@@ -72,6 +86,20 @@ pub enum InlineFunction {
 }
 
 impl InlineFunction {
+    pub fn tasks(&self) -> &[super::BranchTaskExpression] {
+        match self {
+            InlineFunction::Branch { tasks, .. } => tasks,
+            InlineFunction::Leaf { .. } => &[],
+        }
+    }
+
+    pub fn remotes(&self) -> impl Iterator<Item = &crate::RemotePath> {
+        self.tasks().iter().filter_map(|task| match task {
+            super::BranchTaskExpression::ScalarFunction(t) => Some(&t.path),
+            _ => None,
+        })
+    }
+
     pub fn transpile(self) -> functions::InlineFunction {
         match self {
             InlineFunction::Branch { tasks } => {

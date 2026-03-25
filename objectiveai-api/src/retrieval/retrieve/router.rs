@@ -324,32 +324,19 @@ where
         Ok(objectiveai::functions::response::GetFunctionResponse { path, inner })
     }
 
-    /// Recursively fetches all child functions referenced by a function's tasks.
-    ///
-    /// Iterates over the function's task expressions, finds ScalarFunction and
-    /// VectorFunction tasks (which reference remote functions), and fetches each
-    /// concurrently. Returns a HashMap keyed by the path's key string.
-    pub async fn get_function_recursive(
+    /// Fetches all child functions referenced by a function's tasks.
+    /// Returns a HashMap keyed by the path's key string.
+    pub async fn get_function_tasks(
         self: &Arc<Self>,
         ctx: &ctx::Context<CTXEXT>,
-        function: objectiveai::functions::FullRemoteFunction,
+        function: objectiveai::functions::FullFunction,
     ) -> Result<std::collections::HashMap<String, objectiveai::functions::FullRemoteFunction>, ResponseError> {
-        let transpiled = function.transpile();
         let mut futs: Vec<(String, _)> = Vec::new();
 
-        for task_expr in transpiled.tasks() {
-            let path = match task_expr {
-                objectiveai::functions::TaskExpression::ScalarFunction(t) => {
-                    t.path.clone()
-                }
-                objectiveai::functions::TaskExpression::VectorFunction(t) => {
-                    t.path.clone()
-                }
-                _ => continue,
-            };
+        for path in function.remotes() {
             let key = path.key();
             let params = objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
-                path.into(),
+                path.clone().into(),
             );
             let router = self.clone();
             let ctx = ctx.clone();
@@ -360,7 +347,7 @@ where
 
         let mut children = std::collections::HashMap::new();
         for (key, handle) in futs {
-            let full_fn = handle.await.expect("get_function task panicked")?;
+            let full_fn = handle.await.expect("get_function_tasks panicked")?;
             match full_fn {
                 objectiveai::functions::FullFunction::Remote(r) => {
                     children.insert(key, r);

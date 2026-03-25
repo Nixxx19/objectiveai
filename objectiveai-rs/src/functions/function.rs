@@ -536,6 +536,14 @@ impl RemoteFunction {
             RemoteFunction::Vector { input_merge, .. } => Some(input_merge),
         }
     }
+
+    pub fn remotes(&self) -> impl Iterator<Item = &crate::RemotePath> {
+        self.tasks().iter().filter_map(|task| match task {
+            super::TaskExpression::ScalarFunction(t) => Some(&t.path),
+            super::TaskExpression::VectorFunction(t) => Some(&t.path),
+            _ => None,
+        })
+    }
 }
 
 /// An inline function definition without metadata.
@@ -601,6 +609,14 @@ impl InlineFunction {
             InlineFunction::Scalar { .. } => None,
             InlineFunction::Vector { input_merge, .. } => input_merge.as_ref(),
         }
+    }
+
+    pub fn remotes(&self) -> impl Iterator<Item = &crate::RemotePath> {
+        self.tasks().iter().filter_map(|task| match task {
+            super::TaskExpression::ScalarFunction(t) => Some(&t.path),
+            super::TaskExpression::VectorFunction(t) => Some(&t.path),
+            _ => None,
+        })
     }
 }
 
