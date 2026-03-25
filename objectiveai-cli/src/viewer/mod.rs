@@ -11,7 +11,7 @@ pub enum Commands {
         #[command(subcommand)]
         command: config::Commands,
     },
-    /// Viewer mode (disabled or local)
+    /// Viewer mode (remote or local)
     Mode {
         #[command(subcommand)]
         command: mode::Commands,
@@ -21,6 +21,8 @@ pub enum Commands {
         #[command(subcommand)]
         command: local::Commands,
     },
+    /// Generate a new secret/signature pair
+    GenerateSecretSignaturePair,
 }
 
 impl Commands {
@@ -29,6 +31,10 @@ impl Commands {
             Commands::Config { command } => command.handle(),
             Commands::Mode { command } => command.handle(),
             Commands::Local { command } => command.handle(),
+            Commands::GenerateSecretSignaturePair => {
+                let pair = objectiveai::generate_viewer_secret_signature_pair();
+                Ok(crate::Output::ConfigGet(serde_json::to_string(&pair).unwrap()))
+            }
         }
     }
 }

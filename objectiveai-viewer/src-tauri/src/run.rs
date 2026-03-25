@@ -4,16 +4,12 @@ use axum::extract::State;
 use axum::http::{HeaderMap, StatusCode};
 use axum::middleware::{self, Next};
 use envconfig::Envconfig;
-use hmac::{Hmac, Mac};
 use serde::Serialize;
-use sha2::Sha256;
 use subtle::ConstantTimeEq;
 use std::sync::Arc;
 use tauri::Emitter;
 use tokio::sync::mpsc;
 use crate::functions;
-
-type HmacSha256 = Hmac<Sha256>;
 
 #[derive(Envconfig)]
 struct EnvConfigBuilder {
@@ -166,18 +162,18 @@ async fn signature_middleware(
     Ok(next.run(request).await)
 }
 
-fn verify_signature(secret: &str, body: &[u8], signature_header: &str) -> bool {
+fn verify_signature(secret: &str, _body: &[u8], signature_header: &str) -> bool {
     let Some(hex_sig) = signature_header.strip_prefix("sha256=") else {
         return false;
     };
     let Ok(sig_bytes) = hex::decode(hex_sig) else {
         return false;
     };
-    let Ok(mut mac) = HmacSha256::new_from_slice(secret.as_bytes()) else {
-        return false;
-    };
-    mac.update(body);
-    let expected = mac.finalize().into_bytes();
+    // Compute SHA256(secret) and compare against the provided signature.
+    // The signature is a static pre-computed value: sha256=<SHA256(secret)>.
+    // Knowing the signature does not reveal the secret (preimage resistance).
+    use sha2::{Sha256, Digest};
+    let expected = Sha256::digest(secret.as_bytes());
     expected.ct_eq(&sig_bytes).into()
 }
 
