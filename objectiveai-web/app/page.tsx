@@ -1,287 +1,377 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import dynamic from "next/dynamic";
+import { useState, useCallback } from "react";
 import Link from "next/link";
-import { Functions } from "objectiveai";
-import { createPublicClient } from "../lib/client";
-import { deriveCategory, deriveDisplayName } from "../lib/objectiveai";
-import { useResponsive } from "../hooks/useResponsive";
-import PromptBlock from "../components/PromptBlock";
 
-// Lazy-load the 3D hero scene (heavy, uses WebGL)
-const HeroScene = dynamic(() => import("@/components/hero3d/HeroScene"), {
-  ssr: false,
-  loading: () => null,
-});
-
-// =============================================================================
-// FEATURED FUNCTIONS CONFIGURATION
-// =============================================================================
-const FEATURED_COUNT = 3;
-
-interface FeaturedFunction {
-  slug: string;
-  name: string;
-  description: string;
-  category: string;
-  tags: string[];
-}
+/**
+ * Flip to `true` when the CLI skill ships.
+ * Controls: terminal block switches from "coming soon" preview to real commands.
+ */
+const CLI_LIVE = false;
 
 export default function Home() {
-  const { isMobile } = useResponsive();
-  const [slots, setSlots] = useState<(FeaturedFunction | null)[]>(
-    Array.from({ length: FEATURED_COUNT }, () => null)
+  const [copied, setCopied] = useState(false);
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState<false | "success" | "already">(
+    false,
   );
-  const [isListLoading, setIsListLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
-  // Fetch functions from API — progressive loading
-  useEffect(() => {
-    let cancelled = false;
-
-    async function fetchFunctions() {
-      try {
-        setIsListLoading(true);
-
-        const client = createPublicClient();
-        const result = await Functions.list(client);
-
-        // Deduplicate by owner/repository
-        const uniqueFunctions = new Map<string, { owner: string; repository: string; commit: string }>();
-        for (const fn of result.data) {
-          const key = `${fn.owner}/${fn.repository}`;
-          if (!uniqueFunctions.has(key)) {
-            uniqueFunctions.set(key, fn);
-          }
-        }
-
-        const entries = Array.from(uniqueFunctions.values()).slice(0, FEATURED_COUNT);
-        if (cancelled) return;
-
-        setSlots(Array.from({ length: entries.length }, () => null));
-        setIsListLoading(false);
-
-        entries.forEach((fn, index) => {
-          const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 5000);
-
-          Functions.retrieve(client, "github", fn.owner, fn.repository, fn.commit, { signal: controller.signal })
-            .then((details) => {
-              clearTimeout(timeout);
-              if (cancelled) return;
-
-              const name = deriveDisplayName(fn.repository);
-              const tags = fn.repository.split("-").filter((t: string) => t.length > 2);
-              if (details.type === "vector.function") tags.push("ranking");
-              else tags.push("scoring");
-
-              const item: FeaturedFunction = {
-                slug: `${fn.owner}/${fn.repository}`,
-                name,
-                description: details.description || `${name} function`,
-                category: deriveCategory(details),
-                tags,
-              };
-
-              setSlots(prev => {
-                const next = [...prev];
-                next[index] = item;
-                return next;
-              });
-            })
-            .catch(() => {
-              clearTimeout(timeout);
-            });
-        });
-      } catch {
-        if (!cancelled) {
-          setIsListLoading(false);
-        }
-      }
+  const handleCopy = useCallback(async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
     }
-
-    fetchFunctions();
-    return () => { cancelled = true; };
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
   }, []);
 
+  const handleEarlyAccess = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!email || !email.includes("@")) return;
+      setSubmitting(true);
+      try {
+        const res = await fetch("/api/early-access", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+        if (data.already_subscribed) {
+          setSubmitted("already");
+        } else {
+          setSubmitted("success");
+        }
+      } catch {
+        setSubmitted("success");
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [email],
+  );
+
   return (
-    <div className="page" style={{
-      display: 'flex',
-      flexDirection: 'column',
-      gap: isMobile ? '80px' : '120px',
-      paddingBottom: '60px',
-    }}>
-      {/* Hero Section */}
-      <section className="hero">
-        <div className="heroTop">
-          <div className="heroText">
-            <h1 className="heroTagline">Your agent&apos;s advisory board.</h1>
-            <p className="heroSubtitle">
-              Ensembles of LLMs that deliberate, vote, and score
-              — so your agent decides with confidence.
-            </p>
-          </div>
-          <div className="heroVisual">
-            <HeroScene />
-          </div>
+    <div className="landing">
+      {/* ─── Hero ─── */}
+      <section className="landing-hero">
+        <div className="landing-badge">Live now &mdash; CLI coming soon</div>
+
+        <div className="landing-descriptor">
+          An agentic collective judgment harness
         </div>
-        <div className="heroBottom">
-          <PromptBlock />
-          <Link href="/functions" className="pillBtnGhost" style={{ textDecoration: 'none' }}>
-            Browse Functions
+
+        <h1 className="landing-h1">
+          Score everything.
+          <br />
+          Trust nothing
+          <br />
+          to one model.
+        </h1>
+
+        <p className="landing-sub">
+          ObjectiveAI runs <strong>ensembles of LLMs that vote</strong> on your
+          inputs and return confidence-scored outputs. Not vibes &mdash;{" "}
+          <strong>probability distributions</strong> from the models&apos; actual
+          logprobs. One function call. Real signal.
+        </p>
+
+        {/* ── Primary CTA: Sign up ── */}
+        <div className="landing-hero-ctas">
+          <Link href="/api/auth/signin" className="landing-cta-btn primary">
+            Sign up free
+          </Link>
+          <Link href="/functions" className="landing-cta-btn secondary">
+            Browse functions
           </Link>
         </div>
-      </section>
 
-      {/* Featured Functions Section */}
-      <section>
-        <div className="container">
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-end',
-            marginBottom: isMobile ? '24px' : '32px',
-            flexWrap: 'wrap',
-            gap: '16px',
-          }}>
-            <div>
-              <span className="tag" style={{ marginBottom: '12px', display: 'inline-block' }}>
-                Explore
-              </span>
-              <h2 className="heading2">Featured Functions</h2>
-            </div>
-            <Link
-              href="/functions"
-              style={{
-                fontSize: '15px',
-                fontWeight: 600,
-                color: 'var(--accent)',
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-              }}
-            >
-              View all <span>&rarr;</span>
-            </Link>
+        {/* ── Proof point ── */}
+        <p className="landing-proof">
+          <Link href="/functions" className="landing-proof-link">
+            20+ scoring functions live and callable
+          </Link>{" "}
+          &mdash; built by our autonomous agent.
+        </p>
+
+        {/* ── Terminal block ── */}
+        <div className="landing-terminal">
+          <div className="landing-terminal-bar">
+            <span className="landing-dot" />
+            <span className="landing-dot" />
+            <span className="landing-dot" />
+            <span className="landing-terminal-title">
+              {CLI_LIVE ? "terminal" : "terminal"}
+            </span>
           </div>
-
-          {/* Function Cards Grid — slots fill progressively */}
-          <div className="gridThree">
-            {slots.map((fn, i) => fn ? (
-              <Link
-                key={fn.slug}
-                href={`/functions/${fn.slug}`}
-                style={{ textDecoration: 'none', color: 'inherit' }}
-              >
-                <div className="card" style={{
-                  cursor: 'pointer',
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  position: 'relative',
-                  padding: '16px',
-                }}>
-                  <span className="tag" style={{
-                    alignSelf: 'flex-start',
-                    marginBottom: '8px',
-                    fontSize: '11px',
-                    padding: '4px 10px'
-                  }}>
-                    {fn.category}
-                  </span>
-                  <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '6px' }}>
-                    {fn.name}
-                  </h3>
-                  <p style={{
-                    fontSize: '13px',
-                    lineHeight: 1.5,
-                    color: 'var(--text-muted)',
-                    flex: 1,
-                    marginBottom: '12px',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                  }}>
-                    {fn.description}
-                  </p>
-                  <div style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '4px',
-                    marginBottom: '10px',
-                  }}>
-                    {fn.tags.slice(0, 2).map(tag => (
-                      <span key={tag} style={{
-                        fontSize: '11px',
-                        padding: '3px 8px',
-                        background: 'var(--border)',
-                        borderRadius: '10px',
-                        color: 'var(--text-muted)',
-                      }}>
-                        {tag}
-                      </span>
-                    ))}
-                    {fn.tags.length > 2 && (
-                      <span style={{
-                        fontSize: '11px',
-                        padding: '3px 8px',
-                        color: 'var(--text-muted)',
-                      }}>
-                        +{fn.tags.length - 2}
-                      </span>
-                    )}
-                  </div>
-                  <div style={{
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: 'var(--accent)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                  }}>
-                    Open <span>&rarr;</span>
-                  </div>
-                </div>
-              </Link>
-            ) : (
-              <div key={i} className="card" style={{
-                padding: '16px',
-                height: '180px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-              }}>
-                <div style={{ width: '60px', height: '20px', background: 'var(--border)', borderRadius: '10px', animation: 'pulse 1.5s ease-in-out infinite' }} />
-                <div style={{ width: '80%', height: '18px', background: 'var(--border)', borderRadius: '4px', animation: 'pulse 1.5s ease-in-out infinite' }} />
-                <div style={{ width: '100%', height: '32px', background: 'var(--border)', borderRadius: '4px', animation: 'pulse 1.5s ease-in-out infinite' }} />
-              </div>
-            ))}
-            {!isListLoading && slots.length === 0 && (
-              <div style={{
-                gridColumn: '1 / -1',
-                textAlign: 'center',
-                padding: '48px 24px',
-                color: 'var(--text-muted)',
-              }}>
-                <p>No functions available yet.</p>
-                <Link
-                  href="/functions"
-                  style={{
-                    color: 'var(--accent)',
-                    textDecoration: 'none',
-                    fontWeight: 500,
-                  }}
+          <div className="landing-terminal-body">
+            {CLI_LIVE ? (
+              <>
+                <button
+                  className="landing-copy"
+                  onClick={() =>
+                    handleCopy(
+                      "npm install objectiveai\nobjectiveai install-skill",
+                    )
+                  }
                 >
-                  Browse all functions &rarr;
-                </Link>
-              </div>
+                  {copied ? "Copied!" : "Copy"}
+                </button>
+                <div className="landing-comment">
+                  # install the SDK and attach to Claude Code
+                </div>
+                <div className="landing-line">
+                  <span className="landing-prompt">$</span>
+                  <span className="landing-cmd">npm install objectiveai</span>
+                </div>
+                <div className="landing-line">
+                  <span className="landing-prompt">$</span>
+                  <span className="landing-cmd">
+                    objectiveai install-skill
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <button
+                  className="landing-copy"
+                  onClick={() => handleCopy("npm install objectiveai")}
+                >
+                  {copied ? "Copied!" : "Copy"}
+                </button>
+                <div className="landing-comment">
+                  # install the SDK (works today)
+                </div>
+                <div className="landing-line">
+                  <span className="landing-prompt">$</span>
+                  <span className="landing-cmd">npm install objectiveai</span>
+                </div>
+                <br />
+                <div className="landing-comment">
+                  # attach to Claude Code (coming soon)
+                </div>
+                <div className="landing-line">
+                  <span className="landing-prompt">$</span>
+                  <span className="landing-cmd landing-cmd-dim">
+                    objectiveai install-skill
+                  </span>
+                </div>
+              </>
             )}
           </div>
         </div>
+        <p className="landing-install-alt">
+          Also available as <code>cargo add objectiveai</code>
+        </p>
+
+        {/* ── Secondary CTA: CLI notification ── */}
+        <div className="landing-cli-notify" id="early-access">
+          <p className="landing-cli-notify-label">
+            Get notified when the CLI ships
+          </p>
+          {!submitted ? (
+            <form className="landing-ea-form" onSubmit={handleEarlyAccess}>
+              <input
+                type="email"
+                placeholder="you@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <button type="submit" disabled={submitting}>
+                {submitting ? "Sending..." : "Notify me"}
+              </button>
+            </form>
+          ) : submitted === "already" ? (
+            <p className="landing-ea-confirmed">
+              You&apos;re already on the list!
+            </p>
+          ) : (
+            <p className="landing-ea-confirmed">
+              You&apos;re on the list. One email when it ships.
+            </p>
+          )}
+        </div>
       </section>
 
+      {/* ─── The Problem / Key Insight ─── */}
+      <section className="landing-section">
+        <div className="landing-section-label">The Problem</div>
+        <h2 className="landing-h2">One model, one opinion.</h2>
+        <p className="landing-p">
+          Every LLM scoring tool asks a single model for a single answer and
+          throws away the uncertainty. You get a score, but no idea how confident
+          it is.
+        </p>
+        <p className="landing-p">
+          ObjectiveAI captures the{" "}
+          <strong>full probability distribution</strong> from every model in the
+          ensemble using logprobs &mdash; then combines them with learned
+          weights.
+        </p>
+
+        <div className="landing-insight">
+          <div className="landing-comparison">
+            <div className="landing-side landing-side-old">
+              <h4>Typical LLM Scoring</h4>
+              <pre>{`prompt → model → "A"
+
+// lost: model was only 70% sure
+// lost: 30% signal for "B"
+// lost: all nuance`}</pre>
+            </div>
+            <div className="landing-side landing-side-new">
+              <h4>ObjectiveAI</h4>
+              <pre>{`prompt → ensemble → vote
+
+// GPT-4o:   [0.70, 0.30, 0.00]
+// Claude:   [0.55, 0.40, 0.05]
+// Llama:    [0.80, 0.15, 0.05]
+// weighted: [0.69, 0.28, 0.03]`}</pre>
+            </div>
+          </div>
+          <div className="landing-score-area">
+            <div className="landing-score-label">
+              Ensemble result &mdash; &ldquo;What color is the sky?&rdquo;
+            </div>
+            <div className="landing-scores">
+              {[
+                { label: "blue", pct: 85, value: "0.85", high: true },
+                { label: "gray", pct: 8, value: "0.08", high: false },
+                { label: "red", pct: 4, value: "0.04", high: false },
+                { label: "green", pct: 3, value: "0.03", high: false },
+              ].map((s) => (
+                <div key={s.label} className="landing-score-row">
+                  <span className="landing-score-name">{s.label}</span>
+                  <div className="landing-score-track">
+                    <div
+                      className={`landing-score-fill ${s.high ? "high" : "low"}`}
+                      style={{ width: `${s.pct}%` }}
+                    />
+                  </div>
+                  <span className="landing-score-val">{s.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── How It Works ─── */}
+      <section className="landing-section">
+        <div className="landing-section-label">How It Works</div>
+        <h2 className="landing-h2">Three concepts. That&apos;s it.</h2>
+
+        <div className="landing-steps">
+          {[
+            {
+              num: "1",
+              title: "Ensembles vote",
+              desc: "Configure a group of LLMs \u2014 different models, temperatures, system prompts. Each one votes independently on your input using its full logprob distribution, not just a sampled answer.",
+            },
+            {
+              num: "2",
+              title: "Functions score",
+              desc: (
+                <>
+                  A Function is a composable scoring pipeline: data in, score
+                  out. Defined as a <code>function.json</code> on GitHub.
+                  Reference by <code>owner/repo</code>. One line to call, fully
+                  versioned.
+                </>
+              ),
+            },
+            {
+              num: "3",
+              title: "Profiles learn",
+              desc: "Give ObjectiveAI a dataset of inputs and expected outputs. It optimizes the ensemble weights to match \u2014 producing a Profile you can reuse. No fine-tuning. Just better voting.",
+            },
+          ].map((step) => (
+            <div key={step.num} className="landing-step">
+              <div className="landing-step-num">{step.num}</div>
+              <div>
+                <h3>{step.title}</h3>
+                <p>{step.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ─── Use Cases ─── */}
+      <section className="landing-section">
+        <div className="landing-section-label">Use Cases</div>
+        <h2 className="landing-h2">If it can be scored, rank it.</h2>
+
+        <div className="landing-usecases">
+          {[
+            {
+              label: "Eval Pipelines",
+              desc: "Score LLM outputs with an ensemble instead of a single judge model. Get confidence intervals, not coin flips.",
+            },
+            {
+              label: "Content Moderation",
+              desc: "Multi-model consensus on safety classifications. Know when models disagree \u2014 that\u2019s where the edge cases live.",
+            },
+            {
+              label: "Search Ranking",
+              desc: "Re-rank search results, candidates, or recommendations with weighted ensemble scoring.",
+            },
+            {
+              label: "Simulate Perspectives",
+              desc: "Give each LLM a different persona. See how a skeptic, an optimist, and a domain expert would each score the same input.",
+            },
+          ].map((uc) => (
+            <div key={uc.label} className="landing-usecase">
+              <div className="landing-uc-label">{uc.label}</div>
+              {uc.desc}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ─── Bottom CTA ─── */}
+      <section className="landing-bottom-cta">
+        <h2 className="landing-h2">Open source. On GitHub.</h2>
+        <p className="landing-p" style={{ margin: "0 auto 28px" }}>
+          The SDK, the server, and every function &mdash; built in the open.
+        </p>
+        <div className="landing-cta-links">
+          <Link href="/api/auth/signin" className="landing-cta-btn primary">
+            Sign up free
+          </Link>
+          <a
+            href="https://github.com/ObjectiveAI/objectiveai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="landing-cta-btn secondary"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+            >
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
+            </svg>
+            GitHub
+          </a>
+          <a
+            href="https://discord.gg/gbNFHensby"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="landing-cta-btn secondary"
+          >
+            Join Discord
+          </a>
+        </div>
+      </section>
     </div>
   );
 }
