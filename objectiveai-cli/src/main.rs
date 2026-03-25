@@ -66,8 +66,8 @@ impl Commands {
 
 #[tokio::main]
 async fn main() {
+    let _ = dotenv::dotenv();
     let cli = Cli::parse();
-
     match cli.command.handle().await {
         Ok(Output::ConfigGet(output)) => println!("{output}"),
         Ok(Output::ConfigSet) => println!("ok"),
