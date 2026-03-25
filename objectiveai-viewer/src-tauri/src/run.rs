@@ -107,7 +107,18 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
 
 /// Must be called on the main thread. Tauri's event loop panics otherwise.
 /// Spawn `setup` and other async work on tokio tasks instead.
-pub fn serve(listener: tokio::net::TcpListener, app: axum::Router, mut rx: EventReceiver) {
+///
+/// If `app_handle_tx` is provided, the `AppHandle` is sent through it once
+/// Tauri is initialized. Use `AppHandle::exit(code)` from a spawned task
+/// to make `serve` return.
+///
+/// Returns the exit code from Tauri's event loop.
+pub fn serve(
+    listener: tokio::net::TcpListener,
+    app: axum::Router,
+    mut rx: EventReceiver,
+    app_handle_tx: Option<tokio::sync::oneshot::Sender<tauri::AppHandle>>,
+) -> i32 {
     tokio::spawn(async move {
         axum::serve(listener, app).await
     });
@@ -115,6 +126,9 @@ pub fn serve(listener: tokio::net::TcpListener, app: axum::Router, mut rx: Event
     tauri::Builder::default()
         .setup(move |tauri_app| {
             let handle = tauri_app.handle().clone();
+            if let Some(tx) = app_handle_tx {
+                tx.send(handle.clone()).ok();
+            }
             tauri::async_runtime::spawn(async move {
                 while let Some(event) = rx.recv().await {
                     handle.emit(event.name(), &event).ok();
@@ -122,19 +136,21 @@ pub fn serve(listener: tokio::net::TcpListener, app: axum::Router, mut rx: Event
             });
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error building tauri application")
+        .run_return(|_, _| {})
 }
 
-pub async fn run(config: Config) -> std::io::Result<()> {
+/// Sets up and serves the viewer. Returns the exit code from Tauri's event loop.
+/// The caller should use `std::process::exit(code)` with the returned value.
+pub async fn run(config: Config) -> std::io::Result<i32> {
     let suppress_output = config.suppress_output;
     let (listener, app, rx) = setup(config).await?;
     if !suppress_output {
         let addr = listener.local_addr()?;
         eprintln!("listening on {addr}");
     }
-    serve(listener, app, rx);
-    Ok(())
+    Ok(serve(listener, app, rx, None))
 }
 
 async fn signature_middleware(
