@@ -107,7 +107,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
 
 /// Must be called on the main thread. Tauri's event loop panics otherwise.
 /// Spawn `setup` and other async work on tokio tasks instead.
-pub async fn serve(listener: tokio::net::TcpListener, app: axum::Router, mut rx: EventReceiver) -> std::io::Result<()> {
+pub fn serve(listener: tokio::net::TcpListener, app: axum::Router, mut rx: EventReceiver) {
     tokio::spawn(async move {
         axum::serve(listener, app).await
     });
@@ -124,8 +124,6 @@ pub async fn serve(listener: tokio::net::TcpListener, app: axum::Router, mut rx:
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-
-    Ok(())
 }
 
 pub async fn run(config: Config) -> std::io::Result<()> {
@@ -135,7 +133,8 @@ pub async fn run(config: Config) -> std::io::Result<()> {
         let addr = listener.local_addr()?;
         eprintln!("listening on {addr}");
     }
-    serve(listener, app, rx).await
+    serve(listener, app, rx);
+    Ok(())
 }
 
 async fn signature_middleware(
