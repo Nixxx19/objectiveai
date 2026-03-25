@@ -691,6 +691,7 @@ where
                 None,
                 false,
                 self.retrieve_router.clone(),
+                std::collections::HashSet::new(),
             )
             .await.map_err(&send_err)?;
 
@@ -887,6 +888,7 @@ where
                     None,
                     false,
                     self.retrieve_router.clone(),
+                    std::collections::HashSet::new(),
                 ));
             }
             let mut ftps = futures::future::try_join_all(ftp_futs).await.map_err(&send_err)?;
@@ -1205,6 +1207,7 @@ where
                                 None,
                                 false,
                                 self.retrieve_router.clone(),
+                                std::collections::HashSet::new(),
                             ));
                         }
 

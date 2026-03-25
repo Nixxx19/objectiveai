@@ -69,6 +69,9 @@ pub enum Error {
     /// One or more task output expressions failed.
     #[error("task output expression errors: {0:?}")]
     TaskOutputExpressionErrors(Vec<TaskOutputExpressionError>),
+    /// A circular dependency was detected between functions.
+    #[error("circular dependency detected: {0:?}")]
+    CircularDependency(objectiveai::RemotePath),
 }
 
 /// Error from evaluating a task's output expression.
@@ -103,6 +106,7 @@ impl objectiveai::error::StatusError for Error {
             Error::InvalidStrategy(_) => 400,
             Error::NoValidTaskOutputs => 400,
             Error::TaskOutputExpressionErrors(_) => 400,
+            Error::CircularDependency(_) => 400,
         }
     }
 
@@ -192,6 +196,10 @@ impl objectiveai::error::StatusError for Error {
                         "task_index": e.task_index,
                         "message": e.message,
                     })).collect::<Vec<_>>(),
+                }),
+                Error::CircularDependency(path) => serde_json::json!({
+                    "kind": "circular_dependency",
+                    "error": format!("circular dependency detected: {}", path.url()),
                 }),
             }
         }))

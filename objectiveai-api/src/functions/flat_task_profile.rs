@@ -230,6 +230,7 @@ pub async fn get_flat_task_profile<CTXEXT>(
             CTXEXT,
         >,
     >,
+    mut ancestors: std::collections::HashSet<objectiveai::RemotePath>,
 ) -> Result<FunctionFlatTaskProfile, super::executions::Error>
 where
     CTXEXT: Send + Sync + 'static,
@@ -269,6 +270,13 @@ where
         let ((f, fp), (p, pp)) = tokio::try_join!(func_fut, prof_fut)?;
         (f, fp, p, pp)
     };
+
+    // Cycle detection: check if this function is already in the ancestor chain.
+    if let Some(ref fp) = function_path {
+        if !ancestors.insert(fp.clone()) {
+            return Err(super::executions::Error::CircularDependency(fp.clone()));
+        }
+    }
 
     // 2. Validate input.
     if let Some(schema) = function.input_schema() {
@@ -391,7 +399,7 @@ where
                 let profile_param = resolve_child_profile(&task_profile, &auto_swarm)?;
                 let effective_invert = profile_invert_flags[i];
                 flat_tasks_or_futs.push(TaskFut::FunctionTaskFut(Box::pin(
-                    get_flat_task_profile(ctx, task_path, function_param, profile_param, input, Some(output), effective_invert, retrieve_router.clone())
+                    get_flat_task_profile(ctx, task_path, function_param, profile_param, input, Some(output), effective_invert, retrieve_router.clone(), ancestors.clone())
                 )));
             }
 
@@ -483,7 +491,7 @@ where
                             path.into(),
                         );
                         let profile_param = resolve_child_profile(&task_profile, &auto_swarm)?;
-                        futs.push(get_flat_task_profile(ctx, tp, function_param, profile_param, input, None, false, retrieve_router.clone()));
+                        futs.push(get_flat_task_profile(ctx, tp, function_param, profile_param, input, None, false, retrieve_router.clone(), ancestors.clone()));
                     }
                     flat_tasks_or_futs.push(TaskFut::MapFunctionTaskFut((task_path, map_output, map_invert, futures::future::try_join_all(futs))));
                 } else if is_ps {
