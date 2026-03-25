@@ -20,6 +20,7 @@ struct Cli {
 pub enum Output {
     ConfigGet(String),
     ConfigSet,
+    Api(String),
 }
 
 #[derive(Subcommand)]
@@ -70,6 +71,7 @@ async fn main() {
     match cli.command.handle().await {
         Ok(Output::ConfigGet(output)) => println!("{output}"),
         Ok(Output::ConfigSet) => println!("ok"),
+        Ok(Output::Api(output)) => println!("{output}"),
         Err(e) => {
             eprintln!("error: {e}");
             std::process::exit(1);

@@ -105,11 +105,14 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
     Ok((listener, app, rx))
 }
 
+/// A function that exits the viewer's event loop with the given exit code.
+pub type Exiter = Box<dyn FnOnce(i32) + Send>;
+
 /// Must be called on the main thread. Tauri's event loop panics otherwise.
 /// Spawn `setup` and other async work on tokio tasks instead.
 ///
-/// If `app_handle_tx` is provided, the `AppHandle` is sent through it once
-/// Tauri is initialized. Use `AppHandle::exit(code)` from a spawned task
+/// If `exiter_tx` is provided, an `Exiter` is sent through it once
+/// Tauri is initialized. Call the exiter from a spawned task
 /// to make `serve` return.
 ///
 /// Returns the exit code from Tauri's event loop.
@@ -117,7 +120,7 @@ pub fn serve(
     listener: tokio::net::TcpListener,
     app: axum::Router,
     mut rx: EventReceiver,
-    app_handle_tx: Option<tokio::sync::oneshot::Sender<tauri::AppHandle>>,
+    exiter_tx: Option<tokio::sync::oneshot::Sender<Exiter>>,
 ) -> i32 {
     tokio::spawn(async move {
         axum::serve(listener, app).await
@@ -126,8 +129,9 @@ pub fn serve(
     tauri::Builder::default()
         .setup(move |tauri_app| {
             let handle = tauri_app.handle().clone();
-            if let Some(tx) = app_handle_tx {
-                tx.send(handle.clone()).ok();
+            if let Some(tx) = exiter_tx {
+                let exit_handle = handle.clone();
+                tx.send(Box::new(move |code| exit_handle.exit(code))).ok();
             }
             tauri::async_runtime::spawn(async move {
                 while let Some(event) = rx.recv().await {

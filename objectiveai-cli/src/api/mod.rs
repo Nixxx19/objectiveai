@@ -3,6 +3,9 @@ pub mod mode;
 pub mod remote;
 pub mod local;
 pub mod headers;
+mod run;
+
+pub use run::*;
 
 use clap::Subcommand;
 
