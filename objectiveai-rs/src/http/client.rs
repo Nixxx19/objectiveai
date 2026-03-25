@@ -93,23 +93,41 @@ impl HttpClient {
         x_commit_author_name: Option<impl Into<String>>,
         x_commit_author_email: Option<impl Into<String>>,
     ) -> Self {
+        #[cfg(feature = "env")]
+        let env = |name: &str| -> Option<String> { std::env::var(name).ok() };
+
         Self {
             http_client,
             address: match address {
                 Some(base) => base.into(),
+                #[cfg(feature = "env")]
+                None => env("OBJECTIVEAI_ADDRESS")
+                    .unwrap_or_else(|| "https://api.objective-ai.io".to_string()),
+                #[cfg(not(feature = "env"))]
                 None => "https://api.objective-ai.io".to_string(),
             },
-            authorization: authorization.map(|k| Arc::new(k.into())),
-            user_agent: user_agent.map(Into::into),
-            x_title: x_title.map(Into::into),
-            http_referer: http_referer.map(Into::into),
-            x_github_authorization: x_github_authorization.map(|v| Arc::new(v.into())),
-            x_openrouter_authorization: x_openrouter_authorization.map(|v| Arc::new(v.into())),
-            x_mcp_authorization: x_mcp_authorization.map(Arc::new),
-            x_viewer_signature: x_viewer_signature.map(|v| Arc::new(v.into())),
-            x_viewer_address: x_viewer_address.map(|v| Arc::new(v.into())),
-            x_commit_author_name: x_commit_author_name.map(|v| Arc::new(v.into())),
-            x_commit_author_email: x_commit_author_email.map(|v| Arc::new(v.into())),
+            authorization: authorization.map(|k| Arc::new(k.into()))
+                .or_else(|| { #[cfg(feature = "env")] { env("OBJECTIVEAI_AUTHORIZATION").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
+            user_agent: user_agent.map(Into::into)
+                .or_else(|| { #[cfg(feature = "env")] { env("USER_AGENT") } #[cfg(not(feature = "env"))] { None } }),
+            x_title: x_title.map(Into::into)
+                .or_else(|| { #[cfg(feature = "env")] { env("X_TITLE") } #[cfg(not(feature = "env"))] { None } }),
+            http_referer: http_referer.map(Into::into)
+                .or_else(|| { #[cfg(feature = "env")] { env("HTTP_REFERER") } #[cfg(not(feature = "env"))] { None } }),
+            x_github_authorization: x_github_authorization.map(|v| Arc::new(v.into()))
+                .or_else(|| { #[cfg(feature = "env")] { env("GITHUB_AUTHORIZATION").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
+            x_openrouter_authorization: x_openrouter_authorization.map(|v| Arc::new(v.into()))
+                .or_else(|| { #[cfg(feature = "env")] { env("OPENROUTER_AUTHORIZATION").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
+            x_mcp_authorization: x_mcp_authorization.map(Arc::new)
+                .or_else(|| { #[cfg(feature = "env")] { env("MCP_AUTHORIZATION").and_then(|v| serde_json::from_str(&v).ok()).map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
+            x_viewer_signature: x_viewer_signature.map(|v| Arc::new(v.into()))
+                .or_else(|| { #[cfg(feature = "env")] { env("VIEWER_SIGNATURE").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
+            x_viewer_address: x_viewer_address.map(|v| Arc::new(v.into()))
+                .or_else(|| { #[cfg(feature = "env")] { env("VIEWER_ADDRESS").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
+            x_commit_author_name: x_commit_author_name.map(|v| Arc::new(v.into()))
+                .or_else(|| { #[cfg(feature = "env")] { env("COMMIT_AUTHOR_NAME").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
+            x_commit_author_email: x_commit_author_email.map(|v| Arc::new(v.into()))
+                .or_else(|| { #[cfg(feature = "env")] { env("COMMIT_AUTHOR_EMAIL").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
         }
     }
 
