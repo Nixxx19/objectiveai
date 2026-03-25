@@ -6,3 +6,9 @@ pub struct Favorite {
     pub path: crate::RemotePathCommitOptional,
     pub note: String,
 }
+
+impl Favorite {
+    pub fn path(&self) -> &crate::RemotePathCommitOptional {
+        &self.path
+    }
+}
