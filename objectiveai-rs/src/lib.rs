@@ -54,10 +54,7 @@ mod tests;
 mod test_util;
 
 #[cfg(feature = "config")]
-mod config;
-
-#[cfg(feature = "config")]
-pub use config::*;
+pub mod config;
 
 #[cfg(feature = "http")]
 mod http;

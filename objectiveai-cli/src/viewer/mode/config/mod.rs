@@ -6,11 +6,11 @@ pub enum Mode {
     Local,
 }
 
-impl From<Mode> for objectiveai::ViewerMode {
+impl From<Mode> for objectiveai::config::ViewerMode {
     fn from(m: Mode) -> Self {
         match m {
-            Mode::Remote => objectiveai::ViewerMode::Remote,
-            Mode::Local => objectiveai::ViewerMode::Local,
+            Mode::Remote => objectiveai::config::ViewerMode::Remote,
+            Mode::Local => objectiveai::config::ViewerMode::Local,
         }
     }
 }

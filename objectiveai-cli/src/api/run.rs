@@ -9,32 +9,32 @@ where
     F: FnOnce(objectiveai::HttpClient) -> Fut + Send + 'static,
     Fut: Future<Output = Result<String, crate::error::Error>> + Send + 'static,
 {
-    let mut config = objectiveai::ConfigClient::new(None::<String>).read()?;
+    let mut config = objectiveai::config::ConfigClient::new(None::<String>).read()?;
 
     let api_mode = config.api().get_mode();
     let viewer_mode = config.viewer().get_mode();
 
     match (api_mode, viewer_mode) {
         #[cfg(feature = "viewer")]
-        (objectiveai::ApiMode::Local, objectiveai::ViewerMode::Local) => {
+        (objectiveai::config::ApiMode::Local, objectiveai::config::ViewerMode::Local) => {
             run_local_api_local_viewer(config, task).await
         }
         #[cfg(not(feature = "viewer"))]
-        (objectiveai::ApiMode::Local, objectiveai::ViewerMode::Local) => {
+        (objectiveai::config::ApiMode::Local, objectiveai::config::ViewerMode::Local) => {
             run_local_api_remote_viewer(config, task).await
         }
-        (objectiveai::ApiMode::Local, objectiveai::ViewerMode::Remote) => {
+        (objectiveai::config::ApiMode::Local, objectiveai::config::ViewerMode::Remote) => {
             run_local_api_remote_viewer(config, task).await
         }
         #[cfg(feature = "viewer")]
-        (objectiveai::ApiMode::Remote, objectiveai::ViewerMode::Local) => {
+        (objectiveai::config::ApiMode::Remote, objectiveai::config::ViewerMode::Local) => {
             run_remote_api_local_viewer(config, task).await
         }
         #[cfg(not(feature = "viewer"))]
-        (objectiveai::ApiMode::Remote, objectiveai::ViewerMode::Local) => {
+        (objectiveai::config::ApiMode::Remote, objectiveai::config::ViewerMode::Local) => {
             run_remote_api_remote_viewer(config, task).await
         }
-        (objectiveai::ApiMode::Remote, objectiveai::ViewerMode::Remote) => {
+        (objectiveai::config::ApiMode::Remote, objectiveai::config::ViewerMode::Remote) => {
             run_remote_api_remote_viewer(config, task).await
         }
     }
@@ -49,7 +49,7 @@ where
 /// and kills the viewer via the exiter when it completes.
 #[cfg(feature = "viewer")]
 async fn run_local_api_local_viewer<F, Fut>(
-    mut config: objectiveai::Config,
+    mut config: objectiveai::config::Config,
     task: F,
 ) -> Result<String, crate::error::Error>
 where
@@ -112,7 +112,7 @@ where
 /// Spawns a local API server only. No viewer window — viewer address and
 /// signature come from ENV/config headers (pointing at a remote viewer).
 async fn run_local_api_remote_viewer<F, Fut>(
-    mut config: objectiveai::Config,
+    mut config: objectiveai::config::Config,
     task: F,
 ) -> Result<String, crate::error::Error>
 where
@@ -146,7 +146,7 @@ where
 /// to our local viewer.
 #[cfg(feature = "viewer")]
 async fn run_remote_api_local_viewer<F, Fut>(
-    mut config: objectiveai::Config,
+    mut config: objectiveai::config::Config,
     task: F,
 ) -> Result<String, crate::error::Error>
 where
@@ -190,7 +190,7 @@ where
 /// No local spawning. The API and viewer are both remote.
 /// HttpClient gets all values from ENV and config file.
 async fn run_remote_api_remote_viewer<F, Fut>(
-    mut config: objectiveai::Config,
+    mut config: objectiveai::config::Config,
     task: F,
 ) -> Result<String, crate::error::Error>
 where
@@ -214,7 +214,7 @@ where
 /// the API builder's `VIEWER_SIGNATURE`.
 #[cfg(feature = "viewer")]
 fn build_viewer_config(
-    config: &mut objectiveai::Config,
+    config: &mut objectiveai::config::Config,
 ) -> Result<(objectiveai_viewer::Config, bool, Option<String>), crate::error::Error> {
     // Config file: both secret and signature must be present, or both absent
     let viewer_local = config.viewer().local();
@@ -252,7 +252,7 @@ fn build_viewer_config(
 ///
 /// Always force-overrides `address`, `port`, and `suppress_output` for local binding.
 fn build_api_config(
-    config: &mut objectiveai::Config,
+    config: &mut objectiveai::config::Config,
     viewer_address: Option<String>,
     viewer_signature: Option<String>,
 ) -> objectiveai_api::Config {
@@ -308,7 +308,7 @@ fn build_api_config(
 /// - `viewer_signature`: `Some` for local viewer (config pair signature), `None` for remote.
 ///   Only sets if ENV and config overlay didn't already provide one.
 fn build_http_client(
-    config: &mut objectiveai::Config,
+    config: &mut objectiveai::config::Config,
     address: Option<String>,
     viewer_address: Option<String>,
     viewer_signature: Option<String>,

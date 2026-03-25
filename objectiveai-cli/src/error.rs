@@ -1,7 +1,7 @@
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("{0}")]
-    Config(#[from] objectiveai::ConfigError),
+    Config(#[from] objectiveai::config::ConfigError),
     #[error("viewer setup failed: {0}")]
     ViewerSetup(std::io::Error),
     #[error("api setup failed: {0}")]

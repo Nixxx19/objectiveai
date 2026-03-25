@@ -1,4 +1,4 @@
-use objectiveai::{Config, ConfigClient, ConfigError};
+use objectiveai::config::{Config, ConfigClient, ConfigError};
 
 pub fn filter(f: Option<String>) -> String {
     f.unwrap_or_else(|| ".".to_string())

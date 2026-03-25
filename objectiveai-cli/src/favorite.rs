@@ -27,12 +27,12 @@ pub enum AddFavorite {
 }
 
 impl AddFavorite {
-    pub fn apply(self, favorites: &mut Vec<objectiveai::Favorite>) {
+    pub fn apply(self, favorites: &mut Vec<objectiveai::config::Favorite>) {
         favorites.push(self.into());
     }
 }
 
-impl From<AddFavorite> for objectiveai::Favorite {
+impl From<AddFavorite> for objectiveai::config::Favorite {
     fn from(add: AddFavorite) -> Self {
         match add {
             AddFavorite::Github { owner, repository, commit, note } => Self {
@@ -63,7 +63,7 @@ pub struct EditFavorite {
 }
 
 impl EditFavorite {
-    pub fn apply(self, favorite: &mut objectiveai::Favorite) {
+    pub fn apply(self, favorite: &mut objectiveai::config::Favorite) {
         if let Some(note) = self.note {
             favorite.note = note;
         }

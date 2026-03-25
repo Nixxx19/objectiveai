@@ -32,7 +32,7 @@ impl Commands {
             Commands::Mode { command } => command.handle(),
             Commands::Local { command } => command.handle(),
             Commands::GenerateSecretSignaturePair => {
-                let pair = objectiveai::generate_viewer_secret_signature_pair();
+                let pair = objectiveai::config::generate_viewer_secret_signature_pair();
                 Ok(crate::Output::ConfigGet(serde_json::to_string(&pair).unwrap()))
             }
         }
