@@ -9,9 +9,15 @@ impl ConfigClient {
     pub fn new(base_dir: Option<impl Into<PathBuf>>) -> Self {
         let base_dir = match base_dir {
             Some(dir) => dir.into(),
-            None => dirs::home_dir()
-                .unwrap_or_else(|| PathBuf::from("."))
-                .join(".objectiveai"),
+            None => {
+                #[cfg(feature = "env")]
+                if let Ok(dir) = std::env::var("CONFIG_BASE_DIR") {
+                    return Self { base_dir: PathBuf::from(dir) };
+                }
+                dirs::home_dir()
+                    .unwrap_or_else(|| PathBuf::from("."))
+                    .join(".objectiveai")
+            }
         };
         Self { base_dir }
     }
