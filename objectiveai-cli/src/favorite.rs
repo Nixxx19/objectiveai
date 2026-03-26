@@ -2,6 +2,9 @@ use clap::Args;
 
 #[derive(Args)]
 pub struct AddFavorite {
+    /// Name
+    #[arg(long)]
+    pub name: String,
     /// Remote source
     #[arg(long, value_enum)]
     pub remote: crate::remote::Remote,
@@ -20,24 +23,19 @@ pub struct AddFavorite {
 }
 
 impl AddFavorite {
-    pub fn apply(self, favorites: &mut Vec<objectiveai::config::Favorite>) {
-        favorites.push(self.into());
-    }
-}
-
-impl From<AddFavorite> for objectiveai::config::Favorite {
-    fn from(add: AddFavorite) -> Self {
-        Self {
-            path: add.remote.into_path(add.owner, add.repository, add.commit),
-            note: add.note,
-        }
+    pub fn into_favorite(self) -> Result<objectiveai::config::Favorite, objectiveai::config::ConfigError> {
+        objectiveai::config::Favorite::new(
+            self.name,
+            self.remote.into_path(self.owner, self.repository, self.commit),
+            self.note,
+        )
     }
 }
 
 #[derive(Args)]
 pub struct EditFavorite {
-    /// Index of the favorite to edit
-    pub index: usize,
+    /// Name of the favorite to edit
+    pub name: String,
     /// Set the note
     #[arg(long)]
     pub note: Option<String>,
@@ -50,9 +48,9 @@ pub struct EditFavorite {
 }
 
 impl EditFavorite {
-    pub fn apply(self, favorite: &mut objectiveai::config::Favorite) {
+    pub fn apply(self, favorite: &mut objectiveai::config::Favorite) -> Result<(), objectiveai::config::ConfigError> {
         if let Some(note) = self.note {
-            favorite.note = note;
+            favorite.set_note(note)?;
         }
         if let Some(commit) = self.commit {
             match &mut favorite.path {
@@ -67,11 +65,15 @@ impl EditFavorite {
                 objectiveai::RemotePathCommitOptional::Mock { .. } => {}
             }
         }
+        Ok(())
     }
 }
 
 #[derive(Args)]
 pub struct AddPairFavorite {
+    /// Name
+    #[arg(long)]
+    pub name: String,
     /// Function remote source
     #[arg(long, value_enum)]
     pub function_remote: crate::remote::Remote,
@@ -101,20 +103,21 @@ pub struct AddPairFavorite {
     pub note: String,
 }
 
-impl From<AddPairFavorite> for objectiveai::config::PairFavorite {
-    fn from(add: AddPairFavorite) -> Self {
-        Self {
-            function: add.function_remote.into_path(add.function_owner, add.function_repository, add.function_commit),
-            profile: add.profile_remote.into_path(add.profile_owner, add.profile_repository, add.profile_commit),
-            note: add.note,
-        }
+impl AddPairFavorite {
+    pub fn into_pair_favorite(self) -> Result<objectiveai::config::PairFavorite, objectiveai::config::ConfigError> {
+        objectiveai::config::PairFavorite::new(
+            self.name,
+            self.function_remote.into_path(self.function_owner, self.function_repository, self.function_commit),
+            self.profile_remote.into_path(self.profile_owner, self.profile_repository, self.profile_commit),
+            self.note,
+        )
     }
 }
 
 #[derive(Args)]
 pub struct EditPairFavorite {
-    /// Index of the favorite to edit
-    pub index: usize,
+    /// Name of the favorite to edit
+    pub name: String,
     /// Set the note
     #[arg(long)]
     pub note: Option<String>,
@@ -133,9 +136,9 @@ pub struct EditPairFavorite {
 }
 
 impl EditPairFavorite {
-    pub fn apply(self, favorite: &mut objectiveai::config::PairFavorite) {
+    pub fn apply(self, favorite: &mut objectiveai::config::PairFavorite) -> Result<(), objectiveai::config::ConfigError> {
         if let Some(note) = self.note {
-            favorite.note = note;
+            favorite.set_note(note)?;
         }
         if let Some(commit) = self.function_commit {
             match &mut favorite.function {
@@ -163,5 +166,6 @@ impl EditPairFavorite {
                 objectiveai::RemotePathCommitOptional::Mock { .. } => {}
             }
         }
+        Ok(())
     }
 }

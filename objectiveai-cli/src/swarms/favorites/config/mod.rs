@@ -9,8 +9,8 @@ pub enum Commands {
         #[command(flatten)]
         args: crate::favorite::AddFavorite,
     },
-    /// Delete a favorite by index
-    Del { index: usize },
+    /// Delete a favorite by name
+    Del { name: String },
     /// Edit a favorite
     Edit {
         #[command(flatten)]
@@ -24,18 +24,18 @@ impl Commands {
         match self {
             Commands::Get => Ok(crate::Output::ConfigGet(crate::config::format_value(&config.swarms().get_favorites()))),
             Commands::Add { args } => {
-                config.swarms().add_favorite(args.into());
+                config.swarms().add_favorite(args.into_favorite()?);
                 crate::config::write(&client, &config)?;
                 Ok(crate::Output::ConfigSet)
             }
-            Commands::Del { index } => {
-                config.swarms().del_favorite(index)?;
+            Commands::Del { name } => {
+                config.swarms().del_favorite(&name)?;
                 crate::config::write(&client, &config)?;
                 Ok(crate::Output::ConfigSet)
             }
             Commands::Edit { args } => {
-                let favorite = config.swarms().edit_favorite(args.index)?;
-                args.apply(favorite);
+                let favorite = config.swarms().edit_favorite(&args.name)?;
+                args.apply(favorite)?;
                 crate::config::write(&client, &config)?;
                 Ok(crate::Output::ConfigSet)
             }

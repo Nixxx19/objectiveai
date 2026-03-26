@@ -35,19 +35,18 @@ impl FunctionsConfig {
         self.favorites.get_or_insert_with(Vec::new).push(favorite);
     }
 
-    pub fn del_favorite(&mut self, index: usize) -> Result<(), super::ConfigError> {
-        let favorites = self.favorites.as_mut().ok_or(super::ConfigError::IndexOutOfBounds(index, 0))?;
-        if index >= favorites.len() {
-            return Err(super::ConfigError::IndexOutOfBounds(index, favorites.len()));
-        }
-        favorites.remove(index);
+    pub fn del_favorite(&mut self, name: &str) -> Result<(), super::ConfigError> {
+        let favorites = self.favorites.as_mut().ok_or_else(|| super::ConfigError::FavoriteNotFound(name.to_string()))?;
+        let pos = favorites.iter().position(|f| f.get_name() == name)
+            .ok_or_else(|| super::ConfigError::FavoriteNotFound(name.to_string()))?;
+        favorites.remove(pos);
         Ok(())
     }
 
-    pub fn edit_favorite(&mut self, index: usize) -> Result<&mut super::Favorite, super::ConfigError> {
-        let favorites = self.favorites.as_mut().ok_or(super::ConfigError::IndexOutOfBounds(index, 0))?;
-        let len = favorites.len();
-        favorites.get_mut(index).ok_or(super::ConfigError::IndexOutOfBounds(index, len))
+    pub fn edit_favorite(&mut self, name: &str) -> Result<&mut super::Favorite, super::ConfigError> {
+        let favorites = self.favorites.as_mut().ok_or_else(|| super::ConfigError::FavoriteNotFound(name.to_string()))?;
+        favorites.iter_mut().find(|f| f.get_name() == name)
+            .ok_or_else(|| super::ConfigError::FavoriteNotFound(name.to_string()))
     }
 
     pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
@@ -116,19 +115,18 @@ impl FunctionsProfilesConfig {
         self.favorites.get_or_insert_with(Vec::new).push(favorite);
     }
 
-    pub fn del_favorite(&mut self, index: usize) -> Result<(), super::ConfigError> {
-        let favorites = self.favorites.as_mut().ok_or(super::ConfigError::IndexOutOfBounds(index, 0))?;
-        if index >= favorites.len() {
-            return Err(super::ConfigError::IndexOutOfBounds(index, favorites.len()));
-        }
-        favorites.remove(index);
+    pub fn del_favorite(&mut self, name: &str) -> Result<(), super::ConfigError> {
+        let favorites = self.favorites.as_mut().ok_or_else(|| super::ConfigError::FavoriteNotFound(name.to_string()))?;
+        let pos = favorites.iter().position(|f| f.get_name() == name)
+            .ok_or_else(|| super::ConfigError::FavoriteNotFound(name.to_string()))?;
+        favorites.remove(pos);
         Ok(())
     }
 
-    pub fn edit_favorite(&mut self, index: usize) -> Result<&mut super::Favorite, super::ConfigError> {
-        let favorites = self.favorites.as_mut().ok_or(super::ConfigError::IndexOutOfBounds(index, 0))?;
-        let len = favorites.len();
-        favorites.get_mut(index).ok_or(super::ConfigError::IndexOutOfBounds(index, len))
+    pub fn edit_favorite(&mut self, name: &str) -> Result<&mut super::Favorite, super::ConfigError> {
+        let favorites = self.favorites.as_mut().ok_or_else(|| super::ConfigError::FavoriteNotFound(name.to_string()))?;
+        favorites.iter_mut().find(|f| f.get_name() == name)
+            .ok_or_else(|| super::ConfigError::FavoriteNotFound(name.to_string()))
     }
 
     pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
@@ -159,19 +157,18 @@ impl FunctionsProfilesPairsConfig {
         self.favorites.get_or_insert_with(Vec::new).push(favorite);
     }
 
-    pub fn del_favorite(&mut self, index: usize) -> Result<(), super::ConfigError> {
-        let favorites = self.favorites.as_mut().ok_or(super::ConfigError::IndexOutOfBounds(index, 0))?;
-        if index >= favorites.len() {
-            return Err(super::ConfigError::IndexOutOfBounds(index, favorites.len()));
-        }
-        favorites.remove(index);
+    pub fn del_favorite(&mut self, name: &str) -> Result<(), super::ConfigError> {
+        let favorites = self.favorites.as_mut().ok_or_else(|| super::ConfigError::FavoriteNotFound(name.to_string()))?;
+        let pos = favorites.iter().position(|f| f.get_name() == name)
+            .ok_or_else(|| super::ConfigError::FavoriteNotFound(name.to_string()))?;
+        favorites.remove(pos);
         Ok(())
     }
 
-    pub fn edit_favorite(&mut self, index: usize) -> Result<&mut super::PairFavorite, super::ConfigError> {
-        let favorites = self.favorites.as_mut().ok_or(super::ConfigError::IndexOutOfBounds(index, 0))?;
-        let len = favorites.len();
-        favorites.get_mut(index).ok_or(super::ConfigError::IndexOutOfBounds(index, len))
+    pub fn edit_favorite(&mut self, name: &str) -> Result<&mut super::PairFavorite, super::ConfigError> {
+        let favorites = self.favorites.as_mut().ok_or_else(|| super::ConfigError::FavoriteNotFound(name.to_string()))?;
+        favorites.iter_mut().find(|f| f.get_name() == name)
+            .ok_or_else(|| super::ConfigError::FavoriteNotFound(name.to_string()))
     }
 
     pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
