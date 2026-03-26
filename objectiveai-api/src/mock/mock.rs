@@ -122,6 +122,11 @@ fn get_function_json(repository: &str) -> Option<&'static str> {
         "error-missing-input-key" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/error-missing-input-key.json"))),
         "error-missing-sub-function" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/error-missing-sub-function.json"))),
         "error-wrong-sub-input" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/error-wrong-sub-input.json"))),
+        "error-cycle-a" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/error-cycle-a.json"))),
+        "error-cycle-b" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/error-cycle-b.json"))),
+        "error-cycle-abc-a" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/error-cycle-abc-a.json"))),
+        "error-cycle-abc-b" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/error-cycle-abc-b.json"))),
+        "error-cycle-abc-c" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/error-cycle-abc-c.json"))),
         _ => None,
     }
 }
@@ -145,6 +150,8 @@ const FUNCTION_REPOSITORIES: &[&str] = &[
     "error-vector-returns-scalar", "error-nested-list-output",
     "error-none-output", "error-missing-input-key",
     "error-missing-sub-function", "error-wrong-sub-input",
+    "error-cycle-a", "error-cycle-b",
+    "error-cycle-abc-a", "error-cycle-abc-b", "error-cycle-abc-c",
 ];
 
 /// Lists all mock Functions.

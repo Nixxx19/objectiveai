@@ -1665,9 +1665,41 @@ async fn test_error_2_22_recursive_profile_not_found() {
     assert!(matches!(err, super::Error::FetchProfile(_)), "expected FetchProfile, got: {err}");
 }
 
-/// 2.23: Recursive InputSchemaMismatch — wrong input for sub-function.
+/// 2.23: CircularDependency — simple cycle A→B→A.
 #[tokio::test]
-async fn test_error_2_23_recursive_input_schema_mismatch() {
+async fn test_error_2_23_circular_dependency_simple() {
+    let client = make_client();
+    let request = make_request(
+        "error-cycle-a",
+        "baseline-auto",
+        InputValue::Object(indexmap::indexmap! {
+            "text".into() => InputValue::String("test".into()),
+        }),
+        42,
+    );
+    let err = expect_err(&client, request, 400).await;
+    assert!(matches!(err, super::Error::CircularDependency(_)), "expected CircularDependency, got: {err}");
+}
+
+/// 2.24: CircularDependency — complex cycle A→{B,C}, B→C, C→B.
+#[tokio::test]
+async fn test_error_2_24_circular_dependency_complex() {
+    let client = make_client();
+    let request = make_request(
+        "error-cycle-abc-a",
+        "baseline-auto",
+        InputValue::Object(indexmap::indexmap! {
+            "text".into() => InputValue::String("test".into()),
+        }),
+        42,
+    );
+    let err = expect_err(&client, request, 400).await;
+    assert!(matches!(err, super::Error::CircularDependency(_)), "expected CircularDependency, got: {err}");
+}
+
+/// 2.25: Recursive InputSchemaMismatch — wrong input for sub-function.
+#[tokio::test]
+async fn test_error_2_25_recursive_input_schema_mismatch() {
     let client = make_client();
     let request = make_request(
         "error-wrong-sub-input",
