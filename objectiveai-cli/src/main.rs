@@ -4,6 +4,7 @@ mod remote;
 mod get;
 mod list;
 mod favorite;
+mod python;
 mod api;
 mod agents;
 mod swarms;

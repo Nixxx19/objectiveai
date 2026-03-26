@@ -18,4 +18,8 @@ pub enum Error {
     FavoriteNotFound(String),
     #[error("{0}")]
     MissingArgs(&'static str),
+    #[error("no python interpreter found (install Python or enable the rustpython feature)")]
+    PythonNotFound,
+    #[error("failed to read python file {0}: {1}")]
+    PythonFileRead(std::path::PathBuf, std::io::Error),
 }
