@@ -1,6 +1,7 @@
 mod config;
 mod error;
 mod path;
+mod list;
 mod favorite;
 mod api;
 mod agents;
