@@ -341,6 +341,191 @@ print(json.dumps({"foo": "bar"}))
 /// The captured stdout is the concatenation of both prints, which is not
 /// valid JSON for Foo. This should fail to deserialize.
 #[test]
+/// Code that raises an exception, catches it, then returns via bare expression.
+#[test]
+fn try_except_then_bare_expression() {
+    let result: Foo = crate::python::exec_code(r#"
+try:
+    raise ValueError("oops")
+except:
+    pass
+{"foo": "bar"}
+"#).unwrap();
+    assert_eq!(result, expected());
+}
+
+/// Code that uses __name__ inside an if guard — verifies __name__ == "__main__" in exec().
+#[test]
+fn name_equals_main_in_exec() {
+    let result: Foo = crate::python::exec_code(r#"
+import json
+if __name__ == "__main__":
+    print(json.dumps({"foo": "bar"}))
+"#).unwrap();
+    assert_eq!(result, expected());
+}
+
+/// Code that redefines print, then uses the original via builtins.
+#[test]
+fn redefine_print_use_builtins() {
+    let result: Foo = crate::python::exec_code(r#"
+import json, builtins
+print = lambda *a: None
+builtins.print(json.dumps({"foo": "bar"}))
+"#).unwrap();
+    assert_eq!(result, expected());
+}
+
+/// Bare expression after a for loop.
+#[test]
+fn bare_expression_after_for_loop() {
+    let result: Foo = crate::python::exec_code(r#"
+items = []
+for i in range(3):
+    items.append(i)
+{"foo": "bar"}
+"#).unwrap();
+    assert_eq!(result, expected());
+}
+
+/// Bare expression after a with statement.
+#[test]
+fn bare_expression_after_with() {
+    let result: Foo = crate::python::exec_code(r#"
+import io
+with io.StringIO() as f:
+    f.write("ignored")
+{"foo": "bar"}
+"#).unwrap();
+    assert_eq!(result, expected());
+}
+
+/// Bare expression after try/except/finally.
+#[test]
+fn bare_expression_after_try_finally() {
+    let result: Foo = crate::python::exec_code(r#"
+x = None
+try:
+    x = 1
+finally:
+    x = 2
+{"foo": "bar"}
+"#).unwrap();
+    assert_eq!(result, expected());
+}
+
+/// User code sets a variable with the exact __oai_ prefix the harness uses.
+#[test]
+fn user_sets_oai_prefix_variable() {
+    let result: Foo = crate::python::exec_code(r#"
+import json
+__oai_capture = "sabotage"
+__oai_json = None
+__oai_result = 12345
+print(json.dumps({"foo": "bar"}))
+"#).unwrap();
+    assert_eq!(result, expected());
+}
+
+/// Code that uses globals() to set a variable, then references it in bare expression.
+#[test]
+fn globals_dict_then_bare_expression() {
+    let result: Foo = crate::python::exec_code(r#"
+globals()["x"] = "bar"
+{"foo": x}
+"#).unwrap();
+    assert_eq!(result, expected());
+}
+
+/// Code that uses __import__ for dynamic import.
+#[test]
+fn dynamic_import() {
+    let result: Foo = crate::python::exec_code(r#"
+json = __import__("json")
+print(json.dumps({"foo": "bar"}))
+"#).unwrap();
+    assert_eq!(result, expected());
+}
+
+/// Deeply nested dict as bare expression.
+#[test]
+fn deeply_nested_dict() {
+    let result: serde_json::Value = crate::python::exec_code(r#"
+{"a": {"b": {"c": {"foo": "bar"}}}}
+"#).unwrap();
+    assert_eq!(result["a"]["b"]["c"]["foo"], "bar");
+}
+
+/// Multiline string containing what looks like Python code, followed by bare expression.
+#[test]
+fn multiline_string_then_bare_expression() {
+    let result: Foo = crate::python::exec_code(r#"
+code = """
+def fake():
+    return {"wrong": "value"}
+print("this is not executed")
+"""
+{"foo": "bar"}
+"#).unwrap();
+    assert_eq!(result, expected());
+}
+
+/// Unicode and emoji in the dict value.
+#[test]
+fn unicode_emoji_value() {
+    #[derive(Debug, PartialEq, serde::Deserialize)]
+    struct Uni { msg: String }
+    let result: Uni = crate::python::exec_code(r#"
+{"msg": "hello 🦀 world àéîõü"}
+"#).unwrap();
+    assert_eq!(result, Uni { msg: "hello 🦀 world àéîõü".to_string() });
+}
+
+/// Code that uses *args and **kwargs, then bare expression.
+#[test]
+fn args_kwargs_then_bare_expression() {
+    let result: Foo = crate::python::exec_code(r#"
+def make(*args, **kwargs):
+    return kwargs
+
+make("ignored", foo="bar")
+"#).unwrap();
+    assert_eq!(result, expected());
+}
+
+/// Code that uses type() to dynamically create a class, then calls a method.
+#[test]
+fn dynamic_class_creation() {
+    let result: Foo = crate::python::exec_code(r#"
+MyClass = type("MyClass", (), {"get": lambda self: {"foo": "bar"}})
+MyClass().get()
+"#).unwrap();
+    assert_eq!(result, expected());
+}
+
+/// List comprehension producing a single-element list, indexed to get the dict.
+#[test]
+fn list_comprehension_indexed() {
+    let result: Foo = crate::python::exec_code(r#"
+[{"foo": v} for v in ["bar"]][0]
+"#).unwrap();
+    assert_eq!(result, expected());
+}
+
+/// Code that uses `exit()` guard — doesn't actually exit because we use the value before.
+#[test]
+fn conditional_with_no_exit() {
+    let result: Foo = crate::python::exec_code(r#"
+import json
+should_exit = False
+if should_exit:
+    exit(1)
+print(json.dumps({"foo": "bar"}))
+"#).unwrap();
+    assert_eq!(result, expected());
+}
+
+#[test]
 fn garbage_stdout_before_correct_print() {
     let err = crate::python::exec_code::<Foo>(r#"
 import json

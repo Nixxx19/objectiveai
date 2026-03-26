@@ -35,6 +35,10 @@ fn check_non_main(patterns: &[&str]) -> Vec<String> {
         if file == main_rs {
             continue;
         }
+        // Skip test modules — they may contain string literals with print/exit
+        if file.file_name().is_some_and(|n| n.to_str().is_some_and(|s| s.ends_with("_tests.rs"))) {
+            continue;
+        }
         all_violations.extend(check_file(&file, patterns));
     }
     all_violations

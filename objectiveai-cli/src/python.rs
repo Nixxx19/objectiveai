@@ -69,6 +69,7 @@ __oai_old_stdout = __oai_sys.stdout
 __oai_old_dunder_stdout = __oai_sys.__stdout__
 __oai_sys.stdout = __oai_capture
 __oai_sys.__stdout__ = __oai_capture
+__oai_print = print
 __oai_eval = None
 if __oai_tree.body and isinstance(__oai_tree.body[-1], __oai_ast.Expr):
     __oai_last = __oai_tree.body.pop()
@@ -79,7 +80,7 @@ else:
 __oai_stdout = __oai_capture.getvalue()
 __oai_sys.stdout = __oai_old_stdout
 __oai_sys.__stdout__ = __oai_old_dunder_stdout
-print(__oai_json.dumps({{"eval": __oai_eval, "stdout": __oai_stdout}}))
+__oai_print(__oai_json.dumps({{"eval": __oai_eval, "stdout": __oai_stdout}}))
 "#,
         encoded
     )
