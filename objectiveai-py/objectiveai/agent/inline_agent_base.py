@@ -4,12 +4,12 @@ from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
 from objectiveai.agent.claude_agent_sdk.agent_base import AgentBase as AgentClaudeAgentSdkAgentBase
-from objectiveai.agent.mock.agent_base import AgentBase
-from objectiveai.agent.openrouter.agent_base import AgentBase as AgentOpenrouterAgentBase
+from objectiveai.agent.mock.agent_base import AgentBase as AgentMockAgentBase
+from objectiveai.agent.openrouter.agent_base import AgentBase
 
 
 class InlineAgentBaseVariant1(RootModel):
-    root: AgentOpenrouterAgentBase
+    root: AgentBase
 
 
 class InlineAgentBaseVariant2(RootModel):
@@ -17,7 +17,7 @@ class InlineAgentBaseVariant2(RootModel):
 
 
 class InlineAgentBaseVariant3(RootModel):
-    root: AgentBase
+    root: AgentMockAgentBase
 
 
 class InlineAgentBase(RootModel):

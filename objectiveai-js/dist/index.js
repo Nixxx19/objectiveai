@@ -2428,20 +2428,7 @@ function authGetOpenrouterByokApiKey(client, options) {
 function authGetCredits(client, options) {
   return client.get_unary("/auth/credits", void 0, options);
 }
-var ConfigFavoriteSchema = z.union([z.object({
-  commit: z.string().nullable().optional(),
-  owner: z.string(),
-  remote: z.literal("github"),
-  repository: z.string()
-}), z.object({
-  commit: z.string().nullable().optional(),
-  owner: z.string(),
-  remote: z.literal("filesystem"),
-  repository: z.string()
-}), z.object({
-  name: z.string(),
-  remote: z.literal("mock")
-})]).and(z.object({
+var ConfigFavoriteSchema = RemotePathCommitOptionalSchema.and(z.object({
   name: z.string(),
   note: z.string()
 })).meta({ title: "config.Favorite" });
