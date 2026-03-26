@@ -1,29 +1,44 @@
 //! Python execution module. Tries the system Python interpreter first
 //! (when the `systempython` feature is enabled), then falls back to the
 //! built-in RustPython interpreter (when the `rustpython` feature is enabled).
+//!
+//! The output of the Python code is expected to be valid JSON on stdout.
+//! It is deserialized into the requested type `T`.
 
 use std::path::Path;
 
-/// Result of executing Python code.
-pub struct PythonOutput {
-    pub stdout: String,
-    pub stderr: String,
-    pub success: bool,
-}
-
-/// Execute a Python script file.
-pub fn exec_file(path: &Path, args: &[&str]) -> Result<PythonOutput, crate::error::Error> {
-    let _ = args;
+/// Execute a Python script file and deserialize stdout as JSON into `T`.
+pub fn exec_file<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T, crate::error::Error> {
     let code = std::fs::read_to_string(path)
         .map_err(|e| crate::error::Error::PythonFileRead(path.to_path_buf(), e))?;
     exec_code(&code)
 }
 
-/// Execute an inline Python code string.
-pub fn exec_code(code: &str) -> Result<PythonOutput, crate::error::Error> {
+/// Execute inline Python code and deserialize stdout as JSON into `T`.
+pub fn exec_code<T: serde::de::DeserializeOwned>(code: &str) -> Result<T, crate::error::Error> {
+    let stdout = exec_code_raw(code)?;
+    let mut de = serde_json::Deserializer::from_str(&stdout);
+    serde_path_to_error::deserialize(&mut de)
+        .map_err(crate::error::Error::PythonDeserialize)
+}
+
+/// Execute inline Python code and return raw stdout.
+fn exec_code_raw(code: &str) -> Result<String, crate::error::Error> {
     #[cfg(feature = "systempython")]
-    if let Some(output) = try_system_python_code(code) {
-        return Ok(output);
+    if let Some(result) = try_system_python_code(code) {
+        match result {
+            Ok(stdout) => return Ok(stdout),
+            Err(system_err) => {
+                #[cfg(feature = "rustpython")]
+                {
+                    return exec_code_rustpython(code).or(Err(system_err));
+                }
+                #[cfg(not(feature = "rustpython"))]
+                {
+                    return Err(system_err);
+                }
+            }
+        }
     }
     #[cfg(feature = "rustpython")]
     {
@@ -37,7 +52,7 @@ pub fn exec_code(code: &str) -> Result<PythonOutput, crate::error::Error> {
 }
 
 #[cfg(feature = "systempython")]
-fn try_system_python_code(code: &str) -> Option<PythonOutput> {
+fn try_system_python_code(code: &str) -> Option<Result<String, crate::error::Error>> {
     use std::process::Command;
     let python = find_system_python()?;
     let output = Command::new(&python)
@@ -45,11 +60,12 @@ fn try_system_python_code(code: &str) -> Option<PythonOutput> {
         .arg(code)
         .output()
         .ok()?;
-    Some(PythonOutput {
-        stdout: String::from_utf8_lossy(&output.stdout).into_owned(),
-        stderr: String::from_utf8_lossy(&output.stderr).into_owned(),
-        success: output.status.success(),
-    })
+    if output.status.success() {
+        Some(Ok(String::from_utf8_lossy(&output.stdout).into_owned()))
+    } else {
+        let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
+        Some(Err(crate::error::Error::PythonException(stderr)))
+    }
 }
 
 #[cfg(feature = "systempython")]
@@ -64,30 +80,20 @@ fn find_system_python() -> Option<String> {
 }
 
 #[cfg(feature = "rustpython")]
-fn exec_code_rustpython(code: &str) -> Result<PythonOutput, crate::error::Error> {
+fn exec_code_rustpython(code: &str) -> Result<String, crate::error::Error> {
     let interp = rustpython::InterpreterConfig::new()
         .init_stdlib()
         .interpreter();
 
-    let result = interp.enter(|vm| {
+    interp.enter(|vm| {
         let scope = vm.new_scope_with_builtins();
         match vm.run_code_string(scope, code, "<inline>".to_owned()) {
-            Ok(_) => PythonOutput {
-                stdout: String::new(),
-                stderr: String::new(),
-                success: true,
-            },
+            Ok(_) => Ok(String::new()),
             Err(exc) => {
                 let mut stderr = String::new();
                 vm.write_exception(&mut stderr, &exc).ok();
-                PythonOutput {
-                    stdout: String::new(),
-                    stderr,
-                    success: false,
-                }
+                Err(crate::error::Error::PythonException(stderr))
             }
         }
-    });
-
-    Ok(result)
+    })
 }
