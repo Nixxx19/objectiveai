@@ -4,7 +4,10 @@ use envconfig::Envconfig;
 
 /// Reads config and dispatches to the appropriate run variant
 /// based on API mode (Local/Remote) and Viewer mode (Local/Remote).
-pub async fn run<F, Fut>(task: F) -> Result<crate::Output, crate::error::Error>
+///
+/// If `viewer` is false, the viewer mode is forced to Remote regardless of
+/// config — no point spawning a viewer window if nothing will be displayed.
+pub async fn run<F, Fut>(task: F, viewer: bool) -> Result<crate::Output, crate::error::Error>
 where
     F: FnOnce(objectiveai::HttpClient) -> Fut + Send + 'static,
     Fut: Future<Output = Result<String, crate::error::Error>> + Send + 'static,
@@ -12,7 +15,11 @@ where
     let mut config = objectiveai::config::ConfigClient::new(None::<String>).read()?;
 
     let api_mode = config.api().get_mode();
-    let viewer_mode = config.viewer().get_mode();
+    let viewer_mode = if viewer {
+        config.viewer().get_mode()
+    } else {
+        objectiveai::config::ViewerMode::Remote
+    };
 
     match (api_mode, viewer_mode) {
         #[cfg(feature = "viewer")]

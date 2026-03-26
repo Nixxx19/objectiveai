@@ -68,7 +68,7 @@ where
             .map(ListItem::Item)
             .collect();
         Ok(format_items(items))
-    }).await
+    }, false).await
 }
 
 /// Fetches from all sources with de-duplication via api::run.
@@ -122,5 +122,5 @@ where
         }
 
         Ok(format_items(items))
-    }).await
+    }, false).await
 }

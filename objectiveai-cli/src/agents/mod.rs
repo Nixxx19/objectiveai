@@ -51,7 +51,7 @@ impl Commands {
                 crate::api::run(|http_client| async move {
                     let response = objectiveai::agent::get_agent(&http_client, path).await?;
                     Ok(serde_json::to_string_pretty(&response).unwrap())
-                }).await
+                }, false).await
             }
             Commands::List { source } => {
                 use objectiveai::agent::request::ListAgentsSource;
