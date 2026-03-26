@@ -318,7 +318,12 @@ impl ConfigBuilder {
             agent_completions_other_chunk_timeout: self.agent_completions_other_chunk_timeout.unwrap_or(30000),
             mcp_connect_timeout: self.mcp_connect_timeout.unwrap_or(30000),
             mcp_call_timeout: self.mcp_call_timeout.unwrap_or(30000),
-            config_base_dir: self.config_base_dir,
+            config_base_dir: match self.config_base_dir {
+                Some(dir) => std::path::PathBuf::from(dir),
+                None => dirs::home_dir()
+                    .unwrap_or_else(|| std::path::PathBuf::from("."))
+                    .join(".objectiveai"),
+            },
             mock_delay_ms: self.mock_delay_ms.unwrap_or(0),
             mock_max_tool_calls: self.mock_max_tool_calls.unwrap_or(1000),
             address: self.address.unwrap_or_else(|| "0.0.0.0".to_string()),
@@ -373,7 +378,7 @@ pub struct Config {
     pub agent_completions_other_chunk_timeout: u64,
     pub mcp_connect_timeout: u64,
     pub mcp_call_timeout: u64,
-    pub config_base_dir: Option<String>,
+    pub config_base_dir: std::path::PathBuf,
     pub mock_delay_ms: u64,
     pub mock_max_tool_calls: u32,
     pub address: String,
@@ -503,16 +508,8 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         std::time::Duration::from_millis(github_backoff_max_elapsed_time),
     ));
 
-    // Filesystem base directory for local function/profile repositories
-    let filesystem_base_dir = match config_base_dir {
-        Some(dir) => std::path::PathBuf::from(dir),
-        None => dirs::home_dir()
-            .unwrap_or_else(|| std::path::PathBuf::from("."))
-            .join(".objectiveai"),
-    };
-
     let filesystem_client = Arc::new(filesystem::Client::new(
-        filesystem_base_dir,
+        config_base_dir,
         commit_author_name,
         commit_author_email,
     ));
