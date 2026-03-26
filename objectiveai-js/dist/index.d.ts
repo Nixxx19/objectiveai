@@ -4149,14 +4149,18 @@ declare class Stream<T> implements AsyncIterable<T> {
  * Schema for ObjectiveAI client options.
  */
 declare const ObjectiveAIOptionsSchema: z$1.ZodObject<{
-    apiKey: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
-    apiBase: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
+    address: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
+    authorization: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
     userAgent: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
-    xTitle: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
     httpReferer: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
+    xTitle: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
     xGithubAuthorization: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
     xOpenrouterAuthorization: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
     xMcpAuthorization: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodRecord<z$1.ZodString, z$1.ZodString>>>;
+    xViewerSignature: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
+    xViewerAddress: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
+    xCommitAuthorName: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
+    xCommitAuthorEmail: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
 }, z$1.core.$strip>;
 type ObjectiveAIOptions = z$1.infer<typeof ObjectiveAIOptionsSchema>;
 /**
@@ -4171,14 +4175,18 @@ type RequestOptions = z$1.infer<typeof RequestOptionsSchema>;
  * ObjectiveAI API client.
  */
 declare class ObjectiveAI {
-    readonly apiKey: string | undefined;
-    readonly apiBase: string;
+    readonly address: string;
+    readonly authorization: string | undefined;
     readonly userAgent: string | undefined;
-    readonly xTitle: string | undefined;
     readonly httpReferer: string | undefined;
+    readonly xTitle: string | undefined;
     readonly xGithubAuthorization: string | undefined;
     readonly xOpenrouterAuthorization: string | undefined;
     readonly xMcpAuthorization: Record<string, string> | undefined;
+    readonly xViewerSignature: string | undefined;
+    readonly xViewerAddress: string | undefined;
+    readonly xCommitAuthorName: string | undefined;
+    readonly xCommitAuthorEmail: string | undefined;
     constructor(options?: ObjectiveAIOptions | null);
     /**
      * Build headers for a request.
@@ -95163,7 +95171,7 @@ declare function swarmListSwarms(client: ObjectiveAI, params: SwarmListSwarmsReq
 declare function swarmGetSwarm(client: ObjectiveAI, params: RemotePathCommitOptional, options?: RequestOptions): Promise<SwarmGetSwarmResponse>;
 declare function swarmGetSwarmUsage(client: ObjectiveAI, params: RemotePathCommitOptional, options?: RequestOptions): Promise<SwarmUsageSwarmResponse>;
 
-declare function wasmSwarmValidateSwarm(swarm: SwarmSwarmBase, remoteAgents?: Record<string, AgentRemoteAgentWithFallbacks>): SwarmSwarm;
+declare function wasmSwarmValidateSwarm(swarm: SwarmSwarmBase, remoteAgents?: Record<string, AgentRemoteAgentBaseWithFallbacks>): SwarmSwarm;
 
 declare const VectorCompletionsCacheCacheVoteSchema: z.ZodObject<{
     vote: z.ZodOptional<z.ZodNullable<z.ZodObject<{
