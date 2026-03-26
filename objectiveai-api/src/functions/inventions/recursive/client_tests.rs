@@ -280,7 +280,7 @@ async fn run_recursive_invention(
     client: &Arc<TestClient>,
     request: Arc<FunctionInventionRecursiveCreateParams>,
 ) -> FunctionInventionRecursive {
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new());
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
     let stream = client
         .clone()
         .create_streaming(ctx, request)
@@ -624,7 +624,7 @@ async fn run_recursive_invention_err(
     client: &Arc<TestClient>,
     request: Arc<FunctionInventionRecursiveCreateParams>,
 ) -> String {
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new());
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
     let stream = client
         .clone()
         .create_streaming(ctx, request)

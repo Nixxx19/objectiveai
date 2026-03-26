@@ -6,6 +6,8 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::OnceCell;
 
+use super::persistent_cache::PersistentCacheClient;
+
 /// Per-request context containing user-specific state and deduplication caches.
 ///
 /// The context is generic over `CTXEXT`, allowing custom extensions for
@@ -24,6 +26,8 @@ pub struct Context<CTXEXT> {
     pub cost_multiplier: rust_decimal::Decimal,
     /// Whether to suppress output (eprintln, logging, etc).
     pub suppress_output: bool,
+    /// Persistent cache client for key-value storage.
+    pub persistent_cache: Arc<dyn PersistentCacheClient>,
     /// Per-request ObjectiveAI authorization token.
     objectiveai_authorization: Option<Arc<String>>,
     /// Per-request OpenRouter authorization token.
@@ -132,6 +136,7 @@ impl<CTXEXT> Clone for Context<CTXEXT> {
             ext: self.ext.clone(),
             cost_multiplier: self.cost_multiplier,
             suppress_output: self.suppress_output,
+            persistent_cache: self.persistent_cache.clone(),
             objectiveai_authorization: self.objectiveai_authorization.clone(),
             openrouter_authorization: self.openrouter_authorization.clone(),
             github_authorization: self.github_authorization.clone(),
@@ -165,8 +170,9 @@ impl<CTXEXT> Context<CTXEXT> {
     /// - `X-GITHUB-AUTHORIZATION` / `GITHUB-AUTHORIZATION`: GitHub token
     /// - `X-MCP-AUTHORIZATION` / `MCP-AUTHORIZATION`: JSON-encoded `HashMap<String, String>`
     /// - `X-OBJECTIVEAI-AUTHORIZATION` / `AUTHORIZATION`: ObjectiveAI API key
-    pub fn new(
+    pub fn new<PC: PersistentCacheClient + 'static>(
         ext: Arc<CTXEXT>,
+        persistent_cache: Arc<PC>,
         cost_multiplier: rust_decimal::Decimal,
         suppress_output: bool,
         headers: &axum::http::HeaderMap,
@@ -227,6 +233,7 @@ impl<CTXEXT> Context<CTXEXT> {
             ext,
             cost_multiplier,
             suppress_output,
+            persistent_cache,
             openrouter_authorization,
             github_authorization,
             mcp_authorization,

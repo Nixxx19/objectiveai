@@ -151,6 +151,7 @@ fn make_client() -> super::Client<
 fn make_ctx() -> ctx::Context<ctx::DefaultContextExt> {
     ctx::Context::new(
         Arc::new(ctx::DefaultContextExt),
+        Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient),
         rust_decimal::Decimal::ONE,
         false,
         &axum::http::HeaderMap::new(),

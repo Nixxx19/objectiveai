@@ -315,7 +315,7 @@ async fn test_single_agent_2_responses_instruction_seed_42() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -363,7 +363,7 @@ async fn test_single_agent_3_responses_instruction_seed_42() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -410,7 +410,7 @@ async fn test_two_agents_equal_weights_seed_42() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -461,7 +461,7 @@ async fn test_two_agents_unequal_weights_seed_42() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -510,7 +510,7 @@ async fn test_three_agents_4_responses_seed_99() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -560,7 +560,7 @@ async fn test_invert_vote_seed_42() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -610,7 +610,7 @@ async fn test_deterministic_same_seed() {
     let run = |client: Arc<TestVectorClient>, request| async move {
         let stream = client
             .create_streaming(
-                ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+                ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
                 request,
             )
             .await
@@ -659,7 +659,7 @@ async fn test_different_seeds_differ() {
     let run = |client: Arc<TestVectorClient>, request| async move {
         let stream = client
             .create_streaming(
-                ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+                ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
                 request,
             )
             .await
@@ -705,7 +705,7 @@ async fn test_many_responses_deep_prefix_tree_seed_42() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -753,7 +753,7 @@ async fn test_json_schema_single_agent_seed_77() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -800,7 +800,7 @@ async fn test_tool_call_single_agent_seed_55() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -847,7 +847,7 @@ async fn test_error_agent_skipped_seed_42() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -901,7 +901,7 @@ async fn test_mixed_output_modes_seed_88() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -973,7 +973,7 @@ async fn test_image_responses_instruction_seed_33() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -1059,7 +1059,7 @@ async fn test_video_and_file_responses_seed_66() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -1122,7 +1122,7 @@ async fn test_three_different_agents_seed_11() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -1175,7 +1175,7 @@ async fn test_json_schema_many_responses_seed_22() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -1250,7 +1250,7 @@ async fn test_tool_call_two_agents_seed_44() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -1334,7 +1334,7 @@ async fn test_error_and_healthy_agents_seed_99() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -1381,7 +1381,7 @@ async fn test_only_final_chunk_has_usage() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -1425,7 +1425,7 @@ async fn test_error_zero_responses() {
 
     let err = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -1467,7 +1467,7 @@ async fn test_error_one_response() {
 
     let err = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -1514,7 +1514,7 @@ async fn test_error_invalid_swarm_all_count_zero() {
 
     let err = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -1555,7 +1555,7 @@ async fn test_error_invalid_swarm_empty_agents() {
 
     let err = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -1601,7 +1601,7 @@ async fn test_error_invalid_swarm_profile_length_mismatch() {
 
     let err = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -1655,7 +1655,7 @@ async fn test_error_invalid_swarm_conflicting_invert() {
 
     let err = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -1698,7 +1698,7 @@ async fn test_error_invalid_profile_all_zero_weights() {
 
     let err = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -1750,7 +1750,7 @@ async fn test_logprobs_json_schema_2_agents_seed_42() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -1804,7 +1804,7 @@ async fn test_logprobs_json_schema_3_agents_unequal_seed_77() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -1850,7 +1850,7 @@ async fn test_logprobs_tool_call_single_agent_seed_55() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -1905,7 +1905,7 @@ async fn test_logprobs_error_with_fallback_seed_99() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -1959,7 +1959,7 @@ async fn test_logprobs_all_errors_seed_42() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -2006,7 +2006,7 @@ async fn test_logprobs_instruction_seed_33() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
@@ -2070,7 +2070,7 @@ async fn test_logprobs_mixed_modes_with_fallback_seed_88() {
 
     let stream = client
         .create_streaming(
-            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, false, &axum::http::HeaderMap::new()),
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new()),
             request,
         )
         .await
