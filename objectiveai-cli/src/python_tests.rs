@@ -534,3 +534,213 @@ print(json.dumps({"foo": "bar"}))
 "#).unwrap_err();
     assert!(matches!(err, crate::error::Error::PythonDeserialize(_)));
 }
+
+// -- PythonException errors --
+
+/// Bare `def` is a syntax error.
+#[test]
+fn error_syntax_error() {
+    let err = crate::python::exec_code::<Foo>("def").unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonException(_)));
+}
+
+/// Reference to an undefined variable.
+#[test]
+fn error_name_error() {
+    let err = crate::python::exec_code::<Foo>("undefined_variable").unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonException(_)));
+}
+
+/// Division by zero.
+#[test]
+fn error_zero_division() {
+    let err = crate::python::exec_code::<Foo>("1 / 0").unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonException(_)));
+}
+
+/// Import a module that doesn't exist.
+#[test]
+fn error_import_error() {
+    let err = crate::python::exec_code::<Foo>("import nonexistent_module_xyz").unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonException(_)));
+}
+
+/// Infinite recursion.
+#[test]
+fn error_recursion_error() {
+    let err = crate::python::exec_code::<Foo>(r#"
+def f(): f()
+f()
+"#).unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonException(_)));
+}
+
+/// Explicit raise.
+#[test]
+fn error_explicit_raise() {
+    let err = crate::python::exec_code::<Foo>(r#"raise RuntimeError("boom")"#).unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonException(_)));
+}
+
+/// sys.exit() raises SystemExit which propagates through exec.
+#[test]
+fn error_sys_exit() {
+    let err = crate::python::exec_code::<Foo>("import sys; sys.exit(1)").unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonException(_)));
+}
+
+/// TypeError from wrong operation.
+#[test]
+fn error_type_error() {
+    let err = crate::python::exec_code::<Foo>(r#""hello" + 5"#).unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonException(_)));
+}
+
+/// Exception in the eval'd expression (exec part succeeds, eval fails).
+#[test]
+fn error_exception_in_eval_expression() {
+    let err = crate::python::exec_code::<Foo>(r#"
+x = 1
+1 / 0
+"#).unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonException(_)));
+}
+
+/// Assertion error.
+#[test]
+fn error_assert_false() {
+    let err = crate::python::exec_code::<Foo>("assert False, 'nope'").unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonException(_)));
+}
+
+/// KeyError from dict access.
+#[test]
+fn error_key_error() {
+    let err = crate::python::exec_code::<Foo>("{}['missing']").unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonException(_)));
+}
+
+/// IndexError from list access.
+#[test]
+fn error_index_error() {
+    let err = crate::python::exec_code::<Foo>("[][0]").unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonException(_)));
+}
+
+/// AttributeError from accessing nonexistent attribute.
+#[test]
+fn error_attribute_error() {
+    let err = crate::python::exec_code::<Foo>("'hello'.nonexistent_method()").unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonException(_)));
+}
+
+// -- PythonDeserialize errors --
+
+/// Bare integer expression — not deserializable as Foo.
+#[test]
+fn error_deser_bare_int() {
+    let err = crate::python::exec_code::<Foo>("42").unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonDeserialize(_)));
+}
+
+/// Bare string expression — json.dumps wraps it in quotes, not a Foo.
+#[test]
+fn error_deser_bare_string() {
+    let err = crate::python::exec_code::<Foo>(r#""hello""#).unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonDeserialize(_)));
+}
+
+/// Bare list expression — wrong JSON shape for Foo.
+#[test]
+fn error_deser_bare_list() {
+    let err = crate::python::exec_code::<Foo>("[1, 2, 3]").unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonDeserialize(_)));
+}
+
+/// Bare None expression — eval is null, stdout is empty.
+#[test]
+fn error_deser_bare_none() {
+    let err = crate::python::exec_code::<Foo>("None").unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonDeserialize(_)));
+}
+
+/// Print Python repr (single quotes) instead of JSON — not valid JSON.
+#[test]
+fn error_deser_python_repr_not_json() {
+    let err = crate::python::exec_code::<Foo>(r#"print({"foo": "bar"})"#).unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonDeserialize(_)));
+}
+
+/// Valid JSON but wrong shape — has "baz" key instead of "foo".
+#[test]
+fn error_deser_wrong_shape() {
+    let err = crate::python::exec_code::<Foo>(r#"{"baz": "bar"}"#).unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonDeserialize(_)));
+}
+
+/// Empty code — no output at all.
+#[test]
+fn error_deser_empty_code() {
+    let err = crate::python::exec_code::<Foo>("").unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonDeserialize(_)));
+}
+
+/// Only comments — no output.
+#[test]
+fn error_deser_only_comments() {
+    let err = crate::python::exec_code::<Foo>("# nothing here").unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonDeserialize(_)));
+}
+
+/// Print valid JSON but an array of Foos, not a single Foo.
+#[test]
+fn error_deser_array_of_foos() {
+    let err = crate::python::exec_code::<Foo>(r#"
+import json
+print(json.dumps([{"foo": "bar"}, {"foo": "baz"}]))
+"#).unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonDeserialize(_)));
+}
+
+/// Bare boolean expression — not a Foo.
+#[test]
+fn error_deser_bare_bool() {
+    let err = crate::python::exec_code::<Foo>("True").unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonDeserialize(_)));
+}
+
+/// Bare float expression — not a Foo.
+#[test]
+fn error_deser_bare_float() {
+    let err = crate::python::exec_code::<Foo>("3.14").unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonDeserialize(_)));
+}
+
+/// Bare tuple expression — json.dumps turns it into a list, not a Foo.
+#[test]
+fn error_deser_bare_tuple() {
+    let err = crate::python::exec_code::<Foo>("(1, 2, 3)").unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonDeserialize(_)));
+}
+
+// -- PythonFileRead errors --
+
+/// Non-existent file.
+#[test]
+fn error_file_not_found() {
+    let err = crate::python::exec_file::<Foo>(std::path::Path::new("/nonexistent/path/script.py")).unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonFileRead(_, _)));
+}
+
+// -- PythonHarnessBroken errors --
+
+/// os.write(1, ...) bypasses sys.stdout capture and corrupts the envelope.
+#[test]
+fn error_harness_broken_by_os_write() {
+    let err = crate::python::exec_code::<Foo>(r#"
+import os
+os.write(1, b"CORRUPTION")
+{"foo": "bar"}
+"#).unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonHarnessBroken(_)));
+}
