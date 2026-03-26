@@ -1,7 +1,6 @@
 //! Retrieve router — dispatches by `Remote`, resolves commits, and caches per request.
 
 use crate::ctx;
-use futures::FutureExt;
 use objectiveai::error::ResponseError;
 use objectiveai::Remote;
 use std::sync::Arc;
@@ -50,25 +49,12 @@ where
     ) -> Result<Option<objectiveai::RemotePath>, ResponseError> {
         let remote = path.remote();
         let cache_key = path.clone();
+        let router = self.clone();
+        let ctx_clone = ctx.clone();
         let path_clone = path.clone();
-        let shared = ctx
-            .remote_latest_cache
-            .entry(cache_key)
-            .or_insert_with(|| {
-                let (tx, rx) = tokio::sync::oneshot::channel();
-                let router = self.clone();
-                let ctx = ctx.clone();
-                tokio::spawn(async move {
-                    let result = router
-                        .source(remote)
-                        .resolve_latest(&ctx, kind, &path_clone)
-                        .await;
-                    let _ = tx.send(result);
-                });
-                rx.shared()
-            })
-            .clone();
-        shared.await.unwrap()
+        ctx.cached_remote_latest(cache_key, move || async move {
+            router.source(remote).resolve_latest(&ctx_clone, kind, &path_clone).await
+        }).await
     }
 
     // ── Agent ──────────────────────────────────────────────────────
@@ -102,23 +88,13 @@ where
         let Some(path) = self.resolve_path(ctx, crate::retrieval::Kind::Agents, params).await? else {
             return Ok(None);
         };
-        let shared = ctx
-            .agent_cache
-            .entry(path.clone())
-            .or_insert_with(|| {
-                let (tx, rx) = tokio::sync::oneshot::channel();
-                let router = self.clone();
-                let remote = path.remote();
-                let path = path.clone();
-                let ctx = ctx.clone();
-                tokio::spawn(async move {
-                    let result = router.source(remote).get_agent(&ctx, &path).await;
-                    let _ = tx.send(result);
-                });
-                rx.shared()
-            })
-            .clone();
-        shared.await.unwrap()
+        let router = self.clone();
+        let remote = path.remote();
+        let path_clone = path.clone();
+        let ctx_clone = ctx.clone();
+        ctx.cached_agent(path, move || async move {
+            router.source(remote).get_agent(&ctx_clone, &path_clone).await
+        }).await
     }
 
     /// API endpoint: fetch a remote agent, convert, wrap in response.
@@ -218,23 +194,13 @@ where
         let Some(path) = self.resolve_path(ctx, crate::retrieval::Kind::Swarms, params).await? else {
             return Ok(None);
         };
-        let shared = ctx
-            .swarm_cache
-            .entry(path.clone())
-            .or_insert_with(|| {
-                let (tx, rx) = tokio::sync::oneshot::channel();
-                let router = self.clone();
-                let remote = path.remote();
-                let path = path.clone();
-                let ctx = ctx.clone();
-                tokio::spawn(async move {
-                    let result = router.source(remote).get_swarm(&ctx, &path).await;
-                    let _ = tx.send(result);
-                });
-                rx.shared()
-            })
-            .clone();
-        shared.await.unwrap()
+        let router = self.clone();
+        let remote = path.remote();
+        let path_clone = path.clone();
+        let ctx_clone = ctx.clone();
+        ctx.cached_swarm(path, move || async move {
+            router.source(remote).get_swarm(&ctx_clone, &path_clone).await
+        }).await
     }
 
     /// API endpoint: fetch a remote swarm, convert, wrap in response.
@@ -285,24 +251,13 @@ where
         let Some(path) = self.resolve_path(ctx, crate::retrieval::Kind::Functions, params).await? else {
             return Ok(None);
         };
-        let cache_key = path.clone();
-        let shared = ctx
-            .function_cache
-            .entry(cache_key)
-            .or_insert_with(|| {
-                let (tx, rx) = tokio::sync::oneshot::channel();
-                let router = self.clone();
-                let remote = path.remote();
-                let path = path.clone();
-                let ctx = ctx.clone();
-                tokio::spawn(async move {
-                    let result = router.source(remote).get_function(&ctx, &path).await;
-                    let _ = tx.send(result);
-                });
-                rx.shared()
-            })
-            .clone();
-        shared.await.unwrap()
+        let router = self.clone();
+        let remote = path.remote();
+        let path_clone = path.clone();
+        let ctx_clone = ctx.clone();
+        ctx.cached_function(path, move || async move {
+            router.source(remote).get_function(&ctx_clone, &path_clone).await
+        }).await
     }
 
     /// API endpoint: fetch a remote function, wrap in response.
@@ -391,38 +346,27 @@ where
         let Some(path) = self.resolve_path(ctx, crate::retrieval::Kind::Profiles, params).await? else {
             return Ok(None);
         };
-        let cache_key = path.clone();
-        let shared = ctx
-            .profile_cache
-            .entry(cache_key)
-            .or_insert_with(|| {
-                let (tx, rx) = tokio::sync::oneshot::channel();
-                let router = self.clone();
-                let remote = path.remote();
-                let path = path.clone();
-                let ctx = ctx.clone();
-                tokio::spawn(async move {
-                    // Try profile.json first
-                    let result = router.source(remote).get_profile(&ctx, &path).await;
-                    let result = match &result {
-                        Ok(None) => {
-                            // Fallback: try swarm.json (a swarm definition is a valid Auto profile)
-                            match router.source(remote).get_swarm(&ctx, &path).await {
-                                Ok(Some(swarm)) => Ok(Some(
-                                    objectiveai::functions::RemoteProfile::Auto(swarm),
-                                )),
-                                Ok(None) => Ok(None),
-                                Err(e) => Err(e),
-                            }
-                        }
-                        _ => result,
-                    };
-                    let _ = tx.send(result);
-                });
-                rx.shared()
-            })
-            .clone();
-        shared.await.unwrap()
+        let router = self.clone();
+        let remote = path.remote();
+        let path_clone = path.clone();
+        let ctx_clone = ctx.clone();
+        ctx.cached_profile(path, move || async move {
+            // Try profile.json first
+            let result = router.source(remote).get_profile(&ctx_clone, &path_clone).await;
+            match &result {
+                Ok(None) => {
+                    // Fallback: try swarm.json (a swarm definition is a valid Auto profile)
+                    match router.source(remote).get_swarm(&ctx_clone, &path_clone).await {
+                        Ok(Some(swarm)) => Ok(Some(
+                            objectiveai::functions::RemoteProfile::Auto(swarm),
+                        )),
+                        Ok(None) => Ok(None),
+                        Err(e) => Err(e),
+                    }
+                }
+                _ => result,
+            }
+        }).await
     }
 
     /// API endpoint: fetch a remote profile, wrap in response.
