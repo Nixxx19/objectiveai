@@ -5,6 +5,7 @@ use serde::{Serialize, Deserialize};
 pub struct Favorite {
     name: String,
     #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePathCommitOptional>")]
     pub path: crate::RemotePathCommitOptional,
     note: String,
 }
