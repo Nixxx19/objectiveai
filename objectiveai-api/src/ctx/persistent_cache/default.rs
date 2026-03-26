@@ -8,11 +8,11 @@ pub struct DefaultPersistentCacheClient;
 
 #[async_trait::async_trait]
 impl super::PersistentCacheClient for DefaultPersistentCacheClient {
-    async fn get(&self, _key: &str) -> Result<Option<String>, ResponseError> {
+    async fn get(&self, _namespace: &'static str, _key: &str) -> Result<Option<String>, ResponseError> {
         Ok(None)
     }
 
-    async fn set(&self, _key: &str, _value: &str, _permanent: bool) -> Result<(), ResponseError> {
+    async fn set(&self, _namespace: &'static str, _key: &str, _value: &str, _permanent: bool) -> Result<(), ResponseError> {
         Ok(())
     }
 }

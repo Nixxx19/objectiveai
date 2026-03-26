@@ -274,7 +274,7 @@ async fn cached_get_or_fetch<K, V, F, Fut>(
         Shared<tokio::sync::oneshot::Receiver<Result<Option<V>, objectiveai::error::ResponseError>>>,
     >,
     persistent_cache: &Arc<dyn PersistentCacheClient>,
-    persistent_prefix: &str,
+    namespace: &'static str,
     key: K,
     permanent: bool,
     fetch: F,
@@ -286,18 +286,14 @@ where
     Fut: std::future::Future<Output = Result<Option<V>, objectiveai::error::ResponseError>> + Send,
 {
     let persistent_cache = persistent_cache.clone();
-    let persistent_key = format!(
-        "{}:{}",
-        persistent_prefix,
-        serde_json::to_string(&key).unwrap()
-    );
+    let persistent_key = serde_json::to_string(&key).unwrap();
     let shared = cache
         .entry(key)
         .or_insert_with(|| {
             let (tx, rx) = tokio::sync::oneshot::channel();
             tokio::spawn(async move {
                 let from_persistent = persistent_cache
-                    .get(&persistent_key)
+                    .get(namespace, &persistent_key)
                     .await
                     .ok()
                     .flatten()
@@ -315,7 +311,7 @@ where
                     let _ = tx.send(result);
                     // Write to persistent cache after unblocking the caller.
                     if let Some(json) = json_to_persist {
-                        let _ = persistent_cache.set(&persistent_key, &json, permanent).await;
+                        let _ = persistent_cache.set(namespace, &persistent_key, &json, permanent).await;
                     }
                 }
             });
