@@ -6,6 +6,7 @@ import type {
   InputTask,
   InputVectorCompletionTask,
   InputFunctionExecutionTask,
+  EnsembleLlmNodeData,
 } from "../types";
 import { NODE_SIZES as SIZES } from "../types";
 import { nodeId } from "./node-id";
@@ -237,4 +238,44 @@ function processVectorCompletionTask(
   // Add as child of parent
   const parent = nodes.get(parentId);
   if (parent) parent.children.push(id);
+
+  // Create ensemble LLM child nodes from votes
+  if (task.votes && task.votes.length > 0) {
+    for (let v = 0; v < task.votes.length; v++) {
+      const vote = task.votes[v];
+      const llmId = nodeId("llm", [...path, v]);
+      const modelName = modelNames?.[vote.model]
+        ? modelNames[vote.model]
+        : vote.model;
+
+      const llmNode: TreeNode = {
+        id: llmId,
+        kind: "ensemble-llm",
+        label: modelName.includes("/")
+          ? modelName.split("/").pop() || modelName
+          : modelName.length > 12
+            ? modelName.slice(0, 8)
+            : modelName,
+        parentId: id,
+        children: [],
+        x: 0,
+        y: 0,
+        width: SIZES["ensemble-llm"].width,
+        height: SIZES["ensemble-llm"].height,
+        state: "complete",
+        data: {
+          kind: "ensemble-llm",
+          model: modelName,
+          ensembleLlmId: vote.model,
+          weight: vote.weight,
+          fromCache: vote.from_cache ?? false,
+          fromRng: vote.from_rng ?? false,
+          voteDistribution: vote.vote.length > 0 ? vote.vote : null,
+        } satisfies EnsembleLlmNodeData,
+      };
+
+      nodes.set(llmId, llmNode);
+      node.children.push(llmId);
+    }
+  }
 }

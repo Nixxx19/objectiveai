@@ -69,7 +69,7 @@ export function FunctionTree({
     height: typeof height === "number" ? `${height}px` : height,
     overflow: "hidden",
     ...(!borderless && {
-      borderRadius: 8,
+      borderRadius: 4,
       border: "1px solid var(--ft-border, #D1D1D9)",
     }),
     ...(!borderless && {

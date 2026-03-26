@@ -1,5 +1,5 @@
 import React from "react";
-import type { TreeNode, FunctionNodeData, VectorCompletionNodeData } from "../types";
+import type { TreeNode, FunctionNodeData, VectorCompletionNodeData, EnsembleLlmNodeData } from "../types";
 import { scoreColor } from "../types";
 
 interface DetailPanelProps {
@@ -37,6 +37,9 @@ export function DetailPanel({ node, modelNames, onClose }: DetailPanelProps): Re
       )}
       {node.data.kind === "vector-completion" && (
         <VectorCompletionDetails data={node.data} modelNames={modelNames} />
+      )}
+      {node.data.kind === "ensemble-llm" && (
+        <EnsembleLlmDetails data={node.data} />
       )}
     </div>
   );
@@ -163,6 +166,52 @@ function VectorCompletionDetails({
   );
 }
 
+function EnsembleLlmDetails({ data }: { data: EnsembleLlmNodeData }): React.ReactElement {
+  return (
+    <div className="ft-detail-body">
+      <DetailRow label="Model" value={data.model} />
+      <DetailRow label="ID" value={data.ensembleLlmId} />
+      <DetailRow label="Weight" value={data.weight.toFixed(3)} />
+      {data.outputMode && (
+        <DetailRow label="Output Mode" value={data.outputMode} />
+      )}
+      {data.topLogprobs != null && (
+        <DetailRow label="Top Logprobs" value={String(data.topLogprobs)} />
+      )}
+      {data.fromCache && (
+        <DetailRow label="Source" value="Cache" />
+      )}
+      {data.fromRng && (
+        <DetailRow label="Source" value="RNG" />
+      )}
+      {!data.fromCache && !data.fromRng && (
+        <DetailRow label="Source" value="Fresh inference" />
+      )}
+      {data.voteDistribution && data.voteDistribution.length > 0 && (
+        <div className="ft-detail-scores">
+          <span className="ft-detail-label">Vote Distribution</span>
+          <div className="ft-detail-score-bars">
+            {data.voteDistribution.map((v, i) => (
+              <div key={i} className="ft-detail-score-bar">
+                <div
+                  className="ft-detail-score-fill"
+                  style={{
+                    width: `${v * 100}%`,
+                    background: scoreColor(v),
+                  }}
+                />
+                <span className="ft-detail-score-label">
+                  {(v * 100).toFixed(1)}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // -- Helpers ----------------------------------------------------------------
 
 function DetailRow({
@@ -188,6 +237,7 @@ function kindLabel(kind: string): string {
   switch (kind) {
     case "function": return "Function";
     case "vector-completion": return "Vector Completion";
+    case "ensemble-llm": return "Ensemble LLM";
     default: return kind;
   }
 }

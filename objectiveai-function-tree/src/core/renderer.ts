@@ -1,4 +1,4 @@
-import type { TreeNode, FunctionNodeData, VectorCompletionNodeData } from "../types";
+import type { TreeNode, FunctionNodeData, VectorCompletionNodeData, EnsembleLlmNodeData } from "../types";
 import { scoreColor, SCORE_COLORS } from "../types";
 import type { Viewport } from "./viewport";
 import type { LodLevel, LodParams } from "./lod";
@@ -24,19 +24,21 @@ export interface RenderTheme {
   fontBold: string;
 }
 
+const MONO_FONT = '"JetBrains Mono", "Fira Code", "SF Mono", "Cascadia Code", "Consolas", monospace';
+
 const LIGHT_THEME: RenderTheme = {
   bg: "#EDEDF2",
   text: "#1B1B1B",
   textSecondary: "#6B6B7B",
   accent: "#6B5CFF",
-  nodeBg: "#FFFFFF",
+  nodeBg: "#F8F8FA",
   nodeBorder: "#D1D1D9",
   nodeSelectedBorder: "#6B5CFF",
   edgeColor: "#B0B0BE",
-  edgeWidth: 1.5,
-  font: '13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-  fontSmall: '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-  fontBold: 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  edgeWidth: 1,
+  font: `13px ${MONO_FONT}`,
+  fontSmall: `11px ${MONO_FONT}`,
+  fontBold: `bold 13px ${MONO_FONT}`,
 };
 
 const DARK_THEME: RenderTheme = {
@@ -44,14 +46,14 @@ const DARK_THEME: RenderTheme = {
   text: "#EDEDF2",
   textSecondary: "#9B9BAB",
   accent: "#6B5CFF",
-  nodeBg: "#2A2A2E",
+  nodeBg: "#232326",
   nodeBorder: "#3A3A42",
   nodeSelectedBorder: "#6B5CFF",
   edgeColor: "#4A4A56",
-  edgeWidth: 1.5,
-  font: '13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-  fontSmall: '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-  fontBold: 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  edgeWidth: 1,
+  font: `13px ${MONO_FONT}`,
+  fontSmall: `11px ${MONO_FONT}`,
+  fontBold: `bold 13px ${MONO_FONT}`,
 };
 
 export function resolveTheme(mode: "light" | "dark" | "auto"): RenderTheme {
@@ -131,7 +133,7 @@ export class TreeRenderer {
     nodes: Map<string, TreeNode>,
     viewport: Viewport,
     theme: RenderTheme,
-    params: LodParams,
+    _params: LodParams,
     animation: AnimationController | null,
     now: number,
     canvasWidth: number,
@@ -140,6 +142,8 @@ export class TreeRenderer {
     const ctx = this.ctx;
     ctx.strokeStyle = theme.edgeColor;
     ctx.lineWidth = theme.edgeWidth;
+    ctx.lineCap = "square";
+    ctx.lineJoin = "miter";
 
     ctx.beginPath();
 
@@ -159,18 +163,16 @@ export class TreeRenderer {
         const cy = childState?.y ?? child.y;
 
         // Viewport culling: skip if both endpoints are off-screen
-        // (rough check using the parent and child positions)
         if (!this.edgeVisible(px, py, cx, cy, viewport, canvasWidth, canvasHeight)) {
           continue;
         }
 
+        // Elbow connector: vertical down → horizontal jog → vertical down
+        const midY = py + (cy - py) / 2;
         ctx.moveTo(px, py);
-        if (params.curvedEdges) {
-          const midY = py + (cy - py) / 2;
-          ctx.bezierCurveTo(px, midY, cx, midY, cx, cy);
-        } else {
-          ctx.lineTo(cx, cy);
-        }
+        ctx.lineTo(px, midY);
+        ctx.lineTo(cx, midY);
+        ctx.lineTo(cx, cy);
       }
     }
 
@@ -297,6 +299,9 @@ export class TreeRenderer {
         case "vector-completion":
           this.drawVectorCompletionNode(node, x, y, theme, params);
           break;
+        case "ensemble-llm":
+          this.drawEnsembleLlmNode(node, x, y, theme, params);
+          break;
       }
 
       // State indicator (top-right corner)
@@ -319,10 +324,6 @@ export class TreeRenderer {
     const data = node.data as FunctionNodeData;
     const padding = 10;
 
-    // Accent left stripe
-    ctx.fillStyle = theme.accent;
-    ctx.fillRect(x, y, 4, node.height);
-
     // Label
     if (params.showLabels) {
       ctx.font = theme.fontBold;
@@ -330,7 +331,7 @@ export class TreeRenderer {
       const label = params.maxLabelLength > 0
         ? truncate(node.label, params.maxLabelLength)
         : node.label;
-      ctx.fillText(label, x + padding + 4, y + 22, node.width - padding * 2);
+      ctx.fillText(label, x + padding, y + 22, node.width - padding * 2);
     }
 
     // Root node with output: prominent score display
@@ -340,25 +341,25 @@ export class TreeRenderer {
         const color = scoreColor(data.output);
 
         // Large score text
-        ctx.font = `bold 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.font = `bold 22px ${MONO_FONT}`;
         ctx.fillStyle = color;
-        ctx.fillText(`${pct.toFixed(1)}%`, x + padding + 4, y + 52, node.width - padding * 2);
+        ctx.fillText(`${pct.toFixed(1)}%`, x + padding, y + 52, node.width - padding * 2);
 
         // Score bar
         const barY = y + 62;
-        const barWidth = node.width - padding * 2 - 4;
+        const barWidth = node.width - padding * 2;
         const barHeight = 5;
         ctx.fillStyle = theme.nodeBorder;
-        this.drawRoundedRectFill(x + padding + 4, barY, barWidth, barHeight, 2.5);
+        this.drawRoundedRectFill(x + padding, barY, barWidth, barHeight, 2.5);
         ctx.fillStyle = color;
-        this.drawRoundedRectFill(x + padding + 4, barY, barWidth * data.output, barHeight, 2.5);
+        this.drawRoundedRectFill(x + padding, barY, barWidth * data.output, barHeight, 2.5);
 
         // Task count below bar
         if (params.showLabels) {
           ctx.font = theme.fontSmall;
           ctx.fillStyle = theme.textSecondary;
           const typeLabel = data.functionType ? `${data.functionType} · ` : "";
-          ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding + 4, y + 82, node.width - padding * 2);
+          ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding, y + 82, node.width - padding * 2);
         }
       } else {
         // Vector output — show top scores
@@ -367,20 +368,20 @@ export class TreeRenderer {
         const topScore = scores[maxIdx];
         const color = scoreColor(topScore);
 
-        ctx.font = `bold 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.font = `bold 18px ${MONO_FONT}`;
         ctx.fillStyle = color;
-        ctx.fillText(`#${maxIdx + 1} · ${(topScore * 100).toFixed(1)}%`, x + padding + 4, y + 48, node.width - padding * 2);
+        ctx.fillText(`#${maxIdx + 1} · ${(topScore * 100).toFixed(1)}%`, x + padding, y + 48, node.width - padding * 2);
 
         // Show up to 3 scores as mini bars
         const sorted = scores.map((s, i) => ({ s, i })).sort((a, b) => b.s - a.s).slice(0, 3);
-        const barWidth = node.width - padding * 2 - 4;
+        const barWidth = node.width - padding * 2;
         sorted.forEach((item, rank) => {
           const barY = y + 56 + rank * 12;
           const barHeight = 4;
           ctx.fillStyle = theme.nodeBorder;
-          this.drawRoundedRectFill(x + padding + 4, barY, barWidth, barHeight, 2);
+          this.drawRoundedRectFill(x + padding, barY, barWidth, barHeight, 2);
           ctx.fillStyle = scoreColor(item.s);
-          this.drawRoundedRectFill(x + padding + 4, barY, barWidth * item.s, barHeight, 2);
+          this.drawRoundedRectFill(x + padding, barY, barWidth * item.s, barHeight, 2);
         });
       }
     } else if (data.output !== null && params.showScoreBars) {
@@ -393,33 +394,33 @@ export class TreeRenderer {
       ctx.fillStyle = typeof data.output === "number"
         ? scoreColor(data.output)
         : theme.textSecondary;
-      ctx.fillText(outputStr, x + padding + 4, y + 42, node.width - padding * 2);
+      ctx.fillText(outputStr, x + padding, y + 42, node.width - padding * 2);
 
       // Task count + function type
       if (params.showLabels) {
         ctx.font = theme.fontSmall;
         ctx.fillStyle = theme.textSecondary;
         const typeLabel = data.functionType ? `${data.functionType} · ` : "";
-        ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding + 4, y + 60, node.width - padding * 2);
+        ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding, y + 60, node.width - padding * 2);
       }
     } else if (data.ownerRepo && params.showLabels) {
       ctx.font = theme.fontSmall;
       ctx.fillStyle = theme.textSecondary;
-      ctx.fillText(data.ownerRepo, x + padding + 4, y + 42, node.width - padding * 2);
+      ctx.fillText(data.ownerRepo, x + padding, y + 42, node.width - padding * 2);
 
       // Task count + function type
       if (params.showLabels) {
         ctx.font = theme.fontSmall;
         ctx.fillStyle = theme.textSecondary;
         const typeLabel = data.functionType ? `${data.functionType} · ` : "";
-        ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding + 4, y + 60, node.width - padding * 2);
+        ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding, y + 60, node.width - padding * 2);
       }
     } else if (params.showLabels) {
       // No output, no ownerRepo: show task count
       ctx.font = theme.fontSmall;
       ctx.fillStyle = theme.textSecondary;
       const typeLabel = data.functionType ? `${data.functionType} · ` : "";
-      ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding + 4, y + 42, node.width - padding * 2);
+      ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding, y + 42, node.width - padding * 2);
     }
   }
 
@@ -448,7 +449,7 @@ export class TreeRenderer {
 
     // Prompt preview (below label, small muted italic text)
     if (hasPrompt && params.showLabels) {
-      ctx.font = `italic 10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      ctx.font = `italic 10px ${MONO_FONT}`;
       ctx.fillStyle = theme.textSecondary;
       const maxW = node.width - padding * 2;
       const preview = truncate(data.promptPreview!, 50);
@@ -495,6 +496,39 @@ export class TreeRenderer {
         ctx.fillStyle = theme.textSecondary;
         ctx.fillText("No votes", x + padding, statusY, node.width - padding * 2);
       }
+    }
+  }
+
+  private drawEnsembleLlmNode(
+    node: TreeNode,
+    x: number, y: number,
+    theme: RenderTheme,
+    params: LodParams
+  ): void {
+    const ctx = this.ctx;
+    const data = node.data as EnsembleLlmNodeData;
+    const padding = 8;
+
+    // Model name (short label)
+    if (params.showLabels) {
+      ctx.font = theme.fontSmall;
+      ctx.fillStyle = theme.text;
+      const label = params.maxLabelLength > 0
+        ? truncate(node.label, params.maxLabelLength)
+        : node.label;
+      ctx.fillText(label, x + padding, y + 15, node.width - padding * 2);
+    }
+
+    // Weight + source badge line
+    if (params.showLabels) {
+      ctx.font = theme.fontSmall;
+      const weightStr = `w=${data.weight.toFixed(2)}`;
+      let badge = "";
+      if (data.fromRng) badge = " RNG";
+      else if (data.fromCache) badge = " CACHE";
+
+      ctx.fillStyle = theme.textSecondary;
+      ctx.fillText(weightStr + badge, x + padding, y + 29, node.width - padding * 2);
     }
   }
 
@@ -574,6 +608,7 @@ export class TreeRenderer {
     switch (node.kind) {
       case "function": return theme.accent;
       case "vector-completion": return SCORE_COLORS.green;
+      case "ensemble-llm": return theme.textSecondary;
     }
   }
 

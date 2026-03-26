@@ -4,7 +4,7 @@
 
 // -- Tree Node Types --------------------------------------------------------
 
-export type TreeNodeKind = "function" | "vector-completion";
+export type TreeNodeKind = "function" | "vector-completion" | "ensemble-llm";
 
 export type TreeNodeState = "pending" | "streaming" | "complete" | "error";
 
@@ -47,9 +47,31 @@ export interface VectorCompletionNodeData {
   promptMessages?: Array<{ role: string; content: string | null }> | null;
 }
 
+/** Data payload for an ensemble LLM node (individual model in a task's ensemble). */
+export interface EnsembleLlmNodeData {
+  kind: "ensemble-llm";
+  /** Readable model name (e.g., "openai/gpt-4o"). */
+  model: string;
+  /** Cryptic 22-char ensemble LLM ID. */
+  ensembleLlmId: string;
+  /** Weight of this LLM in the ensemble. */
+  weight: number;
+  /** Output mode used by this LLM. */
+  outputMode?: string | null;
+  /** Whether top_logprobs is set (enables probabilistic voting). */
+  topLogprobs?: number | null;
+  /** Whether this vote was from cache. */
+  fromCache?: boolean;
+  /** Whether this vote was from RNG. */
+  fromRng?: boolean;
+  /** This LLM's vote distribution over responses. */
+  voteDistribution?: number[] | null;
+}
+
 export type TreeNodeData =
   | FunctionNodeData
-  | VectorCompletionNodeData;
+  | VectorCompletionNodeData
+  | EnsembleLlmNodeData;
 
 /** A single node in the function execution tree. */
 export interface TreeNode {
@@ -183,6 +205,37 @@ export interface InputFunctionDefinition {
   tasks: InputTaskDefinition[];
 }
 
+// -- Profile Input Types (duck-typed) ---------------------------------------
+
+/** An LLM definition within a profile's ensemble. */
+export interface InputProfileEnsembleLlm {
+  count?: number;
+  model: string;
+  output_mode?: string;
+  top_logprobs?: number;
+  reasoning?: { enabled?: boolean };
+}
+
+/** A single task entry in a profile. */
+export interface InputProfileTask {
+  /** For leaf tasks with inline ensemble. */
+  ensemble?: { llms: InputProfileEnsembleLlm[] };
+  /** Per-LLM weights within the ensemble. */
+  profile?: number[];
+  /** For composite tasks referencing sub-function profiles. */
+  owner?: string;
+  repository?: string;
+  commit?: string;
+}
+
+/** A profile definition (from profile.json). */
+export interface InputProfile {
+  description?: string;
+  tasks: InputProfileTask[];
+  /** Per-task weights. */
+  profile: number[];
+}
+
 // -- Configuration ----------------------------------------------------------
 
 export interface FunctionTreeConfig {
@@ -226,6 +279,7 @@ export const DEFAULT_CONFIG: FunctionTreeConfig = {
 export const NODE_SIZES: Record<TreeNodeKind, { width: number; height: number }> = {
   function: { width: 200, height: 80 },
   "vector-completion": { width: 180, height: 70 },
+  "ensemble-llm": { width: 140, height: 36 },
 };
 
 // -- React Component Props --------------------------------------------------
@@ -237,6 +291,8 @@ export interface FunctionTreeProps {
   definition?: InputFunctionDefinition | null;
   /** Resolved sub-function definitions for recursive structural tree. Key: "owner/repo". */
   resolvedSubFunctions?: Map<string, InputFunctionDefinition>;
+  /** Profile data for ensemble/LLM visualization. */
+  profile?: InputProfile | null;
   /** Resolved model names: { [22-char-id]: "openai/gpt-4o" }. */
   modelNames?: Record<string, string>;
   /** Response labels per task: { [taskPath]: ["Option A", "Option B", ...] }. */

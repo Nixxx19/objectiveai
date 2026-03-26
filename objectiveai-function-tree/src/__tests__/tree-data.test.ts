@@ -104,7 +104,7 @@ describe("buildTree", () => {
     };
 
     const tree = buildTree(exec)!;
-    expect(tree.nodes.size).toBe(2); // root + vc (no LLM nodes)
+    expect(tree.nodes.size).toBe(4); // root + vc + 2 LLM nodes
 
     const root = tree.nodes.get("root")!;
     expect(root.state).toBe("complete");
@@ -114,7 +114,7 @@ describe("buildTree", () => {
     const vc = tree.nodes.get("vc-0")!;
     expect(vc.kind).toBe("vector-completion");
     expect(vc.state).toBe("complete");
-    expect(vc.children.length).toBe(0); // LLM nodes no longer tree children
+    expect(vc.children.length).toBe(2); // 2 LLM child nodes from votes
 
     // Vote data stored on the VC node for DetailPanel access
     const vcData = vc.data as VectorCompletionNodeData;
@@ -154,8 +154,8 @@ describe("buildTree", () => {
     };
 
     const tree = buildTree(exec)!;
-    // root + func-task + 2 vc (from nested) + vc (from root) = 5
-    expect(tree.nodes.size).toBe(5);
+    // root + func-task + 2 vc (1 vote each) + vc (2 votes) + 4 LLM nodes = 9
+    expect(tree.nodes.size).toBe(9);
 
     const root = tree.nodes.get("root")!;
     expect(root.children.length).toBe(2); // func-0 and vc-1

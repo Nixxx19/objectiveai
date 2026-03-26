@@ -35,12 +35,12 @@ export function getLodParams(level: LodLevel): LodParams {
   switch (level) {
     case "full":
       return {
-        curvedEdges: true,
+        curvedEdges: false,
         showLabels: true,
         showStreamingText: true,
         showScoreBars: true,
         maxLabelLength: 0,
-        cornerRadius: 8,
+        cornerRadius: 4,
         showEdges: true,
         dotSize: 0,
       };
@@ -51,7 +51,7 @@ export function getLodParams(level: LodLevel): LodParams {
         showStreamingText: false,
         showScoreBars: false,
         maxLabelLength: 12,
-        cornerRadius: 4,
+        cornerRadius: 3,
         showEdges: true,
         dotSize: 0,
       };

@@ -28,6 +28,7 @@ export type {
   TreeMode,
   FunctionNodeData,
   VectorCompletionNodeData,
+  EnsembleLlmNodeData,
   FunctionTreeConfig,
   FunctionTreeProps,
   InputFunctionExecution,
@@ -38,6 +39,9 @@ export type {
   InputFunctionExecutionTask,
   InputVote,
   InputCompletion,
+  InputProfile,
+  InputProfileTask,
+  InputProfileEnsembleLlm,
 } from "./types";
 
 export { DEFAULT_CONFIG, NODE_SIZES, SCORE_COLORS, scoreColor } from "./types";
