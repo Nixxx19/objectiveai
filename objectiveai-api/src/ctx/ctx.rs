@@ -276,6 +276,7 @@ async fn cached_get_or_fetch<K, V, F, Fut>(
     persistent_cache: &Arc<dyn PersistentCacheClient>,
     persistent_prefix: &str,
     key: K,
+    permanent: bool,
     fetch: F,
 ) -> Result<Option<V>, objectiveai::error::ResponseError>
 where
@@ -314,7 +315,7 @@ where
                     let _ = tx.send(result);
                     // Write to persistent cache after unblocking the caller.
                     if let Some(json) = json_to_persist {
-                        let _ = persistent_cache.set(&persistent_key, &json).await;
+                        let _ = persistent_cache.set(&persistent_key, &json, permanent).await;
                     }
                 }
             });
@@ -334,7 +335,7 @@ impl<CTXEXT> Context<CTXEXT> {
         F: FnOnce() -> Fut + Send + 'static,
         Fut: std::future::Future<Output = Result<Option<objectiveai::agent::RemoteAgentBaseWithFallbacks>, objectiveai::error::ResponseError>> + Send,
     {
-        cached_get_or_fetch(&self.agent_cache, &self.persistent_cache, "agent", key, fetch).await
+        cached_get_or_fetch(&self.agent_cache, &self.persistent_cache, "agent", key, true, fetch).await
     }
 
     pub async fn cached_swarm<F, Fut>(
@@ -346,7 +347,7 @@ impl<CTXEXT> Context<CTXEXT> {
         F: FnOnce() -> Fut + Send + 'static,
         Fut: std::future::Future<Output = Result<Option<objectiveai::swarm::RemoteSwarmBase>, objectiveai::error::ResponseError>> + Send,
     {
-        cached_get_or_fetch(&self.swarm_cache, &self.persistent_cache, "swarm", key, fetch).await
+        cached_get_or_fetch(&self.swarm_cache, &self.persistent_cache, "swarm", key, true, fetch).await
     }
 
     pub async fn cached_function<F, Fut>(
@@ -358,7 +359,7 @@ impl<CTXEXT> Context<CTXEXT> {
         F: FnOnce() -> Fut + Send + 'static,
         Fut: std::future::Future<Output = Result<Option<objectiveai::functions::FullRemoteFunction>, objectiveai::error::ResponseError>> + Send,
     {
-        cached_get_or_fetch(&self.function_cache, &self.persistent_cache, "function", key, fetch).await
+        cached_get_or_fetch(&self.function_cache, &self.persistent_cache, "function", key, true, fetch).await
     }
 
     pub async fn cached_profile<F, Fut>(
@@ -370,7 +371,7 @@ impl<CTXEXT> Context<CTXEXT> {
         F: FnOnce() -> Fut + Send + 'static,
         Fut: std::future::Future<Output = Result<Option<objectiveai::functions::RemoteProfile>, objectiveai::error::ResponseError>> + Send,
     {
-        cached_get_or_fetch(&self.profile_cache, &self.persistent_cache, "profile", key, fetch).await
+        cached_get_or_fetch(&self.profile_cache, &self.persistent_cache, "profile", key, true, fetch).await
     }
 
     pub async fn cached_remote_latest<F, Fut>(
@@ -382,7 +383,7 @@ impl<CTXEXT> Context<CTXEXT> {
         F: FnOnce() -> Fut + Send + 'static,
         Fut: std::future::Future<Output = Result<Option<objectiveai::RemotePath>, objectiveai::error::ResponseError>> + Send,
     {
-        cached_get_or_fetch(&self.remote_latest_cache, &self.persistent_cache, "remote_latest", key, fetch).await
+        cached_get_or_fetch(&self.remote_latest_cache, &self.persistent_cache, "remote_latest", key, false, fetch).await
     }
 }
 

@@ -12,7 +12,7 @@ impl super::PersistentCacheClient for DefaultPersistentCacheClient {
         Ok(None)
     }
 
-    async fn set(&self, _key: &str, _value: &str) -> Result<(), ResponseError> {
+    async fn set(&self, _key: &str, _value: &str, _permanent: bool) -> Result<(), ResponseError> {
         Ok(())
     }
 }
