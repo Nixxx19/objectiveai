@@ -1,0 +1,29 @@
+{
+  "title": "config.FunctionsProfilesConfig",
+  "type": "object",
+  "properties": {
+    "favorites": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "config.Favorite"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "pairs": {
+      "anyOf": [
+        {
+          "$ref": "config.FunctionsProfilesPairsConfig"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

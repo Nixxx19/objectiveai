@@ -1,0 +1,20 @@
+{
+  "title": "config.ViewerConfig",
+  "type": "object",
+  "properties": {
+    "local": {
+      "anyOf": [
+        {
+          "$ref": "config.ViewerLocalConfig"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "mode": {
+      "$ref": "config.ViewerMode",
+      "default": "local"
+    }
+  }
+}

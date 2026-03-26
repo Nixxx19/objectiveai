@@ -1,0 +1,40 @@
+{
+  "title": "config.ApiConfig",
+  "type": "object",
+  "properties": {
+    "headers": {
+      "anyOf": [
+        {
+          "$ref": "config.ApiHeadersConfig"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "local": {
+      "anyOf": [
+        {
+          "$ref": "config.ApiLocalConfig"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "mode": {
+      "$ref": "config.ApiMode",
+      "default": "local"
+    },
+    "remote": {
+      "anyOf": [
+        {
+          "$ref": "config.ApiRemoteConfig"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

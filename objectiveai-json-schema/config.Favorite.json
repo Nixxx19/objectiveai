@@ -1,0 +1,82 @@
+{
+  "title": "config.Favorite",
+  "type": "object",
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "commit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "owner": {
+          "type": "string"
+        },
+        "remote": {
+          "type": "string",
+          "enum": [
+            "github"
+          ]
+        },
+        "repository": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "properties": {
+        "commit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "owner": {
+          "type": "string"
+        },
+        "remote": {
+          "type": "string",
+          "enum": [
+            "filesystem"
+          ]
+        },
+        "repository": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "remote": {
+          "type": "string",
+          "enum": [
+            "mock"
+          ]
+        }
+      }
+    }
+  ],
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "note": {
+      "type": "string"
+    }
+  }
+}
