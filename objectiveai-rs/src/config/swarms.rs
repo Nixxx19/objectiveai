@@ -1,6 +1,7 @@
 use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "config.SwarmsConfig")]
 pub struct SwarmsConfig {
     #[serde(skip_serializing_if = "crate::util::vec_is_none_or_empty")]
     pub favorites: Option<Vec<super::Favorite>>,

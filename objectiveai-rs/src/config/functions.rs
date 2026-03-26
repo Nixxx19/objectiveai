@@ -1,6 +1,7 @@
 use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "config.FunctionsConfig")]
 pub struct FunctionsConfig {
     #[serde(skip_serializing_if = "FunctionsInventionsConfig::is_none")]
     pub inventions: Option<FunctionsInventionsConfig>,
@@ -54,7 +55,8 @@ impl FunctionsConfig {
     }
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "config.FunctionsInventionsConfig")]
 pub struct FunctionsInventionsConfig {
     pub remote: Option<crate::Remote>,
 }
@@ -85,7 +87,8 @@ impl FunctionsInventionsConfig {
     }
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "config.FunctionsProfilesConfig")]
 pub struct FunctionsProfilesConfig {
     #[serde(skip_serializing_if = "FunctionsProfilesPairsConfig::is_none")]
     pub pairs: Option<FunctionsProfilesPairsConfig>,
@@ -134,7 +137,8 @@ impl FunctionsProfilesConfig {
     }
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "config.FunctionsProfilesPairsConfig")]
 pub struct FunctionsProfilesPairsConfig {
     #[serde(skip_serializing_if = "crate::util::vec_is_none_or_empty")]
     pub favorites: Option<Vec<super::PairFavorite>>,

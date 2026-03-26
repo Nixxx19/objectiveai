@@ -1,6 +1,7 @@
 use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "config.Favorite")]
 pub struct Favorite {
     name: String,
     #[serde(flatten)]
@@ -44,7 +45,8 @@ impl Favorite {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "config.PairFavorite")]
 pub struct PairFavorite {
     name: String,
     pub function: crate::RemotePathCommitOptional,

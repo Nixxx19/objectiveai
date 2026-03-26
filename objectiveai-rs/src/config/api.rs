@@ -1,6 +1,7 @@
 use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "config.ApiConfig")]
 pub struct ApiConfig {
     #[serde(default)]
     pub mode: ApiMode,
@@ -46,7 +47,8 @@ impl ApiConfig {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "config.ApiMode")]
 #[serde(rename_all = "snake_case")]
 pub enum ApiMode {
     Remote,
@@ -54,7 +56,8 @@ pub enum ApiMode {
     Local,
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "config.ApiRemoteConfig")]
 pub struct ApiRemoteConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub objectiveai_address: Option<String>,
@@ -82,7 +85,8 @@ impl ApiRemoteConfig {
     }
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "config.ApiLocalConfig")]
 pub struct ApiLocalConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub claude_agent_sdk: Option<bool>,
@@ -110,7 +114,8 @@ impl ApiLocalConfig {
     }
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "config.ApiHeadersConfig")]
 pub struct ApiHeadersConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub x_objectiveai_authorization: Option<String>,
