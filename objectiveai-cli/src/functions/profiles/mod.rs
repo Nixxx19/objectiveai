@@ -74,7 +74,7 @@ impl Commands {
             }
             Commands::Config { command } => command.handle(),
             Commands::Favorites { command } => command.handle(),
-            Commands::Pairs { command } => command.handle(),
+            Commands::Pairs { command } => command.handle().await,
         }
     }
 }

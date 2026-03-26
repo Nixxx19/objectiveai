@@ -12,4 +12,6 @@ pub enum Error {
     ViewerSecretSignatureEnvMismatch,
     #[error("{0}")]
     Http(#[from] objectiveai::HttpError),
+    #[error("filesystem source is not supported for function-profile pairs")]
+    PairsFilesystemNotSupported,
 }
