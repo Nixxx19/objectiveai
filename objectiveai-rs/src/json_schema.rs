@@ -4,7 +4,7 @@
 /// the type's `$defs` for referenced types. The schema title matches
 /// the `#[schemars(rename = "...")]` attribute on each type.
 pub fn json_schemas() -> Vec<schemars::Schema> {
-    vec![
+    let mut schemas = vec![
         schemars::schema_for!(crate::agent::InlineAgentBase),
         schemars::schema_for!(crate::agent::RemoteAgentBase),
         schemars::schema_for!(crate::agent::AgentBase),
@@ -334,25 +334,31 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(crate::functions::expression::WithExpression<Option<Vec<crate::functions::expression::WithExpression<crate::agent::completions::message::AssistantToolCallExpression>>>>),
         schemars::schema_for!(crate::functions::expression::WithExpression<Vec<crate::functions::expression::WithExpression<crate::agent::completions::message::MessageExpression>>>),
         schemars::schema_for!(crate::functions::expression::WithExpression<Vec<crate::functions::expression::WithExpression<crate::agent::completions::message::RichContentExpression>>>),
-        schemars::schema_for!(crate::config::AgentsConfig),
-        schemars::schema_for!(crate::config::ApiConfig),
-        schemars::schema_for!(crate::config::ApiMode),
-        schemars::schema_for!(crate::config::ApiRemoteConfig),
-        schemars::schema_for!(crate::config::ApiLocalConfig),
-        schemars::schema_for!(crate::config::ApiHeadersConfig),
-        schemars::schema_for!(crate::config::Config),
-        schemars::schema_for!(crate::config::Favorite),
-        schemars::schema_for!(crate::config::PairFavorite),
-        schemars::schema_for!(crate::config::FunctionsConfig),
-        schemars::schema_for!(crate::config::FunctionsInventionsConfig),
-        schemars::schema_for!(crate::config::FunctionsProfilesConfig),
-        schemars::schema_for!(crate::config::FunctionsProfilesPairsConfig),
-        schemars::schema_for!(crate::config::SwarmsConfig),
-        schemars::schema_for!(crate::config::ViewerSecretSignaturePair),
-        schemars::schema_for!(crate::config::ViewerMode),
-        schemars::schema_for!(crate::config::ViewerConfig),
-        schemars::schema_for!(crate::config::ViewerLocalConfig),
-    ]
+    ];
+    #[cfg(feature = "config")]
+    {
+        schemas.extend([
+            schemars::schema_for!(crate::config::AgentsConfig),
+            schemars::schema_for!(crate::config::ApiConfig),
+            schemars::schema_for!(crate::config::ApiMode),
+            schemars::schema_for!(crate::config::ApiRemoteConfig),
+            schemars::schema_for!(crate::config::ApiLocalConfig),
+            schemars::schema_for!(crate::config::ApiHeadersConfig),
+            schemars::schema_for!(crate::config::Config),
+            schemars::schema_for!(crate::config::Favorite),
+            schemars::schema_for!(crate::config::PairFavorite),
+            schemars::schema_for!(crate::config::FunctionsConfig),
+            schemars::schema_for!(crate::config::FunctionsInventionsConfig),
+            schemars::schema_for!(crate::config::FunctionsProfilesConfig),
+            schemars::schema_for!(crate::config::FunctionsProfilesPairsConfig),
+            schemars::schema_for!(crate::config::SwarmsConfig),
+            schemars::schema_for!(crate::config::ViewerSecretSignaturePair),
+            schemars::schema_for!(crate::config::ViewerMode),
+            schemars::schema_for!(crate::config::ViewerConfig),
+            schemars::schema_for!(crate::config::ViewerLocalConfig),
+        ]);
+    }
+    schemas
 }
 
 /// Schema helper: produces a `$ref` to `T` for use with `#[schemars(schema_with)]`
