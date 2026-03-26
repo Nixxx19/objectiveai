@@ -5,10 +5,10 @@ use clap::Subcommand;
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Get an agent by remote path
+    /// Get an agent by remote path or favorite name
     Get {
         #[command(flatten)]
-        args: crate::remote::RemotePathCommitOptional,
+        args: crate::get::GetArgs,
     },
     /// List agents
     List {
@@ -47,7 +47,7 @@ impl Commands {
     pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
         match self {
             Commands::Get { args } => {
-                let path: objectiveai::RemotePathCommitOptional = args.into();
+                let path = args.resolve(get_favorites)?;
                 crate::api::run(|http_client| async move {
                     let response = objectiveai::agent::get_agent(&http_client, path).await?;
                     Ok(serde_json::to_string_pretty(&response).unwrap())

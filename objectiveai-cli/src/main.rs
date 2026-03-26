@@ -1,6 +1,7 @@
 mod config;
 mod error;
 mod remote;
+mod get;
 mod list;
 mod favorite;
 mod api;

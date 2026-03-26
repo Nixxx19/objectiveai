@@ -20,21 +20,27 @@ impl Remote {
 pub struct RemotePathCommitOptional {
     /// Remote source
     #[arg(long, value_enum)]
-    pub remote: Remote,
+    pub remote: Option<Remote>,
     /// Owner
     #[arg(long)]
-    pub owner: String,
+    pub owner: Option<String>,
     /// Repository
     #[arg(long)]
-    pub repository: String,
+    pub repository: Option<String>,
     /// Commit (optional)
     #[arg(long)]
     pub commit: Option<String>,
 }
 
-impl From<RemotePathCommitOptional> for objectiveai::RemotePathCommitOptional {
-    fn from(path: RemotePathCommitOptional) -> Self {
-        path.remote.into_path(path.owner, path.repository, path.commit)
+impl RemotePathCommitOptional {
+    /// Converts to SDK type. Returns None if remote/owner/repository are not set.
+    pub fn into_path(self) -> Option<objectiveai::RemotePathCommitOptional> {
+        match (self.remote, self.owner, self.repository) {
+            (Some(remote), Some(owner), Some(repository)) => {
+                Some(remote.into_path(owner, repository, self.commit))
+            }
+            _ => None,
+        }
     }
 }
 
@@ -43,34 +49,41 @@ impl From<RemotePathCommitOptional> for objectiveai::RemotePathCommitOptional {
 pub struct PairRemotePathCommitOptional {
     /// Function remote source
     #[arg(long, value_enum)]
-    pub function_remote: Remote,
+    pub function_remote: Option<Remote>,
     /// Function owner
     #[arg(long)]
-    pub function_owner: String,
+    pub function_owner: Option<String>,
     /// Function repository
     #[arg(long)]
-    pub function_repository: String,
+    pub function_repository: Option<String>,
     /// Function commit (optional)
     #[arg(long)]
     pub function_commit: Option<String>,
     /// Profile remote source
     #[arg(long, value_enum)]
-    pub profile_remote: Remote,
+    pub profile_remote: Option<Remote>,
     /// Profile owner
     #[arg(long)]
-    pub profile_owner: String,
+    pub profile_owner: Option<String>,
     /// Profile repository
     #[arg(long)]
-    pub profile_repository: String,
+    pub profile_repository: Option<String>,
     /// Profile commit (optional)
     #[arg(long)]
     pub profile_commit: Option<String>,
 }
 
 impl PairRemotePathCommitOptional {
-    pub fn into_paths(self) -> (objectiveai::RemotePathCommitOptional, objectiveai::RemotePathCommitOptional) {
-        let function = self.function_remote.into_path(self.function_owner, self.function_repository, self.function_commit);
-        let profile = self.profile_remote.into_path(self.profile_owner, self.profile_repository, self.profile_commit);
-        (function, profile)
+    /// Converts to SDK types. Returns None if required fields are not set.
+    pub fn into_paths(self) -> Option<(objectiveai::RemotePathCommitOptional, objectiveai::RemotePathCommitOptional)> {
+        match (self.function_remote, self.function_owner, self.function_repository,
+               self.profile_remote, self.profile_owner, self.profile_repository) {
+            (Some(fr), Some(fo), Some(fre), Some(pr), Some(po), Some(pre)) => {
+                let function = fr.into_path(fo, fre, self.function_commit);
+                let profile = pr.into_path(po, pre, self.profile_commit);
+                Some((function, profile))
+            }
+            _ => None,
+        }
     }
 }

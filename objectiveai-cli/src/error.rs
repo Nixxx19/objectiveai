@@ -14,4 +14,8 @@ pub enum Error {
     Http(#[from] objectiveai::HttpError),
     #[error("filesystem source is not supported for function-profile pairs")]
     PairsFilesystemNotSupported,
+    #[error("favorite not found: {0}")]
+    FavoriteNotFound(String),
+    #[error("{0}")]
+    MissingArgs(&'static str),
 }

@@ -12,10 +12,10 @@ pub struct GetFunctionProfilePair {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Get a function-profile pair by remote paths
+    /// Get a function-profile pair by remote paths or favorite name
     Get {
         #[command(flatten)]
-        args: crate::remote::PairRemotePathCommitOptional,
+        args: crate::get::GetPairArgs,
     },
     /// List function-profile pairs
     List {
@@ -55,7 +55,7 @@ impl Commands {
     pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
         match self {
             Commands::Get { args } => {
-                let (function_path, profile_path) = args.into_paths();
+                let (function_path, profile_path) = args.resolve(get_favorites)?;
                 crate::api::run(|http_client| async move {
                     let (function, profile) = tokio::join!(
                         objectiveai::functions::get_function(&http_client, function_path),
