@@ -336,3 +336,16 @@ print(json.dumps({"foo": "bar"}))
 "#).unwrap();
     assert_eq!(result, expected());
 }
+
+/// Prints random garbage before printing the correct JSON on the last line.
+/// The captured stdout is the concatenation of both prints, which is not
+/// valid JSON for Foo. This should fail to deserialize.
+#[test]
+fn garbage_stdout_before_correct_print() {
+    let err = crate::python::exec_code::<Foo>(r#"
+import json
+print("here is some random garbage!!!")
+print(json.dumps({"foo": "bar"}))
+"#).unwrap_err();
+    assert!(matches!(err, crate::error::Error::PythonDeserialize(_)));
+}
