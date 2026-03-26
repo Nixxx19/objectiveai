@@ -1,9 +1,8 @@
-//! Python execution module. Tries the system Python interpreter first,
-//! falls back to the built-in RustPython interpreter when the `rustpython`
-//! feature is enabled.
+//! Python execution module. Tries the system Python interpreter first
+//! (when the `systempython` feature is enabled), then falls back to the
+//! built-in RustPython interpreter (when the `rustpython` feature is enabled).
 
 use std::path::Path;
-use std::process::Command;
 
 /// Result of executing Python code.
 pub struct PythonOutput {
@@ -14,21 +13,15 @@ pub struct PythonOutput {
 
 /// Execute a Python script file.
 pub fn exec_file(path: &Path, args: &[&str]) -> Result<PythonOutput, crate::error::Error> {
-    if let Some(output) = try_system_python_file(path, args) {
-        return Ok(output);
-    }
-    #[cfg(feature = "rustpython")]
-    {
-        return exec_file_rustpython(path);
-    }
-    #[cfg(not(feature = "rustpython"))]
-    {
-        Err(crate::error::Error::PythonNotFound)
-    }
+    let _ = args;
+    let code = std::fs::read_to_string(path)
+        .map_err(|e| crate::error::Error::PythonFileRead(path.to_path_buf(), e))?;
+    exec_code(&code)
 }
 
 /// Execute an inline Python code string.
 pub fn exec_code(code: &str) -> Result<PythonOutput, crate::error::Error> {
+    #[cfg(feature = "systempython")]
     if let Some(output) = try_system_python_code(code) {
         return Ok(output);
     }
@@ -38,27 +31,14 @@ pub fn exec_code(code: &str) -> Result<PythonOutput, crate::error::Error> {
     }
     #[cfg(not(feature = "rustpython"))]
     {
+        let _ = code;
         Err(crate::error::Error::PythonNotFound)
     }
 }
 
-/// Try to find and run a Python file using the system interpreter.
-fn try_system_python_file(path: &Path, args: &[&str]) -> Option<PythonOutput> {
-    let python = find_system_python()?;
-    let output = Command::new(&python)
-        .arg(path)
-        .args(args)
-        .output()
-        .ok()?;
-    Some(PythonOutput {
-        stdout: String::from_utf8_lossy(&output.stdout).into_owned(),
-        stderr: String::from_utf8_lossy(&output.stderr).into_owned(),
-        success: output.status.success(),
-    })
-}
-
-/// Try to run inline Python code using the system interpreter.
+#[cfg(feature = "systempython")]
 fn try_system_python_code(code: &str) -> Option<PythonOutput> {
+    use std::process::Command;
     let python = find_system_python()?;
     let output = Command::new(&python)
         .arg("-c")
@@ -72,8 +52,9 @@ fn try_system_python_code(code: &str) -> Option<PythonOutput> {
     })
 }
 
-/// Find a system Python interpreter (python3, python, py).
+#[cfg(feature = "systempython")]
 fn find_system_python() -> Option<String> {
+    use std::process::Command;
     for name in &["python3", "python", "py"] {
         if Command::new(name).arg("--version").output().is_ok() {
             return Some(name.to_string());
@@ -82,19 +63,8 @@ fn find_system_python() -> Option<String> {
     None
 }
 
-/// Execute a Python file using the built-in RustPython interpreter.
-#[cfg(feature = "rustpython")]
-fn exec_file_rustpython(path: &Path) -> Result<PythonOutput, crate::error::Error> {
-    let code = std::fs::read_to_string(path)
-        .map_err(|e| crate::error::Error::PythonFileRead(path.to_path_buf(), e))?;
-    exec_code_rustpython(&code)
-}
-
-/// Execute inline Python code using the built-in RustPython interpreter.
 #[cfg(feature = "rustpython")]
 fn exec_code_rustpython(code: &str) -> Result<PythonOutput, crate::error::Error> {
-    use rustpython::vm::Interpreter;
-
     let interp = rustpython::InterpreterConfig::new()
         .init_stdlib()
         .interpreter();

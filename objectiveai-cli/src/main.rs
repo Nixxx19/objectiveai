@@ -11,6 +11,9 @@ mod swarms;
 mod functions;
 mod viewer;
 
+#[cfg(test)]
+mod python_tests;
+
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
