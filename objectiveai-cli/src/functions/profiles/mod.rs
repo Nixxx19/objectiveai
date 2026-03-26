@@ -1,5 +1,6 @@
 pub mod config;
 pub mod favorites;
+pub mod pairs;
 
 use clap::Subcommand;
 
@@ -24,6 +25,11 @@ pub enum Commands {
     Favorites {
         #[command(subcommand)]
         command: favorites::Commands,
+    },
+    /// Function-profile pairs
+    Pairs {
+        #[command(subcommand)]
+        command: pairs::Commands,
     },
 }
 
@@ -68,6 +74,7 @@ impl Commands {
             }
             Commands::Config { command } => command.handle(),
             Commands::Favorites { command } => command.handle(),
+            Commands::Pairs { command } => command.handle(),
         }
     }
 }

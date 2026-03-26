@@ -12,3 +12,10 @@ impl Favorite {
         &self.path
     }
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PairFavorite {
+    pub function: crate::RemotePathCommitOptional,
+    pub profile: crate::RemotePathCommitOptional,
+    pub note: String,
+}

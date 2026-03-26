@@ -6,8 +6,8 @@ pub enum Commands {
     Get,
     /// Add a favorite
     Add {
-        #[command(subcommand)]
-        command: crate::favorite::AddFavorite,
+        #[command(flatten)]
+        args: crate::favorite::AddFavorite,
     },
     /// Delete a favorite by index
     Del { index: usize },
@@ -23,8 +23,8 @@ impl Commands {
         let (client, mut config) = crate::config::read()?;
         match self {
             Commands::Get => Ok(crate::Output::ConfigGet(crate::config::format_value(&config.agents().get_favorites()))),
-            Commands::Add { command } => {
-                config.agents().add_favorite(command.into());
+            Commands::Add { args } => {
+                config.agents().add_favorite(args.into());
                 crate::config::write(&client, &config)?;
                 Ok(crate::Output::ConfigSet)
             }
