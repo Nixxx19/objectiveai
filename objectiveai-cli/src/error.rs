@@ -26,4 +26,6 @@ pub enum Error {
     PythonException(String),
     #[error("python output deserialization failed: {0}")]
     PythonDeserialize(serde_path_to_error::Error<serde_json::Error>),
+    #[error("internal error: python harness output is malformed: {0}")]
+    PythonHarnessBroken(String),
 }

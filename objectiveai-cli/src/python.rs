@@ -2,36 +2,100 @@
 //! (when the `systempython` feature is enabled), then falls back to the
 //! built-in RustPython interpreter (when the `rustpython` feature is enabled).
 //!
-//! The output of the Python code is expected to be valid JSON on stdout.
-//! It is deserialized into the requested type `T`.
+//! User code is wrapped in a harness that uses `ast` to detect bare trailing
+//! expressions. The harness outputs a JSON envelope with `eval` (the expression
+//! result, or null) and `stdout` (captured print output). The Rust side tries
+//! to deserialize `eval` first, falling back to `stdout`.
 
 use std::path::Path;
 
-/// Execute a Python script file and deserialize stdout as JSON into `T`.
+/// The JSON envelope produced by the Python harness.
+#[derive(serde::Deserialize)]
+struct HarnessOutput {
+    eval: serde_json::Value,
+    stdout: String,
+}
+
+/// Execute a Python script file and deserialize the output as JSON into `T`.
 pub fn exec_file<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T, crate::error::Error> {
     let code = std::fs::read_to_string(path)
         .map_err(|e| crate::error::Error::PythonFileRead(path.to_path_buf(), e))?;
     exec_code(&code)
 }
 
-/// Execute inline Python code and deserialize stdout as JSON into `T`.
+/// Execute inline Python code and deserialize the output as JSON into `T`.
+///
+/// The harness wraps user code and produces `{"eval": ..., "stdout": "..."}`.
+/// If `eval` is non-null, we try to deserialize it into `T`.
+/// Otherwise, we deserialize the raw `stdout` string into `T`.
 pub fn exec_code<T: serde::de::DeserializeOwned>(code: &str) -> Result<T, crate::error::Error> {
-    let stdout = exec_code_raw(code)?;
-    let mut de = serde_json::Deserializer::from_str(&stdout);
-    serde_path_to_error::deserialize(&mut de)
-        .map_err(crate::error::Error::PythonDeserialize)
+    let raw = exec_code_raw(code)?;
+    let envelope: HarnessOutput = serde_json::from_str(&raw)
+        .map_err(|e| crate::error::Error::PythonHarnessBroken(e.to_string()))?;
+
+    // Try eval first (non-null means the last statement was a bare expression)
+    let eval_err = if !envelope.eval.is_null() {
+        let eval_str = envelope.eval.to_string();
+        let mut de = serde_json::Deserializer::from_str(&eval_str);
+        match serde_path_to_error::deserialize(&mut de) {
+            Ok(result) => return Ok(result),
+            Err(e) => Some(e),
+        }
+    } else {
+        None
+    };
+
+    // Fall back to stdout (from print() calls)
+    let mut de = serde_json::Deserializer::from_str(&envelope.stdout);
+    match serde_path_to_error::deserialize(&mut de) {
+        Ok(result) => Ok(result),
+        Err(stdout_err) => Err(crate::error::Error::PythonDeserialize(
+            eval_err.unwrap_or(stdout_err)
+        )),
+    }
 }
 
-/// Execute inline Python code and return raw stdout.
+/// Wraps user code in a harness that outputs a JSON envelope with eval and stdout.
+fn wrap_code(code: &str) -> String {
+    use base64::Engine;
+    let encoded = base64::engine::general_purpose::STANDARD.encode(code);
+    format!(
+        r#"
+import ast as __oai_ast, json as __oai_json, sys as __oai_sys, io as __oai_io, base64 as __oai_b64
+__oai_code = __oai_b64.b64decode("{}").decode()
+__oai_tree = __oai_ast.parse(__oai_code)
+__oai_capture = __oai_io.StringIO()
+__oai_old_stdout = __oai_sys.stdout
+__oai_old_dunder_stdout = __oai_sys.__stdout__
+__oai_sys.stdout = __oai_capture
+__oai_sys.__stdout__ = __oai_capture
+__oai_eval = None
+if __oai_tree.body and isinstance(__oai_tree.body[-1], __oai_ast.Expr):
+    __oai_last = __oai_tree.body.pop()
+    exec(compile(__oai_tree, "<inline>", "exec"))
+    __oai_eval = eval(compile(__oai_ast.Expression(__oai_last.value), "<inline>", "eval"))
+else:
+    exec(compile(__oai_tree, "<inline>", "exec"))
+__oai_stdout = __oai_capture.getvalue()
+__oai_sys.stdout = __oai_old_stdout
+__oai_sys.__stdout__ = __oai_old_dunder_stdout
+print(__oai_json.dumps({{"eval": __oai_eval, "stdout": __oai_stdout}}))
+"#,
+        encoded
+    )
+}
+
+/// Execute inline Python code and return raw stdout from the harness.
 fn exec_code_raw(code: &str) -> Result<String, crate::error::Error> {
+    let wrapped = wrap_code(code);
     #[cfg(feature = "systempython")]
-    if let Some(result) = try_system_python_code(code) {
+    if let Some(result) = try_system_python_code(&wrapped) {
         match result {
             Ok(stdout) => return Ok(stdout),
             Err(system_err) => {
                 #[cfg(feature = "rustpython")]
                 {
-                    return exec_code_rustpython(code).or(Err(system_err));
+                    return exec_code_rustpython(&wrapped).or(Err(system_err));
                 }
                 #[cfg(not(feature = "rustpython"))]
                 {
@@ -42,7 +106,7 @@ fn exec_code_raw(code: &str) -> Result<String, crate::error::Error> {
     }
     #[cfg(feature = "rustpython")]
     {
-        return exec_code_rustpython(code);
+        return exec_code_rustpython(&wrapped);
     }
     #[cfg(not(feature = "rustpython"))]
     {
