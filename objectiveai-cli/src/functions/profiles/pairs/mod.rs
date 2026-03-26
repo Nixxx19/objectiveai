@@ -2,9 +2,21 @@ pub mod config;
 pub mod favorites;
 
 use clap::Subcommand;
+use serde::{Serialize, Deserialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GetFunctionProfilePair {
+    pub function: objectiveai::functions::response::GetFunctionResponse,
+    pub profile: objectiveai::functions::profiles::response::GetProfileResponse,
+}
 
 #[derive(Subcommand)]
 pub enum Commands {
+    /// Get a function-profile pair by remote paths
+    Get {
+        #[command(flatten)]
+        args: crate::remote::PairRemotePathCommitOptional,
+    },
     /// List function-profile pairs
     List {
         #[command(subcommand)]
@@ -42,6 +54,20 @@ async fn list_objectiveai(
 impl Commands {
     pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
         match self {
+            Commands::Get { args } => {
+                let (function_path, profile_path) = args.into_paths();
+                crate::api::run(|http_client| async move {
+                    let (function, profile) = tokio::join!(
+                        objectiveai::functions::get_function(&http_client, function_path),
+                        objectiveai::functions::profiles::get_profile(&http_client, profile_path),
+                    );
+                    let pair = GetFunctionProfilePair {
+                        function: function?,
+                        profile: profile?,
+                    };
+                    Ok(serde_json::to_string_pretty(&pair).unwrap())
+                }, false).await
+            }
             Commands::List { source } => {
                 match source {
                     crate::list::Source::Favorites => crate::list::pair_favorites(get_favorites),

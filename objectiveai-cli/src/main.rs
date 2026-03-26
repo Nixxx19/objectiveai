@@ -1,6 +1,6 @@
 mod config;
 mod error;
-mod path;
+mod remote;
 mod list;
 mod favorite;
 mod api;

@@ -4,7 +4,7 @@ use clap::Args;
 pub struct AddFavorite {
     /// Remote source
     #[arg(long, value_enum)]
-    pub remote: Remote,
+    pub remote: crate::remote::Remote,
     /// Owner
     #[arg(long)]
     pub owner: String,
@@ -70,26 +70,11 @@ impl EditFavorite {
     }
 }
 
-#[derive(Clone, clap::ValueEnum)]
-pub enum Remote {
-    Github,
-    Filesystem,
-}
-
-impl Remote {
-    fn into_path(self, owner: String, repository: String, commit: Option<String>) -> objectiveai::RemotePathCommitOptional {
-        match self {
-            Remote::Github => objectiveai::RemotePathCommitOptional::Github { owner, repository, commit },
-            Remote::Filesystem => objectiveai::RemotePathCommitOptional::Filesystem { owner, repository, commit },
-        }
-    }
-}
-
 #[derive(Args)]
 pub struct AddPairFavorite {
     /// Function remote source
     #[arg(long, value_enum)]
-    pub function_remote: Remote,
+    pub function_remote: crate::remote::Remote,
     /// Function owner
     #[arg(long)]
     pub function_owner: String,
@@ -101,7 +86,7 @@ pub struct AddPairFavorite {
     pub function_commit: Option<String>,
     /// Profile remote source
     #[arg(long, value_enum)]
-    pub profile_remote: Remote,
+    pub profile_remote: crate::remote::Remote,
     /// Profile owner
     #[arg(long)]
     pub profile_owner: String,
