@@ -1,7 +1,7 @@
 import { ObjectiveAI, type RequestOptions } from "../../../client";
 import type { VectorCompletionsCacheCompletionVotes } from "./completionVotes";
 import type { VectorCompletionsCacheCacheVote } from "./cacheVote";
-import type { VectorCompletionsCacheCacheVoteRequestOwned } from "./cacheVoteRequestOwned";
+import type { VectorCompletionsCacheCacheVoteRequest } from "./cacheVoteRequest";
 
 export function vectorCompletionsCacheGetCompletionVotes(
   client: ObjectiveAI,
@@ -17,7 +17,7 @@ export function vectorCompletionsCacheGetCompletionVotes(
 
 export function vectorCompletionsCacheGetCacheVote(
   client: ObjectiveAI,
-  body: VectorCompletionsCacheCacheVoteRequestOwned,
+  body: VectorCompletionsCacheCacheVoteRequest,
   options?: RequestOptions,
 ): Promise<VectorCompletionsCacheCacheVote> {
   return client.get_unary<VectorCompletionsCacheCacheVote>(

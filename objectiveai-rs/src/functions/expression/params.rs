@@ -4,6 +4,7 @@
 //! compilation, including the function input, task outputs, and current map element.
 
 use super::{ExpressionError, FromStarlarkValue, ToStarlarkValue};
+use objectiveai_macros::schema_override;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use starlark::values::{
@@ -13,16 +14,23 @@ use starlark::values::{
 /// Context for evaluating expressions (JMESPath or Starlark).
 ///
 /// Contains all data accessible within expressions: `input`, `output`, and `map`.
-#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
+#[schema_override(RefOwnedEnum)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(untagged)]
-#[schemars(rename = "functions.expression.Params")]
 pub enum Params<'i, 'to> {
     /// Owned version (for deserialization).
-    #[schemars(title = "Owned")]
     Owned(ParamsOwned),
     /// Borrowed version (for efficient evaluation).
-    #[schemars(title = "Ref")]
     Ref(ParamsRef<'i, 'to>),
+}
+
+impl JsonSchema for Params<'static, 'static> {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        ParamsOwned::schema_name()
+    }
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        ParamsOwned::json_schema(generator)
+    }
 }
 
 impl<'de> serde::Deserialize<'de> for Params<'static, 'static> {
@@ -36,8 +44,9 @@ impl<'de> serde::Deserialize<'de> for Params<'static, 'static> {
 }
 
 /// Owned version of expression parameters.
+#[schema_override(Owned)]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.expression.ParamsOwned")]
+#[schemars(rename = "functions.expression.Params")]
 pub struct ParamsOwned {
     /// The function's input data.
     pub input: super::InputValue,
@@ -48,8 +57,8 @@ pub struct ParamsOwned {
 }
 
 /// Borrowed version of expression parameters.
-#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
-#[schemars(rename = "functions.expression.ParamsRef")]
+#[schema_override(Ref)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct ParamsRef<'i, 'to> {
     /// The function's input data.
     pub input: &'i super::InputValue,
@@ -60,16 +69,23 @@ pub struct ParamsRef<'i, 'to> {
 }
 
 /// Output from an executed task.
-#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
+#[schema_override(RefOwnedEnum)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(untagged)]
-#[schemars(rename = "functions.expression.TaskOutput")]
 pub enum TaskOutput<'a> {
     /// Owned version.
-    #[schemars(title = "Owned")]
     Owned(TaskOutputOwned),
     /// Borrowed version.
-    #[schemars(title = "Ref")]
     Ref(TaskOutputRef<'a>),
+}
+
+impl JsonSchema for TaskOutput<'static> {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        TaskOutputOwned::schema_name()
+    }
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        TaskOutputOwned::json_schema(generator)
+    }
 }
 
 impl<'a> super::ToStarlarkValue for TaskOutput<'a> {
@@ -95,9 +111,10 @@ impl<'de> serde::Deserialize<'de> for TaskOutput<'static> {
 }
 
 /// Owned task output variants.
+#[schema_override(Owned)]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(untagged)]
-#[schemars(rename = "functions.expression.TaskOutputOwned")]
+#[schemars(rename = "functions.expression.TaskOutput")]
 pub enum TaskOutputOwned {
     /// A single scalar score.
     #[schemars(title = "Scalar")]
@@ -132,7 +149,6 @@ impl FromStarlarkValue for TaskOutputOwned {
         value: &StarlarkValue,
     ) -> Result<Self, ExpressionError> {
         use starlark::values::float::UnpackFloat;
-use schemars::JsonSchema;
         if value.is_none() {
             return Ok(TaskOutputOwned::Err(serde_json::Value::Null));
         }
@@ -293,21 +309,17 @@ impl TaskOutputOwned {
 }
 
 /// Borrowed task output variants.
-#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
+#[schema_override(Ref)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(untagged)]
-#[schemars(rename = "functions.expression.TaskOutputRef")]
 pub enum TaskOutputRef<'a> {
     /// A single scalar score.
-    #[schemars(title = "Scalar")]
-    Scalar(#[schemars(with = "f64")] &'a rust_decimal::Decimal),
+    Scalar(&'a rust_decimal::Decimal),
     /// A vector of scores.
-    #[schemars(title = "Vector")]
-    Vector(#[schemars(with = "Vec<f64>")] &'a [rust_decimal::Decimal]),
+    Vector(&'a [rust_decimal::Decimal]),
     /// Multiple vectors of scores (from mapped tasks).
-    #[schemars(title = "Vectors")]
-    Vectors(#[schemars(with = "Vec<Vec<f64>>")] &'a [Vec<rust_decimal::Decimal>]),
+    Vectors(&'a [Vec<rust_decimal::Decimal>]),
     /// An error occurred during execution.
-    #[schemars(title = "Err")]
     Err(&'a serde_json::Value),
 }
 

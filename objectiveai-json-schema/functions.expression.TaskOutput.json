@@ -1,16 +1,40 @@
 {
   "title": "functions.expression.TaskOutput",
-  "description": "Output from an executed task.",
+  "description": "Owned task output variants.",
   "anyOf": [
     {
-      "title": "Owned",
-      "description": "Owned version.",
-      "$ref": "functions.expression.TaskOutputOwned"
+      "title": "Scalar",
+      "description": "A single scalar score.",
+      "type": "number",
+      "minimum": -3.4028234663852886e+38,
+      "maximum": 3.4028234663852886e+38
     },
     {
-      "title": "Ref",
-      "description": "Borrowed version.",
-      "$ref": "functions.expression.TaskOutputRef"
+      "title": "Vector",
+      "description": "A vector of scores.",
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": -3.4028234663852886e+38,
+        "maximum": 3.4028234663852886e+38
+      }
+    },
+    {
+      "title": "Vectors",
+      "description": "Multiple vectors of scores (from mapped tasks).",
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "number",
+          "minimum": -3.4028234663852886e+38,
+          "maximum": 3.4028234663852886e+38
+        }
+      }
+    },
+    {
+      "title": "Err",
+      "description": "An error occurred during execution."
     }
   ]
 }

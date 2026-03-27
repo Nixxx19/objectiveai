@@ -22,13 +22,9 @@ from .number_input_schema_type import NumberInputSchemaType  # noqa: F401
 from .object_input_schema import ObjectInputSchema  # noqa: F401
 from .object_input_schema_type import ObjectInputSchemaType  # noqa: F401
 from .params import Params  # noqa: F401
-from .params_owned import ParamsOwned  # noqa: F401
-from .params_ref import ParamsRef  # noqa: F401
 from .special import Special  # noqa: F401
 from .string_input_schema import StringInputSchema  # noqa: F401
 from .string_input_schema_type import StringInputSchemaType  # noqa: F401
 from .task_output import TaskOutput  # noqa: F401
-from .task_output_owned import TaskOutputOwned  # noqa: F401
-from .task_output_ref import TaskOutputRef  # noqa: F401
 from .video_input_schema import VideoInputSchema  # noqa: F401
 from .video_input_schema_type import VideoInputSchemaType  # noqa: F401

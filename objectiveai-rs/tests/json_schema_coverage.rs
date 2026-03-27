@@ -81,6 +81,18 @@ fn has_manual_serde_impl(file: &syn::File, type_name: &str) -> bool {
     false
 }
 
+/// Returns the schema_override value if present: "Owned", "Ref", or "RefOwnedEnum".
+fn get_schema_override(attrs: &[syn::Attribute]) -> Option<String> {
+    attrs.iter().find_map(|attr| {
+        if attr.path().is_ident("schema_override") {
+            let list = attr.meta.require_list().ok()?;
+            Some(list.tokens.to_string().trim().to_string())
+        } else {
+            None
+        }
+    })
+}
+
 fn get_schemars_rename(attrs: &[syn::Attribute]) -> Option<String> {
     attrs.iter().find_map(|attr| {
         if attr.path().is_ident("schemars") {
@@ -155,9 +167,50 @@ fn all_serializable_types_have_json_schema() {
             };
 
             let full_name = format!("{prefix}{name}");
+            let schema_override = get_schema_override(attrs);
             let is_serializable =
                 has_serde_derive(attrs) || has_manual_serde_impl(&file, &name);
             let has_schema = has_json_schema_derive(attrs);
+
+            // schema_override(Ref) and schema_override(RefOwnedEnum) must NOT derive JsonSchema
+            if matches!(schema_override.as_deref(), Some("Ref") | Some("RefOwnedEnum")) {
+                if has_schema {
+                    errors.push(format!(
+                        "{name} in {relative} has #[schema_override({0})] \
+                         but must not derive JsonSchema",
+                        schema_override.as_ref().unwrap()
+                    ));
+                }
+                continue;
+            }
+
+            // schema_override(Owned): must derive JsonSchema, rename must strip "Owned" suffix
+            if schema_override.as_deref() == Some("Owned") {
+                if !has_schema {
+                    errors.push(format!(
+                        "{name} in {relative} has #[schema_override(Owned)] \
+                         but is missing #[derive(JsonSchema)]"
+                    ));
+                    continue;
+                }
+                let expected_rename = full_name.strip_suffix("Owned").unwrap_or(&full_name);
+                match get_schemars_rename(attrs) {
+                    Some(rename) if rename == expected_rename => {}
+                    Some(rename) => {
+                        errors.push(format!(
+                            "{name} in {relative} has #[schema_override(Owned)] \
+                             with wrong rename: got \"{rename}\", expected \"{expected_rename}\""
+                        ));
+                    }
+                    None => {
+                        errors.push(format!(
+                            "{name} in {relative} has #[schema_override(Owned)] \
+                             but is missing #[schemars(rename = \"{expected_rename}\")]"
+                        ));
+                    }
+                }
+                continue;
+            }
 
             if is_serializable && !has_schema {
                 errors.push(format!(
@@ -270,7 +323,15 @@ fn json_schemas_covers_all_types() {
             if has_type_params(item) {
                 continue;
             }
-            let full_name = format!("{prefix}{name}");
+            // For schema_override(Owned), use the schemars rename as the expected title
+            let full_name = if get_schema_override(attrs).as_deref() == Some("Owned") {
+                match get_schemars_rename(attrs) {
+                    Some(rename) => rename,
+                    None => format!("{prefix}{name}"),
+                }
+            } else {
+                format!("{prefix}{name}")
+            };
             expected.insert(full_name);
         }
     }

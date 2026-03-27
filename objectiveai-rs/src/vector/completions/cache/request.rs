@@ -1,4 +1,5 @@
 use crate::agent;
+use objectiveai_macros::schema_override;
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
@@ -10,14 +11,21 @@ pub struct GetCompletionVotesRequest {
     pub id: String,
 }
 
-#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[schema_override(RefOwnedEnum)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(untagged)]
-#[schemars(rename = "vector.completions.cache.CacheVoteRequest")]
 pub enum CacheVoteRequest<'a> {
-    #[schemars(title = "Ref")]
     Ref(CacheVoteRequestRef<'a>),
-    #[schemars(title = "Owned")]
     Owned(CacheVoteRequestOwned),
+}
+
+impl schemars::JsonSchema for CacheVoteRequest<'static> {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        CacheVoteRequestOwned::schema_name()
+    }
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        CacheVoteRequestOwned::json_schema(generator)
+    }
 }
 
 impl<'de> serde::de::Deserialize<'de> for CacheVoteRequest<'static> {
@@ -30,16 +38,17 @@ impl<'de> serde::de::Deserialize<'de> for CacheVoteRequest<'static> {
     }
 }
 
-#[derive(Debug, Clone, Serialize, JsonSchema)]
-#[schemars(rename = "vector.completions.cache.CacheVoteRequestRef")]
+#[schema_override(Ref)]
+#[derive(Debug, Clone, Serialize)]
 pub struct CacheVoteRequestRef<'a> {
     pub agent: &'a agent::InlineAgentBaseWithFallbacksOrRemote,
     pub messages: &'a [agent::completions::message::Message],
     pub responses: &'a [agent::completions::message::RichContent],
 }
 
+#[schema_override(Owned)]
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "vector.completions.cache.CacheVoteRequestOwned")]
+#[schemars(rename = "vector.completions.cache.CacheVoteRequest")]
 pub struct CacheVoteRequestOwned {
     pub agent: agent::InlineAgentBaseWithFallbacksOrRemote,
     pub messages: Vec<agent::completions::message::Message>,
