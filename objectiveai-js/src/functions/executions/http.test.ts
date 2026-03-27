@@ -25,15 +25,15 @@ httpTestSuite<FunctionsExecutionsResponseStreamingFunctionExecutionChunk, Functi
   cases: [
     {
       snapshot: "mock_1_scalar_leaf_binary_seed_42",
-      body: { ...executionBody("mock-1"), input: { text: "Hello world" }, seed: 42 },
+      body: { function: { remote: "mock", name: "binary-classifier" }, profile: { remote: "mock", name: "solo-instruction" }, input: { text: "Hello world" }, seed: 42 },
     },
     {
       snapshot: "mock_7_vector_5_criteria_seed_42",
-      body: { ...executionBody("mock-7"), input: { items: ["Option A", "Option B", "Option C"] }, seed: 42 },
+      body: { function: { remote: "mock", name: "five-criteria-ranker" }, profile: { remote: "mock", name: "schema-heavy-trio" }, input: { items: ["Option A", "Option B", "Option C"] }, seed: 42 },
     },
     {
       snapshot: "mock_20_vector_super_branch_seed_42",
-      body: { ...executionBody("mock-20"), input: { items: ["Alpha", "Beta", "Gamma"] }, seed: 42 },
+      body: { function: { remote: "mock", name: "nested-vector-super-branch" }, profile: { remote: "mock", name: "nested-vector-inline-remote" }, input: { items: ["Alpha", "Beta", "Gamma"] }, seed: 42 },
     },
   ],
 });

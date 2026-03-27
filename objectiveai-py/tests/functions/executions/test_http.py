@@ -21,8 +21,8 @@ globals().update(http_test_suite(
         HttpTestCase(
             snapshot="mock_1_scalar_leaf_binary_seed_42",
             body={
-                "function": mock_remote("mock-1"),
-                "profile": mock_remote("mock-1"),
+                "function": mock_remote("binary-classifier"),
+                "profile": mock_remote("solo-instruction"),
                 "input": {"text": "Hello world"},
                 "seed": 42,
             },
@@ -30,8 +30,8 @@ globals().update(http_test_suite(
         HttpTestCase(
             snapshot="mock_7_vector_5_criteria_seed_42",
             body={
-                "function": mock_remote("mock-7"),
-                "profile": mock_remote("mock-7"),
+                "function": mock_remote("five-criteria-ranker"),
+                "profile": mock_remote("schema-heavy-trio"),
                 "input": {"items": ["Option A", "Option B", "Option C"]},
                 "seed": 42,
             },
@@ -39,8 +39,8 @@ globals().update(http_test_suite(
         HttpTestCase(
             snapshot="mock_20_vector_super_branch_seed_42",
             body={
-                "function": mock_remote("mock-20"),
-                "profile": mock_remote("mock-20"),
+                "function": mock_remote("nested-vector-super-branch"),
+                "profile": mock_remote("nested-vector-inline-remote"),
                 "input": {"items": ["Alpha", "Beta", "Gamma"]},
                 "seed": 42,
             },
