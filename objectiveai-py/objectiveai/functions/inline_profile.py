@@ -6,13 +6,17 @@ from pydantic import ConfigDict, RootModel
 from objectiveai.swarm.inline_swarm_base import InlineSwarmBase
 
 
-class InlineProfileVariant1(RootModel):
+class InlineProfileTasks(RootModel):
     """Tasks-based profile with per-task configuration."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Tasks'})
+
     root: InlineTasksProfile
 
 
-class InlineProfileVariant2(RootModel):
+class InlineProfileAuto(RootModel):
     """Auto profile that applies a single swarm+weights to all vector completion tasks."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Auto'})
+
     root: InlineSwarmBase
 
 
@@ -20,7 +24,7 @@ class InlineProfile(RootModel):
     """An inline profile, either tasks-based or auto."""
     model_config = ConfigDict(title='functions.InlineProfile')
 
-    root: Union[InlineProfileVariant1, InlineProfileVariant2]
+    root: Union[InlineProfileTasks, InlineProfileAuto]
 
 
 # Deferred imports to break circular dependencies

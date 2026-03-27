@@ -9,24 +9,32 @@ from objectiveai.functions.inventions.state.alpha_vector_branch_state import Alp
 from objectiveai.functions.inventions.state.alpha_vector_leaf_state import AlphaVectorLeafState
 
 
-class StateVariant1(AlphaScalarBranchState):
+class StateAlphaScalarBranch(AlphaScalarBranchState):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'AlphaScalarBranch'})
+
     type_: Literal['alpha.scalar.branch.function'] = Field(..., alias='type')
 
 
-class StateVariant2(AlphaScalarLeafState):
+class StateAlphaScalarLeaf(AlphaScalarLeafState):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'AlphaScalarLeaf'})
+
     type_: Literal['alpha.scalar.leaf.function'] = Field(..., alias='type')
 
 
-class StateVariant3(AlphaVectorBranchState):
+class StateAlphaVectorBranch(AlphaVectorBranchState):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'AlphaVectorBranch'})
+
     type_: Literal['alpha.vector.branch.function'] = Field(..., alias='type')
 
 
-class StateVariant4(AlphaVectorLeafState):
+class StateAlphaVectorLeaf(AlphaVectorLeafState):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'AlphaVectorLeaf'})
+
     type_: Literal['alpha.vector.leaf.function'] = Field(..., alias='type')
 
 
 class State(RootModel):
     model_config = ConfigDict(title='functions.inventions.state.State')
 
-    root: Union[StateVariant1, StateVariant2, StateVariant3, StateVariant4]
+    root: Union[StateAlphaScalarBranch, StateAlphaScalarLeaf, StateAlphaVectorBranch, StateAlphaVectorLeaf]
 

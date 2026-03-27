@@ -7,16 +7,20 @@ from objectiveai.functions.alpha_inline_function import AlphaInlineFunction
 from objectiveai.functions.inline_function import InlineFunction
 
 
-class FullInlineFunctionVariant1(RootModel):
+class FullInlineFunctionAlpha(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Alpha'})
+
     root: AlphaInlineFunction
 
 
-class FullInlineFunctionVariant2(RootModel):
+class FullInlineFunctionStandard(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Standard'})
+
     root: InlineFunction
 
 
 class FullInlineFunction(RootModel):
     model_config = ConfigDict(title='functions.FullInlineFunction')
 
-    root: Union[FullInlineFunctionVariant1, FullInlineFunctionVariant2]
+    root: Union[FullInlineFunctionAlpha, FullInlineFunctionStandard]
 

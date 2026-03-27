@@ -9,15 +9,15 @@ from objectiveai.agent.mock.agent_base import AgentBase as AgentMockAgentBase
 from objectiveai.agent.openrouter.agent_base import AgentBase as AgentOpenrouterAgentBase
 
 
-class InlineAgentBaseWithFallbacksVariant1(AgentOpenrouterAgentBase):
+class InlineAgentBaseWithFallbacksOpenrouter(AgentOpenrouterAgentBase):
     fallbacks: Optional[list[InlineAgentBase]] = Field(None, description='Fallback agents to try if the primary fails.')
 
 
-class InlineAgentBaseWithFallbacksVariant2(AgentClaudeAgentSdkAgentBase):
+class InlineAgentBaseWithFallbacksClaudeAgentSdk(AgentClaudeAgentSdkAgentBase):
     fallbacks: Optional[list[InlineAgentBase]] = Field(None, description='Fallback agents to try if the primary fails.')
 
 
-class InlineAgentBaseWithFallbacksVariant3(AgentMockAgentBase):
+class InlineAgentBaseWithFallbacksMock(AgentMockAgentBase):
     fallbacks: Optional[list[InlineAgentBase]] = Field(None, description='Fallback agents to try if the primary fails.')
 
 
@@ -25,5 +25,5 @@ class InlineAgentBaseWithFallbacks(RootModel):
     """An [`InlineAgentBase`] with optional fallbacks (no description)."""
     model_config = ConfigDict(title='agent.InlineAgentBaseWithFallbacks', json_schema_extra={'_expanded_ref': 'agent.InlineAgentBase', '_expanded_ref_props': ['fallbacks']})
 
-    root: Union[InlineAgentBaseWithFallbacksVariant1, InlineAgentBaseWithFallbacksVariant2, InlineAgentBaseWithFallbacksVariant3]
+    root: Union[InlineAgentBaseWithFallbacksOpenrouter, InlineAgentBaseWithFallbacksClaudeAgentSdk, InlineAgentBaseWithFallbacksMock]
 

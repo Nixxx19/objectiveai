@@ -5,23 +5,31 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class VerbosityVariant1(RootModel):
+class VerbosityLow(RootModel):
     """Minimal output, concise responses."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Low'})
+
     root: Literal['low']
 
 
-class VerbosityVariant2(RootModel):
+class VerbosityMedium(RootModel):
     """Balanced output (default, normalized away during preparation)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Medium'})
+
     root: Literal['medium']
 
 
-class VerbosityVariant3(RootModel):
+class VerbosityHigh(RootModel):
     """Detailed output with thorough explanations."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'High'})
+
     root: Literal['high']
 
 
-class VerbosityVariant4(RootModel):
+class VerbosityMax(RootModel):
     """Maximum verbosity, most detailed output possible."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Max'})
+
     root: Literal['max']
 
 
@@ -32,5 +40,5 @@ This setting hints to the model how detailed its responses should be.
 Not all models support this parameter."""
     model_config = ConfigDict(title='agent.openrouter.Verbosity')
 
-    root: Union[VerbosityVariant1, VerbosityVariant2, VerbosityVariant3, VerbosityVariant4]
+    root: Union[VerbosityLow, VerbosityMedium, VerbosityHigh, VerbosityMax]
 

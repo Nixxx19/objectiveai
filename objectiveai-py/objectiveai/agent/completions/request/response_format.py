@@ -6,35 +6,47 @@ from objectiveai.json_value import JsonValue
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 
-class ResponseFormatVariant1(BaseModel):
+class ResponseFormatText(BaseModel):
     """Plain text response (default)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Text'})
+
     type_: Literal['text'] = Field(..., alias='type')
 
 
-class ResponseFormatVariant2(BaseModel):
+class ResponseFormatJsonObject(BaseModel):
     """Response must be valid JSON."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'JsonObject'})
+
     type_: Literal['json_object'] = Field(..., alias='type')
 
 
-class ResponseFormatVariant3(BaseModel):
+class ResponseFormatJsonSchema(BaseModel):
     """Response must conform to a JSON schema."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'JsonSchema'})
+
     schema: dict[str, JsonValue] = Field(..., description='The JSON Schema definition.', json_schema_extra={'additionalProperties': True})
     type_: Literal['json_schema'] = Field(..., alias='type')
 
 
-class ResponseFormatVariant4(BaseModel):
+class ResponseFormatGrammar(BaseModel):
     """Response must conform to a grammar."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Grammar'})
+
     grammar: str
     type_: Literal['grammar'] = Field(..., alias='type')
 
 
-class ResponseFormatVariant5(BaseModel):
+class ResponseFormatPython(BaseModel):
     """Response must be valid Python code."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Python'})
+
     type_: Literal['python'] = Field(..., alias='type')
 
 
-class ResponseFormatVariant6(BaseModel):
+class ResponseFormatToolCall(BaseModel):
     """The final assistant message will contain this tool call"""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'ToolCall'})
+
     description: str = Field(..., description='A description of the tool.')
     name: str = Field(..., description='The name of the tool.')
     required: Optional[bool] = Field(None, description='Whether the tool MUST be called.')
@@ -46,5 +58,5 @@ class ResponseFormat(RootModel):
     """The format of the model's response."""
     model_config = ConfigDict(title='agent.completions.request.ResponseFormat')
 
-    root: Union[ResponseFormatVariant1, ResponseFormatVariant2, ResponseFormatVariant3, ResponseFormatVariant4, ResponseFormatVariant5, ResponseFormatVariant6]
+    root: Union[ResponseFormatText, ResponseFormatJsonObject, ResponseFormatJsonSchema, ResponseFormatGrammar, ResponseFormatPython, ResponseFormatToolCall]
 

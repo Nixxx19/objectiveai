@@ -7,28 +7,28 @@ from .audio_input_schema import AudioInputSchema  # noqa: F401
 from .audio_input_schema_type import AudioInputSchemaType  # noqa: F401
 from .boolean_input_schema import BooleanInputSchema  # noqa: F401
 from .boolean_input_schema_type import BooleanInputSchemaType  # noqa: F401
-from .expression import Expression, ExpressionVariant1, ExpressionVariant2, ExpressionVariant3  # noqa: F401
+from .expression import Expression  # noqa: F401
 from .file_input_schema import FileInputSchema  # noqa: F401
 from .file_input_schema_type import FileInputSchemaType  # noqa: F401
 from .image_input_schema import ImageInputSchema  # noqa: F401
 from .image_input_schema_type import ImageInputSchemaType  # noqa: F401
-from .input_schema import InputSchema, InputSchemaVariant1, InputSchemaVariant10, InputSchemaVariant11, InputSchemaVariant2, InputSchemaVariant3, InputSchemaVariant4, InputSchemaVariant5, InputSchemaVariant6, InputSchemaVariant7, InputSchemaVariant8, InputSchemaVariant9  # noqa: F401
-from .input_value import InputValue, InputValueVariant1, InputValueVariant2, InputValueVariant3, InputValueVariant4, InputValueVariant5, InputValueVariant6, InputValueVariant7  # noqa: F401
-from .input_value_expression import InputValueExpression, InputValueExpressionVariant1, InputValueExpressionVariant2, InputValueExpressionVariant3, InputValueExpressionVariant4, InputValueExpressionVariant5, InputValueExpressionVariant6, InputValueExpressionVariant7, ItemVariant1, ItemVariant2, ValueVariant1, ValueVariant2  # noqa: F401
+from .input_schema import InputSchema  # noqa: F401
+from .input_value import InputValue  # noqa: F401
+from .input_value_expression import InputValueExpression  # noqa: F401
 from .integer_input_schema import IntegerInputSchema  # noqa: F401
 from .integer_input_schema_type import IntegerInputSchemaType  # noqa: F401
 from .number_input_schema import NumberInputSchema  # noqa: F401
 from .number_input_schema_type import NumberInputSchemaType  # noqa: F401
 from .object_input_schema import ObjectInputSchema  # noqa: F401
 from .object_input_schema_type import ObjectInputSchemaType  # noqa: F401
-from .params import Params, ParamsVariant1, ParamsVariant2  # noqa: F401
+from .params import Params  # noqa: F401
 from .params_owned import ParamsOwned  # noqa: F401
 from .params_ref import ParamsRef  # noqa: F401
-from .special import Special, SpecialVariant1, SpecialVariant2, SpecialVariant3, SpecialVariant4, SpecialVariant5, SpecialVariant6, SpecialVariant7  # noqa: F401
+from .special import Special  # noqa: F401
 from .string_input_schema import StringInputSchema  # noqa: F401
 from .string_input_schema_type import StringInputSchemaType  # noqa: F401
-from .task_output import TaskOutput, TaskOutputVariant1, TaskOutputVariant2  # noqa: F401
-from .task_output_owned import TaskOutputOwned, TaskOutputOwnedVariant1, TaskOutputOwnedVariant2, TaskOutputOwnedVariant3, TaskOutputOwnedVariant4  # noqa: F401
-from .task_output_ref import TaskOutputRef, TaskOutputRefVariant1, TaskOutputRefVariant2, TaskOutputRefVariant3, TaskOutputRefVariant4  # noqa: F401
+from .task_output import TaskOutput  # noqa: F401
+from .task_output_owned import TaskOutputOwned  # noqa: F401
+from .task_output_ref import TaskOutputRef  # noqa: F401
 from .video_input_schema import VideoInputSchema  # noqa: F401
 from .video_input_schema_type import VideoInputSchemaType  # noqa: F401

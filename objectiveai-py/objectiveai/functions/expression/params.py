@@ -7,13 +7,17 @@ from objectiveai.functions.expression.params_owned import ParamsOwned
 from objectiveai.functions.expression.params_ref import ParamsRef
 
 
-class ParamsVariant1(RootModel):
+class ParamsOwned(RootModel):
     """Owned version (for deserialization)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Owned'})
+
     root: ParamsOwned
 
 
-class ParamsVariant2(RootModel):
+class ParamsRef(RootModel):
     """Borrowed version (for efficient evaluation)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Ref'})
+
     root: ParamsRef
 
 
@@ -23,5 +27,5 @@ class Params(RootModel):
 Contains all data accessible within expressions: `input`, `output`, and `map`."""
     model_config = ConfigDict(title='functions.expression.Params')
 
-    root: Union[ParamsVariant1, ParamsVariant2]
+    root: Union[ParamsOwned, ParamsRef]
 

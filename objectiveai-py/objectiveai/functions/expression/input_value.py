@@ -6,38 +6,52 @@ from pydantic import ConfigDict, Field, RootModel
 from objectiveai.agent.completions.message.rich_content_part import RichContentPart
 
 
-class InputValueVariant1(RootModel):
+class InputValueRichContentPart(RootModel):
     """Rich content (image, audio, video, file)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'RichContentPart'})
+
     root: RichContentPart
 
 
-class InputValueVariant2(RootModel):
+class InputValueObject(RootModel):
     """An object with string keys."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Object'})
+
     root: dict[str, InputValue]
 
 
-class InputValueVariant3(RootModel):
+class InputValueArray(RootModel):
     """An array of values."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Array'})
+
     root: list[InputValue]
 
 
-class InputValueVariant4(RootModel):
+class InputValueString(RootModel):
     """A string value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'String'})
+
     root: str
 
 
-class InputValueVariant5(RootModel):
+class InputValueInteger(RootModel):
     """An integer value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Integer'})
+
     root: Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]
 
 
-class InputValueVariant6(RootModel):
+class InputValueNumber(RootModel):
     """A floating-point number."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Number'})
+
     root: Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]
 
 
-class InputValueVariant7(RootModel):
+class InputValueBoolean(RootModel):
     """A boolean value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Boolean'})
+
     root: bool
 
 
@@ -48,5 +62,5 @@ Represents any JSON-like value that can be passed to a Function,
 including rich content types (images, audio, video, files)."""
     model_config = ConfigDict(title='functions.expression.InputValue')
 
-    root: Union[InputValueVariant1, InputValueVariant2, InputValueVariant3, InputValueVariant4, InputValueVariant5, InputValueVariant6, InputValueVariant7]
+    root: Union[InputValueRichContentPart, InputValueObject, InputValueArray, InputValueString, InputValueInteger, InputValueNumber, InputValueBoolean]
 

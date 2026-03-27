@@ -5,13 +5,17 @@ from typing import Annotated, Literal, Optional, Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 
-class StrategyVariant1(BaseModel):
+class StrategyDefault(BaseModel):
     """Scalar or Vector"""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Default'})
+
     type_: Literal['default'] = Field(..., alias='type')
 
 
-class StrategyVariant2(BaseModel):
+class StrategySwissSystem(BaseModel):
     """Vector"""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'SwissSystem'})
+
     pool: Optional[Annotated[int, Field(ge=0, le=4294967295)]] = Field(None, description='How many vector responses for each execution')
     rounds: Optional[Annotated[int, Field(ge=0, le=4294967295)]] = Field(None, description='How many sequential rounds of comparison')
     type_: Literal['swiss_system'] = Field(..., alias='type')
@@ -20,5 +24,5 @@ class StrategyVariant2(BaseModel):
 class Strategy(RootModel):
     model_config = ConfigDict(title='functions.executions.request.Strategy')
 
-    root: Union[StrategyVariant1, StrategyVariant2]
+    root: Union[StrategyDefault, StrategySwissSystem]
 

@@ -10,28 +10,38 @@ from objectiveai.agent.completions.message.tool_message import ToolMessage
 from objectiveai.agent.completions.message.user_message import UserMessage
 
 
-class MessageVariant1(DeveloperMessage):
+class MessageDeveloper(DeveloperMessage):
     """A developer message (similar to system, but from the developer)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Developer'})
+
     role: Literal['developer']
 
 
-class MessageVariant2(SystemMessage):
+class MessageSystem(SystemMessage):
     """A system message setting context or instructions."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'System'})
+
     role: Literal['system']
 
 
-class MessageVariant3(UserMessage):
+class MessageUser(UserMessage):
     """A user message from the end user."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'User'})
+
     role: Literal['user']
 
 
-class MessageVariant4(AssistantMessage):
+class MessageAssistant(AssistantMessage):
     """An assistant message (model's previous response)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Assistant'})
+
     role: Literal['assistant']
 
 
-class MessageVariant5(ToolMessage):
+class MessageTool(ToolMessage):
     """A tool message containing the result of a tool call."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Tool'})
+
     role: Literal['tool']
 
 
@@ -39,5 +49,5 @@ class Message(RootModel):
     """A message in the conversation."""
     model_config = ConfigDict(title='agent.completions.message.Message')
 
-    root: Union[MessageVariant1, MessageVariant2, MessageVariant3, MessageVariant4, MessageVariant5]
+    root: Union[MessageDeveloper, MessageSystem, MessageUser, MessageAssistant, MessageTool]
 

@@ -7,16 +7,20 @@ from objectiveai.functions.alpha_vector.partial_placeholder_scalar_function_task
 from objectiveai.functions.alpha_vector.partial_placeholder_vector_function_task_expression import PartialPlaceholderVectorFunctionTaskExpression
 
 
-class PartialPlaceholderBranchTaskExpressionVariant1(PartialPlaceholderScalarFunctionTaskExpression):
+class PartialPlaceholderBranchTaskExpressionPlaceholderScalarFunction(PartialPlaceholderScalarFunctionTaskExpression):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'PlaceholderScalarFunction'})
+
     type_: Literal['placeholder.alpha.scalar.function'] = Field(..., alias='type')
 
 
-class PartialPlaceholderBranchTaskExpressionVariant2(PartialPlaceholderVectorFunctionTaskExpression):
+class PartialPlaceholderBranchTaskExpressionPlaceholderVectorFunction(PartialPlaceholderVectorFunctionTaskExpression):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'PlaceholderVectorFunction'})
+
     type_: Literal['placeholder.alpha.vector.function'] = Field(..., alias='type')
 
 
 class PartialPlaceholderBranchTaskExpression(RootModel):
     model_config = ConfigDict(title='functions.alpha_vector.PartialPlaceholderBranchTaskExpression')
 
-    root: Union[PartialPlaceholderBranchTaskExpressionVariant1, PartialPlaceholderBranchTaskExpressionVariant2]
+    root: Union[PartialPlaceholderBranchTaskExpressionPlaceholderScalarFunction, PartialPlaceholderBranchTaskExpressionPlaceholderVectorFunction]
 

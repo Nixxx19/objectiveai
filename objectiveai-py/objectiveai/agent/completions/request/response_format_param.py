@@ -6,13 +6,17 @@ from pydantic import ConfigDict, RootModel
 from objectiveai.agent.completions.request.response_format import ResponseFormat
 
 
-class ResponseFormatParamVariant1(RootModel):
+class ResponseFormatParamSingle(RootModel):
     """A single response format applied to all agents."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Single'})
+
     root: ResponseFormat
 
 
-class ResponseFormatParamVariant2(RootModel):
+class ResponseFormatParamPerAgent(RootModel):
     """Per-agent response formats, keyed by agent ID."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'PerAgent'})
+
     root: dict[str, ResponseFormat]
 
 
@@ -20,5 +24,5 @@ class ResponseFormatParam(RootModel):
     """Either a single response format or a per-agent map."""
     model_config = ConfigDict(title='agent.completions.request.ResponseFormatParam')
 
-    root: Union[ResponseFormatParamVariant1, ResponseFormatParamVariant2]
+    root: Union[ResponseFormatParamSingle, ResponseFormatParamPerAgent]
 

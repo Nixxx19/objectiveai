@@ -8,7 +8,7 @@ from objectiveai.functions.expression.input_value import InputValue
 from objectiveai.remote_path import RemotePath
 
 
-class VectorFunctionTaskVariant1(BaseModel):
+class VectorFunctionTaskGithub(BaseModel):
     commit: str
     owner: str
     remote: Literal['github']
@@ -17,7 +17,7 @@ class VectorFunctionTaskVariant1(BaseModel):
     output: Expression = Field(..., description="Expression to transform the task result into a valid function output.\n\nReceives `output` as the nested function's result (Scalar or Vector).\nMust return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).\nSee [`VectorFunctionTaskExpression::output`] for full documentation.")
 
 
-class VectorFunctionTaskVariant2(BaseModel):
+class VectorFunctionTaskFilesystem(BaseModel):
     commit: str
     owner: str
     remote: Literal['filesystem']
@@ -26,7 +26,7 @@ class VectorFunctionTaskVariant2(BaseModel):
     output: Expression = Field(..., description="Expression to transform the task result into a valid function output.\n\nReceives `output` as the nested function's result (Scalar or Vector).\nMust return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).\nSee [`VectorFunctionTaskExpression::output`] for full documentation.")
 
 
-class VectorFunctionTaskVariant3(BaseModel):
+class VectorFunctionTaskMock(BaseModel):
     name: str
     remote: Literal['mock']
     input: InputValue = Field(..., description='The resolved input to pass to the function.')
@@ -37,5 +37,5 @@ class VectorFunctionTask(RootModel):
     """A compiled vector function task ready for execution."""
     model_config = ConfigDict(title='functions.VectorFunctionTask', json_schema_extra={'_expanded_ref': 'RemotePath', '_expanded_ref_props': ['input', 'output']})
 
-    root: Union[VectorFunctionTaskVariant1, VectorFunctionTaskVariant2, VectorFunctionTaskVariant3]
+    root: Union[VectorFunctionTaskGithub, VectorFunctionTaskFilesystem, VectorFunctionTaskMock]
 

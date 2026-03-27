@@ -5,13 +5,17 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class ProviderDataCollectionVariant1(RootModel):
+class ProviderDataCollectionDeny(RootModel):
     """Do not allow data collection."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Deny'})
+
     root: Literal['deny']
 
 
-class ProviderDataCollectionVariant2(RootModel):
+class ProviderDataCollectionAllow(RootModel):
     """Allow data collection."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Allow'})
+
     root: Literal['allow']
 
 
@@ -19,5 +23,5 @@ class ProviderDataCollection(RootModel):
     """Data collection policy for providers."""
     model_config = ConfigDict(title='agent.completions.request.ProviderDataCollection')
 
-    root: Union[ProviderDataCollectionVariant1, ProviderDataCollectionVariant2]
+    root: Union[ProviderDataCollectionDeny, ProviderDataCollectionAllow]
 

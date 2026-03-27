@@ -5,48 +5,66 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class ProviderQuantizationVariant1(RootModel):
+class ProviderQuantizationInt4(RootModel):
     """4-bit integer quantization."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Int4'})
+
     root: Literal['int4']
 
 
-class ProviderQuantizationVariant2(RootModel):
+class ProviderQuantizationInt8(RootModel):
     """8-bit integer quantization."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Int8'})
+
     root: Literal['int8']
 
 
-class ProviderQuantizationVariant3(RootModel):
+class ProviderQuantizationFp4(RootModel):
     """4-bit floating point quantization."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Fp4'})
+
     root: Literal['fp4']
 
 
-class ProviderQuantizationVariant4(RootModel):
+class ProviderQuantizationFp6(RootModel):
     """6-bit floating point quantization."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Fp6'})
+
     root: Literal['fp6']
 
 
-class ProviderQuantizationVariant5(RootModel):
+class ProviderQuantizationFp8(RootModel):
     """8-bit floating point quantization."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Fp8'})
+
     root: Literal['fp8']
 
 
-class ProviderQuantizationVariant6(RootModel):
+class ProviderQuantizationFp16(RootModel):
     """16-bit floating point (half precision)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Fp16'})
+
     root: Literal['fp16']
 
 
-class ProviderQuantizationVariant7(RootModel):
+class ProviderQuantizationBf16(RootModel):
     """16-bit brain floating point."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Bf16'})
+
     root: Literal['bf16']
 
 
-class ProviderQuantizationVariant8(RootModel):
+class ProviderQuantizationFp32(RootModel):
     """32-bit floating point (full precision)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Fp32'})
+
     root: Literal['fp32']
 
 
-class ProviderQuantizationVariant9(RootModel):
+class ProviderQuantizationUnknown(RootModel):
     """Unknown quantization level."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Unknown'})
+
     root: Literal['unknown']
 
 
@@ -57,5 +75,5 @@ Quantization reduces model precision to decrease memory usage and
 increase inference speed, potentially at the cost of output quality."""
     model_config = ConfigDict(title='agent.openrouter.ProviderQuantization')
 
-    root: Union[ProviderQuantizationVariant1, ProviderQuantizationVariant2, ProviderQuantizationVariant3, ProviderQuantizationVariant4, ProviderQuantizationVariant5, ProviderQuantizationVariant6, ProviderQuantizationVariant7, ProviderQuantizationVariant8, ProviderQuantizationVariant9]
+    root: Union[ProviderQuantizationInt4, ProviderQuantizationInt8, ProviderQuantizationFp4, ProviderQuantizationFp6, ProviderQuantizationFp8, ProviderQuantizationFp16, ProviderQuantizationBf16, ProviderQuantizationFp32, ProviderQuantizationUnknown]
 

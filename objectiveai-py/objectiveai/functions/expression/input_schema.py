@@ -13,58 +13,80 @@ from objectiveai.functions.expression.string_input_schema import StringInputSche
 from objectiveai.functions.expression.video_input_schema import VideoInputSchema
 
 
-class InputSchemaVariant1(RootModel):
+class InputSchemaAnyOf(RootModel):
     """A union of schemas - input must match at least one."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'AnyOf'})
+
     root: AnyOfInputSchema
 
 
-class InputSchemaVariant2(RootModel):
+class InputSchemaObject(RootModel):
     """An object with named properties."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Object'})
+
     root: ObjectInputSchema
 
 
-class InputSchemaVariant3(RootModel):
+class InputSchemaArray(RootModel):
     """An array of items."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Array'})
+
     root: ArrayInputSchema
 
 
-class InputSchemaVariant4(RootModel):
+class InputSchemaString(RootModel):
     """A string value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'String'})
+
     root: StringInputSchema
 
 
-class InputSchemaVariant5(RootModel):
+class InputSchemaInteger(RootModel):
     """An integer value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Integer'})
+
     root: IntegerInputSchema
 
 
-class InputSchemaVariant6(RootModel):
+class InputSchemaNumber(RootModel):
     """A floating-point number."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Number'})
+
     root: NumberInputSchema
 
 
-class InputSchemaVariant7(RootModel):
+class InputSchemaBoolean(RootModel):
     """A boolean value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Boolean'})
+
     root: BooleanInputSchema
 
 
-class InputSchemaVariant8(RootModel):
+class InputSchemaImage(RootModel):
     """An image (URL or base64)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Image'})
+
     root: ImageInputSchema
 
 
-class InputSchemaVariant9(RootModel):
+class InputSchemaAudio(RootModel):
     """Audio content."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Audio'})
+
     root: AudioInputSchema
 
 
-class InputSchemaVariant10(RootModel):
+class InputSchemaVideo(RootModel):
     """Video content."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Video'})
+
     root: VideoInputSchema
 
 
-class InputSchemaVariant11(RootModel):
+class InputSchemaFile(RootModel):
     """A file."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'File'})
+
     root: FileInputSchema
 
 
@@ -75,7 +97,7 @@ Defines the expected structure and constraints for input data.
 Used by remote Functions to document and validate their inputs."""
     model_config = ConfigDict(title='functions.expression.InputSchema')
 
-    root: Union[InputSchemaVariant1, InputSchemaVariant2, InputSchemaVariant3, InputSchemaVariant4, InputSchemaVariant5, InputSchemaVariant6, InputSchemaVariant7, InputSchemaVariant8, InputSchemaVariant9, InputSchemaVariant10, InputSchemaVariant11]
+    root: Union[InputSchemaAnyOf, InputSchemaObject, InputSchemaArray, InputSchemaString, InputSchemaInteger, InputSchemaNumber, InputSchemaBoolean, InputSchemaImage, InputSchemaAudio, InputSchemaVideo, InputSchemaFile]
 
 
 # Deferred imports to break circular dependencies

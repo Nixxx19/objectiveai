@@ -7,13 +7,17 @@ from objectiveai.functions.expression.task_output_owned import TaskOutputOwned
 from objectiveai.functions.expression.task_output_ref import TaskOutputRef
 
 
-class TaskOutputVariant1(RootModel):
+class TaskOutputOwned(RootModel):
     """Owned version."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Owned'})
+
     root: TaskOutputOwned
 
 
-class TaskOutputVariant2(RootModel):
+class TaskOutputRef(RootModel):
     """Borrowed version."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Ref'})
+
     root: TaskOutputRef
 
 
@@ -21,5 +25,5 @@ class TaskOutput(RootModel):
     """Output from an executed task."""
     model_config = ConfigDict(title='functions.expression.TaskOutput')
 
-    root: Union[TaskOutputVariant1, TaskOutputVariant2]
+    root: Union[TaskOutputOwned, TaskOutputRef]
 

@@ -6,21 +6,21 @@ from pydantic import BaseModel, ConfigDict, RootModel
 from objectiveai.remote_path import RemotePath
 
 
-class GetFunctionResponseVariant1(BaseModel):
+class GetFunctionResponseGithub(BaseModel):
     commit: str
     owner: str
     remote: Literal['github']
     repository: str
 
 
-class GetFunctionResponseVariant2(BaseModel):
+class GetFunctionResponseFilesystem(BaseModel):
     commit: str
     owner: str
     remote: Literal['filesystem']
     repository: str
 
 
-class GetFunctionResponseVariant3(BaseModel):
+class GetFunctionResponseMock(BaseModel):
     name: str
     remote: Literal['mock']
 
@@ -28,5 +28,5 @@ class GetFunctionResponseVariant3(BaseModel):
 class GetFunctionResponse(RootModel):
     model_config = ConfigDict(title='functions.GetFunctionResponse', json_schema_extra={'_expanded_ref': 'RemotePath'})
 
-    root: Union[GetFunctionResponseVariant1, GetFunctionResponseVariant2, GetFunctionResponseVariant3]
+    root: Union[GetFunctionResponseGithub, GetFunctionResponseFilesystem, GetFunctionResponseMock]
 

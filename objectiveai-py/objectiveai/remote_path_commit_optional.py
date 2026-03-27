@@ -5,21 +5,27 @@ from typing import Literal, Optional, Union
 from pydantic import BaseModel, ConfigDict, RootModel
 
 
-class RemotePathCommitOptionalVariant1(BaseModel):
+class RemotePathCommitOptionalGithub(BaseModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Github'})
+
     commit: Optional[str] = None
     owner: str
     remote: Literal['github']
     repository: str
 
 
-class RemotePathCommitOptionalVariant2(BaseModel):
+class RemotePathCommitOptionalFilesystem(BaseModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Filesystem'})
+
     commit: Optional[str] = None
     owner: str
     remote: Literal['filesystem']
     repository: str
 
 
-class RemotePathCommitOptionalVariant3(BaseModel):
+class RemotePathCommitOptionalMock(BaseModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Mock'})
+
     name: str
     remote: Literal['mock']
 
@@ -27,5 +33,5 @@ class RemotePathCommitOptionalVariant3(BaseModel):
 class RemotePathCommitOptional(RootModel):
     model_config = ConfigDict(title='RemotePathCommitOptional')
 
-    root: Union[RemotePathCommitOptionalVariant1, RemotePathCommitOptionalVariant2, RemotePathCommitOptionalVariant3]
+    root: Union[RemotePathCommitOptionalGithub, RemotePathCommitOptionalFilesystem, RemotePathCommitOptionalMock]
 

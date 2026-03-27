@@ -6,13 +6,17 @@ from pydantic import BaseModel, ConfigDict, Field, RootModel
 from objectiveai.functions.expression.expression import Expression
 
 
-class SimpleContentPartExpressionTextVariant1(RootModel):
+class SimpleContentPartExpressionTextExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class SimpleContentPartExpressionTextVariant2(RootModel):
+class SimpleContentPartExpressionTextValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: str
 
 
@@ -41,7 +45,7 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[SimpleContentPartExpressionTextVariant1, SimpleContentPartExpressionTextVariant2]
+    root: Union[SimpleContentPartExpressionTextExpression, SimpleContentPartExpressionTextValue]
 
 
 class SimpleContentPartExpression(BaseModel):

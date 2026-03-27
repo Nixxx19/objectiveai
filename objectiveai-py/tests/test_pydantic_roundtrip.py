@@ -298,6 +298,16 @@ def _convert_union(args: list[Any], root_title: str) -> dict:
     return {"anyOf": variants}
 
 
+def _get_variant_title(tp: Any) -> str | None:
+    """Read _variant_title from a type's model_config json_schema_extra."""
+    config = getattr(tp, "model_config", None)
+    if config and isinstance(config, dict):
+        extra = config.get("json_schema_extra")
+        if isinstance(extra, dict):
+            return extra.get("_variant_title")
+    return None
+
+
 def _convert_union_member(tp: Any, root_title: str) -> dict:
     """Convert a single Union member to a JSON Schema dict.
 
@@ -307,13 +317,22 @@ def _convert_union_member(tp: Any, root_title: str) -> dict:
     if _is_none_type(tp):
         return {"type": "null"}
 
+    # Read variant title metadata (emitted by install_pydantic.py)
+    variant_title = _get_variant_title(tp)
+
     known = _is_known_type(tp)
     if known:
-        return {"$ref": known}
+        result: dict = {}
+        if variant_title:
+            result["title"] = variant_title
+        result["$ref"] = known
+        return result
 
     # Inline variant type — include description from docstring
     if isinstance(tp, type) and issubclass(tp, (BaseModel, RootModel)):
-        result: dict = {}
+        result = {}
+        if variant_title:
+            result["title"] = variant_title
         doc = getattr(tp, "__doc__", None)
         if doc:
             result["description"] = doc
@@ -324,7 +343,10 @@ def _convert_union_member(tp: Any, root_title: str) -> dict:
         result.update(inner)
         return result
 
-    return convert_type(tp, root_title)
+    result = convert_type(tp, root_title)
+    if variant_title:
+        result = {"title": variant_title, **result}
+    return result
 
 
 def _convert_root_model(cls: type, root_title: str) -> dict:
@@ -418,23 +440,15 @@ def _get_root_annotation(cls: type) -> Any:
 
 
 def _find_variant_types(cls: type) -> list[type]:
-    """Find variant types for a class by scanning its module.
-
-    Looks for {ClassName}Variant1, Variant2, etc. in the same module.
-    """
-    mod = sys.modules.get(cls.__module__)
-    if not mod:
+    """Find variant types for a class from its Union root annotation."""
+    fields = getattr(cls, "model_fields", {})
+    if "root" not in fields:
         return []
-    base_name = cls.__name__
-    variants: list[type] = []
-    i = 1
-    while True:
-        variant_cls = getattr(mod, f"{base_name}Variant{i}", None)
-        if variant_cls is None:
-            break
-        variants.append(variant_cls)
-        i += 1
-    return variants
+    root_type = fields["root"].annotation
+    args = get_args(root_type)
+    if not args:
+        return []
+    return [a for a in args if not _is_none_type(a)]
 
 
 def _get_ref_base(cls: type) -> str | None:

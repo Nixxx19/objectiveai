@@ -9,15 +9,15 @@ from objectiveai.agent.mock.agent_base import AgentBase as AgentMockAgentBase
 from objectiveai.agent.openrouter.agent_base import AgentBase as AgentOpenrouterAgentBase
 
 
-class RemoteAgentBaseVariant1(AgentOpenrouterAgentBase):
+class RemoteAgentBaseOpenrouter(AgentOpenrouterAgentBase):
     description: str
 
 
-class RemoteAgentBaseVariant2(AgentClaudeAgentSdkAgentBase):
+class RemoteAgentBaseClaudeAgentSdk(AgentClaudeAgentSdkAgentBase):
     description: str
 
 
-class RemoteAgentBaseVariant3(AgentMockAgentBase):
+class RemoteAgentBaseMock(AgentMockAgentBase):
     description: str
 
 
@@ -27,5 +27,5 @@ class RemoteAgentBase(RootModel):
 Like [`InlineAgentBase`] but includes a description field for remote storage."""
     model_config = ConfigDict(title='agent.RemoteAgentBase', json_schema_extra={'_expanded_ref': 'agent.InlineAgentBase', '_expanded_ref_props': ['description']})
 
-    root: Union[RemoteAgentBaseVariant1, RemoteAgentBaseVariant2, RemoteAgentBaseVariant3]
+    root: Union[RemoteAgentBaseOpenrouter, RemoteAgentBaseClaudeAgentSdk, RemoteAgentBaseMock]
 

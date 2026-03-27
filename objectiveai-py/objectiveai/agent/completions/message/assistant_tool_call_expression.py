@@ -7,13 +7,17 @@ from objectiveai.agent.completions.message.assistant_tool_call_function_expressi
 from objectiveai.functions.expression.expression import Expression
 
 
-class AssistantToolCallExpressionFunctionVariant1(RootModel):
+class AssistantToolCallExpressionFunctionExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class AssistantToolCallExpressionFunctionVariant2(RootModel):
+class AssistantToolCallExpressionFunctionValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: AssistantToolCallFunctionExpression
 
 
@@ -42,16 +46,20 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[AssistantToolCallExpressionFunctionVariant1, AssistantToolCallExpressionFunctionVariant2]
+    root: Union[AssistantToolCallExpressionFunctionExpression, AssistantToolCallExpressionFunctionValue]
 
 
-class AssistantToolCallExpressionIdVariant1(RootModel):
+class AssistantToolCallExpressionIdExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class AssistantToolCallExpressionIdVariant2(RootModel):
+class AssistantToolCallExpressionIdValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: str
 
 
@@ -80,7 +88,7 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[AssistantToolCallExpressionIdVariant1, AssistantToolCallExpressionIdVariant2]
+    root: Union[AssistantToolCallExpressionIdExpression, AssistantToolCallExpressionIdValue]
 
 
 class AssistantToolCallExpression(BaseModel):

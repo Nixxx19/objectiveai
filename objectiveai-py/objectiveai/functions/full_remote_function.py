@@ -7,16 +7,20 @@ from objectiveai.functions.alpha_remote_function import AlphaRemoteFunction
 from objectiveai.functions.remote_function import RemoteFunction
 
 
-class FullRemoteFunctionVariant1(RootModel):
+class FullRemoteFunctionAlpha(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Alpha'})
+
     root: AlphaRemoteFunction
 
 
-class FullRemoteFunctionVariant2(RootModel):
+class FullRemoteFunctionStandard(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Standard'})
+
     root: RemoteFunction
 
 
 class FullRemoteFunction(RootModel):
     model_config = ConfigDict(title='functions.FullRemoteFunction')
 
-    root: Union[FullRemoteFunctionVariant1, FullRemoteFunctionVariant2]
+    root: Union[FullRemoteFunctionAlpha, FullRemoteFunctionStandard]
 

@@ -7,16 +7,20 @@ from objectiveai.agent.completions.response.tool_response import ToolResponse
 from objectiveai.agent.completions.response.unary.assistant_response import AssistantResponse
 
 
-class MessageVariant1(RootModel):
+class MessageAssistant(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Assistant'})
+
     root: AssistantResponse
 
 
-class MessageVariant2(RootModel):
+class MessageTool(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Tool'})
+
     root: ToolResponse
 
 
 class Message(RootModel):
     model_config = ConfigDict(title='agent.completions.response.unary.Message')
 
-    root: Union[MessageVariant1, MessageVariant2]
+    root: Union[MessageAssistant, MessageTool]
 

@@ -7,11 +7,15 @@ from objectiveai.functions.full_inline_function import FullInlineFunction
 from objectiveai.remote_path_commit_optional import RemotePathCommitOptional
 
 
-class FullInlineFunctionOrRemoteCommitOptionalVariant1(RootModel):
+class FullInlineFunctionOrRemoteCommitOptionalInline(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Inline'})
+
     root: FullInlineFunction
 
 
-class FullInlineFunctionOrRemoteCommitOptionalVariant2(RootModel):
+class FullInlineFunctionOrRemoteCommitOptionalRemote(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Remote'})
+
     root: RemotePathCommitOptional
 
 
@@ -20,5 +24,5 @@ class FullInlineFunctionOrRemoteCommitOptional(RootModel):
 or a remote path reference."""
     model_config = ConfigDict(title='functions.FullInlineFunctionOrRemoteCommitOptional')
 
-    root: Union[FullInlineFunctionOrRemoteCommitOptionalVariant1, FullInlineFunctionOrRemoteCommitOptionalVariant2]
+    root: Union[FullInlineFunctionOrRemoteCommitOptionalInline, FullInlineFunctionOrRemoteCommitOptionalRemote]
 

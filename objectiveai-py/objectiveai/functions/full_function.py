@@ -7,11 +7,15 @@ from objectiveai.functions.full_inline_function import FullInlineFunction
 from objectiveai.functions.full_remote_function import FullRemoteFunction
 
 
-class FullFunctionVariant1(RootModel):
+class FullFunctionRemote(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Remote'})
+
     root: FullRemoteFunction
 
 
-class FullFunctionVariant2(RootModel):
+class FullFunctionInline(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Inline'})
+
     root: FullInlineFunction
 
 
@@ -19,5 +23,5 @@ class FullFunction(RootModel):
     """A full function, either remote or inline."""
     model_config = ConfigDict(title='functions.FullFunction')
 
-    root: Union[FullFunctionVariant1, FullFunctionVariant2]
+    root: Union[FullFunctionRemote, FullFunctionInline]
 

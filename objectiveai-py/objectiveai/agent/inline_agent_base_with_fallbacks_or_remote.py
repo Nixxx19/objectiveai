@@ -7,11 +7,15 @@ from objectiveai.agent.inline_agent_base_with_fallbacks import InlineAgentBaseWi
 from objectiveai.remote_path import RemotePath
 
 
-class InlineAgentBaseWithFallbacksOrRemoteVariant1(RootModel):
+class InlineAgentBaseWithFallbacksOrRemoteAgentBase(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'AgentBase'})
+
     root: InlineAgentBaseWithFallbacks
 
 
-class InlineAgentBaseWithFallbacksOrRemoteVariant2(RootModel):
+class InlineAgentBaseWithFallbacksOrRemoteRemote(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Remote'})
+
     root: RemotePath
 
 
@@ -24,5 +28,5 @@ Used in swarm definitions to allow agents to be specified inline
 hashmap during conversion."""
     model_config = ConfigDict(title='agent.InlineAgentBaseWithFallbacksOrRemote')
 
-    root: Union[InlineAgentBaseWithFallbacksOrRemoteVariant1, InlineAgentBaseWithFallbacksOrRemoteVariant2]
+    root: Union[InlineAgentBaseWithFallbacksOrRemoteAgentBase, InlineAgentBaseWithFallbacksOrRemoteRemote]
 

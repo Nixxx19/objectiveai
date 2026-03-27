@@ -8,13 +8,17 @@ from objectiveai.functions.expression.input_schema import InputSchema
 from objectiveai.functions.expression.input_value_expression import InputValueExpression
 
 
-class PlaceholderScalarFunctionTaskExpressionInputVariant1(RootModel):
+class PlaceholderScalarFunctionTaskExpressionInputExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class PlaceholderScalarFunctionTaskExpressionInputVariant2(RootModel):
+class PlaceholderScalarFunctionTaskExpressionInputValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: InputValueExpression
 
 
@@ -44,7 +48,7 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[PlaceholderScalarFunctionTaskExpressionInputVariant1, PlaceholderScalarFunctionTaskExpressionInputVariant2]
+    root: Union[PlaceholderScalarFunctionTaskExpressionInputExpression, PlaceholderScalarFunctionTaskExpressionInputValue]
 
 
 class PlaceholderScalarFunctionTaskExpression(BaseModel):

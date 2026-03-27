@@ -7,13 +7,17 @@ from objectiveai.functions.inline_profile import InlineProfile
 from objectiveai.functions.remote_profile import RemoteProfile
 
 
-class ProfileVariant1(RootModel):
+class ProfileRemote(RootModel):
     """A remote profile with metadata."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Remote'})
+
     root: RemoteProfile
 
 
-class ProfileVariant2(RootModel):
+class ProfileInline(RootModel):
     """An inline profile definition."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Inline'})
+
     root: InlineProfile
 
 
@@ -24,5 +28,5 @@ Profiles contain the weights and nested configurations needed to execute
 a Function. They correspond to a Function's task structure."""
     model_config = ConfigDict(title='functions.Profile')
 
-    root: Union[ProfileVariant1, ProfileVariant2]
+    root: Union[ProfileRemote, ProfileInline]
 

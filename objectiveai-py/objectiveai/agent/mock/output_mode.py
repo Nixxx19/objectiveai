@@ -5,24 +5,30 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class OutputModeVariant1(RootModel):
+class OutputModeInstruction(RootModel):
     """The model is instructed via the prompt to output a specific key.
 
 This is the default and most widely supported mode."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Instruction'})
+
     root: Literal['instruction']
 
 
-class OutputModeVariant2(RootModel):
+class OutputModeJsonSchema(RootModel):
     """A JSON schema response format is used with an enum of possible keys.
 
 Requires model support for structured JSON output."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'JsonSchema'})
+
     root: Literal['json_schema']
 
 
-class OutputModeVariant3(RootModel):
+class OutputModeToolCall(RootModel):
     """A forced tool call with an argument schema containing possible keys.
 
 Requires model support for tool/function calling."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'ToolCall'})
+
     root: Literal['tool_call']
 
 
@@ -36,5 +42,5 @@ responses. This enum controls *how* that constraint is enforced.
 completely ignored for agent completions."""
     model_config = ConfigDict(title='agent.mock.OutputMode')
 
-    root: Union[OutputModeVariant1, OutputModeVariant2, OutputModeVariant3]
+    root: Union[OutputModeInstruction, OutputModeJsonSchema, OutputModeToolCall]
 

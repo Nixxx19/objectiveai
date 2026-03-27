@@ -7,11 +7,15 @@ from objectiveai.agent.inline_agent_base import InlineAgentBase
 from objectiveai.agent.remote_agent_base import RemoteAgentBase
 
 
-class AgentBaseVariant1(RootModel):
+class AgentBaseRemote(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Remote'})
+
     root: RemoteAgentBase
 
 
-class AgentBaseVariant2(RootModel):
+class AgentBaseInline(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Inline'})
+
     root: InlineAgentBase
 
 
@@ -19,5 +23,5 @@ class AgentBase(RootModel):
     """An Agent base definition, either remote (with metadata) or inline."""
     model_config = ConfigDict(title='agent.AgentBase')
 
-    root: Union[AgentBaseVariant1, AgentBaseVariant2]
+    root: Union[AgentBaseRemote, AgentBaseInline]
 

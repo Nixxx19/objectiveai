@@ -10,35 +10,35 @@ from objectiveai.agent.mock.agent import Agent as AgentMockAgent
 from objectiveai.agent.openrouter.agent import Agent as AgentOpenrouterAgent
 
 
-class AgentWithFallbacksWithCountVariant1(AgentOpenrouterAgent):
+class AgentWithFallbacksWithCountRemoteOpenrouter(AgentOpenrouterAgent):
     description: str
     count: int = Field(1, description='Number of instances of this agent in the swarm. Defaults to 1.', ge=0, le=18446744073709551615)
     fallbacks: Optional[list[InlineAgent]] = Field(None, description='Fallback agents to try if the primary fails.')
 
 
-class AgentWithFallbacksWithCountVariant2(AgentClaudeAgentSdkAgent):
+class AgentWithFallbacksWithCountRemoteClaudeAgentSdk(AgentClaudeAgentSdkAgent):
     description: str
     count: int = Field(1, description='Number of instances of this agent in the swarm. Defaults to 1.', ge=0, le=18446744073709551615)
     fallbacks: Optional[list[InlineAgent]] = Field(None, description='Fallback agents to try if the primary fails.')
 
 
-class AgentWithFallbacksWithCountVariant3(AgentMockAgent):
+class AgentWithFallbacksWithCountRemoteMock(AgentMockAgent):
     description: str
     count: int = Field(1, description='Number of instances of this agent in the swarm. Defaults to 1.', ge=0, le=18446744073709551615)
     fallbacks: Optional[list[InlineAgent]] = Field(None, description='Fallback agents to try if the primary fails.')
 
 
-class AgentWithFallbacksWithCountVariant4(AgentOpenrouterAgent):
+class AgentWithFallbacksWithCountInlineOpenrouter(AgentOpenrouterAgent):
     fallbacks: Optional[list[InlineAgent]] = Field(None, description='Fallback agents to try if the primary fails.')
     count: int = Field(1, description='Number of instances of this agent in the swarm. Defaults to 1.', ge=0, le=18446744073709551615)
 
 
-class AgentWithFallbacksWithCountVariant5(AgentClaudeAgentSdkAgent):
+class AgentWithFallbacksWithCountInlineClaudeAgentSdk(AgentClaudeAgentSdkAgent):
     fallbacks: Optional[list[InlineAgent]] = Field(None, description='Fallback agents to try if the primary fails.')
     count: int = Field(1, description='Number of instances of this agent in the swarm. Defaults to 1.', ge=0, le=18446744073709551615)
 
 
-class AgentWithFallbacksWithCountVariant6(AgentMockAgent):
+class AgentWithFallbacksWithCountInlineMock(AgentMockAgent):
     fallbacks: Optional[list[InlineAgent]] = Field(None, description='Fallback agents to try if the primary fails.')
     count: int = Field(1, description='Number of instances of this agent in the swarm. Defaults to 1.', ge=0, le=18446744073709551615)
 
@@ -47,5 +47,5 @@ class AgentWithFallbacksWithCount(RootModel):
     """An [`AgentWithFallbacks`] with a count (post-validation swarm agent slot)."""
     model_config = ConfigDict(title='agent.AgentWithFallbacksWithCount', json_schema_extra={'_expanded_ref': 'agent.AgentWithFallbacks', '_expanded_ref_props': ['count']})
 
-    root: Union[AgentWithFallbacksWithCountVariant1, AgentWithFallbacksWithCountVariant2, AgentWithFallbacksWithCountVariant3, AgentWithFallbacksWithCountVariant4, AgentWithFallbacksWithCountVariant5, AgentWithFallbacksWithCountVariant6]
+    root: Union[AgentWithFallbacksWithCountRemoteOpenrouter, AgentWithFallbacksWithCountRemoteClaudeAgentSdk, AgentWithFallbacksWithCountRemoteMock, AgentWithFallbacksWithCountInlineOpenrouter, AgentWithFallbacksWithCountInlineClaudeAgentSdk, AgentWithFallbacksWithCountInlineMock]
 

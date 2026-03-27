@@ -9,15 +9,15 @@ from objectiveai.agent.mock.agent import Agent as AgentMockAgent
 from objectiveai.agent.openrouter.agent import Agent as AgentOpenrouterAgent
 
 
-class RemoteAgentVariant1(AgentOpenrouterAgent):
+class RemoteAgentOpenrouter(AgentOpenrouterAgent):
     description: str
 
 
-class RemoteAgentVariant2(AgentClaudeAgentSdkAgent):
+class RemoteAgentClaudeAgentSdk(AgentClaudeAgentSdkAgent):
     description: str
 
 
-class RemoteAgentVariant3(AgentMockAgent):
+class RemoteAgentMock(AgentMockAgent):
     description: str
 
 
@@ -25,5 +25,5 @@ class RemoteAgent(RootModel):
     """A validated remote Agent with metadata and computed content-addressed ID."""
     model_config = ConfigDict(title='agent.RemoteAgent', json_schema_extra={'_expanded_ref': 'agent.InlineAgent', '_expanded_ref_props': ['description']})
 
-    root: Union[RemoteAgentVariant1, RemoteAgentVariant2, RemoteAgentVariant3]
+    root: Union[RemoteAgentOpenrouter, RemoteAgentClaudeAgentSdk, RemoteAgentMock]
 

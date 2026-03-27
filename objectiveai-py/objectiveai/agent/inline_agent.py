@@ -4,20 +4,26 @@ from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
 from objectiveai.agent.claude_agent_sdk.agent import Agent as AgentClaudeAgentSdkAgent
-from objectiveai.agent.mock.agent import Agent as AgentMockAgent
-from objectiveai.agent.openrouter.agent import Agent
+from objectiveai.agent.mock.agent import Agent
+from objectiveai.agent.openrouter.agent import Agent as AgentOpenrouterAgent
 
 
-class InlineAgentVariant1(RootModel):
-    root: Agent
+class InlineAgentOpenrouter(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Openrouter'})
+
+    root: AgentOpenrouterAgent
 
 
-class InlineAgentVariant2(RootModel):
+class InlineAgentClaudeAgentSdk(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'ClaudeAgentSdk'})
+
     root: AgentClaudeAgentSdkAgent
 
 
-class InlineAgentVariant3(RootModel):
-    root: AgentMockAgent
+class InlineAgentMock(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Mock'})
+
+    root: Agent
 
 
 class InlineAgent(RootModel):
@@ -26,5 +32,5 @@ class InlineAgent(RootModel):
 This is an untagged enum that dispatches to the per-upstream Agent."""
     model_config = ConfigDict(title='agent.InlineAgent')
 
-    root: Union[InlineAgentVariant1, InlineAgentVariant2, InlineAgentVariant3]
+    root: Union[InlineAgentOpenrouter, InlineAgentClaudeAgentSdk, InlineAgentMock]
 

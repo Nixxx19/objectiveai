@@ -7,16 +7,20 @@ from objectiveai.vector.completions.cache.cache_vote_request_owned import CacheV
 from objectiveai.vector.completions.cache.cache_vote_request_ref import CacheVoteRequestRef
 
 
-class CacheVoteRequestVariant1(RootModel):
+class CacheVoteRequestRef(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Ref'})
+
     root: CacheVoteRequestRef
 
 
-class CacheVoteRequestVariant2(RootModel):
+class CacheVoteRequestOwned(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Owned'})
+
     root: CacheVoteRequestOwned
 
 
 class CacheVoteRequest(RootModel):
     model_config = ConfigDict(title='vector.completions.cache.CacheVoteRequest')
 
-    root: Union[CacheVoteRequestVariant1, CacheVoteRequestVariant2]
+    root: Union[CacheVoteRequestRef, CacheVoteRequestOwned]
 

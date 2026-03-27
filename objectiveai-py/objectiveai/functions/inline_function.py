@@ -7,14 +7,18 @@ from objectiveai.functions.expression.expression import Expression
 from objectiveai.functions.task_expression import TaskExpression
 
 
-class InlineFunctionVariant1(BaseModel):
+class InlineFunctionScalar(BaseModel):
     """Produces a single score in [0, 1]."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Scalar'})
+
     tasks: list[TaskExpression] = Field(..., description='The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped).')
     type_: Literal['scalar.function'] = Field(..., alias='type')
 
 
-class InlineFunctionVariant2(BaseModel):
+class InlineFunctionVector(BaseModel):
     """Produces a vector of scores that sums to 1."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Vector'})
+
     input_merge: Optional[Expression] = Field(None, description='Expression transforming an array of inputs computed by `input_split`\ninto a single Input object for the Function.\nReceives: `input` (as an array).\nOnly required if the request uses a strategy that needs input splitting.')
     input_split: Optional[Expression] = Field(None, description='Expression transforming input into an input array of the output_length\nWhen the Function is executed with any input from the array,\nThe output_length should be 1.\nReceives: `input`.\nOnly required if the request uses a strategy that needs input splitting.')
     tasks: list[TaskExpression] = Field(..., description='The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped).')
@@ -29,5 +33,5 @@ referencing a remote function. Lacks description and input
 schema fields."""
     model_config = ConfigDict(title='functions.InlineFunction')
 
-    root: Union[InlineFunctionVariant1, InlineFunctionVariant2]
+    root: Union[InlineFunctionScalar, InlineFunctionVector]
 

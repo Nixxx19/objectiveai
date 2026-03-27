@@ -7,11 +7,15 @@ from objectiveai.functions.inline_profile import InlineProfile
 from objectiveai.remote_path_commit_optional import RemotePathCommitOptional
 
 
-class InlineProfileOrRemoteCommitOptionalVariant1(RootModel):
+class InlineProfileOrRemoteCommitOptionalInline(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Inline'})
+
     root: InlineProfile
 
 
-class InlineProfileOrRemoteCommitOptionalVariant2(RootModel):
+class InlineProfileOrRemoteCommitOptionalRemote(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Remote'})
+
     root: RemotePathCommitOptional
 
 
@@ -20,5 +24,5 @@ class InlineProfileOrRemoteCommitOptional(RootModel):
 or a remote path reference."""
     model_config = ConfigDict(title='functions.InlineProfileOrRemoteCommitOptional')
 
-    root: Union[InlineProfileOrRemoteCommitOptionalVariant1, InlineProfileOrRemoteCommitOptionalVariant2]
+    root: Union[InlineProfileOrRemoteCommitOptionalInline, InlineProfileOrRemoteCommitOptionalRemote]
 

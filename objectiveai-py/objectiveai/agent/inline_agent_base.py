@@ -8,15 +8,21 @@ from objectiveai.agent.mock.agent_base import AgentBase as AgentMockAgentBase
 from objectiveai.agent.openrouter.agent_base import AgentBase
 
 
-class InlineAgentBaseVariant1(RootModel):
+class InlineAgentBaseOpenrouter(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Openrouter'})
+
     root: AgentBase
 
 
-class InlineAgentBaseVariant2(RootModel):
+class InlineAgentBaseClaudeAgentSdk(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'ClaudeAgentSdk'})
+
     root: AgentClaudeAgentSdkAgentBase
 
 
-class InlineAgentBaseVariant3(RootModel):
+class InlineAgentBaseMock(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Mock'})
+
     root: AgentMockAgentBase
 
 
@@ -27,5 +33,5 @@ This is an untagged enum that dispatches to the per-upstream AgentBase.
 Deserialization tries each variant in order until one matches."""
     model_config = ConfigDict(title='agent.InlineAgentBase')
 
-    root: Union[InlineAgentBaseVariant1, InlineAgentBaseVariant2, InlineAgentBaseVariant3]
+    root: Union[InlineAgentBaseOpenrouter, InlineAgentBaseClaudeAgentSdk, InlineAgentBaseMock]
 

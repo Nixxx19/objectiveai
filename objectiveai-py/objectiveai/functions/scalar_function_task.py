@@ -8,7 +8,7 @@ from objectiveai.functions.expression.input_value import InputValue
 from objectiveai.remote_path import RemotePath
 
 
-class ScalarFunctionTaskVariant1(BaseModel):
+class ScalarFunctionTaskGithub(BaseModel):
     commit: str
     owner: str
     remote: Literal['github']
@@ -17,7 +17,7 @@ class ScalarFunctionTaskVariant1(BaseModel):
     output: Expression = Field(..., description="Expression to transform the task result into a valid function output.\n\nReceives `output` as the nested function's result (Scalar or Vector).\nMust return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).\nSee [`ScalarFunctionTaskExpression::output`] for full documentation.")
 
 
-class ScalarFunctionTaskVariant2(BaseModel):
+class ScalarFunctionTaskFilesystem(BaseModel):
     commit: str
     owner: str
     remote: Literal['filesystem']
@@ -26,7 +26,7 @@ class ScalarFunctionTaskVariant2(BaseModel):
     output: Expression = Field(..., description="Expression to transform the task result into a valid function output.\n\nReceives `output` as the nested function's result (Scalar or Vector).\nMust return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).\nSee [`ScalarFunctionTaskExpression::output`] for full documentation.")
 
 
-class ScalarFunctionTaskVariant3(BaseModel):
+class ScalarFunctionTaskMock(BaseModel):
     name: str
     remote: Literal['mock']
     input: InputValue = Field(..., description='The resolved input to pass to the function.')
@@ -37,5 +37,5 @@ class ScalarFunctionTask(RootModel):
     """A compiled scalar function task ready for execution."""
     model_config = ConfigDict(title='functions.ScalarFunctionTask', json_schema_extra={'_expanded_ref': 'RemotePath', '_expanded_ref_props': ['input', 'output']})
 
-    root: Union[ScalarFunctionTaskVariant1, ScalarFunctionTaskVariant2, ScalarFunctionTaskVariant3]
+    root: Union[ScalarFunctionTaskGithub, ScalarFunctionTaskFilesystem, ScalarFunctionTaskMock]
 

@@ -10,17 +10,21 @@ from objectiveai.agent.completions.message.video_url import VideoUrl
 from objectiveai.functions.expression.expression import Expression
 
 
-class RichContentPartExpressionVariant1TextVariant1(RootModel):
+class RichContentPartExpressionTextTextExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class RichContentPartExpressionVariant1TextVariant2(RootModel):
+class RichContentPartExpressionTextTextValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: str
 
 
-class RichContentPartExpressionVariant1Text(RootModel):
+class RichContentPartExpressionTextText(RootModel):
     """A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
@@ -43,20 +47,24 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[RichContentPartExpressionVariant1TextVariant1, RichContentPartExpressionVariant1TextVariant2]
+    root: Union[RichContentPartExpressionTextTextExpression, RichContentPartExpressionTextTextValue]
 
 
-class RichContentPartExpressionVariant2Image_urlVariant1(RootModel):
+class RichContentPartExpressionImageUrlImage_urlExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class RichContentPartExpressionVariant2Image_urlVariant2(RootModel):
+class RichContentPartExpressionImageUrlImage_urlValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: ImageUrl
 
 
-class RichContentPartExpressionVariant2Image_url(RootModel):
+class RichContentPartExpressionImageUrlImage_url(RootModel):
     """A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
@@ -79,20 +87,24 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[RichContentPartExpressionVariant2Image_urlVariant1, RichContentPartExpressionVariant2Image_urlVariant2]
+    root: Union[RichContentPartExpressionImageUrlImage_urlExpression, RichContentPartExpressionImageUrlImage_urlValue]
 
 
-class RichContentPartExpressionVariant3Input_audioVariant1(RootModel):
+class RichContentPartExpressionInputAudioInput_audioExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class RichContentPartExpressionVariant3Input_audioVariant2(RootModel):
+class RichContentPartExpressionInputAudioInput_audioValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: InputAudio
 
 
-class RichContentPartExpressionVariant3Input_audio(RootModel):
+class RichContentPartExpressionInputAudioInput_audio(RootModel):
     """A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
@@ -115,20 +127,24 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[RichContentPartExpressionVariant3Input_audioVariant1, RichContentPartExpressionVariant3Input_audioVariant2]
+    root: Union[RichContentPartExpressionInputAudioInput_audioExpression, RichContentPartExpressionInputAudioInput_audioValue]
 
 
-class RichContentPartExpressionVariant4Video_urlVariant1(RootModel):
+class RichContentPartExpressionInputVideoVideo_urlExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class RichContentPartExpressionVariant4Video_urlVariant2(RootModel):
+class RichContentPartExpressionInputVideoVideo_urlValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: VideoUrl
 
 
-class RichContentPartExpressionVariant4Video_url(RootModel):
+class RichContentPartExpressionInputVideoVideo_url(RootModel):
     """A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
@@ -151,20 +167,24 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[RichContentPartExpressionVariant4Video_urlVariant1, RichContentPartExpressionVariant4Video_urlVariant2]
+    root: Union[RichContentPartExpressionInputVideoVideo_urlExpression, RichContentPartExpressionInputVideoVideo_urlValue]
 
 
-class RichContentPartExpressionVariant5Video_urlVariant1(RootModel):
+class RichContentPartExpressionVideoUrlVideo_urlExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class RichContentPartExpressionVariant5Video_urlVariant2(RootModel):
+class RichContentPartExpressionVideoUrlVideo_urlValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: VideoUrl
 
 
-class RichContentPartExpressionVariant5Video_url(RootModel):
+class RichContentPartExpressionVideoUrlVideo_url(RootModel):
     """A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
@@ -187,20 +207,24 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[RichContentPartExpressionVariant5Video_urlVariant1, RichContentPartExpressionVariant5Video_urlVariant2]
+    root: Union[RichContentPartExpressionVideoUrlVideo_urlExpression, RichContentPartExpressionVideoUrlVideo_urlValue]
 
 
-class RichContentPartExpressionVariant6FileVariant1(RootModel):
+class RichContentPartExpressionFileFileExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class RichContentPartExpressionVariant6FileVariant2(RootModel):
+class RichContentPartExpressionFileFileValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: File
 
 
-class RichContentPartExpressionVariant6File(RootModel):
+class RichContentPartExpressionFileFile(RootModel):
     """A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
@@ -223,36 +247,48 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[RichContentPartExpressionVariant6FileVariant1, RichContentPartExpressionVariant6FileVariant2]
+    root: Union[RichContentPartExpressionFileFileExpression, RichContentPartExpressionFileFileValue]
 
 
-class RichContentPartExpressionVariant1(BaseModel):
-    text: RichContentPartExpressionVariant1Text = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+class RichContentPartExpressionText(BaseModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Text'})
+
+    text: RichContentPartExpressionTextText = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
     type_: Literal['text'] = Field(..., alias='type')
 
 
-class RichContentPartExpressionVariant2(BaseModel):
-    image_url: RichContentPartExpressionVariant2Image_url = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+class RichContentPartExpressionImageUrl(BaseModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'ImageUrl'})
+
+    image_url: RichContentPartExpressionImageUrlImage_url = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
     type_: Literal['image_url'] = Field(..., alias='type')
 
 
-class RichContentPartExpressionVariant3(BaseModel):
-    input_audio: RichContentPartExpressionVariant3Input_audio = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+class RichContentPartExpressionInputAudio(BaseModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'InputAudio'})
+
+    input_audio: RichContentPartExpressionInputAudioInput_audio = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
     type_: Literal['input_audio'] = Field(..., alias='type')
 
 
-class RichContentPartExpressionVariant4(BaseModel):
+class RichContentPartExpressionInputVideo(BaseModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'InputVideo'})
+
     type_: Literal['input_video'] = Field(..., alias='type')
-    video_url: RichContentPartExpressionVariant4Video_url = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+    video_url: RichContentPartExpressionInputVideoVideo_url = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
 
 
-class RichContentPartExpressionVariant5(BaseModel):
+class RichContentPartExpressionVideoUrl(BaseModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'VideoUrl'})
+
     type_: Literal['video_url'] = Field(..., alias='type')
-    video_url: RichContentPartExpressionVariant5Video_url = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+    video_url: RichContentPartExpressionVideoUrlVideo_url = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
 
 
-class RichContentPartExpressionVariant6(BaseModel):
-    file: RichContentPartExpressionVariant6File = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+class RichContentPartExpressionFile(BaseModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'File'})
+
+    file: RichContentPartExpressionFileFile = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
     type_: Literal['file'] = Field(..., alias='type')
 
 
@@ -260,5 +296,5 @@ class RichContentPartExpression(RootModel):
     """Expression variant of [`RichContentPart`] for dynamic content."""
     model_config = ConfigDict(title='agent.completions.message.RichContentPartExpression')
 
-    root: Union[RichContentPartExpressionVariant1, RichContentPartExpressionVariant2, RichContentPartExpressionVariant3, RichContentPartExpressionVariant4, RichContentPartExpressionVariant5, RichContentPartExpressionVariant6]
+    root: Union[RichContentPartExpressionText, RichContentPartExpressionImageUrl, RichContentPartExpressionInputAudio, RichContentPartExpressionInputVideo, RichContentPartExpressionVideoUrl, RichContentPartExpressionFile]
 

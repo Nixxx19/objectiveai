@@ -7,13 +7,17 @@ from objectiveai.functions.inline_function import InlineFunction
 from objectiveai.functions.remote_function import RemoteFunction
 
 
-class FunctionVariant1(RootModel):
+class FunctionRemote(RootModel):
     """A remote function with metadata (description, schema, etc.)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Remote'})
+
     root: RemoteFunction
 
 
-class FunctionVariant2(RootModel):
+class FunctionInline(RootModel):
     """An inline function definition without metadata."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Inline'})
+
     root: InlineFunction
 
 
@@ -29,5 +33,5 @@ Use [`compile_tasks`](Self::compile_tasks) to preview how task expressions resol
 for given inputs."""
     model_config = ConfigDict(title='functions.Function')
 
-    root: Union[FunctionVariant1, FunctionVariant2]
+    root: Union[FunctionRemote, FunctionInline]
 

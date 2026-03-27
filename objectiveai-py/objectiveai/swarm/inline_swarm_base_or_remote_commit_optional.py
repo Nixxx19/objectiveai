@@ -7,11 +7,15 @@ from objectiveai.remote_path_commit_optional import RemotePathCommitOptional
 from objectiveai.swarm.inline_swarm_base import InlineSwarmBase
 
 
-class InlineSwarmBaseOrRemoteCommitOptionalVariant1(RootModel):
+class InlineSwarmBaseOrRemoteCommitOptionalSwarmBase(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'SwarmBase'})
+
     root: InlineSwarmBase
 
 
-class InlineSwarmBaseOrRemoteCommitOptionalVariant2(RootModel):
+class InlineSwarmBaseOrRemoteCommitOptionalRemote(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Remote'})
+
     root: RemotePathCommitOptional
 
 
@@ -20,5 +24,5 @@ class InlineSwarmBaseOrRemoteCommitOptional(RootModel):
 Used in request types where commit resolution happens server-side."""
     model_config = ConfigDict(title='swarm.InlineSwarmBaseOrRemoteCommitOptional')
 
-    root: Union[InlineSwarmBaseOrRemoteCommitOptionalVariant1, InlineSwarmBaseOrRemoteCommitOptionalVariant2]
+    root: Union[InlineSwarmBaseOrRemoteCommitOptionalSwarmBase, InlineSwarmBaseOrRemoteCommitOptionalRemote]
 

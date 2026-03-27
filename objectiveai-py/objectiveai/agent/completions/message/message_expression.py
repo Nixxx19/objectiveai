@@ -10,23 +10,33 @@ from objectiveai.agent.completions.message.tool_message_expression import ToolMe
 from objectiveai.agent.completions.message.user_message_expression import UserMessageExpression
 
 
-class MessageExpressionVariant1(DeveloperMessageExpression):
+class MessageExpressionDeveloper(DeveloperMessageExpression):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Developer'})
+
     role: Literal['developer']
 
 
-class MessageExpressionVariant2(SystemMessageExpression):
+class MessageExpressionSystem(SystemMessageExpression):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'System'})
+
     role: Literal['system']
 
 
-class MessageExpressionVariant3(UserMessageExpression):
+class MessageExpressionUser(UserMessageExpression):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'User'})
+
     role: Literal['user']
 
 
-class MessageExpressionVariant4(AssistantMessageExpression):
+class MessageExpressionAssistant(AssistantMessageExpression):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Assistant'})
+
     role: Literal['assistant']
 
 
-class MessageExpressionVariant5(ToolMessageExpression):
+class MessageExpressionTool(ToolMessageExpression):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Tool'})
+
     role: Literal['tool']
 
 
@@ -38,5 +48,5 @@ where message content can be computed from the function input at runtime.
 Supports both JMESPath and Starlark expressions."""
     model_config = ConfigDict(title='agent.completions.message.MessageExpression')
 
-    root: Union[MessageExpressionVariant1, MessageExpressionVariant2, MessageExpressionVariant3, MessageExpressionVariant4, MessageExpressionVariant5]
+    root: Union[MessageExpressionDeveloper, MessageExpressionSystem, MessageExpressionUser, MessageExpressionAssistant, MessageExpressionTool]
 

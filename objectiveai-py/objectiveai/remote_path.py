@@ -5,21 +5,27 @@ from typing import Literal, Union
 from pydantic import BaseModel, ConfigDict, RootModel
 
 
-class RemotePathVariant1(BaseModel):
+class RemotePathGithub(BaseModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Github'})
+
     commit: str
     owner: str
     remote: Literal['github']
     repository: str
 
 
-class RemotePathVariant2(BaseModel):
+class RemotePathFilesystem(BaseModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Filesystem'})
+
     commit: str
     owner: str
     remote: Literal['filesystem']
     repository: str
 
 
-class RemotePathVariant3(BaseModel):
+class RemotePathMock(BaseModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Mock'})
+
     name: str
     remote: Literal['mock']
 
@@ -27,5 +33,5 @@ class RemotePathVariant3(BaseModel):
 class RemotePath(RootModel):
     model_config = ConfigDict(title='RemotePath')
 
-    root: Union[RemotePathVariant1, RemotePathVariant2, RemotePathVariant3]
+    root: Union[RemotePathGithub, RemotePathFilesystem, RemotePathMock]
 

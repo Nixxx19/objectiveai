@@ -8,13 +8,17 @@ from objectiveai.agent.completions.message.rich_content_expression import RichCo
 from objectiveai.functions.expression.expression import Expression
 
 
-class AssistantMessageExpressionContentVariant1(RootModel):
+class AssistantMessageExpressionContentExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class AssistantMessageExpressionContentVariant2(RootModel):
+class AssistantMessageExpressionContentValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: Optional[RichContentExpression]
 
 
@@ -43,16 +47,20 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[AssistantMessageExpressionContentVariant1, AssistantMessageExpressionContentVariant2]
+    root: Union[AssistantMessageExpressionContentExpression, AssistantMessageExpressionContentValue]
 
 
-class AssistantMessageExpressionNameVariant1(RootModel):
+class AssistantMessageExpressionNameExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class AssistantMessageExpressionNameVariant2(RootModel):
+class AssistantMessageExpressionNameValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: Optional[str]
 
 
@@ -79,16 +87,20 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[AssistantMessageExpressionNameVariant1, AssistantMessageExpressionNameVariant2]
+    root: Union[AssistantMessageExpressionNameExpression, AssistantMessageExpressionNameValue]
 
 
-class AssistantMessageExpressionReasoningVariant1(RootModel):
+class AssistantMessageExpressionReasoningExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class AssistantMessageExpressionReasoningVariant2(RootModel):
+class AssistantMessageExpressionReasoningValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: Optional[str]
 
 
@@ -115,16 +127,20 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[AssistantMessageExpressionReasoningVariant1, AssistantMessageExpressionReasoningVariant2]
+    root: Union[AssistantMessageExpressionReasoningExpression, AssistantMessageExpressionReasoningValue]
 
 
-class AssistantMessageExpressionRefusalVariant1(RootModel):
+class AssistantMessageExpressionRefusalExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class AssistantMessageExpressionRefusalVariant2(RootModel):
+class AssistantMessageExpressionRefusalValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: Optional[str]
 
 
@@ -151,16 +167,20 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[AssistantMessageExpressionRefusalVariant1, AssistantMessageExpressionRefusalVariant2]
+    root: Union[AssistantMessageExpressionRefusalExpression, AssistantMessageExpressionRefusalValue]
 
 
-class AssistantMessageExpressionTool_callsItemVariant1(RootModel):
+class AssistantMessageExpressionTool_callsItemExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class AssistantMessageExpressionTool_callsItemVariant2(RootModel):
+class AssistantMessageExpressionTool_callsItemValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: AssistantToolCallExpression
 
 
@@ -187,16 +207,20 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[AssistantMessageExpressionTool_callsItemVariant1, AssistantMessageExpressionTool_callsItemVariant2]
+    root: Union[AssistantMessageExpressionTool_callsItemExpression, AssistantMessageExpressionTool_callsItemValue]
 
 
-class AssistantMessageExpressionTool_callsVariant1(RootModel):
+class AssistantMessageExpressionTool_callsExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class AssistantMessageExpressionTool_callsVariant2(RootModel):
+class AssistantMessageExpressionTool_callsValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: Optional[list[AssistantMessageExpressionTool_callsItem]]
 
 
@@ -223,7 +247,7 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[AssistantMessageExpressionTool_callsVariant1, AssistantMessageExpressionTool_callsVariant2]
+    root: Union[AssistantMessageExpressionTool_callsExpression, AssistantMessageExpressionTool_callsValue]
 
 
 class AssistantMessageExpression(BaseModel):

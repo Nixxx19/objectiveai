@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from objectiveai.agent.completions.response.streaming.message_chunk import (
     MessageChunk,
-    MessageChunkVariant1,
+    MessageChunkAssistant,
 )
 
 
@@ -13,8 +13,8 @@ def _push(self, other: MessageChunk) -> None:
 
     # Only merge if both are assistant variants
     if (
-        isinstance(self_inner, MessageChunkVariant1)
-        and isinstance(other_inner, MessageChunkVariant1)
+        isinstance(self_inner, MessageChunkAssistant)
+        and isinstance(other_inner, MessageChunkAssistant)
     ):
         self_inner.root.push(other_inner.root)
 

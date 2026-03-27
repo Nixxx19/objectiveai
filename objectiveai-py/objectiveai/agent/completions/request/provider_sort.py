@@ -5,18 +5,24 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class ProviderSortVariant1(RootModel):
+class ProviderSortPrice(RootModel):
     """Prioritize by price (cheapest first)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Price'})
+
     root: Literal['price']
 
 
-class ProviderSortVariant2(RootModel):
+class ProviderSortThroughput(RootModel):
     """Prioritize by throughput (fastest first)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Throughput'})
+
     root: Literal['throughput']
 
 
-class ProviderSortVariant3(RootModel):
+class ProviderSortLatency(RootModel):
     """Prioritize by latency (lowest first)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Latency'})
+
     root: Literal['latency']
 
 
@@ -24,5 +30,5 @@ class ProviderSort(RootModel):
     """How to sort/prioritize providers."""
     model_config = ConfigDict(title='agent.completions.request.ProviderSort')
 
-    root: Union[ProviderSortVariant1, ProviderSortVariant2, ProviderSortVariant3]
+    root: Union[ProviderSortPrice, ProviderSortThroughput, ProviderSortLatency]
 

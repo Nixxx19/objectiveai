@@ -5,18 +5,24 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class ImageUrlDetailVariant1(RootModel):
+class ImageUrlDetailAuto(RootModel):
     """Let the model decide the detail level."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Auto'})
+
     root: Literal['auto']
 
 
-class ImageUrlDetailVariant2(RootModel):
+class ImageUrlDetailLow(RootModel):
     """Low detail mode (faster, less tokens)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Low'})
+
     root: Literal['low']
 
 
-class ImageUrlDetailVariant3(RootModel):
+class ImageUrlDetailHigh(RootModel):
     """High detail mode (more accurate, more tokens)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'High'})
+
     root: Literal['high']
 
 
@@ -24,5 +30,5 @@ class ImageUrlDetail(RootModel):
     """Detail level for image processing."""
     model_config = ConfigDict(title='agent.completions.message.ImageUrlDetail')
 
-    root: Union[ImageUrlDetailVariant1, ImageUrlDetailVariant2, ImageUrlDetailVariant3]
+    root: Union[ImageUrlDetailAuto, ImageUrlDetailLow, ImageUrlDetailHigh]
 

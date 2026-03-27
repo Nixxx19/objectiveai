@@ -6,13 +6,17 @@ from pydantic import ConfigDict, RootModel
 from objectiveai.agent.completions.message.rich_content_part import RichContentPart
 
 
-class RichContentVariant1(RootModel):
+class RichContentText(RootModel):
     """Plain text content."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Text'})
+
     root: str
 
 
-class RichContentVariant2(RootModel):
+class RichContentParts(RootModel):
     """Multi-part content (text, images, audio, video, files)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Parts'})
+
     root: list[RichContentPart]
 
 
@@ -20,5 +24,5 @@ class RichContent(RootModel):
     """Rich content for user/assistant messages (supports multimodal input)."""
     model_config = ConfigDict(title='agent.completions.message.RichContent')
 
-    root: Union[RichContentVariant1, RichContentVariant2]
+    root: Union[RichContentText, RichContentParts]
 

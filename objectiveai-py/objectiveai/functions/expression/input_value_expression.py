@@ -7,13 +7,17 @@ from objectiveai.agent.completions.message.rich_content_part import RichContentP
 from objectiveai.functions.expression.expression import Expression
 
 
-class ValueVariant1(RootModel):
+class ValueExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class ValueVariant2(RootModel):
+class ValueValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: InputValueExpression
 
 
@@ -40,16 +44,20 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[ValueVariant1, ValueVariant2]
+    root: Union[ValueExpression, ValueValue]
 
 
-class ItemVariant1(RootModel):
+class ItemExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class ItemVariant2(RootModel):
+class ItemValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: InputValueExpression
 
 
@@ -76,41 +84,55 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[ItemVariant1, ItemVariant2]
+    root: Union[ItemExpression, ItemValue]
 
 
-class InputValueExpressionVariant1(RootModel):
+class InputValueExpressionRichContentPart(RootModel):
     """Rich content (image, audio, video, file)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'RichContentPart'})
+
     root: RichContentPart
 
 
-class InputValueExpressionVariant2(RootModel):
+class InputValueExpressionObject(RootModel):
     """An object with values that may be expressions."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Object'})
+
     root: dict[str, Value]
 
 
-class InputValueExpressionVariant3(RootModel):
+class InputValueExpressionArray(RootModel):
     """An array with elements that may be expressions."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Array'})
+
     root: list[Item]
 
 
-class InputValueExpressionVariant4(RootModel):
+class InputValueExpressionString(RootModel):
     """A string value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'String'})
+
     root: str
 
 
-class InputValueExpressionVariant5(RootModel):
+class InputValueExpressionInteger(RootModel):
     """An integer value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Integer'})
+
     root: Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]
 
 
-class InputValueExpressionVariant6(RootModel):
+class InputValueExpressionNumber(RootModel):
     """A floating-point number."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Number'})
+
     root: Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]
 
 
-class InputValueExpressionVariant7(RootModel):
+class InputValueExpressionBoolean(RootModel):
     """A boolean value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Boolean'})
+
     root: bool
 
 
@@ -121,5 +143,5 @@ Similar to [`InputValue`] but object values and array elements can be
 expressions (JMESPath or Starlark) that are evaluated during compilation."""
     model_config = ConfigDict(title='functions.expression.InputValueExpression')
 
-    root: Union[InputValueExpressionVariant1, InputValueExpressionVariant2, InputValueExpressionVariant3, InputValueExpressionVariant4, InputValueExpressionVariant5, InputValueExpressionVariant6, InputValueExpressionVariant7]
+    root: Union[InputValueExpressionRichContentPart, InputValueExpressionObject, InputValueExpressionArray, InputValueExpressionString, InputValueExpressionInteger, InputValueExpressionNumber, InputValueExpressionBoolean]
 

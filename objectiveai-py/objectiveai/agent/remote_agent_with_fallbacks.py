@@ -10,17 +10,17 @@ from objectiveai.agent.mock.agent import Agent as AgentMockAgent
 from objectiveai.agent.openrouter.agent import Agent as AgentOpenrouterAgent
 
 
-class RemoteAgentWithFallbacksVariant1(AgentOpenrouterAgent):
+class RemoteAgentWithFallbacksOpenrouter(AgentOpenrouterAgent):
     fallbacks: Optional[list[InlineAgent]] = Field(None, description='Fallback agents to try if the primary fails.')
     description: str
 
 
-class RemoteAgentWithFallbacksVariant2(AgentClaudeAgentSdkAgent):
+class RemoteAgentWithFallbacksClaudeAgentSdk(AgentClaudeAgentSdkAgent):
     fallbacks: Optional[list[InlineAgent]] = Field(None, description='Fallback agents to try if the primary fails.')
     description: str
 
 
-class RemoteAgentWithFallbacksVariant3(AgentMockAgent):
+class RemoteAgentWithFallbacksMock(AgentMockAgent):
     fallbacks: Optional[list[InlineAgent]] = Field(None, description='Fallback agents to try if the primary fails.')
     description: str
 
@@ -29,5 +29,5 @@ class RemoteAgentWithFallbacks(RootModel):
     """A validated remote agent with description and optional fallbacks."""
     model_config = ConfigDict(title='agent.RemoteAgentWithFallbacks', json_schema_extra={'_expanded_ref': 'agent.InlineAgentWithFallbacks', '_expanded_ref_props': ['description']})
 
-    root: Union[RemoteAgentWithFallbacksVariant1, RemoteAgentWithFallbacksVariant2, RemoteAgentWithFallbacksVariant3]
+    root: Union[RemoteAgentWithFallbacksOpenrouter, RemoteAgentWithFallbacksClaudeAgentSdk, RemoteAgentWithFallbacksMock]
 

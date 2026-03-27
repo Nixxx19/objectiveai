@@ -8,13 +8,17 @@ from objectiveai.agent.completions.message.rich_content_expression import RichCo
 from objectiveai.functions.expression.expression import Expression
 
 
-class VectorCompletionTaskExpressionMessagesItemVariant1(RootModel):
+class VectorCompletionTaskExpressionMessagesItemExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class VectorCompletionTaskExpressionMessagesItemVariant2(RootModel):
+class VectorCompletionTaskExpressionMessagesItemValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: MessageExpression
 
 
@@ -41,16 +45,20 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[VectorCompletionTaskExpressionMessagesItemVariant1, VectorCompletionTaskExpressionMessagesItemVariant2]
+    root: Union[VectorCompletionTaskExpressionMessagesItemExpression, VectorCompletionTaskExpressionMessagesItemValue]
 
 
-class VectorCompletionTaskExpressionMessagesVariant1(RootModel):
+class VectorCompletionTaskExpressionMessagesExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class VectorCompletionTaskExpressionMessagesVariant2(RootModel):
+class VectorCompletionTaskExpressionMessagesValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: list[VectorCompletionTaskExpressionMessagesItem]
 
 
@@ -80,16 +88,20 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[VectorCompletionTaskExpressionMessagesVariant1, VectorCompletionTaskExpressionMessagesVariant2]
+    root: Union[VectorCompletionTaskExpressionMessagesExpression, VectorCompletionTaskExpressionMessagesValue]
 
 
-class VectorCompletionTaskExpressionResponsesItemVariant1(RootModel):
+class VectorCompletionTaskExpressionResponsesItemExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class VectorCompletionTaskExpressionResponsesItemVariant2(RootModel):
+class VectorCompletionTaskExpressionResponsesItemValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: RichContentExpression
 
 
@@ -116,16 +128,20 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[VectorCompletionTaskExpressionResponsesItemVariant1, VectorCompletionTaskExpressionResponsesItemVariant2]
+    root: Union[VectorCompletionTaskExpressionResponsesItemExpression, VectorCompletionTaskExpressionResponsesItemValue]
 
 
-class VectorCompletionTaskExpressionResponsesVariant1(RootModel):
+class VectorCompletionTaskExpressionResponsesExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class VectorCompletionTaskExpressionResponsesVariant2(RootModel):
+class VectorCompletionTaskExpressionResponsesValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: list[VectorCompletionTaskExpressionResponsesItem]
 
 
@@ -155,7 +171,7 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[VectorCompletionTaskExpressionResponsesVariant1, VectorCompletionTaskExpressionResponsesVariant2]
+    root: Union[VectorCompletionTaskExpressionResponsesExpression, VectorCompletionTaskExpressionResponsesValue]
 
 
 class VectorCompletionTaskExpression(BaseModel):

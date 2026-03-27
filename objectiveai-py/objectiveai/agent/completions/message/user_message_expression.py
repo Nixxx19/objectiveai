@@ -7,13 +7,17 @@ from objectiveai.agent.completions.message.rich_content_expression import RichCo
 from objectiveai.functions.expression.expression import Expression
 
 
-class UserMessageExpressionContentVariant1(RootModel):
+class UserMessageExpressionContentExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class UserMessageExpressionContentVariant2(RootModel):
+class UserMessageExpressionContentValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: RichContentExpression
 
 
@@ -42,16 +46,20 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[UserMessageExpressionContentVariant1, UserMessageExpressionContentVariant2]
+    root: Union[UserMessageExpressionContentExpression, UserMessageExpressionContentValue]
 
 
-class UserMessageExpressionNameVariant1(RootModel):
+class UserMessageExpressionNameExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class UserMessageExpressionNameVariant2(RootModel):
+class UserMessageExpressionNameValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: Optional[str]
 
 
@@ -80,7 +88,7 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[UserMessageExpressionNameVariant1, UserMessageExpressionNameVariant2]
+    root: Union[UserMessageExpressionNameExpression, UserMessageExpressionNameValue]
 
 
 class UserMessageExpression(BaseModel):

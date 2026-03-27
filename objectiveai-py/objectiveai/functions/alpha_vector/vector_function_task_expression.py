@@ -8,7 +8,7 @@ from objectiveai.functions.expression.expression import Expression
 from objectiveai.remote_path import RemotePath
 
 
-class VectorFunctionTaskExpressionVariant1(BaseModel):
+class VectorFunctionTaskExpressionGithub(BaseModel):
     commit: str
     owner: str
     remote: Literal['github']
@@ -17,7 +17,7 @@ class VectorFunctionTaskExpressionVariant1(BaseModel):
     skip: Optional[Expression] = None
 
 
-class VectorFunctionTaskExpressionVariant2(BaseModel):
+class VectorFunctionTaskExpressionFilesystem(BaseModel):
     commit: str
     owner: str
     remote: Literal['filesystem']
@@ -26,7 +26,7 @@ class VectorFunctionTaskExpressionVariant2(BaseModel):
     skip: Optional[Expression] = None
 
 
-class VectorFunctionTaskExpressionVariant3(BaseModel):
+class VectorFunctionTaskExpressionMock(BaseModel):
     name: str
     remote: Literal['mock']
     input: VectorFunctionInputValueExpression
@@ -36,5 +36,5 @@ class VectorFunctionTaskExpressionVariant3(BaseModel):
 class VectorFunctionTaskExpression(RootModel):
     model_config = ConfigDict(title='functions.alpha_vector.VectorFunctionTaskExpression', json_schema_extra={'_expanded_ref': 'RemotePath', '_expanded_ref_props': ['input', 'skip']})
 
-    root: Union[VectorFunctionTaskExpressionVariant1, VectorFunctionTaskExpressionVariant2, VectorFunctionTaskExpressionVariant3]
+    root: Union[VectorFunctionTaskExpressionGithub, VectorFunctionTaskExpressionFilesystem, VectorFunctionTaskExpressionMock]
 

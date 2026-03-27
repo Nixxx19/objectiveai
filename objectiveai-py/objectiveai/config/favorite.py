@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, RootModel
 from objectiveai.remote_path_commit_optional import RemotePathCommitOptional
 
 
-class FavoriteVariant1(BaseModel):
+class FavoriteGithub(BaseModel):
     commit: Optional[str] = None
     owner: str
     remote: Literal['github']
@@ -15,7 +15,7 @@ class FavoriteVariant1(BaseModel):
     note: str
 
 
-class FavoriteVariant2(BaseModel):
+class FavoriteFilesystem(BaseModel):
     commit: Optional[str] = None
     owner: str
     remote: Literal['filesystem']
@@ -24,7 +24,7 @@ class FavoriteVariant2(BaseModel):
     note: str
 
 
-class FavoriteVariant3(BaseModel):
+class FavoriteMock(BaseModel):
     name: str
     remote: Literal['mock']
     note: str
@@ -33,5 +33,5 @@ class FavoriteVariant3(BaseModel):
 class Favorite(RootModel):
     model_config = ConfigDict(title='config.Favorite', json_schema_extra={'_expanded_ref': 'RemotePathCommitOptional', '_expanded_ref_props': ['name', 'note']})
 
-    root: Union[FavoriteVariant1, FavoriteVariant2, FavoriteVariant3]
+    root: Union[FavoriteGithub, FavoriteFilesystem, FavoriteMock]
 

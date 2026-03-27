@@ -5,28 +5,38 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class FinishReasonVariant1(RootModel):
+class FinishReasonStop(RootModel):
     """The model reached a natural stop point or stop sequence."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Stop'})
+
     root: Literal['stop']
 
 
-class FinishReasonVariant2(RootModel):
+class FinishReasonLength(RootModel):
     """The model reached the maximum token limit."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Length'})
+
     root: Literal['length']
 
 
-class FinishReasonVariant3(RootModel):
+class FinishReasonToolCalls(RootModel):
     """The model decided to call one or more tools."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'ToolCalls'})
+
     root: Literal['tool_calls']
 
 
-class FinishReasonVariant4(RootModel):
+class FinishReasonContentFilter(RootModel):
     """The response was filtered due to content policy."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'ContentFilter'})
+
     root: Literal['content_filter']
 
 
-class FinishReasonVariant5(RootModel):
+class FinishReasonError(RootModel):
     """An error occurred during generation."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Error'})
+
     root: Literal['error']
 
 
@@ -34,5 +44,5 @@ class FinishReason(RootModel):
     """The reason the model stopped generating."""
     model_config = ConfigDict(title='agent.completions.response.FinishReason')
 
-    root: Union[FinishReasonVariant1, FinishReasonVariant2, FinishReasonVariant3, FinishReasonVariant4, FinishReasonVariant5]
+    root: Union[FinishReasonStop, FinishReasonLength, FinishReasonToolCalls, FinishReasonContentFilter, FinishReasonError]
 

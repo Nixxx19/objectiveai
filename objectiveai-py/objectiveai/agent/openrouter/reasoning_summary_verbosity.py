@@ -5,18 +5,24 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class ReasoningSummaryVerbosityVariant1(RootModel):
+class ReasoningSummaryVerbosityAuto(RootModel):
     """Let the model decide (default, normalized away)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Auto'})
+
     root: Literal['auto']
 
 
-class ReasoningSummaryVerbosityVariant2(RootModel):
+class ReasoningSummaryVerbosityConcise(RootModel):
     """Brief summary of reasoning."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Concise'})
+
     root: Literal['concise']
 
 
-class ReasoningSummaryVerbosityVariant3(RootModel):
+class ReasoningSummaryVerbosityDetailed(RootModel):
     """Thorough summary of reasoning."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Detailed'})
+
     root: Literal['detailed']
 
 
@@ -26,5 +32,5 @@ class ReasoningSummaryVerbosity(RootModel):
 Only supported by some models."""
     model_config = ConfigDict(title='agent.openrouter.ReasoningSummaryVerbosity')
 
-    root: Union[ReasoningSummaryVerbosityVariant1, ReasoningSummaryVerbosityVariant2, ReasoningSummaryVerbosityVariant3]
+    root: Union[ReasoningSummaryVerbosityAuto, ReasoningSummaryVerbosityConcise, ReasoningSummaryVerbosityDetailed]
 

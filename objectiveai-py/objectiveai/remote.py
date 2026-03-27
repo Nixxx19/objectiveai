@@ -5,18 +5,24 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class RemoteVariant1(RootModel):
+class RemoteGithub(RootModel):
     """GitHub repository."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Github'})
+
     root: Literal['github']
 
 
-class RemoteVariant2(RootModel):
+class RemoteFilesystem(RootModel):
     """Local filesystem."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Filesystem'})
+
     root: Literal['filesystem']
 
 
-class RemoteVariant3(RootModel):
+class RemoteMock(RootModel):
     """Mock (for testing)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Mock'})
+
     root: Literal['mock']
 
 
@@ -24,5 +30,5 @@ class Remote(RootModel):
     """The remote source where a function, profile, or agent is hosted."""
     model_config = ConfigDict(title='Remote')
 
-    root: Union[RemoteVariant1, RemoteVariant2, RemoteVariant3]
+    root: Union[RemoteGithub, RemoteFilesystem, RemoteMock]
 

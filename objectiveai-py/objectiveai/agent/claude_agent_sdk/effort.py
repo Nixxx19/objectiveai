@@ -5,23 +5,31 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class EffortVariant1(RootModel):
+class EffortLow(RootModel):
     """Minimal output, concise responses."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Low'})
+
     root: Literal['low']
 
 
-class EffortVariant2(RootModel):
+class EffortMedium(RootModel):
     """Balanced output (default, normalized away during preparation)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Medium'})
+
     root: Literal['medium']
 
 
-class EffortVariant3(RootModel):
+class EffortHigh(RootModel):
     """Detailed output with thorough explanations."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'High'})
+
     root: Literal['high']
 
 
-class EffortVariant4(RootModel):
+class EffortMax(RootModel):
     """Maximum effort, most detailed output possible."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Max'})
+
     root: Literal['max']
 
 
@@ -31,5 +39,5 @@ class Effort(RootModel):
 This setting hints to the model how detailed its responses should be."""
     model_config = ConfigDict(title='agent.claude_agent_sdk.Effort')
 
-    root: Union[EffortVariant1, EffortVariant2, EffortVariant3, EffortVariant4]
+    root: Union[EffortLow, EffortMedium, EffortHigh, EffortMax]
 

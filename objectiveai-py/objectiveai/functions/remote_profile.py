@@ -7,13 +7,17 @@ from objectiveai.functions.remote_tasks_profile import RemoteTasksProfile
 from objectiveai.swarm.remote_swarm_base import RemoteSwarmBase
 
 
-class RemoteProfileVariant1(RootModel):
+class RemoteProfileTasks(RootModel):
     """Tasks-based profile with per-task configuration."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Tasks'})
+
     root: RemoteTasksProfile
 
 
-class RemoteProfileVariant2(RootModel):
+class RemoteProfileAuto(RootModel):
     """Auto profile that applies a single swarm+weights to all vector completion tasks."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Auto'})
+
     root: RemoteSwarmBase
 
 
@@ -21,5 +25,5 @@ class RemoteProfile(RootModel):
     """A remote profile, either tasks-based or auto."""
     model_config = ConfigDict(title='functions.RemoteProfile')
 
-    root: Union[RemoteProfileVariant1, RemoteProfileVariant2]
+    root: Union[RemoteProfileTasks, RemoteProfileAuto]
 

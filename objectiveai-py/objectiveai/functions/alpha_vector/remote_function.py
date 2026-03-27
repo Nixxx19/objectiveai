@@ -8,14 +8,18 @@ from objectiveai.functions.alpha_vector.expression.vector_function_input_schema 
 from objectiveai.functions.alpha_vector.leaf_task_expression import LeafTaskExpression
 
 
-class RemoteFunctionVariant1(BaseModel):
+class RemoteFunctionBranch(BaseModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Branch'})
+
     description: str
     input_schema: VectorFunctionInputSchema
     tasks: list[BranchTaskExpression]
     type_: Literal['alpha.vector.branch.function'] = Field(..., alias='type')
 
 
-class RemoteFunctionVariant2(BaseModel):
+class RemoteFunctionLeaf(BaseModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Leaf'})
+
     description: str
     input_schema: VectorFunctionInputSchema
     tasks: list[LeafTaskExpression]
@@ -25,5 +29,5 @@ class RemoteFunctionVariant2(BaseModel):
 class RemoteFunction(RootModel):
     model_config = ConfigDict(title='functions.alpha_vector.RemoteFunction')
 
-    root: Union[RemoteFunctionVariant1, RemoteFunctionVariant2]
+    root: Union[RemoteFunctionBranch, RemoteFunctionLeaf]
 

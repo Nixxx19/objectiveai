@@ -7,11 +7,15 @@ from objectiveai.agent.inline_agent_base_with_fallbacks import InlineAgentBaseWi
 from objectiveai.remote_path_commit_optional import RemotePathCommitOptional
 
 
-class InlineAgentBaseWithFallbacksOrRemoteCommitOptionalVariant1(RootModel):
+class InlineAgentBaseWithFallbacksOrRemoteCommitOptionalAgentBase(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'AgentBase'})
+
     root: InlineAgentBaseWithFallbacks
 
 
-class InlineAgentBaseWithFallbacksOrRemoteCommitOptionalVariant2(RootModel):
+class InlineAgentBaseWithFallbacksOrRemoteCommitOptionalRemote(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Remote'})
+
     root: RemotePathCommitOptional
 
 
@@ -20,5 +24,5 @@ class InlineAgentBaseWithFallbacksOrRemoteCommitOptional(RootModel):
 Used in request types where commit resolution happens server-side."""
     model_config = ConfigDict(title='agent.InlineAgentBaseWithFallbacksOrRemoteCommitOptional')
 
-    root: Union[InlineAgentBaseWithFallbacksOrRemoteCommitOptionalVariant1, InlineAgentBaseWithFallbacksOrRemoteCommitOptionalVariant2]
+    root: Union[InlineAgentBaseWithFallbacksOrRemoteCommitOptionalAgentBase, InlineAgentBaseWithFallbacksOrRemoteCommitOptionalRemote]
 

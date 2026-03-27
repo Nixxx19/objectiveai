@@ -5,23 +5,31 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class UpstreamVariant1(RootModel):
+class UpstreamUnknown(RootModel):
     """Unknown Upstream."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Unknown'})
+
     root: Literal['unknown']
 
 
-class UpstreamVariant2(RootModel):
+class UpstreamOpenrouter(RootModel):
     """OpenRouter Upstream."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Openrouter'})
+
     root: Literal['openrouter']
 
 
-class UpstreamVariant3(RootModel):
+class UpstreamClaudeAgentSdk(RootModel):
     """Claude Agent SDK Upstream."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'ClaudeAgentSdk'})
+
     root: Literal['claude_agent_sdk']
 
 
-class UpstreamVariant4(RootModel):
+class UpstreamMock(RootModel):
     """Mock Upstream."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Mock'})
+
     root: Literal['mock']
 
 
@@ -29,5 +37,5 @@ class Upstream(RootModel):
     """Supported agent upstreams."""
     model_config = ConfigDict(title='agent.Upstream')
 
-    root: Union[UpstreamVariant1, UpstreamVariant2, UpstreamVariant3, UpstreamVariant4]
+    root: Union[UpstreamUnknown, UpstreamOpenrouter, UpstreamClaudeAgentSdk, UpstreamMock]
 

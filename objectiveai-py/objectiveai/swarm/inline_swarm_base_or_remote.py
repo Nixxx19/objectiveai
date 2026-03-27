@@ -7,11 +7,15 @@ from objectiveai.remote_path import RemotePath
 from objectiveai.swarm.inline_swarm_base import InlineSwarmBase
 
 
-class InlineSwarmBaseOrRemoteVariant1(RootModel):
+class InlineSwarmBaseOrRemoteSwarmBase(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'SwarmBase'})
+
     root: InlineSwarmBase
 
 
-class InlineSwarmBaseOrRemoteVariant2(RootModel):
+class InlineSwarmBaseOrRemoteRemote(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Remote'})
+
     root: RemotePath
 
 
@@ -20,5 +24,5 @@ class InlineSwarmBaseOrRemote(RootModel):
 or a remote path reference."""
     model_config = ConfigDict(title='swarm.InlineSwarmBaseOrRemote')
 
-    root: Union[InlineSwarmBaseOrRemoteVariant1, InlineSwarmBaseOrRemoteVariant2]
+    root: Union[InlineSwarmBaseOrRemoteSwarmBase, InlineSwarmBaseOrRemoteRemote]
 

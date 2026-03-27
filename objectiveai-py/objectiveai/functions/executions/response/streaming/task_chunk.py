@@ -6,18 +6,22 @@ from pydantic import ConfigDict, RootModel
 from objectiveai.functions.executions.response.streaming.vector_completion_task_chunk import VectorCompletionTaskChunk
 
 
-class TaskChunkVariant1(RootModel):
+class TaskChunkFunctionExecution(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'FunctionExecution'})
+
     root: FunctionExecutionTaskChunk
 
 
-class TaskChunkVariant2(RootModel):
+class TaskChunkVectorCompletion(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'VectorCompletion'})
+
     root: VectorCompletionTaskChunk
 
 
 class TaskChunk(RootModel):
     model_config = ConfigDict(title='functions.executions.response.streaming.TaskChunk')
 
-    root: Union[TaskChunkVariant1, TaskChunkVariant2]
+    root: Union[TaskChunkFunctionExecution, TaskChunkVectorCompletion]
 
 
 # Deferred imports to break circular dependencies

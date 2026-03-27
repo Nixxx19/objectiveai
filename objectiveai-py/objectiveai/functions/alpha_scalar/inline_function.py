@@ -7,12 +7,16 @@ from objectiveai.functions.alpha_scalar.branch_task_expression import BranchTask
 from objectiveai.functions.alpha_scalar.leaf_task_expression import LeafTaskExpression
 
 
-class InlineFunctionVariant1(BaseModel):
+class InlineFunctionBranch(BaseModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Branch'})
+
     tasks: list[BranchTaskExpression]
     type_: Literal['alpha.scalar.branch.function'] = Field(..., alias='type')
 
 
-class InlineFunctionVariant2(BaseModel):
+class InlineFunctionLeaf(BaseModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Leaf'})
+
     tasks: list[LeafTaskExpression]
     type_: Literal['alpha.scalar.leaf.function'] = Field(..., alias='type')
 
@@ -20,5 +24,5 @@ class InlineFunctionVariant2(BaseModel):
 class InlineFunction(RootModel):
     model_config = ConfigDict(title='functions.alpha_scalar.InlineFunction')
 
-    root: Union[InlineFunctionVariant1, InlineFunctionVariant2]
+    root: Union[InlineFunctionBranch, InlineFunctionLeaf]
 

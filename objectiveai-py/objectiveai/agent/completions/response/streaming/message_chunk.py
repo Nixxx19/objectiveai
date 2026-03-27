@@ -7,16 +7,20 @@ from objectiveai.agent.completions.response.streaming.assistant_response_chunk i
 from objectiveai.agent.completions.response.tool_response import ToolResponse
 
 
-class MessageChunkVariant1(RootModel):
+class MessageChunkAssistant(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Assistant'})
+
     root: AssistantResponseChunk
 
 
-class MessageChunkVariant2(RootModel):
+class MessageChunkTool(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Tool'})
+
     root: ToolResponse
 
 
 class MessageChunk(RootModel):
     model_config = ConfigDict(title='agent.completions.response.streaming.MessageChunk')
 
-    root: Union[MessageChunkVariant1, MessageChunkVariant2]
+    root: Union[MessageChunkAssistant, MessageChunkTool]
 

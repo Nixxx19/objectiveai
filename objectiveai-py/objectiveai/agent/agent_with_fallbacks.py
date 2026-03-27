@@ -7,11 +7,15 @@ from objectiveai.agent.inline_agent_with_fallbacks import InlineAgentWithFallbac
 from objectiveai.agent.remote_agent_with_fallbacks import RemoteAgentWithFallbacks
 
 
-class AgentWithFallbacksVariant1(RootModel):
+class AgentWithFallbacksRemote(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Remote'})
+
     root: RemoteAgentWithFallbacks
 
 
-class AgentWithFallbacksVariant2(RootModel):
+class AgentWithFallbacksInline(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Inline'})
+
     root: InlineAgentWithFallbacks
 
 
@@ -19,5 +23,5 @@ class AgentWithFallbacks(RootModel):
     """A validated agent with optional fallbacks, either remote (with description) or inline."""
     model_config = ConfigDict(title='agent.AgentWithFallbacks')
 
-    root: Union[AgentWithFallbacksVariant1, AgentWithFallbacksVariant2]
+    root: Union[AgentWithFallbacksRemote, AgentWithFallbacksInline]
 

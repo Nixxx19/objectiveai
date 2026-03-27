@@ -9,38 +9,50 @@ from objectiveai.agent.completions.message.input_audio import InputAudio
 from objectiveai.agent.completions.message.video_url import VideoUrl
 
 
-class RichContentPartVariant1(BaseModel):
+class RichContentPartText(BaseModel):
     """Text content."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Text'})
+
     text: str
     type_: Literal['text'] = Field(..., alias='type')
 
 
-class RichContentPartVariant2(BaseModel):
+class RichContentPartImageUrl(BaseModel):
     """An image URL."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'ImageUrl'})
+
     image_url: ImageUrl
     type_: Literal['image_url'] = Field(..., alias='type')
 
 
-class RichContentPartVariant3(BaseModel):
+class RichContentPartInputAudio(BaseModel):
     """Audio input."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'InputAudio'})
+
     input_audio: InputAudio
     type_: Literal['input_audio'] = Field(..., alias='type')
 
 
-class RichContentPartVariant4(BaseModel):
+class RichContentPartInputVideo(BaseModel):
     """Video input."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'InputVideo'})
+
     type_: Literal['input_video'] = Field(..., alias='type')
     video_url: VideoUrl
 
 
-class RichContentPartVariant5(BaseModel):
+class RichContentPartVideoUrl(BaseModel):
     """A video URL."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'VideoUrl'})
+
     type_: Literal['video_url'] = Field(..., alias='type')
     video_url: VideoUrl
 
 
-class RichContentPartVariant6(BaseModel):
+class RichContentPartFile(BaseModel):
     """A file."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'File'})
+
     file: File
     type_: Literal['file'] = Field(..., alias='type')
 
@@ -49,5 +61,5 @@ class RichContentPart(RootModel):
     """A part of rich content."""
     model_config = ConfigDict(title='agent.completions.message.RichContentPart')
 
-    root: Union[RichContentPartVariant1, RichContentPartVariant2, RichContentPartVariant3, RichContentPartVariant4, RichContentPartVariant5, RichContentPartVariant6]
+    root: Union[RichContentPartText, RichContentPartImageUrl, RichContentPartInputAudio, RichContentPartInputVideo, RichContentPartVideoUrl, RichContentPartFile]
 

@@ -6,13 +6,17 @@ from pydantic import ConfigDict, RootModel
 from objectiveai.functions.task import Task
 
 
-class CompiledTaskVariant1(RootModel):
+class CompiledTaskOne(RootModel):
     """A single task (no mapping)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'One'})
+
     root: Task
 
 
-class CompiledTaskVariant2(RootModel):
+class CompiledTaskMany(RootModel):
     """Multiple task instances from mapped execution."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Many'})
+
     root: list[Task]
 
 
@@ -24,5 +28,5 @@ expression are expanded into multiple tasks, one per integer index from
 0 to the evaluated count."""
     model_config = ConfigDict(title='functions.CompiledTask')
 
-    root: Union[CompiledTaskVariant1, CompiledTaskVariant2]
+    root: Union[CompiledTaskOne, CompiledTaskMany]
 

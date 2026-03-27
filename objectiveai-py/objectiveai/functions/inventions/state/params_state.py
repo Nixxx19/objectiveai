@@ -11,32 +11,44 @@ from objectiveai.functions.inventions.state.alpha_vector_leaf_state import Alpha
 from objectiveai.functions.inventions.state.alpha_vector_state import AlphaVectorState
 
 
-class ParamsStateVariant1(AlphaScalarBranchState):
+class ParamsStateAlphaScalarBranch(AlphaScalarBranchState):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'AlphaScalarBranch'})
+
     type_: Literal['alpha.scalar.branch.function'] = Field(..., alias='type')
 
 
-class ParamsStateVariant2(AlphaScalarLeafState):
+class ParamsStateAlphaScalarLeaf(AlphaScalarLeafState):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'AlphaScalarLeaf'})
+
     type_: Literal['alpha.scalar.leaf.function'] = Field(..., alias='type')
 
 
-class ParamsStateVariant3(AlphaVectorBranchState):
+class ParamsStateAlphaVectorBranch(AlphaVectorBranchState):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'AlphaVectorBranch'})
+
     type_: Literal['alpha.vector.branch.function'] = Field(..., alias='type')
 
 
-class ParamsStateVariant4(AlphaVectorLeafState):
+class ParamsStateAlphaVectorLeaf(AlphaVectorLeafState):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'AlphaVectorLeaf'})
+
     type_: Literal['alpha.vector.leaf.function'] = Field(..., alias='type')
 
 
-class ParamsStateVariant5(AlphaScalarState):
+class ParamsStateAlphaScalar(AlphaScalarState):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'AlphaScalar'})
+
     type_: Literal['alpha.scalar.function'] = Field(..., alias='type')
 
 
-class ParamsStateVariant6(AlphaVectorState):
+class ParamsStateAlphaVector(AlphaVectorState):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'AlphaVector'})
+
     type_: Literal['alpha.vector.function'] = Field(..., alias='type')
 
 
 class ParamsState(RootModel):
     model_config = ConfigDict(title='functions.inventions.state.ParamsState')
 
-    root: Union[ParamsStateVariant1, ParamsStateVariant2, ParamsStateVariant3, ParamsStateVariant4, ParamsStateVariant5, ParamsStateVariant6]
+    root: Union[ParamsStateAlphaScalarBranch, ParamsStateAlphaScalarLeaf, ParamsStateAlphaVectorBranch, ParamsStateAlphaVectorLeaf, ParamsStateAlphaScalar, ParamsStateAlphaVector]
 

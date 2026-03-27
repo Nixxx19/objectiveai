@@ -7,13 +7,17 @@ from objectiveai.agent.completions.message.simple_content_part_expression import
 from objectiveai.functions.expression.expression import Expression
 
 
-class ItemVariant1(RootModel):
+class ItemExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class ItemVariant2(RootModel):
+class ItemValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: SimpleContentPartExpression
 
 
@@ -40,16 +44,20 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[ItemVariant1, ItemVariant2]
+    root: Union[ItemExpression, ItemValue]
 
 
-class SimpleContentExpressionVariant1(RootModel):
+class SimpleContentExpressionText(RootModel):
     """Plain text content."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Text'})
+
     root: str
 
 
-class SimpleContentExpressionVariant2(RootModel):
+class SimpleContentExpressionParts(RootModel):
     """Multi-part text content expressions."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Parts'})
+
     root: list[Item]
 
 
@@ -57,5 +65,5 @@ class SimpleContentExpression(RootModel):
     """Expression variant of [`SimpleContent`] for dynamic content."""
     model_config = ConfigDict(title='agent.completions.message.SimpleContentExpression')
 
-    root: Union[SimpleContentExpressionVariant1, SimpleContentExpressionVariant2]
+    root: Union[SimpleContentExpressionText, SimpleContentExpressionParts]
 

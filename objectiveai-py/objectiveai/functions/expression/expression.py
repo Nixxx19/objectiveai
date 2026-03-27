@@ -6,23 +6,23 @@ from pydantic import BaseModel, ConfigDict, Field, RootModel
 from objectiveai.functions.expression.special import Special
 
 
-class ExpressionVariant1(BaseModel):
+class ExpressionJMESPath(BaseModel):
     """A JMESPath expression."""
-    model_config = ConfigDict(extra='forbid')
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'JMESPath'}, extra='forbid')
 
     jmespath: str = Field(..., alias='$jmespath')
 
 
-class ExpressionVariant2(BaseModel):
+class ExpressionStarlark(BaseModel):
     """A Starlark expression."""
-    model_config = ConfigDict(extra='forbid')
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Starlark'}, extra='forbid')
 
     starlark: str = Field(..., alias='$starlark')
 
 
-class ExpressionVariant3(BaseModel):
+class ExpressionSpecial(BaseModel):
     """A predefined special expression variant."""
-    model_config = ConfigDict(extra='forbid')
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Special'}, extra='forbid')
 
     special: Special = Field(..., alias='$special')
 
@@ -45,5 +45,5 @@ Starlark:
 ```"""
     model_config = ConfigDict(title='functions.expression.Expression')
 
-    root: Union[ExpressionVariant1, ExpressionVariant2, ExpressionVariant3]
+    root: Union[ExpressionJMESPath, ExpressionStarlark, ExpressionSpecial]
 

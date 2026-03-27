@@ -7,11 +7,15 @@ from objectiveai.swarm.inline_swarm_base import InlineSwarmBase
 from objectiveai.swarm.remote_swarm_base import RemoteSwarmBase
 
 
-class SwarmBaseVariant1(RootModel):
+class SwarmBaseRemote(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Remote'})
+
     root: RemoteSwarmBase
 
 
-class SwarmBaseVariant2(RootModel):
+class SwarmBaseInline(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Inline'})
+
     root: InlineSwarmBase
 
 
@@ -19,5 +23,5 @@ class SwarmBase(RootModel):
     """A swarm base definition, either remote (with metadata) or inline."""
     model_config = ConfigDict(title='swarm.SwarmBase')
 
-    root: Union[SwarmBaseVariant1, SwarmBaseVariant2]
+    root: Union[SwarmBaseRemote, SwarmBaseInline]
 

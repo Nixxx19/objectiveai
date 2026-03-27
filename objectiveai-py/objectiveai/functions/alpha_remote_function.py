@@ -7,16 +7,20 @@ from objectiveai.functions.alpha_scalar.remote_function import RemoteFunction as
 from objectiveai.functions.alpha_vector.remote_function import RemoteFunction
 
 
-class AlphaRemoteFunctionVariant1(RootModel):
+class AlphaRemoteFunctionScalar(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Scalar'})
+
     root: FunctionsAlphaScalarRemoteFunction
 
 
-class AlphaRemoteFunctionVariant2(RootModel):
+class AlphaRemoteFunctionVector(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Vector'})
+
     root: RemoteFunction
 
 
 class AlphaRemoteFunction(RootModel):
     model_config = ConfigDict(title='functions.AlphaRemoteFunction')
 
-    root: Union[AlphaRemoteFunctionVariant1, AlphaRemoteFunctionVariant2]
+    root: Union[AlphaRemoteFunctionScalar, AlphaRemoteFunctionVector]
 

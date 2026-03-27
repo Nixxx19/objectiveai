@@ -7,7 +7,7 @@ from .api_local_config import ApiLocalConfig  # noqa: F401
 from .api_mode import ApiMode  # noqa: F401
 from .api_remote_config import ApiRemoteConfig  # noqa: F401
 from .config import Config  # noqa: F401
-from .favorite import Favorite, FavoriteVariant1, FavoriteVariant2, FavoriteVariant3  # noqa: F401
+from .favorite import Favorite  # noqa: F401
 from .functions_config import FunctionsConfig  # noqa: F401
 from .functions_inventions_config import FunctionsInventionsConfig  # noqa: F401
 from .functions_profiles_config import FunctionsProfilesConfig  # noqa: F401

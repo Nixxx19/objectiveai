@@ -548,7 +548,8 @@ def _generate_variant_class(
 
     Returns (code, class_name, refs).
     """
-    class_name = f"{parent_name}Variant{variant_index}"
+    variant_title = variant_schema["title"]
+    class_name = f"{parent_name}{variant_title}"
     refs: set[str] = set()
     desc = variant_schema.get("description", "")
     safe_desc = desc.replace('"""', '\\"\\"\\"') if desc else ""
@@ -565,6 +566,7 @@ def _generate_variant_class(
         code = _generate_flattened_ref_model(
             self_title, variant_schema, refs, all_titles,
             class_name, safe_desc, ref_target, all_schemas=all_schemas,
+            variant_title=variant_title,
         )
         return code, class_name, refs
 
@@ -572,7 +574,7 @@ def _generate_variant_class(
     if has_properties:
         code = _generate_object_model(
             self_title, variant_schema, refs, all_titles,
-            class_name, safe_desc,
+            class_name, safe_desc, variant_title=variant_title,
         )
         return code, class_name, refs
 
@@ -594,7 +596,7 @@ def _generate_variant_class(
                 refs.update(sub_refs)
 
             root_type = _union_type(union_members)
-            main_code = _make_root_model(class_name, safe_desc, root_type)
+            main_code = _make_root_model(class_name, safe_desc, root_type, variant_title=variant_title)
             code = "\n\n".join(sub_codes + [main_code])
             return code, class_name, refs
         else:
@@ -603,27 +605,27 @@ def _generate_variant_class(
             collect_refs(non_null[0], refs)
             inner_type = _convert_inner_type(non_null[0], self_title, all_titles)
             root_type = f"Optional[{inner_type}]"
-            code = _make_root_model(class_name, safe_desc, root_type)
+            code = _make_root_model(class_name, safe_desc, root_type, variant_title=variant_title)
             return code, class_name, refs
 
     # Pure $ref
     if has_ref:
         ref_type = _convert_inner_type(variant_schema, self_title, all_titles)
         collect_refs(variant_schema, refs)
-        code = _make_root_model(class_name, safe_desc, ref_type)
+        code = _make_root_model(class_name, safe_desc, ref_type, variant_title=variant_title)
         return code, class_name, refs
 
     # enum (Literal)
     if "enum" in variant_schema:
         literals = ", ".join(repr(v) for v in variant_schema["enum"])
         root_type = f"Literal[{literals}]"
-        code = _make_root_model(class_name, safe_desc, root_type)
+        code = _make_root_model(class_name, safe_desc, root_type, variant_title=variant_title)
         return code, class_name, refs
 
     # Simple type (string, integer, number, boolean, array, etc.)
     type_str = _convert_inner_type(variant_schema, self_title, all_titles)
     collect_refs(variant_schema, refs)
-    code = _make_root_model(class_name, safe_desc, type_str)
+    code = _make_root_model(class_name, safe_desc, type_str, variant_title=variant_title)
     return code, class_name, refs
 
 
@@ -635,6 +637,7 @@ def _make_root_model(
     schema_title: str | None = None,
     expanded_ref: str | None = None,
     expanded_ref_props: list[str] | None = None,
+    variant_title: str | None = None,
 ) -> str:
     """Generate a plain RootModel."""
     lines = [f"class {pascal_name}(RootModel):"]
@@ -643,10 +646,14 @@ def _make_root_model(
     config_parts: list[str] = []
     if schema_title:
         config_parts.append(f"title={schema_title!r}")
+    extra: dict = {}
     if expanded_ref:
-        extra = {"_expanded_ref": expanded_ref}
+        extra["_expanded_ref"] = expanded_ref
         if expanded_ref_props:
             extra["_expanded_ref_props"] = expanded_ref_props
+    if variant_title:
+        extra["_variant_title"] = variant_title
+    if extra:
         config_parts.append(f"json_schema_extra={extra!r}")
     if config_parts:
         lines.append(f"    model_config = ConfigDict({', '.join(config_parts)})")
@@ -780,6 +787,7 @@ def _generate_object_model(
     safe_desc: str,
     *,
     schema_title: str | None = None,
+    variant_title: str | None = None,
 ) -> str:
     """Generate a Pydantic BaseModel for an object schema."""
     properties = schema.get("properties", {})
@@ -791,6 +799,8 @@ def _generate_object_model(
     config_parts: list[str] = []
     if schema_title:
         config_parts.append(f"title={schema_title!r}")
+    if variant_title:
+        config_parts.append(f"json_schema_extra={{'_variant_title': {variant_title!r}}}")
     if schema.get("additionalProperties") is False:
         config_parts.append("extra='forbid'")
 
@@ -911,6 +921,7 @@ def _generate_flattened_ref_model(
     *,
     all_schemas: dict[str, dict] | None = None,
     schema_title: str | None = None,
+    variant_title: str | None = None,
 ) -> str:
     """Generate a model for schemas with properties AND a $ref.
 
@@ -928,6 +939,7 @@ def _generate_flattened_ref_model(
         return _generate_expanded_union_ref(
             title, schema, refs, all_titles, pascal_name, safe_desc,
             ref_target, ref_schema, all_schemas=all_schemas, schema_title=schema_title,
+            variant_title=variant_title,
         )
 
     # BaseModel target: simple inheritance
@@ -935,8 +947,13 @@ def _generate_flattened_ref_model(
     lines = [f"class {pascal_name}({base_class}):"]
     if safe_desc:
         lines.append(f'    """{safe_desc}"""')
+    config_parts: list[str] = []
     if schema_title:
-        lines.append(f"    model_config = ConfigDict(title={schema_title!r})")
+        config_parts.append(f"title={schema_title!r}")
+    if variant_title:
+        config_parts.append(f"json_schema_extra={{'_variant_title': {variant_title!r}}}")
+    if config_parts:
+        lines.append(f"    model_config = ConfigDict({', '.join(config_parts)})")
         lines.append("")
 
     if properties:
@@ -964,6 +981,7 @@ def _generate_expanded_union_ref(
     *,
     all_schemas: dict[str, dict] | None = None,
     schema_title: str | None = None,
+    variant_title: str | None = None,
 ) -> str:
     """Expand a $ref to a RootModel union by creating new variants.
 
@@ -1014,16 +1032,19 @@ def _generate_expanded_union_ref(
     union_members: list[str] = []
 
     # Use a recursive helper to flatten through nested RootModel unions
-    _counter = [0]
 
     def _expand_variants(
         any_of_list: list[dict],
         props: dict,
+        title_prefix: str = "",
     ) -> None:
         for variant_schema in any_of_list:
             if _is_simple_null_variant(variant_schema):
                 union_members.append("None")
                 continue
+
+            variant_title = variant_schema.get("title", "")
+            composed_title = title_prefix + variant_title
 
             # Resolve the variant to a BaseModel by unwrapping $ref chains
             resolved_ref, resolved_schema = _resolve_to_base_model(
@@ -1032,8 +1053,7 @@ def _generate_expanded_union_ref(
 
             if resolved_ref and resolved_schema and not _is_root_model_schema(resolved_schema, all_schemas):
                 # BaseModel — inherit and add properties.
-                _counter[0] += 1
-                var_name = f"{pascal_name}Variant{_counter[0]}"
+                var_name = f"{pascal_name}{composed_title}"
                 # Use title_to_pascal for the base class name to avoid collisions
                 # when multiple variants resolve to types with the same short name.
                 refs.add(resolved_ref)
@@ -1065,12 +1085,11 @@ def _generate_expanded_union_ref(
                         inner_any_of = ref_s.get("anyOf", [])
                         inner_ref = ref_s.get("$ref") if not inner_any_of else None
                 if inner_any_of:
-                    _expand_variants(inner_any_of, inner_props)
+                    _expand_variants(inner_any_of, inner_props, title_prefix=composed_title)
                 else:
                     # RootModel without anyOf — fallback
-                    _counter[0] += 1
                     var_code, var_name_out, var_refs = _generate_variant_class(
-                        variant_schema, pascal_name, _counter[0], title, all_titles,
+                        variant_schema, pascal_name, 0, title, all_titles,
                         all_schemas=all_schemas,
                     )
                     refs.update(var_refs)
@@ -1078,8 +1097,7 @@ def _generate_expanded_union_ref(
                     union_members.append(var_name_out)
             elif "properties" in variant_schema:
                 # Inline object variant — generate as BaseModel with merged properties
-                _counter[0] += 1
-                var_name = f"{pascal_name}Variant{_counter[0]}"
+                var_name = f"{pascal_name}{composed_title}"
                 merged_props = dict(variant_schema.get("properties", {}))
                 merged_props.update(props)
                 merged_schema = dict(variant_schema)
@@ -1091,9 +1109,8 @@ def _generate_expanded_union_ref(
                 union_members.append(var_name)
             else:
                 # Other variant type — just generate as-is with properties
-                _counter[0] += 1
                 var_code, var_name_out, var_refs = _generate_variant_class(
-                    variant_schema, pascal_name, _counter[0], title, all_titles,
+                    variant_schema, pascal_name, 0, title, all_titles,
                     all_schemas=all_schemas,
                 )
                 refs.update(var_refs)
@@ -1104,7 +1121,7 @@ def _generate_expanded_union_ref(
 
     # Generate the main RootModel union
     root_type = _union_type(union_members)
-    main_code = _make_root_model(pascal_name, safe_desc, root_type, schema_title=schema_title, expanded_ref=ref_target, expanded_ref_props=original_prop_names)
+    main_code = _make_root_model(pascal_name, safe_desc, root_type, schema_title=schema_title, expanded_ref=ref_target, expanded_ref_props=original_prop_names, variant_title=variant_title)
     return "\n\n".join(variant_codes + [main_code])
 
 

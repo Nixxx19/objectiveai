@@ -6,13 +6,17 @@ from pydantic import ConfigDict, RootModel
 from objectiveai.agent.completions.message.simple_content_part import SimpleContentPart
 
 
-class SimpleContentVariant1(RootModel):
+class SimpleContentText(RootModel):
     """Plain text content."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Text'})
+
     root: str
 
 
-class SimpleContentVariant2(RootModel):
+class SimpleContentParts(RootModel):
     """Multi-part text content."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Parts'})
+
     root: list[SimpleContentPart]
 
 
@@ -20,5 +24,5 @@ class SimpleContent(RootModel):
     """Simple text content for system/developer messages."""
     model_config = ConfigDict(title='agent.completions.message.SimpleContent')
 
-    root: Union[SimpleContentVariant1, SimpleContentVariant2]
+    root: Union[SimpleContentText, SimpleContentParts]
 

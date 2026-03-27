@@ -8,17 +8,21 @@ from objectiveai.functions.expression.input_value_expression import InputValueEx
 from objectiveai.remote_path import RemotePath
 
 
-class VectorFunctionTaskExpressionVariant1InputVariant1(RootModel):
+class VectorFunctionTaskExpressionGithubInputExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class VectorFunctionTaskExpressionVariant1InputVariant2(RootModel):
+class VectorFunctionTaskExpressionGithubInputValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: InputValueExpression
 
 
-class VectorFunctionTaskExpressionVariant1Input(RootModel):
+class VectorFunctionTaskExpressionGithubInput(RootModel):
     """Expression for the input to pass to the function.
 Receives: `input`, `map` (if mapped).
 
@@ -44,20 +48,24 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[VectorFunctionTaskExpressionVariant1InputVariant1, VectorFunctionTaskExpressionVariant1InputVariant2]
+    root: Union[VectorFunctionTaskExpressionGithubInputExpression, VectorFunctionTaskExpressionGithubInputValue]
 
 
-class VectorFunctionTaskExpressionVariant2InputVariant1(RootModel):
+class VectorFunctionTaskExpressionFilesystemInputExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class VectorFunctionTaskExpressionVariant2InputVariant2(RootModel):
+class VectorFunctionTaskExpressionFilesystemInputValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: InputValueExpression
 
 
-class VectorFunctionTaskExpressionVariant2Input(RootModel):
+class VectorFunctionTaskExpressionFilesystemInput(RootModel):
     """Expression for the input to pass to the function.
 Receives: `input`, `map` (if mapped).
 
@@ -83,20 +91,24 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[VectorFunctionTaskExpressionVariant2InputVariant1, VectorFunctionTaskExpressionVariant2InputVariant2]
+    root: Union[VectorFunctionTaskExpressionFilesystemInputExpression, VectorFunctionTaskExpressionFilesystemInputValue]
 
 
-class VectorFunctionTaskExpressionVariant3InputVariant1(RootModel):
+class VectorFunctionTaskExpressionMockInputExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class VectorFunctionTaskExpressionVariant3InputVariant2(RootModel):
+class VectorFunctionTaskExpressionMockInputValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: InputValueExpression
 
 
-class VectorFunctionTaskExpressionVariant3Input(RootModel):
+class VectorFunctionTaskExpressionMockInput(RootModel):
     """Expression for the input to pass to the function.
 Receives: `input`, `map` (if mapped).
 
@@ -122,35 +134,35 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[VectorFunctionTaskExpressionVariant3InputVariant1, VectorFunctionTaskExpressionVariant3InputVariant2]
+    root: Union[VectorFunctionTaskExpressionMockInputExpression, VectorFunctionTaskExpressionMockInputValue]
 
 
-class VectorFunctionTaskExpressionVariant1(BaseModel):
+class VectorFunctionTaskExpressionGithub(BaseModel):
     commit: str
     owner: str
     remote: Literal['github']
     repository: str
-    input: VectorFunctionTaskExpressionVariant1Input = Field(..., description='Expression for the input to pass to the function.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+    input: VectorFunctionTaskExpressionGithubInput = Field(..., description='Expression for the input to pass to the function.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
     map: Optional[Expression] = Field(None, description='Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).')
     output: Expression = Field(..., description="Expression to transform the task result into a valid function output.\n\nReceives `output` which is one of 4 variants:\n- `Scalar(Decimal)` - a single score\n- `Vector(Vec<Decimal>)` - a vector of scores\n- `Vectors(Vec<Vec<Decimal>>)` - multiple vectors (from mapped tasks)\n- `Err(Value)` - an error\n\nThe expression must return a `TaskOutputOwned` that is valid for the parent function's type:\n- For scalar functions: must return `Scalar(value)` where value is in [0, 1]\n- For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length\n\nThe function's final output is computed as a weighted average of all task outputs using\nprofile weights. If a function has only one task, that task's output becomes the function's\noutput directly.")
     skip: Optional[Expression] = Field(None, description='If this expression evaluates to true, skip the task. Receives: `input`.')
 
 
-class VectorFunctionTaskExpressionVariant2(BaseModel):
+class VectorFunctionTaskExpressionFilesystem(BaseModel):
     commit: str
     owner: str
     remote: Literal['filesystem']
     repository: str
-    input: VectorFunctionTaskExpressionVariant2Input = Field(..., description='Expression for the input to pass to the function.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+    input: VectorFunctionTaskExpressionFilesystemInput = Field(..., description='Expression for the input to pass to the function.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
     map: Optional[Expression] = Field(None, description='Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).')
     output: Expression = Field(..., description="Expression to transform the task result into a valid function output.\n\nReceives `output` which is one of 4 variants:\n- `Scalar(Decimal)` - a single score\n- `Vector(Vec<Decimal>)` - a vector of scores\n- `Vectors(Vec<Vec<Decimal>>)` - multiple vectors (from mapped tasks)\n- `Err(Value)` - an error\n\nThe expression must return a `TaskOutputOwned` that is valid for the parent function's type:\n- For scalar functions: must return `Scalar(value)` where value is in [0, 1]\n- For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length\n\nThe function's final output is computed as a weighted average of all task outputs using\nprofile weights. If a function has only one task, that task's output becomes the function's\noutput directly.")
     skip: Optional[Expression] = Field(None, description='If this expression evaluates to true, skip the task. Receives: `input`.')
 
 
-class VectorFunctionTaskExpressionVariant3(BaseModel):
+class VectorFunctionTaskExpressionMock(BaseModel):
     name: str
     remote: Literal['mock']
-    input: VectorFunctionTaskExpressionVariant3Input = Field(..., description='Expression for the input to pass to the function.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+    input: VectorFunctionTaskExpressionMockInput = Field(..., description='Expression for the input to pass to the function.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
     map: Optional[Expression] = Field(None, description='Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).')
     output: Expression = Field(..., description="Expression to transform the task result into a valid function output.\n\nReceives `output` which is one of 4 variants:\n- `Scalar(Decimal)` - a single score\n- `Vector(Vec<Decimal>)` - a vector of scores\n- `Vectors(Vec<Vec<Decimal>>)` - multiple vectors (from mapped tasks)\n- `Err(Value)` - an error\n\nThe expression must return a `TaskOutputOwned` that is valid for the parent function's type:\n- For scalar functions: must return `Scalar(value)` where value is in [0, 1]\n- For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length\n\nThe function's final output is computed as a weighted average of all task outputs using\nprofile weights. If a function has only one task, that task's output becomes the function's\noutput directly.")
     skip: Optional[Expression] = Field(None, description='If this expression evaluates to true, skip the task. Receives: `input`.')
@@ -160,5 +172,5 @@ class VectorFunctionTaskExpression(RootModel):
     """Expression for a task that calls a vector function (pre-compilation)."""
     model_config = ConfigDict(title='functions.VectorFunctionTaskExpression', json_schema_extra={'_expanded_ref': 'RemotePath', '_expanded_ref_props': ['input', 'map', 'output', 'skip']})
 
-    root: Union[VectorFunctionTaskExpressionVariant1, VectorFunctionTaskExpressionVariant2, VectorFunctionTaskExpressionVariant3]
+    root: Union[VectorFunctionTaskExpressionGithub, VectorFunctionTaskExpressionFilesystem, VectorFunctionTaskExpressionMock]
 

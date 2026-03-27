@@ -11,7 +11,7 @@ from objectiveai.functions.alpha_vector.vector_function_task_expression import V
 from objectiveai.functions.expression.expression import Expression
 
 
-class BranchTaskExpressionVariant1Variant1(BaseModel):
+class BranchTaskExpressionScalarFunctionGithub(BaseModel):
     commit: str
     owner: str
     remote: Literal['github']
@@ -21,7 +21,7 @@ class BranchTaskExpressionVariant1Variant1(BaseModel):
     type_: Literal['alpha.scalar.function'] = Field(..., alias='type')
 
 
-class BranchTaskExpressionVariant1Variant2(BaseModel):
+class BranchTaskExpressionScalarFunctionFilesystem(BaseModel):
     commit: str
     owner: str
     remote: Literal['filesystem']
@@ -31,7 +31,7 @@ class BranchTaskExpressionVariant1Variant2(BaseModel):
     type_: Literal['alpha.scalar.function'] = Field(..., alias='type')
 
 
-class BranchTaskExpressionVariant1Variant3(BaseModel):
+class BranchTaskExpressionScalarFunctionMock(BaseModel):
     name: str
     remote: Literal['mock']
     input: Expression
@@ -39,13 +39,13 @@ class BranchTaskExpressionVariant1Variant3(BaseModel):
     type_: Literal['alpha.scalar.function'] = Field(..., alias='type')
 
 
-class BranchTaskExpressionVariant1(RootModel):
-    model_config = ConfigDict(json_schema_extra={'_expanded_ref': 'functions.alpha_vector.ScalarFunctionTaskExpression', '_expanded_ref_props': ['type']})
+class BranchTaskExpressionScalarFunction(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_expanded_ref': 'functions.alpha_vector.ScalarFunctionTaskExpression', '_expanded_ref_props': ['type'], '_variant_title': 'ScalarFunction'})
 
-    root: Union[BranchTaskExpressionVariant1Variant1, BranchTaskExpressionVariant1Variant2, BranchTaskExpressionVariant1Variant3]
+    root: Union[BranchTaskExpressionScalarFunctionGithub, BranchTaskExpressionScalarFunctionFilesystem, BranchTaskExpressionScalarFunctionMock]
 
 
-class BranchTaskExpressionVariant2Variant1(BaseModel):
+class BranchTaskExpressionVectorFunctionGithub(BaseModel):
     commit: str
     owner: str
     remote: Literal['github']
@@ -55,7 +55,7 @@ class BranchTaskExpressionVariant2Variant1(BaseModel):
     type_: Literal['alpha.vector.function'] = Field(..., alias='type')
 
 
-class BranchTaskExpressionVariant2Variant2(BaseModel):
+class BranchTaskExpressionVectorFunctionFilesystem(BaseModel):
     commit: str
     owner: str
     remote: Literal['filesystem']
@@ -65,7 +65,7 @@ class BranchTaskExpressionVariant2Variant2(BaseModel):
     type_: Literal['alpha.vector.function'] = Field(..., alias='type')
 
 
-class BranchTaskExpressionVariant2Variant3(BaseModel):
+class BranchTaskExpressionVectorFunctionMock(BaseModel):
     name: str
     remote: Literal['mock']
     input: VectorFunctionInputValueExpression
@@ -73,22 +73,26 @@ class BranchTaskExpressionVariant2Variant3(BaseModel):
     type_: Literal['alpha.vector.function'] = Field(..., alias='type')
 
 
-class BranchTaskExpressionVariant2(RootModel):
-    model_config = ConfigDict(json_schema_extra={'_expanded_ref': 'functions.alpha_vector.VectorFunctionTaskExpression', '_expanded_ref_props': ['type']})
+class BranchTaskExpressionVectorFunction(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_expanded_ref': 'functions.alpha_vector.VectorFunctionTaskExpression', '_expanded_ref_props': ['type'], '_variant_title': 'VectorFunction'})
 
-    root: Union[BranchTaskExpressionVariant2Variant1, BranchTaskExpressionVariant2Variant2, BranchTaskExpressionVariant2Variant3]
+    root: Union[BranchTaskExpressionVectorFunctionGithub, BranchTaskExpressionVectorFunctionFilesystem, BranchTaskExpressionVectorFunctionMock]
 
 
-class BranchTaskExpressionVariant3(PlaceholderScalarFunctionTaskExpression):
+class BranchTaskExpressionPlaceholderScalarFunction(PlaceholderScalarFunctionTaskExpression):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'PlaceholderScalarFunction'})
+
     type_: Literal['placeholder.alpha.scalar.function'] = Field(..., alias='type')
 
 
-class BranchTaskExpressionVariant4(PlaceholderVectorFunctionTaskExpression):
+class BranchTaskExpressionPlaceholderVectorFunction(PlaceholderVectorFunctionTaskExpression):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'PlaceholderVectorFunction'})
+
     type_: Literal['placeholder.alpha.vector.function'] = Field(..., alias='type')
 
 
 class BranchTaskExpression(RootModel):
     model_config = ConfigDict(title='functions.alpha_vector.BranchTaskExpression')
 
-    root: Union[BranchTaskExpressionVariant1, BranchTaskExpressionVariant2, BranchTaskExpressionVariant3, BranchTaskExpressionVariant4]
+    root: Union[BranchTaskExpressionScalarFunction, BranchTaskExpressionVectorFunction, BranchTaskExpressionPlaceholderScalarFunction, BranchTaskExpressionPlaceholderVectorFunction]
 

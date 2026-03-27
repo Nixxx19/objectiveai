@@ -6,18 +6,22 @@ from pydantic import ConfigDict, RootModel
 from objectiveai.functions.executions.response.unary.vector_completion_task import VectorCompletionTask
 
 
-class TaskVariant1(RootModel):
+class TaskFunctionExecution(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'FunctionExecution'})
+
     root: FunctionExecutionTask
 
 
-class TaskVariant2(RootModel):
+class TaskVectorCompletion(RootModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'VectorCompletion'})
+
     root: VectorCompletionTask
 
 
 class Task(RootModel):
     model_config = ConfigDict(title='functions.executions.response.unary.Task')
 
-    root: Union[TaskVariant1, TaskVariant2]
+    root: Union[TaskFunctionExecution, TaskVectorCompletion]
 
 
 # Deferred imports to break circular dependencies

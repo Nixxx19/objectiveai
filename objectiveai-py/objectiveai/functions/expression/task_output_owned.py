@@ -6,23 +6,31 @@ from objectiveai.json_value import JsonValue
 from pydantic import ConfigDict, Field, RootModel
 
 
-class TaskOutputOwnedVariant1(RootModel):
+class TaskOutputOwnedScalar(RootModel):
     """A single scalar score."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Scalar'})
+
     root: Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]
 
 
-class TaskOutputOwnedVariant2(RootModel):
+class TaskOutputOwnedVector(RootModel):
     """A vector of scores."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Vector'})
+
     root: list[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]]
 
 
-class TaskOutputOwnedVariant3(RootModel):
+class TaskOutputOwnedVectors(RootModel):
     """Multiple vectors of scores (from mapped tasks)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Vectors'})
+
     root: list[list[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]]]
 
 
-class TaskOutputOwnedVariant4(RootModel):
+class TaskOutputOwnedErr(RootModel):
     """An error occurred during execution."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Err'})
+
     root: JsonValue
 
 
@@ -30,5 +38,5 @@ class TaskOutputOwned(RootModel):
     """Owned task output variants."""
     model_config = ConfigDict(title='functions.expression.TaskOutputOwned')
 
-    root: Union[TaskOutputOwnedVariant1, TaskOutputOwnedVariant2, TaskOutputOwnedVariant3, TaskOutputOwnedVariant4]
+    root: Union[TaskOutputOwnedScalar, TaskOutputOwnedVector, TaskOutputOwnedVectors, TaskOutputOwnedErr]
 

@@ -7,13 +7,17 @@ from objectiveai.agent.completions.message.rich_content_part_expression import R
 from objectiveai.functions.expression.expression import Expression
 
 
-class ItemVariant1(RootModel):
+class ItemExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class ItemVariant2(RootModel):
+class ItemValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: RichContentPartExpression
 
 
@@ -40,16 +44,20 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[ItemVariant1, ItemVariant2]
+    root: Union[ItemExpression, ItemValue]
 
 
-class RichContentExpressionVariant1(RootModel):
+class RichContentExpressionText(RootModel):
     """Plain text content."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Text'})
+
     root: str
 
 
-class RichContentExpressionVariant2(RootModel):
+class RichContentExpressionParts(RootModel):
     """Multi-part content expressions."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Parts'})
+
     root: list[Item]
 
 
@@ -57,5 +65,5 @@ class RichContentExpression(RootModel):
     """Expression variant of [`RichContent`] for dynamic content."""
     model_config = ConfigDict(title='agent.completions.message.RichContentExpression')
 
-    root: Union[RichContentExpressionVariant1, RichContentExpressionVariant2]
+    root: Union[RichContentExpressionText, RichContentExpressionParts]
 

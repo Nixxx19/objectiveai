@@ -6,13 +6,17 @@ from pydantic import BaseModel, ConfigDict, Field, RootModel
 from objectiveai.functions.expression.expression import Expression
 
 
-class AssistantToolCallFunctionExpressionArgumentsVariant1(RootModel):
+class AssistantToolCallFunctionExpressionArgumentsExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class AssistantToolCallFunctionExpressionArgumentsVariant2(RootModel):
+class AssistantToolCallFunctionExpressionArgumentsValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: str
 
 
@@ -41,16 +45,20 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[AssistantToolCallFunctionExpressionArgumentsVariant1, AssistantToolCallFunctionExpressionArgumentsVariant2]
+    root: Union[AssistantToolCallFunctionExpressionArgumentsExpression, AssistantToolCallFunctionExpressionArgumentsValue]
 
 
-class AssistantToolCallFunctionExpressionNameVariant1(RootModel):
+class AssistantToolCallFunctionExpressionNameExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class AssistantToolCallFunctionExpressionNameVariant2(RootModel):
+class AssistantToolCallFunctionExpressionNameValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: str
 
 
@@ -79,7 +87,7 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[AssistantToolCallFunctionExpressionNameVariant1, AssistantToolCallFunctionExpressionNameVariant2]
+    root: Union[AssistantToolCallFunctionExpressionNameExpression, AssistantToolCallFunctionExpressionNameValue]
 
 
 class AssistantToolCallFunctionExpression(BaseModel):

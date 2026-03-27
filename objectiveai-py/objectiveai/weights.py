@@ -6,13 +6,17 @@ from pydantic import ConfigDict, Field, RootModel
 from objectiveai.weights_entry import WeightsEntry
 
 
-class WeightsVariant1(RootModel):
+class WeightsWeights(RootModel):
     """Simple vector of decimal weights."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Weights'})
+
     root: list[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]]
 
 
-class WeightsVariant2(RootModel):
+class WeightsEntries(RootModel):
     """Vector of entries with optional invert flags."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Entries'})
+
     root: list[WeightsEntry]
 
 
@@ -23,5 +27,5 @@ class Weights(RootModel):
 - `Entries(Vec<WeightsEntry>)` - weights with optional per-agent `invert`"""
     model_config = ConfigDict(title='Weights')
 
-    root: Union[WeightsVariant1, WeightsVariant2]
+    root: Union[WeightsWeights, WeightsEntries]
 

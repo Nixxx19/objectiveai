@@ -6,21 +6,21 @@ from pydantic import BaseModel, ConfigDict, RootModel
 from objectiveai.remote_path import RemotePath
 
 
-class GetAgentResponseVariant1(BaseModel):
+class GetAgentResponseGithub(BaseModel):
     commit: str
     owner: str
     remote: Literal['github']
     repository: str
 
 
-class GetAgentResponseVariant2(BaseModel):
+class GetAgentResponseFilesystem(BaseModel):
     commit: str
     owner: str
     remote: Literal['filesystem']
     repository: str
 
 
-class GetAgentResponseVariant3(BaseModel):
+class GetAgentResponseMock(BaseModel):
     name: str
     remote: Literal['mock']
 
@@ -29,5 +29,5 @@ class GetAgentResponse(RootModel):
     """Response containing a single Agent with creation timestamp."""
     model_config = ConfigDict(title='agent.GetAgentResponse', json_schema_extra={'_expanded_ref': 'RemotePath'})
 
-    root: Union[GetAgentResponseVariant1, GetAgentResponseVariant2, GetAgentResponseVariant3]
+    root: Union[GetAgentResponseGithub, GetAgentResponseFilesystem, GetAgentResponseMock]
 

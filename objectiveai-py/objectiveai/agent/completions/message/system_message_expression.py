@@ -7,13 +7,17 @@ from objectiveai.agent.completions.message.simple_content_expression import Simp
 from objectiveai.functions.expression.expression import Expression
 
 
-class SystemMessageExpressionContentVariant1(RootModel):
+class SystemMessageExpressionContentExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class SystemMessageExpressionContentVariant2(RootModel):
+class SystemMessageExpressionContentValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: SimpleContentExpression
 
 
@@ -42,16 +46,20 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[SystemMessageExpressionContentVariant1, SystemMessageExpressionContentVariant2]
+    root: Union[SystemMessageExpressionContentExpression, SystemMessageExpressionContentValue]
 
 
-class SystemMessageExpressionNameVariant1(RootModel):
+class SystemMessageExpressionNameExpression(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Expression'})
+
     root: Expression
 
 
-class SystemMessageExpressionNameVariant2(RootModel):
+class SystemMessageExpressionNameValue(RootModel):
     """A literal value."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Value'})
+
     root: Optional[str]
 
 
@@ -80,7 +88,7 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[SystemMessageExpressionNameVariant1, SystemMessageExpressionNameVariant2]
+    root: Union[SystemMessageExpressionNameExpression, SystemMessageExpressionNameValue]
 
 
 class SystemMessageExpression(BaseModel):

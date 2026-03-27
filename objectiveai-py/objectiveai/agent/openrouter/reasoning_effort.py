@@ -5,33 +5,45 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class ReasoningEffortVariant1(RootModel):
+class ReasoningEffortNone(RootModel):
     """No reasoning."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'None'})
+
     root: Literal['none']
 
 
-class ReasoningEffortVariant2(RootModel):
+class ReasoningEffortMinimal(RootModel):
     """Minimal reasoning effort."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Minimal'})
+
     root: Literal['minimal']
 
 
-class ReasoningEffortVariant3(RootModel):
+class ReasoningEffortLow(RootModel):
     """Low reasoning effort."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Low'})
+
     root: Literal['low']
 
 
-class ReasoningEffortVariant4(RootModel):
+class ReasoningEffortMedium(RootModel):
     """Medium reasoning effort."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Medium'})
+
     root: Literal['medium']
 
 
-class ReasoningEffortVariant5(RootModel):
+class ReasoningEffortHigh(RootModel):
     """High reasoning effort."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'High'})
+
     root: Literal['high']
 
 
-class ReasoningEffortVariant6(RootModel):
+class ReasoningEffortXhigh(RootModel):
     """Maximum reasoning effort."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Xhigh'})
+
     root: Literal['xhigh']
 
 
@@ -41,5 +53,5 @@ class ReasoningEffort(RootModel):
 Only supported by some models."""
     model_config = ConfigDict(title='agent.openrouter.ReasoningEffort')
 
-    root: Union[ReasoningEffortVariant1, ReasoningEffortVariant2, ReasoningEffortVariant3, ReasoningEffortVariant4, ReasoningEffortVariant5, ReasoningEffortVariant6]
+    root: Union[ReasoningEffortNone, ReasoningEffortMinimal, ReasoningEffortLow, ReasoningEffortMedium, ReasoningEffortHigh, ReasoningEffortXhigh]
 

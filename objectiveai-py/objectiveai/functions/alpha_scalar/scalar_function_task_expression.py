@@ -7,7 +7,7 @@ from objectiveai.functions.expression.expression import Expression
 from objectiveai.remote_path import RemotePath
 
 
-class ScalarFunctionTaskExpressionVariant1(BaseModel):
+class ScalarFunctionTaskExpressionGithub(BaseModel):
     commit: str
     owner: str
     remote: Literal['github']
@@ -16,7 +16,7 @@ class ScalarFunctionTaskExpressionVariant1(BaseModel):
     skip: Optional[Expression] = None
 
 
-class ScalarFunctionTaskExpressionVariant2(BaseModel):
+class ScalarFunctionTaskExpressionFilesystem(BaseModel):
     commit: str
     owner: str
     remote: Literal['filesystem']
@@ -25,7 +25,7 @@ class ScalarFunctionTaskExpressionVariant2(BaseModel):
     skip: Optional[Expression] = None
 
 
-class ScalarFunctionTaskExpressionVariant3(BaseModel):
+class ScalarFunctionTaskExpressionMock(BaseModel):
     name: str
     remote: Literal['mock']
     input: Expression
@@ -35,5 +35,5 @@ class ScalarFunctionTaskExpressionVariant3(BaseModel):
 class ScalarFunctionTaskExpression(RootModel):
     model_config = ConfigDict(title='functions.alpha_scalar.ScalarFunctionTaskExpression', json_schema_extra={'_expanded_ref': 'RemotePath', '_expanded_ref_props': ['input', 'skip']})
 
-    root: Union[ScalarFunctionTaskExpressionVariant1, ScalarFunctionTaskExpressionVariant2, ScalarFunctionTaskExpressionVariant3]
+    root: Union[ScalarFunctionTaskExpressionGithub, ScalarFunctionTaskExpressionFilesystem, ScalarFunctionTaskExpressionMock]
 

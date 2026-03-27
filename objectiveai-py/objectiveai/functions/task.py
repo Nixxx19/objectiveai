@@ -12,7 +12,7 @@ from objectiveai.functions.vector_completion_task import VectorCompletionTask
 from objectiveai.functions.vector_function_task import VectorFunctionTask
 
 
-class TaskVariant1Variant1(BaseModel):
+class TaskScalarFunctionGithub(BaseModel):
     commit: str
     owner: str
     remote: Literal['github']
@@ -22,7 +22,7 @@ class TaskVariant1Variant1(BaseModel):
     type_: Literal['scalar.function'] = Field(..., alias='type')
 
 
-class TaskVariant1Variant2(BaseModel):
+class TaskScalarFunctionFilesystem(BaseModel):
     commit: str
     owner: str
     remote: Literal['filesystem']
@@ -32,7 +32,7 @@ class TaskVariant1Variant2(BaseModel):
     type_: Literal['scalar.function'] = Field(..., alias='type')
 
 
-class TaskVariant1Variant3(BaseModel):
+class TaskScalarFunctionMock(BaseModel):
     name: str
     remote: Literal['mock']
     input: InputValue = Field(..., description='The resolved input to pass to the function.')
@@ -40,14 +40,14 @@ class TaskVariant1Variant3(BaseModel):
     type_: Literal['scalar.function'] = Field(..., alias='type')
 
 
-class TaskVariant1(RootModel):
+class TaskScalarFunction(RootModel):
     """Calls a scalar function (produces a single score)."""
-    model_config = ConfigDict(json_schema_extra={'_expanded_ref': 'functions.ScalarFunctionTask', '_expanded_ref_props': ['type']})
+    model_config = ConfigDict(json_schema_extra={'_expanded_ref': 'functions.ScalarFunctionTask', '_expanded_ref_props': ['type'], '_variant_title': 'ScalarFunction'})
 
-    root: Union[TaskVariant1Variant1, TaskVariant1Variant2, TaskVariant1Variant3]
+    root: Union[TaskScalarFunctionGithub, TaskScalarFunctionFilesystem, TaskScalarFunctionMock]
 
 
-class TaskVariant2Variant1(BaseModel):
+class TaskVectorFunctionGithub(BaseModel):
     commit: str
     owner: str
     remote: Literal['github']
@@ -57,7 +57,7 @@ class TaskVariant2Variant1(BaseModel):
     type_: Literal['vector.function'] = Field(..., alias='type')
 
 
-class TaskVariant2Variant2(BaseModel):
+class TaskVectorFunctionFilesystem(BaseModel):
     commit: str
     owner: str
     remote: Literal['filesystem']
@@ -67,7 +67,7 @@ class TaskVariant2Variant2(BaseModel):
     type_: Literal['vector.function'] = Field(..., alias='type')
 
 
-class TaskVariant2Variant3(BaseModel):
+class TaskVectorFunctionMock(BaseModel):
     name: str
     remote: Literal['mock']
     input: InputValue = Field(..., description='The resolved input to pass to the function.')
@@ -75,25 +75,31 @@ class TaskVariant2Variant3(BaseModel):
     type_: Literal['vector.function'] = Field(..., alias='type')
 
 
-class TaskVariant2(RootModel):
+class TaskVectorFunction(RootModel):
     """Calls a vector function (produces a vector of scores)."""
-    model_config = ConfigDict(json_schema_extra={'_expanded_ref': 'functions.VectorFunctionTask', '_expanded_ref_props': ['type']})
+    model_config = ConfigDict(json_schema_extra={'_expanded_ref': 'functions.VectorFunctionTask', '_expanded_ref_props': ['type'], '_variant_title': 'VectorFunction'})
 
-    root: Union[TaskVariant2Variant1, TaskVariant2Variant2, TaskVariant2Variant3]
+    root: Union[TaskVectorFunctionGithub, TaskVectorFunctionFilesystem, TaskVectorFunctionMock]
 
 
-class TaskVariant3(VectorCompletionTask):
+class TaskVectorCompletion(VectorCompletionTask):
     """Runs a vector completion."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'VectorCompletion'})
+
     type_: Literal['vector.completion'] = Field(..., alias='type')
 
 
-class TaskVariant4(PlaceholderScalarFunctionTask):
+class TaskPlaceholderScalarFunction(PlaceholderScalarFunctionTask):
     """Placeholder scalar function (always outputs 0.5)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'PlaceholderScalarFunction'})
+
     type_: Literal['placeholder.scalar.function'] = Field(..., alias='type')
 
 
-class TaskVariant5(PlaceholderVectorFunctionTask):
+class TaskPlaceholderVectorFunction(PlaceholderVectorFunctionTask):
     """Placeholder vector function (always outputs equalized vector)."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'PlaceholderVectorFunction'})
+
     type_: Literal['placeholder.vector.function'] = Field(..., alias='type')
 
 
@@ -104,5 +110,5 @@ Produced by compiling a [`TaskExpression`] against input data. All
 expressions have been resolved to concrete values."""
     model_config = ConfigDict(title='functions.Task')
 
-    root: Union[TaskVariant1, TaskVariant2, TaskVariant3, TaskVariant4, TaskVariant5]
+    root: Union[TaskScalarFunction, TaskVectorFunction, TaskVectorCompletion, TaskPlaceholderScalarFunction, TaskPlaceholderVectorFunction]
 

@@ -6,21 +6,21 @@ from pydantic import BaseModel, ConfigDict, RootModel
 from objectiveai.remote_path import RemotePath
 
 
-class GetSwarmResponseVariant1(BaseModel):
+class GetSwarmResponseGithub(BaseModel):
     commit: str
     owner: str
     remote: Literal['github']
     repository: str
 
 
-class GetSwarmResponseVariant2(BaseModel):
+class GetSwarmResponseFilesystem(BaseModel):
     commit: str
     owner: str
     remote: Literal['filesystem']
     repository: str
 
 
-class GetSwarmResponseVariant3(BaseModel):
+class GetSwarmResponseMock(BaseModel):
     name: str
     remote: Literal['mock']
 
@@ -29,5 +29,5 @@ class GetSwarmResponse(RootModel):
     """Response containing a single Swarm."""
     model_config = ConfigDict(title='swarm.GetSwarmResponse', json_schema_extra={'_expanded_ref': 'RemotePath'})
 
-    root: Union[GetSwarmResponseVariant1, GetSwarmResponseVariant2, GetSwarmResponseVariant3]
+    root: Union[GetSwarmResponseGithub, GetSwarmResponseFilesystem, GetSwarmResponseMock]
 

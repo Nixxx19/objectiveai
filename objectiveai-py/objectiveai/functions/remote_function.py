@@ -8,16 +8,20 @@ from objectiveai.functions.expression.input_schema import InputSchema
 from objectiveai.functions.task_expression import TaskExpression
 
 
-class RemoteFunctionVariant1(BaseModel):
+class RemoteFunctionScalar(BaseModel):
     """Produces a single score in [0, 1]."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Scalar'})
+
     description: str = Field(..., description='Human-readable description of what the function does.')
     input_schema: InputSchema = Field(..., description='JSON Schema defining the expected input structure.')
     tasks: list[TaskExpression] = Field(..., description='The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped).')
     type_: Literal['scalar.function'] = Field(..., alias='type')
 
 
-class RemoteFunctionVariant2(BaseModel):
+class RemoteFunctionVector(BaseModel):
     """Produces a vector of scores that sums to 1."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Vector'})
+
     description: str = Field(..., description='Human-readable description of what the function does.')
     input_merge: Expression = Field(..., description='Expression transforming an array of inputs computed by `input_split`\ninto a single Input object for the Function.\nReceives: `input` (as an array).')
     input_schema: InputSchema = Field(..., description='JSON Schema defining the expected input structure.')
@@ -35,5 +39,5 @@ referenced by `remote/owner/repository`. They include documentation fields
 that inline functions lack."""
     model_config = ConfigDict(title='functions.RemoteFunction')
 
-    root: Union[RemoteFunctionVariant1, RemoteFunctionVariant2]
+    root: Union[RemoteFunctionScalar, RemoteFunctionVector]
 
