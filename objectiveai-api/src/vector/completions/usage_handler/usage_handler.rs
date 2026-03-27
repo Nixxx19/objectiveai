@@ -7,9 +7,9 @@ use std::sync::Arc;
 #[async_trait::async_trait]
 pub trait UsageHandler<CTXEXT> {
     /// Called after a vector completion finishes to track usage.
-    async fn handle_usage(
+    async fn handle_usage<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, PC>,
         request: Arc<objectiveai::vector::completions::request::VectorCompletionCreateParams>,
         response: objectiveai::vector::completions::response::unary::VectorCompletion,
     );

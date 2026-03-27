@@ -22,9 +22,9 @@ impl<CTXEXT> super::Fetcher<CTXEXT> for ObjectiveAiFetcher
 where
     CTXEXT: Send + Sync + 'static + ctx::ContextExt,
 {
-    async fn fetch(
+    async fn fetch<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, PC>,
         agent: &objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote,
         messages: &[objectiveai::agent::completions::message::Message],
         responses: &[objectiveai::agent::completions::message::RichContent],

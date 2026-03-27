@@ -12,6 +12,10 @@ readme = "README.md"
 keywords = ["llm", "ai", "swarm"]
 publish = true
 
+[features]
+default = []
+sqlite-persistent-cache = ["dep:rusqlite"]
+
 [dependencies]
 objectiveai = { path = "../objectiveai-rs", version = "2.0.0", default-features = false, features = ["http"] }
 serde_json = { version = "1.0.149", features = ["preserve_order"] }
@@ -46,6 +50,7 @@ twox-hash = { version = "2.1.2" }
 base62 = { version = "2.2.4" }
 tokio-util = { version = "0.7.18", features = ["io"] }
 futures-util = { version = "0.3.32" }
+rusqlite = { version = "0.31.0", features = ["bundled"], optional = true }
 
 [dev-dependencies]
 dunce = "1.0.5"

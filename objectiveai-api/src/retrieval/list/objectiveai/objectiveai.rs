@@ -19,9 +19,9 @@ impl<CTXEXT> super::super::Client<CTXEXT> for ObjectiveAiClient
 where
     CTXEXT: Send + Sync + 'static + ctx::ContextExt,
 {
-    async fn list_agents(
+    async fn list_agents<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, PC>,
     ) -> Result<objectiveai::agent::response::ListAgentResponse, ResponseError> {
         let client = self.client.with_authorization(ctx).await;
         objectiveai::agent::list_agents(
@@ -34,9 +34,9 @@ where
         .map_err(|e| ResponseError::from(&e))
     }
 
-    async fn list_swarms(
+    async fn list_swarms<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, PC>,
     ) -> Result<objectiveai::swarm::response::ListSwarmResponse, ResponseError> {
         let client = self.client.with_authorization(ctx).await;
         objectiveai::swarm::list_swarms(
@@ -49,9 +49,9 @@ where
         .map_err(|e| ResponseError::from(&e))
     }
 
-    async fn list_functions(
+    async fn list_functions<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, PC>,
     ) -> Result<objectiveai::functions::response::ListFunctionResponse, ResponseError> {
         let client = self.client.with_authorization(ctx).await;
         objectiveai::functions::list_functions(
@@ -64,9 +64,9 @@ where
         .map_err(|e| ResponseError::from(&e))
     }
 
-    async fn list_profiles(
+    async fn list_profiles<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, PC>,
     ) -> Result<objectiveai::functions::profiles::response::ListProfileResponse, ResponseError>
     {
         let client = self.client.with_authorization(ctx).await;
@@ -82,9 +82,9 @@ where
         .map_err(|e| ResponseError::from(&e))
     }
 
-    async fn list_function_profile_pairs(
+    async fn list_function_profile_pairs<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, PC>,
     ) -> Result<objectiveai::functions::response::ListFunctionProfilePairResponse, ResponseError>
     {
         let client = self.client.with_authorization(ctx).await;

@@ -9,9 +9,9 @@ impl<CTXEXT> super::UsageHandler<CTXEXT> for LogUsageHandler
 where
     CTXEXT: Send + Sync + 'static,
 {
-    async fn handle_usage(
+    async fn handle_usage<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, PC>,
         _request: Arc<objectiveai::functions::inventions::request::FunctionInventionCreateParams>,
         response: objectiveai::functions::inventions::response::unary::FunctionInvention,
     ) {

@@ -91,7 +91,7 @@ where
 {
     pub async fn create_unary_handle_usage(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams>,
     ) -> Result<
         objectiveai::functions::inventions::recursive::response::unary::FunctionInventionRecursive,
@@ -111,7 +111,7 @@ where
 
     pub async fn create_streaming_handle_usage(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams>,
     ) -> Result<
         impl Stream<Item = RecursiveChunk> + Send + Unpin + 'static,
@@ -167,7 +167,7 @@ where
 
     pub async fn create_streaming(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams>,
     ) -> Result<
         impl Stream<Item = RecursiveChunk> + Send + 'static,
@@ -272,7 +272,7 @@ fn run_recursive<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, 
             CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM,
         >,
     >,
-    ctx: ctx::Context<CTXEXT>,
+    ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
     request: Arc<objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams>,
     id: String,
     created: u64,

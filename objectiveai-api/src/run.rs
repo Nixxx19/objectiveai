@@ -1112,7 +1112,7 @@ pub async fn run(config: Config) -> std::io::Result<()> {
 
 // Create Context
 
-fn context(headers: &axum::http::HeaderMap, persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>, suppress_output: bool) -> ctx::Context<ctx::DefaultContextExt> {
+fn context(headers: &axum::http::HeaderMap, persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>, suppress_output: bool) -> ctx::Context<ctx::DefaultContextExt, impl ctx::persistent_cache::PersistentCacheClient> {
     ctx::Context::new(
         Arc::new(ctx::DefaultContextExt),
         persistent_cache,

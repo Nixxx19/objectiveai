@@ -4,8 +4,17 @@ use tokio::sync::mpsc;
 
 use crate::ctx;
 
+/// Resolved viewer context data (address + signature).
+struct ViewerData {
+    address: Option<Arc<String>>,
+    signature: Option<Arc<String>>,
+}
+
 pub struct Client<CTXEXT> {
-    tx: mpsc::UnboundedSender<(ctx::Context<CTXEXT>, super::request::Request)>,
+    tx: mpsc::UnboundedSender<(ViewerData, super::request::Request)>,
+    default_address: Option<Arc<String>>,
+    default_signature: Option<Arc<String>>,
+    _marker: std::marker::PhantomData<CTXEXT>,
 }
 
 impl<CTXEXT: ctx::ContextExt + Send + Sync + 'static> Client<CTXEXT> {
@@ -20,47 +29,22 @@ impl<CTXEXT: ctx::ContextExt + Send + Sync + 'static> Client<CTXEXT> {
         backoff_max_interval: Duration,
         backoff_max_elapsed_time: Duration,
     ) -> Self {
-        let (tx, mut rx) = mpsc::unbounded_channel::<(ctx::Context<CTXEXT>, super::request::Request)>();
+        let (tx, mut rx) = mpsc::unbounded_channel::<(ViewerData, super::request::Request)>();
 
         let default_address = address.map(Arc::new);
         let default_signature = signature.map(Arc::new);
 
-        tokio::spawn(async move {
-            while let Some((ctx, request)) = rx.recv().await {
-                // Resolve address and signature concurrently via select.
-                // If ctx provides an address, use it with ctx signature.
-                // If ctx has no address, use default address with default signature.
-                // If both are None, skip.
-                // If address resolves first to None, signature future is dropped.
-                let addr_fut = ctx.viewer_address();
-                let sig_fut = ctx.viewer_signature();
-                tokio::pin!(addr_fut);
-                tokio::pin!(sig_fut);
+        let bg_default_address = default_address.clone();
+        let bg_default_signature = default_signature.clone();
 
-                let (address, signature) = tokio::select! {
-                    biased;
-                    addr = &mut addr_fut => {
-                        match addr {
-                            Some(addr) => {
-                                let sig = sig_fut.await;
-                                (addr, sig)
-                            }
-                            None => match &default_address {
-                                Some(addr) => (addr.clone(), default_signature.clone()),
-                                None => continue,
-                            },
-                        }
-                    }
-                    sig = &mut sig_fut => {
-                        let addr = addr_fut.await;
-                        match addr {
-                            Some(addr) => (addr, sig),
-                            None => match &default_address {
-                                Some(addr) => (addr.clone(), default_signature.clone()),
-                                None => continue,
-                            },
-                        }
-                    }
+        tokio::spawn(async move {
+            while let Some((viewer_data, request)) = rx.recv().await {
+                let (address, signature) = match viewer_data.address {
+                    Some(addr) => (addr, viewer_data.signature),
+                    None => match &bg_default_address {
+                        Some(addr) => (addr.clone(), bg_default_signature.clone()),
+                        None => continue,
+                    },
                 };
 
                 let url = match &request {
@@ -119,82 +103,128 @@ impl<CTXEXT: ctx::ContextExt + Send + Sync + 'static> Client<CTXEXT> {
             }
         });
 
-        Self { tx }
+        Self { tx, default_address, default_signature, _marker: std::marker::PhantomData }
+    }
+
+    /// Resolves viewer data from the context and sends the request through the channel.
+    /// The resolution is done in a spawned task to avoid blocking the caller.
+    fn send_with_ctx(
+        &self,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
+        request: super::request::Request,
+    ) {
+        let tx = self.tx.clone();
+        let default_address = self.default_address.clone();
+        let default_signature = self.default_signature.clone();
+        tokio::spawn(async move {
+            let addr_fut = ctx.viewer_address();
+            let sig_fut = ctx.viewer_signature();
+            tokio::pin!(addr_fut);
+            tokio::pin!(sig_fut);
+
+            let (address, signature) = tokio::select! {
+                biased;
+                addr = &mut addr_fut => {
+                    match addr {
+                        Some(addr) => {
+                            let sig = sig_fut.await;
+                            (Some(addr), sig)
+                        }
+                        None => match &default_address {
+                            Some(addr) => (Some(addr.clone()), default_signature.clone()),
+                            None => return,
+                        },
+                    }
+                }
+                sig = &mut sig_fut => {
+                    let addr = addr_fut.await;
+                    match addr {
+                        Some(addr) => (Some(addr), sig),
+                        None => match &default_address {
+                            Some(addr) => (Some(addr.clone()), default_signature.clone()),
+                            None => return,
+                        },
+                    }
+                }
+            };
+
+            let _ = tx.send((ViewerData { address, signature }, request));
+        });
     }
 
     pub fn send_function_execution_begin(
         &self,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         id: String,
         request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
     ) {
-        self.tx.send((ctx, super::request::Request::FunctionExecution(
+        self.send_with_ctx(ctx, super::request::Request::FunctionExecution(
             super::request::FunctionExecutionRequest::Begin(super::request::FunctionExecutionCreateParams {
                 id,
                 inner: request,
             }),
-        ))).ok();
+        ));
     }
 
     pub fn send_function_execution_continue(
         &self,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         chunk: objectiveai::functions::executions::response::streaming::FunctionExecutionChunk,
     ) {
-        self.tx.send((ctx, super::request::Request::FunctionExecution(
+        self.send_with_ctx(ctx, super::request::Request::FunctionExecution(
             super::request::FunctionExecutionRequest::Continue(chunk),
-        ))).ok();
+        ));
     }
 
     pub fn send_function_execution_error(
         &self,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         id: String,
         error: &crate::functions::executions::Error,
     ) {
-        self.tx.send((ctx, super::request::Request::FunctionExecution(
+        self.send_with_ctx(ctx, super::request::Request::FunctionExecution(
             super::request::FunctionExecutionRequest::Error(super::request::ResponseError {
                 id,
                 inner: objectiveai::error::ResponseError::from(error),
             }),
-        ))).ok();
+        ));
     }
 
     pub fn send_function_invention_recursive_begin(
         &self,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         id: String,
         request: Arc<objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams>,
     ) {
-        self.tx.send((ctx, super::request::Request::FunctionInventionRecursive(
+        self.send_with_ctx(ctx, super::request::Request::FunctionInventionRecursive(
             super::request::FunctionInventionRecursiveRequest::Begin(super::request::FunctionInventionRecursiveCreateParams {
                 id,
                 inner: request,
             }),
-        ))).ok();
+        ));
     }
 
     pub fn send_function_invention_recursive_continue(
         &self,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         chunk: objectiveai::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk,
     ) {
-        self.tx.send((ctx, super::request::Request::FunctionInventionRecursive(
+        self.send_with_ctx(ctx, super::request::Request::FunctionInventionRecursive(
             super::request::FunctionInventionRecursiveRequest::Continue(chunk),
-        ))).ok();
+        ));
     }
 
     pub fn send_function_invention_recursive_error(
         &self,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         id: String,
         error: &crate::functions::inventions::recursive::Error,
     ) {
-        self.tx.send((ctx, super::request::Request::FunctionInventionRecursive(
+        self.send_with_ctx(ctx, super::request::Request::FunctionInventionRecursive(
             super::request::FunctionInventionRecursiveRequest::Error(super::request::ResponseError {
                 id,
                 inner: objectiveai::error::ResponseError::from(error),
             }),
-        ))).ok();
+        ));
     }
 }

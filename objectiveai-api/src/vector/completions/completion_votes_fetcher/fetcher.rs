@@ -11,9 +11,9 @@ pub trait Fetcher<CTXEXT> {
     /// Retrieves votes from a historical vector completion by ID.
     ///
     /// Returns None if the completion is not found.
-    async fn fetch(
+    async fn fetch<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, PC>,
         id: &str,
     ) -> Result<
         Option<Vec<objectiveai::vector::completions::response::Vote>>,

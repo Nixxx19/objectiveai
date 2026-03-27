@@ -27,7 +27,7 @@ where
 {
     pub async fn get_agent_usage(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         params: &objectiveai::agent::request::GetAgentRequest,
     ) -> Result<objectiveai::agent::response::UsageAgentResponse, ResponseError> {
         self.objectiveai.get_agent_usage(ctx, params).await
@@ -35,7 +35,7 @@ where
 
     pub async fn get_swarm_usage(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         params: &objectiveai::swarm::request::GetSwarmRequest,
     ) -> Result<objectiveai::swarm::response::UsageSwarmResponse, ResponseError> {
         self.objectiveai.get_swarm_usage(ctx, params).await
@@ -43,7 +43,7 @@ where
 
     pub async fn get_function_usage(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         params: &objectiveai::functions::request::GetFunctionRequest,
     ) -> Result<objectiveai::functions::response::UsageFunctionResponse, ResponseError> {
         self.objectiveai.get_function_usage(ctx, params).await
@@ -51,7 +51,7 @@ where
 
     pub async fn get_profile_usage(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         params: &objectiveai::functions::profiles::request::GetProfileRequest,
     ) -> Result<objectiveai::functions::profiles::response::UsageProfileResponse, ResponseError> {
         self.objectiveai.get_profile_usage(ctx, params).await
@@ -59,7 +59,7 @@ where
 
     pub async fn get_function_profile_pair_usage(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         params: &objectiveai::functions::request::GetFunctionProfilePairUsageRequest,
     ) -> Result<objectiveai::functions::response::UsageFunctionProfilePairResponse, ResponseError>
     {

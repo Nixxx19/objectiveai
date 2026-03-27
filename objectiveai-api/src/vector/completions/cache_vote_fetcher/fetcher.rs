@@ -8,9 +8,9 @@ pub trait Fetcher<CTXEXT> {
     /// Requests a cached vote matching the given parameters.
     ///
     /// Returns None if no cached vote exists.
-    async fn fetch(
+    async fn fetch<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, PC>,
         agent: &objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote,
         messages: &[objectiveai::agent::completions::message::Message],
         responses: &[objectiveai::agent::completions::message::RichContent],

@@ -141,7 +141,7 @@ where
     /// Internally streams the response and aggregates chunks into a single response.
     pub async fn create_unary_handle_usage(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         params: Arc<objectiveai::agent::completions::request::AgentCompletionCreateParams>,
         continuation: Option<
             super::Continuation<
@@ -178,7 +178,7 @@ where
     /// Creates a streaming agent completion, tracking usage after the stream ends.
     pub async fn create_streaming_handle_usage(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         params: Arc<objectiveai::agent::completions::request::AgentCompletionCreateParams>,
         continuation: Option<
             super::Continuation<
@@ -256,7 +256,7 @@ where
 
     pub async fn create_streaming(
         &self,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         params: Arc<objectiveai::agent::completions::request::AgentCompletionCreateParams>,
         continuation: Option<
             super::Continuation<
@@ -814,7 +814,7 @@ where
     pub fn resolve_agents_mcp_connections(
         &self,
         agent: &objectiveai::agent::AgentWithFallbacks,
-        ctx: &crate::ctx::Context<CTXEXT>,
+        ctx: &crate::ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
     ) -> Vec<McpHandle> {
         let inline = agent.inline();
         let mut handles = Vec::with_capacity(
@@ -850,7 +850,7 @@ where
     pub fn spawn_agent_mcp_connections(
         &self,
         agent: &objectiveai::agent::InlineAgent,
-        ctx: &crate::ctx::Context<CTXEXT>,
+        ctx: &crate::ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
     ) -> McpHandle {
         match agent.base().mcp_servers() {
             Some(servers) if !servers.is_empty() => {

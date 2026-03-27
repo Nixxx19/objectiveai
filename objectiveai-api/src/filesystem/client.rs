@@ -121,7 +121,7 @@ impl Client {
     /// Returns the commit SHA on success.
     pub async fn publish<CTXEXT: crate::ctx::ContextExt>(
         &self,
-        ctx: &crate::ctx::Context<CTXEXT>,
+        ctx: &crate::ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         kind: Kind,
         owner: &str,
         repository: &str,
@@ -211,7 +211,7 @@ impl Client {
     /// Returns the commit SHA on success.
     pub async fn publish_and_push<CTXEXT: crate::ctx::ContextExt>(
         &self,
-        ctx: &crate::ctx::Context<CTXEXT>,
+        ctx: &crate::ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         kind: Kind,
         owner: &str,
         repository: &str,

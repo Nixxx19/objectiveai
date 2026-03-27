@@ -148,7 +148,7 @@ where
 {
     pub async fn create_unary_handle_usage(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<
             objectiveai::functions::inventions::request::FunctionInventionCreateParams,
         >,
@@ -170,7 +170,7 @@ where
 
     pub async fn create_streaming_handle_usage(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<
             objectiveai::functions::inventions::request::FunctionInventionCreateParams,
         >,
@@ -225,7 +225,7 @@ where
 
     pub async fn create_streaming(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<
             objectiveai::functions::inventions::request::FunctionInventionCreateParams,
         >,
@@ -341,7 +341,7 @@ where
     ///   exist on the target remote.
     async fn check_preflight(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: &objectiveai::functions::inventions::request::FunctionInventionCreateParams,
         name: &str,
     ) -> Result<(), super::Error> {
@@ -420,7 +420,7 @@ fn run_all_steps<T, CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETR
     >,
     github_client: Arc<crate::github::Client>,
     filesystem_client: Arc<crate::filesystem::Client>,
-    ctx: ctx::Context<CTXEXT>,
+    ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
     request: Arc<objectiveai::functions::inventions::request::FunctionInventionCreateParams>,
     id: String,
     created: u64,
@@ -1000,7 +1000,7 @@ pub(crate) fn extract_description(state: &objectiveai::functions::inventions::St
 /// and commits.
 pub(crate) async fn publish_filesystem<CTXEXT: crate::ctx::ContextExt>(
     filesystem_client: &crate::filesystem::Client,
-    ctx: &crate::ctx::Context<CTXEXT>,
+    ctx: &crate::ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
     name: &str,
     files: &[(&'static str, String)],
 ) -> Result<objectiveai::RemotePath, super::Error> {
@@ -1030,7 +1030,7 @@ pub(crate) async fn publish_filesystem<CTXEXT: crate::ctx::ContextExt>(
 pub(crate) async fn publish_github<CTXEXT: ctx::ContextExt + Send + Sync>(
     github_client: &crate::github::Client,
     filesystem_client: &crate::filesystem::Client,
-    ctx: &ctx::Context<CTXEXT>,
+    ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
     name: &str,
     description: &str,
     files: &[(&'static str, String)],
@@ -1095,7 +1095,7 @@ fn run_step<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG>
             CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG,
         >,
     >,
-    ctx: ctx::Context<CTXEXT>,
+    ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
     request: Arc<objectiveai::functions::inventions::request::FunctionInventionCreateParams>,
     prompt: String,
     tools: Vec<objectiveai::functions::inventions::InventionTool>,

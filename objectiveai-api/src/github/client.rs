@@ -66,7 +66,7 @@ impl Client {
     /// Resolves the authorization token: per-request header → ext → self.authorization.
     async fn resolve_authorization<CTXEXT: ctx::ContextExt>(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
     ) -> Option<Arc<String>> {
         if let Some(token) = ctx.github_authorization().await {
             return Some(token);
@@ -78,7 +78,7 @@ impl Client {
     /// If `allow_publish_without_byok` is false, only the per-request ctx token is accepted.
     async fn require_authorization<CTXEXT: ctx::ContextExt>(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
     ) -> Result<Arc<String>, super::Error> {
         if let Some(token) = ctx.github_authorization().await {
             return Ok(token);
@@ -117,7 +117,7 @@ impl Client {
     /// Fetches the latest commit SHA for a repository.
     pub async fn fetch_latest_commit<CTXEXT: ctx::ContextExt>(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         owner: &str,
         repository: &str,
     ) -> Result<Option<String>, super::Error> {
@@ -168,7 +168,7 @@ impl Client {
     /// Fetches a JSON file from a GitHub repository and deserializes it.
     pub async fn read_json<T, CTXEXT: ctx::ContextExt>(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         owner: &str,
         repository: &str,
         commit: &str,
@@ -279,7 +279,7 @@ impl Client {
     /// Checks whether a GitHub repository exists.
     pub async fn repository_exists<CTXEXT: ctx::ContextExt>(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         owner: &str,
         repository: &str,
     ) -> Result<bool, super::Error> {
@@ -312,7 +312,7 @@ impl Client {
     /// Validates that a GitHub token is valid. Returns the scopes.
     pub async fn validate_token<CTXEXT: ctx::ContextExt>(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
     ) -> Result<Vec<String>, super::Error> {
         let token = self.require_authorization(ctx).await?;
         let req = self.request_headers(
@@ -350,7 +350,7 @@ impl Client {
     /// Returns the authenticated user's login name.
     pub async fn get_authenticated_user<CTXEXT: ctx::ContextExt>(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
     ) -> Result<String, super::Error> {
         let token = self.require_authorization(ctx).await?;
         let req = self.request_headers(
@@ -392,7 +392,7 @@ impl Client {
     /// Creates a new GitHub repository under the authenticated user.
     pub async fn create_repository<CTXEXT: ctx::ContextExt>(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         name: &str,
         description: &str,
     ) -> Result<String, super::Error> {
@@ -432,7 +432,7 @@ impl Client {
     /// Updates the description of a GitHub repository.
     pub async fn update_description<CTXEXT: ctx::ContextExt>(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         owner: &str,
         repository: &str,
         description: &str,
@@ -466,7 +466,7 @@ impl Client {
     pub async fn publish<CTXEXT: ctx::ContextExt + Send + Sync>(
         &self,
         filesystem_client: &crate::filesystem::Client,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         name: &str,
         description: &str,
         files: &[(&str, &str)],

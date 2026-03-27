@@ -460,7 +460,7 @@ where
     /// Collects the full streaming response and records usage.
     pub async fn create_unary_handle_usage(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
     ) -> Result<
         objectiveai::functions::executions::response::unary::FunctionExecution,
@@ -485,7 +485,7 @@ where
     /// Streams chunks as they become available and records usage after completion.
     pub async fn create_streaming_handle_usage(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
     ) -> Result<
         impl Stream<Item = objectiveai::functions::executions::response::streaming::FunctionExecutionChunk>
@@ -601,7 +601,7 @@ where
     /// if requested.
     pub async fn create_streaming(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
     ) -> Result<
         impl Stream<Item = objectiveai::functions::executions::response::streaming::FunctionExecutionChunk>
@@ -1692,7 +1692,7 @@ where
 
     fn execute_ftp_streaming(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
         root_retry_token: Option<
             Arc<objectiveai::functions::executions::RetryToken>,
@@ -1853,7 +1853,7 @@ where
 
     fn execute_map_function_ftp_streaming(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
         root_retry_token: Option<
             Arc<objectiveai::functions::executions::RetryToken>,
@@ -1983,7 +1983,7 @@ where
 
     fn execute_function_ftp_streaming(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
         root_retry_token: Option<
             Arc<objectiveai::functions::executions::RetryToken>,
@@ -2324,7 +2324,7 @@ where
 
     async fn execute_map_vector_ftp_streaming(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
         root_retry_token: Option<
             Arc<objectiveai::functions::executions::RetryToken>,
@@ -2409,7 +2409,7 @@ where
 
     async fn execute_vector_ftp_streaming(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
         root_retry_token: Option<
             Arc<objectiveai::functions::executions::RetryToken>,
@@ -2532,7 +2532,7 @@ where
 
     async fn create_reasoning_summary_streaming(
         &self,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
         agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
         description: Option<String>,

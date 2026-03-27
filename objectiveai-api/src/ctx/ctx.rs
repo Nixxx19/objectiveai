@@ -19,7 +19,7 @@ use super::persistent_cache::PersistentCacheClient;
 /// When multiple parts of a request need the same swarm or agent,
 /// only one fetch is performed and the result is shared.
 #[derive(Debug)]
-pub struct Context<CTXEXT> {
+pub struct Context<CTXEXT, PC> {
     /// Custom context extension (e.g., for BYOK keys).
     pub ext: Arc<CTXEXT>,
     /// Multiplier applied to costs for this request.
@@ -27,7 +27,7 @@ pub struct Context<CTXEXT> {
     /// Whether to suppress output (eprintln, logging, etc).
     pub suppress_output: bool,
     /// Persistent cache client for key-value storage.
-    persistent_cache: Arc<dyn PersistentCacheClient>,
+    persistent_cache: Arc<PC>,
     /// Per-request ObjectiveAI authorization token.
     objectiveai_authorization: Option<Arc<String>>,
     /// Per-request OpenRouter authorization token.
@@ -130,7 +130,7 @@ pub struct Context<CTXEXT> {
     >,
 }
 
-impl<CTXEXT> Clone for Context<CTXEXT> {
+impl<CTXEXT, PC> Clone for Context<CTXEXT, PC> {
     fn clone(&self) -> Self {
         Self {
             ext: self.ext.clone(),
@@ -161,7 +161,7 @@ impl<CTXEXT> Clone for Context<CTXEXT> {
     }
 }
 
-impl<CTXEXT> Context<CTXEXT> {
+impl<CTXEXT, PC> Context<CTXEXT, PC> {
     /// Creates a new context by extracting authorization headers from the request.
     ///
     /// For each header, checks the `X-` prefixed variant first, then falls back
@@ -170,7 +170,7 @@ impl<CTXEXT> Context<CTXEXT> {
     /// - `X-GITHUB-AUTHORIZATION` / `GITHUB-AUTHORIZATION`: GitHub token
     /// - `X-MCP-AUTHORIZATION` / `MCP-AUTHORIZATION`: JSON-encoded `HashMap<String, String>`
     /// - `X-OBJECTIVEAI-AUTHORIZATION` / `AUTHORIZATION`: ObjectiveAI API key
-    pub fn new<PC: PersistentCacheClient + 'static>(
+    pub fn new(
         ext: Arc<CTXEXT>,
         persistent_cache: Arc<PC>,
         cost_multiplier: rust_decimal::Decimal,
@@ -258,7 +258,7 @@ impl<CTXEXT> Context<CTXEXT> {
     }
 }
 
-impl<CTXEXT> Context<CTXEXT> {
+impl<CTXEXT, PC> Context<CTXEXT, PC> {
     /// Returns the per-request ObjectiveAI authorization token, if present.
     pub fn objectiveai_authorization(&self) -> Option<&Arc<String>> {
         self.objectiveai_authorization.as_ref()
@@ -268,12 +268,12 @@ impl<CTXEXT> Context<CTXEXT> {
 /// Check the in-memory DashMap, then the persistent cache, then call `fetch`.
 /// Non-None results from `fetch` are written to the persistent cache.
 /// All results (including None/Err) are cached in the DashMap for per-request dedup.
-async fn cached_get_or_fetch<K, V, F, Fut>(
+async fn cached_get_or_fetch<K, V, PC, F, Fut>(
     cache: &DashMap<
         K,
         Shared<tokio::sync::oneshot::Receiver<Result<Option<V>, objectiveai::error::ResponseError>>>,
     >,
-    persistent_cache: &Arc<dyn PersistentCacheClient>,
+    persistent_cache: &Arc<PC>,
     namespace: &'static str,
     key: K,
     permanent: bool,
@@ -282,6 +282,7 @@ async fn cached_get_or_fetch<K, V, F, Fut>(
 where
     K: std::hash::Hash + Eq + serde::Serialize + Clone + Send + Sync + 'static,
     V: serde::Serialize + serde::de::DeserializeOwned + Clone + Send + Sync + 'static,
+    PC: PersistentCacheClient,
     F: FnOnce() -> Fut + Send + 'static,
     Fut: std::future::Future<Output = Result<Option<V>, objectiveai::error::ResponseError>> + Send,
 {
@@ -321,7 +322,7 @@ where
     shared.await.unwrap()
 }
 
-impl<CTXEXT> Context<CTXEXT> {
+impl<CTXEXT, PC: PersistentCacheClient> Context<CTXEXT, PC> {
     pub async fn cached_agent<F, Fut>(
         &self,
         key: objectiveai::RemotePath,
@@ -383,7 +384,7 @@ impl<CTXEXT> Context<CTXEXT> {
     }
 }
 
-impl<CTXEXT: super::ContextExt> Context<CTXEXT> {
+impl<CTXEXT: super::ContextExt, PC> Context<CTXEXT, PC> {
     /// Returns the resolved upstream BYOK API key.
     ///
     /// Only OpenRouter is supported. Returns `None` for other upstreams.

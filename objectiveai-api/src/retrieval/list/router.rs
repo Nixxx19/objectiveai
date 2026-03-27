@@ -37,7 +37,7 @@ where
 {
     pub async fn list_agents(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         source: Option<SourceFilter>,
     ) -> Result<objectiveai::agent::response::ListAgentResponse, ResponseError> {
         use objectiveai::agent::response::ListAgentResponse;
@@ -62,7 +62,7 @@ where
 
     pub async fn list_swarms(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         source: Option<SourceFilter>,
     ) -> Result<objectiveai::swarm::response::ListSwarmResponse, ResponseError> {
         use objectiveai::swarm::response::ListSwarmResponse;
@@ -87,7 +87,7 @@ where
 
     pub async fn list_functions(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         source: Option<SourceFilter>,
     ) -> Result<objectiveai::functions::response::ListFunctionResponse, ResponseError> {
         use objectiveai::functions::response::ListFunctionResponse;
@@ -112,7 +112,7 @@ where
 
     pub async fn list_profiles(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         source: Option<SourceFilter>,
     ) -> Result<objectiveai::functions::profiles::response::ListProfileResponse, ResponseError> {
         use objectiveai::functions::profiles::response::ListProfileResponse;
@@ -137,7 +137,7 @@ where
 
     pub async fn list_function_profile_pairs(
         &self,
-        ctx: &ctx::Context<CTXEXT>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
     ) -> Result<objectiveai::functions::response::ListFunctionProfilePairResponse, ResponseError> {
         self.objectiveai.list_function_profile_pairs(ctx).await
     }

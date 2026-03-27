@@ -42,7 +42,7 @@ where
     /// Retrieves all votes from a historical vector completion.
     pub async fn fetch_completion_votes(
         &self,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         id: &str,
     ) -> Result<
         objectiveai::vector::completions::cache::response::CompletionVotes,
@@ -59,7 +59,7 @@ where
     /// Returns a cached vote if one exists for the given model, messages, tools, and responses.
     pub async fn fetch_cache_vote(
         &self,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         agent: &objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote,
         messages: &[objectiveai::agent::completions::message::Message],
         responses: &[objectiveai::agent::completions::message::RichContent],

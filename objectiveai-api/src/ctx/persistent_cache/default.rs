@@ -6,13 +6,12 @@ use objectiveai::error::ResponseError;
 #[derive(Debug)]
 pub struct DefaultPersistentCacheClient;
 
-#[async_trait::async_trait]
 impl super::PersistentCacheClient for DefaultPersistentCacheClient {
-    async fn get(&self, _namespace: &'static str, _key: &str) -> Result<Option<String>, ResponseError> {
-        Ok(None)
+    fn get(&self, _namespace: &'static str, _key: &str) -> impl std::future::Future<Output = Result<Option<String>, ResponseError>> + Send {
+        std::future::ready(Ok(None))
     }
 
-    async fn set(&self, _namespace: &'static str, _key: &str, _value: &str, _permanent: bool) -> Result<(), ResponseError> {
-        Ok(())
+    fn set(&self, _namespace: &'static str, _key: &str, _value: &str, _permanent: bool) -> impl std::future::Future<Output = Result<(), ResponseError>> + Send {
+        std::future::ready(Ok(()))
     }
 }

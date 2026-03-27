@@ -33,9 +33,9 @@ impl<CTXEXT> super::super::Client<CTXEXT> for FilesystemClient
 where
     CTXEXT: Send + Sync + 'static,
 {
-    async fn get_agent(
+    async fn get_agent<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        _ctx: &ctx::Context<CTXEXT>,
+        _ctx: &ctx::Context<CTXEXT, PC>,
         path: &objectiveai::RemotePath,
     ) -> Result<Option<objectiveai::agent::RemoteAgentBaseWithFallbacks>, ResponseError> {
         let (owner, repository, commit) = fs_fields(path);
@@ -56,9 +56,9 @@ where
         }
     }
 
-    async fn get_swarm(
+    async fn get_swarm<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        _ctx: &ctx::Context<CTXEXT>,
+        _ctx: &ctx::Context<CTXEXT, PC>,
         path: &objectiveai::RemotePath,
     ) -> Result<Option<objectiveai::swarm::RemoteSwarmBase>, ResponseError> {
         let (owner, repository, commit) = fs_fields(path);
@@ -79,9 +79,9 @@ where
         }
     }
 
-    async fn get_function(
+    async fn get_function<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        _ctx: &ctx::Context<CTXEXT>,
+        _ctx: &ctx::Context<CTXEXT, PC>,
         path: &objectiveai::RemotePath,
     ) -> Result<Option<objectiveai::functions::FullRemoteFunction>, ResponseError> {
         let (owner, repository, commit) = fs_fields(path);
@@ -102,9 +102,9 @@ where
         }
     }
 
-    async fn get_profile(
+    async fn get_profile<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        _ctx: &ctx::Context<CTXEXT>,
+        _ctx: &ctx::Context<CTXEXT, PC>,
         path: &objectiveai::RemotePath,
     ) -> Result<Option<objectiveai::functions::RemoteProfile>, ResponseError> {
         let (owner, repository, commit) = fs_fields(path);
@@ -125,9 +125,9 @@ where
         }
     }
 
-    async fn resolve_latest(
+    async fn resolve_latest<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        _ctx: &ctx::Context<CTXEXT>,
+        _ctx: &ctx::Context<CTXEXT, PC>,
         kind: crate::retrieval::Kind,
         path: &objectiveai::RemotePathCommitOptional,
     ) -> Result<Option<objectiveai::RemotePath>, ResponseError> {
