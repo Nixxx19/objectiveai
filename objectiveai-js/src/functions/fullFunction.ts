@@ -4,5 +4,5 @@ import { z } from "zod";
 import { FunctionsFullInlineFunctionSchema } from "./fullInlineFunction";
 import { FunctionsFullRemoteFunctionSchema } from "./fullRemoteFunction";
 
-export const FunctionsFullFunctionSchema = z.union([FunctionsFullRemoteFunctionSchema, FunctionsFullInlineFunctionSchema]).describe("A full function, either remote or inline.").meta({ title: "functions.FullFunction" });
+export const FunctionsFullFunctionSchema = z.union([FunctionsFullRemoteFunctionSchema.meta({"title":"functions.FullRemoteFunction","variantTitle":"Remote"}), FunctionsFullInlineFunctionSchema.meta({"title":"functions.FullInlineFunction","variantTitle":"Inline"})]).describe("A full function, either remote or inline.").meta({ title: "functions.FullFunction" });
 export type FunctionsFullFunction = z.infer<typeof FunctionsFullFunctionSchema>;

@@ -7,13 +7,13 @@ export const RemotePathSchema = z.union([z.object({
   owner: z.string(),
   remote: z.literal("github"),
   repository: z.string(),
-}), z.object({
+}).meta({"variantTitle":"Github"}), z.object({
   commit: z.string(),
   owner: z.string(),
   remote: z.literal("filesystem"),
   repository: z.string(),
-}), z.object({
+}).meta({"variantTitle":"Filesystem"}), z.object({
   name: z.string(),
   remote: z.literal("mock"),
-})]).meta({ title: "RemotePath" });
+}).meta({"variantTitle":"Mock"})]).meta({ title: "RemotePath" });
 export type RemotePath = z.infer<typeof RemotePathSchema>;

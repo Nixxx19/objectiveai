@@ -4,5 +4,5 @@ import { z } from "zod";
 import { AgentCompletionsResponseToolResponseSchema } from "../toolResponse";
 import { AgentCompletionsResponseUnaryAssistantResponseSchema } from "./assistantResponse";
 
-export const AgentCompletionsResponseUnaryMessageSchema = z.union([AgentCompletionsResponseUnaryAssistantResponseSchema, AgentCompletionsResponseToolResponseSchema]).meta({ title: "agent.completions.response.unary.Message" });
+export const AgentCompletionsResponseUnaryMessageSchema = z.union([AgentCompletionsResponseUnaryAssistantResponseSchema.meta({"title":"agent.completions.response.unary.AssistantResponse","variantTitle":"Assistant"}), AgentCompletionsResponseToolResponseSchema.meta({"title":"agent.completions.response.ToolResponse","variantTitle":"Tool"})]).meta({ title: "agent.completions.response.unary.Message" });
 export type AgentCompletionsResponseUnaryMessage = z.infer<typeof AgentCompletionsResponseUnaryMessageSchema>;

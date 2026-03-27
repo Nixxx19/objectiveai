@@ -9,13 +9,13 @@ import { FunctionsVectorFunctionTaskSchema } from "./vectorFunctionTask";
 
 export const FunctionsTaskSchema = z.union([FunctionsScalarFunctionTaskSchema.and(z.object({
   type: z.literal("scalar.function"),
-})).describe("Calls a scalar function (produces a single score)."), FunctionsVectorFunctionTaskSchema.and(z.object({
+})).describe("Calls a scalar function (produces a single score).").meta({"variantTitle":"ScalarFunction"}), FunctionsVectorFunctionTaskSchema.and(z.object({
   type: z.literal("vector.function"),
-})).describe("Calls a vector function (produces a vector of scores)."), FunctionsVectorCompletionTaskSchema.and(z.object({
+})).describe("Calls a vector function (produces a vector of scores).").meta({"variantTitle":"VectorFunction"}), FunctionsVectorCompletionTaskSchema.and(z.object({
   type: z.literal("vector.completion"),
-})).describe("Runs a vector completion."), FunctionsPlaceholderScalarFunctionTaskSchema.and(z.object({
+})).describe("Runs a vector completion.").meta({"variantTitle":"VectorCompletion"}), FunctionsPlaceholderScalarFunctionTaskSchema.and(z.object({
   type: z.literal("placeholder.scalar.function"),
-})).describe("Placeholder scalar function (always outputs 0.5)."), FunctionsPlaceholderVectorFunctionTaskSchema.and(z.object({
+})).describe("Placeholder scalar function (always outputs 0.5).").meta({"variantTitle":"PlaceholderScalarFunction"}), FunctionsPlaceholderVectorFunctionTaskSchema.and(z.object({
   type: z.literal("placeholder.vector.function"),
-})).describe("Placeholder vector function (always outputs equalized vector).")]).describe("A compiled task ready for execution.\n\nProduced by compiling a [`TaskExpression`] against input data. All\nexpressions have been resolved to concrete values.").meta({ title: "functions.Task" });
+})).describe("Placeholder vector function (always outputs equalized vector).").meta({"variantTitle":"PlaceholderVectorFunction"})]).describe("A compiled task ready for execution.\n\nProduced by compiling a [`TaskExpression`] against input data. All\nexpressions have been resolved to concrete values.").meta({ title: "functions.Task" });
 export type FunctionsTask = z.infer<typeof FunctionsTaskSchema>;

@@ -8,11 +8,11 @@ import { FunctionsInventionsStateAlphaVectorLeafStateSchema } from "./alphaVecto
 
 export const FunctionsInventionsStateStateSchema = z.union([FunctionsInventionsStateAlphaScalarBranchStateSchema.and(z.object({
   type: z.literal("alpha.scalar.branch.function"),
-})), FunctionsInventionsStateAlphaScalarLeafStateSchema.and(z.object({
+})).meta({"variantTitle":"AlphaScalarBranch"}), FunctionsInventionsStateAlphaScalarLeafStateSchema.and(z.object({
   type: z.literal("alpha.scalar.leaf.function"),
-})), FunctionsInventionsStateAlphaVectorBranchStateSchema.and(z.object({
+})).meta({"variantTitle":"AlphaScalarLeaf"}), FunctionsInventionsStateAlphaVectorBranchStateSchema.and(z.object({
   type: z.literal("alpha.vector.branch.function"),
-})), FunctionsInventionsStateAlphaVectorLeafStateSchema.and(z.object({
+})).meta({"variantTitle":"AlphaVectorBranch"}), FunctionsInventionsStateAlphaVectorLeafStateSchema.and(z.object({
   type: z.literal("alpha.vector.leaf.function"),
-}))]).meta({ title: "functions.inventions.state.State" });
+})).meta({"variantTitle":"AlphaVectorLeaf"})]).meta({ title: "functions.inventions.state.State" });
 export type FunctionsInventionsStateState = z.infer<typeof FunctionsInventionsStateStateSchema>;

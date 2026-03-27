@@ -9,13 +9,13 @@ import { AgentCompletionsMessageUserMessageExpressionSchema } from "./userMessag
 
 export const AgentCompletionsMessageMessageExpressionSchema = z.union([AgentCompletionsMessageDeveloperMessageExpressionSchema.and(z.object({
   role: z.literal("developer"),
-})), AgentCompletionsMessageSystemMessageExpressionSchema.and(z.object({
+})).meta({"variantTitle":"Developer"}), AgentCompletionsMessageSystemMessageExpressionSchema.and(z.object({
   role: z.literal("system"),
-})), AgentCompletionsMessageUserMessageExpressionSchema.and(z.object({
+})).meta({"variantTitle":"System"}), AgentCompletionsMessageUserMessageExpressionSchema.and(z.object({
   role: z.literal("user"),
-})), AgentCompletionsMessageAssistantMessageExpressionSchema.and(z.object({
+})).meta({"variantTitle":"User"}), AgentCompletionsMessageAssistantMessageExpressionSchema.and(z.object({
   role: z.literal("assistant"),
-})), AgentCompletionsMessageToolMessageExpressionSchema.and(z.object({
+})).meta({"variantTitle":"Assistant"}), AgentCompletionsMessageToolMessageExpressionSchema.and(z.object({
   role: z.literal("tool"),
-}))]).describe("A message with expressions for dynamic content.\n\nThis is the expression variant of [`Message`] used in function definitions\nwhere message content can be computed from the function input at runtime.\nSupports both JMESPath and Starlark expressions.").meta({ title: "agent.completions.message.MessageExpression" });
+})).meta({"variantTitle":"Tool"})]).describe("A message with expressions for dynamic content.\n\nThis is the expression variant of [`Message`] used in function definitions\nwhere message content can be computed from the function input at runtime.\nSupports both JMESPath and Starlark expressions.").meta({ title: "agent.completions.message.MessageExpression" });
 export type AgentCompletionsMessageMessageExpression = z.infer<typeof AgentCompletionsMessageMessageExpressionSchema>;

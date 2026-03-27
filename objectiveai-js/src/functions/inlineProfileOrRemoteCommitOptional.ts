@@ -4,5 +4,5 @@ import { z } from "zod";
 import { FunctionsInlineProfileSchema } from "./inlineProfile";
 import { RemotePathCommitOptionalSchema } from "../remotePathCommitOptional";
 
-export const FunctionsInlineProfileOrRemoteCommitOptionalSchema = z.union([FunctionsInlineProfileSchema, RemotePathCommitOptionalSchema]).describe("A profile specification that is either an inline profile definition\nor a remote path reference.").meta({ title: "functions.InlineProfileOrRemoteCommitOptional" });
+export const FunctionsInlineProfileOrRemoteCommitOptionalSchema = z.union([FunctionsInlineProfileSchema.meta({"title":"functions.InlineProfile","variantTitle":"Inline"}), RemotePathCommitOptionalSchema.meta({"title":"RemotePathCommitOptional","variantTitle":"Remote"})]).describe("A profile specification that is either an inline profile definition\nor a remote path reference.").meta({ title: "functions.InlineProfileOrRemoteCommitOptional" });
 export type FunctionsInlineProfileOrRemoteCommitOptional = z.infer<typeof FunctionsInlineProfileOrRemoteCommitOptionalSchema>;

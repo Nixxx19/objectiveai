@@ -4,5 +4,5 @@ import { z } from "zod";
 import { AgentInlineAgentWithFallbacksSchema } from "./inlineAgentWithFallbacks";
 import { AgentRemoteAgentWithFallbacksSchema } from "./remoteAgentWithFallbacks";
 
-export const AgentAgentWithFallbacksSchema = z.union([AgentRemoteAgentWithFallbacksSchema, AgentInlineAgentWithFallbacksSchema]).describe("A validated agent with optional fallbacks, either remote (with description) or inline.").meta({ title: "agent.AgentWithFallbacks" });
+export const AgentAgentWithFallbacksSchema = z.union([AgentRemoteAgentWithFallbacksSchema.meta({"title":"agent.RemoteAgentWithFallbacks","variantTitle":"Remote"}), AgentInlineAgentWithFallbacksSchema.meta({"title":"agent.InlineAgentWithFallbacks","variantTitle":"Inline"})]).describe("A validated agent with optional fallbacks, either remote (with description) or inline.").meta({ title: "agent.AgentWithFallbacks" });
 export type AgentAgentWithFallbacks = z.infer<typeof AgentAgentWithFallbacksSchema>;

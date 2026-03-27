@@ -4,5 +4,5 @@ import { z } from "zod";
 import { AgentInlineAgentBaseWithFallbacksSchema } from "./inlineAgentBaseWithFallbacks";
 import { RemotePathSchema } from "../remotePath";
 
-export const AgentInlineAgentBaseWithFallbacksOrRemoteSchema = z.union([AgentInlineAgentBaseWithFallbacksSchema, RemotePathSchema]).describe("An agent specification that is either an inline agent base with fallbacks\nor a remote path reference.\n\nUsed in swarm definitions to allow agents to be specified inline\n(with optional fallbacks) or resolved from a remote source via a\nhashmap during conversion.").meta({ title: "agent.InlineAgentBaseWithFallbacksOrRemote" });
+export const AgentInlineAgentBaseWithFallbacksOrRemoteSchema = z.union([AgentInlineAgentBaseWithFallbacksSchema.meta({"title":"agent.InlineAgentBaseWithFallbacks","variantTitle":"AgentBase"}), RemotePathSchema.meta({"title":"RemotePath","variantTitle":"Remote"})]).describe("An agent specification that is either an inline agent base with fallbacks\nor a remote path reference.\n\nUsed in swarm definitions to allow agents to be specified inline\n(with optional fallbacks) or resolved from a remote source via a\nhashmap during conversion.").meta({ title: "agent.InlineAgentBaseWithFallbacksOrRemote" });
 export type AgentInlineAgentBaseWithFallbacksOrRemote = z.infer<typeof AgentInlineAgentBaseWithFallbacksOrRemoteSchema>;

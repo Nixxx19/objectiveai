@@ -3,5 +3,5 @@
 import { z } from "zod";
 import { AgentCompletionsRequestResponseFormatSchema } from "./responseFormat";
 
-export const AgentCompletionsRequestResponseFormatParamSchema = z.union([AgentCompletionsRequestResponseFormatSchema.describe("A single response format applied to all agents."), z.record(z.string(), AgentCompletionsRequestResponseFormatSchema).describe("Per-agent response formats, keyed by agent ID.")]).describe("Either a single response format or a per-agent map.").meta({ title: "agent.completions.request.ResponseFormatParam" });
+export const AgentCompletionsRequestResponseFormatParamSchema = z.union([AgentCompletionsRequestResponseFormatSchema.describe("A single response format applied to all agents.").meta({"title":"agent.completions.request.ResponseFormat","variantTitle":"Single"}), z.record(z.string(), AgentCompletionsRequestResponseFormatSchema).describe("Per-agent response formats, keyed by agent ID.").meta({"variantTitle":"PerAgent"})]).describe("Either a single response format or a per-agent map.").meta({ title: "agent.completions.request.ResponseFormatParam" });
 export type AgentCompletionsRequestResponseFormatParam = z.infer<typeof AgentCompletionsRequestResponseFormatParamSchema>;

@@ -4,5 +4,5 @@ import { z } from "zod";
 import { VectorCompletionsCacheCacheVoteRequestOwnedSchema } from "./cacheVoteRequestOwned";
 import { VectorCompletionsCacheCacheVoteRequestRefSchema } from "./cacheVoteRequestRef";
 
-export const VectorCompletionsCacheCacheVoteRequestSchema = z.union([VectorCompletionsCacheCacheVoteRequestRefSchema, VectorCompletionsCacheCacheVoteRequestOwnedSchema]).meta({ title: "vector.completions.cache.CacheVoteRequest" });
+export const VectorCompletionsCacheCacheVoteRequestSchema = z.union([VectorCompletionsCacheCacheVoteRequestRefSchema.meta({"title":"vector.completions.cache.CacheVoteRequestRef","variantTitle":"Ref"}), VectorCompletionsCacheCacheVoteRequestOwnedSchema.meta({"title":"vector.completions.cache.CacheVoteRequestOwned","variantTitle":"Owned"})]).meta({ title: "vector.completions.cache.CacheVoteRequest" });
 export type VectorCompletionsCacheCacheVoteRequest = z.infer<typeof VectorCompletionsCacheCacheVoteRequestSchema>;

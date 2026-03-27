@@ -4,5 +4,5 @@ import { z } from "zod";
 import { SwarmInlineSwarmSchema } from "./inlineSwarm";
 import { SwarmRemoteSwarmSchema } from "./remoteSwarm";
 
-export const SwarmSwarmSchema = z.union([SwarmRemoteSwarmSchema, SwarmInlineSwarmSchema]).describe("A validated Swarm, either remote (with metadata) or inline.").meta({ title: "swarm.Swarm" });
+export const SwarmSwarmSchema = z.union([SwarmRemoteSwarmSchema.meta({"title":"swarm.RemoteSwarm","variantTitle":"Remote"}), SwarmInlineSwarmSchema.meta({"title":"swarm.InlineSwarm","variantTitle":"Inline"})]).describe("A validated Swarm, either remote (with metadata) or inline.").meta({ title: "swarm.Swarm" });
 export type SwarmSwarm = z.infer<typeof SwarmSwarmSchema>;

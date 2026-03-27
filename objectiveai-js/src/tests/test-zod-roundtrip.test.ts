@@ -344,16 +344,19 @@ function convertUnion(
 ): Record<string, unknown> {
   const options = schema._zod.def.options;
 
-  // Check if all options are literals with no individual descriptions → emit as flat enum
+  // Check if all options are literals with no individual descriptions or titles → emit as flat enum
   const allLiterals = options.every((o: ZodSchema) => o._zod.def.type === "literal");
   if (allLiterals) {
     const anyHasDesc = options.some((o: ZodSchema) => o.description);
-    if (!anyHasDesc) {
+    const anyHasTitle = options.some((o: ZodSchema) => {
+      const m = typeof o.meta === "function" ? o.meta() : undefined;
+      return m?.variantTitle;
+    });
+    if (!anyHasDesc && !anyHasTitle) {
       const values = options.flatMap((o: ZodSchema) => [...o._zod.def.values]);
       return { enum: values };
     }
-    // Literals with descriptions → anyOf of typed enums
-    // (each variant carries its own description)
+    // Literals with descriptions or titles → anyOf of typed enums
   }
 
   // Check for nullable pattern: [...variants, null-typed option]
@@ -366,7 +369,14 @@ function convertUnion(
     return { anyOf: [inner, { type: "null" }] };
   }
 
-  return { anyOf: options.map((o: ZodSchema) => convert(o, allTitles, rootTitle, seen)) };
+  return { anyOf: options.map((o: ZodSchema) => {
+    const converted = convert(o, allTitles, rootTitle, seen);
+    const variantMeta = typeof o.meta === "function" ? o.meta() : undefined;
+    if (variantMeta?.variantTitle) {
+      return { title: variantMeta.variantTitle, ...converted };
+    }
+    return converted;
+  }) };
 }
 
 function convertNullable(

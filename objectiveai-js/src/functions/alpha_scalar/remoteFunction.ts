@@ -10,10 +10,10 @@ export const FunctionsAlphaScalarRemoteFunctionSchema = z.union([z.object({
   input_schema: FunctionsExpressionObjectInputSchemaSchema,
   tasks: z.array(FunctionsAlphaScalarBranchTaskExpressionSchema),
   type: z.literal("alpha.scalar.branch.function"),
-}), z.object({
+}).meta({"variantTitle":"Branch"}), z.object({
   description: z.string(),
   input_schema: FunctionsExpressionObjectInputSchemaSchema,
   tasks: z.array(FunctionsAlphaScalarLeafTaskExpressionSchema),
   type: z.literal("alpha.scalar.leaf.function"),
-})]).meta({ title: "functions.alpha_scalar.RemoteFunction" });
+}).meta({"variantTitle":"Leaf"})]).meta({ title: "functions.alpha_scalar.RemoteFunction" });
 export type FunctionsAlphaScalarRemoteFunction = z.infer<typeof FunctionsAlphaScalarRemoteFunctionSchema>;

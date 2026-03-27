@@ -4,5 +4,5 @@ import { z } from "zod";
 import { AgentInlineAgentBaseWithFallbacksSchema } from "./inlineAgentBaseWithFallbacks";
 import { RemotePathCommitOptionalSchema } from "../remotePathCommitOptional";
 
-export const AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema = z.union([AgentInlineAgentBaseWithFallbacksSchema, RemotePathCommitOptionalSchema]).describe("Like [`InlineAgentBaseWithFallbacksOrRemote`] but with optional commit.\nUsed in request types where commit resolution happens server-side.").meta({ title: "agent.InlineAgentBaseWithFallbacksOrRemoteCommitOptional" });
+export const AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema = z.union([AgentInlineAgentBaseWithFallbacksSchema.meta({"title":"agent.InlineAgentBaseWithFallbacks","variantTitle":"AgentBase"}), RemotePathCommitOptionalSchema.meta({"title":"RemotePathCommitOptional","variantTitle":"Remote"})]).describe("Like [`InlineAgentBaseWithFallbacksOrRemote`] but with optional commit.\nUsed in request types where commit resolution happens server-side.").meta({ title: "agent.InlineAgentBaseWithFallbacksOrRemoteCommitOptional" });
 export type AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional = z.infer<typeof AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema>;

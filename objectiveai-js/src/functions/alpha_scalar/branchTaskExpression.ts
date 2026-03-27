@@ -6,7 +6,7 @@ import { FunctionsAlphaScalarScalarFunctionTaskExpressionSchema } from "./scalar
 
 export const FunctionsAlphaScalarBranchTaskExpressionSchema = z.union([FunctionsAlphaScalarScalarFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("alpha.scalar.function"),
-})), FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema.and(z.object({
+})).meta({"variantTitle":"ScalarFunction"}), FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("placeholder.alpha.scalar.function"),
-}))]).meta({ title: "functions.alpha_scalar.BranchTaskExpression" });
+})).meta({"variantTitle":"PlaceholderScalarFunction"})]).meta({ title: "functions.alpha_scalar.BranchTaskExpression" });
 export type FunctionsAlphaScalarBranchTaskExpression = z.infer<typeof FunctionsAlphaScalarBranchTaskExpressionSchema>;

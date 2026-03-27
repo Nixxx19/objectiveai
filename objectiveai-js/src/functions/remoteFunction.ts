@@ -10,7 +10,7 @@ export const FunctionsRemoteFunctionSchema = z.union([z.object({
   input_schema: FunctionsExpressionInputSchemaSchema.describe("JSON Schema defining the expected input structure."),
   tasks: z.array(FunctionsTaskExpressionSchema).describe("The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped)."),
   type: z.literal("scalar.function"),
-}).describe("Produces a single score in [0, 1]."), z.object({
+}).describe("Produces a single score in [0, 1].").meta({"variantTitle":"Scalar"}), z.object({
   description: z.string().describe("Human-readable description of what the function does."),
   input_merge: FunctionsExpressionExpressionSchema.describe("Expression transforming an array of inputs computed by `input_split`\ninto a single Input object for the Function.\nReceives: `input` (as an array)."),
   input_schema: FunctionsExpressionInputSchemaSchema.describe("JSON Schema defining the expected input structure."),
@@ -18,5 +18,5 @@ export const FunctionsRemoteFunctionSchema = z.union([z.object({
   output_length: FunctionsExpressionExpressionSchema.describe("Expression computing the expected output vector length for task outputs.\nReceives: `input`."),
   tasks: z.array(FunctionsTaskExpressionSchema).describe("The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped)."),
   type: z.literal("vector.function"),
-}).describe("Produces a vector of scores that sums to 1.")]).describe("A remote function with full metadata.\n\nRemote functions are stored as `function.json` in repositories and\nreferenced by `remote/owner/repository`. They include documentation fields\nthat inline functions lack.").meta({ title: "functions.RemoteFunction" });
+}).describe("Produces a vector of scores that sums to 1.").meta({"variantTitle":"Vector"})]).describe("A remote function with full metadata.\n\nRemote functions are stored as `function.json` in repositories and\nreferenced by `remote/owner/repository`. They include documentation fields\nthat inline functions lack.").meta({ title: "functions.RemoteFunction" });
 export type FunctionsRemoteFunction = z.infer<typeof FunctionsRemoteFunctionSchema>;

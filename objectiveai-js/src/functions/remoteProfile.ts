@@ -4,5 +4,5 @@ import { z } from "zod";
 import { FunctionsRemoteTasksProfileSchema } from "./remoteTasksProfile";
 import { SwarmRemoteSwarmBaseSchema } from "../swarm/remoteSwarmBase";
 
-export const FunctionsRemoteProfileSchema = z.union([FunctionsRemoteTasksProfileSchema.describe("Tasks-based profile with per-task configuration."), SwarmRemoteSwarmBaseSchema.describe("Auto profile that applies a single swarm+weights to all vector completion tasks.")]).describe("A remote profile, either tasks-based or auto.").meta({ title: "functions.RemoteProfile" });
+export const FunctionsRemoteProfileSchema = z.union([FunctionsRemoteTasksProfileSchema.describe("Tasks-based profile with per-task configuration.").meta({"title":"functions.RemoteTasksProfile","variantTitle":"Tasks"}), SwarmRemoteSwarmBaseSchema.describe("Auto profile that applies a single swarm+weights to all vector completion tasks.").meta({"title":"swarm.RemoteSwarmBase","variantTitle":"Auto"})]).describe("A remote profile, either tasks-based or auto.").meta({ title: "functions.RemoteProfile" });
 export type FunctionsRemoteProfile = z.infer<typeof FunctionsRemoteProfileSchema>;

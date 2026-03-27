@@ -8,11 +8,11 @@ import { FunctionsAlphaVectorVectorFunctionTaskExpressionSchema } from "./vector
 
 export const FunctionsAlphaVectorBranchTaskExpressionSchema = z.union([FunctionsAlphaVectorScalarFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("alpha.scalar.function"),
-})), FunctionsAlphaVectorVectorFunctionTaskExpressionSchema.and(z.object({
+})).meta({"variantTitle":"ScalarFunction"}), FunctionsAlphaVectorVectorFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("alpha.vector.function"),
-})), FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema.and(z.object({
+})).meta({"variantTitle":"VectorFunction"}), FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("placeholder.alpha.scalar.function"),
-})), FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema.and(z.object({
+})).meta({"variantTitle":"PlaceholderScalarFunction"}), FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("placeholder.alpha.vector.function"),
-}))]).meta({ title: "functions.alpha_vector.BranchTaskExpression" });
+})).meta({"variantTitle":"PlaceholderVectorFunction"})]).meta({ title: "functions.alpha_vector.BranchTaskExpression" });
 export type FunctionsAlphaVectorBranchTaskExpression = z.infer<typeof FunctionsAlphaVectorBranchTaskExpressionSchema>;

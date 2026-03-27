@@ -4,5 +4,5 @@ import { z } from "zod";
 import { AgentInlineAgentSchema } from "./inlineAgent";
 import { AgentRemoteAgentSchema } from "./remoteAgent";
 
-export const AgentAgentSchema = z.union([AgentRemoteAgentSchema, AgentInlineAgentSchema]).describe("A validated Agent, either remote (with metadata) or inline.").meta({ title: "agent.Agent" });
+export const AgentAgentSchema = z.union([AgentRemoteAgentSchema.meta({"title":"agent.RemoteAgent","variantTitle":"Remote"}), AgentInlineAgentSchema.meta({"title":"agent.InlineAgent","variantTitle":"Inline"})]).describe("A validated Agent, either remote (with metadata) or inline.").meta({ title: "agent.Agent" });
 export type AgentAgent = z.infer<typeof AgentAgentSchema>;

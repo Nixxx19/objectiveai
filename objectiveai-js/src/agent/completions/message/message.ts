@@ -9,13 +9,13 @@ import { AgentCompletionsMessageUserMessageSchema } from "./userMessage";
 
 export const AgentCompletionsMessageMessageSchema = z.union([AgentCompletionsMessageDeveloperMessageSchema.and(z.object({
   role: z.literal("developer"),
-})).describe("A developer message (similar to system, but from the developer)."), AgentCompletionsMessageSystemMessageSchema.and(z.object({
+})).describe("A developer message (similar to system, but from the developer).").meta({"variantTitle":"Developer"}), AgentCompletionsMessageSystemMessageSchema.and(z.object({
   role: z.literal("system"),
-})).describe("A system message setting context or instructions."), AgentCompletionsMessageUserMessageSchema.and(z.object({
+})).describe("A system message setting context or instructions.").meta({"variantTitle":"System"}), AgentCompletionsMessageUserMessageSchema.and(z.object({
   role: z.literal("user"),
-})).describe("A user message from the end user."), AgentCompletionsMessageAssistantMessageSchema.and(z.object({
+})).describe("A user message from the end user.").meta({"variantTitle":"User"}), AgentCompletionsMessageAssistantMessageSchema.and(z.object({
   role: z.literal("assistant"),
-})).describe("An assistant message (model's previous response)."), AgentCompletionsMessageToolMessageSchema.and(z.object({
+})).describe("An assistant message (model's previous response).").meta({"variantTitle":"Assistant"}), AgentCompletionsMessageToolMessageSchema.and(z.object({
   role: z.literal("tool"),
-})).describe("A tool message containing the result of a tool call.")]).describe("A message in the conversation.").meta({ title: "agent.completions.message.Message" });
+})).describe("A tool message containing the result of a tool call.").meta({"variantTitle":"Tool"})]).describe("A message in the conversation.").meta({ title: "agent.completions.message.Message" });
 export type AgentCompletionsMessageMessage = z.infer<typeof AgentCompletionsMessageMessageSchema>;

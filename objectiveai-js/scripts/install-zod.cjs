@@ -385,7 +385,21 @@ function convertAnyOf(schema, refs, lazyRefs, selfTitle, cyclicTitles) {
   }
 
   // No null variant — plain union
-  const variants = anyOf.map((v) => convert(v, refs, lazyRefs, selfTitle, cyclicTitles));
+  const variants = anyOf.map((v) => {
+    let expr = convert(v, refs, lazyRefs, selfTitle, cyclicTitles);
+    if (v.title) {
+      // For pure $ref variants, preserve the ref title alongside variantTitle
+      // (since .meta() overwrites, we must include both in one call).
+      // For intersection variants ($ref + properties), the $ref lives inside
+      // .and() left side which keeps its own meta, so only variantTitle is needed.
+      const isPureRef = v.$ref && !v.properties && v.type !== "object";
+      const metaObj = isPureRef
+        ? { title: v.$ref, variantTitle: v.title }
+        : { variantTitle: v.title };
+      expr += `.meta(${JSON.stringify(metaObj)})`;
+    }
+    return expr;
+  });
   return `z.union([${variants.join(", ")}])`;
 }
 

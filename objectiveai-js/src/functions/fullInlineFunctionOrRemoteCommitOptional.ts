@@ -4,5 +4,5 @@ import { z } from "zod";
 import { FunctionsFullInlineFunctionSchema } from "./fullInlineFunction";
 import { RemotePathCommitOptionalSchema } from "../remotePathCommitOptional";
 
-export const FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema = z.union([FunctionsFullInlineFunctionSchema, RemotePathCommitOptionalSchema]).describe("A function specification that is either a full inline function definition\nor a remote path reference.").meta({ title: "functions.FullInlineFunctionOrRemoteCommitOptional" });
+export const FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema = z.union([FunctionsFullInlineFunctionSchema.meta({"title":"functions.FullInlineFunction","variantTitle":"Inline"}), RemotePathCommitOptionalSchema.meta({"title":"RemotePathCommitOptional","variantTitle":"Remote"})]).describe("A function specification that is either a full inline function definition\nor a remote path reference.").meta({ title: "functions.FullInlineFunctionOrRemoteCommitOptional" });
 export type FunctionsFullInlineFunctionOrRemoteCommitOptional = z.infer<typeof FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema>;

@@ -4,5 +4,5 @@ import { z } from "zod";
 import { RemotePathSchema } from "../remotePath";
 import { SwarmInlineSwarmBaseSchema } from "./inlineSwarmBase";
 
-export const SwarmInlineSwarmBaseOrRemoteSchema = z.union([SwarmInlineSwarmBaseSchema, RemotePathSchema]).describe("A swarm specification that is either an inline swarm base\nor a remote path reference.").meta({ title: "swarm.InlineSwarmBaseOrRemote" });
+export const SwarmInlineSwarmBaseOrRemoteSchema = z.union([SwarmInlineSwarmBaseSchema.meta({"title":"swarm.InlineSwarmBase","variantTitle":"SwarmBase"}), RemotePathSchema.meta({"title":"RemotePath","variantTitle":"Remote"})]).describe("A swarm specification that is either an inline swarm base\nor a remote path reference.").meta({ title: "swarm.InlineSwarmBaseOrRemote" });
 export type SwarmInlineSwarmBaseOrRemote = z.infer<typeof SwarmInlineSwarmBaseOrRemoteSchema>;

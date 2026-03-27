@@ -4,5 +4,5 @@ import { z } from "zod";
 import { FunctionsExpressionParamsOwnedSchema } from "./paramsOwned";
 import { FunctionsExpressionParamsRefSchema } from "./paramsRef";
 
-export const FunctionsExpressionParamsSchema = z.union([FunctionsExpressionParamsOwnedSchema.describe("Owned version (for deserialization)."), FunctionsExpressionParamsRefSchema.describe("Borrowed version (for efficient evaluation).")]).describe("Context for evaluating expressions (JMESPath or Starlark).\n\nContains all data accessible within expressions: `input`, `output`, and `map`.").meta({ title: "functions.expression.Params" });
+export const FunctionsExpressionParamsSchema = z.union([FunctionsExpressionParamsOwnedSchema.describe("Owned version (for deserialization).").meta({"title":"functions.expression.ParamsOwned","variantTitle":"Owned"}), FunctionsExpressionParamsRefSchema.describe("Borrowed version (for efficient evaluation).").meta({"title":"functions.expression.ParamsRef","variantTitle":"Ref"})]).describe("Context for evaluating expressions (JMESPath or Starlark).\n\nContains all data accessible within expressions: `input`, `output`, and `map`.").meta({ title: "functions.expression.Params" });
 export type FunctionsExpressionParams = z.infer<typeof FunctionsExpressionParamsSchema>;

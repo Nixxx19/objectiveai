@@ -4,9 +4,9 @@ import { z } from "zod";
 
 export const FunctionsExecutionsRequestStrategySchema = z.union([z.object({
   type: z.literal("default"),
-}).describe("Scalar or Vector"), z.object({
+}).describe("Scalar or Vector").meta({"variantTitle":"Default"}), z.object({
   pool: z.number().int().min(0).max(4294967295).nullable().describe("How many vector responses for each execution").optional(),
   rounds: z.number().int().min(0).max(4294967295).nullable().describe("How many sequential rounds of comparison").optional(),
   type: z.literal("swiss_system"),
-}).describe("Vector")]).meta({ title: "functions.executions.request.Strategy" });
+}).describe("Vector").meta({"variantTitle":"SwissSystem"})]).meta({ title: "functions.executions.request.Strategy" });
 export type FunctionsExecutionsRequestStrategy = z.infer<typeof FunctionsExecutionsRequestStrategySchema>;

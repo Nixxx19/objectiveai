@@ -7,8 +7,8 @@ import { FunctionsAlphaVectorLeafTaskExpressionSchema } from "./leafTaskExpressi
 export const FunctionsAlphaVectorInlineFunctionSchema = z.union([z.object({
   tasks: z.array(FunctionsAlphaVectorBranchTaskExpressionSchema),
   type: z.literal("alpha.vector.branch.function"),
-}), z.object({
+}).meta({"variantTitle":"Branch"}), z.object({
   tasks: z.array(FunctionsAlphaVectorLeafTaskExpressionSchema),
   type: z.literal("alpha.vector.leaf.function"),
-})]).meta({ title: "functions.alpha_vector.InlineFunction" });
+}).meta({"variantTitle":"Leaf"})]).meta({ title: "functions.alpha_vector.InlineFunction" });
 export type FunctionsAlphaVectorInlineFunction = z.infer<typeof FunctionsAlphaVectorInlineFunctionSchema>;

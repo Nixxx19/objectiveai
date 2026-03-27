@@ -6,7 +6,7 @@ import { FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchem
 
 export const FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema = z.union([FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("placeholder.alpha.scalar.function"),
-})), FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema.and(z.object({
+})).meta({"variantTitle":"PlaceholderScalarFunction"}), FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("placeholder.alpha.vector.function"),
-}))]).meta({ title: "functions.alpha_vector.PartialPlaceholderBranchTaskExpression" });
+})).meta({"variantTitle":"PlaceholderVectorFunction"})]).meta({ title: "functions.alpha_vector.PartialPlaceholderBranchTaskExpression" });
 export type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression = z.infer<typeof FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema>;
