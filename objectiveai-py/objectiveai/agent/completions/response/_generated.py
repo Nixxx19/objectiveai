@@ -3,7 +3,7 @@
 from .assistant_role import AssistantRole  # noqa: F401
 from .completion_tokens_details import CompletionTokensDetails  # noqa: F401
 from .cost_details import CostDetails  # noqa: F401
-from .finish_reason import FinishReason  # noqa: F401
+from .finish_reason import FinishReason, FinishReasonContentFilter, FinishReasonError, FinishReasonLength, FinishReasonStop, FinishReasonToolCalls  # noqa: F401
 from .logprob import Logprob  # noqa: F401
 from .logprobs import Logprobs  # noqa: F401
 from .prompt_tokens_details import PromptTokensDetails  # noqa: F401

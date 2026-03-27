@@ -1347,9 +1347,8 @@ def main() -> None:
             elif len(ref_titles) == 1:
                 name_map[ref_titles[0]] = short
             else:
-                # Multiple external refs share short name — alias all but first
-                name_map[ref_titles[0]] = short
-                for t in ref_titles[1:]:
+                # Multiple external refs share short name — alias all
+                for t in ref_titles:
                     name_map[t] = title_to_pascal(t)
 
         # Set module-level name map for convert_to_type
@@ -1523,9 +1522,10 @@ def main() -> None:
         # Record exports for __init__.py re-exports (including variant classes)
         dir_part = "/".join(parts[:-1]) if len(parts) > 1 else ""
         module_name = parts[-1]  # file name without .py
-        class_names = [global_class_names.get(e["title"], title_to_class_name(e["title"])) for e in entries]
+        # Collect all class names from generated code (main + variant classes)
+        class_names: list[str] = []
         for line in "\n".join(model_codes).split("\n"):
-            if line.startswith("class ") and "Variant" in line:
+            if line.startswith("class "):
                 cls_name = line.split("(")[0].replace("class ", "").strip()
                 class_names.append(cls_name)
         dir_exports.setdefault(dir_part, []).append((module_name, class_names))

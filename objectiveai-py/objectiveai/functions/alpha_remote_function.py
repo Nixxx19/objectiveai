@@ -3,14 +3,14 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.functions.alpha_scalar.remote_function import RemoteFunction
+from objectiveai.functions.alpha_scalar.remote_function import RemoteFunction as FunctionsAlphaScalarRemoteFunction
 from objectiveai.functions.alpha_vector.remote_function import RemoteFunction as FunctionsAlphaVectorRemoteFunction
 
 
 class AlphaRemoteFunctionScalar(RootModel):
     model_config = ConfigDict(json_schema_extra={'_variant_title': 'Scalar'})
 
-    root: RemoteFunction
+    root: FunctionsAlphaScalarRemoteFunction
 
 
 class AlphaRemoteFunctionVector(RootModel):

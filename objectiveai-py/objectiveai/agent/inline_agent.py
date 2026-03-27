@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
 from objectiveai.agent.claude_agent_sdk.agent import Agent as AgentClaudeAgentSdkAgent
-from objectiveai.agent.mock.agent import Agent
+from objectiveai.agent.mock.agent import Agent as AgentMockAgent
 from objectiveai.agent.openrouter.agent import Agent as AgentOpenrouterAgent
 
 
@@ -23,7 +23,7 @@ class InlineAgentClaudeAgentSdk(RootModel):
 class InlineAgentMock(RootModel):
     model_config = ConfigDict(json_schema_extra={'_variant_title': 'Mock'})
 
-    root: Agent
+    root: AgentMockAgent
 
 
 class InlineAgent(RootModel):
