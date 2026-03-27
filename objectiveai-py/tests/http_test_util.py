@@ -25,7 +25,7 @@ def get_test_client():
     if not _port:
         pytest.skip("OBJECTIVEAI_TEST_PORT not set")
     from objectiveai.client import ObjectiveAI
-    return ObjectiveAI(api_base=f"http://127.0.0.1:{_port}", api_key="test")
+    return ObjectiveAI(address=f"http://127.0.0.1:{_port}")
 
 
 def load_snapshot(snapshots_dir: Path, name: str) -> dict:

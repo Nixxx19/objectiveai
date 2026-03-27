@@ -7,7 +7,7 @@ import * as path from "path";
 const port = process.env.OBJECTIVEAI_TEST_PORT;
 
 export const httpTestClient = port
-  ? new ObjectiveAI({ apiBase: `http://127.0.0.1:${port}`, apiKey: "test" })
+  ? new ObjectiveAI({ address: `http://127.0.0.1:${port}` })
   : null;
 
 export function loadSnapshot<U>(snapshotsDir: string, name: string): U {
