@@ -3,10 +3,12 @@
   "description": "A concrete input value (post-compilation).\n\nRepresents any JSON-like value that can be passed to a Function,\nincluding rich content types (images, audio, video, files).",
   "anyOf": [
     {
+      "title": "RichContentPart",
       "description": "Rich content (image, audio, video, file).",
       "$ref": "agent.completions.message.RichContentPart"
     },
     {
+      "title": "Object",
       "description": "An object with string keys.",
       "type": "object",
       "additionalProperties": {
@@ -14,6 +16,7 @@
       }
     },
     {
+      "title": "Array",
       "description": "An array of values.",
       "type": "array",
       "items": {
@@ -21,22 +24,26 @@
       }
     },
     {
+      "title": "String",
       "description": "A string value.",
       "type": "string"
     },
     {
+      "title": "Integer",
       "description": "An integer value.",
       "type": "integer",
       "minimum": -9223372036854775808,
       "maximum": 9223372036854775807
     },
     {
+      "title": "Number",
       "description": "A floating-point number.",
       "type": "number",
       "minimum": -3.4028234663852886e+38,
       "maximum": 3.4028234663852886e+38
     },
     {
+      "title": "Boolean",
       "description": "A boolean value.",
       "type": "boolean"
     }

@@ -10,8 +10,10 @@ use serde::{Deserialize, Serialize, de::DeserializeOwned};
 #[schemars(rename = "functions.expression.OneOrMany.{T}")]
 pub enum OneOrMany<T> {
     /// A single value.
+    #[schemars(title = "One")]
     One(T),
     /// Multiple values (from array expressions).
+    #[schemars(title = "Many")]
     Many(Vec<T>),
 }
 
@@ -35,12 +37,15 @@ pub enum OneOrMany<T> {
 #[schemars(rename = "functions.expression.Expression")]
 pub enum Expression {
     /// A JMESPath expression.
+    #[schemars(title = "JMESPath")]
     #[serde(rename = "$jmespath")]
     JMESPath(String),
     /// A Starlark expression.
+    #[schemars(title = "Starlark")]
     #[serde(rename = "$starlark")]
     Starlark(String),
     /// A predefined special expression variant.
+    #[schemars(title = "Special")]
     #[serde(rename = "$special")]
     Special(super::Special),
 }
@@ -153,8 +158,10 @@ impl Expression {
 #[schemars(rename = "functions.expression.WithExpression.{T}")]
 pub enum WithExpression<T> {
     /// An expression (JMESPath or Starlark) to evaluate.
+    #[schemars(title = "Expression")]
     Expression(Expression),
     /// A literal value.
+    #[schemars(title = "Value")]
     Value(T),
 }
 

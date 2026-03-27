@@ -3,9 +3,11 @@
   "description": "Like [`InlineSwarmBaseOrRemote`] but with optional commit.\nUsed in request types where commit resolution happens server-side.",
   "anyOf": [
     {
+      "title": "SwarmBase",
       "$ref": "swarm.InlineSwarmBase"
     },
     {
+      "title": "Remote",
       "$ref": "RemotePathCommitOptional"
     }
   ]

@@ -11,13 +11,17 @@ use serde::{Deserialize, Serialize};
 #[schemars(rename = "agent.Upstream")]
 pub enum Upstream {
     /// Unknown Upstream.
+    #[schemars(title = "Unknown")]
     #[default]
     Unknown,
     /// OpenRouter Upstream.
+    #[schemars(title = "Openrouter")]
     Openrouter,
     /// Claude Agent SDK Upstream.
+    #[schemars(title = "ClaudeAgentSdk")]
     ClaudeAgentSdk,
     /// Mock Upstream.
+    #[schemars(title = "Mock")]
     Mock,
 }
 

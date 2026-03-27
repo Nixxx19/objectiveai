@@ -18,26 +18,37 @@ use super::InputValue;
 #[schemars(rename = "functions.expression.InputSchema")]
 pub enum InputSchema {
     /// A union of schemas - input must match at least one.
+    #[schemars(title = "AnyOf")]
     AnyOf(AnyOfInputSchema),
     /// An object with named properties.
+    #[schemars(title = "Object")]
     Object(ObjectInputSchema),
     /// An array of items.
+    #[schemars(title = "Array")]
     Array(ArrayInputSchema),
     /// A string value.
+    #[schemars(title = "String")]
     String(StringInputSchema),
     /// An integer value.
+    #[schemars(title = "Integer")]
     Integer(IntegerInputSchema),
     /// A floating-point number.
+    #[schemars(title = "Number")]
     Number(NumberInputSchema),
     /// A boolean value.
+    #[schemars(title = "Boolean")]
     Boolean(BooleanInputSchema),
     /// An image (URL or base64).
+    #[schemars(title = "Image")]
     Image(ImageInputSchema),
     /// Audio content.
+    #[schemars(title = "Audio")]
     Audio(AudioInputSchema),
     /// Video content.
+    #[schemars(title = "Video")]
     Video(VideoInputSchema),
     /// A file.
+    #[schemars(title = "File")]
     File(FileInputSchema),
 }
 

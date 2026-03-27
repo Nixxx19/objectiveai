@@ -3,12 +3,14 @@
   "description": "Owned task output variants.",
   "anyOf": [
     {
+      "title": "Scalar",
       "description": "A single scalar score.",
       "type": "number",
       "minimum": -3.4028234663852886e+38,
       "maximum": 3.4028234663852886e+38
     },
     {
+      "title": "Vector",
       "description": "A vector of scores.",
       "type": "array",
       "items": {
@@ -18,6 +20,7 @@
       }
     },
     {
+      "title": "Vectors",
       "description": "Multiple vectors of scores (from mapped tasks).",
       "type": "array",
       "items": {
@@ -30,6 +33,7 @@
       }
     },
     {
+      "title": "Err",
       "description": "An error occurred during execution."
     }
   ]

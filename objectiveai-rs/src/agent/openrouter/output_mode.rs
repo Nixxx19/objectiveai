@@ -21,15 +21,18 @@ pub enum OutputMode {
     /// The model is instructed via the prompt to output a specific key.
     ///
     /// This is the default and most widely supported mode.
+    #[schemars(title = "Instruction")]
     #[default]
     Instruction,
     /// A JSON schema response format is used with an enum of possible keys.
     ///
     /// Requires model support for structured JSON output.
+    #[schemars(title = "JsonSchema")]
     JsonSchema,
     /// A forced tool call with an argument schema containing possible keys.
     ///
     /// Requires model support for tool/function calling.
+    #[schemars(title = "ToolCall")]
     ToolCall,
 }
 

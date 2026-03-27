@@ -3,6 +3,7 @@
   "description": "An inline function definition without metadata.\n\nUsed when embedding function logic directly in requests rather than\nreferencing a remote function. Lacks description and input\nschema fields.",
   "anyOf": [
     {
+      "title": "Scalar",
       "description": "Produces a single score in [0, 1].",
       "type": "object",
       "properties": {
@@ -22,6 +23,7 @@
       }
     },
     {
+      "title": "Vector",
       "description": "Produces a vector of scores that sums to 1.",
       "type": "object",
       "properties": {

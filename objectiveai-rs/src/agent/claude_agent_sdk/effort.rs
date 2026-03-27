@@ -10,15 +10,19 @@ use schemars::JsonSchema;
 #[schemars(rename = "agent.claude_agent_sdk.Effort")]
 pub enum Effort {
     /// Minimal output, concise responses.
+    #[schemars(title = "Low")]
     #[serde(rename = "low")]
     Low,
     /// Balanced output (default, normalized away during preparation).
+    #[schemars(title = "Medium")]
     #[serde(rename = "medium")]
     Medium,
     /// Detailed output with thorough explanations.
+    #[schemars(title = "High")]
     #[serde(rename = "high")]
     High,
     /// Maximum effort, most detailed output possible.
+    #[schemars(title = "Max")]
     #[serde(rename = "max")]
     Max,
 }

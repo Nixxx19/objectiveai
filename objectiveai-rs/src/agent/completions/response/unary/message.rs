@@ -8,7 +8,9 @@ use schemars::JsonSchema;
 #[serde(untagged)]
 #[schemars(rename = "agent.completions.response.unary.Message")]
 pub enum Message {
+    #[schemars(title = "Assistant")]
     Assistant(super::AssistantResponse),
+    #[schemars(title = "Tool")]
     Tool(response::ToolResponse),
 }
 

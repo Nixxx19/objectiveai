@@ -13,7 +13,9 @@ use schemars::JsonSchema;
 #[serde(untagged)]
 #[schemars(rename = "functions.InlineProfileOrRemoteCommitOptional")]
 pub enum InlineProfileOrRemoteCommitOptional {
+    #[schemars(title = "Inline")]
     Inline(InlineProfile),
+    #[schemars(title = "Remote")]
     Remote(crate::RemotePathCommitOptional),
 }
 
@@ -26,8 +28,10 @@ pub enum InlineProfileOrRemoteCommitOptional {
 #[schemars(rename = "functions.Profile")]
 pub enum Profile {
     /// A remote profile with metadata.
+    #[schemars(title = "Remote")]
     Remote(RemoteProfile),
     /// An inline profile definition.
+    #[schemars(title = "Inline")]
     Inline(InlineProfile),
 }
 
@@ -37,8 +41,10 @@ pub enum Profile {
 #[schemars(rename = "functions.RemoteProfile")]
 pub enum RemoteProfile {
     /// Tasks-based profile with per-task configuration.
+    #[schemars(title = "Tasks")]
     Tasks(RemoteTasksProfile),
     /// Auto profile that applies a single swarm+weights to all vector completion tasks.
+    #[schemars(title = "Auto")]
     Auto(crate::swarm::RemoteSwarmBase),
 }
 
@@ -48,8 +54,10 @@ pub enum RemoteProfile {
 #[schemars(rename = "functions.InlineProfile")]
 pub enum InlineProfile {
     /// Tasks-based profile with per-task configuration.
+    #[schemars(title = "Tasks")]
     Tasks(InlineTasksProfile),
     /// Auto profile that applies a single swarm+weights to all vector completion tasks.
+    #[schemars(title = "Auto")]
     Auto(crate::swarm::InlineSwarmBase),
 }
 
@@ -95,10 +103,13 @@ pub struct RemoteTasksProfile {
 #[schemars(rename = "functions.TaskProfile")]
 pub enum TaskProfile {
     /// Profile for a nested function task (references another profile).
+    #[schemars(title = "Remote")]
     Remote(crate::RemotePath),
     /// Inline profile for a task (tasks-based or auto).
+    #[schemars(title = "Inline")]
     Inline(InlineProfile),
     /// Placeholder task — no configuration needed, output is fixed.
+    #[schemars(title = "Placeholder")]
     Placeholder {},
 }
 

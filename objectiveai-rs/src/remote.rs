@@ -10,10 +10,13 @@ use schemars::JsonSchema;
 #[schemars(rename = "Remote")]
 pub enum Remote {
     /// GitHub repository.
+    #[schemars(title = "Github")]
     Github,
     /// Local filesystem.
+    #[schemars(title = "Filesystem")]
     Filesystem,
     /// Mock (for testing).
+    #[schemars(title = "Mock")]
     Mock,
 }
 
@@ -31,16 +34,19 @@ impl fmt::Display for Remote {
 #[serde(tag = "remote", rename_all = "snake_case")]
 #[schemars(rename = "RemotePath")]
 pub enum RemotePath {
+    #[schemars(title = "Github")]
     Github {
         owner: String,
         repository: String,
         commit: String,
     },
+    #[schemars(title = "Filesystem")]
     Filesystem {
         owner: String,
         repository: String,
         commit: String,
     },
+    #[schemars(title = "Mock")]
     Mock {
         name: String,
     },
@@ -99,16 +105,19 @@ impl RemotePath {
 #[serde(tag = "remote", rename_all = "snake_case")]
 #[schemars(rename = "RemotePathCommitOptional")]
 pub enum RemotePathCommitOptional {
+    #[schemars(title = "Github")]
     Github {
         owner: String,
         repository: String,
         commit: Option<String>,
     },
+    #[schemars(title = "Filesystem")]
     Filesystem {
         owner: String,
         repository: String,
         commit: Option<String>,
     },
+    #[schemars(title = "Mock")]
     Mock {
         name: String,
     },

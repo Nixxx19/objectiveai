@@ -33,8 +33,10 @@ use schemars::JsonSchema;
 #[schemars(rename = "functions.Function")]
 pub enum Function {
     /// A remote function with metadata (description, schema, etc.).
+    #[schemars(title = "Remote")]
     Remote(RemoteFunction),
     /// An inline function definition without metadata.
+    #[schemars(title = "Inline")]
     Inline(InlineFunction),
 }
 
@@ -449,6 +451,7 @@ impl Function {
 #[schemars(rename = "functions.RemoteFunction")]
 pub enum RemoteFunction {
     /// Produces a single score in [0, 1].
+    #[schemars(title = "Scalar")]
     #[serde(rename = "scalar.function")]
     Scalar {
         /// Human-readable description of what the function does.
@@ -462,6 +465,7 @@ pub enum RemoteFunction {
         tasks: Vec<super::TaskExpression>,
     },
     /// Produces a vector of scores that sums to 1.
+    #[schemars(title = "Vector")]
     #[serde(rename = "vector.function")]
     Vector {
         /// Human-readable description of what the function does.
@@ -556,6 +560,7 @@ impl RemoteFunction {
 #[schemars(rename = "functions.InlineFunction")]
 pub enum InlineFunction {
     /// Produces a single score in [0, 1].
+    #[schemars(title = "Scalar")]
     #[serde(rename = "scalar.function")]
     Scalar {
         /// The list of tasks to execute. Tasks with a `map` expression are
@@ -565,6 +570,7 @@ pub enum InlineFunction {
         tasks: Vec<super::TaskExpression>,
     },
     /// Produces a vector of scores that sums to 1.
+    #[schemars(title = "Vector")]
     #[serde(rename = "vector.function")]
     Vector {
         /// The list of tasks to execute. Tasks with a `map` expression are
@@ -623,8 +629,10 @@ impl InlineFunction {
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, JsonSchema)]
 #[schemars(rename = "functions.FunctionType")]
 pub enum FunctionType {
+    #[schemars(title = "Scalar")]
     #[serde(rename = "scalar.function")]
     Scalar,
+    #[schemars(title = "Vector")]
     #[serde(rename = "vector.function")]
     Vector,
 }

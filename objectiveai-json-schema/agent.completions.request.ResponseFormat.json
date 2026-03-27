@@ -3,6 +3,7 @@
   "description": "The format of the model's response.",
   "anyOf": [
     {
+      "title": "Text",
       "description": "Plain text response (default).",
       "type": "object",
       "properties": {
@@ -15,6 +16,7 @@
       }
     },
     {
+      "title": "JsonObject",
       "description": "Response must be valid JSON.",
       "type": "object",
       "properties": {
@@ -27,6 +29,7 @@
       }
     },
     {
+      "title": "JsonSchema",
       "description": "Response must conform to a JSON schema.",
       "type": "object",
       "properties": {
@@ -44,6 +47,7 @@
       }
     },
     {
+      "title": "Grammar",
       "description": "Response must conform to a grammar.",
       "type": "object",
       "properties": {
@@ -59,6 +63,7 @@
       }
     },
     {
+      "title": "Python",
       "description": "Response must be valid Python code.",
       "type": "object",
       "properties": {
@@ -71,6 +76,7 @@
       }
     },
     {
+      "title": "ToolCall",
       "description": "The final assistant message will contain this tool call",
       "type": "object",
       "properties": {

@@ -3,6 +3,7 @@
   "description": "Model quantization levels for provider filtering.\n\nQuantization reduces model precision to decrease memory usage and\nincrease inference speed, potentially at the cost of output quality.",
   "anyOf": [
     {
+      "title": "Int4",
       "description": "4-bit integer quantization.",
       "type": "string",
       "enum": [
@@ -10,6 +11,7 @@
       ]
     },
     {
+      "title": "Int8",
       "description": "8-bit integer quantization.",
       "type": "string",
       "enum": [
@@ -17,6 +19,7 @@
       ]
     },
     {
+      "title": "Fp4",
       "description": "4-bit floating point quantization.",
       "type": "string",
       "enum": [
@@ -24,6 +27,7 @@
       ]
     },
     {
+      "title": "Fp6",
       "description": "6-bit floating point quantization.",
       "type": "string",
       "enum": [
@@ -31,6 +35,7 @@
       ]
     },
     {
+      "title": "Fp8",
       "description": "8-bit floating point quantization.",
       "type": "string",
       "enum": [
@@ -38,6 +43,7 @@
       ]
     },
     {
+      "title": "Fp16",
       "description": "16-bit floating point (half precision).",
       "type": "string",
       "enum": [
@@ -45,6 +51,7 @@
       ]
     },
     {
+      "title": "Bf16",
       "description": "16-bit brain floating point.",
       "type": "string",
       "enum": [
@@ -52,6 +59,7 @@
       ]
     },
     {
+      "title": "Fp32",
       "description": "32-bit floating point (full precision).",
       "type": "string",
       "enum": [
@@ -59,6 +67,7 @@
       ]
     },
     {
+      "title": "Unknown",
       "description": "Unknown quantization level.",
       "type": "string",
       "enum": [

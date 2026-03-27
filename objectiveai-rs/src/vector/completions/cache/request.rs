@@ -14,7 +14,9 @@ pub struct GetCompletionVotesRequest {
 #[serde(untagged)]
 #[schemars(rename = "vector.completions.cache.CacheVoteRequest")]
 pub enum CacheVoteRequest<'a> {
+    #[schemars(title = "Ref")]
     Ref(CacheVoteRequestRef<'a>),
+    #[schemars(title = "Owned")]
     Owned(CacheVoteRequestOwned),
 }
 

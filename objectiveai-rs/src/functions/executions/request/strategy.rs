@@ -6,8 +6,10 @@ use schemars::JsonSchema;
 #[schemars(rename = "functions.executions.request.Strategy")]
 pub enum Strategy {
     /// Scalar or Vector
+    #[schemars(title = "Default")]
     Default,
     /// Vector
+    #[schemars(title = "SwissSystem")]
     SwissSystem {
         /// How many vector responses for each execution
         pool: Option<usize>, // default is 10

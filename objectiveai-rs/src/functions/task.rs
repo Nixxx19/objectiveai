@@ -38,14 +38,19 @@ use schemars::JsonSchema;
 #[serde(tag = "type")]
 #[schemars(rename = "functions.TaskExpression")]
 pub enum TaskExpression {
+    #[schemars(title = "ScalarFunction")]
     #[serde(rename = "scalar.function")]
     ScalarFunction(ScalarFunctionTaskExpression),
+    #[schemars(title = "VectorFunction")]
     #[serde(rename = "vector.function")]
     VectorFunction(VectorFunctionTaskExpression),
+    #[schemars(title = "VectorCompletion")]
     #[serde(rename = "vector.completion")]
     VectorCompletion(VectorCompletionTaskExpression),
+    #[schemars(title = "PlaceholderScalarFunction")]
     #[serde(rename = "placeholder.scalar.function")]
     PlaceholderScalarFunction(PlaceholderScalarFunctionTaskExpression),
+    #[schemars(title = "PlaceholderVectorFunction")]
     #[serde(rename = "placeholder.vector.function")]
     PlaceholderVectorFunction(PlaceholderVectorFunctionTaskExpression),
 }
@@ -121,18 +126,23 @@ impl TaskExpression {
 #[schemars(rename = "functions.Task")]
 pub enum Task {
     /// Calls a scalar function (produces a single score).
+    #[schemars(title = "ScalarFunction")]
     #[serde(rename = "scalar.function")]
     ScalarFunction(ScalarFunctionTask),
     /// Calls a vector function (produces a vector of scores).
+    #[schemars(title = "VectorFunction")]
     #[serde(rename = "vector.function")]
     VectorFunction(VectorFunctionTask),
     /// Runs a vector completion.
+    #[schemars(title = "VectorCompletion")]
     #[serde(rename = "vector.completion")]
     VectorCompletion(VectorCompletionTask),
     /// Placeholder scalar function (always outputs 0.5).
+    #[schemars(title = "PlaceholderScalarFunction")]
     #[serde(rename = "placeholder.scalar.function")]
     PlaceholderScalarFunction(PlaceholderScalarFunctionTask),
     /// Placeholder vector function (always outputs equalized vector).
+    #[schemars(title = "PlaceholderVectorFunction")]
     #[serde(rename = "placeholder.vector.function")]
     PlaceholderVectorFunction(PlaceholderVectorFunctionTask),
 }
@@ -683,7 +693,9 @@ impl PlaceholderVectorFunctionTask {
 #[schemars(rename = "functions.CompiledTask")]
 pub enum CompiledTask {
     /// A single task (no mapping).
+    #[schemars(title = "One")]
     One(Task),
     /// Multiple task instances from mapped execution.
+    #[schemars(title = "Many")]
     Many(Vec<Task>),
 }

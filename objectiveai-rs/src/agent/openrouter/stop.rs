@@ -12,8 +12,10 @@ use schemars::JsonSchema;
 #[schemars(rename = "agent.openrouter.Stop")]
 pub enum Stop {
     /// A single stop sequence.
+    #[schemars(title = "String")]
     String(String),
     /// Multiple stop sequences (up to 4 typically supported).
+    #[schemars(title = "Strings")]
     Strings(Vec<String>),
 }
 

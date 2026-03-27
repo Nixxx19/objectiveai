@@ -3,6 +3,7 @@
   "description": "A message in the conversation.",
   "anyOf": [
     {
+      "title": "Developer",
       "description": "A developer message (similar to system, but from the developer).",
       "type": "object",
       "$ref": "agent.completions.message.DeveloperMessage",
@@ -16,6 +17,7 @@
       }
     },
     {
+      "title": "System",
       "description": "A system message setting context or instructions.",
       "type": "object",
       "$ref": "agent.completions.message.SystemMessage",
@@ -29,6 +31,7 @@
       }
     },
     {
+      "title": "User",
       "description": "A user message from the end user.",
       "type": "object",
       "$ref": "agent.completions.message.UserMessage",
@@ -42,6 +45,7 @@
       }
     },
     {
+      "title": "Assistant",
       "description": "An assistant message (model's previous response).",
       "type": "object",
       "$ref": "agent.completions.message.AssistantMessage",
@@ -55,6 +59,7 @@
       }
     },
     {
+      "title": "Tool",
       "description": "A tool message containing the result of a tool call.",
       "type": "object",
       "$ref": "agent.completions.message.ToolMessage",

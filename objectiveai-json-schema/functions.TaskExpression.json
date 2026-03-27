@@ -3,6 +3,7 @@
   "description": "A task definition with expressions (pre-compilation).\n\nTask expressions contain dynamic fields (JMESPath or Starlark) that are\nresolved against input data during compilation. Use [`compile`](Self::compile)\nto produce a concrete [`Task`].",
   "anyOf": [
     {
+      "title": "ScalarFunction",
       "type": "object",
       "$ref": "functions.ScalarFunctionTaskExpression",
       "properties": {
@@ -15,6 +16,7 @@
       }
     },
     {
+      "title": "VectorFunction",
       "type": "object",
       "$ref": "functions.VectorFunctionTaskExpression",
       "properties": {
@@ -27,6 +29,7 @@
       }
     },
     {
+      "title": "VectorCompletion",
       "type": "object",
       "$ref": "functions.VectorCompletionTaskExpression",
       "properties": {
@@ -39,6 +42,7 @@
       }
     },
     {
+      "title": "PlaceholderScalarFunction",
       "type": "object",
       "$ref": "functions.PlaceholderScalarFunctionTaskExpression",
       "properties": {
@@ -51,6 +55,7 @@
       }
     },
     {
+      "title": "PlaceholderVectorFunction",
       "type": "object",
       "$ref": "functions.PlaceholderVectorFunctionTaskExpression",
       "properties": {

@@ -18,8 +18,10 @@ use starlark::values::{
 #[schemars(rename = "functions.expression.Params")]
 pub enum Params<'i, 'to> {
     /// Owned version (for deserialization).
+    #[schemars(title = "Owned")]
     Owned(ParamsOwned),
     /// Borrowed version (for efficient evaluation).
+    #[schemars(title = "Ref")]
     Ref(ParamsRef<'i, 'to>),
 }
 
@@ -63,8 +65,10 @@ pub struct ParamsRef<'i, 'to> {
 #[schemars(rename = "functions.expression.TaskOutput")]
 pub enum TaskOutput<'a> {
     /// Owned version.
+    #[schemars(title = "Owned")]
     Owned(TaskOutputOwned),
     /// Borrowed version.
+    #[schemars(title = "Ref")]
     Ref(TaskOutputRef<'a>),
 }
 
@@ -96,12 +100,16 @@ impl<'de> serde::Deserialize<'de> for TaskOutput<'static> {
 #[schemars(rename = "functions.expression.TaskOutputOwned")]
 pub enum TaskOutputOwned {
     /// A single scalar score.
+    #[schemars(title = "Scalar")]
     Scalar(#[schemars(with = "f64")] #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)] rust_decimal::Decimal),
     /// A vector of scores.
+    #[schemars(title = "Vector")]
     Vector(#[schemars(with = "Vec<f64>")] #[arbitrary(with = crate::arbitrary_util::arbitrary_vec_rust_decimal)] Vec<rust_decimal::Decimal>),
     /// Multiple vectors of scores (from mapped tasks).
+    #[schemars(title = "Vectors")]
     Vectors(#[schemars(with = "Vec<Vec<f64>>")] #[arbitrary(with = crate::arbitrary_util::arbitrary_vec_vec_rust_decimal)] Vec<Vec<rust_decimal::Decimal>>),
     /// An error occurred during execution.
+    #[schemars(title = "Err")]
     Err(#[arbitrary(with = crate::arbitrary_util::arbitrary_json_value)] serde_json::Value),
 }
 
@@ -290,12 +298,16 @@ impl TaskOutputOwned {
 #[schemars(rename = "functions.expression.TaskOutputRef")]
 pub enum TaskOutputRef<'a> {
     /// A single scalar score.
+    #[schemars(title = "Scalar")]
     Scalar(#[schemars(with = "f64")] &'a rust_decimal::Decimal),
     /// A vector of scores.
+    #[schemars(title = "Vector")]
     Vector(#[schemars(with = "Vec<f64>")] &'a [rust_decimal::Decimal]),
     /// Multiple vectors of scores (from mapped tasks).
+    #[schemars(title = "Vectors")]
     Vectors(#[schemars(with = "Vec<Vec<f64>>")] &'a [Vec<rust_decimal::Decimal>]),
     /// An error occurred during execution.
+    #[schemars(title = "Err")]
     Err(&'a serde_json::Value),
 }
 

@@ -94,12 +94,16 @@ pub trait InventionState: Clone + Send + 'static {
 #[serde(tag = "type")]
 #[schemars(rename = "functions.inventions.state.State")]
 pub enum State {
+    #[schemars(title = "AlphaScalarBranch")]
     #[serde(rename = "alpha.scalar.branch.function")]
     AlphaScalarBranch(AlphaScalarBranchState),
+    #[schemars(title = "AlphaScalarLeaf")]
     #[serde(rename = "alpha.scalar.leaf.function")]
     AlphaScalarLeaf(AlphaScalarLeafState),
+    #[schemars(title = "AlphaVectorBranch")]
     #[serde(rename = "alpha.vector.branch.function")]
     AlphaVectorBranch(AlphaVectorBranchState),
+    #[schemars(title = "AlphaVectorLeaf")]
     #[serde(rename = "alpha.vector.leaf.function")]
     AlphaVectorLeaf(AlphaVectorLeafState),
 }
@@ -245,19 +249,25 @@ impl State {
 #[serde(tag = "type")]
 #[schemars(rename = "functions.inventions.state.ParamsState")]
 pub enum ParamsState {
+    #[schemars(title = "AlphaScalarBranch")]
     #[serde(rename = "alpha.scalar.branch.function")]
     AlphaScalarBranch(AlphaScalarBranchState),
+    #[schemars(title = "AlphaScalarLeaf")]
     #[serde(rename = "alpha.scalar.leaf.function")]
     AlphaScalarLeaf(AlphaScalarLeafState),
+    #[schemars(title = "AlphaVectorBranch")]
     #[serde(rename = "alpha.vector.branch.function")]
     AlphaVectorBranch(AlphaVectorBranchState),
+    #[schemars(title = "AlphaVectorLeaf")]
     #[serde(rename = "alpha.vector.leaf.function")]
     AlphaVectorLeaf(AlphaVectorLeafState),
+    #[schemars(title = "AlphaScalar")]
     #[serde(
         rename = "alpha.scalar.function",
         alias = "placeholder.alpha.scalar.function"
     )]
     AlphaScalar(AlphaScalarState),
+    #[schemars(title = "AlphaVector")]
     #[serde(
         rename = "alpha.vector.function",
         alias = "placeholder.alpha.vector.function"

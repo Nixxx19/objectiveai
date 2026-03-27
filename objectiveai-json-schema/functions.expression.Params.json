@@ -3,10 +3,12 @@
   "description": "Context for evaluating expressions (JMESPath or Starlark).\n\nContains all data accessible within expressions: `input`, `output`, and `map`.",
   "anyOf": [
     {
+      "title": "Owned",
       "description": "Owned version (for deserialization).",
       "$ref": "functions.expression.ParamsOwned"
     },
     {
+      "title": "Ref",
       "description": "Borrowed version (for efficient evaluation).",
       "$ref": "functions.expression.ParamsRef"
     }

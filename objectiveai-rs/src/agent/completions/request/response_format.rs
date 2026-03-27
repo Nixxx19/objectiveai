@@ -11,19 +11,25 @@ use schemars::JsonSchema;
 #[schemars(rename = "agent.completions.request.ResponseFormat")]
 pub enum ResponseFormat {
     /// Plain text response (default).
+    #[schemars(title = "Text")]
     Text,
     /// Response must be valid JSON.
+    #[schemars(title = "JsonObject")]
     JsonObject,
     /// Response must conform to a JSON schema.
+    #[schemars(title = "JsonSchema")]
     JsonSchema {
         /// The JSON Schema definition.
         schema: IndexMap<String, serde_json::Value>,
     },
     /// Response must conform to a grammar.
+    #[schemars(title = "Grammar")]
     Grammar { grammar: String },
     /// Response must be valid Python code.
+    #[schemars(title = "Python")]
     Python,
     /// The final assistant message will contain this tool call
+    #[schemars(title = "ToolCall")]
     ToolCall {
         /// The name of the tool.
         name: String,
@@ -55,7 +61,9 @@ pub type PerAgentResponseFormat = IndexMap<String, ResponseFormat>;
 #[schemars(rename = "agent.completions.request.ResponseFormatParam")]
 pub enum ResponseFormatParam {
     /// A single response format applied to all agents.
+    #[schemars(title = "Single")]
     Single(ResponseFormat),
     /// Per-agent response formats, keyed by agent ID.
+    #[schemars(title = "PerAgent")]
     PerAgent(PerAgentResponseFormat),
 }

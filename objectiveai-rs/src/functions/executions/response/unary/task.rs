@@ -6,7 +6,9 @@ use schemars::JsonSchema;
 #[serde(untagged)]
 #[schemars(rename = "functions.executions.response.unary.Task")]
 pub enum Task {
+    #[schemars(title = "FunctionExecution")]
     FunctionExecution(super::FunctionExecutionTask),
+    #[schemars(title = "VectorCompletion")]
     VectorCompletion(super::VectorCompletionTask),
 }
 

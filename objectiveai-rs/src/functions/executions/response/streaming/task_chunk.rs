@@ -5,7 +5,9 @@ use schemars::JsonSchema;
 #[serde(untagged)]
 #[schemars(rename = "functions.executions.response.streaming.TaskChunk")]
 pub enum TaskChunk {
+    #[schemars(title = "FunctionExecution")]
     FunctionExecution(super::FunctionExecutionTaskChunk),
+    #[schemars(title = "VectorCompletion")]
     VectorCompletion(super::VectorCompletionTaskChunk),
 }
 

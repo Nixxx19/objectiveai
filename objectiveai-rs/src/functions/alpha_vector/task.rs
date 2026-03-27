@@ -6,12 +6,16 @@ use schemars::JsonSchema;
 #[serde(tag = "type")]
 #[schemars(rename = "functions.alpha_vector.BranchTaskExpression")]
 pub enum BranchTaskExpression {
+    #[schemars(title = "ScalarFunction")]
     #[serde(rename = "alpha.scalar.function")]
     ScalarFunction(ScalarFunctionTaskExpression),
+    #[schemars(title = "VectorFunction")]
     #[serde(rename = "alpha.vector.function")]
     VectorFunction(VectorFunctionTaskExpression),
+    #[schemars(title = "PlaceholderScalarFunction")]
     #[serde(rename = "placeholder.alpha.scalar.function")]
     PlaceholderScalarFunction(PlaceholderScalarFunctionTaskExpression),
+    #[schemars(title = "PlaceholderVectorFunction")]
     #[serde(rename = "placeholder.alpha.vector.function")]
     PlaceholderVectorFunction(PlaceholderVectorFunctionTaskExpression),
 }
@@ -61,8 +65,10 @@ impl BranchTaskExpression {
 #[serde(tag = "type")]
 #[schemars(rename = "functions.alpha_vector.PartialPlaceholderBranchTaskExpression")]
 pub enum PartialPlaceholderBranchTaskExpression {
+    #[schemars(title = "PlaceholderScalarFunction")]
     #[serde(rename = "placeholder.alpha.scalar.function")]
     PlaceholderScalarFunction(PartialPlaceholderScalarFunctionTaskExpression),
+    #[schemars(title = "PlaceholderVectorFunction")]
     #[serde(rename = "placeholder.alpha.vector.function")]
     PlaceholderVectorFunction(PartialPlaceholderVectorFunctionTaskExpression),
 }

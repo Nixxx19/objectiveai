@@ -104,18 +104,23 @@ use schemars::JsonSchema;
 #[schemars(rename = "agent.completions.message.Message")]
 pub enum Message {
     /// A developer message (similar to system, but from the developer).
+    #[schemars(title = "Developer")]
     #[serde(rename = "developer")]
     Developer(DeveloperMessage),
     /// A system message setting context or instructions.
+    #[schemars(title = "System")]
     #[serde(rename = "system")]
     System(SystemMessage),
     /// A user message from the end user.
+    #[schemars(title = "User")]
     #[serde(rename = "user")]
     User(UserMessage),
     /// An assistant message (model's previous response).
+    #[schemars(title = "Assistant")]
     #[serde(rename = "assistant")]
     Assistant(AssistantMessage),
     /// A tool message containing the result of a tool call.
+    #[schemars(title = "Tool")]
     #[serde(rename = "tool")]
     Tool(ToolMessage),
 }
@@ -201,14 +206,19 @@ impl FromStarlarkValue for Message {
 #[serde(tag = "role")]
 #[schemars(rename = "agent.completions.message.MessageExpression")]
 pub enum MessageExpression {
+    #[schemars(title = "Developer")]
     #[serde(rename = "developer")]
     Developer(DeveloperMessageExpression),
+    #[schemars(title = "System")]
     #[serde(rename = "system")]
     System(SystemMessageExpression),
+    #[schemars(title = "User")]
     #[serde(rename = "user")]
     User(UserMessageExpression),
+    #[schemars(title = "Assistant")]
     #[serde(rename = "assistant")]
     Assistant(AssistantMessageExpression),
+    #[schemars(title = "Tool")]
     #[serde(rename = "tool")]
     Tool(ToolMessageExpression),
 }

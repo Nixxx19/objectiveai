@@ -6,12 +6,14 @@ use schemars::JsonSchema;
 #[serde(tag = "type")]
 #[schemars(rename = "functions.alpha_scalar.RemoteFunction")]
 pub enum RemoteFunction {
+    #[schemars(title = "Branch")]
     #[serde(rename = "alpha.scalar.branch.function")]
     Branch {
         description: String,
         input_schema: super::expression::ScalarFunctionInputSchema,
         tasks: Vec<super::BranchTaskExpression>,
     },
+    #[schemars(title = "Leaf")]
     #[serde(rename = "alpha.scalar.leaf.function")]
     Leaf {
         description: String,
@@ -75,10 +77,12 @@ impl RemoteFunction {
 #[serde(tag = "type")]
 #[schemars(rename = "functions.alpha_scalar.InlineFunction")]
 pub enum InlineFunction {
+    #[schemars(title = "Branch")]
     #[serde(rename = "alpha.scalar.branch.function")]
     Branch {
         tasks: Vec<super::BranchTaskExpression>,
     },
+    #[schemars(title = "Leaf")]
     #[serde(rename = "alpha.scalar.leaf.function")]
     Leaf {
         tasks: Vec<super::LeafTaskExpression>,

@@ -19,8 +19,10 @@ use starlark::values::{
 #[schemars(rename = "agent.completions.message.RichContent")]
 pub enum RichContent {
     /// Plain text content.
+    #[schemars(title = "Text")]
     Text(String),
     /// Multi-part content (text, images, audio, video, files).
+    #[schemars(title = "Parts")]
     Parts(Vec<RichContentPart>),
 }
 
@@ -141,8 +143,10 @@ impl FromStarlarkValue for RichContent {
 #[schemars(rename = "agent.completions.message.RichContentExpression")]
 pub enum RichContentExpression {
     /// Plain text content.
+    #[schemars(title = "Text")]
     Text(String),
     /// Multi-part content expressions.
+    #[schemars(title = "Parts")]
     Parts(
         Vec<functions::expression::WithExpression<RichContentPartExpression>>,
     ),
@@ -209,16 +213,22 @@ impl FromStarlarkValue for RichContentExpression {
 #[schemars(rename = "agent.completions.message.RichContentPart")]
 pub enum RichContentPart {
     /// Text content.
+    #[schemars(title = "Text")]
     Text { text: String },
     /// An image URL.
+    #[schemars(title = "ImageUrl")]
     ImageUrl { image_url: ImageUrl },
     /// Audio input.
+    #[schemars(title = "InputAudio")]
     InputAudio { input_audio: InputAudio },
     /// Video input.
+    #[schemars(title = "InputVideo")]
     InputVideo { video_url: VideoUrl },
     /// A video URL.
+    #[schemars(title = "VideoUrl")]
     VideoUrl { video_url: VideoUrl },
     /// A file.
+    #[schemars(title = "File")]
     File { file: File },
 }
 
@@ -388,21 +398,27 @@ impl FromStarlarkValue for RichContentPart {
 #[serde(tag = "type", rename_all = "snake_case")]
 #[schemars(rename = "agent.completions.message.RichContentPartExpression")]
 pub enum RichContentPartExpression {
+    #[schemars(title = "Text")]
     Text {
         text: functions::expression::WithExpression<String>,
     },
+    #[schemars(title = "ImageUrl")]
     ImageUrl {
         image_url: functions::expression::WithExpression<ImageUrl>,
     },
+    #[schemars(title = "InputAudio")]
     InputAudio {
         input_audio: functions::expression::WithExpression<InputAudio>,
     },
+    #[schemars(title = "InputVideo")]
     InputVideo {
         video_url: functions::expression::WithExpression<VideoUrl>,
     },
+    #[schemars(title = "VideoUrl")]
     VideoUrl {
         video_url: functions::expression::WithExpression<VideoUrl>,
     },
+    #[schemars(title = "File")]
     File {
         file: functions::expression::WithExpression<File>,
     },
@@ -601,12 +617,15 @@ impl FromStarlarkValue for ImageUrl {
 #[schemars(rename = "agent.completions.message.ImageUrlDetail")]
 pub enum ImageUrlDetail {
     /// Let the model decide the detail level.
+    #[schemars(title = "Auto")]
     #[serde(rename = "auto")]
     Auto,
     /// Low detail mode (faster, less tokens).
+    #[schemars(title = "Low")]
     #[serde(rename = "low")]
     Low,
     /// High detail mode (more accurate, more tokens).
+    #[schemars(title = "High")]
     #[serde(rename = "high")]
     High,
 }

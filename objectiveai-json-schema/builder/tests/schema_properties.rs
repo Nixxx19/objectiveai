@@ -473,6 +473,64 @@ fn multi_variant_anyof_never_nullable() {
     }
 }
 
+fn check_any_of_variants_have_title(
+    value: &serde_json::Value,
+    inside_properties: bool,
+    errors: &mut Vec<String>,
+    path: &str,
+) {
+    match value {
+        serde_json::Value::Object(map) => {
+            if !inside_properties {
+                if let Some(serde_json::Value::Array(variants)) = map.get("anyOf") {
+                    let non_null: Vec<(usize, &serde_json::Value)> = variants
+                        .iter()
+                        .enumerate()
+                        .filter(|(_, v)| v.get("type").and_then(|t| t.as_str()) != Some("null"))
+                        .collect();
+                    // Only check multi-variant unions (not simple nullable anyOf)
+                    if non_null.len() >= 2 {
+                        for (i, variant) in &non_null {
+                            if variant.get("title").and_then(|t| t.as_str()).is_none() {
+                                errors.push(format!(
+                                    "{path}.anyOf[{i}]: non-null variant is missing a title"
+                                ));
+                            }
+                        }
+                    }
+                }
+            }
+            for (k, v) in map {
+                let child_path = if path.is_empty() {
+                    k.clone()
+                } else {
+                    format!("{path}.{k}")
+                };
+                check_any_of_variants_have_title(v, k == "properties", errors, &child_path);
+            }
+        }
+        serde_json::Value::Array(arr) => {
+            for (i, v) in arr.iter().enumerate() {
+                check_any_of_variants_have_title(v, false, errors, &format!("{path}[{i}]"));
+            }
+        }
+        _ => {}
+    }
+}
+
+#[test]
+fn all_any_of_variants_have_title() {
+    let mut errors = Vec::new();
+    for (name, schema) in load_schemas() {
+        check_any_of_variants_have_title(&schema, false, &mut errors, &name);
+    }
+    assert!(
+        errors.is_empty(),
+        "every non-null variant in a multi-variant anyOf must have a title:\n{}",
+        errors.join("\n")
+    );
+}
+
 fn is_valid_schema_title(title: &str) -> bool {
     let segments: Vec<&str> = title.split('.').collect();
     if segments.is_empty() {

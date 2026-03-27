@@ -3,6 +3,7 @@
   "description": "A remote function with full metadata.\n\nRemote functions are stored as `function.json` in repositories and\nreferenced by `remote/owner/repository`. They include documentation fields\nthat inline functions lack.",
   "anyOf": [
     {
+      "title": "Scalar",
       "description": "Produces a single score in [0, 1].",
       "type": "object",
       "properties": {
@@ -30,6 +31,7 @@
       }
     },
     {
+      "title": "Vector",
       "description": "Produces a vector of scores that sums to 1.",
       "type": "object",
       "properties": {

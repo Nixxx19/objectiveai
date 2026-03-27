@@ -115,22 +115,31 @@ impl Provider {
 #[schemars(rename = "agent.openrouter.ProviderQuantization")]
 pub enum ProviderQuantization {
     /// 4-bit integer quantization.
+    #[schemars(title = "Int4")]
     Int4,
     /// 8-bit integer quantization.
+    #[schemars(title = "Int8")]
     Int8,
     /// 4-bit floating point quantization.
+    #[schemars(title = "Fp4")]
     Fp4,
     /// 6-bit floating point quantization.
+    #[schemars(title = "Fp6")]
     Fp6,
     /// 8-bit floating point quantization.
+    #[schemars(title = "Fp8")]
     Fp8,
     /// 16-bit floating point (half precision).
+    #[schemars(title = "Fp16")]
     Fp16,
     /// 16-bit brain floating point.
+    #[schemars(title = "Bf16")]
     Bf16,
     /// 32-bit floating point (full precision).
+    #[schemars(title = "Fp32")]
     Fp32,
     /// Unknown quantization level.
+    #[schemars(title = "Unknown")]
     Unknown,
 }
 

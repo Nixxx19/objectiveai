@@ -21,18 +21,25 @@ use schemars::JsonSchema;
 #[schemars(rename = "functions.expression.InputValue")]
 pub enum InputValue {
     /// Rich content (image, audio, video, file).
+    #[schemars(title = "RichContentPart")]
     RichContentPart(agent::completions::message::RichContentPart),
     /// An object with string keys.
+    #[schemars(title = "Object")]
     Object(IndexMap<String, InputValue>),
     /// An array of values.
+    #[schemars(title = "Array")]
     Array(Vec<InputValue>),
     /// A string value.
+    #[schemars(title = "String")]
     String(String),
     /// An integer value.
+    #[schemars(title = "Integer")]
     Integer(i64),
     /// A floating-point number.
+    #[schemars(title = "Number")]
     Number(f64),
     /// A boolean value.
+    #[schemars(title = "Boolean")]
     Boolean(bool),
 }
 
@@ -489,18 +496,25 @@ impl InputValue {
 #[schemars(rename = "functions.expression.InputValueExpression")]
 pub enum InputValueExpression {
     /// Rich content (image, audio, video, file).
+    #[schemars(title = "RichContentPart")]
     RichContentPart(agent::completions::message::RichContentPart),
     /// An object with values that may be expressions.
+    #[schemars(title = "Object")]
     Object(IndexMap<String, super::WithExpression<InputValueExpression>>),
     /// An array with elements that may be expressions.
+    #[schemars(title = "Array")]
     Array(Vec<super::WithExpression<InputValueExpression>>),
     /// A string value.
+    #[schemars(title = "String")]
     String(String),
     /// An integer value.
+    #[schemars(title = "Integer")]
     Integer(i64),
     /// A floating-point number.
+    #[schemars(title = "Number")]
     Number(f64),
     /// A boolean value.
+    #[schemars(title = "Boolean")]
     Boolean(bool),
 }
 

@@ -39,8 +39,10 @@ pub struct Provider {
 #[schemars(rename = "agent.completions.request.ProviderDataCollection")]
 pub enum ProviderDataCollection {
     /// Do not allow data collection.
+    #[schemars(title = "Deny")]
     Deny,
     /// Allow data collection.
+    #[schemars(title = "Allow")]
     Allow,
 }
 
@@ -50,10 +52,13 @@ pub enum ProviderDataCollection {
 #[schemars(rename = "agent.completions.request.ProviderSort")]
 pub enum ProviderSort {
     /// Prioritize by price (cheapest first).
+    #[schemars(title = "Price")]
     Price,
     /// Prioritize by throughput (fastest first).
+    #[schemars(title = "Throughput")]
     Throughput,
     /// Prioritize by latency (lowest first).
+    #[schemars(title = "Latency")]
     Latency,
 }
 

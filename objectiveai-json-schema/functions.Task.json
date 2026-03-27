@@ -3,6 +3,7 @@
   "description": "A compiled task ready for execution.\n\nProduced by compiling a [`TaskExpression`] against input data. All\nexpressions have been resolved to concrete values.",
   "anyOf": [
     {
+      "title": "ScalarFunction",
       "description": "Calls a scalar function (produces a single score).",
       "type": "object",
       "$ref": "functions.ScalarFunctionTask",
@@ -16,6 +17,7 @@
       }
     },
     {
+      "title": "VectorFunction",
       "description": "Calls a vector function (produces a vector of scores).",
       "type": "object",
       "$ref": "functions.VectorFunctionTask",
@@ -29,6 +31,7 @@
       }
     },
     {
+      "title": "VectorCompletion",
       "description": "Runs a vector completion.",
       "type": "object",
       "$ref": "functions.VectorCompletionTask",
@@ -42,6 +45,7 @@
       }
     },
     {
+      "title": "PlaceholderScalarFunction",
       "description": "Placeholder scalar function (always outputs 0.5).",
       "type": "object",
       "$ref": "functions.PlaceholderScalarFunctionTask",
@@ -55,6 +59,7 @@
       }
     },
     {
+      "title": "PlaceholderVectorFunction",
       "description": "Placeholder vector function (always outputs equalized vector).",
       "type": "object",
       "$ref": "functions.PlaceholderVectorFunctionTask",

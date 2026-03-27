@@ -6,8 +6,10 @@ use schemars::JsonSchema;
 #[serde(tag = "type")]
 #[schemars(rename = "functions.alpha_scalar.BranchTaskExpression")]
 pub enum BranchTaskExpression {
+    #[schemars(title = "ScalarFunction")]
     #[serde(rename = "alpha.scalar.function")]
     ScalarFunction(ScalarFunctionTaskExpression),
+    #[schemars(title = "PlaceholderScalarFunction")]
     #[serde(rename = "placeholder.alpha.scalar.function")]
     PlaceholderScalarFunction(PlaceholderScalarFunctionTaskExpression),
 }

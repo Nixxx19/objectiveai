@@ -3,6 +3,7 @@
   "description": "An expression that can be either JMESPath or Starlark.\n\nSerializes as `{\"$jmespath\": \"...\"}` or `{\"$starlark\": \"...\"}` in JSON.\n\n# Examples\n\nJMESPath:\n```json\n{\"$jmespath\": \"input.items[0].name\"}\n```\n\nStarlark:\n```json\n{\"$starlark\": \"input['items'][0]['name']\"}\n```",
   "anyOf": [
     {
+      "title": "JMESPath",
       "description": "A JMESPath expression.",
       "type": "object",
       "properties": {
@@ -13,6 +14,7 @@
       "additionalProperties": false
     },
     {
+      "title": "Starlark",
       "description": "A Starlark expression.",
       "type": "object",
       "properties": {
@@ -23,6 +25,7 @@
       "additionalProperties": false
     },
     {
+      "title": "Special",
       "description": "A predefined special expression variant.",
       "type": "object",
       "properties": {

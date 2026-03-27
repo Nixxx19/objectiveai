@@ -15,8 +15,10 @@ use schemars::JsonSchema;
 #[schemars(rename = "agent.completions.message.SimpleContent")]
 pub enum SimpleContent {
     /// Plain text content.
+    #[schemars(title = "Text")]
     Text(String),
     /// Multi-part text content.
+    #[schemars(title = "Parts")]
     Parts(Vec<SimpleContentPart>),
 }
 
@@ -88,8 +90,10 @@ impl FromStarlarkValue for SimpleContent {
 #[schemars(rename = "agent.completions.message.SimpleContentExpression")]
 pub enum SimpleContentExpression {
     /// Plain text content.
+    #[schemars(title = "Text")]
     Text(String),
     /// Multi-part text content expressions.
+    #[schemars(title = "Parts")]
     Parts(
         Vec<functions::expression::WithExpression<SimpleContentPartExpression>>,
     ),

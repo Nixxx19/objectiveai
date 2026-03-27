@@ -5,7 +5,9 @@ use schemars::JsonSchema;
 #[serde(untagged)]
 #[schemars(rename = "functions.FullRemoteFunction")]
 pub enum FullRemoteFunction {
+    #[schemars(title = "Alpha")]
     Alpha(AlphaRemoteFunction),
+    #[schemars(title = "Standard")]
     Standard(super::RemoteFunction),
 }
 
@@ -36,7 +38,9 @@ impl FullRemoteFunction {
 #[serde(untagged)]
 #[schemars(rename = "functions.FullInlineFunction")]
 pub enum FullInlineFunction {
+    #[schemars(title = "Alpha")]
     Alpha(AlphaInlineFunction),
+    #[schemars(title = "Standard")]
     Standard(super::InlineFunction),
 }
 
@@ -67,7 +71,9 @@ impl FullInlineFunction {
 #[serde(untagged)]
 #[schemars(rename = "functions.AlphaRemoteFunction")]
 pub enum AlphaRemoteFunction {
+    #[schemars(title = "Scalar")]
     Scalar(super::alpha_scalar::RemoteFunction),
+    #[schemars(title = "Vector")]
     Vector(super::alpha_vector::RemoteFunction),
 }
 
@@ -98,7 +104,9 @@ impl AlphaRemoteFunction {
 #[serde(untagged)]
 #[schemars(rename = "functions.AlphaInlineFunction")]
 pub enum AlphaInlineFunction {
+    #[schemars(title = "Scalar")]
     Scalar(super::alpha_scalar::InlineFunction),
+    #[schemars(title = "Vector")]
     Vector(super::alpha_vector::InlineFunction),
 }
 
@@ -130,7 +138,9 @@ impl AlphaInlineFunction {
 #[serde(untagged)]
 #[schemars(rename = "functions.FullFunction")]
 pub enum FullFunction {
+    #[schemars(title = "Remote")]
     Remote(FullRemoteFunction),
+    #[schemars(title = "Inline")]
     Inline(FullInlineFunction),
 }
 
@@ -156,6 +166,8 @@ impl FullFunction {
 #[serde(untagged)]
 #[schemars(rename = "functions.FullInlineFunctionOrRemoteCommitOptional")]
 pub enum FullInlineFunctionOrRemoteCommitOptional {
+    #[schemars(title = "Inline")]
     Inline(FullInlineFunction),
+    #[schemars(title = "Remote")]
     Remote(crate::RemotePathCommitOptional),
 }

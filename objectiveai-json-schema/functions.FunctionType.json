@@ -1,8 +1,19 @@
 {
   "title": "functions.FunctionType",
-  "type": "string",
-  "enum": [
-    "scalar.function",
-    "vector.function"
+  "anyOf": [
+    {
+      "title": "Scalar",
+      "type": "string",
+      "enum": [
+        "scalar.function"
+      ]
+    },
+    {
+      "title": "Vector",
+      "type": "string",
+      "enum": [
+        "vector.function"
+      ]
+    }
   ]
 }

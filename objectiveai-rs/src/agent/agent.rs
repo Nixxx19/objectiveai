@@ -13,8 +13,11 @@ use schemars::JsonSchema;
 #[serde(untagged)]
 #[schemars(rename = "agent.InlineAgentBase")]
 pub enum InlineAgentBase {
+    #[schemars(title = "Openrouter")]
     Openrouter(super::openrouter::AgentBase),
+    #[schemars(title = "ClaudeAgentSdk")]
     ClaudeAgentSdk(super::claude_agent_sdk::AgentBase),
+    #[schemars(title = "Mock")]
     Mock(super::mock::AgentBase),
 }
 
@@ -138,7 +141,9 @@ impl RemoteAgentBase {
 #[serde(untagged)]
 #[schemars(rename = "agent.AgentBase")]
 pub enum AgentBase {
+    #[schemars(title = "Remote")]
     Remote(RemoteAgentBase),
+    #[schemars(title = "Inline")]
     Inline(InlineAgentBase),
 }
 
@@ -290,8 +295,11 @@ impl<'a> InlineAgentRef<'a> {
 #[serde(untagged)]
 #[schemars(rename = "agent.InlineAgent")]
 pub enum InlineAgent {
+    #[schemars(title = "Openrouter")]
     Openrouter(super::openrouter::Agent),
+    #[schemars(title = "ClaudeAgentSdk")]
     ClaudeAgentSdk(super::claude_agent_sdk::Agent),
+    #[schemars(title = "Mock")]
     Mock(super::mock::Agent),
 }
 
@@ -361,7 +369,9 @@ impl RemoteAgent {
 #[serde(untagged)]
 #[schemars(rename = "agent.Agent")]
 pub enum Agent {
+    #[schemars(title = "Remote")]
     Remote(RemoteAgent),
+    #[schemars(title = "Inline")]
     Inline(InlineAgent),
 }
 
@@ -518,7 +528,9 @@ impl RemoteAgentWithFallbacks {
 #[serde(untagged)]
 #[schemars(rename = "agent.AgentWithFallbacks")]
 pub enum AgentWithFallbacks {
+    #[schemars(title = "Remote")]
     Remote(RemoteAgentWithFallbacks),
+    #[schemars(title = "Inline")]
     Inline(InlineAgentWithFallbacks),
 }
 
@@ -576,7 +588,9 @@ impl AgentWithFallbacks {
 #[serde(untagged)]
 #[schemars(rename = "agent.InlineAgentBaseWithFallbacksOrRemote")]
 pub enum InlineAgentBaseWithFallbacksOrRemote {
+    #[schemars(title = "AgentBase")]
     AgentBase(InlineAgentBaseWithFallbacks),
+    #[schemars(title = "Remote")]
     Remote(crate::RemotePath),
 }
 
@@ -586,7 +600,9 @@ pub enum InlineAgentBaseWithFallbacksOrRemote {
 #[serde(untagged)]
 #[schemars(rename = "agent.InlineAgentBaseWithFallbacksOrRemoteCommitOptional")]
 pub enum InlineAgentBaseWithFallbacksOrRemoteCommitOptional {
+    #[schemars(title = "AgentBase")]
     AgentBase(InlineAgentBaseWithFallbacks),
+    #[schemars(title = "Remote")]
     Remote(crate::RemotePathCommitOptional),
 }
 

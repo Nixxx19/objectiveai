@@ -69,7 +69,9 @@ impl RemoteSwarmBase {
 #[serde(untagged)]
 #[schemars(rename = "swarm.SwarmBase")]
 pub enum SwarmBase {
+    #[schemars(title = "Remote")]
     Remote(RemoteSwarmBase),
+    #[schemars(title = "Inline")]
     Inline(InlineSwarmBase),
 }
 
@@ -128,7 +130,9 @@ pub struct RemoteSwarm {
 #[serde(untagged)]
 #[schemars(rename = "swarm.Swarm")]
 pub enum Swarm {
+    #[schemars(title = "Remote")]
     Remote(RemoteSwarm),
+    #[schemars(title = "Inline")]
     Inline(InlineSwarm),
 }
 
@@ -184,7 +188,9 @@ impl Swarm {
 #[serde(untagged)]
 #[schemars(rename = "swarm.InlineSwarmBaseOrRemote")]
 pub enum InlineSwarmBaseOrRemote {
+    #[schemars(title = "SwarmBase")]
     SwarmBase(InlineSwarmBase),
+    #[schemars(title = "Remote")]
     Remote(crate::RemotePath),
 }
 
@@ -194,7 +200,9 @@ pub enum InlineSwarmBaseOrRemote {
 #[serde(untagged)]
 #[schemars(rename = "swarm.InlineSwarmBaseOrRemoteCommitOptional")]
 pub enum InlineSwarmBaseOrRemoteCommitOptional {
+    #[schemars(title = "SwarmBase")]
     SwarmBase(InlineSwarmBase),
+    #[schemars(title = "Remote")]
     Remote(crate::RemotePathCommitOptional),
 }
 

@@ -5,7 +5,9 @@ use schemars::JsonSchema;
 #[serde(untagged)]
 #[schemars(rename = "agent.completions.response.streaming.MessageChunk")]
 pub enum MessageChunk {
+    #[schemars(title = "Assistant")]
     Assistant(super::AssistantResponseChunk),
+    #[schemars(title = "Tool")]
     Tool(super::super::ToolResponse),
 }
 

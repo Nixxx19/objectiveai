@@ -102,16 +102,22 @@ impl Reasoning {
 #[schemars(rename = "agent.openrouter.ReasoningEffort")]
 pub enum ReasoningEffort {
     /// No reasoning.
+    #[schemars(title = "None")]
     None,
     /// Minimal reasoning effort.
+    #[schemars(title = "Minimal")]
     Minimal,
     /// Low reasoning effort.
+    #[schemars(title = "Low")]
     Low,
     /// Medium reasoning effort.
+    #[schemars(title = "Medium")]
     Medium,
     /// High reasoning effort.
+    #[schemars(title = "High")]
     High,
     /// Maximum reasoning effort.
+    #[schemars(title = "Xhigh")]
     Xhigh,
 }
 
@@ -123,9 +129,12 @@ pub enum ReasoningEffort {
 #[schemars(rename = "agent.openrouter.ReasoningSummaryVerbosity")]
 pub enum ReasoningSummaryVerbosity {
     /// Let the model decide (default, normalized away).
+    #[schemars(title = "Auto")]
     Auto,
     /// Brief summary of reasoning.
+    #[schemars(title = "Concise")]
     Concise,
     /// Thorough summary of reasoning.
+    #[schemars(title = "Detailed")]
     Detailed,
 }
