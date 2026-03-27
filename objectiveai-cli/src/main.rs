@@ -10,6 +10,7 @@ mod agents;
 mod swarms;
 mod functions;
 mod viewer;
+mod schemas;
 
 #[cfg(test)]
 mod python_tests;
@@ -28,6 +29,7 @@ pub enum Output {
     ConfigGet(String),
     ConfigSet,
     Api(String),
+    Schema(&'static str),
 }
 
 #[derive(Subcommand)]
@@ -57,6 +59,11 @@ enum Commands {
         #[command(subcommand)]
         command: viewer::Commands,
     },
+    /// Browse JSON schemas
+    Schemas {
+        #[command(subcommand)]
+        command: schemas::Commands,
+    },
 }
 
 impl Commands {
@@ -67,6 +74,7 @@ impl Commands {
             Commands::Swarms { command } => command.handle().await,
             Commands::Functions { command } => command.handle().await,
             Commands::Viewer { command } => command.handle(),
+            Commands::Schemas { command } => command.handle(),
         }
     }
 }
@@ -79,6 +87,7 @@ async fn main() {
         Ok(Output::ConfigGet(output)) => println!("{output}"),
         Ok(Output::ConfigSet) => println!("ok"),
         Ok(Output::Api(output)) => println!("{output}"),
+        Ok(Output::Schema(output)) => print!("{output}"),
         Err(e) => {
             eprintln!("error: {e}");
             std::process::exit(1);
