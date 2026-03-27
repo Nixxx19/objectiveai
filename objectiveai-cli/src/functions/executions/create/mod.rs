@@ -220,9 +220,10 @@ impl Commands {
         };
 
         crate::api::run(|http_client| async move {
-            let mut stream = objectiveai::functions::executions::create_function_execution_streaming(
+            let stream = objectiveai::functions::executions::create_function_execution_streaming(
                 &http_client, params,
             ).await?;
+            tokio::pin!(stream);
 
             // Aggregate all chunks into one
             let mut aggregated: Option<objectiveai::functions::executions::response::streaming::FunctionExecutionChunk> = None;
@@ -236,14 +237,14 @@ impl Commands {
 
             let chunk = aggregated.ok_or(crate::error::Error::EmptyStream)?;
 
+            // Recursively collect all errors
+            let mut errors = Vec::new();
+            collect_errors(&chunk, &mut errors);
+
             // Extract output (default to Err(null) if missing)
             let output = chunk.output
                 .map(|o| o.unwrap())
                 .unwrap_or(objectiveai::functions::expression::TaskOutputOwned::Err(serde_json::Value::Null));
-
-            // Recursively collect all errors
-            let mut errors = Vec::new();
-            collect_errors(&chunk, &mut errors);
 
             let result = ExecutionResult { output, errors };
             Ok(serde_json::to_string(&result).unwrap())
