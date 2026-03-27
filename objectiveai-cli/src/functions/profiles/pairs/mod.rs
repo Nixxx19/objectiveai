@@ -65,7 +65,7 @@ impl Commands {
                         function: function?,
                         profile: profile?,
                     };
-                    Ok(serde_json::to_string_pretty(&pair).unwrap())
+                    Ok(serde_json::to_string(&pair).unwrap())
                 }, false).await
             }
             Commands::List { source } => {

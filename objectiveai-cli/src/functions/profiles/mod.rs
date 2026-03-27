@@ -56,7 +56,7 @@ impl Commands {
                 let path = args.resolve(get_favorites)?;
                 crate::api::run(|http_client| async move {
                     let response = objectiveai::functions::profiles::get_profile(&http_client, path).await?;
-                    Ok(serde_json::to_string_pretty(&response).unwrap())
+                    Ok(serde_json::to_string(&response).unwrap())
                 }, false).await
             }
             Commands::List { source } => {

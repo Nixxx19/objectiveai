@@ -21,7 +21,7 @@ pub enum ListItem {
 }
 
 fn format_items(items: Vec<ListItem>) -> String {
-    serde_json::to_string_pretty(&items).unwrap()
+    serde_json::to_string(&items).unwrap()
 }
 
 /// Returns true if a favorite matches a remote path.
@@ -120,7 +120,7 @@ pub enum PairListItem {
 }
 
 fn format_pair_items(items: Vec<PairListItem>) -> String {
-    serde_json::to_string_pretty(&items).unwrap()
+    serde_json::to_string(&items).unwrap()
 }
 
 /// Compares a RemotePathCommitOptional against a RemotePath.

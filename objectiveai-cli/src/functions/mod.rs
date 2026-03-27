@@ -28,6 +28,11 @@ pub enum Commands {
         #[command(subcommand)]
         command: favorites::Commands,
     },
+    /// Function executions
+    Executions {
+        #[command(subcommand)]
+        command: executions::Commands,
+    },
     /// Functions inventions
     Inventions {
         #[command(subcommand)]
@@ -63,7 +68,7 @@ impl Commands {
                 let path = args.resolve(get_favorites)?;
                 crate::api::run(|http_client| async move {
                     let response = objectiveai::functions::get_function(&http_client, path).await?;
-                    Ok(serde_json::to_string_pretty(&response).unwrap())
+                    Ok(serde_json::to_string(&response).unwrap())
                 }, false).await
             }
             Commands::List { source } => {
@@ -79,6 +84,7 @@ impl Commands {
                     ).await,
                 }
             }
+            Commands::Executions { command } => command.handle().await,
             Commands::Config { command } => command.handle(),
             Commands::Favorites { command } => command.handle(),
             Commands::Inventions { command } => command.handle(),
