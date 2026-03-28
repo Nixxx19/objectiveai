@@ -559,6 +559,19 @@ func buildStructTags(jsonTag string, propSchema Schema, selfTitle string, allTit
 	if v, ok := cs["maximum"]; ok {
 		validates = append(validates, "max="+formatTagNumber(v))
 	}
+
+	// Array items constraints via dive
+	if items, ok := cs["items"].(map[string]any); ok {
+		if v, ok := items["minimum"]; ok {
+			validates = append(validates, "dive", "min="+formatTagNumber(v))
+			if v, ok := items["maximum"]; ok {
+				validates = append(validates, "max="+formatTagNumber(v))
+			}
+		} else if v, ok := items["maximum"]; ok {
+			validates = append(validates, "dive", "max="+formatTagNumber(v))
+		}
+	}
+
 	if len(validates) > 0 {
 		tags = append(tags, fmt.Sprintf("validate:%q", strings.Join(validates, ",")))
 	}

@@ -32,7 +32,7 @@ type VectorCompletionsResponseVote struct {
 	SwarmIndex uint64 `json:"swarm_index" validate:"min=0,max=18446744073709551615"`
 	// The vote distribution. Each index corresponds to a response from the
 	// request. Typically one element is 1.0 (selected) and the rest are 0.0.
-	Vote []float64 `json:"vote"`
+	Vote []float64 `json:"vote" validate:"dive,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// The weight applied to this vote when computing final scores.
 	Weight float64 `json:"weight" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }

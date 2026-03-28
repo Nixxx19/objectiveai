@@ -26,7 +26,7 @@ type FunctionsExecutionsResponseUnaryFunctionExecutionTask struct {
 	SwissPoolIndex *uint64 `json:"swiss_pool_index,omitempty" validate:"min=0,max=18446744073709551615"`
 	SwissRound *uint64 `json:"swiss_round,omitempty" validate:"min=0,max=18446744073709551615"`
 	TaskIndex uint64 `json:"task_index" validate:"min=0,max=18446744073709551615"`
-	TaskPath []uint64 `json:"task_path"`
+	TaskPath []uint64 `json:"task_path" validate:"dive,min=0,max=18446744073709551615"`
 	// Results from each task in the function.
 	Tasks []FunctionsExecutionsResponseUnaryTask `json:"tasks"`
 	// Whether any tasks encountered errors.

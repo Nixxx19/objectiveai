@@ -337,7 +337,24 @@ func addValidateConstraints(schema map[string]any, validateTag string) {
 	if validateTag == "" {
 		return
 	}
-	for _, part := range strings.Split(validateTag, ",") {
+	parts := strings.Split(validateTag, ",")
+
+	// Find dive index — constraints before dive apply to the field,
+	// constraints after dive apply to array items.
+	diveIdx := -1
+	for i, part := range parts {
+		if part == "dive" {
+			diveIdx = i
+			break
+		}
+	}
+
+	// Field-level constraints (before dive, or all if no dive)
+	fieldParts := parts
+	if diveIdx >= 0 {
+		fieldParts = parts[:diveIdx]
+	}
+	for _, part := range fieldParts {
 		if strings.HasPrefix(part, "oneof=") {
 			vals := strings.Split(strings.TrimPrefix(part, "oneof="), " ")
 			enumVals := make([]any, len(vals))
@@ -351,6 +368,22 @@ func addValidateConstraints(schema map[string]any, validateTag string) {
 		}
 		if strings.HasPrefix(part, "max=") {
 			schema["maximum"] = json.Number(strings.TrimPrefix(part, "max="))
+		}
+	}
+
+	// Item-level constraints (after dive)
+	if diveIdx >= 0 && diveIdx+1 < len(parts) {
+		itemParts := parts[diveIdx+1:]
+		items, _ := schema["items"].(map[string]any)
+		if items != nil {
+			for _, part := range itemParts {
+				if strings.HasPrefix(part, "min=") {
+					items["minimum"] = json.Number(strings.TrimPrefix(part, "min="))
+				}
+				if strings.HasPrefix(part, "max=") {
+					items["maximum"] = json.Number(strings.TrimPrefix(part, "max="))
+				}
+			}
 		}
 	}
 }

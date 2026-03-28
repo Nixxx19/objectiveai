@@ -18,11 +18,11 @@ type FunctionsExecutionsResponseUnaryVectorCompletionTask struct {
 	// Object type identifier (`"vector.completion"`).
 	Object VectorCompletionsResponseUnaryObject `json:"object"`
 	// Final weighted scores for each response option. Sums to 1.
-	Scores []float64 `json:"scores"`
+	Scores []float64 `json:"scores" validate:"dive,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// ID of the swarm used for this completion.
 	Swarm string `json:"swarm"`
 	TaskIndex uint64 `json:"task_index" validate:"min=0,max=18446744073709551615"`
-	TaskPath []uint64 `json:"task_path"`
+	TaskPath []uint64 `json:"task_path" validate:"dive,min=0,max=18446744073709551615"`
 	// Aggregated token and cost usage across all completions.
 	Usage AgentCompletionsResponseUsage `json:"usage"`
 	// Individual votes from each agent, showing their selections.
@@ -30,7 +30,7 @@ type FunctionsExecutionsResponseUnaryVectorCompletionTask struct {
 	// Total weight allocated to each response option. Same length as `scores`.
 	// For discrete votes, an LLM's full weight goes to its selected response.
 	// For probabilistic votes, the weight is divided according to the distribution.
-	Weights []float64 `json:"weights"`
+	Weights []float64 `json:"weights" validate:"dive,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }
 
 func (FunctionsExecutionsResponseUnaryVectorCompletionTask) SchemaTitle() string { return "functions.executions.response.unary.VectorCompletionTask" }

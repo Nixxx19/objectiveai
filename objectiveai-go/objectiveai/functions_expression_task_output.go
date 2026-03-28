@@ -12,7 +12,7 @@ type FunctionsExpressionTaskOutput struct {
 	// A single scalar score.
 	Scalar *float64 `validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// A vector of scores.
-	Vector []float64 
+	Vector []float64 `validate:"dive,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// Multiple vectors of scores (from mapped tasks).
 	Vectors [][]float64 
 	// An error occurred during execution.

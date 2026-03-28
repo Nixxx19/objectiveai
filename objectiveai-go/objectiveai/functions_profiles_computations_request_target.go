@@ -14,7 +14,7 @@ type FunctionsProfilesComputationsRequestTargetScalar struct {
 
 type FunctionsProfilesComputationsRequestTargetVector struct {
 	Type string `json:"type" validate:"oneof=vector"`
-	Value []float64 `json:"value"`
+	Value []float64 `json:"value" validate:"dive,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }
 
 type FunctionsProfilesComputationsRequestTargetVectorWinner struct {

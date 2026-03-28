@@ -13,7 +13,7 @@ import (
 // - `Entries(Vec<WeightsEntry>)` - weights with optional per-agent `invert`
 type Weights struct {
 	// Simple vector of decimal weights.
-	Weights []float64 
+	Weights []float64 `validate:"dive,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// Vector of entries with optional invert flags.
 	Entries []WeightsEntry 
 }
