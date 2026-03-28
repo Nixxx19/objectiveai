@@ -25,6 +25,7 @@ type SwarmInlineSwarm struct {
 	Weights Weights `json:"weights"`
 }
 
+func (SwarmInlineSwarm) SchemaTitle() string { return "swarm.InlineSwarm" }
 func (v SwarmInlineSwarm) Validate() error {
 	return variantValidator.Struct(v)
 }

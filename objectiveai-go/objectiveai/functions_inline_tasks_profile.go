@@ -11,6 +11,7 @@ type FunctionsInlineTasksProfile struct {
 	Weights *Weights `json:"weights,omitempty"`
 }
 
+func (FunctionsInlineTasksProfile) SchemaTitle() string { return "functions.InlineTasksProfile" }
 func (v FunctionsInlineTasksProfile) Validate() error {
 	return variantValidator.Struct(v)
 }

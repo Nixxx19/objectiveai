@@ -11,6 +11,7 @@ type AuthCreateOpenRouterByokApiKeyRequest struct {
 	APIKey string `json:"api_key"`
 }
 
+func (AuthCreateOpenRouterByokApiKeyRequest) SchemaTitle() string { return "auth.CreateOpenRouterByokApiKeyRequest" }
 func (v AuthCreateOpenRouterByokApiKeyRequest) Validate() error {
 	return variantValidator.Struct(v)
 }

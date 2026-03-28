@@ -8,6 +8,7 @@ type FunctionsListFunctionsRequest struct {
 	Source *FunctionsListFunctionsSource `json:"source,omitempty"`
 }
 
+func (FunctionsListFunctionsRequest) SchemaTitle() string { return "functions.ListFunctionsRequest" }
 func (v FunctionsListFunctionsRequest) Validate() error {
 	return variantValidator.Struct(v)
 }

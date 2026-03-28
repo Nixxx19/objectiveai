@@ -15,6 +15,7 @@ type FunctionsExecutionsResponseUnaryReasoningSummary struct {
 	Usage AgentCompletionsResponseUsage `json:"usage"`
 }
 
+func (FunctionsExecutionsResponseUnaryReasoningSummary) SchemaTitle() string { return "functions.executions.response.unary.ReasoningSummary" }
 func (v FunctionsExecutionsResponseUnaryReasoningSummary) Validate() error {
 	return variantValidator.Struct(v)
 }

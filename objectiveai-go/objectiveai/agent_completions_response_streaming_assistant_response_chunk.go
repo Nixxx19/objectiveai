@@ -27,6 +27,7 @@ type AgentCompletionsResponseStreamingAssistantResponseChunk struct {
 	Usage *AgentCompletionsResponseUpstreamUsage `json:"usage,omitempty"`
 }
 
+func (AgentCompletionsResponseStreamingAssistantResponseChunk) SchemaTitle() string { return "agent.completions.response.streaming.AssistantResponseChunk" }
 func (v AgentCompletionsResponseStreamingAssistantResponseChunk) Validate() error {
 	return variantValidator.Struct(v)
 }

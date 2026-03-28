@@ -8,16 +8,15 @@ import (
 
 // Claude Agent SDK upstream marker.
 type AgentClaudeAgentSdkUpstream struct {
-	// Claude Agent SDK upstream marker.
-	Agent.claudeAgentSdk.Upstream string `validate:"oneof=claude_agent_sdk"`
+	ClaudeAgentSdk string `validate:"oneof=claude_agent_sdk"`
 }
 
 func (v AgentClaudeAgentSdkUpstream) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Agent.claudeAgentSdk.Upstream)
+	return json.Marshal(v.ClaudeAgentSdk)
 }
 
 func (v *AgentClaudeAgentSdkUpstream) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Agent.claudeAgentSdk.Upstream); err != nil {
+	if err := json.Unmarshal(data, &v.ClaudeAgentSdk); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -26,4 +25,5 @@ func (v *AgentClaudeAgentSdkUpstream) UnmarshalJSON(data []byte) error {
 func (v AgentClaudeAgentSdkUpstream) Validate() error {
 	return variantValidator.Struct(v)
 }
+func (AgentClaudeAgentSdkUpstream) SchemaTitle() string { return "agent.claude_agent_sdk.Upstream" }
 

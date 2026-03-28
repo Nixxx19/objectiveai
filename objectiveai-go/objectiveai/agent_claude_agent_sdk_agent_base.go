@@ -34,6 +34,7 @@ type AgentClaudeAgentSdkAgentBase struct {
 	Upstream AgentClaudeAgentSdkUpstream `json:"upstream"`
 }
 
+func (AgentClaudeAgentSdkAgentBase) SchemaTitle() string { return "agent.claude_agent_sdk.AgentBase" }
 func (v AgentClaudeAgentSdkAgentBase) Validate() error {
 	return variantValidator.Struct(v)
 }

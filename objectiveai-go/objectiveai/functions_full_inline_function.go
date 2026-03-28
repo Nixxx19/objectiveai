@@ -8,8 +8,8 @@ import (
 )
 
 type FunctionsFullInlineFunction struct {
-	Alpha *FunctionsAlphaInlineFunction 
-	Standard *FunctionsInlineFunction 
+	Alpha *FunctionsAlphaInlineFunction `ref:"functions.AlphaInlineFunction"`
+	Standard *FunctionsInlineFunction `ref:"functions.InlineFunction"`
 }
 
 func (v FunctionsFullInlineFunction) MarshalJSON() ([]byte, error) {
@@ -60,4 +60,5 @@ func (v FunctionsFullInlineFunction) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsFullInlineFunction) SchemaTitle() string { return "functions.FullInlineFunction" }
 

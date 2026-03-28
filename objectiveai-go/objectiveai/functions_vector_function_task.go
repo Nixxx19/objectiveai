@@ -15,6 +15,7 @@ type FunctionsVectorFunctionTask struct {
 	Output FunctionsExpressionExpression `json:"output"`
 }
 
+func (FunctionsVectorFunctionTask) SchemaTitle() string { return "functions.VectorFunctionTask" }
 func (v FunctionsVectorFunctionTask) Validate() error {
 	return variantValidator.Struct(v)
 }

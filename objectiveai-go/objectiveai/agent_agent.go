@@ -9,8 +9,8 @@ import (
 
 // A validated Agent, either remote (with metadata) or inline.
 type AgentAgent struct {
-	Remote *AgentRemoteAgent 
-	Inline *AgentInlineAgent 
+	Remote *AgentRemoteAgent `ref:"agent.RemoteAgent"`
+	Inline *AgentInlineAgent `ref:"agent.InlineAgent"`
 }
 
 func (v AgentAgent) MarshalJSON() ([]byte, error) {
@@ -61,4 +61,5 @@ func (v AgentAgent) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentAgent) SchemaTitle() string { return "agent.Agent" }
 

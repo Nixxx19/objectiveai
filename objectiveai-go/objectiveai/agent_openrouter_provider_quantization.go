@@ -185,4 +185,5 @@ func (v AgentOpenrouterProviderQuantization) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentOpenrouterProviderQuantization) SchemaTitle() string { return "agent.openrouter.ProviderQuantization" }
 

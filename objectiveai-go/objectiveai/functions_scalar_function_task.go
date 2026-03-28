@@ -15,6 +15,7 @@ type FunctionsScalarFunctionTask struct {
 	Output FunctionsExpressionExpression `json:"output"`
 }
 
+func (FunctionsScalarFunctionTask) SchemaTitle() string { return "functions.ScalarFunctionTask" }
 func (v FunctionsScalarFunctionTask) Validate() error {
 	return variantValidator.Struct(v)
 }

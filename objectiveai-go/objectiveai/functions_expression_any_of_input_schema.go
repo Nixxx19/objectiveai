@@ -8,6 +8,7 @@ type FunctionsExpressionAnyOfInputSchema struct {
 	AnyOf []FunctionsExpressionInputSchema `json:"anyOf"`
 }
 
+func (FunctionsExpressionAnyOfInputSchema) SchemaTitle() string { return "functions.expression.AnyOfInputSchema" }
 func (v FunctionsExpressionAnyOfInputSchema) Validate() error {
 	return variantValidator.Struct(v)
 }

@@ -14,6 +14,7 @@ type AgentCompletionsResponseLogprob struct {
 	TopLogprobs []AgentCompletionsResponseTopLogprob `json:"top_logprobs"`
 }
 
+func (AgentCompletionsResponseLogprob) SchemaTitle() string { return "agent.completions.response.Logprob" }
 func (v AgentCompletionsResponseLogprob) Validate() error {
 	return variantValidator.Struct(v)
 }

@@ -7,6 +7,7 @@ type FunctionsAlphaScalarLeafTaskExpression struct {
 	Type string `json:"type" validate:"oneof=vector.completion"`
 }
 
+func (FunctionsAlphaScalarLeafTaskExpression) SchemaTitle() string { return "functions.alpha_scalar.LeafTaskExpression" }
 func (v FunctionsAlphaScalarLeafTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

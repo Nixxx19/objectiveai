@@ -149,4 +149,5 @@ func (v FunctionsExpressionSpecial) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsExpressionSpecial) SchemaTitle() string { return "functions.expression.Special" }
 

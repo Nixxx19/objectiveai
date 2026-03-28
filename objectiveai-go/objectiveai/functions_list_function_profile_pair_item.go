@@ -10,6 +10,7 @@ type FunctionsListFunctionProfilePairItem struct {
 	Profile RemotePath `json:"profile"`
 }
 
+func (FunctionsListFunctionProfilePairItem) SchemaTitle() string { return "functions.ListFunctionProfilePairItem" }
 func (v FunctionsListFunctionProfilePairItem) Validate() error {
 	return variantValidator.Struct(v)
 }

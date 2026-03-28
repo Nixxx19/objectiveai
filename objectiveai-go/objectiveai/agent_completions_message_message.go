@@ -35,15 +35,15 @@ type AgentCompletionsMessageMessageTool struct {
 // A message in the conversation.
 type AgentCompletionsMessageMessage struct {
 	// A developer message (similar to system, but from the developer).
-	Developer *AgentCompletionsMessageMessageDeveloper 
+	Developer *AgentCompletionsMessageMessageDeveloper `ref:"agent.completions.message.DeveloperMessage"`
 	// A system message setting context or instructions.
-	System *AgentCompletionsMessageMessageSystem 
+	System *AgentCompletionsMessageMessageSystem `ref:"agent.completions.message.SystemMessage"`
 	// A user message from the end user.
-	User *AgentCompletionsMessageMessageUser 
+	User *AgentCompletionsMessageMessageUser `ref:"agent.completions.message.UserMessage"`
 	// An assistant message (model's previous response).
-	Assistant *AgentCompletionsMessageMessageAssistant 
+	Assistant *AgentCompletionsMessageMessageAssistant `ref:"agent.completions.message.AssistantMessage"`
 	// A tool message containing the result of a tool call.
-	Tool *AgentCompletionsMessageMessageTool 
+	Tool *AgentCompletionsMessageMessageTool `ref:"agent.completions.message.ToolMessage"`
 }
 
 func (v AgentCompletionsMessageMessage) MarshalJSON() ([]byte, error) {
@@ -139,4 +139,5 @@ func (v AgentCompletionsMessageMessage) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentCompletionsMessageMessage) SchemaTitle() string { return "agent.completions.message.Message" }
 

@@ -10,6 +10,7 @@ type ConfigConfig struct {
 	Viewer *ConfigViewerConfig `json:"viewer,omitempty"`
 }
 
+func (ConfigConfig) SchemaTitle() string { return "config.Config" }
 func (v ConfigConfig) Validate() error {
 	return variantValidator.Struct(v)
 }

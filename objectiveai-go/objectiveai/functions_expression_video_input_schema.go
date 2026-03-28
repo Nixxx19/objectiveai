@@ -9,6 +9,7 @@ type FunctionsExpressionVideoInputSchema struct {
 	Type FunctionsExpressionVideoInputSchemaType `json:"type"`
 }
 
+func (FunctionsExpressionVideoInputSchema) SchemaTitle() string { return "functions.expression.VideoInputSchema" }
 func (v FunctionsExpressionVideoInputSchema) Validate() error {
 	return variantValidator.Struct(v)
 }

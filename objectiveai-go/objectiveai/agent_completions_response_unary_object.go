@@ -8,16 +8,15 @@ import (
 
 // A agent completion object.
 type AgentCompletionsResponseUnaryObject struct {
-	// A agent completion object.
-	Agent.completions.response.unary.Object string `validate:"oneof=agent.completion"`
+	AgentCompletion string `validate:"oneof=agent.completion"`
 }
 
 func (v AgentCompletionsResponseUnaryObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Agent.completions.response.unary.Object)
+	return json.Marshal(v.AgentCompletion)
 }
 
 func (v *AgentCompletionsResponseUnaryObject) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Agent.completions.response.unary.Object); err != nil {
+	if err := json.Unmarshal(data, &v.AgentCompletion); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -26,4 +25,5 @@ func (v *AgentCompletionsResponseUnaryObject) UnmarshalJSON(data []byte) error {
 func (v AgentCompletionsResponseUnaryObject) Validate() error {
 	return variantValidator.Struct(v)
 }
+func (AgentCompletionsResponseUnaryObject) SchemaTitle() string { return "agent.completions.response.unary.Object" }
 

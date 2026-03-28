@@ -76,4 +76,5 @@ func (v FunctionsExecutionsRequestStrategy) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsExecutionsRequestStrategy) SchemaTitle() string { return "functions.executions.request.Strategy" }
 

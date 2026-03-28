@@ -10,18 +10,15 @@ import (
 //
 // This is the default and most widely supported mode.
 type AgentClaudeAgentSdkOutputMode struct {
-	// The model is instructed via the prompt to output a specific key.
-	//
-	// This is the default and most widely supported mode.
-	Agent.claudeAgentSdk.OutputMode string `validate:"oneof=instruction"`
+	Instruction string `validate:"oneof=instruction"`
 }
 
 func (v AgentClaudeAgentSdkOutputMode) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Agent.claudeAgentSdk.OutputMode)
+	return json.Marshal(v.Instruction)
 }
 
 func (v *AgentClaudeAgentSdkOutputMode) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Agent.claudeAgentSdk.OutputMode); err != nil {
+	if err := json.Unmarshal(data, &v.Instruction); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -30,4 +27,5 @@ func (v *AgentClaudeAgentSdkOutputMode) UnmarshalJSON(data []byte) error {
 func (v AgentClaudeAgentSdkOutputMode) Validate() error {
 	return variantValidator.Struct(v)
 }
+func (AgentClaudeAgentSdkOutputMode) SchemaTitle() string { return "agent.claude_agent_sdk.OutputMode" }
 

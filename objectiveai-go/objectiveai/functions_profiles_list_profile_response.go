@@ -8,6 +8,7 @@ type FunctionsProfilesListProfileResponse struct {
 	Data []RemotePath `json:"data"`
 }
 
+func (FunctionsProfilesListProfileResponse) SchemaTitle() string { return "functions.profiles.ListProfileResponse" }
 func (v FunctionsProfilesListProfileResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

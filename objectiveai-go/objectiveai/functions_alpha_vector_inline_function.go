@@ -70,4 +70,5 @@ func (v FunctionsAlphaVectorInlineFunction) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsAlphaVectorInlineFunction) SchemaTitle() string { return "functions.alpha_vector.InlineFunction" }
 

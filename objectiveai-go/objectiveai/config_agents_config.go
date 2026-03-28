@@ -6,6 +6,7 @@ type ConfigAgentsConfig struct {
 	Favorites []ConfigFavorite `json:"favorites,omitempty"`
 }
 
+func (ConfigAgentsConfig) SchemaTitle() string { return "config.AgentsConfig" }
 func (v ConfigAgentsConfig) Validate() error {
 	return variantValidator.Struct(v)
 }

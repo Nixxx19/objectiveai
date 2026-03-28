@@ -92,4 +92,5 @@ func (v AgentOpenrouterOutputMode) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentOpenrouterOutputMode) SchemaTitle() string { return "agent.openrouter.OutputMode" }
 

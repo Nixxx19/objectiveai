@@ -6,6 +6,7 @@ type ConfigFunctionsProfilesPairsConfig struct {
 	Favorites []ConfigPairFavorite `json:"favorites,omitempty"`
 }
 
+func (ConfigFunctionsProfilesPairsConfig) SchemaTitle() string { return "config.FunctionsProfilesPairsConfig" }
 func (v ConfigFunctionsProfilesPairsConfig) Validate() error {
 	return variantValidator.Struct(v)
 }

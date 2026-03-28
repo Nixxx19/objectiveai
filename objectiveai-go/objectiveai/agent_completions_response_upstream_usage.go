@@ -31,6 +31,7 @@ type AgentCompletionsResponseUpstreamUsage struct {
 	TotalTokens uint64 `json:"total_tokens" validate:"min=0,max=18446744073709551615"`
 }
 
+func (AgentCompletionsResponseUpstreamUsage) SchemaTitle() string { return "agent.completions.response.UpstreamUsage" }
 func (v AgentCompletionsResponseUpstreamUsage) Validate() error {
 	return variantValidator.Struct(v)
 }

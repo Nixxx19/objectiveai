@@ -4,26 +4,94 @@ package objectiveai
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 // Source filter for listing agents.
 type AgentListAgentsSource struct {
-	// Source filter for listing agents.
-	Agent.ListAgentsSource string `validate:"oneof=all mock filesystem objectiveai"`
+	All *string `validate:"oneof=all"`
+	Mock *string `validate:"oneof=mock"`
+	Filesystem *string `validate:"oneof=filesystem"`
+	Objectiveai *string `validate:"oneof=objectiveai"`
 }
 
 func (v AgentListAgentsSource) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Agent.ListAgentsSource)
+	if v.All != nil {
+		return json.Marshal(v.All)
+	}
+	if v.Mock != nil {
+		return json.Marshal(v.Mock)
+	}
+	if v.Filesystem != nil {
+		return json.Marshal(v.Filesystem)
+	}
+	if v.Objectiveai != nil {
+		return json.Marshal(v.Objectiveai)
+	}
+	return []byte("null"), nil
 }
 
 func (v *AgentListAgentsSource) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Agent.ListAgentsSource); err != nil {
-		return err
+	if string(data) == "null" {
+		return nil
 	}
-	return v.Validate()
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := AgentListAgentsSource{}
+			candidate.All = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := AgentListAgentsSource{}
+			candidate.Mock = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := AgentListAgentsSource{}
+			candidate.Filesystem = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := AgentListAgentsSource{}
+			candidate.Objectiveai = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of AgentListAgentsSource")
 }
 
 func (v AgentListAgentsSource) Validate() error {
+	count := 0
+	if v.All != nil { count++ }
+	if v.Mock != nil { count++ }
+	if v.Filesystem != nil { count++ }
+	if v.Objectiveai != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("AgentListAgentsSource: exactly one variant must be set, got %d", count)
+	}
 	return variantValidator.Struct(v)
 }
+func (AgentListAgentsSource) SchemaTitle() string { return "agent.ListAgentsSource" }
 

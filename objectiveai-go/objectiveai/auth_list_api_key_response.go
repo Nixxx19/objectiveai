@@ -8,6 +8,7 @@ type AuthListApiKeyResponse struct {
 	Data []AuthListApiKeyItem `json:"data"`
 }
 
+func (AuthListApiKeyResponse) SchemaTitle() string { return "auth.ListApiKeyResponse" }
 func (v AuthListApiKeyResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

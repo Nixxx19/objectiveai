@@ -9,8 +9,8 @@ import (
 
 // An Agent base definition, either remote (with metadata) or inline.
 type AgentAgentBase struct {
-	Remote *AgentRemoteAgentBase 
-	Inline *AgentInlineAgentBase 
+	Remote *AgentRemoteAgentBase `ref:"agent.RemoteAgentBase"`
+	Inline *AgentInlineAgentBase `ref:"agent.InlineAgentBase"`
 }
 
 func (v AgentAgentBase) MarshalJSON() ([]byte, error) {
@@ -61,4 +61,5 @@ func (v AgentAgentBase) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentAgentBase) SchemaTitle() string { return "agent.AgentBase" }
 

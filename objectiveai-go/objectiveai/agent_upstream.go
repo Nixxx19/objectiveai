@@ -97,4 +97,5 @@ func (v AgentUpstream) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentUpstream) SchemaTitle() string { return "agent.Upstream" }
 

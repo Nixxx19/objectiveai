@@ -5,10 +5,11 @@ package objectiveai
 type ConfigApiConfig struct {
 	Headers *ConfigApiHeadersConfig `json:"headers,omitempty"`
 	Local *ConfigApiLocalConfig `json:"local,omitempty"`
-	Mode ConfigApiMode `json:"mode,omitempty"`
+	Mode ConfigApiMode `json:"mode,omitempty" def:"local"`
 	Remote *ConfigApiRemoteConfig `json:"remote,omitempty"`
 }
 
+func (ConfigApiConfig) SchemaTitle() string { return "config.ApiConfig" }
 func (v ConfigApiConfig) Validate() error {
 	return variantValidator.Struct(v)
 }

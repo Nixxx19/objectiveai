@@ -14,6 +14,7 @@ type AgentCompletionsResponseCompletionTokensDetails struct {
 	RejectedPredictionTokens *uint64 `json:"rejected_prediction_tokens,omitempty" validate:"min=0,max=18446744073709551615"`
 }
 
+func (AgentCompletionsResponseCompletionTokensDetails) SchemaTitle() string { return "agent.completions.response.CompletionTokensDetails" }
 func (v AgentCompletionsResponseCompletionTokensDetails) Validate() error {
 	return variantValidator.Struct(v)
 }

@@ -75,6 +75,7 @@ type FunctionsVectorCompletionTaskExpression struct {
 	Skip *FunctionsExpressionExpression `json:"skip,omitempty"`
 }
 
+func (FunctionsVectorCompletionTaskExpression) SchemaTitle() string { return "functions.VectorCompletionTaskExpression" }
 func (v FunctionsVectorCompletionTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

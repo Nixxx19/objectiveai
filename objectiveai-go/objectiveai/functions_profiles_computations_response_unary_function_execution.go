@@ -34,6 +34,7 @@ type FunctionsProfilesComputationsResponseUnaryFunctionExecution struct {
 	Usage AgentCompletionsResponseUsage `json:"usage"`
 }
 
+func (FunctionsProfilesComputationsResponseUnaryFunctionExecution) SchemaTitle() string { return "functions.profiles.computations.response.unary.FunctionExecution" }
 func (v FunctionsProfilesComputationsResponseUnaryFunctionExecution) Validate() error {
 	return variantValidator.Struct(v)
 }

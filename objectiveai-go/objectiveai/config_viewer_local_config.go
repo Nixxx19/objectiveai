@@ -7,6 +7,7 @@ type ConfigViewerLocalConfig struct {
 	Signature *string `json:"signature,omitempty"`
 }
 
+func (ConfigViewerLocalConfig) SchemaTitle() string { return "config.ViewerLocalConfig" }
 func (v ConfigViewerLocalConfig) Validate() error {
 	return variantValidator.Struct(v)
 }

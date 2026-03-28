@@ -60,4 +60,5 @@ func (v FunctionsFunctionType) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsFunctionType) SchemaTitle() string { return "functions.FunctionType" }
 

@@ -18,6 +18,7 @@ type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams s
 	Stream *bool `json:"stream,omitempty"`
 }
 
+func (FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams) SchemaTitle() string { return "functions.inventions.recursive.request.FunctionInventionRecursiveCreateParams" }
 func (v FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams) Validate() error {
 	return variantValidator.Struct(v)
 }

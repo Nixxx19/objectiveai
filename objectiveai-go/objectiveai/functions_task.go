@@ -38,15 +38,15 @@ type FunctionsTaskPlaceholderVectorFunction struct {
 // expressions have been resolved to concrete values.
 type FunctionsTask struct {
 	// Calls a scalar function (produces a single score).
-	ScalarFunction *FunctionsTaskScalarFunction 
+	ScalarFunction *FunctionsTaskScalarFunction `ref:"functions.ScalarFunctionTask"`
 	// Calls a vector function (produces a vector of scores).
-	VectorFunction *FunctionsTaskVectorFunction 
+	VectorFunction *FunctionsTaskVectorFunction `ref:"functions.VectorFunctionTask"`
 	// Runs a vector completion.
-	VectorCompletion *FunctionsTaskVectorCompletion 
+	VectorCompletion *FunctionsTaskVectorCompletion `ref:"functions.VectorCompletionTask"`
 	// Placeholder scalar function (always outputs 0.5).
-	PlaceholderScalarFunction *FunctionsTaskPlaceholderScalarFunction 
+	PlaceholderScalarFunction *FunctionsTaskPlaceholderScalarFunction `ref:"functions.PlaceholderScalarFunctionTask"`
 	// Placeholder vector function (always outputs equalized vector).
-	PlaceholderVectorFunction *FunctionsTaskPlaceholderVectorFunction 
+	PlaceholderVectorFunction *FunctionsTaskPlaceholderVectorFunction `ref:"functions.PlaceholderVectorFunctionTask"`
 }
 
 func (v FunctionsTask) MarshalJSON() ([]byte, error) {
@@ -142,4 +142,5 @@ func (v FunctionsTask) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsTask) SchemaTitle() string { return "functions.Task" }
 

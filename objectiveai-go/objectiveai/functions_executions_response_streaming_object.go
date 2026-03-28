@@ -4,24 +4,61 @@ package objectiveai
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type FunctionsExecutionsResponseStreamingObject struct {
-	Functions.executions.response.streaming.Object string `validate:"oneof=scalar.function.execution.chunk vector.function.execution.chunk"`
+	ScalarFunctionExecutionChunk *string `validate:"oneof=scalar.function.execution.chunk"`
+	VectorFunctionExecutionChunk *string `validate:"oneof=vector.function.execution.chunk"`
 }
 
 func (v FunctionsExecutionsResponseStreamingObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Functions.executions.response.streaming.Object)
+	if v.ScalarFunctionExecutionChunk != nil {
+		return json.Marshal(v.ScalarFunctionExecutionChunk)
+	}
+	if v.VectorFunctionExecutionChunk != nil {
+		return json.Marshal(v.VectorFunctionExecutionChunk)
+	}
+	return []byte("null"), nil
 }
 
 func (v *FunctionsExecutionsResponseStreamingObject) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Functions.executions.response.streaming.Object); err != nil {
-		return err
+	if string(data) == "null" {
+		return nil
 	}
-	return v.Validate()
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsExecutionsResponseStreamingObject{}
+			candidate.ScalarFunctionExecutionChunk = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsExecutionsResponseStreamingObject{}
+			candidate.VectorFunctionExecutionChunk = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of FunctionsExecutionsResponseStreamingObject")
 }
 
 func (v FunctionsExecutionsResponseStreamingObject) Validate() error {
+	count := 0
+	if v.ScalarFunctionExecutionChunk != nil { count++ }
+	if v.VectorFunctionExecutionChunk != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("FunctionsExecutionsResponseStreamingObject: exactly one variant must be set, got %d", count)
+	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsExecutionsResponseStreamingObject) SchemaTitle() string { return "functions.executions.response.streaming.Object" }
 

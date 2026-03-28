@@ -11,6 +11,7 @@ type SwarmRemoteSwarmBase struct {
 	Description string `json:"description"`
 }
 
+func (SwarmRemoteSwarmBase) SchemaTitle() string { return "swarm.RemoteSwarmBase" }
 func (v SwarmRemoteSwarmBase) Validate() error {
 	return variantValidator.Struct(v)
 }

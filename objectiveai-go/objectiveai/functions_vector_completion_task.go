@@ -16,6 +16,7 @@ type FunctionsVectorCompletionTask struct {
 	Responses []AgentCompletionsMessageRichContent `json:"responses"`
 }
 
+func (FunctionsVectorCompletionTask) SchemaTitle() string { return "functions.VectorCompletionTask" }
 func (v FunctionsVectorCompletionTask) Validate() error {
 	return variantValidator.Struct(v)
 }

@@ -66,4 +66,5 @@ func (v Weights) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (Weights) SchemaTitle() string { return "Weights" }
 

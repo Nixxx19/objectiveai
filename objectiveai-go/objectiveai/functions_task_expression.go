@@ -33,11 +33,11 @@ type FunctionsTaskExpressionPlaceholderVectorFunction struct {
 // resolved against input data during compilation. Use [`compile`](Self::compile)
 // to produce a concrete [`Task`].
 type FunctionsTaskExpression struct {
-	ScalarFunction *FunctionsTaskExpressionScalarFunction 
-	VectorFunction *FunctionsTaskExpressionVectorFunction 
-	VectorCompletion *FunctionsTaskExpressionVectorCompletion 
-	PlaceholderScalarFunction *FunctionsTaskExpressionPlaceholderScalarFunction 
-	PlaceholderVectorFunction *FunctionsTaskExpressionPlaceholderVectorFunction 
+	ScalarFunction *FunctionsTaskExpressionScalarFunction `ref:"functions.ScalarFunctionTaskExpression"`
+	VectorFunction *FunctionsTaskExpressionVectorFunction `ref:"functions.VectorFunctionTaskExpression"`
+	VectorCompletion *FunctionsTaskExpressionVectorCompletion `ref:"functions.VectorCompletionTaskExpression"`
+	PlaceholderScalarFunction *FunctionsTaskExpressionPlaceholderScalarFunction `ref:"functions.PlaceholderScalarFunctionTaskExpression"`
+	PlaceholderVectorFunction *FunctionsTaskExpressionPlaceholderVectorFunction `ref:"functions.PlaceholderVectorFunctionTaskExpression"`
 }
 
 func (v FunctionsTaskExpression) MarshalJSON() ([]byte, error) {
@@ -133,4 +133,5 @@ func (v FunctionsTaskExpression) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsTaskExpression) SchemaTitle() string { return "functions.TaskExpression" }
 

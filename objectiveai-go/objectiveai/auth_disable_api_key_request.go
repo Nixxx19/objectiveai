@@ -11,6 +11,7 @@ type AuthDisableApiKeyRequest struct {
 	APIKey PrefixedUuid `json:"api_key"`
 }
 
+func (AuthDisableApiKeyRequest) SchemaTitle() string { return "auth.DisableApiKeyRequest" }
 func (v AuthDisableApiKeyRequest) Validate() error {
 	return variantValidator.Struct(v)
 }

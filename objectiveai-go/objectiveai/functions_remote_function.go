@@ -107,4 +107,5 @@ func (v FunctionsRemoteFunction) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsRemoteFunction) SchemaTitle() string { return "functions.RemoteFunction" }
 

@@ -8,6 +8,7 @@ type AuthGetOpenRouterByokApiKeyResponse struct {
 	APIKey *string `json:"api_key,omitempty"`
 }
 
+func (AuthGetOpenRouterByokApiKeyResponse) SchemaTitle() string { return "auth.GetOpenRouterByokApiKeyResponse" }
 func (v AuthGetOpenRouterByokApiKeyResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

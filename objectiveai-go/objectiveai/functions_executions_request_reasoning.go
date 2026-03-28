@@ -6,6 +6,7 @@ type FunctionsExecutionsRequestReasoning struct {
 	Agent AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional `json:"agent"`
 }
 
+func (FunctionsExecutionsRequestReasoning) SchemaTitle() string { return "functions.executions.request.Reasoning" }
 func (v FunctionsExecutionsRequestReasoning) Validate() error {
 	return variantValidator.Struct(v)
 }

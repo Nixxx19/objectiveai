@@ -27,6 +27,7 @@ type AgentOpenrouterReasoning struct {
 	SummaryVerbosity *AgentOpenrouterReasoningSummaryVerbosity `json:"summary_verbosity,omitempty"`
 }
 
+func (AgentOpenrouterReasoning) SchemaTitle() string { return "agent.openrouter.Reasoning" }
 func (v AgentOpenrouterReasoning) Validate() error {
 	return variantValidator.Struct(v)
 }

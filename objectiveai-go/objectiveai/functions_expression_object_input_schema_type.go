@@ -7,15 +7,15 @@ import (
 )
 
 type FunctionsExpressionObjectInputSchemaType struct {
-	Functions.expression.ObjectInputSchemaType string `validate:"oneof=object"`
+	Object string `validate:"oneof=object"`
 }
 
 func (v FunctionsExpressionObjectInputSchemaType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Functions.expression.ObjectInputSchemaType)
+	return json.Marshal(v.Object)
 }
 
 func (v *FunctionsExpressionObjectInputSchemaType) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Functions.expression.ObjectInputSchemaType); err != nil {
+	if err := json.Unmarshal(data, &v.Object); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -24,4 +24,5 @@ func (v *FunctionsExpressionObjectInputSchemaType) UnmarshalJSON(data []byte) er
 func (v FunctionsExpressionObjectInputSchemaType) Validate() error {
 	return variantValidator.Struct(v)
 }
+func (FunctionsExpressionObjectInputSchemaType) SchemaTitle() string { return "functions.expression.ObjectInputSchemaType" }
 

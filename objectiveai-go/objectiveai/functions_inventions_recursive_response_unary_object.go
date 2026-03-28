@@ -4,24 +4,61 @@ package objectiveai
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type FunctionsInventionsRecursiveResponseUnaryObject struct {
-	Functions.inventions.recursive.response.unary.Object string `validate:"oneof=alpha.scalar.function.invention.recursive alpha.vector.function.invention.recursive"`
+	AlphaScalarFunctionInventionRecursive *string `validate:"oneof=alpha.scalar.function.invention.recursive"`
+	AlphaVectorFunctionInventionRecursive *string `validate:"oneof=alpha.vector.function.invention.recursive"`
 }
 
 func (v FunctionsInventionsRecursiveResponseUnaryObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Functions.inventions.recursive.response.unary.Object)
+	if v.AlphaScalarFunctionInventionRecursive != nil {
+		return json.Marshal(v.AlphaScalarFunctionInventionRecursive)
+	}
+	if v.AlphaVectorFunctionInventionRecursive != nil {
+		return json.Marshal(v.AlphaVectorFunctionInventionRecursive)
+	}
+	return []byte("null"), nil
 }
 
 func (v *FunctionsInventionsRecursiveResponseUnaryObject) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Functions.inventions.recursive.response.unary.Object); err != nil {
-		return err
+	if string(data) == "null" {
+		return nil
 	}
-	return v.Validate()
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsInventionsRecursiveResponseUnaryObject{}
+			candidate.AlphaScalarFunctionInventionRecursive = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsInventionsRecursiveResponseUnaryObject{}
+			candidate.AlphaVectorFunctionInventionRecursive = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of FunctionsInventionsRecursiveResponseUnaryObject")
 }
 
 func (v FunctionsInventionsRecursiveResponseUnaryObject) Validate() error {
+	count := 0
+	if v.AlphaScalarFunctionInventionRecursive != nil { count++ }
+	if v.AlphaVectorFunctionInventionRecursive != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("FunctionsInventionsRecursiveResponseUnaryObject: exactly one variant must be set, got %d", count)
+	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsInventionsRecursiveResponseUnaryObject) SchemaTitle() string { return "functions.inventions.recursive.response.unary.Object" }
 

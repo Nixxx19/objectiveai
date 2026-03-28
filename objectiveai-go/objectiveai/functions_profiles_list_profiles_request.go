@@ -8,6 +8,7 @@ type FunctionsProfilesListProfilesRequest struct {
 	Source *FunctionsProfilesListProfilesSource `json:"source,omitempty"`
 }
 
+func (FunctionsProfilesListProfilesRequest) SchemaTitle() string { return "functions.profiles.ListProfilesRequest" }
 func (v FunctionsProfilesListProfilesRequest) Validate() error {
 	return variantValidator.Struct(v)
 }

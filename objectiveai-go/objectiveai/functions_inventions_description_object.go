@@ -6,6 +6,7 @@ type FunctionsInventionsDescriptionObject struct {
 	Description string `json:"description"`
 }
 
+func (FunctionsInventionsDescriptionObject) SchemaTitle() string { return "functions.inventions.DescriptionObject" }
 func (v FunctionsInventionsDescriptionObject) Validate() error {
 	return variantValidator.Struct(v)
 }

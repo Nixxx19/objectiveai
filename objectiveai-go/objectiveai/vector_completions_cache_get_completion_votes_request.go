@@ -8,6 +8,7 @@ type VectorCompletionsCacheGetCompletionVotesRequest struct {
 	ID string `json:"id"`
 }
 
+func (VectorCompletionsCacheGetCompletionVotesRequest) SchemaTitle() string { return "vector.completions.cache.GetCompletionVotesRequest" }
 func (v VectorCompletionsCacheGetCompletionVotesRequest) Validate() error {
 	return variantValidator.Struct(v)
 }

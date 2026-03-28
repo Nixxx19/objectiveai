@@ -109,4 +109,5 @@ func (v FunctionsExpressionExpression) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsExpressionExpression) SchemaTitle() string { return "functions.expression.Expression" }
 

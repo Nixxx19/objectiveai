@@ -10,6 +10,7 @@ type FunctionsGetFunctionProfilePairUsageRequest struct {
 	Profile RemotePathCommitOptional `json:"profile"`
 }
 
+func (FunctionsGetFunctionProfilePairUsageRequest) SchemaTitle() string { return "functions.GetFunctionProfilePairUsageRequest" }
 func (v FunctionsGetFunctionProfilePairUsageRequest) Validate() error {
 	return variantValidator.Struct(v)
 }

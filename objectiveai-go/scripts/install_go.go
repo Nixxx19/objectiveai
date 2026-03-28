@@ -225,6 +225,14 @@ func goTypeAnyOf(anyOf []any, selfTitle string, allTitles map[string]bool) strin
 func goTypeSingle(t string, schema Schema, selfTitle string, allTitles map[string]bool) string {
 	switch t {
 	case "string":
+		if fmt_, ok := schema["format"].(string); ok {
+			switch fmt_ {
+			case "uuid":
+				return "uuid.UUID"
+			case "date-time":
+				return "time.Time"
+			}
+		}
 		return "string"
 	case "integer":
 		return goIntType(schema)
@@ -538,7 +546,6 @@ func buildStructTags(jsonTag string, propSchema Schema, selfTitle string, allTit
 
 	// Build validate tag parts
 	var validates []string
-
 	if enumVals, ok := cs["enum"].([]any); ok {
 		parts := make([]string, len(enumVals))
 		for i, v := range enumVals {
@@ -552,9 +559,18 @@ func buildStructTags(jsonTag string, propSchema Schema, selfTitle string, allTit
 	if v, ok := cs["maximum"]; ok {
 		validates = append(validates, "max="+formatTagNumber(v))
 	}
-
 	if len(validates) > 0 {
 		tags = append(tags, fmt.Sprintf("validate:%q", strings.Join(validates, ",")))
+	}
+
+	// pattern tag
+	if pat, ok := cs["pattern"].(string); ok {
+		tags = append(tags, fmt.Sprintf("pat:%q", pat))
+	}
+
+	// default tag
+	if def, ok := cs["default"]; ok {
+		tags = append(tags, fmt.Sprintf("def:%q", formatTagDefault(def)))
 	}
 
 	if len(tags) == 0 {
@@ -601,10 +617,8 @@ func generateAnyOfStruct(typeName string, anyOf []any, selfTitle string, schema 
 			fieldName = goFieldName(variantTitle)
 			vStructName = typeName + fieldName
 		} else {
-			// Fallback for variants without a title (e.g., inline primitives)
-			fallbackIdx := len(variantFieldNames) + 1
-			fieldName = fmt.Sprintf("Variant%d", fallbackIdx)
-			vStructName = fmt.Sprintf("%sVariant%d", typeName, fallbackIdx)
+			// Every variant must have a title
+			panic(fmt.Sprintf("variant in %s has no title", typeName))
 		}
 
 		variantDesc, _ := m["description"].(string)
@@ -642,9 +656,21 @@ func generateAnyOfStruct(typeName string, anyOf []any, selfTitle string, schema 
 		variantIsPointer = append(variantIsPointer, strings.HasPrefix(fieldType, "*"))
 		variantValidateTags = append(variantValidateTags, buildValidateValue(m))
 
-		// Build tags through the same path as regular struct fields, but no json tag
-		tags := buildStructTags("", m, selfTitle, allTitles)
-		fields = append(fields, goDocComment(variantDesc, "\t")+fmt.Sprintf("\t%s %s %s", fieldName, fieldType, tags))
+		// Build tags: ref tag for $ref, plus any constraint tags
+		var variantTags []string
+		if ref, ok := m["$ref"].(string); ok {
+			variantTags = append(variantTags, fmt.Sprintf("ref:%q", ref))
+		}
+		if constraintTags := buildStructTags("", m, selfTitle, allTitles); constraintTags != "" {
+			// Strip the backticks from buildStructTags result and merge
+			inner := strings.TrimPrefix(strings.TrimSuffix(constraintTags, "`"), "`")
+			variantTags = append(variantTags, inner)
+		}
+		var tagStr string
+		if len(variantTags) > 0 {
+			tagStr = "`" + strings.Join(variantTags, " ") + "`"
+		}
+		fields = append(fields, goDocComment(variantDesc, "\t")+fmt.Sprintf("\t%s %s %s", fieldName, fieldType, tagStr))
 	}
 
 	var b strings.Builder
@@ -827,6 +853,7 @@ func generateTypeCode(title string, schema Schema, allTitles map[string]bool) st
 	if schema["properties"] != nil {
 		b.WriteString(generateStruct(typeName, schema, title, allTitles))
 		b.WriteString("\n")
+		b.WriteString(fmt.Sprintf("func (%s) SchemaTitle() string { return %q }\n", typeName, title))
 		b.WriteString(generateValidateMethod(typeName, nil))
 		return b.String()
 	}
@@ -835,7 +862,7 @@ func generateTypeCode(title string, schema Schema, allTitles map[string]bool) st
 	if anyOf, ok := schema["anyOf"].([]any); ok {
 		nonNull, hasNull := splitNullVariants(anyOf)
 		if hasNull && len(nonNull) == 1 {
-			// Simple nullable — type alias
+			// Simple nullable — type alias (no SchemaTitle since it's an alias)
 			goT := goType(nonNull[0], title, allTitles)
 			if goT != "any" && !strings.HasPrefix(goT, "*") && !strings.HasPrefix(goT, "[]") && !strings.HasPrefix(goT, "map[") {
 				goT = "*" + goT
@@ -844,15 +871,26 @@ func generateTypeCode(title string, schema Schema, allTitles map[string]bool) st
 		} else {
 			// anyOf struct with variant fields
 			b.WriteString(generateAnyOfStruct(typeName, anyOf, title, schema, allTitles))
+			b.WriteString(fmt.Sprintf("func (%s) SchemaTitle() string { return %q }\n", typeName, title))
 			b.WriteString("\n")
 		}
 		return b.String()
 	}
 
-	// Case 3: Root string enum → variant struct with 1 variant
+	// Case 3: Root string enum → one variant per enum value
 	if schema["type"] == "string" && schema["enum"] != nil {
-		syntheticAnyOf := []any{schema}
+		enumVals, _ := schema["enum"].([]any)
+		var syntheticAnyOf []any
+		for _, ev := range enumVals {
+			s := fmt.Sprintf("%v", ev)
+			syntheticAnyOf = append(syntheticAnyOf, Schema{
+				"title": toPascal(s),
+				"type":  "string",
+				"enum":  []any{ev},
+			})
+		}
 		b.WriteString(generateAnyOfStruct(typeName, syntheticAnyOf, title, schema, allTitles))
+		b.WriteString(fmt.Sprintf("func (%s) SchemaTitle() string { return %q }\n", typeName, title))
 		b.WriteString("\n")
 		return b.String()
 	}
@@ -987,17 +1025,25 @@ func main() {
 		fullCode := strings.Join(codes, "\n")
 		needsJSON := strings.Contains(fullCode, "json.Marshal") || strings.Contains(fullCode, "json.Number")
 		needsFmt := strings.Contains(fullCode, "fmt.Errorf")
+		needsTime := strings.Contains(fullCode, "time.Time")
+		needsUUID := strings.Contains(fullCode, "uuid.UUID")
 
 		var file strings.Builder
 		file.WriteString(generatedHeader)
 		file.WriteString("package objectiveai\n")
-		if needsJSON || needsFmt {
+		if needsJSON || needsFmt || needsTime || needsUUID {
 			file.WriteString("\nimport (\n")
 			if needsJSON {
 				file.WriteString("\t\"encoding/json\"\n")
 			}
 			if needsFmt {
 				file.WriteString("\t\"fmt\"\n")
+			}
+			if needsTime {
+				file.WriteString("\t\"time\"\n")
+			}
+			if needsUUID {
+				file.WriteString("\t\"github.com/google/uuid\"\n")
 			}
 			file.WriteString(")\n")
 		}

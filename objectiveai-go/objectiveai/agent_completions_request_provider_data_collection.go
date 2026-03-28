@@ -63,4 +63,5 @@ func (v AgentCompletionsRequestProviderDataCollection) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentCompletionsRequestProviderDataCollection) SchemaTitle() string { return "agent.completions.request.ProviderDataCollection" }
 

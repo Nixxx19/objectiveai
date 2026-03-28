@@ -8,8 +8,8 @@ import (
 )
 
 type AgentCompletionsResponseStreamingMessageChunk struct {
-	Assistant *AgentCompletionsResponseStreamingAssistantResponseChunk 
-	Tool *AgentCompletionsResponseToolResponse 
+	Assistant *AgentCompletionsResponseStreamingAssistantResponseChunk `ref:"agent.completions.response.streaming.AssistantResponseChunk"`
+	Tool *AgentCompletionsResponseToolResponse `ref:"agent.completions.response.ToolResponse"`
 }
 
 func (v AgentCompletionsResponseStreamingMessageChunk) MarshalJSON() ([]byte, error) {
@@ -60,4 +60,5 @@ func (v AgentCompletionsResponseStreamingMessageChunk) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentCompletionsResponseStreamingMessageChunk) SchemaTitle() string { return "agent.completions.response.streaming.MessageChunk" }
 

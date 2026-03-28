@@ -10,8 +10,8 @@ import (
 // A profile specification that is either an inline profile definition
 // or a remote path reference.
 type FunctionsInlineProfileOrRemoteCommitOptional struct {
-	Inline *FunctionsInlineProfile 
-	Remote *RemotePathCommitOptional 
+	Inline *FunctionsInlineProfile `ref:"functions.InlineProfile"`
+	Remote *RemotePathCommitOptional `ref:"RemotePathCommitOptional"`
 }
 
 func (v FunctionsInlineProfileOrRemoteCommitOptional) MarshalJSON() ([]byte, error) {
@@ -62,4 +62,5 @@ func (v FunctionsInlineProfileOrRemoteCommitOptional) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsInlineProfileOrRemoteCommitOptional) SchemaTitle() string { return "functions.InlineProfileOrRemoteCommitOptional" }
 

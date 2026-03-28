@@ -9,6 +9,7 @@ type FunctionsExpressionBooleanInputSchema struct {
 	Type FunctionsExpressionBooleanInputSchemaType `json:"type"`
 }
 
+func (FunctionsExpressionBooleanInputSchema) SchemaTitle() string { return "functions.expression.BooleanInputSchema" }
 func (v FunctionsExpressionBooleanInputSchema) Validate() error {
 	return variantValidator.Struct(v)
 }

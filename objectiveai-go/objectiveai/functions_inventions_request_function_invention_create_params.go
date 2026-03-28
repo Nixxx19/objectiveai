@@ -18,6 +18,7 @@ type FunctionsInventionsRequestFunctionInventionCreateParams struct {
 	Stream *bool `json:"stream,omitempty"`
 }
 
+func (FunctionsInventionsRequestFunctionInventionCreateParams) SchemaTitle() string { return "functions.inventions.request.FunctionInventionCreateParams" }
 func (v FunctionsInventionsRequestFunctionInventionCreateParams) Validate() error {
 	return variantValidator.Struct(v)
 }

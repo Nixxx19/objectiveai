@@ -7,15 +7,15 @@ import (
 )
 
 type FunctionsProfilesComputationsResponseStreamingObject struct {
-	Functions.profiles.computations.response.streaming.Object string `validate:"oneof=function.profile.computation.chunk"`
+	FunctionProfileComputationChunk string `validate:"oneof=function.profile.computation.chunk"`
 }
 
 func (v FunctionsProfilesComputationsResponseStreamingObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Functions.profiles.computations.response.streaming.Object)
+	return json.Marshal(v.FunctionProfileComputationChunk)
 }
 
 func (v *FunctionsProfilesComputationsResponseStreamingObject) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Functions.profiles.computations.response.streaming.Object); err != nil {
+	if err := json.Unmarshal(data, &v.FunctionProfileComputationChunk); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -24,4 +24,5 @@ func (v *FunctionsProfilesComputationsResponseStreamingObject) UnmarshalJSON(dat
 func (v FunctionsProfilesComputationsResponseStreamingObject) Validate() error {
 	return variantValidator.Struct(v)
 }
+func (FunctionsProfilesComputationsResponseStreamingObject) SchemaTitle() string { return "functions.profiles.computations.response.streaming.Object" }
 

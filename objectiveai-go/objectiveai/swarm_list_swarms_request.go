@@ -8,6 +8,7 @@ type SwarmListSwarmsRequest struct {
 	Source *SwarmListSwarmsSource `json:"source,omitempty"`
 }
 
+func (SwarmListSwarmsRequest) SchemaTitle() string { return "swarm.ListSwarmsRequest" }
 func (v SwarmListSwarmsRequest) Validate() error {
 	return variantValidator.Struct(v)
 }

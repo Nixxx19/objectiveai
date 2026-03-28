@@ -12,6 +12,7 @@ type WeightsEntry struct {
 	Weight float64 `json:"weight" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }
 
+func (WeightsEntry) SchemaTitle() string { return "WeightsEntry" }
 func (v WeightsEntry) Validate() error {
 	return variantValidator.Struct(v)
 }

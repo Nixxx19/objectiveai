@@ -14,6 +14,7 @@ type FunctionsProfilesUsageProfileResponse struct {
 	TotalCost float64 `json:"total_cost" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }
 
+func (FunctionsProfilesUsageProfileResponse) SchemaTitle() string { return "functions.profiles.UsageProfileResponse" }
 func (v FunctionsProfilesUsageProfileResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

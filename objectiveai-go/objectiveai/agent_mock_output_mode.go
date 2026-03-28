@@ -92,4 +92,5 @@ func (v AgentMockOutputMode) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentMockOutputMode) SchemaTitle() string { return "agent.mock.OutputMode" }
 

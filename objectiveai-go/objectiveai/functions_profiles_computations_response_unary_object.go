@@ -7,15 +7,15 @@ import (
 )
 
 type FunctionsProfilesComputationsResponseUnaryObject struct {
-	Functions.profiles.computations.response.unary.Object string `validate:"oneof=function.profile.computation"`
+	FunctionProfileComputation string `validate:"oneof=function.profile.computation"`
 }
 
 func (v FunctionsProfilesComputationsResponseUnaryObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Functions.profiles.computations.response.unary.Object)
+	return json.Marshal(v.FunctionProfileComputation)
 }
 
 func (v *FunctionsProfilesComputationsResponseUnaryObject) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Functions.profiles.computations.response.unary.Object); err != nil {
+	if err := json.Unmarshal(data, &v.FunctionProfileComputation); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -24,4 +24,5 @@ func (v *FunctionsProfilesComputationsResponseUnaryObject) UnmarshalJSON(data []
 func (v FunctionsProfilesComputationsResponseUnaryObject) Validate() error {
 	return variantValidator.Struct(v)
 }
+func (FunctionsProfilesComputationsResponseUnaryObject) SchemaTitle() string { return "functions.profiles.computations.response.unary.Object" }
 

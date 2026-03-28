@@ -98,4 +98,5 @@ func (v FunctionsInlineFunction) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsInlineFunction) SchemaTitle() string { return "functions.InlineFunction" }
 

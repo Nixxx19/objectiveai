@@ -7,6 +7,7 @@ type FunctionsProfilesComputationsRequestDatasetItem struct {
 	Target FunctionsProfilesComputationsRequestTarget `json:"target"`
 }
 
+func (FunctionsProfilesComputationsRequestDatasetItem) SchemaTitle() string { return "functions.profiles.computations.request.DatasetItem" }
 func (v FunctionsProfilesComputationsRequestDatasetItem) Validate() error {
 	return variantValidator.Struct(v)
 }

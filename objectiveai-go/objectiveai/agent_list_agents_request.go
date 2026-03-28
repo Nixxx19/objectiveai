@@ -8,6 +8,7 @@ type AgentListAgentsRequest struct {
 	Source *AgentListAgentsSource `json:"source,omitempty"`
 }
 
+func (AgentListAgentsRequest) SchemaTitle() string { return "agent.ListAgentsRequest" }
 func (v AgentListAgentsRequest) Validate() error {
 	return variantValidator.Struct(v)
 }

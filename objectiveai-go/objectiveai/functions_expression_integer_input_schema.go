@@ -13,6 +13,7 @@ type FunctionsExpressionIntegerInputSchema struct {
 	Type FunctionsExpressionIntegerInputSchemaType `json:"type"`
 }
 
+func (FunctionsExpressionIntegerInputSchema) SchemaTitle() string { return "functions.expression.IntegerInputSchema" }
 func (v FunctionsExpressionIntegerInputSchema) Validate() error {
 	return variantValidator.Struct(v)
 }

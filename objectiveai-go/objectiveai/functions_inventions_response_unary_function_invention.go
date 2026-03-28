@@ -14,6 +14,7 @@ type FunctionsInventionsResponseUnaryFunctionInvention struct {
 	Usage AgentCompletionsResponseUsage `json:"usage"`
 }
 
+func (FunctionsInventionsResponseUnaryFunctionInvention) SchemaTitle() string { return "functions.inventions.response.unary.FunctionInvention" }
 func (v FunctionsInventionsResponseUnaryFunctionInvention) Validate() error {
 	return variantValidator.Struct(v)
 }

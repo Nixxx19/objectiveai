@@ -13,6 +13,7 @@ type FunctionsInventionsStateAlphaVectorState struct {
 	Spec string `json:"spec"`
 }
 
+func (FunctionsInventionsStateAlphaVectorState) SchemaTitle() string { return "functions.inventions.state.AlphaVectorState" }
 func (v FunctionsInventionsStateAlphaVectorState) Validate() error {
 	return variantValidator.Struct(v)
 }

@@ -9,8 +9,8 @@ import (
 
 // A swarm base definition, either remote (with metadata) or inline.
 type SwarmSwarmBase struct {
-	Remote *SwarmRemoteSwarmBase 
-	Inline *SwarmInlineSwarmBase 
+	Remote *SwarmRemoteSwarmBase `ref:"swarm.RemoteSwarmBase"`
+	Inline *SwarmInlineSwarmBase `ref:"swarm.InlineSwarmBase"`
 }
 
 func (v SwarmSwarmBase) MarshalJSON() ([]byte, error) {
@@ -61,4 +61,5 @@ func (v SwarmSwarmBase) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (SwarmSwarmBase) SchemaTitle() string { return "swarm.SwarmBase" }
 

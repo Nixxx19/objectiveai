@@ -9,6 +9,7 @@ type AgentInlineAgentWithFallbacks struct {
 	Fallbacks []AgentInlineAgent `json:"fallbacks,omitempty"`
 }
 
+func (AgentInlineAgentWithFallbacks) SchemaTitle() string { return "agent.InlineAgentWithFallbacks" }
 func (v AgentInlineAgentWithFallbacks) Validate() error {
 	return variantValidator.Struct(v)
 }

@@ -15,6 +15,7 @@ type FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChu
 	Usage *AgentCompletionsResponseUsage `json:"usage,omitempty"`
 }
 
+func (FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk) SchemaTitle() string { return "functions.profiles.computations.response.streaming.FunctionProfileComputationChunk" }
 func (v FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk) Validate() error {
 	return variantValidator.Struct(v)
 }

@@ -8,6 +8,7 @@ type FunctionsAlphaVectorVectorFunctionTaskExpression struct {
 	Skip *FunctionsExpressionExpression `json:"skip,omitempty"`
 }
 
+func (FunctionsAlphaVectorVectorFunctionTaskExpression) SchemaTitle() string { return "functions.alpha_vector.VectorFunctionTaskExpression" }
 func (v FunctionsAlphaVectorVectorFunctionTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

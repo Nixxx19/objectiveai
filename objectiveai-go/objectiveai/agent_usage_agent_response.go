@@ -14,6 +14,7 @@ type AgentUsageAgentResponse struct {
 	TotalCost float64 `json:"total_cost" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }
 
+func (AgentUsageAgentResponse) SchemaTitle() string { return "agent.UsageAgentResponse" }
 func (v AgentUsageAgentResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

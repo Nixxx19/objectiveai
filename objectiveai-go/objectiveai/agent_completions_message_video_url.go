@@ -8,6 +8,7 @@ type AgentCompletionsMessageVideoUrl struct {
 	URL string `json:"url"`
 }
 
+func (AgentCompletionsMessageVideoUrl) SchemaTitle() string { return "agent.completions.message.VideoUrl" }
 func (v AgentCompletionsMessageVideoUrl) Validate() error {
 	return variantValidator.Struct(v)
 }

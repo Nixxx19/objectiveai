@@ -12,6 +12,7 @@ type AgentCompletionsResponseTopLogprob struct {
 	Token string `json:"token"`
 }
 
+func (AgentCompletionsResponseTopLogprob) SchemaTitle() string { return "agent.completions.response.TopLogprob" }
 func (v AgentCompletionsResponseTopLogprob) Validate() error {
 	return variantValidator.Struct(v)
 }

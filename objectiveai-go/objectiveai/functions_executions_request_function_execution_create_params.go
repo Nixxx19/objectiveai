@@ -18,6 +18,7 @@ type FunctionsExecutionsRequestFunctionExecutionCreateParams struct {
 	Stream *bool `json:"stream,omitempty"`
 }
 
+func (FunctionsExecutionsRequestFunctionExecutionCreateParams) SchemaTitle() string { return "functions.executions.request.FunctionExecutionCreateParams" }
 func (v FunctionsExecutionsRequestFunctionExecutionCreateParams) Validate() error {
 	return variantValidator.Struct(v)
 }

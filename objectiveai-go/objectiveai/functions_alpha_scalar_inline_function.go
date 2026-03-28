@@ -70,4 +70,5 @@ func (v FunctionsAlphaScalarInlineFunction) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsAlphaScalarInlineFunction) SchemaTitle() string { return "functions.alpha_scalar.InlineFunction" }
 

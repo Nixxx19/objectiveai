@@ -6,6 +6,7 @@ type ConfigApiRemoteConfig struct {
 	ObjectiveaiAddress *string `json:"objectiveai_address,omitempty"`
 }
 
+func (ConfigApiRemoteConfig) SchemaTitle() string { return "config.ApiRemoteConfig" }
 func (v ConfigApiRemoteConfig) Validate() error {
 	return variantValidator.Struct(v)
 }

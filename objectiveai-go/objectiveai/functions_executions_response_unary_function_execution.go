@@ -30,6 +30,7 @@ type FunctionsExecutionsResponseUnaryFunctionExecution struct {
 	Usage AgentCompletionsResponseUsage `json:"usage"`
 }
 
+func (FunctionsExecutionsResponseUnaryFunctionExecution) SchemaTitle() string { return "functions.executions.response.unary.FunctionExecution" }
 func (v FunctionsExecutionsResponseUnaryFunctionExecution) Validate() error {
 	return variantValidator.Struct(v)
 }

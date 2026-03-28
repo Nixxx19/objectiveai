@@ -10,9 +10,9 @@ import (
 // An inline profile, either tasks-based or auto.
 type FunctionsInlineProfile struct {
 	// Tasks-based profile with per-task configuration.
-	Tasks *FunctionsInlineTasksProfile 
+	Tasks *FunctionsInlineTasksProfile `ref:"functions.InlineTasksProfile"`
 	// Auto profile that applies a single swarm+weights to all vector completion tasks.
-	Auto *SwarmInlineSwarmBase 
+	Auto *SwarmInlineSwarmBase `ref:"swarm.InlineSwarmBase"`
 }
 
 func (v FunctionsInlineProfile) MarshalJSON() ([]byte, error) {
@@ -63,4 +63,5 @@ func (v FunctionsInlineProfile) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsInlineProfile) SchemaTitle() string { return "functions.InlineProfile" }
 

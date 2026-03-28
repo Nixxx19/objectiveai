@@ -20,6 +20,7 @@ type FunctionsExecutionsResponseStreamingReasoningSummaryChunk struct {
 	Usage *AgentCompletionsResponseUsage `json:"usage,omitempty"`
 }
 
+func (FunctionsExecutionsResponseStreamingReasoningSummaryChunk) SchemaTitle() string { return "functions.executions.response.streaming.ReasoningSummaryChunk" }
 func (v FunctionsExecutionsResponseStreamingReasoningSummaryChunk) Validate() error {
 	return variantValidator.Struct(v)
 }

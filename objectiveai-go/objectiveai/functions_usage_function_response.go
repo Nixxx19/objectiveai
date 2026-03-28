@@ -14,6 +14,7 @@ type FunctionsUsageFunctionResponse struct {
 	TotalCost float64 `json:"total_cost" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }
 
+func (FunctionsUsageFunctionResponse) SchemaTitle() string { return "functions.UsageFunctionResponse" }
 func (v FunctionsUsageFunctionResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

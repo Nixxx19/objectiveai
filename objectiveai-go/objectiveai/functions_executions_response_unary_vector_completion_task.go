@@ -33,6 +33,7 @@ type FunctionsExecutionsResponseUnaryVectorCompletionTask struct {
 	Weights []float64 `json:"weights"`
 }
 
+func (FunctionsExecutionsResponseUnaryVectorCompletionTask) SchemaTitle() string { return "functions.executions.response.unary.VectorCompletionTask" }
 func (v FunctionsExecutionsResponseUnaryVectorCompletionTask) Validate() error {
 	return variantValidator.Struct(v)
 }

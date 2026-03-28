@@ -11,6 +11,7 @@ type FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive struct 
 	Usage AgentCompletionsResponseUsage `json:"usage"`
 }
 
+func (FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive) SchemaTitle() string { return "functions.inventions.recursive.response.unary.FunctionInventionRecursive" }
 func (v FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive) Validate() error {
 	return variantValidator.Struct(v)
 }

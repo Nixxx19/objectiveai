@@ -29,6 +29,7 @@ type VectorCompletionsResponseUnaryVectorCompletion struct {
 	Weights []float64 `json:"weights"`
 }
 
+func (VectorCompletionsResponseUnaryVectorCompletion) SchemaTitle() string { return "vector.completions.response.unary.VectorCompletion" }
 func (v VectorCompletionsResponseUnaryVectorCompletion) Validate() error {
 	return variantValidator.Struct(v)
 }

@@ -100,4 +100,5 @@ func (v AgentOpenrouterVerbosity) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentOpenrouterVerbosity) SchemaTitle() string { return "agent.openrouter.Verbosity" }
 

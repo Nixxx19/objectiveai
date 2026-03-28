@@ -11,6 +11,7 @@ type FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChun
 	Usage *AgentCompletionsResponseUsage `json:"usage,omitempty"`
 }
 
+func (FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk) SchemaTitle() string { return "functions.inventions.recursive.response.streaming.FunctionInventionRecursiveChunk" }
 func (v FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk) Validate() error {
 	return variantValidator.Struct(v)
 }

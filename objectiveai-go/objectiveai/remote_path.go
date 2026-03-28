@@ -95,4 +95,5 @@ func (v RemotePath) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (RemotePath) SchemaTitle() string { return "RemotePath" }
 

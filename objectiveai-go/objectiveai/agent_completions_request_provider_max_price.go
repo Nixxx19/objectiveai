@@ -16,6 +16,7 @@ type AgentCompletionsRequestProviderMaxPrice struct {
 	Request *float64 `json:"request,omitempty" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }
 
+func (AgentCompletionsRequestProviderMaxPrice) SchemaTitle() string { return "agent.completions.request.ProviderMaxPrice" }
 func (v AgentCompletionsRequestProviderMaxPrice) Validate() error {
 	return variantValidator.Struct(v)
 }

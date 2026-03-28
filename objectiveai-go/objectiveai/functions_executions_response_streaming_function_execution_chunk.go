@@ -17,6 +17,7 @@ type FunctionsExecutionsResponseStreamingFunctionExecutionChunk struct {
 	Usage *AgentCompletionsResponseUsage `json:"usage,omitempty"`
 }
 
+func (FunctionsExecutionsResponseStreamingFunctionExecutionChunk) SchemaTitle() string { return "functions.executions.response.streaming.FunctionExecutionChunk" }
 func (v FunctionsExecutionsResponseStreamingFunctionExecutionChunk) Validate() error {
 	return variantValidator.Struct(v)
 }

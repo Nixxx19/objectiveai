@@ -82,4 +82,5 @@ func (v AgentOpenrouterReasoningSummaryVerbosity) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentOpenrouterReasoningSummaryVerbosity) SchemaTitle() string { return "agent.openrouter.ReasoningSummaryVerbosity" }
 

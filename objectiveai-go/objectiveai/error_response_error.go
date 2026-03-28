@@ -14,6 +14,7 @@ type ErrorResponseError struct {
 	Message any `json:"message"`
 }
 
+func (ErrorResponseError) SchemaTitle() string { return "error.ResponseError" }
 func (v ErrorResponseError) Validate() error {
 	return variantValidator.Struct(v)
 }

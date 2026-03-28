@@ -18,9 +18,9 @@ import (
 // for given inputs.
 type FunctionsFunction struct {
 	// A remote function with metadata (description, schema, etc.).
-	Remote *FunctionsRemoteFunction 
+	Remote *FunctionsRemoteFunction `ref:"functions.RemoteFunction"`
 	// An inline function definition without metadata.
-	Inline *FunctionsInlineFunction 
+	Inline *FunctionsInlineFunction `ref:"functions.InlineFunction"`
 }
 
 func (v FunctionsFunction) MarshalJSON() ([]byte, error) {
@@ -71,4 +71,5 @@ func (v FunctionsFunction) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsFunction) SchemaTitle() string { return "functions.Function" }
 

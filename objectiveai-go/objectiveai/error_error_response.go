@@ -8,6 +8,7 @@ type ErrorErrorResponse struct {
 	Ok bool `json:"ok"`
 }
 
+func (ErrorErrorResponse) SchemaTitle() string { return "error.ErrorResponse" }
 func (v ErrorErrorResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

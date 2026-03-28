@@ -54,6 +54,7 @@ type FunctionsPlaceholderVectorFunctionTaskExpression struct {
 	Skip *FunctionsExpressionExpression `json:"skip,omitempty"`
 }
 
+func (FunctionsPlaceholderVectorFunctionTaskExpression) SchemaTitle() string { return "functions.PlaceholderVectorFunctionTaskExpression" }
 func (v FunctionsPlaceholderVectorFunctionTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

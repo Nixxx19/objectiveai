@@ -10,8 +10,8 @@ import (
 // A function specification that is either a full inline function definition
 // or a remote path reference.
 type FunctionsFullInlineFunctionOrRemoteCommitOptional struct {
-	Inline *FunctionsFullInlineFunction 
-	Remote *RemotePathCommitOptional 
+	Inline *FunctionsFullInlineFunction `ref:"functions.FullInlineFunction"`
+	Remote *RemotePathCommitOptional `ref:"RemotePathCommitOptional"`
 }
 
 func (v FunctionsFullInlineFunctionOrRemoteCommitOptional) MarshalJSON() ([]byte, error) {
@@ -62,4 +62,5 @@ func (v FunctionsFullInlineFunctionOrRemoteCommitOptional) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsFullInlineFunctionOrRemoteCommitOptional) SchemaTitle() string { return "functions.FullInlineFunctionOrRemoteCommitOptional" }
 

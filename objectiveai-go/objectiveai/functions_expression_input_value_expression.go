@@ -13,7 +13,7 @@ import (
 // expressions (JMESPath or Starlark) that are evaluated during compilation.
 type FunctionsExpressionInputValueExpression struct {
 	// Rich content (image, audio, video, file).
-	RichContentPart *AgentCompletionsMessageRichContentPart 
+	RichContentPart *AgentCompletionsMessageRichContentPart `ref:"agent.completions.message.RichContentPart"`
 	// An object with values that may be expressions.
 	Object map[string]any 
 	// An array with elements that may be expressions.
@@ -151,4 +151,5 @@ func (v FunctionsExpressionInputValueExpression) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsExpressionInputValueExpression) SchemaTitle() string { return "functions.expression.InputValueExpression" }
 

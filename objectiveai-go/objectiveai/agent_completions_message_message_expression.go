@@ -33,11 +33,11 @@ type AgentCompletionsMessageMessageExpressionTool struct {
 // where message content can be computed from the function input at runtime.
 // Supports both JMESPath and Starlark expressions.
 type AgentCompletionsMessageMessageExpression struct {
-	Developer *AgentCompletionsMessageMessageExpressionDeveloper 
-	System *AgentCompletionsMessageMessageExpressionSystem 
-	User *AgentCompletionsMessageMessageExpressionUser 
-	Assistant *AgentCompletionsMessageMessageExpressionAssistant 
-	Tool *AgentCompletionsMessageMessageExpressionTool 
+	Developer *AgentCompletionsMessageMessageExpressionDeveloper `ref:"agent.completions.message.DeveloperMessageExpression"`
+	System *AgentCompletionsMessageMessageExpressionSystem `ref:"agent.completions.message.SystemMessageExpression"`
+	User *AgentCompletionsMessageMessageExpressionUser `ref:"agent.completions.message.UserMessageExpression"`
+	Assistant *AgentCompletionsMessageMessageExpressionAssistant `ref:"agent.completions.message.AssistantMessageExpression"`
+	Tool *AgentCompletionsMessageMessageExpressionTool `ref:"agent.completions.message.ToolMessageExpression"`
 }
 
 func (v AgentCompletionsMessageMessageExpression) MarshalJSON() ([]byte, error) {
@@ -133,4 +133,5 @@ func (v AgentCompletionsMessageMessageExpression) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentCompletionsMessageMessageExpression) SchemaTitle() string { return "agent.completions.message.MessageExpression" }
 

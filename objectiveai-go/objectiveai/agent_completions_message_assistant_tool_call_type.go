@@ -8,16 +8,15 @@ import (
 
 // A function call.
 type AgentCompletionsMessageAssistantToolCallType struct {
-	// A function call.
-	Agent.completions.message.AssistantToolCallType string `validate:"oneof=function"`
+	Function string `validate:"oneof=function"`
 }
 
 func (v AgentCompletionsMessageAssistantToolCallType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Agent.completions.message.AssistantToolCallType)
+	return json.Marshal(v.Function)
 }
 
 func (v *AgentCompletionsMessageAssistantToolCallType) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Agent.completions.message.AssistantToolCallType); err != nil {
+	if err := json.Unmarshal(data, &v.Function); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -26,4 +25,5 @@ func (v *AgentCompletionsMessageAssistantToolCallType) UnmarshalJSON(data []byte
 func (v AgentCompletionsMessageAssistantToolCallType) Validate() error {
 	return variantValidator.Struct(v)
 }
+func (AgentCompletionsMessageAssistantToolCallType) SchemaTitle() string { return "agent.completions.message.AssistantToolCallType" }
 

@@ -8,6 +8,7 @@ type ConfigFunctionsConfig struct {
 	Profiles *ConfigFunctionsProfilesConfig `json:"profiles,omitempty"`
 }
 
+func (ConfigFunctionsConfig) SchemaTitle() string { return "config.FunctionsConfig" }
 func (v ConfigFunctionsConfig) Validate() error {
 	return variantValidator.Struct(v)
 }

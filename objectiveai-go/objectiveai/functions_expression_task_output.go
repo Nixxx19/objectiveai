@@ -97,4 +97,5 @@ func (v FunctionsExpressionTaskOutput) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsExpressionTaskOutput) SchemaTitle() string { return "functions.expression.TaskOutput" }
 

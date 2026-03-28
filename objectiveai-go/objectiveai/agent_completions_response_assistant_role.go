@@ -8,16 +8,15 @@ import (
 
 // The assistant role.
 type AgentCompletionsResponseAssistantRole struct {
-	// The assistant role.
-	Agent.completions.response.AssistantRole string `validate:"oneof=assistant"`
+	Assistant string `validate:"oneof=assistant"`
 }
 
 func (v AgentCompletionsResponseAssistantRole) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Agent.completions.response.AssistantRole)
+	return json.Marshal(v.Assistant)
 }
 
 func (v *AgentCompletionsResponseAssistantRole) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Agent.completions.response.AssistantRole); err != nil {
+	if err := json.Unmarshal(data, &v.Assistant); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -26,4 +25,5 @@ func (v *AgentCompletionsResponseAssistantRole) UnmarshalJSON(data []byte) error
 func (v AgentCompletionsResponseAssistantRole) Validate() error {
 	return variantValidator.Struct(v)
 }
+func (AgentCompletionsResponseAssistantRole) SchemaTitle() string { return "agent.completions.response.AssistantRole" }
 

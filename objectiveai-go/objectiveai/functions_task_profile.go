@@ -12,9 +12,9 @@ import (
 // Each variant corresponds to a task type in the Function definition.
 type FunctionsTaskProfile struct {
 	// Profile for a nested function task (references another profile).
-	Remote *RemotePath 
+	Remote *RemotePath `ref:"RemotePath"`
 	// Inline profile for a task (tasks-based or auto).
-	Inline *FunctionsInlineProfile 
+	Inline *FunctionsInlineProfile `ref:"functions.InlineProfile"`
 	// Placeholder task — no configuration needed, output is fixed.
 	Placeholder map[string]any 
 }
@@ -82,4 +82,5 @@ func (v FunctionsTaskProfile) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsTaskProfile) SchemaTitle() string { return "functions.TaskProfile" }
 

@@ -13,9 +13,9 @@ import (
 // a Function. They correspond to a Function's task structure.
 type FunctionsProfile struct {
 	// A remote profile with metadata.
-	Remote *FunctionsRemoteProfile 
+	Remote *FunctionsRemoteProfile `ref:"functions.RemoteProfile"`
 	// An inline profile definition.
-	Inline *FunctionsInlineProfile 
+	Inline *FunctionsInlineProfile `ref:"functions.InlineProfile"`
 }
 
 func (v FunctionsProfile) MarshalJSON() ([]byte, error) {
@@ -66,4 +66,5 @@ func (v FunctionsProfile) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsProfile) SchemaTitle() string { return "functions.Profile" }
 

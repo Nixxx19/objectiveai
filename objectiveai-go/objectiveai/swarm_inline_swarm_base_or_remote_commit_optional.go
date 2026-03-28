@@ -10,8 +10,8 @@ import (
 // Like [`InlineSwarmBaseOrRemote`] but with optional commit.
 // Used in request types where commit resolution happens server-side.
 type SwarmInlineSwarmBaseOrRemoteCommitOptional struct {
-	SwarmBase *SwarmInlineSwarmBase 
-	Remote *RemotePathCommitOptional 
+	SwarmBase *SwarmInlineSwarmBase `ref:"swarm.InlineSwarmBase"`
+	Remote *RemotePathCommitOptional `ref:"RemotePathCommitOptional"`
 }
 
 func (v SwarmInlineSwarmBaseOrRemoteCommitOptional) MarshalJSON() ([]byte, error) {
@@ -62,4 +62,5 @@ func (v SwarmInlineSwarmBaseOrRemoteCommitOptional) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (SwarmInlineSwarmBaseOrRemoteCommitOptional) SchemaTitle() string { return "swarm.InlineSwarmBaseOrRemoteCommitOptional" }
 

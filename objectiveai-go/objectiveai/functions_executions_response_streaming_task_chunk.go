@@ -8,8 +8,8 @@ import (
 )
 
 type FunctionsExecutionsResponseStreamingTaskChunk struct {
-	FunctionExecution *FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk 
-	VectorCompletion *FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk 
+	FunctionExecution *FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk `ref:"functions.executions.response.streaming.FunctionExecutionTaskChunk"`
+	VectorCompletion *FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk `ref:"functions.executions.response.streaming.VectorCompletionTaskChunk"`
 }
 
 func (v FunctionsExecutionsResponseStreamingTaskChunk) MarshalJSON() ([]byte, error) {
@@ -60,4 +60,5 @@ func (v FunctionsExecutionsResponseStreamingTaskChunk) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsExecutionsResponseStreamingTaskChunk) SchemaTitle() string { return "functions.executions.response.streaming.TaskChunk" }
 

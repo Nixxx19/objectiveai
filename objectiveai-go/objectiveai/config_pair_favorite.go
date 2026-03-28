@@ -9,6 +9,7 @@ type ConfigPairFavorite struct {
 	Profile RemotePathCommitOptional `json:"profile"`
 }
 
+func (ConfigPairFavorite) SchemaTitle() string { return "config.PairFavorite" }
 func (v ConfigPairFavorite) Validate() error {
 	return variantValidator.Struct(v)
 }

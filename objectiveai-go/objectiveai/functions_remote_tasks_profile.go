@@ -12,6 +12,7 @@ type FunctionsRemoteTasksProfile struct {
 	Description string `json:"description"`
 }
 
+func (FunctionsRemoteTasksProfile) SchemaTitle() string { return "functions.RemoteTasksProfile" }
 func (v FunctionsRemoteTasksProfile) Validate() error {
 	return variantValidator.Struct(v)
 }

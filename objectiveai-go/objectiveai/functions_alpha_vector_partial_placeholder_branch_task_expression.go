@@ -16,8 +16,8 @@ type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderVector
 }
 
 type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression struct {
-	PlaceholderScalarFunction *FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderScalarFunction 
-	PlaceholderVectorFunction *FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderVectorFunction 
+	PlaceholderScalarFunction *FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderScalarFunction `ref:"functions.alpha_vector.PartialPlaceholderScalarFunctionTaskExpression"`
+	PlaceholderVectorFunction *FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderVectorFunction `ref:"functions.alpha_vector.PartialPlaceholderVectorFunctionTaskExpression"`
 }
 
 func (v FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression) MarshalJSON() ([]byte, error) {
@@ -68,4 +68,5 @@ func (v FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression) Validate() e
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression) SchemaTitle() string { return "functions.alpha_vector.PartialPlaceholderBranchTaskExpression" }
 

@@ -12,6 +12,7 @@ type FunctionsExpressionParams struct {
 	Output *FunctionsExpressionTaskOutput `json:"output,omitempty"`
 }
 
+func (FunctionsExpressionParams) SchemaTitle() string { return "functions.expression.Params" }
 func (v FunctionsExpressionParams) Validate() error {
 	return variantValidator.Struct(v)
 }

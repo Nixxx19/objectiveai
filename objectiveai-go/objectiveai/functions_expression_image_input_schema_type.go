@@ -7,15 +7,15 @@ import (
 )
 
 type FunctionsExpressionImageInputSchemaType struct {
-	Functions.expression.ImageInputSchemaType string `validate:"oneof=image"`
+	Image string `validate:"oneof=image"`
 }
 
 func (v FunctionsExpressionImageInputSchemaType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Functions.expression.ImageInputSchemaType)
+	return json.Marshal(v.Image)
 }
 
 func (v *FunctionsExpressionImageInputSchemaType) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Functions.expression.ImageInputSchemaType); err != nil {
+	if err := json.Unmarshal(data, &v.Image); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -24,4 +24,5 @@ func (v *FunctionsExpressionImageInputSchemaType) UnmarshalJSON(data []byte) err
 func (v FunctionsExpressionImageInputSchemaType) Validate() error {
 	return variantValidator.Struct(v)
 }
+func (FunctionsExpressionImageInputSchemaType) SchemaTitle() string { return "functions.expression.ImageInputSchemaType" }
 

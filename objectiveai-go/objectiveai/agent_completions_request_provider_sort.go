@@ -80,4 +80,5 @@ func (v AgentCompletionsRequestProviderSort) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentCompletionsRequestProviderSort) SchemaTitle() string { return "agent.completions.request.ProviderSort" }
 

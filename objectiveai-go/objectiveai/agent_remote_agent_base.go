@@ -10,6 +10,7 @@ type AgentRemoteAgentBase struct {
 	Description string `json:"description"`
 }
 
+func (AgentRemoteAgentBase) SchemaTitle() string { return "agent.RemoteAgentBase" }
 func (v AgentRemoteAgentBase) Validate() error {
 	return variantValidator.Struct(v)
 }

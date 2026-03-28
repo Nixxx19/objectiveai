@@ -80,4 +80,5 @@ func (v AgentCompletionsMessageImageUrlDetail) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentCompletionsMessageImageUrlDetail) SchemaTitle() string { return "agent.completions.message.ImageUrlDetail" }
 

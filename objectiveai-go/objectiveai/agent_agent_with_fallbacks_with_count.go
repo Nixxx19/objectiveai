@@ -6,9 +6,10 @@ package objectiveai
 type AgentAgentWithFallbacksWithCount struct {
 	AgentAgentWithFallbacks
 	// Number of instances of this agent in the swarm. Defaults to 1.
-	Count uint64 `json:"count,omitempty" validate:"min=0,max=18446744073709551615"`
+	Count uint64 `json:"count,omitempty" validate:"min=0,max=18446744073709551615" def:"1"`
 }
 
+func (AgentAgentWithFallbacksWithCount) SchemaTitle() string { return "agent.AgentWithFallbacksWithCount" }
 func (v AgentAgentWithFallbacksWithCount) Validate() error {
 	return variantValidator.Struct(v)
 }

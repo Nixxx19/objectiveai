@@ -167,4 +167,5 @@ func (v AgentCompletionsMessageRichContentPart) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentCompletionsMessageRichContentPart) SchemaTitle() string { return "agent.completions.message.RichContentPart" }
 

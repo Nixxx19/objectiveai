@@ -4,26 +4,94 @@ package objectiveai
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 // Source filter for listing profiles.
 type FunctionsProfilesListProfilesSource struct {
-	// Source filter for listing profiles.
-	Functions.profiles.ListProfilesSource string `validate:"oneof=all mock filesystem objectiveai"`
+	All *string `validate:"oneof=all"`
+	Mock *string `validate:"oneof=mock"`
+	Filesystem *string `validate:"oneof=filesystem"`
+	Objectiveai *string `validate:"oneof=objectiveai"`
 }
 
 func (v FunctionsProfilesListProfilesSource) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Functions.profiles.ListProfilesSource)
+	if v.All != nil {
+		return json.Marshal(v.All)
+	}
+	if v.Mock != nil {
+		return json.Marshal(v.Mock)
+	}
+	if v.Filesystem != nil {
+		return json.Marshal(v.Filesystem)
+	}
+	if v.Objectiveai != nil {
+		return json.Marshal(v.Objectiveai)
+	}
+	return []byte("null"), nil
 }
 
 func (v *FunctionsProfilesListProfilesSource) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Functions.profiles.ListProfilesSource); err != nil {
-		return err
+	if string(data) == "null" {
+		return nil
 	}
-	return v.Validate()
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsProfilesListProfilesSource{}
+			candidate.All = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsProfilesListProfilesSource{}
+			candidate.Mock = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsProfilesListProfilesSource{}
+			candidate.Filesystem = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsProfilesListProfilesSource{}
+			candidate.Objectiveai = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of FunctionsProfilesListProfilesSource")
 }
 
 func (v FunctionsProfilesListProfilesSource) Validate() error {
+	count := 0
+	if v.All != nil { count++ }
+	if v.Mock != nil { count++ }
+	if v.Filesystem != nil { count++ }
+	if v.Objectiveai != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("FunctionsProfilesListProfilesSource: exactly one variant must be set, got %d", count)
+	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsProfilesListProfilesSource) SchemaTitle() string { return "functions.profiles.ListProfilesSource" }
 

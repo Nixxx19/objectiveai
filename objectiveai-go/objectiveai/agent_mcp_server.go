@@ -5,11 +5,12 @@ package objectiveai
 // An MCP server that the agent can connect to.
 type AgentMcpServer struct {
 	// Whether this MCP server uses authorization.
-	Authorization bool `json:"authorization,omitempty"`
+	Authorization bool `json:"authorization,omitempty" def:"false"`
 	// The URL of the MCP server.
 	URL string `json:"url"`
 }
 
+func (AgentMcpServer) SchemaTitle() string { return "agent.McpServer" }
 func (v AgentMcpServer) Validate() error {
 	return variantValidator.Struct(v)
 }

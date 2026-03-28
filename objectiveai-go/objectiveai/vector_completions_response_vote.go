@@ -37,6 +37,7 @@ type VectorCompletionsResponseVote struct {
 	Weight float64 `json:"weight" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }
 
+func (VectorCompletionsResponseVote) SchemaTitle() string { return "vector.completions.response.Vote" }
 func (v VectorCompletionsResponseVote) Validate() error {
 	return variantValidator.Struct(v)
 }

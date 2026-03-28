@@ -123,6 +123,7 @@ type AgentCompletionsMessageAssistantMessageExpression struct {
 	ToolCalls any `json:"tool_calls"`
 }
 
+func (AgentCompletionsMessageAssistantMessageExpression) SchemaTitle() string { return "agent.completions.message.AssistantMessageExpression" }
 func (v AgentCompletionsMessageAssistantMessageExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

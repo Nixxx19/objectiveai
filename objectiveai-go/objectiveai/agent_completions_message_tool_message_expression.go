@@ -56,6 +56,7 @@ type AgentCompletionsMessageToolMessageExpression struct {
 	ToolCallID any `json:"tool_call_id"`
 }
 
+func (AgentCompletionsMessageToolMessageExpression) SchemaTitle() string { return "agent.completions.message.ToolMessageExpression" }
 func (v AgentCompletionsMessageToolMessageExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

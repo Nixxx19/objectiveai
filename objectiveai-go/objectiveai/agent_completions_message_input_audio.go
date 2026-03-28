@@ -10,6 +10,7 @@ type AgentCompletionsMessageInputAudio struct {
 	Format string `json:"format"`
 }
 
+func (AgentCompletionsMessageInputAudio) SchemaTitle() string { return "agent.completions.message.InputAudio" }
 func (v AgentCompletionsMessageInputAudio) Validate() error {
 	return variantValidator.Struct(v)
 }

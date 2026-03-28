@@ -8,16 +8,15 @@ import (
 
 // A agent completion chunk object.
 type AgentCompletionsResponseStreamingObject struct {
-	// A agent completion chunk object.
-	Agent.completions.response.streaming.Object string `validate:"oneof=agent.completion.chunk"`
+	AgentCompletionChunk string `validate:"oneof=agent.completion.chunk"`
 }
 
 func (v AgentCompletionsResponseStreamingObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Agent.completions.response.streaming.Object)
+	return json.Marshal(v.AgentCompletionChunk)
 }
 
 func (v *AgentCompletionsResponseStreamingObject) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Agent.completions.response.streaming.Object); err != nil {
+	if err := json.Unmarshal(data, &v.AgentCompletionChunk); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -26,4 +25,5 @@ func (v *AgentCompletionsResponseStreamingObject) UnmarshalJSON(data []byte) err
 func (v AgentCompletionsResponseStreamingObject) Validate() error {
 	return variantValidator.Struct(v)
 }
+func (AgentCompletionsResponseStreamingObject) SchemaTitle() string { return "agent.completions.response.streaming.Object" }
 

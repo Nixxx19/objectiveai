@@ -10,6 +10,7 @@ type AgentCompletionsResponseCostDetails struct {
 	UpstreamUpstreamInferenceCost float64 `json:"upstream_upstream_inference_cost" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }
 
+func (AgentCompletionsResponseCostDetails) SchemaTitle() string { return "agent.completions.response.CostDetails" }
 func (v AgentCompletionsResponseCostDetails) Validate() error {
 	return variantValidator.Struct(v)
 }

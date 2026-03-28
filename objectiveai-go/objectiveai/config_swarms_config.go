@@ -6,6 +6,7 @@ type ConfigSwarmsConfig struct {
 	Favorites []ConfigFavorite `json:"favorites,omitempty"`
 }
 
+func (ConfigSwarmsConfig) SchemaTitle() string { return "config.SwarmsConfig" }
 func (v ConfigSwarmsConfig) Validate() error {
 	return variantValidator.Struct(v)
 }

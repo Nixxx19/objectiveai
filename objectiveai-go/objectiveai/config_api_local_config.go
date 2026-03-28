@@ -6,6 +6,7 @@ type ConfigApiLocalConfig struct {
 	ClaudeAgentSDK *bool `json:"claude_agent_sdk,omitempty"`
 }
 
+func (ConfigApiLocalConfig) SchemaTitle() string { return "config.ApiLocalConfig" }
 func (v ConfigApiLocalConfig) Validate() error {
 	return variantValidator.Struct(v)
 }

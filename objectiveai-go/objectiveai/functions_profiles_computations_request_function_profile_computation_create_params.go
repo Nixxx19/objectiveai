@@ -17,6 +17,7 @@ type FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParams 
 	Swarm SwarmInlineSwarmBaseOrRemoteCommitOptional `json:"swarm"`
 }
 
+func (FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParams) SchemaTitle() string { return "functions.profiles.computations.request.FunctionProfileComputationCreateParams" }
 func (v FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParams) Validate() error {
 	return variantValidator.Struct(v)
 }

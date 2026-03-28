@@ -13,7 +13,7 @@ import (
 // including rich content types (images, audio, video, files).
 type FunctionsExpressionInputValue struct {
 	// Rich content (image, audio, video, file).
-	RichContentPart *AgentCompletionsMessageRichContentPart 
+	RichContentPart *AgentCompletionsMessageRichContentPart `ref:"agent.completions.message.RichContentPart"`
 	// An object with string keys.
 	Object map[string]FunctionsExpressionInputValue 
 	// An array of values.
@@ -151,4 +151,5 @@ func (v FunctionsExpressionInputValue) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsExpressionInputValue) SchemaTitle() string { return "functions.expression.InputValue" }
 

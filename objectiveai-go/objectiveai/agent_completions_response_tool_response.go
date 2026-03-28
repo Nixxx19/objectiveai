@@ -12,6 +12,7 @@ type AgentCompletionsResponseToolResponse struct {
 	ToolCallID string `json:"tool_call_id"`
 }
 
+func (AgentCompletionsResponseToolResponse) SchemaTitle() string { return "agent.completions.response.ToolResponse" }
 func (v AgentCompletionsResponseToolResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

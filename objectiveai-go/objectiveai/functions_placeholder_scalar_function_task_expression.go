@@ -45,6 +45,7 @@ type FunctionsPlaceholderScalarFunctionTaskExpression struct {
 	Skip *FunctionsExpressionExpression `json:"skip,omitempty"`
 }
 
+func (FunctionsPlaceholderScalarFunctionTaskExpression) SchemaTitle() string { return "functions.PlaceholderScalarFunctionTaskExpression" }
 func (v FunctionsPlaceholderScalarFunctionTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

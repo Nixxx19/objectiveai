@@ -19,6 +19,7 @@ type AgentMockAgentBase struct {
 	Upstream AgentMockUpstream `json:"upstream"`
 }
 
+func (AgentMockAgentBase) SchemaTitle() string { return "agent.mock.AgentBase" }
 func (v AgentMockAgentBase) Validate() error {
 	return variantValidator.Struct(v)
 }

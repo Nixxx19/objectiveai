@@ -56,6 +56,7 @@ type AgentCompletionsMessageSystemMessageExpression struct {
 	Name any `json:"name"`
 }
 
+func (AgentCompletionsMessageSystemMessageExpression) SchemaTitle() string { return "agent.completions.message.SystemMessageExpression" }
 func (v AgentCompletionsMessageSystemMessageExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

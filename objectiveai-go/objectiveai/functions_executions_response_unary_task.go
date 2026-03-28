@@ -8,8 +8,8 @@ import (
 )
 
 type FunctionsExecutionsResponseUnaryTask struct {
-	FunctionExecution *FunctionsExecutionsResponseUnaryFunctionExecutionTask 
-	VectorCompletion *FunctionsExecutionsResponseUnaryVectorCompletionTask 
+	FunctionExecution *FunctionsExecutionsResponseUnaryFunctionExecutionTask `ref:"functions.executions.response.unary.FunctionExecutionTask"`
+	VectorCompletion *FunctionsExecutionsResponseUnaryVectorCompletionTask `ref:"functions.executions.response.unary.VectorCompletionTask"`
 }
 
 func (v FunctionsExecutionsResponseUnaryTask) MarshalJSON() ([]byte, error) {
@@ -60,4 +60,5 @@ func (v FunctionsExecutionsResponseUnaryTask) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsExecutionsResponseUnaryTask) SchemaTitle() string { return "functions.executions.response.unary.Task" }
 

@@ -10,7 +10,7 @@ import (
 // Either a single response format or a per-agent map.
 type AgentCompletionsRequestResponseFormatParam struct {
 	// A single response format applied to all agents.
-	Single *AgentCompletionsRequestResponseFormat 
+	Single *AgentCompletionsRequestResponseFormat `ref:"agent.completions.request.ResponseFormat"`
 	// Per-agent response formats, keyed by agent ID.
 	PerAgent map[string]AgentCompletionsRequestResponseFormat 
 }
@@ -63,4 +63,5 @@ func (v AgentCompletionsRequestResponseFormatParam) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentCompletionsRequestResponseFormatParam) SchemaTitle() string { return "agent.completions.request.ResponseFormatParam" }
 

@@ -9,8 +9,8 @@ import (
 
 // A validated agent with optional fallbacks, either remote (with description) or inline.
 type AgentAgentWithFallbacks struct {
-	Remote *AgentRemoteAgentWithFallbacks 
-	Inline *AgentInlineAgentWithFallbacks 
+	Remote *AgentRemoteAgentWithFallbacks `ref:"agent.RemoteAgentWithFallbacks"`
+	Inline *AgentInlineAgentWithFallbacks `ref:"agent.InlineAgentWithFallbacks"`
 }
 
 func (v AgentAgentWithFallbacks) MarshalJSON() ([]byte, error) {
@@ -61,4 +61,5 @@ func (v AgentAgentWithFallbacks) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentAgentWithFallbacks) SchemaTitle() string { return "agent.AgentWithFallbacks" }
 

@@ -10,8 +10,8 @@ import (
 // Like [`InlineAgentBaseWithFallbacksOrRemote`] but with optional commit.
 // Used in request types where commit resolution happens server-side.
 type AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional struct {
-	AgentBase *AgentInlineAgentBaseWithFallbacks 
-	Remote *RemotePathCommitOptional 
+	AgentBase *AgentInlineAgentBaseWithFallbacks `ref:"agent.InlineAgentBaseWithFallbacks"`
+	Remote *RemotePathCommitOptional `ref:"RemotePathCommitOptional"`
 }
 
 func (v AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional) MarshalJSON() ([]byte, error) {
@@ -62,4 +62,5 @@ func (v AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional) Validate() erro
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional) SchemaTitle() string { return "agent.InlineAgentBaseWithFallbacksOrRemoteCommitOptional" }
 

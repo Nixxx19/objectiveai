@@ -13,27 +13,27 @@ import (
 // Used by remote Functions to document and validate their inputs.
 type FunctionsExpressionInputSchema struct {
 	// A union of schemas - input must match at least one.
-	AnyOf *FunctionsExpressionAnyOfInputSchema 
+	AnyOf *FunctionsExpressionAnyOfInputSchema `ref:"functions.expression.AnyOfInputSchema"`
 	// An object with named properties.
-	Object *FunctionsExpressionObjectInputSchema 
+	Object *FunctionsExpressionObjectInputSchema `ref:"functions.expression.ObjectInputSchema"`
 	// An array of items.
-	Array *FunctionsExpressionArrayInputSchema 
+	Array *FunctionsExpressionArrayInputSchema `ref:"functions.expression.ArrayInputSchema"`
 	// A string value.
-	String *FunctionsExpressionStringInputSchema 
+	String *FunctionsExpressionStringInputSchema `ref:"functions.expression.StringInputSchema"`
 	// An integer value.
-	Integer *FunctionsExpressionIntegerInputSchema 
+	Integer *FunctionsExpressionIntegerInputSchema `ref:"functions.expression.IntegerInputSchema"`
 	// A floating-point number.
-	Number *FunctionsExpressionNumberInputSchema 
+	Number *FunctionsExpressionNumberInputSchema `ref:"functions.expression.NumberInputSchema"`
 	// A boolean value.
-	Boolean *FunctionsExpressionBooleanInputSchema 
+	Boolean *FunctionsExpressionBooleanInputSchema `ref:"functions.expression.BooleanInputSchema"`
 	// An image (URL or base64).
-	Image *FunctionsExpressionImageInputSchema 
+	Image *FunctionsExpressionImageInputSchema `ref:"functions.expression.ImageInputSchema"`
 	// Audio content.
-	Audio *FunctionsExpressionAudioInputSchema 
+	Audio *FunctionsExpressionAudioInputSchema `ref:"functions.expression.AudioInputSchema"`
 	// Video content.
-	Video *FunctionsExpressionVideoInputSchema 
+	Video *FunctionsExpressionVideoInputSchema `ref:"functions.expression.VideoInputSchema"`
 	// A file.
-	File *FunctionsExpressionFileInputSchema 
+	File *FunctionsExpressionFileInputSchema `ref:"functions.expression.FileInputSchema"`
 }
 
 func (v FunctionsExpressionInputSchema) MarshalJSON() ([]byte, error) {
@@ -219,4 +219,5 @@ func (v FunctionsExpressionInputSchema) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsExpressionInputSchema) SchemaTitle() string { return "functions.expression.InputSchema" }
 

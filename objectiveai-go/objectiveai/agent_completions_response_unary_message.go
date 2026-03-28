@@ -8,8 +8,8 @@ import (
 )
 
 type AgentCompletionsResponseUnaryMessage struct {
-	Assistant *AgentCompletionsResponseUnaryAssistantResponse 
-	Tool *AgentCompletionsResponseToolResponse 
+	Assistant *AgentCompletionsResponseUnaryAssistantResponse `ref:"agent.completions.response.unary.AssistantResponse"`
+	Tool *AgentCompletionsResponseToolResponse `ref:"agent.completions.response.ToolResponse"`
 }
 
 func (v AgentCompletionsResponseUnaryMessage) MarshalJSON() ([]byte, error) {
@@ -60,4 +60,5 @@ func (v AgentCompletionsResponseUnaryMessage) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentCompletionsResponseUnaryMessage) SchemaTitle() string { return "agent.completions.response.unary.Message" }
 

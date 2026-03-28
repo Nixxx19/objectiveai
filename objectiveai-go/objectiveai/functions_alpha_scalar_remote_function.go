@@ -74,4 +74,5 @@ func (v FunctionsAlphaScalarRemoteFunction) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsAlphaScalarRemoteFunction) SchemaTitle() string { return "functions.alpha_scalar.RemoteFunction" }
 

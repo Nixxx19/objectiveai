@@ -172,4 +172,5 @@ func (v AgentCompletionsRequestResponseFormat) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentCompletionsRequestResponseFormat) SchemaTitle() string { return "agent.completions.request.ResponseFormat" }
 

@@ -7,15 +7,15 @@ import (
 )
 
 type AgentCompletionsResponseToolRole struct {
-	Agent.completions.response.ToolRole string `validate:"oneof=tool"`
+	Tool string `validate:"oneof=tool"`
 }
 
 func (v AgentCompletionsResponseToolRole) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Agent.completions.response.ToolRole)
+	return json.Marshal(v.Tool)
 }
 
 func (v *AgentCompletionsResponseToolRole) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Agent.completions.response.ToolRole); err != nil {
+	if err := json.Unmarshal(data, &v.Tool); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -24,4 +24,5 @@ func (v *AgentCompletionsResponseToolRole) UnmarshalJSON(data []byte) error {
 func (v AgentCompletionsResponseToolRole) Validate() error {
 	return variantValidator.Struct(v)
 }
+func (AgentCompletionsResponseToolRole) SchemaTitle() string { return "agent.completions.response.ToolRole" }
 

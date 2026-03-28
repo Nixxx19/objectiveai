@@ -8,8 +8,8 @@ import (
 )
 
 type FunctionsFullRemoteFunction struct {
-	Alpha *FunctionsAlphaRemoteFunction 
-	Standard *FunctionsRemoteFunction 
+	Alpha *FunctionsAlphaRemoteFunction `ref:"functions.AlphaRemoteFunction"`
+	Standard *FunctionsRemoteFunction `ref:"functions.RemoteFunction"`
 }
 
 func (v FunctionsFullRemoteFunction) MarshalJSON() ([]byte, error) {
@@ -60,4 +60,5 @@ func (v FunctionsFullRemoteFunction) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsFullRemoteFunction) SchemaTitle() string { return "functions.FullRemoteFunction" }
 

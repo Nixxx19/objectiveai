@@ -14,6 +14,7 @@ type AgentCompletionsMessageAssistantToolCallDelta struct {
 	Type *AgentCompletionsMessageAssistantToolCallType `json:"type,omitempty"`
 }
 
+func (AgentCompletionsMessageAssistantToolCallDelta) SchemaTitle() string { return "agent.completions.message.AssistantToolCallDelta" }
 func (v AgentCompletionsMessageAssistantToolCallDelta) Validate() error {
 	return variantValidator.Struct(v)
 }

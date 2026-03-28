@@ -8,6 +8,7 @@ type SwarmListSwarmResponse struct {
 	Data []RemotePath `json:"data"`
 }
 
+func (SwarmListSwarmResponse) SchemaTitle() string { return "swarm.ListSwarmResponse" }
 func (v SwarmListSwarmResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

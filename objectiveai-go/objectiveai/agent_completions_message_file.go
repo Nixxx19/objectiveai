@@ -14,6 +14,7 @@ type AgentCompletionsMessageFile struct {
 	Filename *string `json:"filename,omitempty"`
 }
 
+func (AgentCompletionsMessageFile) SchemaTitle() string { return "agent.completions.message.File" }
 func (v AgentCompletionsMessageFile) Validate() error {
 	return variantValidator.Struct(v)
 }

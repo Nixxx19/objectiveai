@@ -8,6 +8,7 @@ type FunctionsExecutionsResponseOutput struct {
 	Output FunctionsExpressionTaskOutput `json:"output"`
 }
 
+func (FunctionsExecutionsResponseOutput) SchemaTitle() string { return "functions.executions.response.Output" }
 func (v FunctionsExecutionsResponseOutput) Validate() error {
 	return variantValidator.Struct(v)
 }

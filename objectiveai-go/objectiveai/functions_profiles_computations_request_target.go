@@ -91,4 +91,5 @@ func (v FunctionsProfilesComputationsRequestTarget) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsProfilesComputationsRequestTarget) SchemaTitle() string { return "functions.profiles.computations.request.Target" }
 

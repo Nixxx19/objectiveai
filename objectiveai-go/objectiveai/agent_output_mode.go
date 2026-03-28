@@ -92,4 +92,5 @@ func (v AgentOutputMode) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentOutputMode) SchemaTitle() string { return "agent.OutputMode" }
 

@@ -80,4 +80,5 @@ func (v Remote) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (Remote) SchemaTitle() string { return "Remote" }
 

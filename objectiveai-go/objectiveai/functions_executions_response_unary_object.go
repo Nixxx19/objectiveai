@@ -4,24 +4,61 @@ package objectiveai
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type FunctionsExecutionsResponseUnaryObject struct {
-	Functions.executions.response.unary.Object string `validate:"oneof=scalar.function.execution vector.function.execution"`
+	ScalarFunctionExecution *string `validate:"oneof=scalar.function.execution"`
+	VectorFunctionExecution *string `validate:"oneof=vector.function.execution"`
 }
 
 func (v FunctionsExecutionsResponseUnaryObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Functions.executions.response.unary.Object)
+	if v.ScalarFunctionExecution != nil {
+		return json.Marshal(v.ScalarFunctionExecution)
+	}
+	if v.VectorFunctionExecution != nil {
+		return json.Marshal(v.VectorFunctionExecution)
+	}
+	return []byte("null"), nil
 }
 
 func (v *FunctionsExecutionsResponseUnaryObject) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Functions.executions.response.unary.Object); err != nil {
-		return err
+	if string(data) == "null" {
+		return nil
 	}
-	return v.Validate()
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsExecutionsResponseUnaryObject{}
+			candidate.ScalarFunctionExecution = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsExecutionsResponseUnaryObject{}
+			candidate.VectorFunctionExecution = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of FunctionsExecutionsResponseUnaryObject")
 }
 
 func (v FunctionsExecutionsResponseUnaryObject) Validate() error {
+	count := 0
+	if v.ScalarFunctionExecution != nil { count++ }
+	if v.VectorFunctionExecution != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("FunctionsExecutionsResponseUnaryObject: exactly one variant must be set, got %d", count)
+	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsExecutionsResponseUnaryObject) SchemaTitle() string { return "functions.executions.response.unary.Object" }
 

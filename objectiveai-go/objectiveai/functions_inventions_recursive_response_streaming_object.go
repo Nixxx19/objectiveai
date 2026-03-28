@@ -4,24 +4,61 @@ package objectiveai
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type FunctionsInventionsRecursiveResponseStreamingObject struct {
-	Functions.inventions.recursive.response.streaming.Object string `validate:"oneof=alpha.scalar.function.invention.recursive.chunk alpha.vector.function.invention.recursive.chunk"`
+	AlphaScalarFunctionInventionRecursiveChunk *string `validate:"oneof=alpha.scalar.function.invention.recursive.chunk"`
+	AlphaVectorFunctionInventionRecursiveChunk *string `validate:"oneof=alpha.vector.function.invention.recursive.chunk"`
 }
 
 func (v FunctionsInventionsRecursiveResponseStreamingObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Functions.inventions.recursive.response.streaming.Object)
+	if v.AlphaScalarFunctionInventionRecursiveChunk != nil {
+		return json.Marshal(v.AlphaScalarFunctionInventionRecursiveChunk)
+	}
+	if v.AlphaVectorFunctionInventionRecursiveChunk != nil {
+		return json.Marshal(v.AlphaVectorFunctionInventionRecursiveChunk)
+	}
+	return []byte("null"), nil
 }
 
 func (v *FunctionsInventionsRecursiveResponseStreamingObject) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Functions.inventions.recursive.response.streaming.Object); err != nil {
-		return err
+	if string(data) == "null" {
+		return nil
 	}
-	return v.Validate()
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsInventionsRecursiveResponseStreamingObject{}
+			candidate.AlphaScalarFunctionInventionRecursiveChunk = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsInventionsRecursiveResponseStreamingObject{}
+			candidate.AlphaVectorFunctionInventionRecursiveChunk = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of FunctionsInventionsRecursiveResponseStreamingObject")
 }
 
 func (v FunctionsInventionsRecursiveResponseStreamingObject) Validate() error {
+	count := 0
+	if v.AlphaScalarFunctionInventionRecursiveChunk != nil { count++ }
+	if v.AlphaVectorFunctionInventionRecursiveChunk != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("FunctionsInventionsRecursiveResponseStreamingObject: exactly one variant must be set, got %d", count)
+	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsInventionsRecursiveResponseStreamingObject) SchemaTitle() string { return "functions.inventions.recursive.response.streaming.Object" }
 

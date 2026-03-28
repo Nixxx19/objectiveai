@@ -63,4 +63,5 @@ func (v AgentCompletionsMessageSimpleContentExpression) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentCompletionsMessageSimpleContentExpression) SchemaTitle() string { return "agent.completions.message.SimpleContentExpression" }
 

@@ -4,24 +4,61 @@ package objectiveai
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type ConfigViewerMode struct {
-	Config.ViewerMode string `validate:"oneof=remote local"`
+	Remote *string `validate:"oneof=remote"`
+	Local *string `validate:"oneof=local"`
 }
 
 func (v ConfigViewerMode) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Config.ViewerMode)
+	if v.Remote != nil {
+		return json.Marshal(v.Remote)
+	}
+	if v.Local != nil {
+		return json.Marshal(v.Local)
+	}
+	return []byte("null"), nil
 }
 
 func (v *ConfigViewerMode) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Config.ViewerMode); err != nil {
-		return err
+	if string(data) == "null" {
+		return nil
 	}
-	return v.Validate()
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := ConfigViewerMode{}
+			candidate.Remote = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := ConfigViewerMode{}
+			candidate.Local = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of ConfigViewerMode")
 }
 
 func (v ConfigViewerMode) Validate() error {
+	count := 0
+	if v.Remote != nil { count++ }
+	if v.Local != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("ConfigViewerMode: exactly one variant must be set, got %d", count)
+	}
 	return variantValidator.Struct(v)
 }
+func (ConfigViewerMode) SchemaTitle() string { return "config.ViewerMode" }
 

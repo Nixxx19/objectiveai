@@ -18,6 +18,7 @@ type AgentCompletionsRequestAgentCompletionCreateParams struct {
 	Stream *bool `json:"stream,omitempty"`
 }
 
+func (AgentCompletionsRequestAgentCompletionCreateParams) SchemaTitle() string { return "agent.completions.request.AgentCompletionCreateParams" }
 func (v AgentCompletionsRequestAgentCompletionCreateParams) Validate() error {
 	return variantValidator.Struct(v)
 }

@@ -13,6 +13,7 @@ type FunctionsExpressionNumberInputSchema struct {
 	Type FunctionsExpressionNumberInputSchemaType `json:"type"`
 }
 
+func (FunctionsExpressionNumberInputSchema) SchemaTitle() string { return "functions.expression.NumberInputSchema" }
 func (v FunctionsExpressionNumberInputSchema) Validate() error {
 	return variantValidator.Struct(v)
 }

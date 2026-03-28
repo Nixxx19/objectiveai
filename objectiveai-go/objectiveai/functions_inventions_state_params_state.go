@@ -32,12 +32,12 @@ type FunctionsInventionsStateParamsStateAlphaVector struct {
 }
 
 type FunctionsInventionsStateParamsState struct {
-	AlphaScalarBranch *FunctionsInventionsStateParamsStateAlphaScalarBranch 
-	AlphaScalarLeaf *FunctionsInventionsStateParamsStateAlphaScalarLeaf 
-	AlphaVectorBranch *FunctionsInventionsStateParamsStateAlphaVectorBranch 
-	AlphaVectorLeaf *FunctionsInventionsStateParamsStateAlphaVectorLeaf 
-	AlphaScalar *FunctionsInventionsStateParamsStateAlphaScalar 
-	AlphaVector *FunctionsInventionsStateParamsStateAlphaVector 
+	AlphaScalarBranch *FunctionsInventionsStateParamsStateAlphaScalarBranch `ref:"functions.inventions.state.AlphaScalarBranchState"`
+	AlphaScalarLeaf *FunctionsInventionsStateParamsStateAlphaScalarLeaf `ref:"functions.inventions.state.AlphaScalarLeafState"`
+	AlphaVectorBranch *FunctionsInventionsStateParamsStateAlphaVectorBranch `ref:"functions.inventions.state.AlphaVectorBranchState"`
+	AlphaVectorLeaf *FunctionsInventionsStateParamsStateAlphaVectorLeaf `ref:"functions.inventions.state.AlphaVectorLeafState"`
+	AlphaScalar *FunctionsInventionsStateParamsStateAlphaScalar `ref:"functions.inventions.state.AlphaScalarState"`
+	AlphaVector *FunctionsInventionsStateParamsStateAlphaVector `ref:"functions.inventions.state.AlphaVectorState"`
 }
 
 func (v FunctionsInventionsStateParamsState) MarshalJSON() ([]byte, error) {
@@ -148,4 +148,5 @@ func (v FunctionsInventionsStateParamsState) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsInventionsStateParamsState) SchemaTitle() string { return "functions.inventions.state.ParamsState" }
 

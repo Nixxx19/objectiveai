@@ -10,6 +10,7 @@ type FunctionsCheckVectorFieldsValidation struct {
 	OutputLength FunctionsExpressionExpression `json:"output_length"`
 }
 
+func (FunctionsCheckVectorFieldsValidation) SchemaTitle() string { return "functions.check.VectorFieldsValidation" }
 func (v FunctionsCheckVectorFieldsValidation) Validate() error {
 	return variantValidator.Struct(v)
 }

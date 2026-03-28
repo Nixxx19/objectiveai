@@ -22,6 +22,7 @@ type AgentCompletionsRequestProvider struct {
 	Zdr *bool `json:"zdr,omitempty"`
 }
 
+func (AgentCompletionsRequestProvider) SchemaTitle() string { return "agent.completions.request.Provider" }
 func (v AgentCompletionsRequestProvider) Validate() error {
 	return variantValidator.Struct(v)
 }

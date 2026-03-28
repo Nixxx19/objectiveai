@@ -19,7 +19,7 @@ type AgentOpenrouterAgentBase struct {
 	// The upstream language model identifier (e.g., `"gpt-4"`, `"claude-3-opus"`).
 	Model string `json:"model"`
 	// The output mode for vector completions. Ignored for agent completions.
-	OutputMode AgentOpenrouterOutputMode `json:"output_mode,omitempty"`
+	OutputMode AgentOpenrouterOutputMode `json:"output_mode,omitempty" def:"instruction"`
 	// Messages inserted after the leading chain of system/developer messages.
 	PostSystemPrefixMessages []AgentCompletionsMessageMessage `json:"post_system_prefix_messages,omitempty"`
 	// Messages prepended to the user's prompt.
@@ -58,6 +58,7 @@ type AgentOpenrouterAgentBase struct {
 	Verbosity *AgentOpenrouterVerbosity `json:"verbosity,omitempty"`
 }
 
+func (AgentOpenrouterAgentBase) SchemaTitle() string { return "agent.openrouter.AgentBase" }
 func (v AgentOpenrouterAgentBase) Validate() error {
 	return variantValidator.Struct(v)
 }

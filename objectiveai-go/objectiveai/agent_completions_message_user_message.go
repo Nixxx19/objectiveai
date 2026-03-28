@@ -10,6 +10,7 @@ type AgentCompletionsMessageUserMessage struct {
 	Name *string `json:"name,omitempty"`
 }
 
+func (AgentCompletionsMessageUserMessage) SchemaTitle() string { return "agent.completions.message.UserMessage" }
 func (v AgentCompletionsMessageUserMessage) Validate() error {
 	return variantValidator.Struct(v)
 }

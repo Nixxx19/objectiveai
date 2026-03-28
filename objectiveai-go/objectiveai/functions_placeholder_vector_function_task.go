@@ -21,6 +21,7 @@ type FunctionsPlaceholderVectorFunctionTask struct {
 	OutputLength FunctionsExpressionExpression `json:"output_length"`
 }
 
+func (FunctionsPlaceholderVectorFunctionTask) SchemaTitle() string { return "functions.PlaceholderVectorFunctionTask" }
 func (v FunctionsPlaceholderVectorFunctionTask) Validate() error {
 	return variantValidator.Struct(v)
 }

@@ -10,6 +10,7 @@ type FunctionsProfilesComputationsResponseFittingStats struct {
 	Starts uint32 `json:"starts" validate:"min=0,max=4294967295"`
 }
 
+func (FunctionsProfilesComputationsResponseFittingStats) SchemaTitle() string { return "functions.profiles.computations.response.FittingStats" }
 func (v FunctionsProfilesComputationsResponseFittingStats) Validate() error {
 	return variantValidator.Struct(v)
 }

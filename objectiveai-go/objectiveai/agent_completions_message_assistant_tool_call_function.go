@@ -10,6 +10,7 @@ type AgentCompletionsMessageAssistantToolCallFunction struct {
 	Name string `json:"name"`
 }
 
+func (AgentCompletionsMessageAssistantToolCallFunction) SchemaTitle() string { return "agent.completions.message.AssistantToolCallFunction" }
 func (v AgentCompletionsMessageAssistantToolCallFunction) Validate() error {
 	return variantValidator.Struct(v)
 }

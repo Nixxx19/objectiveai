@@ -14,7 +14,7 @@ import (
 // 0 to the evaluated count.
 type FunctionsCompiledTask struct {
 	// A single task (no mapping).
-	One *FunctionsTask 
+	One *FunctionsTask `ref:"functions.Task"`
 	// Multiple task instances from mapped execution.
 	Many []FunctionsTask 
 }
@@ -67,4 +67,5 @@ func (v FunctionsCompiledTask) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsCompiledTask) SchemaTitle() string { return "functions.CompiledTask" }
 

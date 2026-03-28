@@ -14,8 +14,8 @@ import (
 // (with optional fallbacks) or resolved from a remote source via a
 // hashmap during conversion.
 type AgentInlineAgentBaseWithFallbacksOrRemote struct {
-	AgentBase *AgentInlineAgentBaseWithFallbacks 
-	Remote *RemotePath 
+	AgentBase *AgentInlineAgentBaseWithFallbacks `ref:"agent.InlineAgentBaseWithFallbacks"`
+	Remote *RemotePath `ref:"RemotePath"`
 }
 
 func (v AgentInlineAgentBaseWithFallbacksOrRemote) MarshalJSON() ([]byte, error) {
@@ -66,4 +66,5 @@ func (v AgentInlineAgentBaseWithFallbacksOrRemote) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentInlineAgentBaseWithFallbacksOrRemote) SchemaTitle() string { return "agent.InlineAgentBaseWithFallbacksOrRemote" }
 

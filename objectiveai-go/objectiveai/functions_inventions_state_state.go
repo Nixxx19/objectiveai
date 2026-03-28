@@ -24,10 +24,10 @@ type FunctionsInventionsStateStateAlphaVectorLeaf struct {
 }
 
 type FunctionsInventionsStateState struct {
-	AlphaScalarBranch *FunctionsInventionsStateStateAlphaScalarBranch 
-	AlphaScalarLeaf *FunctionsInventionsStateStateAlphaScalarLeaf 
-	AlphaVectorBranch *FunctionsInventionsStateStateAlphaVectorBranch 
-	AlphaVectorLeaf *FunctionsInventionsStateStateAlphaVectorLeaf 
+	AlphaScalarBranch *FunctionsInventionsStateStateAlphaScalarBranch `ref:"functions.inventions.state.AlphaScalarBranchState"`
+	AlphaScalarLeaf *FunctionsInventionsStateStateAlphaScalarLeaf `ref:"functions.inventions.state.AlphaScalarLeafState"`
+	AlphaVectorBranch *FunctionsInventionsStateStateAlphaVectorBranch `ref:"functions.inventions.state.AlphaVectorBranchState"`
+	AlphaVectorLeaf *FunctionsInventionsStateStateAlphaVectorLeaf `ref:"functions.inventions.state.AlphaVectorLeafState"`
 }
 
 func (v FunctionsInventionsStateState) MarshalJSON() ([]byte, error) {
@@ -108,4 +108,5 @@ func (v FunctionsInventionsStateState) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsInventionsStateState) SchemaTitle() string { return "functions.inventions.state.State" }
 

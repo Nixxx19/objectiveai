@@ -11,6 +11,7 @@ type AgentCompletionsMessageAssistantToolCall struct {
 	Type string `json:"type" validate:"oneof=function"`
 }
 
+func (AgentCompletionsMessageAssistantToolCall) SchemaTitle() string { return "agent.completions.message.AssistantToolCall" }
 func (v AgentCompletionsMessageAssistantToolCall) Validate() error {
 	return variantValidator.Struct(v)
 }

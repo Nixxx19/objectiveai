@@ -8,6 +8,7 @@ type VectorCompletionsCacheCacheVoteRequest struct {
 	Responses []AgentCompletionsMessageRichContent `json:"responses"`
 }
 
+func (VectorCompletionsCacheCacheVoteRequest) SchemaTitle() string { return "vector.completions.cache.CacheVoteRequest" }
 func (v VectorCompletionsCacheCacheVoteRequest) Validate() error {
 	return variantValidator.Struct(v)
 }

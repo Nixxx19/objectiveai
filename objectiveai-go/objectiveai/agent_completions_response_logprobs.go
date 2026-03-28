@@ -10,6 +10,7 @@ type AgentCompletionsResponseLogprobs struct {
 	Refusal []AgentCompletionsResponseLogprob `json:"refusal,omitempty"`
 }
 
+func (AgentCompletionsResponseLogprobs) SchemaTitle() string { return "agent.completions.response.Logprobs" }
 func (v AgentCompletionsResponseLogprobs) Validate() error {
 	return variantValidator.Struct(v)
 }

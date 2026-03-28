@@ -4,24 +4,61 @@ package objectiveai
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type FunctionsInventionsResponseStreamingObject struct {
-	Functions.inventions.response.streaming.Object string `validate:"oneof=alpha.scalar.function.invention.chunk alpha.vector.function.invention.chunk"`
+	AlphaScalarFunctionInventionChunk *string `validate:"oneof=alpha.scalar.function.invention.chunk"`
+	AlphaVectorFunctionInventionChunk *string `validate:"oneof=alpha.vector.function.invention.chunk"`
 }
 
 func (v FunctionsInventionsResponseStreamingObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Functions.inventions.response.streaming.Object)
+	if v.AlphaScalarFunctionInventionChunk != nil {
+		return json.Marshal(v.AlphaScalarFunctionInventionChunk)
+	}
+	if v.AlphaVectorFunctionInventionChunk != nil {
+		return json.Marshal(v.AlphaVectorFunctionInventionChunk)
+	}
+	return []byte("null"), nil
 }
 
 func (v *FunctionsInventionsResponseStreamingObject) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Functions.inventions.response.streaming.Object); err != nil {
-		return err
+	if string(data) == "null" {
+		return nil
 	}
-	return v.Validate()
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsInventionsResponseStreamingObject{}
+			candidate.AlphaScalarFunctionInventionChunk = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsInventionsResponseStreamingObject{}
+			candidate.AlphaVectorFunctionInventionChunk = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of FunctionsInventionsResponseStreamingObject")
 }
 
 func (v FunctionsInventionsResponseStreamingObject) Validate() error {
+	count := 0
+	if v.AlphaScalarFunctionInventionChunk != nil { count++ }
+	if v.AlphaVectorFunctionInventionChunk != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("FunctionsInventionsResponseStreamingObject: exactly one variant must be set, got %d", count)
+	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsInventionsResponseStreamingObject) SchemaTitle() string { return "functions.inventions.response.streaming.Object" }
 

@@ -8,6 +8,7 @@ type ConfigFavorite struct {
 	Note string `json:"note"`
 }
 
+func (ConfigFavorite) SchemaTitle() string { return "config.Favorite" }
 func (v ConfigFavorite) Validate() error {
 	return variantValidator.Struct(v)
 }

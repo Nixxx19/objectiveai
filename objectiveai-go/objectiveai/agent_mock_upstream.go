@@ -8,16 +8,15 @@ import (
 
 // Mock upstream marker.
 type AgentMockUpstream struct {
-	// Mock upstream marker.
-	Agent.mock.Upstream string `validate:"oneof=mock"`
+	Mock string `validate:"oneof=mock"`
 }
 
 func (v AgentMockUpstream) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Agent.mock.Upstream)
+	return json.Marshal(v.Mock)
 }
 
 func (v *AgentMockUpstream) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Agent.mock.Upstream); err != nil {
+	if err := json.Unmarshal(data, &v.Mock); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -26,4 +25,5 @@ func (v *AgentMockUpstream) UnmarshalJSON(data []byte) error {
 func (v AgentMockUpstream) Validate() error {
 	return variantValidator.Struct(v)
 }
+func (AgentMockUpstream) SchemaTitle() string { return "agent.mock.Upstream" }
 

@@ -15,6 +15,7 @@ type AuthGetCreditsResponse struct {
 	TotalCreditsUsed float64 `json:"total_credits_used" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }
 
+func (AuthGetCreditsResponse) SchemaTitle() string { return "auth.GetCreditsResponse" }
 func (v AuthGetCreditsResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

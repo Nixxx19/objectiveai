@@ -95,4 +95,5 @@ func (v RemotePathCommitOptional) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (RemotePathCommitOptional) SchemaTitle() string { return "RemotePathCommitOptional" }
 

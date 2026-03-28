@@ -10,6 +10,7 @@ type FunctionsGetFunctionProfilePairResponse struct {
 	Profile FunctionsProfilesGetProfileResponse `json:"profile"`
 }
 
+func (FunctionsGetFunctionProfilePairResponse) SchemaTitle() string { return "functions.GetFunctionProfilePairResponse" }
 func (v FunctionsGetFunctionProfilePairResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

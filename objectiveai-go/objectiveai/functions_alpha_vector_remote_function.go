@@ -74,4 +74,5 @@ func (v FunctionsAlphaVectorRemoteFunction) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (FunctionsAlphaVectorRemoteFunction) SchemaTitle() string { return "functions.alpha_vector.RemoteFunction" }
 

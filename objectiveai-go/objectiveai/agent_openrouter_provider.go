@@ -23,6 +23,7 @@ type AgentOpenrouterProvider struct {
 	RequireParameters *bool `json:"require_parameters,omitempty"`
 }
 
+func (AgentOpenrouterProvider) SchemaTitle() string { return "agent.openrouter.Provider" }
 func (v AgentOpenrouterProvider) Validate() error {
 	return variantValidator.Struct(v)
 }

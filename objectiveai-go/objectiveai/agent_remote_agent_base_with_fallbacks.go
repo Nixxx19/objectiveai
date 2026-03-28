@@ -8,6 +8,7 @@ type AgentRemoteAgentBaseWithFallbacks struct {
 	Description string `json:"description"`
 }
 
+func (AgentRemoteAgentBaseWithFallbacks) SchemaTitle() string { return "agent.RemoteAgentBaseWithFallbacks" }
 func (v AgentRemoteAgentBaseWithFallbacks) Validate() error {
 	return variantValidator.Struct(v)
 }

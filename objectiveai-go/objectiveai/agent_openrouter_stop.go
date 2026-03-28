@@ -66,4 +66,5 @@ func (v AgentOpenrouterStop) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentOpenrouterStop) SchemaTitle() string { return "agent.openrouter.Stop" }
 

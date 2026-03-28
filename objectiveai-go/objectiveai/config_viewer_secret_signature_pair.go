@@ -15,6 +15,7 @@ type ConfigViewerSecretSignaturePair struct {
 	Signature string `json:"signature"`
 }
 
+func (ConfigViewerSecretSignaturePair) SchemaTitle() string { return "config.ViewerSecretSignaturePair" }
 func (v ConfigViewerSecretSignaturePair) Validate() error {
 	return variantValidator.Struct(v)
 }

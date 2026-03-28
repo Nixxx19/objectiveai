@@ -21,6 +21,7 @@ type VectorCompletionsResponseUnaryAgentCompletion struct {
 	Usage AgentCompletionsResponseUsage `json:"usage"`
 }
 
+func (VectorCompletionsResponseUnaryAgentCompletion) SchemaTitle() string { return "vector.completions.response.unary.AgentCompletion" }
 func (v VectorCompletionsResponseUnaryAgentCompletion) Validate() error {
 	return variantValidator.Struct(v)
 }

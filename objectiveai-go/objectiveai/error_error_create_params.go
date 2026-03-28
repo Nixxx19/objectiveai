@@ -10,6 +10,7 @@ type ErrorErrorCreateParams struct {
 	Stream *bool `json:"stream,omitempty"`
 }
 
+func (ErrorErrorCreateParams) SchemaTitle() string { return "error.ErrorCreateParams" }
 func (v ErrorErrorCreateParams) Validate() error {
 	return variantValidator.Struct(v)
 }

@@ -10,6 +10,7 @@ type AgentCompletionsMessageImageUrl struct {
 	URL string `json:"url"`
 }
 
+func (AgentCompletionsMessageImageUrl) SchemaTitle() string { return "agent.completions.message.ImageUrl" }
 func (v AgentCompletionsMessageImageUrl) Validate() error {
 	return variantValidator.Struct(v)
 }

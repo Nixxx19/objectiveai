@@ -9,6 +9,7 @@ type FunctionsExpressionImageInputSchema struct {
 	Type FunctionsExpressionImageInputSchemaType `json:"type"`
 }
 
+func (FunctionsExpressionImageInputSchema) SchemaTitle() string { return "functions.expression.ImageInputSchema" }
 func (v FunctionsExpressionImageInputSchema) Validate() error {
 	return variantValidator.Struct(v)
 }

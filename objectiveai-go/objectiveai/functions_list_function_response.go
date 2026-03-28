@@ -8,6 +8,7 @@ type FunctionsListFunctionResponse struct {
 	Data []RemotePath `json:"data"`
 }
 
+func (FunctionsListFunctionResponse) SchemaTitle() string { return "functions.ListFunctionResponse" }
 func (v FunctionsListFunctionResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

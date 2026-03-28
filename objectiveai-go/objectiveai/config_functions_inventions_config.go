@@ -6,6 +6,7 @@ type ConfigFunctionsInventionsConfig struct {
 	Remote *Remote `json:"remote,omitempty"`
 }
 
+func (ConfigFunctionsInventionsConfig) SchemaTitle() string { return "config.FunctionsInventionsConfig" }
 func (v ConfigFunctionsInventionsConfig) Validate() error {
 	return variantValidator.Struct(v)
 }

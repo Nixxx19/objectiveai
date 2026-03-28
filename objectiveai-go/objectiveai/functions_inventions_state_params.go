@@ -12,6 +12,7 @@ type FunctionsInventionsStateParams struct {
 	Spec string `json:"spec"`
 }
 
+func (FunctionsInventionsStateParams) SchemaTitle() string { return "functions.inventions.state.Params" }
 func (v FunctionsInventionsStateParams) Validate() error {
 	return variantValidator.Struct(v)
 }

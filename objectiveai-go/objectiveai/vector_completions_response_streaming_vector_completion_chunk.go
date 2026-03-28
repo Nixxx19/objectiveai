@@ -27,6 +27,7 @@ type VectorCompletionsResponseStreamingVectorCompletionChunk struct {
 	Weights []float64 `json:"weights"`
 }
 
+func (VectorCompletionsResponseStreamingVectorCompletionChunk) SchemaTitle() string { return "vector.completions.response.streaming.VectorCompletionChunk" }
 func (v VectorCompletionsResponseStreamingVectorCompletionChunk) Validate() error {
 	return variantValidator.Struct(v)
 }

@@ -8,6 +8,7 @@ type FunctionsListFunctionProfilePairResponse struct {
 	Data []FunctionsListFunctionProfilePairItem `json:"data"`
 }
 
+func (FunctionsListFunctionProfilePairResponse) SchemaTitle() string { return "functions.ListFunctionProfilePairResponse" }
 func (v FunctionsListFunctionProfilePairResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

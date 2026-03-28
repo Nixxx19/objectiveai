@@ -4,9 +4,10 @@ package objectiveai
 
 type ConfigViewerConfig struct {
 	Local *ConfigViewerLocalConfig `json:"local,omitempty"`
-	Mode ConfigViewerMode `json:"mode,omitempty"`
+	Mode ConfigViewerMode `json:"mode,omitempty" def:"local"`
 }
 
+func (ConfigViewerConfig) SchemaTitle() string { return "config.ViewerConfig" }
 func (v ConfigViewerConfig) Validate() error {
 	return variantValidator.Struct(v)
 }

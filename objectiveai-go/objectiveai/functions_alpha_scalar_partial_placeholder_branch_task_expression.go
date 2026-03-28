@@ -7,6 +7,7 @@ type FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression struct {
 	Type string `json:"type" validate:"oneof=placeholder.alpha.scalar.function"`
 }
 
+func (FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression) SchemaTitle() string { return "functions.alpha_scalar.PartialPlaceholderBranchTaskExpression" }
 func (v FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

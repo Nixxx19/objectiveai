@@ -8,6 +8,7 @@ type AgentListAgentResponse struct {
 	Data []RemotePath `json:"data"`
 }
 
+func (AgentListAgentResponse) SchemaTitle() string { return "agent.ListAgentResponse" }
 func (v AgentListAgentResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

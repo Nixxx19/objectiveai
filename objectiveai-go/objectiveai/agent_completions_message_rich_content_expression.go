@@ -63,4 +63,5 @@ func (v AgentCompletionsMessageRichContentExpression) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentCompletionsMessageRichContentExpression) SchemaTitle() string { return "agent.completions.message.RichContentExpression" }
 

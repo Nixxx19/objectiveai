@@ -99,4 +99,5 @@ func (v AgentClaudeAgentSdkEffort) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentClaudeAgentSdkEffort) SchemaTitle() string { return "agent.claude_agent_sdk.Effort" }
 

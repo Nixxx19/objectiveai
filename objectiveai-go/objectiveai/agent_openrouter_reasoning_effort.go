@@ -133,4 +133,5 @@ func (v AgentOpenrouterReasoningEffort) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentOpenrouterReasoningEffort) SchemaTitle() string { return "agent.openrouter.ReasoningEffort" }
 

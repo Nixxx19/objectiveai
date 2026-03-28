@@ -26,6 +26,7 @@ type VectorCompletionsRequestVectorCompletionCreateParams struct {
 	Swarm SwarmInlineSwarmBaseOrRemoteCommitOptional `json:"swarm"`
 }
 
+func (VectorCompletionsRequestVectorCompletionCreateParams) SchemaTitle() string { return "vector.completions.request.VectorCompletionCreateParams" }
 func (v VectorCompletionsRequestVectorCompletionCreateParams) Validate() error {
 	return variantValidator.Struct(v)
 }

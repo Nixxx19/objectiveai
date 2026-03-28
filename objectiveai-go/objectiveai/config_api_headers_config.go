@@ -16,6 +16,7 @@ type ConfigApiHeadersConfig struct {
 	XViewerSignature *string `json:"x_viewer_signature,omitempty"`
 }
 
+func (ConfigApiHeadersConfig) SchemaTitle() string { return "config.ApiHeadersConfig" }
 func (v ConfigApiHeadersConfig) Validate() error {
 	return variantValidator.Struct(v)
 }

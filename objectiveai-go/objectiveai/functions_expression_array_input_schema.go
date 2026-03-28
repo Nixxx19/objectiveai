@@ -15,6 +15,7 @@ type FunctionsExpressionArrayInputSchema struct {
 	Type FunctionsExpressionArrayInputSchemaType `json:"type"`
 }
 
+func (FunctionsExpressionArrayInputSchema) SchemaTitle() string { return "functions.expression.ArrayInputSchema" }
 func (v FunctionsExpressionArrayInputSchema) Validate() error {
 	return variantValidator.Struct(v)
 }

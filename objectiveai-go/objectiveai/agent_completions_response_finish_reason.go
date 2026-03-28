@@ -114,4 +114,5 @@ func (v AgentCompletionsResponseFinishReason) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
+func (AgentCompletionsResponseFinishReason) SchemaTitle() string { return "agent.completions.response.FinishReason" }
 

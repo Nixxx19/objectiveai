@@ -14,6 +14,7 @@ type AgentCompletionsResponsePromptTokensDetails struct {
 	VideoTokens *uint64 `json:"video_tokens,omitempty" validate:"min=0,max=18446744073709551615"`
 }
 
+func (AgentCompletionsResponsePromptTokensDetails) SchemaTitle() string { return "agent.completions.response.PromptTokensDetails" }
 func (v AgentCompletionsResponsePromptTokensDetails) Validate() error {
 	return variantValidator.Struct(v)
 }
