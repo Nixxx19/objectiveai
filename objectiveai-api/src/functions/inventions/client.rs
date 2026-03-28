@@ -233,8 +233,15 @@ where
         impl Stream<Item = FunctionInventionChunk> + Send + 'static,
         super::Error,
     > {
+        // Resolve state (inline or from remote files).
+        let resolved_state = self.retrieve_router
+            .get_function_invention_state(&ctx, request.state.clone())
+            .await
+            .map_err(|e| super::Error::InvalidState(e.to_string()))?
+            .ok_or(super::Error::StateNotFound)?;
+
         // Validate params before starting.
-        let params = match &request.state {
+        let params = match &resolved_state {
             objectiveai::functions::inventions::state::ParamsState::AlphaScalarBranch(s) => &s.params,
             objectiveai::functions::inventions::state::ParamsState::AlphaScalarLeaf(s) => &s.params,
             objectiveai::functions::inventions::state::ParamsState::AlphaVectorBranch(s) => &s.params,
@@ -247,12 +254,12 @@ where
 
         // Validate depth matches variant.
         let is_leaf = matches!(
-            &request.state,
+            &resolved_state,
             objectiveai::functions::inventions::state::ParamsState::AlphaScalarLeaf(_)
             | objectiveai::functions::inventions::state::ParamsState::AlphaVectorLeaf(_)
         );
         let is_branch = matches!(
-            &request.state,
+            &resolved_state,
             objectiveai::functions::inventions::state::ParamsState::AlphaScalarBranch(_)
             | objectiveai::functions::inventions::state::ParamsState::AlphaVectorBranch(_)
         );
@@ -275,7 +282,7 @@ where
             .unwrap()
             .as_secs();
         let id = invention_response_id(created);
-        let mut state = request.state.clone().route();
+        let mut state = resolved_state.route();
         state.set_checker_seed(request.seed);
 
         // Validate predicted tasks_length against params bounds.

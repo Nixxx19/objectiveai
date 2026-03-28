@@ -21,6 +21,9 @@ pub enum Error {
     /// The name is invalid (too long or would exceed limits with child paths).
     #[error("invalid name: {0}")]
     InvalidName(String),
+    /// The remote state was not found.
+    #[error("state not found")]
+    StateNotFound,
     /// Filesystem error.
     #[error("filesystem error: {0}")]
     Filesystem(#[from] crate::filesystem::Error),
@@ -37,6 +40,7 @@ impl StatusError for Error {
             Error::NameAlreadyExists(_) => 409,
             Error::GithubToken(e) => e.status(),
             Error::GithubTokenMissingPermissions(_) => 403,
+            Error::StateNotFound => 404,
             Error::InvalidName(_) => 400,
             Error::Filesystem(e) => e.status(),
             Error::FunctionFetch(e) => e.code,
@@ -64,6 +68,10 @@ impl StatusError for Error {
             Error::GithubTokenMissingPermissions(msg) => serde_json::json!({
                 "kind": "github_token_missing_permissions",
                 "error": msg,
+            }),
+            Error::StateNotFound => serde_json::json!({
+                "kind": "state_not_found",
+                "error": "remote state not found",
             }),
             Error::InvalidName(msg) => serde_json::json!({
                 "kind": "invalid_name",
