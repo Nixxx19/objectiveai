@@ -870,12 +870,15 @@ func generateTypeCode(title string, schema Schema, allTitles map[string]bool) st
 	if anyOf, ok := schema["anyOf"].([]any); ok {
 		nonNull, hasNull := splitNullVariants(anyOf)
 		if hasNull && len(nonNull) == 1 {
-			// Simple nullable — type alias (no SchemaTitle since it's an alias)
+			// Simple nullable — type definition
 			goT := goType(nonNull[0], title, allTitles)
 			if goT != "any" && !strings.HasPrefix(goT, "*") {
 				goT = "*" + goT
 			}
-			b.WriteString(fmt.Sprintf("type %s = %s\n\n", typeName, goT))
+			desc, _ := schema["description"].(string)
+			b.WriteString(goDocComment(desc, ""))
+			b.WriteString(fmt.Sprintf("type %s %s\n\n", typeName, goT))
+			b.WriteString(fmt.Sprintf("func (%s) SchemaTitle() string { return %q }\n", typeName, title))
 		} else {
 			// anyOf struct with variant fields
 			b.WriteString(generateAnyOfStruct(typeName, anyOf, title, schema, allTitles))
@@ -905,7 +908,10 @@ func generateTypeCode(title string, schema Schema, allTitles map[string]bool) st
 
 	// Case 4: Non-anyOf, non-struct, non-enum (primitive, array, map, $ref)
 	goT := determinePrimitiveGoType(schema, title, allTitles)
-	b.WriteString(fmt.Sprintf("type %s = %s\n\n", typeName, goT))
+	desc, _ := schema["description"].(string)
+	b.WriteString(goDocComment(desc, ""))
+	b.WriteString(fmt.Sprintf("type %s %s\n\n", typeName, goT))
+	b.WriteString(fmt.Sprintf("func (%s) SchemaTitle() string { return %q }\n", typeName, title))
 	return b.String()
 }
 

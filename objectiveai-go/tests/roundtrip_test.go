@@ -17,13 +17,14 @@ import (
 // ---------------------------------------------------------------------------
 
 type typeInfo struct {
-	name        string
-	doc         string
-	isAlias     bool
-	aliasTarget string
-	fields      []fieldInfo
-	embeds      []string
-	methods     map[string]string
+	name           string
+	doc            string
+	isAlias        bool
+	aliasTarget    string
+	underlyingType string // for non-struct type definitions (e.g., type Foo *string)
+	fields         []fieldInfo
+	embeds         []string
+	methods        map[string]string
 }
 
 type fieldInfo struct {
@@ -98,6 +99,9 @@ func parseSourceDir(t *testing.T) map[string]*typeInfo {
 							}
 							ti.fields = append(ti.fields, fi)
 						}
+					} else {
+						// Non-struct type definition (e.g., type Foo *string)
+						ti.underlyingType = typeExprString(ts.Type)
 					}
 
 					types[ts.Name.Name] = ti
@@ -201,6 +205,24 @@ func reconstructSchema(
 					map[string]any{"$ref": innerTitle},
 					map[string]any{"type": "null"},
 				}
+			}
+		}
+		return result
+	}
+
+	// Non-struct type definition (e.g., type Foo *string)
+	if ti.underlyingType != "" {
+		ut := ti.underlyingType
+		isPtr := strings.HasPrefix(ut, "*")
+		if isPtr {
+			ut = strings.TrimPrefix(ut, "*")
+		}
+		inner := buildFieldTypeSchema(ut, types, titleMap)
+		if isPtr {
+			result["anyOf"] = []any{inner, map[string]any{"type": "null"}}
+		} else {
+			for k, v := range inner {
+				result[k] = v
 			}
 		}
 		return result
