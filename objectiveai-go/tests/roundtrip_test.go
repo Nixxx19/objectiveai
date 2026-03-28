@@ -316,6 +316,14 @@ func buildFieldTypeSchema(
 	types map[string]*typeInfo,
 	titleMap map[string]string,
 ) map[string]any {
+	// Pointer types → nullable (anyOf with null)
+	if strings.HasPrefix(typeName, "*") {
+		inner := buildFieldTypeSchema(strings.TrimPrefix(typeName, "*"), types, titleMap)
+		return map[string]any{
+			"anyOf": []any{inner, map[string]any{"type": "null"}},
+		}
+	}
+
 	if schemaTitle, ok := titleMap[typeName]; ok {
 		return map[string]any{"$ref": schemaTitle}
 	}
@@ -530,6 +538,9 @@ func reconstructVariant(
 				}
 				propName := strings.Split(jsonTag, ",")[0]
 				propSchema := reconstructFieldSchema(sf, strings.Contains(jsonTag, "omitempty"), types, titleMap)
+				if sf.doc != "" {
+					propSchema["description"] = sf.doc
+				}
 				props[propName] = propSchema
 			}
 			if len(props) > 0 {
@@ -549,6 +560,9 @@ func reconstructVariant(
 			}
 			propName := strings.Split(jsonTag, ",")[0]
 			propSchema := reconstructFieldSchema(sf, strings.Contains(jsonTag, "omitempty"), types, titleMap)
+			if sf.doc != "" {
+				propSchema["description"] = sf.doc
+			}
 			props[propName] = propSchema
 		}
 		if len(props) > 0 {
