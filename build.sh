@@ -35,8 +35,8 @@ run_phase() {
 # Phase 1: build tools + json schema
 run_phase build-bin.sh objectiveai-json-schema/build.sh
 
-# Phase 2: wasm + pyo3 (need build tools from phase 1)
-run_phase objectiveai-rs-wasm-js/build.sh objectiveai-rs-pyo3/build.sh
+# Phase 2: wasm + pyo3 + cffi (need build tools from phase 1)
+run_phase objectiveai-rs-wasm-js/build.sh objectiveai-rs-pyo3/build.sh objectiveai-rs-cffi/build.sh
 
 # Phase 3: js + py (need wasm/pyo3 from phase 2)
 run_phase objectiveai-js/build.sh objectiveai-py/build.sh
