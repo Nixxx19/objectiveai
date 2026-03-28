@@ -133,19 +133,25 @@ pub enum Commands {
     },
     /// Invent from a remote state (previously saved invention state files)
     Remote {
-        /// Name for the recursive invention
-        #[arg(long)]
-        name: String,
-        /// Remote source for the state
-        #[arg(long, value_enum)]
-        state_remote: crate::remote::Remote,
-        /// State owner
-        #[arg(long)]
-        state_owner: String,
-        /// State repository
-        #[arg(long)]
-        state_repository: String,
-        /// State commit (optional)
+        /// Remote source for the state (github, filesystem, or mock)
+        #[arg(long, value_enum,
+            requires_if("github", "state_owner"),
+            requires_if("github", "state_repository"),
+            requires_if("filesystem", "state_owner"),
+            requires_if("filesystem", "state_repository"),
+            requires_if("mock", "state_name"),
+        )]
+        state_remote: crate::remote::RemoteWithMock,
+        /// State owner (github/filesystem)
+        #[arg(long, conflicts_with = "state_name")]
+        state_owner: Option<String>,
+        /// State repository (github/filesystem)
+        #[arg(long, conflicts_with = "state_name")]
+        state_repository: Option<String>,
+        /// State name (mock only)
+        #[arg(long, conflicts_with_all = ["state_owner", "state_repository", "state_commit"])]
+        state_name: Option<String>,
+        /// State commit (optional, github/filesystem only)
         #[arg(long)]
         state_commit: Option<String>,
         #[command(flatten)]
@@ -153,39 +159,35 @@ pub enum Commands {
         /// Seed for deterministic mock responses
         #[arg(long)]
         seed: Option<i64>,
-        /// Maximum step retries
-        #[arg(long)]
-        max_step_retries: Option<u32>,
     },
 }
 
 impl Commands {
     pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
-        let (name, agent_args, seed, state, max_step_retries) = match self {
+        let (agent_args, seed, state) = match self {
             Commands::AlphaScalar { params, agent, seed } => {
                 let p = params.into_params();
-                let name = p.name.clone();
                 let state = objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(
                     objectiveai::functions::inventions::ParamsState::AlphaScalar(
                         objectiveai::functions::inventions::state::AlphaScalarState { params: p, input_schema: None },
                     ),
                 );
-                (name, agent, seed, state, None)
+                (agent, seed, state)
             }
             Commands::AlphaVector { params, agent, seed } => {
                 let p = params.into_params();
-                let name = p.name.clone();
                 let state = objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(
                     objectiveai::functions::inventions::ParamsState::AlphaVector(
                         objectiveai::functions::inventions::state::AlphaVectorState { params: p, input_schema: None },
                     ),
                 );
-                (name, agent, seed, state, None)
+                (agent, seed, state)
             }
-            Commands::Remote { name, state_remote, state_owner, state_repository, state_commit, agent, seed, max_step_retries } => {
-                let remote_path = state_remote.into_path(state_owner, state_repository, state_commit);
+            Commands::Remote { state_remote, state_owner, state_repository, state_name, state_commit, agent, seed } => {
+                let remote_path = state_remote.into_path(state_owner, state_repository, state_name, state_commit)
+                    .ok_or(crate::error::Error::MissingArgs("--state-owner and --state-repository are required for github/filesystem, --state-name for mock"))?;
                 let state = objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Remote(remote_path);
-                (name, agent, seed, state, max_step_retries)
+                (agent, seed, state)
             }
         };
 
@@ -197,13 +199,13 @@ impl Commands {
 
         let request = objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams {
             remote,
-            name,
+            overwrite: None,
             state,
             provider: None,
             agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::Remote(agent_path),
             seed,
             stream: Some(true),
-            max_step_retries,
+            max_step_retries: None,
         };
 
         crate::api::run(|http_client| async move {
