@@ -518,7 +518,7 @@ where
         };
 
         let name = state.name();
-        let publish_files = crate::functions::inventions::extract_publish_files(&state, &function);
+        let publish_files = state.serialize_into_files();
         let description = crate::functions::inventions::extract_description(&state);
 
         let (updated_path, publish_error) = match request.remote {

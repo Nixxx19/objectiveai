@@ -890,7 +890,7 @@ where
         // Publish the function if remote is set and build succeeded.
         let (path, publish_error) = if function.is_some() {
             if let Some(remote) = &request.remote {
-                let publish_files = extract_publish_files(&final_state, function.as_ref().unwrap());
+                let publish_files = final_state.serialize_into_files();
                 let name = &T::params(&state).name;
                 let description = extract_description(&final_state);
                 match remote {
@@ -946,43 +946,6 @@ where
 // Publishing helpers
 // ---------------------------------------------------------------------------
 
-/// Extracts the files to publish from the final invention state.
-pub(crate) fn extract_publish_files(
-    state: &objectiveai::functions::inventions::State,
-    function: &objectiveai::functions::FullRemoteFunction,
-) -> Vec<(&'static str, String)> {
-    use objectiveai::functions::inventions::State;
-
-    macro_rules! state_fields {
-        ($s:expr) => {{
-            let params_json = serde_json::to_string_pretty(&$s.params)
-                .unwrap_or_default();
-            let essay = $s.essay.clone().unwrap_or_default();
-            let essay_tasks = $s.essay_tasks.clone().unwrap_or_default();
-            let readme = $s.readme.clone().unwrap_or_default();
-            (params_json, essay, essay_tasks, readme)
-        }};
-    }
-
-    let (params_json, essay, essay_tasks, readme) = match state {
-        State::AlphaScalarBranch(s) => state_fields!(s),
-        State::AlphaScalarLeaf(s) => state_fields!(s),
-        State::AlphaVectorBranch(s) => state_fields!(s),
-        State::AlphaVectorLeaf(s) => state_fields!(s),
-    };
-
-    let function_json = serde_json::to_string_pretty(function)
-        .unwrap_or_default();
-
-    vec![
-        ("function.json", function_json),
-        ("parameters.json", params_json),
-        ("ESSAY.md", essay),
-        ("ESSAY_TASKS.md", essay_tasks),
-        ("README.md", readme),
-    ]
-}
-
 /// Extracts the description from the final invention state.
 pub(crate) fn extract_description(state: &objectiveai::functions::inventions::State) -> String {
     use objectiveai::functions::inventions::State;
@@ -1002,7 +965,7 @@ pub(crate) async fn publish_filesystem<CTXEXT: crate::ctx::ContextExt>(
     filesystem_client: &crate::filesystem::Client,
     ctx: &crate::ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
     name: &str,
-    files: &[(&'static str, String)],
+    files: &std::collections::HashMap<&'static str, String>,
 ) -> Result<objectiveai::RemotePath, super::Error> {
     let (owner, repo) = name.split_once('/')
         .ok_or_else(|| super::Error::InvalidName(
@@ -1033,7 +996,7 @@ pub(crate) async fn publish_github<CTXEXT: ctx::ContextExt + Send + Sync>(
     ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
     name: &str,
     description: &str,
-    files: &[(&'static str, String)],
+    files: &std::collections::HashMap<&'static str, String>,
 ) -> Result<objectiveai::RemotePath, super::Error> {
     let file_refs: Vec<(&str, &str)> = files.iter()
         .map(|(n, c)| (*n, c.as_str()))
