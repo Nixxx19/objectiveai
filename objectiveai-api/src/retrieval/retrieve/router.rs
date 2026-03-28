@@ -427,6 +427,65 @@ where
         }).await
     }
 
+    // ── Function Invention State ────────────────────────────────────
+
+    /// Resolves an invention state: if inline, returns the ParamsState directly.
+    /// If remote, fetches the constituent files and deserializes into ParamsState.
+    /// Returns None if the remote path doesn't exist or all files are missing.
+    pub async fn get_function_invention_state<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
+        self: &Arc<Self>,
+        ctx: &ctx::Context<CTXEXT, PC>,
+        params: objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional,
+    ) -> Result<Option<objectiveai::functions::inventions::ParamsState>, ResponseError> {
+        let remote_path = match params {
+            objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(state) => {
+                return Ok(Some(state));
+            }
+            objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Remote(remote) => remote,
+        };
+
+        let Some(path) = self.resolve_path(ctx, crate::retrieval::Kind::Functions, &remote_path).await? else {
+            return Ok(None);
+        };
+        let remote = path.remote();
+
+        // Fetch all state files concurrently
+        let filenames = objectiveai::functions::inventions::ParamsState::filenames();
+        let futs: Vec<_> = filenames.iter().map(|&filename| {
+            let path = path.clone();
+            let ctx = ctx.clone();
+            async move {
+                let content = match remote {
+                    Remote::Github => self.github.get_function_invention_state_file(&ctx, &path, filename).await,
+                    Remote::Filesystem => self.filesystem.get_function_invention_state_file(&ctx, &path, filename).await,
+                    Remote::Mock => self.mock.get_function_invention_state_file(&ctx, &path, filename).await,
+                }?;
+                Ok::<_, ResponseError>((filename, content))
+            }
+        }).collect();
+
+        let results = futures::future::try_join_all(futs).await?;
+
+        // If all files are None, no state exists
+        if results.iter().all(|(_, content)| content.is_none()) {
+            return Ok(None);
+        }
+
+        // Build HashMap from the results (only include files that exist)
+        let map: std::collections::HashMap<&'static str, String> = results
+            .into_iter()
+            .filter_map(|(filename, content)| content.map(|c| (filename, c)))
+            .collect();
+
+        match objectiveai::functions::inventions::ParamsState::deserialize_from_files(map) {
+            Ok(state) => Ok(state),
+            Err(e) => Err(ResponseError {
+                code: 500,
+                message: serde_json::json!({ "error": format!("failed to deserialize invention state: {e}") }),
+            }),
+        }
+    }
+
     /// API endpoint: fetch a remote profile, wrap in response.
     pub async fn endpoint_get_profile<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         self: &Arc<Self>,
