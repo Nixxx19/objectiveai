@@ -55,30 +55,41 @@ impl FunctionsConfig {
     }
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, schemars::JsonSchema)]
 #[schemars(rename = "config.FunctionsInventionsConfig")]
 pub struct FunctionsInventionsConfig {
-    pub remote: Option<crate::Remote>,
+    #[serde(default = "FunctionsInventionsConfig::default_remote")]
+    pub remote: crate::Remote,
+}
+
+impl Default for FunctionsInventionsConfig {
+    fn default() -> Self {
+        Self { remote: Self::default_remote() }
+    }
 }
 
 impl FunctionsInventionsConfig {
+    fn default_remote() -> crate::Remote {
+        crate::Remote::Filesystem
+    }
+
     pub fn is_empty(&self) -> bool {
-        self.remote.is_none()
+        matches!(self.remote, crate::Remote::Filesystem)
     }
 
     pub fn is_none(this: &Option<Self>) -> bool {
         this.as_ref().is_none_or(|cfg| cfg.is_empty())
     }
 
-    pub fn get_remote(&self) -> Option<&crate::Remote> {
-        self.remote.as_ref()
+    pub fn get_remote(&self) -> crate::Remote {
+        self.remote
     }
 
     pub fn set_remote(&mut self, remote: crate::Remote) -> Result<(), super::ConfigError> {
         if matches!(remote, crate::Remote::Mock) {
             return Err(super::ConfigError::InvalidRemote(remote));
         }
-        self.remote = Some(remote);
+        self.remote = remote;
         Ok(())
     }
 
