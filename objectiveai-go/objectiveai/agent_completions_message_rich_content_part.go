@@ -8,37 +8,37 @@ import (
 )
 
 // Text content.
-type AgentCompletionsMessageRichContentPartVariant1 struct {
+type AgentCompletionsMessageRichContentPartText struct {
 	Text string `json:"text"`
 	Type string `json:"type"`
 }
 
 // An image URL.
-type AgentCompletionsMessageRichContentPartVariant2 struct {
+type AgentCompletionsMessageRichContentPartImageUrl struct {
 	ImageURL AgentCompletionsMessageImageUrl `json:"image_url"`
 	Type string `json:"type"`
 }
 
 // Audio input.
-type AgentCompletionsMessageRichContentPartVariant3 struct {
+type AgentCompletionsMessageRichContentPartInputAudio struct {
 	InputAudio AgentCompletionsMessageInputAudio `json:"input_audio"`
 	Type string `json:"type"`
 }
 
 // Video input.
-type AgentCompletionsMessageRichContentPartVariant4 struct {
+type AgentCompletionsMessageRichContentPartInputVideo struct {
 	Type string `json:"type"`
 	VideoURL AgentCompletionsMessageVideoUrl `json:"video_url"`
 }
 
 // A video URL.
-type AgentCompletionsMessageRichContentPartVariant5 struct {
+type AgentCompletionsMessageRichContentPartVideoUrl struct {
 	Type string `json:"type"`
 	VideoURL AgentCompletionsMessageVideoUrl `json:"video_url"`
 }
 
 // A file.
-type AgentCompletionsMessageRichContentPartVariant6 struct {
+type AgentCompletionsMessageRichContentPartFile struct {
 	File AgentCompletionsMessageFile `json:"file"`
 	Type string `json:"type"`
 }
@@ -46,37 +46,37 @@ type AgentCompletionsMessageRichContentPartVariant6 struct {
 // A part of rich content.
 type AgentCompletionsMessageRichContentPart struct {
 	// Text content.
-	Variant1 *AgentCompletionsMessageRichContentPartVariant1 
+	Text *AgentCompletionsMessageRichContentPartText 
 	// An image URL.
-	Variant2 *AgentCompletionsMessageRichContentPartVariant2 
+	ImageUrl *AgentCompletionsMessageRichContentPartImageUrl 
 	// Audio input.
-	Variant3 *AgentCompletionsMessageRichContentPartVariant3 
+	InputAudio *AgentCompletionsMessageRichContentPartInputAudio 
 	// Video input.
-	Variant4 *AgentCompletionsMessageRichContentPartVariant4 
+	InputVideo *AgentCompletionsMessageRichContentPartInputVideo 
 	// A video URL.
-	Variant5 *AgentCompletionsMessageRichContentPartVariant5 
+	VideoUrl *AgentCompletionsMessageRichContentPartVideoUrl 
 	// A file.
-	Variant6 *AgentCompletionsMessageRichContentPartVariant6 
+	File *AgentCompletionsMessageRichContentPartFile 
 }
 
 func (v AgentCompletionsMessageRichContentPart) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Text != nil {
+		return json.Marshal(v.Text)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.ImageUrl != nil {
+		return json.Marshal(v.ImageUrl)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.InputAudio != nil {
+		return json.Marshal(v.InputAudio)
 	}
-	if v.Variant4 != nil {
-		return json.Marshal(v.Variant4)
+	if v.InputVideo != nil {
+		return json.Marshal(v.InputVideo)
 	}
-	if v.Variant5 != nil {
-		return json.Marshal(v.Variant5)
+	if v.VideoUrl != nil {
+		return json.Marshal(v.VideoUrl)
 	}
-	if v.Variant6 != nil {
-		return json.Marshal(v.Variant6)
+	if v.File != nil {
+		return json.Marshal(v.File)
 	}
 	return []byte("null"), nil
 }
@@ -86,10 +86,10 @@ func (v *AgentCompletionsMessageRichContentPart) UnmarshalJSON(data []byte) erro
 		return nil
 	}
 	{
-		var try AgentCompletionsMessageRichContentPartVariant1
+		var try AgentCompletionsMessageRichContentPartText
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageRichContentPart{}
-			candidate.Variant1 = &try
+			candidate.Text = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -97,10 +97,10 @@ func (v *AgentCompletionsMessageRichContentPart) UnmarshalJSON(data []byte) erro
 		}
 	}
 	{
-		var try AgentCompletionsMessageRichContentPartVariant2
+		var try AgentCompletionsMessageRichContentPartImageUrl
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageRichContentPart{}
-			candidate.Variant2 = &try
+			candidate.ImageUrl = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -108,10 +108,10 @@ func (v *AgentCompletionsMessageRichContentPart) UnmarshalJSON(data []byte) erro
 		}
 	}
 	{
-		var try AgentCompletionsMessageRichContentPartVariant3
+		var try AgentCompletionsMessageRichContentPartInputAudio
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageRichContentPart{}
-			candidate.Variant3 = &try
+			candidate.InputAudio = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -119,10 +119,10 @@ func (v *AgentCompletionsMessageRichContentPart) UnmarshalJSON(data []byte) erro
 		}
 	}
 	{
-		var try AgentCompletionsMessageRichContentPartVariant4
+		var try AgentCompletionsMessageRichContentPartInputVideo
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageRichContentPart{}
-			candidate.Variant4 = &try
+			candidate.InputVideo = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -130,10 +130,10 @@ func (v *AgentCompletionsMessageRichContentPart) UnmarshalJSON(data []byte) erro
 		}
 	}
 	{
-		var try AgentCompletionsMessageRichContentPartVariant5
+		var try AgentCompletionsMessageRichContentPartVideoUrl
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageRichContentPart{}
-			candidate.Variant5 = &try
+			candidate.VideoUrl = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -141,10 +141,10 @@ func (v *AgentCompletionsMessageRichContentPart) UnmarshalJSON(data []byte) erro
 		}
 	}
 	{
-		var try AgentCompletionsMessageRichContentPartVariant6
+		var try AgentCompletionsMessageRichContentPartFile
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageRichContentPart{}
-			candidate.Variant6 = &try
+			candidate.File = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -156,55 +156,15 @@ func (v *AgentCompletionsMessageRichContentPart) UnmarshalJSON(data []byte) erro
 
 func (v AgentCompletionsMessageRichContentPart) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
-	if v.Variant4 != nil { count++ }
-	if v.Variant5 != nil { count++ }
-	if v.Variant6 != nil { count++ }
+	if v.Text != nil { count++ }
+	if v.ImageUrl != nil { count++ }
+	if v.InputAudio != nil { count++ }
+	if v.InputVideo != nil { count++ }
+	if v.VideoUrl != nil { count++ }
+	if v.File != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentCompletionsMessageRichContentPart: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentCompletionsMessageRichContentPartSchema struct{}
-
-func (AgentCompletionsMessageRichContentPartSchema) SchemaTitle() string { return "agent.completions.message.RichContentPart" }
-func (AgentCompletionsMessageRichContentPartSchema) SchemaDescription() string { return "A part of rich content." }
-func (AgentCompletionsMessageRichContentPartSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Text content.",
-			"type": "object",
-			"properties": map[string]any{"text": map[string]any{"type": "string"}, "type": map[string]any{"enum": []any{"text"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "An image URL.",
-			"type": "object",
-			"properties": map[string]any{"image_url": map[string]any{"$ref": "agent.completions.message.ImageUrl"}, "type": map[string]any{"enum": []any{"image_url"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "Audio input.",
-			"type": "object",
-			"properties": map[string]any{"input_audio": map[string]any{"$ref": "agent.completions.message.InputAudio"}, "type": map[string]any{"enum": []any{"input_audio"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "Video input.",
-			"type": "object",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"input_video"}, "type": "string"}, "video_url": map[string]any{"$ref": "agent.completions.message.VideoUrl"}},
-		},
-			map[string]any{
-			"description": "A video URL.",
-			"type": "object",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"video_url"}, "type": "string"}, "video_url": map[string]any{"$ref": "agent.completions.message.VideoUrl"}},
-		},
-			map[string]any{
-			"description": "A file.",
-			"type": "object",
-			"properties": map[string]any{"file": map[string]any{"$ref": "agent.completions.message.File"}, "type": map[string]any{"enum": []any{"file"}, "type": "string"}},
-		},
-		},
-	}
-}

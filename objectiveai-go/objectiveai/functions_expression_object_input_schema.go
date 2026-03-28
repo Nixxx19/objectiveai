@@ -13,15 +13,6 @@ type FunctionsExpressionObjectInputSchema struct {
 	Type FunctionsExpressionObjectInputSchemaType `json:"type"`
 }
 
-func (FunctionsExpressionObjectInputSchema) SchemaTitle() string { return "functions.expression.ObjectInputSchema" }
-func (FunctionsExpressionObjectInputSchema) SchemaDescription() string { return "Schema for an object input with named properties." }
-func (FunctionsExpressionObjectInputSchema) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"description": "Human-readable description of the object.",
-		"properties": "Schema for each property in the object.",
-		"required": "List of property names that must be present.",
-	}
-}
 func (v FunctionsExpressionObjectInputSchema) Validate() error {
 	return variantValidator.Struct(v)
 }

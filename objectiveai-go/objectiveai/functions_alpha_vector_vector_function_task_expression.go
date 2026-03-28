@@ -3,16 +3,11 @@
 package objectiveai
 
 type FunctionsAlphaVectorVectorFunctionTaskExpression struct {
-	Commit string `json:"commit"`
+	RemotePath
 	Input FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression `json:"input"`
-	Owner string `json:"owner"`
-	Remote FunctionsRemote `json:"remote"`
-	Repository string `json:"repository"`
 	Skip *FunctionsExpressionExpression `json:"skip,omitempty"`
 }
 
-func (FunctionsAlphaVectorVectorFunctionTaskExpression) SchemaTitle() string { return "functions.alpha_vector.VectorFunctionTaskExpression" }
-func (FunctionsAlphaVectorVectorFunctionTaskExpression) SchemaDescription() string { return "" }
 func (v FunctionsAlphaVectorVectorFunctionTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

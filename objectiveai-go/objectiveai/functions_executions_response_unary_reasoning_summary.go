@@ -5,7 +5,7 @@ package objectiveai
 // A complete agent completion response.
 type FunctionsExecutionsResponseUnaryReasoningSummary struct {
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
-	Error *ResponseError `json:"error,omitempty"`
+	Error *ErrorResponseError `json:"error,omitempty"`
 	ID string `json:"id"`
 	Messages []AgentCompletionsResponseUnaryMessage `json:"messages"`
 	// The object type (always "agent.completion").
@@ -15,14 +15,6 @@ type FunctionsExecutionsResponseUnaryReasoningSummary struct {
 	Usage AgentCompletionsResponseUsage `json:"usage"`
 }
 
-func (FunctionsExecutionsResponseUnaryReasoningSummary) SchemaTitle() string { return "functions.executions.response.unary.ReasoningSummary" }
-func (FunctionsExecutionsResponseUnaryReasoningSummary) SchemaDescription() string { return "A complete agent completion response." }
-func (FunctionsExecutionsResponseUnaryReasoningSummary) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"object": "The object type (always \"agent.completion\").",
-		"upstream": "Upstream provider",
-	}
-}
 func (v FunctionsExecutionsResponseUnaryReasoningSummary) Validate() error {
 	return variantValidator.Struct(v)
 }

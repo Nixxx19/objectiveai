@@ -10,14 +10,6 @@ type AgentCompletionsMessageUserMessage struct {
 	Name *string `json:"name,omitempty"`
 }
 
-func (AgentCompletionsMessageUserMessage) SchemaTitle() string { return "agent.completions.message.UserMessage" }
-func (AgentCompletionsMessageUserMessage) SchemaDescription() string { return "A user message from the end user." }
-func (AgentCompletionsMessageUserMessage) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"content": "The message content (supports text, images, audio, video, files).",
-		"name": "Optional name for the user.",
-	}
-}
 func (v AgentCompletionsMessageUserMessage) Validate() error {
 	return variantValidator.Struct(v)
 }

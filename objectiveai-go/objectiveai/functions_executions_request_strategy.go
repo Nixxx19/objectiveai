@@ -8,12 +8,12 @@ import (
 )
 
 // Scalar or Vector
-type FunctionsExecutionsRequestStrategyVariant1 struct {
+type FunctionsExecutionsRequestStrategyDefault struct {
 	Type string `json:"type"`
 }
 
 // Vector
-type FunctionsExecutionsRequestStrategyVariant2 struct {
+type FunctionsExecutionsRequestStrategySwissSystem struct {
 	// How many vector responses for each execution
 	Pool *uint32 `json:"pool,omitempty"`
 	// How many sequential rounds of comparison
@@ -23,17 +23,17 @@ type FunctionsExecutionsRequestStrategyVariant2 struct {
 
 type FunctionsExecutionsRequestStrategy struct {
 	// Scalar or Vector
-	Variant1 *FunctionsExecutionsRequestStrategyVariant1 
+	Default *FunctionsExecutionsRequestStrategyDefault 
 	// Vector
-	Variant2 *FunctionsExecutionsRequestStrategyVariant2 
+	SwissSystem *FunctionsExecutionsRequestStrategySwissSystem 
 }
 
 func (v FunctionsExecutionsRequestStrategy) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Default != nil {
+		return json.Marshal(v.Default)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.SwissSystem != nil {
+		return json.Marshal(v.SwissSystem)
 	}
 	return []byte("null"), nil
 }
@@ -43,10 +43,10 @@ func (v *FunctionsExecutionsRequestStrategy) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try FunctionsExecutionsRequestStrategyVariant1
+		var try FunctionsExecutionsRequestStrategyDefault
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExecutionsRequestStrategy{}
-			candidate.Variant1 = &try
+			candidate.Default = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -54,10 +54,10 @@ func (v *FunctionsExecutionsRequestStrategy) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsExecutionsRequestStrategyVariant2
+		var try FunctionsExecutionsRequestStrategySwissSystem
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExecutionsRequestStrategy{}
-			candidate.Variant2 = &try
+			candidate.SwissSystem = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -69,31 +69,11 @@ func (v *FunctionsExecutionsRequestStrategy) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsExecutionsRequestStrategy) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Default != nil { count++ }
+	if v.SwissSystem != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsExecutionsRequestStrategy: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsExecutionsRequestStrategySchema struct{}
-
-func (FunctionsExecutionsRequestStrategySchema) SchemaTitle() string { return "functions.executions.request.Strategy" }
-func (FunctionsExecutionsRequestStrategySchema) SchemaDescription() string { return "" }
-func (FunctionsExecutionsRequestStrategySchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Scalar or Vector",
-			"type": "object",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"default"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "Vector",
-			"type": "object",
-			"properties": map[string]any{"pool": map[string]any{"anyOf": []any{map[string]any{"maximum": json.Number("4294967295"), "minimum": json.Number("0"), "type": "integer"}, map[string]any{"type": "null"}}, "description": "How many vector responses for each execution"}, "rounds": map[string]any{"anyOf": []any{map[string]any{"maximum": json.Number("4294967295"), "minimum": json.Number("0"), "type": "integer"}, map[string]any{"type": "null"}}, "description": "How many sequential rounds of comparison"}, "type": map[string]any{"enum": []any{"swiss_system"}, "type": "string"}},
-		},
-		},
-	}
-}

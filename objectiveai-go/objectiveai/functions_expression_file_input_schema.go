@@ -9,13 +9,6 @@ type FunctionsExpressionFileInputSchema struct {
 	Type FunctionsExpressionFileInputSchemaType `json:"type"`
 }
 
-func (FunctionsExpressionFileInputSchema) SchemaTitle() string { return "functions.expression.FileInputSchema" }
-func (FunctionsExpressionFileInputSchema) SchemaDescription() string { return "Schema for a file input." }
-func (FunctionsExpressionFileInputSchema) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"description": "Human-readable description of the expected file.",
-	}
-}
 func (v FunctionsExpressionFileInputSchema) Validate() error {
 	return variantValidator.Struct(v)
 }

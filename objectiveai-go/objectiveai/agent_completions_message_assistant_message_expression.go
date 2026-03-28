@@ -5,20 +5,124 @@ package objectiveai
 // Expression variant of [`AssistantMessage`] for dynamic content.
 type AgentCompletionsMessageAssistantMessageExpression struct {
 	// The content expression.
-	Content any `json:"content,omitempty"`
-	Name any `json:"name,omitempty"`
-	Reasoning any `json:"reasoning,omitempty"`
-	Refusal any `json:"refusal,omitempty"`
-	ToolCalls any `json:"tool_calls,omitempty"`
+	//
+	// A value that can be either a literal or an expression.
+	//
+	// This allows Function definitions to mix static values with dynamic
+	// expressions. During compilation, expressions are evaluated while
+	// literal values pass through unchanged.
+	//
+	// # Example
+	//
+	// Literal value:
+	// ```json
+	// "hello world"
+	// ```
+	//
+	// JMESPath expression:
+	// ```json
+	// {"$jmespath": "input.greeting"}
+	// ```
+	//
+	// Starlark expression:
+	// ```json
+	// {"$starlark": "input['greeting']"}
+	// ```
+	Content any `json:"content"`
+	// A value that can be either a literal or an expression.
+	//
+	// This allows Function definitions to mix static values with dynamic
+	// expressions. During compilation, expressions are evaluated while
+	// literal values pass through unchanged.
+	//
+	// # Example
+	//
+	// Literal value:
+	// ```json
+	// "hello world"
+	// ```
+	//
+	// JMESPath expression:
+	// ```json
+	// {"$jmespath": "input.greeting"}
+	// ```
+	//
+	// Starlark expression:
+	// ```json
+	// {"$starlark": "input['greeting']"}
+	// ```
+	Name any `json:"name"`
+	// A value that can be either a literal or an expression.
+	//
+	// This allows Function definitions to mix static values with dynamic
+	// expressions. During compilation, expressions are evaluated while
+	// literal values pass through unchanged.
+	//
+	// # Example
+	//
+	// Literal value:
+	// ```json
+	// "hello world"
+	// ```
+	//
+	// JMESPath expression:
+	// ```json
+	// {"$jmespath": "input.greeting"}
+	// ```
+	//
+	// Starlark expression:
+	// ```json
+	// {"$starlark": "input['greeting']"}
+	// ```
+	Reasoning any `json:"reasoning"`
+	// A value that can be either a literal or an expression.
+	//
+	// This allows Function definitions to mix static values with dynamic
+	// expressions. During compilation, expressions are evaluated while
+	// literal values pass through unchanged.
+	//
+	// # Example
+	//
+	// Literal value:
+	// ```json
+	// "hello world"
+	// ```
+	//
+	// JMESPath expression:
+	// ```json
+	// {"$jmespath": "input.greeting"}
+	// ```
+	//
+	// Starlark expression:
+	// ```json
+	// {"$starlark": "input['greeting']"}
+	// ```
+	Refusal any `json:"refusal"`
+	// A value that can be either a literal or an expression.
+	//
+	// This allows Function definitions to mix static values with dynamic
+	// expressions. During compilation, expressions are evaluated while
+	// literal values pass through unchanged.
+	//
+	// # Example
+	//
+	// Literal value:
+	// ```json
+	// "hello world"
+	// ```
+	//
+	// JMESPath expression:
+	// ```json
+	// {"$jmespath": "input.greeting"}
+	// ```
+	//
+	// Starlark expression:
+	// ```json
+	// {"$starlark": "input['greeting']"}
+	// ```
+	ToolCalls any `json:"tool_calls"`
 }
 
-func (AgentCompletionsMessageAssistantMessageExpression) SchemaTitle() string { return "agent.completions.message.AssistantMessageExpression" }
-func (AgentCompletionsMessageAssistantMessageExpression) SchemaDescription() string { return "Expression variant of [`AssistantMessage`] for dynamic content." }
-func (AgentCompletionsMessageAssistantMessageExpression) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"content": "The content expression.",
-	}
-}
 func (v AgentCompletionsMessageAssistantMessageExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

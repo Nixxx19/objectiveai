@@ -10,17 +10,17 @@ import (
 // Simple text content for system/developer messages.
 type AgentCompletionsMessageSimpleContent struct {
 	// Plain text content.
-	Variant1 *string 
+	Text *string 
 	// Multi-part text content.
-	Variant2 []AgentCompletionsMessageSimpleContentPart 
+	Parts []AgentCompletionsMessageSimpleContentPart 
 }
 
 func (v AgentCompletionsMessageSimpleContent) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Text != nil {
+		return json.Marshal(v.Text)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Parts != nil {
+		return json.Marshal(v.Parts)
 	}
 	return []byte("null"), nil
 }
@@ -33,7 +33,7 @@ func (v *AgentCompletionsMessageSimpleContent) UnmarshalJSON(data []byte) error 
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageSimpleContent{}
-			candidate.Variant1 = &try
+			candidate.Text = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -44,7 +44,7 @@ func (v *AgentCompletionsMessageSimpleContent) UnmarshalJSON(data []byte) error 
 		var try []AgentCompletionsMessageSimpleContentPart
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageSimpleContent{}
-			candidate.Variant2 = try
+			candidate.Parts = try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -56,30 +56,11 @@ func (v *AgentCompletionsMessageSimpleContent) UnmarshalJSON(data []byte) error 
 
 func (v AgentCompletionsMessageSimpleContent) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Text != nil { count++ }
+	if v.Parts != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentCompletionsMessageSimpleContent: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentCompletionsMessageSimpleContentSchema struct{}
-
-func (AgentCompletionsMessageSimpleContentSchema) SchemaTitle() string { return "agent.completions.message.SimpleContent" }
-func (AgentCompletionsMessageSimpleContentSchema) SchemaDescription() string { return "Simple text content for system/developer messages." }
-func (AgentCompletionsMessageSimpleContentSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Plain text content.",
-			"type": "string",
-		},
-			map[string]any{
-			"description": "Multi-part text content.",
-			"type": "array",
-			"items": map[string]any{"$ref": "agent.completions.message.SimpleContentPart"},
-		},
-		},
-	}
-}

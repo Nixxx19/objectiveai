@@ -36,23 +36,6 @@ type AgentClaudeAgentSdkAgent struct {
 	Upstream AgentClaudeAgentSdkUpstream `json:"upstream"`
 }
 
-func (AgentClaudeAgentSdkAgent) SchemaTitle() string { return "agent.claude_agent_sdk.Agent" }
-func (AgentClaudeAgentSdkAgent) SchemaDescription() string { return "A validated Claude Agent SDK Agent with its computed content-addressed ID." }
-func (AgentClaudeAgentSdkAgent) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"effort": "The effort level for model output.",
-		"id": "The deterministic content-addressed ID (22-character base62 string).",
-		"mcp_servers": "MCP servers the agent can connect to.",
-		"model": "The upstream language model identifier.",
-		"output_mode": "The output mode for vector completions. Ignored for agent completions.",
-		"prefix_content": "Rich content prepended to the user's prompt.",
-		"suffix_content": "Rich content appended after the user's prompt.",
-		"synthetic_reasoning": "Enable synthetic reasoning for non-reasoning LLMs.\n\n**Vector completions only.** Ignored for agent completions.\n\nWhen enabled, forces the LLM to output a `_think` field before voting,\nsimulating chain-of-thought reasoning. Requires `output_mode` to be\n`ToolCall` (not `Instruction`).",
-		"system_prompt": "System prompt for the agent.",
-		"thinking": "Whether thinking/extended thinking is enabled.\n\nDefaults to `true`. Set to `false` to disable.",
-		"upstream": "The upstream provider marker.",
-	}
-}
 func (v AgentClaudeAgentSdkAgent) Validate() error {
 	return variantValidator.Struct(v)
 }

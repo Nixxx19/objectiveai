@@ -7,15 +7,15 @@ import (
 )
 
 type FunctionsProfilesComputationsResponseStreamingObject struct {
-	Variant1 string `validate:"oneof=function.profile.computation.chunk"`
+	Functions.profiles.computations.response.streaming.Object string `validate:"oneof=function.profile.computation.chunk"`
 }
 
 func (v FunctionsProfilesComputationsResponseStreamingObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Functions.profiles.computations.response.streaming.Object)
 }
 
 func (v *FunctionsProfilesComputationsResponseStreamingObject) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Functions.profiles.computations.response.streaming.Object); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -25,13 +25,3 @@ func (v FunctionsProfilesComputationsResponseStreamingObject) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type FunctionsProfilesComputationsResponseStreamingObjectSchema struct{}
-
-func (FunctionsProfilesComputationsResponseStreamingObjectSchema) SchemaTitle() string { return "functions.profiles.computations.response.streaming.Object" }
-func (FunctionsProfilesComputationsResponseStreamingObjectSchema) SchemaDescription() string { return "" }
-func (FunctionsProfilesComputationsResponseStreamingObjectSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"function.profile.computation.chunk"},
-	}
-}

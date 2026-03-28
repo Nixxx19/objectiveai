@@ -5,11 +5,11 @@ package objectiveai
 // A agent completion from a single agent within a vector completion.
 //
 // Wraps the standard agent completion response with an index to identify
-// which agent in the ensemble produced it.
+// which agent in the swarm produced it.
 type VectorCompletionsResponseUnaryAgentCompletion struct {
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
 	// Error details if this completion failed.
-	Error *ResponseError `json:"error,omitempty"`
+	Error *ErrorResponseError `json:"error,omitempty"`
 	ID string `json:"id"`
 	// Index of this completion within the vector completion.
 	Index uint64 `json:"index" validate:"min=0,max=18446744073709551615"`
@@ -21,16 +21,6 @@ type VectorCompletionsResponseUnaryAgentCompletion struct {
 	Usage AgentCompletionsResponseUsage `json:"usage"`
 }
 
-func (VectorCompletionsResponseUnaryAgentCompletion) SchemaTitle() string { return "vector.completions.response.unary.AgentCompletion" }
-func (VectorCompletionsResponseUnaryAgentCompletion) SchemaDescription() string { return "A agent completion from a single agent within a vector completion.\n\nWraps the standard agent completion response with an index to identify\nwhich agent in the ensemble produced it." }
-func (VectorCompletionsResponseUnaryAgentCompletion) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"error": "Error details if this completion failed.",
-		"index": "Index of this completion within the vector completion.",
-		"object": "The object type (always \"agent.completion\").",
-		"upstream": "Upstream provider",
-	}
-}
 func (v VectorCompletionsResponseUnaryAgentCompletion) Validate() error {
 	return variantValidator.Struct(v)
 }

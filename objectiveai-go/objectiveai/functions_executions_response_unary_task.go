@@ -8,16 +8,16 @@ import (
 )
 
 type FunctionsExecutionsResponseUnaryTask struct {
-	Variant1 *FunctionsExecutionsResponseUnaryFunctionExecutionTask 
-	Variant2 *FunctionsExecutionsResponseUnaryVectorCompletionTask 
+	FunctionExecution *FunctionsExecutionsResponseUnaryFunctionExecutionTask 
+	VectorCompletion *FunctionsExecutionsResponseUnaryVectorCompletionTask 
 }
 
 func (v FunctionsExecutionsResponseUnaryTask) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.FunctionExecution != nil {
+		return json.Marshal(v.FunctionExecution)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.VectorCompletion != nil {
+		return json.Marshal(v.VectorCompletion)
 	}
 	return []byte("null"), nil
 }
@@ -30,7 +30,7 @@ func (v *FunctionsExecutionsResponseUnaryTask) UnmarshalJSON(data []byte) error 
 		var try FunctionsExecutionsResponseUnaryFunctionExecutionTask
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExecutionsResponseUnaryTask{}
-			candidate.Variant1 = &try
+			candidate.FunctionExecution = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -41,7 +41,7 @@ func (v *FunctionsExecutionsResponseUnaryTask) UnmarshalJSON(data []byte) error 
 		var try FunctionsExecutionsResponseUnaryVectorCompletionTask
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExecutionsResponseUnaryTask{}
-			candidate.Variant2 = &try
+			candidate.VectorCompletion = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -53,27 +53,11 @@ func (v *FunctionsExecutionsResponseUnaryTask) UnmarshalJSON(data []byte) error 
 
 func (v FunctionsExecutionsResponseUnaryTask) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.FunctionExecution != nil { count++ }
+	if v.VectorCompletion != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsExecutionsResponseUnaryTask: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsExecutionsResponseUnaryTaskSchema struct{}
-
-func (FunctionsExecutionsResponseUnaryTaskSchema) SchemaTitle() string { return "functions.executions.response.unary.Task" }
-func (FunctionsExecutionsResponseUnaryTaskSchema) SchemaDescription() string { return "" }
-func (FunctionsExecutionsResponseUnaryTaskSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"$ref": "functions.executions.response.unary.FunctionExecutionTask",
-		},
-			map[string]any{
-			"$ref": "functions.executions.response.unary.VectorCompletionTask",
-		},
-		},
-	}
-}

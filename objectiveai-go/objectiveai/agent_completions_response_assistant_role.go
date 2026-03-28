@@ -9,15 +9,15 @@ import (
 // The assistant role.
 type AgentCompletionsResponseAssistantRole struct {
 	// The assistant role.
-	Variant1 string `validate:"oneof=assistant"`
+	Agent.completions.response.AssistantRole string `validate:"oneof=assistant"`
 }
 
 func (v AgentCompletionsResponseAssistantRole) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Agent.completions.response.AssistantRole)
 }
 
 func (v *AgentCompletionsResponseAssistantRole) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Agent.completions.response.AssistantRole); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -27,13 +27,3 @@ func (v AgentCompletionsResponseAssistantRole) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type AgentCompletionsResponseAssistantRoleSchema struct{}
-
-func (AgentCompletionsResponseAssistantRoleSchema) SchemaTitle() string { return "agent.completions.response.AssistantRole" }
-func (AgentCompletionsResponseAssistantRoleSchema) SchemaDescription() string { return "The assistant role." }
-func (AgentCompletionsResponseAssistantRoleSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"assistant"},
-	}
-}

@@ -10,14 +10,6 @@ type AgentCompletionsMessageImageUrl struct {
 	URL string `json:"url"`
 }
 
-func (AgentCompletionsMessageImageUrl) SchemaTitle() string { return "agent.completions.message.ImageUrl" }
-func (AgentCompletionsMessageImageUrl) SchemaDescription() string { return "An image URL for multimodal input." }
-func (AgentCompletionsMessageImageUrl) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"detail": "The detail level for image processing.",
-		"url": "The URL of the image (can be a data URL or HTTP URL).",
-	}
-}
 func (v AgentCompletionsMessageImageUrl) Validate() error {
 	return variantValidator.Struct(v)
 }

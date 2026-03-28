@@ -9,13 +9,6 @@ type FunctionsExpressionAudioInputSchema struct {
 	Type FunctionsExpressionAudioInputSchemaType `json:"type"`
 }
 
-func (FunctionsExpressionAudioInputSchema) SchemaTitle() string { return "functions.expression.AudioInputSchema" }
-func (FunctionsExpressionAudioInputSchema) SchemaDescription() string { return "Schema for an audio input." }
-func (FunctionsExpressionAudioInputSchema) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"description": "Human-readable description of the expected audio.",
-	}
-}
 func (v FunctionsExpressionAudioInputSchema) Validate() error {
 	return variantValidator.Struct(v)
 }

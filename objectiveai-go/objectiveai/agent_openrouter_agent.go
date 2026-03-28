@@ -60,37 +60,6 @@ type AgentOpenrouterAgent struct {
 	Verbosity *AgentOpenrouterVerbosity `json:"verbosity,omitempty"`
 }
 
-func (AgentOpenrouterAgent) SchemaTitle() string { return "agent.openrouter.Agent" }
-func (AgentOpenrouterAgent) SchemaDescription() string { return "A validated OpenRouter Agent with its computed content-addressed ID." }
-func (AgentOpenrouterAgent) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"frequency_penalty": "Penalizes tokens based on their frequency in the output so far (-2.0 to 2.0).",
-		"id": "The deterministic content-addressed ID (22-character base62 string).",
-		"logit_bias": "Token ID to bias mapping (-100 to 100). Positive values increase likelihood.",
-		"max_completion_tokens": "Maximum tokens in the completion.",
-		"max_tokens": "Maximum tokens (OpenRouter variant of max_completion_tokens).",
-		"mcp_servers": "MCP servers the agent can connect to.",
-		"min_p": "Minimum probability threshold for sampling (0.0 to 1.0).",
-		"model": "The upstream language model identifier (e.g., `\"gpt-4\"`, `\"claude-3-opus\"`).",
-		"output_mode": "The output mode for vector completions. Ignored for agent completions.",
-		"post_system_prefix_messages": "Messages inserted after the leading chain of system/developer messages.",
-		"prefix_messages": "Messages prepended to the user's prompt.",
-		"presence_penalty": "Penalizes tokens based on their presence in the output so far (-2.0 to 2.0).",
-		"provider": "Provider routing preferences.",
-		"reasoning": "Reasoning/thinking configuration for supported models.",
-		"repetition_penalty": "Repetition penalty (0.0 to 2.0). Values > 1.0 penalize repetition.",
-		"stop": "Stop sequences that halt generation.",
-		"suffix_messages": "Messages appended after the user's prompt.",
-		"synthetic_reasoning": "Enable synthetic reasoning for non-reasoning LLMs.\n\n**Vector completions only.** Ignored for agent completions.",
-		"temperature": "Sampling temperature (0.0 to 2.0). Higher = more random.",
-		"top_a": "Top-a sampling parameter (0.0 to 1.0).",
-		"top_k": "Top-k sampling: only consider the k most likely tokens.",
-		"top_logprobs": "Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.",
-		"top_p": "Nucleus sampling probability (0.0 to 1.0).",
-		"upstream": "The upstream provider marker.",
-		"verbosity": "Output verbosity hint for supported models.",
-	}
-}
 func (v AgentOpenrouterAgent) Validate() error {
 	return variantValidator.Struct(v)
 }

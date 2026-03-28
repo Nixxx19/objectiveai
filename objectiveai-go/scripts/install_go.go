@@ -411,43 +411,6 @@ func formatMapLiteral(m map[string]any) string {
 	return "map[string]any{" + strings.Join(parts, ", ") + "}"
 }
 
-func formatSchemaMapLiteral(schema Schema) string {
-	if len(schema) == 0 {
-		return "map[string]any{}"
-	}
-	kwOrder := []string{
-		"title", "description", "type", "enum", "anyOf", "$ref",
-		"properties", "additionalProperties", "items",
-		"minItems", "maxItems", "minimum", "maximum",
-		"pattern", "format", "default",
-	}
-	rank := make(map[string]int, len(kwOrder))
-	for i, k := range kwOrder {
-		rank[k] = i
-	}
-	keys := make([]string, 0, len(schema))
-	for k := range schema {
-		keys = append(keys, k)
-	}
-	sort.SliceStable(keys, func(i, j int) bool {
-		ri, oki := rank[keys[i]]
-		rj, okj := rank[keys[j]]
-		if !oki {
-			ri = len(kwOrder)
-		}
-		if !okj {
-			rj = len(kwOrder)
-		}
-		return ri < rj
-	})
-	var b strings.Builder
-	b.WriteString("map[string]any{\n")
-	for _, k := range keys {
-		b.WriteString(fmt.Sprintf("\t\t\t%q: %s,\n", k, formatJSONValue(schema[k])))
-	}
-	b.WriteString("\t\t}")
-	return b.String()
-}
 
 func formatTagNumber(v any) string {
 	switch n := v.(type) {
@@ -625,13 +588,24 @@ func generateAnyOfStruct(typeName string, anyOf []any, selfTitle string, schema 
 	var variantValidateTags []string // validate tag value for each variant (empty if none)
 	var variantIsPointer []bool // whether the field is a pointer type
 
-	for i, v := range anyOf {
+	for _, v := range anyOf {
 		m, ok := v.(map[string]any)
 		if !ok {
 			continue
 		}
-		fieldName := fmt.Sprintf("Variant%d", i+1)
-		vStructName := fmt.Sprintf("%sVariant%d", typeName, i+1)
+
+		// Determine variant field name from schema title, falling back to positional
+		variantTitle, _ := m["title"].(string)
+		var fieldName, vStructName string
+		if variantTitle != "" {
+			fieldName = goFieldName(variantTitle)
+			vStructName = typeName + fieldName
+		} else {
+			// Fallback for variants without a title (e.g., inline primitives)
+			fallbackIdx := len(variantFieldNames) + 1
+			fieldName = fmt.Sprintf("Variant%d", fallbackIdx)
+			vStructName = fmt.Sprintf("%sVariant%d", typeName, fallbackIdx)
+		}
 
 		variantDesc, _ := m["description"].(string)
 
@@ -816,114 +790,6 @@ func generateInlineVariantStruct(structName string, schema Schema, selfTitle str
 	return b.String()
 }
 
-// ---------------------------------------------------------------------------
-// Described + Body + FieldDescriptions generation
-// ---------------------------------------------------------------------------
-
-func generateDescribedMethods(receiver string, schema Schema, title string) string {
-	desc, _ := schema["description"].(string)
-	return fmt.Sprintf("func (%s) SchemaTitle() string { return %q }\nfunc (%s) SchemaDescription() string { return %q }\n",
-		receiver, title, receiver, desc)
-}
-
-func generateFieldDescriptions(receiver string, schema Schema) string {
-	properties, ok := schema["properties"].(map[string]any)
-	if !ok {
-		return ""
-	}
-	var entries []string
-	for _, pn := range sortedKeys(properties) {
-		ps, ok := properties[pn].(map[string]any)
-		if !ok {
-			continue
-		}
-		if desc, ok := ps["description"].(string); ok {
-			entries = append(entries, fmt.Sprintf("\t\t%q: %q,", pn, desc))
-		}
-	}
-	if len(entries) == 0 {
-		return ""
-	}
-	return fmt.Sprintf("func (%s) FieldDescriptions() map[string]string {\n\treturn map[string]string{\n%s\n\t}\n}\n",
-		receiver, strings.Join(entries, "\n"))
-}
-
-func generateBodyMethod(receiver string, schema Schema) string {
-	var b strings.Builder
-	b.WriteString(fmt.Sprintf("func (%s) Body() map[string]any {\n\treturn map[string]any{\n", receiver))
-
-	if t, ok := schema["type"].(string); ok {
-		b.WriteString(fmt.Sprintf("\t\t\"type\": %q,\n", t))
-	}
-	if ev, ok := schema["enum"].([]any); ok {
-		parts := make([]string, len(ev))
-		for i, v := range ev {
-			parts[i] = fmt.Sprintf("%q", v)
-		}
-		b.WriteString(fmt.Sprintf("\t\t\"enum\": []any{%s},\n", strings.Join(parts, ", ")))
-	}
-	if ao, ok := schema["anyOf"].([]any); ok {
-		b.WriteString("\t\t\"anyOf\": []any{\n")
-		for _, v := range ao {
-			m, ok := v.(map[string]any)
-			if !ok {
-				continue
-			}
-			b.WriteString(fmt.Sprintf("\t\t\t%s,\n", formatSchemaMapLiteral(m)))
-		}
-		b.WriteString("\t\t},\n")
-	}
-	if ref, ok := schema["$ref"].(string); ok {
-		b.WriteString(fmt.Sprintf("\t\t\"$ref\": %q,\n", ref))
-	}
-	if items, ok := schema["items"].(map[string]any); ok {
-		b.WriteString(fmt.Sprintf("\t\t\"items\": %s,\n", formatSchemaMapLiteral(items)))
-	}
-	for _, kw := range []string{"minItems", "maxItems", "minimum", "maximum", "pattern", "format"} {
-		if v, ok := schema[kw]; ok {
-			b.WriteString(fmt.Sprintf("\t\t%q: %s,\n", kw, formatJSONValue(v)))
-		}
-	}
-	if ap, ok := schema["additionalProperties"]; ok {
-		b.WriteString(fmt.Sprintf("\t\t\"additionalProperties\": %s,\n", formatJSONValue(ap)))
-	}
-	if v, ok := schema["default"]; ok {
-		b.WriteString(fmt.Sprintf("\t\t\"default\": %s,\n", formatJSONValue(v)))
-	}
-
-	b.WriteString("\t}\n}\n")
-	return b.String()
-}
-
-func generateStructBodyMethod(receiver string, schema Schema) string {
-	hasAnyOf := schema["anyOf"] != nil
-	hasRef := schema["$ref"] != nil
-	hasAP := schema["additionalProperties"] != nil
-	if !hasAnyOf && !hasRef && !hasAP {
-		return ""
-	}
-	var b strings.Builder
-	b.WriteString(fmt.Sprintf("func (%s) Body() map[string]any {\n\treturn map[string]any{\n", receiver))
-	if ao, ok := schema["anyOf"].([]any); ok {
-		b.WriteString("\t\t\"anyOf\": []any{\n")
-		for _, v := range ao {
-			m, ok := v.(map[string]any)
-			if !ok {
-				continue
-			}
-			b.WriteString(fmt.Sprintf("\t\t\t%s,\n", formatSchemaMapLiteral(m)))
-		}
-		b.WriteString("\t\t},\n")
-	}
-	if ref, ok := schema["$ref"].(string); ok {
-		b.WriteString(fmt.Sprintf("\t\t\"$ref\": %q,\n", ref))
-	}
-	if ap, ok := schema["additionalProperties"]; ok {
-		b.WriteString(fmt.Sprintf("\t\t\"additionalProperties\": %s,\n", formatJSONValue(ap)))
-	}
-	b.WriteString("\t}\n}\n")
-	return b.String()
-}
 
 // ---------------------------------------------------------------------------
 // Validate method generation
@@ -961,15 +827,7 @@ func generateTypeCode(title string, schema Schema, allTitles map[string]bool) st
 	if schema["properties"] != nil {
 		b.WriteString(generateStruct(typeName, schema, title, allTitles))
 		b.WriteString("\n")
-		b.WriteString(generateDescribedMethods(typeName, schema, title))
-		if fd := generateFieldDescriptions(typeName, schema); fd != "" {
-			b.WriteString(fd)
-		}
 		b.WriteString(generateValidateMethod(typeName, nil))
-		if body := generateStructBodyMethod(typeName, schema); body != "" {
-			b.WriteString("\n")
-			b.WriteString(body)
-		}
 		return b.String()
 	}
 
@@ -988,10 +846,6 @@ func generateTypeCode(title string, schema Schema, allTitles map[string]bool) st
 			b.WriteString(generateAnyOfStruct(typeName, anyOf, title, schema, allTitles))
 			b.WriteString("\n")
 		}
-		helper := typeName + "Schema"
-		b.WriteString(fmt.Sprintf("type %s struct{}\n\n", helper))
-		b.WriteString(generateDescribedMethods(helper, schema, title))
-		b.WriteString(generateBodyMethod(helper, schema))
 		return b.String()
 	}
 
@@ -1000,20 +854,12 @@ func generateTypeCode(title string, schema Schema, allTitles map[string]bool) st
 		syntheticAnyOf := []any{schema}
 		b.WriteString(generateAnyOfStruct(typeName, syntheticAnyOf, title, schema, allTitles))
 		b.WriteString("\n")
-		helper := typeName + "Schema"
-		b.WriteString(fmt.Sprintf("type %s struct{}\n\n", helper))
-		b.WriteString(generateDescribedMethods(helper, schema, title))
-		b.WriteString(generateBodyMethod(helper, schema))
 		return b.String()
 	}
 
 	// Case 4: Non-anyOf, non-struct, non-enum (primitive, array, map, $ref)
 	goT := determinePrimitiveGoType(schema, title, allTitles)
 	b.WriteString(fmt.Sprintf("type %s = %s\n\n", typeName, goT))
-	helper := typeName + "Schema"
-	b.WriteString(fmt.Sprintf("type %s struct{}\n\n", helper))
-	b.WriteString(generateDescribedMethods(helper, schema, title))
-	b.WriteString(generateBodyMethod(helper, schema))
 	return b.String()
 }
 
@@ -1129,14 +975,6 @@ func main() {
 
 	fmt.Printf("Generating %d .go files (single package)\n", len(filePaths))
 
-	// Track test entries
-	type testEntry struct {
-		title    string
-		typeName string
-		isStruct bool
-	}
-	var testEntries []testEntry
-
 	for _, fp := range filePaths {
 		fes := fileGroups[fp]
 		sort.Slice(fes, func(i, j int) bool { return fes[i].title < fes[j].title })
@@ -1144,11 +982,6 @@ func main() {
 		var codes []string
 		for _, fe := range fes {
 			codes = append(codes, generateTypeCode(fe.title, fe.schema, allTitles))
-			testEntries = append(testEntries, testEntry{
-				title:    fe.title,
-				typeName: toPascal(fe.title),
-				isStruct: fe.schema["properties"] != nil,
-			})
 		}
 
 		fullCode := strings.Join(codes, "\n")
@@ -1178,41 +1011,7 @@ func main() {
 		}
 	}
 
-	// Sort test entries
-	sort.Slice(testEntries, func(i, j int) bool { return testEntries[i].title < testEntries[j].title })
-
-	// Generate roundtrip test
-	var tb strings.Builder
-	tb.WriteString(generatedHeader)
-	tb.WriteString("package objectiveai\n\nimport \"testing\"\n\n")
-
-	tb.WriteString("func describedForTitle(title string) any {\n\tswitch title {\n")
-	for _, te := range testEntries {
-		name := te.typeName
-		if !te.isStruct {
-			name += "Schema"
-		}
-		tb.WriteString(fmt.Sprintf("\tcase %q:\n\t\treturn %s{}\n", te.title, name))
-	}
-	tb.WriteString("\t}\n\treturn nil\n}\n\n")
-
-	tb.WriteString("func TestRoundtrip(t *testing.T) {\n")
-	tb.WriteString("\tfor _, title := range allTitlesSorted {\n")
-	tb.WriteString("\t\tt.Run(title, func(t *testing.T) {\n")
-	tb.WriteString("\t\t\tv := describedForTitle(title)\n")
-	tb.WriteString("\t\t\tif v == nil {\n")
-	tb.WriteString("\t\t\t\tt.Fatalf(\"no type for %q\", title)\n")
-	tb.WriteString("\t\t\t}\n")
-	tb.WriteString("\t\t\tschema := convertToSchema(v)\n")
-	tb.WriteString("\t\t\tassertSchemaMatches(t, title, schema)\n")
-	tb.WriteString("\t\t})\n\t}\n}\n")
-
-	if err := os.WriteFile(filepath.Join(srcDir, "roundtrip_test.go"), []byte(tb.String()), 0o644); err != nil {
-		fmt.Fprintf(os.Stderr, "Error writing roundtrip_test.go: %v\n", err)
-		os.Exit(1)
-	}
-
-	fmt.Printf("Generated %d type files + roundtrip test\nDone!\n", len(filePaths))
+	fmt.Printf("Generated %d type files\nDone!\n", len(filePaths))
 }
 
 func cleanGenerated(dir string) {

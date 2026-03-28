@@ -10,14 +10,6 @@ type AgentMcpServer struct {
 	URL string `json:"url"`
 }
 
-func (AgentMcpServer) SchemaTitle() string { return "agent.McpServer" }
-func (AgentMcpServer) SchemaDescription() string { return "An MCP server that the agent can connect to." }
-func (AgentMcpServer) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"authorization": "Whether this MCP server uses authorization.",
-		"url": "The URL of the MCP server.",
-	}
-}
 func (v AgentMcpServer) Validate() error {
 	return variantValidator.Struct(v)
 }

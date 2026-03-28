@@ -4,8 +4,7 @@ package objectiveai
 
 // A compiled scalar function task ready for execution.
 type FunctionsScalarFunctionTask struct {
-	// Git commit SHA for the function version.
-	Commit string `json:"commit"`
+	RemotePath
 	// The resolved input to pass to the function.
 	Input FunctionsExpressionInputValue `json:"input"`
 	// Expression to transform the task result into a valid function output.
@@ -14,26 +13,8 @@ type FunctionsScalarFunctionTask struct {
 	// Must return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).
 	// See [`ScalarFunctionTaskExpression::output`] for full documentation.
 	Output FunctionsExpressionExpression `json:"output"`
-	// Repository owner.
-	Owner string `json:"owner"`
-	// The remote source where the function is hosted.
-	Remote FunctionsRemote `json:"remote"`
-	// Repository name.
-	Repository string `json:"repository"`
 }
 
-func (FunctionsScalarFunctionTask) SchemaTitle() string { return "functions.ScalarFunctionTask" }
-func (FunctionsScalarFunctionTask) SchemaDescription() string { return "A compiled scalar function task ready for execution." }
-func (FunctionsScalarFunctionTask) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"commit": "Git commit SHA for the function version.",
-		"input": "The resolved input to pass to the function.",
-		"output": "Expression to transform the task result into a valid function output.\n\nReceives `output` as the nested function's result (Scalar or Vector).\nMust return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).\nSee [`ScalarFunctionTaskExpression::output`] for full documentation.",
-		"owner": "Repository owner.",
-		"remote": "The remote source where the function is hosted.",
-		"repository": "Repository name.",
-	}
-}
 func (v FunctionsScalarFunctionTask) Validate() error {
 	return variantValidator.Struct(v)
 }

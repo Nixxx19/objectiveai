@@ -13,15 +13,6 @@ type FunctionsExpressionNumberInputSchema struct {
 	Type FunctionsExpressionNumberInputSchemaType `json:"type"`
 }
 
-func (FunctionsExpressionNumberInputSchema) SchemaTitle() string { return "functions.expression.NumberInputSchema" }
-func (FunctionsExpressionNumberInputSchema) SchemaDescription() string { return "Schema for a floating-point number input." }
-func (FunctionsExpressionNumberInputSchema) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"description": "Human-readable description of the number.",
-		"maximum": "Maximum allowed value (inclusive).",
-		"minimum": "Minimum allowed value (inclusive).",
-	}
-}
 func (v FunctionsExpressionNumberInputSchema) Validate() error {
 	return variantValidator.Struct(v)
 }

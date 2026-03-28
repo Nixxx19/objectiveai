@@ -7,23 +7,23 @@ import (
 	"fmt"
 )
 
-type AgentCompletionsMessageMessageExpressionVariant1 struct {
+type AgentCompletionsMessageMessageExpressionDeveloper struct {
 	Role string `json:"role"`
 }
 
-type AgentCompletionsMessageMessageExpressionVariant2 struct {
+type AgentCompletionsMessageMessageExpressionSystem struct {
 	Role string `json:"role"`
 }
 
-type AgentCompletionsMessageMessageExpressionVariant3 struct {
+type AgentCompletionsMessageMessageExpressionUser struct {
 	Role string `json:"role"`
 }
 
-type AgentCompletionsMessageMessageExpressionVariant4 struct {
+type AgentCompletionsMessageMessageExpressionAssistant struct {
 	Role string `json:"role"`
 }
 
-type AgentCompletionsMessageMessageExpressionVariant5 struct {
+type AgentCompletionsMessageMessageExpressionTool struct {
 	Role string `json:"role"`
 }
 
@@ -33,28 +33,28 @@ type AgentCompletionsMessageMessageExpressionVariant5 struct {
 // where message content can be computed from the function input at runtime.
 // Supports both JMESPath and Starlark expressions.
 type AgentCompletionsMessageMessageExpression struct {
-	Variant1 *AgentCompletionsMessageMessageExpressionVariant1 
-	Variant2 *AgentCompletionsMessageMessageExpressionVariant2 
-	Variant3 *AgentCompletionsMessageMessageExpressionVariant3 
-	Variant4 *AgentCompletionsMessageMessageExpressionVariant4 
-	Variant5 *AgentCompletionsMessageMessageExpressionVariant5 
+	Developer *AgentCompletionsMessageMessageExpressionDeveloper 
+	System *AgentCompletionsMessageMessageExpressionSystem 
+	User *AgentCompletionsMessageMessageExpressionUser 
+	Assistant *AgentCompletionsMessageMessageExpressionAssistant 
+	Tool *AgentCompletionsMessageMessageExpressionTool 
 }
 
 func (v AgentCompletionsMessageMessageExpression) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Developer != nil {
+		return json.Marshal(v.Developer)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.System != nil {
+		return json.Marshal(v.System)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.User != nil {
+		return json.Marshal(v.User)
 	}
-	if v.Variant4 != nil {
-		return json.Marshal(v.Variant4)
+	if v.Assistant != nil {
+		return json.Marshal(v.Assistant)
 	}
-	if v.Variant5 != nil {
-		return json.Marshal(v.Variant5)
+	if v.Tool != nil {
+		return json.Marshal(v.Tool)
 	}
 	return []byte("null"), nil
 }
@@ -64,10 +64,10 @@ func (v *AgentCompletionsMessageMessageExpression) UnmarshalJSON(data []byte) er
 		return nil
 	}
 	{
-		var try AgentCompletionsMessageMessageExpressionVariant1
+		var try AgentCompletionsMessageMessageExpressionDeveloper
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageMessageExpression{}
-			candidate.Variant1 = &try
+			candidate.Developer = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -75,10 +75,10 @@ func (v *AgentCompletionsMessageMessageExpression) UnmarshalJSON(data []byte) er
 		}
 	}
 	{
-		var try AgentCompletionsMessageMessageExpressionVariant2
+		var try AgentCompletionsMessageMessageExpressionSystem
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageMessageExpression{}
-			candidate.Variant2 = &try
+			candidate.System = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -86,10 +86,10 @@ func (v *AgentCompletionsMessageMessageExpression) UnmarshalJSON(data []byte) er
 		}
 	}
 	{
-		var try AgentCompletionsMessageMessageExpressionVariant3
+		var try AgentCompletionsMessageMessageExpressionUser
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageMessageExpression{}
-			candidate.Variant3 = &try
+			candidate.User = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -97,10 +97,10 @@ func (v *AgentCompletionsMessageMessageExpression) UnmarshalJSON(data []byte) er
 		}
 	}
 	{
-		var try AgentCompletionsMessageMessageExpressionVariant4
+		var try AgentCompletionsMessageMessageExpressionAssistant
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageMessageExpression{}
-			candidate.Variant4 = &try
+			candidate.Assistant = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -108,10 +108,10 @@ func (v *AgentCompletionsMessageMessageExpression) UnmarshalJSON(data []byte) er
 		}
 	}
 	{
-		var try AgentCompletionsMessageMessageExpressionVariant5
+		var try AgentCompletionsMessageMessageExpressionTool
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageMessageExpression{}
-			candidate.Variant5 = &try
+			candidate.Tool = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -123,49 +123,14 @@ func (v *AgentCompletionsMessageMessageExpression) UnmarshalJSON(data []byte) er
 
 func (v AgentCompletionsMessageMessageExpression) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
-	if v.Variant4 != nil { count++ }
-	if v.Variant5 != nil { count++ }
+	if v.Developer != nil { count++ }
+	if v.System != nil { count++ }
+	if v.User != nil { count++ }
+	if v.Assistant != nil { count++ }
+	if v.Tool != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentCompletionsMessageMessageExpression: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentCompletionsMessageMessageExpressionSchema struct{}
-
-func (AgentCompletionsMessageMessageExpressionSchema) SchemaTitle() string { return "agent.completions.message.MessageExpression" }
-func (AgentCompletionsMessageMessageExpressionSchema) SchemaDescription() string { return "A message with expressions for dynamic content.\n\nThis is the expression variant of [`Message`] used in function definitions\nwhere message content can be computed from the function input at runtime.\nSupports both JMESPath and Starlark expressions." }
-func (AgentCompletionsMessageMessageExpressionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"type": "object",
-			"$ref": "agent.completions.message.DeveloperMessageExpression",
-			"properties": map[string]any{"role": map[string]any{"enum": []any{"developer"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "agent.completions.message.SystemMessageExpression",
-			"properties": map[string]any{"role": map[string]any{"enum": []any{"system"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "agent.completions.message.UserMessageExpression",
-			"properties": map[string]any{"role": map[string]any{"enum": []any{"user"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "agent.completions.message.AssistantMessageExpression",
-			"properties": map[string]any{"role": map[string]any{"enum": []any{"assistant"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "agent.completions.message.ToolMessageExpression",
-			"properties": map[string]any{"role": map[string]any{"enum": []any{"tool"}, "type": "string"}},
-		},
-		},
-	}
-}

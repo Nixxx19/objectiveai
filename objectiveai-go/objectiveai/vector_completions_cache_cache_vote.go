@@ -6,8 +6,6 @@ type VectorCompletionsCacheCacheVote struct {
 	Vote *VectorCompletionsResponseVote `json:"vote,omitempty"`
 }
 
-func (VectorCompletionsCacheCacheVote) SchemaTitle() string { return "vector.completions.cache.CacheVote" }
-func (VectorCompletionsCacheCacheVote) SchemaDescription() string { return "" }
 func (v VectorCompletionsCacheCacheVote) Validate() error {
 	return variantValidator.Struct(v)
 }

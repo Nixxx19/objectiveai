@@ -7,15 +7,15 @@ import (
 )
 
 type FunctionsInventionsResponseStreamingObject struct {
-	Variant1 string `validate:"oneof=alpha.scalar.function.invention.chunk alpha.vector.function.invention.chunk"`
+	Functions.inventions.response.streaming.Object string `validate:"oneof=alpha.scalar.function.invention.chunk alpha.vector.function.invention.chunk"`
 }
 
 func (v FunctionsInventionsResponseStreamingObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Functions.inventions.response.streaming.Object)
 }
 
 func (v *FunctionsInventionsResponseStreamingObject) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Functions.inventions.response.streaming.Object); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -25,13 +25,3 @@ func (v FunctionsInventionsResponseStreamingObject) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type FunctionsInventionsResponseStreamingObjectSchema struct{}
-
-func (FunctionsInventionsResponseStreamingObjectSchema) SchemaTitle() string { return "functions.inventions.response.streaming.Object" }
-func (FunctionsInventionsResponseStreamingObjectSchema) SchemaDescription() string { return "" }
-func (FunctionsInventionsResponseStreamingObjectSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"alpha.scalar.function.invention.chunk", "alpha.vector.function.invention.chunk"},
-	}
-}

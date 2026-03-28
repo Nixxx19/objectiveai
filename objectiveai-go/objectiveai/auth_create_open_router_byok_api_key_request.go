@@ -11,13 +11,6 @@ type AuthCreateOpenRouterByokApiKeyRequest struct {
 	APIKey string `json:"api_key"`
 }
 
-func (AuthCreateOpenRouterByokApiKeyRequest) SchemaTitle() string { return "auth.CreateOpenRouterByokApiKeyRequest" }
-func (AuthCreateOpenRouterByokApiKeyRequest) SchemaDescription() string { return "Request to create or update an OpenRouter BYOK (Bring Your Own Key) API key.\n\nThis allows users to provide their own OpenRouter API key for routing\nrequests through OpenRouter's model marketplace." }
-func (AuthCreateOpenRouterByokApiKeyRequest) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"api_key": "The OpenRouter API key to associate with the user's account.",
-	}
-}
 func (v AuthCreateOpenRouterByokApiKeyRequest) Validate() error {
 	return variantValidator.Struct(v)
 }

@@ -5,24 +5,13 @@ package objectiveai
 // Parameters for creating a vector completion.
 //
 // Vector completions run multiple agent completions (one per LLM in the
-// ensemble), force each to vote for one of the predefined responses, and
+// swarm), force each to vote for one of the predefined responses, and
 // combine votes using the provided profile weights to produce final scores.
 type VectorCompletionsRequestVectorCompletionCreateParams struct {
-	// The Ensemble of agents to use.
-	Ensemble VectorCompletionsRequestEnsemble `json:"ensemble"`
 	// If true, uses cached votes when available.
 	FromCache *bool `json:"from_cache,omitempty"`
-	// Map from MCP server URL to authorization header value.
-	MCPServerAuthorization map[string]string `json:"mcp_server_authorization,omitempty"`
 	// The conversation messages (the prompt).
 	Messages []AgentCompletionsMessageMessage `json:"messages"`
-	// The profile weights for each agent in the ensemble.
-	//
-	// Must have the same length as the total agent count in the ensemble.
-	// Can be either:
-	// - A vector of decimals (legacy representation), or
-	// - A vector of objects with `weight` and optional `invert` fields.
-	Profile VectorCompletionsRequestProfile `json:"profile"`
 	// Provider routing preferences.
 	Provider *AgentCompletionsRequestProvider `json:"provider,omitempty"`
 	// The possible responses the LLMs can vote for.
@@ -33,24 +22,10 @@ type VectorCompletionsRequestVectorCompletionCreateParams struct {
 	Seed *int64 `json:"seed,omitempty" validate:"min=-9223372036854775808,max=9223372036854775807"`
 	// Whether to stream the response.
 	Stream *bool `json:"stream,omitempty"`
+	// The Swarm of agents to use.
+	Swarm SwarmInlineSwarmBaseOrRemoteCommitOptional `json:"swarm"`
 }
 
-func (VectorCompletionsRequestVectorCompletionCreateParams) SchemaTitle() string { return "vector.completions.request.VectorCompletionCreateParams" }
-func (VectorCompletionsRequestVectorCompletionCreateParams) SchemaDescription() string { return "Parameters for creating a vector completion.\n\nVector completions run multiple agent completions (one per LLM in the\nensemble), force each to vote for one of the predefined responses, and\ncombine votes using the provided profile weights to produce final scores." }
-func (VectorCompletionsRequestVectorCompletionCreateParams) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"ensemble": "The Ensemble of agents to use.",
-		"from_cache": "If true, uses cached votes when available.",
-		"mcp_server_authorization": "Map from MCP server URL to authorization header value.",
-		"messages": "The conversation messages (the prompt).",
-		"profile": "The profile weights for each agent in the ensemble.\n\nMust have the same length as the total agent count in the ensemble.\nCan be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields.",
-		"provider": "Provider routing preferences.",
-		"responses": "The possible responses the LLMs can vote for.",
-		"retry": "If present, reuses votes from a previous request with this ID.",
-		"seed": "Random seed for deterministic results.",
-		"stream": "Whether to stream the response.",
-	}
-}
 func (v VectorCompletionsRequestVectorCompletionCreateParams) Validate() error {
 	return variantValidator.Struct(v)
 }

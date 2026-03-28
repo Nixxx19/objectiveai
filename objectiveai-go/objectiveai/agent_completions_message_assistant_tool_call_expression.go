@@ -4,6 +4,8 @@ package objectiveai
 
 // A function call expression.
 type AgentCompletionsMessageAssistantToolCallExpression struct {
+	// The function expression.
+	//
 	// A value that can be either a literal or an expression.
 	//
 	// This allows Function definitions to mix static values with dynamic
@@ -27,6 +29,8 @@ type AgentCompletionsMessageAssistantToolCallExpression struct {
 	// {"$starlark": "input['greeting']"}
 	// ```
 	Function any `json:"function"`
+	// The tool call ID expression.
+	//
 	// A value that can be either a literal or an expression.
 	//
 	// This allows Function definitions to mix static values with dynamic
@@ -53,14 +57,6 @@ type AgentCompletionsMessageAssistantToolCallExpression struct {
 	Type string `json:"type" validate:"oneof=function"`
 }
 
-func (AgentCompletionsMessageAssistantToolCallExpression) SchemaTitle() string { return "agent.completions.message.AssistantToolCallExpression" }
-func (AgentCompletionsMessageAssistantToolCallExpression) SchemaDescription() string { return "A function call expression." }
-func (AgentCompletionsMessageAssistantToolCallExpression) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"function": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
-		"id": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
-	}
-}
 func (v AgentCompletionsMessageAssistantToolCallExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

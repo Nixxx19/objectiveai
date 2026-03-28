@@ -10,8 +10,6 @@ type FunctionsCheckVectorFieldsValidation struct {
 	OutputLength FunctionsExpressionExpression `json:"output_length"`
 }
 
-func (FunctionsCheckVectorFieldsValidation) SchemaTitle() string { return "functions.check.VectorFieldsValidation" }
-func (FunctionsCheckVectorFieldsValidation) SchemaDescription() string { return "The 4 fields needed to validate a vector function's split/merge behavior." }
 func (v FunctionsCheckVectorFieldsValidation) Validate() error {
 	return variantValidator.Struct(v)
 }

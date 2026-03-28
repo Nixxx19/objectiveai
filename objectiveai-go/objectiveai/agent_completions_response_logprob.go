@@ -14,16 +14,6 @@ type AgentCompletionsResponseLogprob struct {
 	TopLogprobs []AgentCompletionsResponseTopLogprob `json:"top_logprobs"`
 }
 
-func (AgentCompletionsResponseLogprob) SchemaTitle() string { return "agent.completions.response.Logprob" }
-func (AgentCompletionsResponseLogprob) SchemaDescription() string { return "Log probability information for a single token." }
-func (AgentCompletionsResponseLogprob) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"bytes": "The raw bytes of the token.",
-		"logprob": "The log probability of this token.",
-		"token": "The token string.",
-		"top_logprobs": "The top alternative tokens and their log probabilities.",
-	}
-}
 func (v AgentCompletionsResponseLogprob) Validate() error {
 	return variantValidator.Struct(v)
 }

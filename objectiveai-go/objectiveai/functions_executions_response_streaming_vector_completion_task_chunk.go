@@ -11,9 +11,7 @@ type FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk struct {
 	Completions []VectorCompletionsResponseStreamingAgentCompletionChunk `json:"completions"`
 	// Unix timestamp when the completion was created.
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
-	// ID of the ensemble used for this completion.
-	Ensemble string `json:"ensemble"`
-	Error *ResponseError `json:"error,omitempty"`
+	Error *ErrorResponseError `json:"error,omitempty"`
 	// Unique identifier for this vector completion.
 	ID string `json:"id"`
 	Index uint64 `json:"index" validate:"min=0,max=18446744073709551615"`
@@ -21,6 +19,8 @@ type FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk struct {
 	Object VectorCompletionsResponseStreamingObject `json:"object"`
 	// Current weighted scores. Updated as new votes arrive.
 	Scores []float64 `json:"scores"`
+	// ID of the swarm used for this completion.
+	Swarm string `json:"swarm"`
 	TaskIndex uint64 `json:"task_index" validate:"min=0,max=18446744073709551615"`
 	TaskPath []uint64 `json:"task_path"`
 	// Aggregated usage statistics. Typically present only in the final chunk.
@@ -31,21 +31,6 @@ type FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk struct {
 	Weights []float64 `json:"weights"`
 }
 
-func (FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk) SchemaTitle() string { return "functions.executions.response.streaming.VectorCompletionTaskChunk" }
-func (FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk) SchemaDescription() string { return "A chunk in a streaming vector completion response.\n\nEach chunk contains incremental updates to the completion. Use the\n[`push`](Self::push) method to accumulate chunks into a complete response." }
-func (FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"completions": "Incremental agent completion chunks from each agent.",
-		"created": "Unix timestamp when the completion was created.",
-		"ensemble": "ID of the ensemble used for this completion.",
-		"id": "Unique identifier for this vector completion.",
-		"object": "Object type identifier (`\"vector.completion.chunk\"`).",
-		"scores": "Current weighted scores. Updated as new votes arrive.",
-		"usage": "Aggregated usage statistics. Typically present only in the final chunk.",
-		"votes": "Votes received so far. New votes are appended in subsequent chunks.",
-		"weights": "Current weight distribution across responses. Updated as new votes arrive.",
-	}
-}
 func (v FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk) Validate() error {
 	return variantValidator.Struct(v)
 }

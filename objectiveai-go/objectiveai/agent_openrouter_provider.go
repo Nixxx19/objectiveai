@@ -23,18 +23,6 @@ type AgentOpenrouterProvider struct {
 	RequireParameters *bool `json:"require_parameters,omitempty"`
 }
 
-func (AgentOpenrouterProvider) SchemaTitle() string { return "agent.openrouter.Provider" }
-func (AgentOpenrouterProvider) SchemaDescription() string { return "Provider routing preferences.\n\nControls which providers are used and in what order when routing\nrequests to upstream model hosts." }
-func (AgentOpenrouterProvider) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"allow_fallbacks": "Whether to allow fallback to other providers if preferred ones fail.\nDefaults to `true`.",
-		"ignore": "Providers to exclude from routing.",
-		"only": "Exclusive list of allowed providers. If set, only these providers are used.",
-		"order": "Preferred provider order. Earlier providers are tried first.",
-		"quantizations": "Allowed model quantization levels.",
-		"require_parameters": "Whether to require that the provider supports all request parameters.\nDefaults to `false`.",
-	}
-}
 func (v AgentOpenrouterProvider) Validate() error {
 	return variantValidator.Struct(v)
 }

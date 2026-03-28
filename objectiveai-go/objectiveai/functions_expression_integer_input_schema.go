@@ -13,15 +13,6 @@ type FunctionsExpressionIntegerInputSchema struct {
 	Type FunctionsExpressionIntegerInputSchemaType `json:"type"`
 }
 
-func (FunctionsExpressionIntegerInputSchema) SchemaTitle() string { return "functions.expression.IntegerInputSchema" }
-func (FunctionsExpressionIntegerInputSchema) SchemaDescription() string { return "Schema for an integer input." }
-func (FunctionsExpressionIntegerInputSchema) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"description": "Human-readable description of the integer.",
-		"maximum": "Maximum allowed value (inclusive).",
-		"minimum": "Minimum allowed value (inclusive).",
-	}
-}
 func (v FunctionsExpressionIntegerInputSchema) Validate() error {
 	return variantValidator.Struct(v)
 }

@@ -4,34 +4,60 @@ package objectiveai
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type FunctionsFunctionType struct {
-	Variant1 string `validate:"oneof=scalar.function vector.function"`
+	Scalar *string `validate:"oneof=scalar.function"`
+	Vector *string `validate:"oneof=vector.function"`
 }
 
 func (v FunctionsFunctionType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	if v.Scalar != nil {
+		return json.Marshal(v.Scalar)
+	}
+	if v.Vector != nil {
+		return json.Marshal(v.Vector)
+	}
+	return []byte("null"), nil
 }
 
 func (v *FunctionsFunctionType) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
-		return err
+	if string(data) == "null" {
+		return nil
 	}
-	return v.Validate()
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsFunctionType{}
+			candidate.Scalar = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try string
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsFunctionType{}
+			candidate.Vector = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of FunctionsFunctionType")
 }
 
 func (v FunctionsFunctionType) Validate() error {
+	count := 0
+	if v.Scalar != nil { count++ }
+	if v.Vector != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("FunctionsFunctionType: exactly one variant must be set, got %d", count)
+	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsFunctionTypeSchema struct{}
-
-func (FunctionsFunctionTypeSchema) SchemaTitle() string { return "functions.FunctionType" }
-func (FunctionsFunctionTypeSchema) SchemaDescription() string { return "" }
-func (FunctionsFunctionTypeSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"scalar.function", "vector.function"},
-	}
-}

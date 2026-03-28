@@ -4,15 +4,3 @@ package objectiveai
 
 type FunctionsProfilesComputationsRetryToken = []*string
 
-type FunctionsProfilesComputationsRetryTokenSchema struct{}
-
-func (FunctionsProfilesComputationsRetryTokenSchema) SchemaTitle() string { return "functions.profiles.computations.RetryToken" }
-func (FunctionsProfilesComputationsRetryTokenSchema) SchemaDescription() string { return "" }
-func (FunctionsProfilesComputationsRetryTokenSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "array",
-		"items": map[string]any{
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-	}
-}

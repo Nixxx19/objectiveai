@@ -8,13 +8,6 @@ type AuthGetOpenRouterByokApiKeyResponse struct {
 	APIKey *string `json:"api_key,omitempty"`
 }
 
-func (AuthGetOpenRouterByokApiKeyResponse) SchemaTitle() string { return "auth.GetOpenRouterByokApiKeyResponse" }
-func (AuthGetOpenRouterByokApiKeyResponse) SchemaDescription() string { return "Response containing the user's OpenRouter BYOK API key." }
-func (AuthGetOpenRouterByokApiKeyResponse) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"api_key": "The OpenRouter API key, or `None` if not configured.",
-	}
-}
 func (v AuthGetOpenRouterByokApiKeyResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

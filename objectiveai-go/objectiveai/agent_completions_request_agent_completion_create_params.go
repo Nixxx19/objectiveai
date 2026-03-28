@@ -5,11 +5,7 @@ package objectiveai
 // Parameters for creating a agent completion.
 type AgentCompletionsRequestAgentCompletionCreateParams struct {
 	// The agent to use (inline Agent or stored ID).
-	Agent AgentCompletionsRequestAgent `json:"agent"`
-	// Alternative agents to try if the primary agent fails.
-	Agents []AgentCompletionsRequestAgent `json:"agents,omitempty"`
-	// Map from MCP server URL to authorization header value.
-	MCPServerAuthorization map[string]string `json:"mcp_server_authorization,omitempty"`
+	Agent AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional `json:"agent"`
 	// The conversation messages.
 	Messages []AgentCompletionsMessageMessage `json:"messages"`
 	// Provider routing preferences.
@@ -22,20 +18,6 @@ type AgentCompletionsRequestAgentCompletionCreateParams struct {
 	Stream *bool `json:"stream,omitempty"`
 }
 
-func (AgentCompletionsRequestAgentCompletionCreateParams) SchemaTitle() string { return "agent.completions.request.AgentCompletionCreateParams" }
-func (AgentCompletionsRequestAgentCompletionCreateParams) SchemaDescription() string { return "Parameters for creating a agent completion." }
-func (AgentCompletionsRequestAgentCompletionCreateParams) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"agent": "The agent to use (inline Agent or stored ID).",
-		"agents": "Alternative agents to try if the primary agent fails.",
-		"mcp_server_authorization": "Map from MCP server URL to authorization header value.",
-		"messages": "The conversation messages.",
-		"provider": "Provider routing preferences.",
-		"response_format": "Output format constraints (text, JSON, or JSON schema).",
-		"seed": "Random seed for deterministic generation.",
-		"stream": "Whether to stream the response.",
-	}
-}
 func (v AgentCompletionsRequestAgentCompletionCreateParams) Validate() error {
 	return variantValidator.Struct(v)
 }

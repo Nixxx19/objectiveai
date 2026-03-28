@@ -7,14 +7,14 @@ import (
 	"fmt"
 )
 
-type FunctionsAlphaVectorRemoteFunctionVariant1 struct {
+type FunctionsAlphaVectorRemoteFunctionBranch struct {
 	Description string `json:"description"`
 	InputSchema FunctionsAlphaVectorExpressionVectorFunctionInputSchema `json:"input_schema"`
 	Tasks []FunctionsAlphaVectorBranchTaskExpression `json:"tasks"`
 	Type string `json:"type"`
 }
 
-type FunctionsAlphaVectorRemoteFunctionVariant2 struct {
+type FunctionsAlphaVectorRemoteFunctionLeaf struct {
 	Description string `json:"description"`
 	InputSchema FunctionsAlphaVectorExpressionVectorFunctionInputSchema `json:"input_schema"`
 	Tasks []FunctionsAlphaVectorLeafTaskExpression `json:"tasks"`
@@ -22,16 +22,16 @@ type FunctionsAlphaVectorRemoteFunctionVariant2 struct {
 }
 
 type FunctionsAlphaVectorRemoteFunction struct {
-	Variant1 *FunctionsAlphaVectorRemoteFunctionVariant1 
-	Variant2 *FunctionsAlphaVectorRemoteFunctionVariant2 
+	Branch *FunctionsAlphaVectorRemoteFunctionBranch 
+	Leaf *FunctionsAlphaVectorRemoteFunctionLeaf 
 }
 
 func (v FunctionsAlphaVectorRemoteFunction) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Branch != nil {
+		return json.Marshal(v.Branch)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Leaf != nil {
+		return json.Marshal(v.Leaf)
 	}
 	return []byte("null"), nil
 }
@@ -41,10 +41,10 @@ func (v *FunctionsAlphaVectorRemoteFunction) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try FunctionsAlphaVectorRemoteFunctionVariant1
+		var try FunctionsAlphaVectorRemoteFunctionBranch
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsAlphaVectorRemoteFunction{}
-			candidate.Variant1 = &try
+			candidate.Branch = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -52,10 +52,10 @@ func (v *FunctionsAlphaVectorRemoteFunction) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsAlphaVectorRemoteFunctionVariant2
+		var try FunctionsAlphaVectorRemoteFunctionLeaf
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsAlphaVectorRemoteFunction{}
-			candidate.Variant2 = &try
+			candidate.Leaf = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -67,29 +67,11 @@ func (v *FunctionsAlphaVectorRemoteFunction) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsAlphaVectorRemoteFunction) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Branch != nil { count++ }
+	if v.Leaf != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsAlphaVectorRemoteFunction: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsAlphaVectorRemoteFunctionSchema struct{}
-
-func (FunctionsAlphaVectorRemoteFunctionSchema) SchemaTitle() string { return "functions.alpha_vector.RemoteFunction" }
-func (FunctionsAlphaVectorRemoteFunctionSchema) SchemaDescription() string { return "" }
-func (FunctionsAlphaVectorRemoteFunctionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"type": "object",
-			"properties": map[string]any{"description": map[string]any{"type": "string"}, "input_schema": map[string]any{"$ref": "functions.alpha_vector.expression.VectorFunctionInputSchema"}, "tasks": map[string]any{"items": map[string]any{"$ref": "functions.alpha_vector.BranchTaskExpression"}, "type": "array"}, "type": map[string]any{"enum": []any{"alpha.vector.branch.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"properties": map[string]any{"description": map[string]any{"type": "string"}, "input_schema": map[string]any{"$ref": "functions.alpha_vector.expression.VectorFunctionInputSchema"}, "tasks": map[string]any{"items": map[string]any{"$ref": "functions.alpha_vector.LeafTaskExpression"}, "type": "array"}, "type": map[string]any{"enum": []any{"alpha.vector.leaf.function"}, "type": "string"}},
-		},
-		},
-	}
-}

@@ -7,20 +7,30 @@ import (
 	"fmt"
 )
 
-// Output from an executed task.
+// Owned task output variants.
 type FunctionsExpressionTaskOutput struct {
-	// Owned version.
-	Variant1 *FunctionsExpressionTaskOutputOwned 
-	// Borrowed version.
-	Variant2 *FunctionsExpressionTaskOutputRef 
+	// A single scalar score.
+	Scalar *float64 `validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
+	// A vector of scores.
+	Vector []float64 
+	// Multiple vectors of scores (from mapped tasks).
+	Vectors [][]float64 
+	// An error occurred during execution.
+	Err any 
 }
 
 func (v FunctionsExpressionTaskOutput) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Scalar != nil {
+		return json.Marshal(v.Scalar)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Vector != nil {
+		return json.Marshal(v.Vector)
+	}
+	if v.Vectors != nil {
+		return json.Marshal(v.Vectors)
+	}
+	if v.Err != nil {
+		return json.Marshal(v.Err)
 	}
 	return []byte("null"), nil
 }
@@ -30,10 +40,10 @@ func (v *FunctionsExpressionTaskOutput) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try FunctionsExpressionTaskOutputOwned
+		var try float64
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionTaskOutput{}
-			candidate.Variant1 = &try
+			candidate.Scalar = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -41,10 +51,32 @@ func (v *FunctionsExpressionTaskOutput) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsExpressionTaskOutputRef
+		var try []float64
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionTaskOutput{}
-			candidate.Variant2 = &try
+			candidate.Vector = try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try [][]float64
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsExpressionTaskOutput{}
+			candidate.Vectors = try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try any
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsExpressionTaskOutput{}
+			candidate.Err = try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -56,29 +88,13 @@ func (v *FunctionsExpressionTaskOutput) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsExpressionTaskOutput) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Scalar != nil { count++ }
+	if v.Vector != nil { count++ }
+	if v.Vectors != nil { count++ }
+	if v.Err != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsExpressionTaskOutput: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsExpressionTaskOutputSchema struct{}
-
-func (FunctionsExpressionTaskOutputSchema) SchemaTitle() string { return "functions.expression.TaskOutput" }
-func (FunctionsExpressionTaskOutputSchema) SchemaDescription() string { return "Output from an executed task." }
-func (FunctionsExpressionTaskOutputSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Owned version.",
-			"$ref": "functions.expression.TaskOutputOwned",
-		},
-			map[string]any{
-			"description": "Borrowed version.",
-			"$ref": "functions.expression.TaskOutputRef",
-		},
-		},
-	}
-}

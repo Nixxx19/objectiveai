@@ -18,26 +18,26 @@ type AgentMockOutputMode struct {
 	// The model is instructed via the prompt to output a specific key.
 	//
 	// This is the default and most widely supported mode.
-	Variant1 *string `validate:"oneof=instruction"`
+	Instruction *string `validate:"oneof=instruction"`
 	// A JSON schema response format is used with an enum of possible keys.
 	//
 	// Requires model support for structured JSON output.
-	Variant2 *string `validate:"oneof=json_schema"`
+	JsonSchema *string `validate:"oneof=json_schema"`
 	// A forced tool call with an argument schema containing possible keys.
 	//
 	// Requires model support for tool/function calling.
-	Variant3 *string `validate:"oneof=tool_call"`
+	ToolCall *string `validate:"oneof=tool_call"`
 }
 
 func (v AgentMockOutputMode) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Instruction != nil {
+		return json.Marshal(v.Instruction)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.JsonSchema != nil {
+		return json.Marshal(v.JsonSchema)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.ToolCall != nil {
+		return json.Marshal(v.ToolCall)
 	}
 	return []byte("null"), nil
 }
@@ -50,7 +50,7 @@ func (v *AgentMockOutputMode) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentMockOutputMode{}
-			candidate.Variant1 = &try
+			candidate.Instruction = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -61,7 +61,7 @@ func (v *AgentMockOutputMode) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentMockOutputMode{}
-			candidate.Variant2 = &try
+			candidate.JsonSchema = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -72,7 +72,7 @@ func (v *AgentMockOutputMode) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentMockOutputMode{}
-			candidate.Variant3 = &try
+			candidate.ToolCall = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -84,37 +84,12 @@ func (v *AgentMockOutputMode) UnmarshalJSON(data []byte) error {
 
 func (v AgentMockOutputMode) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
+	if v.Instruction != nil { count++ }
+	if v.JsonSchema != nil { count++ }
+	if v.ToolCall != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentMockOutputMode: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentMockOutputModeSchema struct{}
-
-func (AgentMockOutputModeSchema) SchemaTitle() string { return "agent.mock.OutputMode" }
-func (AgentMockOutputModeSchema) SchemaDescription() string { return "The method used to constrain LLM output to valid response keys.\n\nIn vector completions, the model must select from a predefined set of\nresponses. This enum controls *how* that constraint is enforced.\n\n**Note:** This setting is only relevant for vector completions and is\ncompletely ignored for agent completions." }
-func (AgentMockOutputModeSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "The model is instructed via the prompt to output a specific key.\n\nThis is the default and most widely supported mode.",
-			"type": "string",
-			"enum": []any{"instruction"},
-		},
-			map[string]any{
-			"description": "A JSON schema response format is used with an enum of possible keys.\n\nRequires model support for structured JSON output.",
-			"type": "string",
-			"enum": []any{"json_schema"},
-		},
-			map[string]any{
-			"description": "A forced tool call with an argument schema containing possible keys.\n\nRequires model support for tool/function calling.",
-			"type": "string",
-			"enum": []any{"tool_call"},
-		},
-		},
-	}
-}

@@ -15,15 +15,6 @@ type FunctionsPlaceholderScalarFunctionTask struct {
 	Output FunctionsExpressionExpression `json:"output"`
 }
 
-func (FunctionsPlaceholderScalarFunctionTask) SchemaTitle() string { return "functions.PlaceholderScalarFunctionTask" }
-func (FunctionsPlaceholderScalarFunctionTask) SchemaDescription() string { return "A compiled placeholder scalar function task.\n\nAlways produces `Scalar(0.5)` before the output expression\nis applied." }
-func (FunctionsPlaceholderScalarFunctionTask) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"input": "The resolved input.",
-		"input_schema": "JSON Schema defining the expected input structure.",
-		"output": "Expression to transform the fixed 0.5 output.",
-	}
-}
 func (v FunctionsPlaceholderScalarFunctionTask) Validate() error {
 	return variantValidator.Struct(v)
 }

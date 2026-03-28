@@ -3,32 +3,21 @@
 package objectiveai
 
 type FunctionsInventionsRequestFunctionInventionCreateParams struct {
-	Agent AgentCompletionsRequestAgent `json:"agent"`
-	Agents []AgentCompletionsRequestAgent `json:"agents,omitempty"`
+	Agent AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional `json:"agent"`
 	// Maximum number of retries per invention step.
 	// Each step is one agent completion (which itself may loop internally
 	// via tool calls). If the step's validation still fails after the
 	// agent loop ends, the step is retried up to this many times.
 	// Defaults to 3 if not specified.
 	MaxStepRetries *uint32 `json:"max_step_retries,omitempty" validate:"min=0,max=4294967295"`
-	// Map from MCP server URL to authorization header value.
-	MCPServerAuthorization map[string]string `json:"mcp_server_authorization,omitempty"`
 	Overwrite *bool `json:"overwrite,omitempty"`
 	Provider *AgentCompletionsRequestProvider `json:"provider,omitempty"`
-	Remote *FunctionsRemote `json:"remote,omitempty"`
+	Remote *Remote `json:"remote,omitempty"`
 	Seed *int64 `json:"seed,omitempty" validate:"min=-9223372036854775808,max=9223372036854775807"`
 	State FunctionsInventionsStateParamsState `json:"state"`
 	Stream *bool `json:"stream,omitempty"`
 }
 
-func (FunctionsInventionsRequestFunctionInventionCreateParams) SchemaTitle() string { return "functions.inventions.request.FunctionInventionCreateParams" }
-func (FunctionsInventionsRequestFunctionInventionCreateParams) SchemaDescription() string { return "" }
-func (FunctionsInventionsRequestFunctionInventionCreateParams) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"max_step_retries": "Maximum number of retries per invention step.\nEach step is one agent completion (which itself may loop internally\nvia tool calls). If the step's validation still fails after the\nagent loop ends, the step is retried up to this many times.\nDefaults to 3 if not specified.",
-		"mcp_server_authorization": "Map from MCP server URL to authorization header value.",
-	}
-}
 func (v FunctionsInventionsRequestFunctionInventionCreateParams) Validate() error {
 	return variantValidator.Struct(v)
 }

@@ -7,15 +7,15 @@ import (
 )
 
 type FunctionsExpressionIntegerInputSchemaType struct {
-	Variant1 string `validate:"oneof=integer"`
+	Functions.expression.IntegerInputSchemaType string `validate:"oneof=integer"`
 }
 
 func (v FunctionsExpressionIntegerInputSchemaType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Functions.expression.IntegerInputSchemaType)
 }
 
 func (v *FunctionsExpressionIntegerInputSchemaType) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Functions.expression.IntegerInputSchemaType); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -25,13 +25,3 @@ func (v FunctionsExpressionIntegerInputSchemaType) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type FunctionsExpressionIntegerInputSchemaTypeSchema struct{}
-
-func (FunctionsExpressionIntegerInputSchemaTypeSchema) SchemaTitle() string { return "functions.expression.IntegerInputSchemaType" }
-func (FunctionsExpressionIntegerInputSchemaTypeSchema) SchemaDescription() string { return "" }
-func (FunctionsExpressionIntegerInputSchemaTypeSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"integer"},
-	}
-}

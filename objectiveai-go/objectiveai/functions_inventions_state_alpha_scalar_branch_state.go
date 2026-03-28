@@ -19,8 +19,6 @@ type FunctionsInventionsStateAlphaScalarBranchState struct {
 	TasksLength *uint64 `json:"tasks_length,omitempty" validate:"min=0,max=18446744073709551615"`
 }
 
-func (FunctionsInventionsStateAlphaScalarBranchState) SchemaTitle() string { return "functions.inventions.state.AlphaScalarBranchState" }
-func (FunctionsInventionsStateAlphaScalarBranchState) SchemaDescription() string { return "" }
 func (v FunctionsInventionsStateAlphaScalarBranchState) Validate() error {
 	return variantValidator.Struct(v)
 }

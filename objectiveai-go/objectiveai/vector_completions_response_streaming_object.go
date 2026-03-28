@@ -9,15 +9,15 @@ import (
 // A streaming vector completion chunk.
 type VectorCompletionsResponseStreamingObject struct {
 	// A streaming vector completion chunk.
-	Variant1 string `validate:"oneof=vector.completion.chunk"`
+	Vector.completions.response.streaming.Object string `validate:"oneof=vector.completion.chunk"`
 }
 
 func (v VectorCompletionsResponseStreamingObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Vector.completions.response.streaming.Object)
 }
 
 func (v *VectorCompletionsResponseStreamingObject) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Vector.completions.response.streaming.Object); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -27,13 +27,3 @@ func (v VectorCompletionsResponseStreamingObject) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type VectorCompletionsResponseStreamingObjectSchema struct{}
-
-func (VectorCompletionsResponseStreamingObjectSchema) SchemaTitle() string { return "vector.completions.response.streaming.Object" }
-func (VectorCompletionsResponseStreamingObjectSchema) SchemaDescription() string { return "A streaming vector completion chunk." }
-func (VectorCompletionsResponseStreamingObjectSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"vector.completion.chunk"},
-	}
-}

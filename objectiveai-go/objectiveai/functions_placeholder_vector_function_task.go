@@ -21,18 +21,6 @@ type FunctionsPlaceholderVectorFunctionTask struct {
 	OutputLength FunctionsExpressionExpression `json:"output_length"`
 }
 
-func (FunctionsPlaceholderVectorFunctionTask) SchemaTitle() string { return "functions.PlaceholderVectorFunctionTask" }
-func (FunctionsPlaceholderVectorFunctionTask) SchemaDescription() string { return "A compiled placeholder vector function task.\n\nAlways produces `Vector(vec![1/N; output_length])` before\nthe output expression is applied." }
-func (FunctionsPlaceholderVectorFunctionTask) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"input": "The resolved input.",
-		"input_merge": "Expression merging sub-inputs back into one input.",
-		"input_schema": "JSON Schema defining the expected input structure.",
-		"input_split": "Expression transforming input into sub-inputs for swiss system.",
-		"output": "Expression to transform the equalized vector output.",
-		"output_length": "Expression computing the expected output vector length.",
-	}
-}
 func (v FunctionsPlaceholderVectorFunctionTask) Validate() error {
 	return variantValidator.Struct(v)
 }

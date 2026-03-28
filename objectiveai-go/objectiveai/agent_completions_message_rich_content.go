@@ -10,17 +10,17 @@ import (
 // Rich content for user/assistant messages (supports multimodal input).
 type AgentCompletionsMessageRichContent struct {
 	// Plain text content.
-	Variant1 *string 
+	Text *string 
 	// Multi-part content (text, images, audio, video, files).
-	Variant2 []AgentCompletionsMessageRichContentPart 
+	Parts []AgentCompletionsMessageRichContentPart 
 }
 
 func (v AgentCompletionsMessageRichContent) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Text != nil {
+		return json.Marshal(v.Text)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Parts != nil {
+		return json.Marshal(v.Parts)
 	}
 	return []byte("null"), nil
 }
@@ -33,7 +33,7 @@ func (v *AgentCompletionsMessageRichContent) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageRichContent{}
-			candidate.Variant1 = &try
+			candidate.Text = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -44,7 +44,7 @@ func (v *AgentCompletionsMessageRichContent) UnmarshalJSON(data []byte) error {
 		var try []AgentCompletionsMessageRichContentPart
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageRichContent{}
-			candidate.Variant2 = try
+			candidate.Parts = try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -56,30 +56,11 @@ func (v *AgentCompletionsMessageRichContent) UnmarshalJSON(data []byte) error {
 
 func (v AgentCompletionsMessageRichContent) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Text != nil { count++ }
+	if v.Parts != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentCompletionsMessageRichContent: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentCompletionsMessageRichContentSchema struct{}
-
-func (AgentCompletionsMessageRichContentSchema) SchemaTitle() string { return "agent.completions.message.RichContent" }
-func (AgentCompletionsMessageRichContentSchema) SchemaDescription() string { return "Rich content for user/assistant messages (supports multimodal input)." }
-func (AgentCompletionsMessageRichContentSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Plain text content.",
-			"type": "string",
-		},
-			map[string]any{
-			"description": "Multi-part content (text, images, audio, video, files).",
-			"type": "array",
-			"items": map[string]any{"$ref": "agent.completions.message.RichContentPart"},
-		},
-		},
-	}
-}

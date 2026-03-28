@@ -7,15 +7,15 @@ import (
 )
 
 type FunctionsExecutionsResponseUnaryObject struct {
-	Variant1 string `validate:"oneof=scalar.function.execution vector.function.execution"`
+	Functions.executions.response.unary.Object string `validate:"oneof=scalar.function.execution vector.function.execution"`
 }
 
 func (v FunctionsExecutionsResponseUnaryObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Functions.executions.response.unary.Object)
 }
 
 func (v *FunctionsExecutionsResponseUnaryObject) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Functions.executions.response.unary.Object); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -25,13 +25,3 @@ func (v FunctionsExecutionsResponseUnaryObject) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type FunctionsExecutionsResponseUnaryObjectSchema struct{}
-
-func (FunctionsExecutionsResponseUnaryObjectSchema) SchemaTitle() string { return "functions.executions.response.unary.Object" }
-func (FunctionsExecutionsResponseUnaryObjectSchema) SchemaDescription() string { return "" }
-func (FunctionsExecutionsResponseUnaryObjectSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"scalar.function.execution", "vector.function.execution"},
-	}
-}

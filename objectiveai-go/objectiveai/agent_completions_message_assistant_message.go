@@ -16,17 +16,6 @@ type AgentCompletionsMessageAssistantMessage struct {
 	ToolCalls []AgentCompletionsMessageAssistantToolCall `json:"tool_calls,omitempty"`
 }
 
-func (AgentCompletionsMessageAssistantMessage) SchemaTitle() string { return "agent.completions.message.AssistantMessage" }
-func (AgentCompletionsMessageAssistantMessage) SchemaDescription() string { return "An assistant message (model's previous response)." }
-func (AgentCompletionsMessageAssistantMessage) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"content": "The message content, if any.",
-		"name": "Optional name for the assistant.",
-		"reasoning": "Reasoning content from models that support chain-of-thought.",
-		"refusal": "Refusal message if the model declined to respond.",
-		"tool_calls": "Tool calls made by the assistant.",
-	}
-}
 func (v AgentCompletionsMessageAssistantMessage) Validate() error {
 	return variantValidator.Struct(v)
 }

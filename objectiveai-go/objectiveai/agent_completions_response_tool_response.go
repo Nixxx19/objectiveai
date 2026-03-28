@@ -12,14 +12,6 @@ type AgentCompletionsResponseToolResponse struct {
 	ToolCallID string `json:"tool_call_id"`
 }
 
-func (AgentCompletionsResponseToolResponse) SchemaTitle() string { return "agent.completions.response.ToolResponse" }
-func (AgentCompletionsResponseToolResponse) SchemaDescription() string { return "A tool message containing the result of a tool call." }
-func (AgentCompletionsResponseToolResponse) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"content": "The content of the tool response.",
-		"tool_call_id": "The ID of the tool call this message responds to.",
-	}
-}
 func (v AgentCompletionsResponseToolResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

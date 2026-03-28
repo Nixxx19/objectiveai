@@ -4,16 +4,14 @@ package objectiveai
 
 // A complete vector completion response (non-streaming).
 //
-// Contains the final scores, all votes from the ensemble, and the underlying
+// Contains the final scores, all votes from the swarm, and the underlying
 // agent completions that produced those votes.
 type FunctionsExecutionsResponseUnaryVectorCompletionTask struct {
-	// The underlying agent completions from each agent in the ensemble.
+	// The underlying agent completions from each agent in the swarm.
 	Completions []VectorCompletionsResponseUnaryAgentCompletion `json:"completions"`
 	// Unix timestamp when the completion was created.
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
-	// ID of the ensemble used for this completion.
-	Ensemble string `json:"ensemble"`
-	Error *ResponseError `json:"error,omitempty"`
+	Error *ErrorResponseError `json:"error,omitempty"`
 	// Unique identifier for this vector completion.
 	ID string `json:"id"`
 	Index uint64 `json:"index" validate:"min=0,max=18446744073709551615"`
@@ -21,6 +19,8 @@ type FunctionsExecutionsResponseUnaryVectorCompletionTask struct {
 	Object VectorCompletionsResponseUnaryObject `json:"object"`
 	// Final weighted scores for each response option. Sums to 1.
 	Scores []float64 `json:"scores"`
+	// ID of the swarm used for this completion.
+	Swarm string `json:"swarm"`
 	TaskIndex uint64 `json:"task_index" validate:"min=0,max=18446744073709551615"`
 	TaskPath []uint64 `json:"task_path"`
 	// Aggregated token and cost usage across all completions.
@@ -33,21 +33,6 @@ type FunctionsExecutionsResponseUnaryVectorCompletionTask struct {
 	Weights []float64 `json:"weights"`
 }
 
-func (FunctionsExecutionsResponseUnaryVectorCompletionTask) SchemaTitle() string { return "functions.executions.response.unary.VectorCompletionTask" }
-func (FunctionsExecutionsResponseUnaryVectorCompletionTask) SchemaDescription() string { return "A complete vector completion response (non-streaming).\n\nContains the final scores, all votes from the ensemble, and the underlying\nagent completions that produced those votes." }
-func (FunctionsExecutionsResponseUnaryVectorCompletionTask) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"completions": "The underlying agent completions from each agent in the ensemble.",
-		"created": "Unix timestamp when the completion was created.",
-		"ensemble": "ID of the ensemble used for this completion.",
-		"id": "Unique identifier for this vector completion.",
-		"object": "Object type identifier (`\"vector.completion\"`).",
-		"scores": "Final weighted scores for each response option. Sums to 1.",
-		"usage": "Aggregated token and cost usage across all completions.",
-		"votes": "Individual votes from each agent, showing their selections.",
-		"weights": "Total weight allocated to each response option. Same length as `scores`.\nFor discrete votes, an LLM's full weight goes to its selected response.\nFor probabilistic votes, the weight is divided according to the distribution.",
-	}
-}
 func (v FunctionsExecutionsResponseUnaryVectorCompletionTask) Validate() error {
 	return variantValidator.Struct(v)
 }

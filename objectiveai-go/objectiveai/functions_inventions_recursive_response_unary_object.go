@@ -7,15 +7,15 @@ import (
 )
 
 type FunctionsInventionsRecursiveResponseUnaryObject struct {
-	Variant1 string `validate:"oneof=alpha.scalar.function.invention.recursive alpha.vector.function.invention.recursive"`
+	Functions.inventions.recursive.response.unary.Object string `validate:"oneof=alpha.scalar.function.invention.recursive alpha.vector.function.invention.recursive"`
 }
 
 func (v FunctionsInventionsRecursiveResponseUnaryObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Functions.inventions.recursive.response.unary.Object)
 }
 
 func (v *FunctionsInventionsRecursiveResponseUnaryObject) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Functions.inventions.recursive.response.unary.Object); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -25,13 +25,3 @@ func (v FunctionsInventionsRecursiveResponseUnaryObject) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type FunctionsInventionsRecursiveResponseUnaryObjectSchema struct{}
-
-func (FunctionsInventionsRecursiveResponseUnaryObjectSchema) SchemaTitle() string { return "functions.inventions.recursive.response.unary.Object" }
-func (FunctionsInventionsRecursiveResponseUnaryObjectSchema) SchemaDescription() string { return "" }
-func (FunctionsInventionsRecursiveResponseUnaryObjectSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"alpha.scalar.function.invention.recursive", "alpha.vector.function.invention.recursive"},
-	}
-}

@@ -8,16 +8,16 @@ import (
 )
 
 type FunctionsFullInlineFunction struct {
-	Variant1 *FunctionsAlphaInlineFunction 
-	Variant2 *FunctionsInlineFunction 
+	Alpha *FunctionsAlphaInlineFunction 
+	Standard *FunctionsInlineFunction 
 }
 
 func (v FunctionsFullInlineFunction) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Alpha != nil {
+		return json.Marshal(v.Alpha)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Standard != nil {
+		return json.Marshal(v.Standard)
 	}
 	return []byte("null"), nil
 }
@@ -30,7 +30,7 @@ func (v *FunctionsFullInlineFunction) UnmarshalJSON(data []byte) error {
 		var try FunctionsAlphaInlineFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsFullInlineFunction{}
-			candidate.Variant1 = &try
+			candidate.Alpha = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -41,7 +41,7 @@ func (v *FunctionsFullInlineFunction) UnmarshalJSON(data []byte) error {
 		var try FunctionsInlineFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsFullInlineFunction{}
-			candidate.Variant2 = &try
+			candidate.Standard = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -53,27 +53,11 @@ func (v *FunctionsFullInlineFunction) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsFullInlineFunction) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Alpha != nil { count++ }
+	if v.Standard != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsFullInlineFunction: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsFullInlineFunctionSchema struct{}
-
-func (FunctionsFullInlineFunctionSchema) SchemaTitle() string { return "functions.FullInlineFunction" }
-func (FunctionsFullInlineFunctionSchema) SchemaDescription() string { return "" }
-func (FunctionsFullInlineFunctionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"$ref": "functions.AlphaInlineFunction",
-		},
-			map[string]any{
-			"$ref": "functions.InlineFunction",
-		},
-		},
-	}
-}

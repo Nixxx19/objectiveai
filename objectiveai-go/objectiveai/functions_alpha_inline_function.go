@@ -8,16 +8,16 @@ import (
 )
 
 type FunctionsAlphaInlineFunction struct {
-	Variant1 *FunctionsAlphaScalarInlineFunction 
-	Variant2 *FunctionsAlphaVectorInlineFunction 
+	Scalar *FunctionsAlphaScalarInlineFunction 
+	Vector *FunctionsAlphaVectorInlineFunction 
 }
 
 func (v FunctionsAlphaInlineFunction) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Scalar != nil {
+		return json.Marshal(v.Scalar)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Vector != nil {
+		return json.Marshal(v.Vector)
 	}
 	return []byte("null"), nil
 }
@@ -30,7 +30,7 @@ func (v *FunctionsAlphaInlineFunction) UnmarshalJSON(data []byte) error {
 		var try FunctionsAlphaScalarInlineFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsAlphaInlineFunction{}
-			candidate.Variant1 = &try
+			candidate.Scalar = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -41,7 +41,7 @@ func (v *FunctionsAlphaInlineFunction) UnmarshalJSON(data []byte) error {
 		var try FunctionsAlphaVectorInlineFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsAlphaInlineFunction{}
-			candidate.Variant2 = &try
+			candidate.Vector = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -53,27 +53,11 @@ func (v *FunctionsAlphaInlineFunction) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsAlphaInlineFunction) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Scalar != nil { count++ }
+	if v.Vector != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsAlphaInlineFunction: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsAlphaInlineFunctionSchema struct{}
-
-func (FunctionsAlphaInlineFunctionSchema) SchemaTitle() string { return "functions.AlphaInlineFunction" }
-func (FunctionsAlphaInlineFunctionSchema) SchemaDescription() string { return "" }
-func (FunctionsAlphaInlineFunctionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"$ref": "functions.alpha_scalar.InlineFunction",
-		},
-			map[string]any{
-			"$ref": "functions.alpha_vector.InlineFunction",
-		},
-		},
-	}
-}

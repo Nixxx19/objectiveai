@@ -10,14 +10,6 @@ type AgentCompletionsMessageAssistantToolCallFunction struct {
 	Name string `json:"name"`
 }
 
-func (AgentCompletionsMessageAssistantToolCallFunction) SchemaTitle() string { return "agent.completions.message.AssistantToolCallFunction" }
-func (AgentCompletionsMessageAssistantToolCallFunction) SchemaDescription() string { return "Details of a function call made by the assistant." }
-func (AgentCompletionsMessageAssistantToolCallFunction) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"arguments": "The arguments to pass to the function, as a JSON string.",
-		"name": "The name of the function to call.",
-	}
-}
 func (v AgentCompletionsMessageAssistantToolCallFunction) Validate() error {
 	return variantValidator.Struct(v)
 }

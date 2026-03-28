@@ -8,9 +8,9 @@ type FunctionsProfilesComputationsResponseUnaryFunctionExecution struct {
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
 	Dataset uint64 `json:"dataset" validate:"min=0,max=18446744073709551615"`
 	// Error details if the execution failed.
-	Error *ResponseError `json:"error,omitempty"`
-	// ID of the function used (if remote).
-	Function *string `json:"function,omitempty"`
+	Error *ErrorResponseError `json:"error,omitempty"`
+	// The function used (if remote).
+	Function *RemotePath `json:"function,omitempty"`
 	// Unique identifier for this execution.
 	ID string `json:"id"`
 	Index uint64 `json:"index" validate:"min=0,max=18446744073709551615"`
@@ -18,9 +18,9 @@ type FunctionsProfilesComputationsResponseUnaryFunctionExecution struct {
 	// Object type identifier.
 	Object FunctionsExecutionsResponseUnaryObject `json:"object"`
 	// The final output (scalar or vector score).
-	Output FunctionsExpressionTaskOutputOwned `json:"output"`
-	// ID of the profile used (if remote).
-	Profile *string `json:"profile,omitempty"`
+	Output FunctionsExecutionsResponseOutput `json:"output"`
+	// The profile used (if remote).
+	Profile *RemotePath `json:"profile,omitempty"`
 	// Reasoning summary if reasoning was enabled.
 	Reasoning *FunctionsExecutionsResponseUnaryReasoningSummary `json:"reasoning,omitempty"`
 	Retry uint64 `json:"retry" validate:"min=0,max=18446744073709551615"`
@@ -34,24 +34,6 @@ type FunctionsProfilesComputationsResponseUnaryFunctionExecution struct {
 	Usage AgentCompletionsResponseUsage `json:"usage"`
 }
 
-func (FunctionsProfilesComputationsResponseUnaryFunctionExecution) SchemaTitle() string { return "functions.profiles.computations.response.unary.FunctionExecution" }
-func (FunctionsProfilesComputationsResponseUnaryFunctionExecution) SchemaDescription() string { return "A complete function execution response (non-streaming)." }
-func (FunctionsProfilesComputationsResponseUnaryFunctionExecution) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"created": "Unix timestamp when the execution was created.",
-		"error": "Error details if the execution failed.",
-		"function": "ID of the function used (if remote).",
-		"id": "Unique identifier for this execution.",
-		"object": "Object type identifier.",
-		"output": "The final output (scalar or vector score).",
-		"profile": "ID of the profile used (if remote).",
-		"reasoning": "Reasoning summary if reasoning was enabled.",
-		"retry_token": "Token for retrying this execution with cached votes.",
-		"tasks": "Results from each task in the function.",
-		"tasks_errors": "Whether any tasks encountered errors.",
-		"usage": "Aggregated token and cost usage.",
-	}
-}
 func (v FunctionsProfilesComputationsResponseUnaryFunctionExecution) Validate() error {
 	return variantValidator.Struct(v)
 }

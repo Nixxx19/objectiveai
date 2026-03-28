@@ -16,15 +16,6 @@ type FunctionsVectorCompletionTask struct {
 	Responses []AgentCompletionsMessageRichContent `json:"responses"`
 }
 
-func (FunctionsVectorCompletionTask) SchemaTitle() string { return "functions.VectorCompletionTask" }
-func (FunctionsVectorCompletionTask) SchemaDescription() string { return "A compiled vector completion task ready for execution." }
-func (FunctionsVectorCompletionTask) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"messages": "The resolved conversation messages.",
-		"output": "Expression to transform the task result into a valid function output.\n\nReceives `output` as the task's raw result (typically `Vector(scores)`).\nMust return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).\nSee [`VectorCompletionTaskExpression::output`] for full documentation.",
-		"responses": "The resolved response options the LLMs can vote for.",
-	}
-}
 func (v FunctionsVectorCompletionTask) Validate() error {
 	return variantValidator.Struct(v)
 }

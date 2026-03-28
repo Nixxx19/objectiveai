@@ -27,16 +27,6 @@ type AgentOpenrouterReasoning struct {
 	SummaryVerbosity *AgentOpenrouterReasoningSummaryVerbosity `json:"summary_verbosity,omitempty"`
 }
 
-func (AgentOpenrouterReasoning) SchemaTitle() string { return "agent.openrouter.Reasoning" }
-func (AgentOpenrouterReasoning) SchemaDescription() string { return "Configuration for model reasoning/thinking capabilities.\n\nSome models (like o1, o3, Claude with extended thinking) support\nexplicit reasoning modes where they can \"think\" before responding.\nThis struct configures those capabilities.\n\n**Note:** The `max_tokens`, `effort`, and `summary_verbosity` fields are\nonly supported by some models. Unsupported fields are silently ignored." }
-func (AgentOpenrouterReasoning) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"effort": "The reasoning effort level.\n\nOnly supported by some models.",
-		"enabled": "Whether reasoning is enabled. Defaults to `true` if other fields are set.",
-		"max_tokens": "Maximum tokens for the reasoning/thinking output.\n\nOnly supported by some models.",
-		"summary_verbosity": "Verbosity of reasoning summaries in the response.\n\nOnly supported by some models.",
-	}
-}
 func (v AgentOpenrouterReasoning) Validate() error {
 	return variantValidator.Struct(v)
 }

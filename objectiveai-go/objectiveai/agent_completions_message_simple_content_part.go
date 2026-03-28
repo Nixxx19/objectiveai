@@ -9,13 +9,6 @@ type AgentCompletionsMessageSimpleContentPart struct {
 	Type string `json:"type" validate:"oneof=text"`
 }
 
-func (AgentCompletionsMessageSimpleContentPart) SchemaTitle() string { return "agent.completions.message.SimpleContentPart" }
-func (AgentCompletionsMessageSimpleContentPart) SchemaDescription() string { return "A text part." }
-func (AgentCompletionsMessageSimpleContentPart) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"text": "The text content.",
-	}
-}
 func (v AgentCompletionsMessageSimpleContentPart) Validate() error {
 	return variantValidator.Struct(v)
 }

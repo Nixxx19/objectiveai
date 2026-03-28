@@ -13,17 +13,17 @@ import (
 // stops producing further tokens.
 type AgentOpenrouterStop struct {
 	// A single stop sequence.
-	Variant1 *string 
+	String *string 
 	// Multiple stop sequences (up to 4 typically supported).
-	Variant2 []string 
+	Strings []string 
 }
 
 func (v AgentOpenrouterStop) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.String != nil {
+		return json.Marshal(v.String)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Strings != nil {
+		return json.Marshal(v.Strings)
 	}
 	return []byte("null"), nil
 }
@@ -36,7 +36,7 @@ func (v *AgentOpenrouterStop) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterStop{}
-			candidate.Variant1 = &try
+			candidate.String = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -47,7 +47,7 @@ func (v *AgentOpenrouterStop) UnmarshalJSON(data []byte) error {
 		var try []string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterStop{}
-			candidate.Variant2 = try
+			candidate.Strings = try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -59,30 +59,11 @@ func (v *AgentOpenrouterStop) UnmarshalJSON(data []byte) error {
 
 func (v AgentOpenrouterStop) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.String != nil { count++ }
+	if v.Strings != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentOpenrouterStop: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentOpenrouterStopSchema struct{}
-
-func (AgentOpenrouterStopSchema) SchemaTitle() string { return "agent.openrouter.Stop" }
-func (AgentOpenrouterStopSchema) SchemaDescription() string { return "Stop sequences that terminate model generation.\n\nWhen the model generates any of these sequences, it immediately\nstops producing further tokens." }
-func (AgentOpenrouterStopSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "A single stop sequence.",
-			"type": "string",
-		},
-			map[string]any{
-			"description": "Multiple stop sequences (up to 4 typically supported).",
-			"type": "array",
-			"items": map[string]any{"type": "string"},
-		},
-		},
-	}
-}

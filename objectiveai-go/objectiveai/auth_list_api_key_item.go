@@ -23,19 +23,6 @@ type AuthListApiKeyItem struct {
 	Name string `json:"name"`
 }
 
-func (AuthListApiKeyItem) SchemaTitle() string { return "auth.ListApiKeyItem" }
-func (AuthListApiKeyItem) SchemaDescription() string { return "An API key with metadata and accumulated cost information.\n\nThis extends [`ApiKeyWithMetadata`](super::ApiKeyWithMetadata) with\nthe total cost incurred by requests using this key." }
-func (AuthListApiKeyItem) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"api_key": "The API key itself.",
-		"cost": "The total cost incurred by this API key.",
-		"created": "The timestamp when the API key was created (RFC 3339 format).",
-		"description": "The user-provided description of the API key, or `None` if not provided.",
-		"disabled": "The timestamp when the API key was disabled, or `None` if it is active.",
-		"expires": "The timestamp when the API key expires, or `None` if it does not expire.",
-		"name": "The user-provided name of the API key.",
-	}
-}
 func (v AuthListApiKeyItem) Validate() error {
 	return variantValidator.Struct(v)
 }

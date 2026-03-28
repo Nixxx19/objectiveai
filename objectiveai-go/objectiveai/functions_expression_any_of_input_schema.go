@@ -8,13 +8,6 @@ type FunctionsExpressionAnyOfInputSchema struct {
 	AnyOf []FunctionsExpressionInputSchema `json:"anyOf"`
 }
 
-func (FunctionsExpressionAnyOfInputSchema) SchemaTitle() string { return "functions.expression.AnyOfInputSchema" }
-func (FunctionsExpressionAnyOfInputSchema) SchemaDescription() string { return "Schema for a union of possible types - input must match at least one." }
-func (FunctionsExpressionAnyOfInputSchema) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"anyOf": "The possible schemas that the input can match.",
-	}
-}
 func (v FunctionsExpressionAnyOfInputSchema) Validate() error {
 	return variantValidator.Struct(v)
 }

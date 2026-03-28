@@ -10,17 +10,17 @@ import (
 // Expression variant of [`SimpleContent`] for dynamic content.
 type AgentCompletionsMessageSimpleContentExpression struct {
 	// Plain text content.
-	Variant1 *string 
+	Text *string 
 	// Multi-part text content expressions.
-	Variant2 []any 
+	Parts []any 
 }
 
 func (v AgentCompletionsMessageSimpleContentExpression) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Text != nil {
+		return json.Marshal(v.Text)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Parts != nil {
+		return json.Marshal(v.Parts)
 	}
 	return []byte("null"), nil
 }
@@ -33,7 +33,7 @@ func (v *AgentCompletionsMessageSimpleContentExpression) UnmarshalJSON(data []by
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageSimpleContentExpression{}
-			candidate.Variant1 = &try
+			candidate.Text = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -44,7 +44,7 @@ func (v *AgentCompletionsMessageSimpleContentExpression) UnmarshalJSON(data []by
 		var try []any
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageSimpleContentExpression{}
-			candidate.Variant2 = try
+			candidate.Parts = try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -56,30 +56,11 @@ func (v *AgentCompletionsMessageSimpleContentExpression) UnmarshalJSON(data []by
 
 func (v AgentCompletionsMessageSimpleContentExpression) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Text != nil { count++ }
+	if v.Parts != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentCompletionsMessageSimpleContentExpression: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentCompletionsMessageSimpleContentExpressionSchema struct{}
-
-func (AgentCompletionsMessageSimpleContentExpressionSchema) SchemaTitle() string { return "agent.completions.message.SimpleContentExpression" }
-func (AgentCompletionsMessageSimpleContentExpressionSchema) SchemaDescription() string { return "Expression variant of [`SimpleContent`] for dynamic content." }
-func (AgentCompletionsMessageSimpleContentExpressionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Plain text content.",
-			"type": "string",
-		},
-			map[string]any{
-			"description": "Multi-part text content expressions.",
-			"type": "array",
-			"items": map[string]any{"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression", "description": "An expression (JMESPath or Starlark) to evaluate."}, map[string]any{"$ref": "agent.completions.message.SimpleContentPartExpression", "description": "A literal value."}}, "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```"},
-		},
-		},
-	}
-}

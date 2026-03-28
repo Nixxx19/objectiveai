@@ -10,22 +10,22 @@ import (
 // How to sort/prioritize providers.
 type AgentCompletionsRequestProviderSort struct {
 	// Prioritize by price (cheapest first).
-	Variant1 *string `validate:"oneof=price"`
+	Price *string `validate:"oneof=price"`
 	// Prioritize by throughput (fastest first).
-	Variant2 *string `validate:"oneof=throughput"`
+	Throughput *string `validate:"oneof=throughput"`
 	// Prioritize by latency (lowest first).
-	Variant3 *string `validate:"oneof=latency"`
+	Latency *string `validate:"oneof=latency"`
 }
 
 func (v AgentCompletionsRequestProviderSort) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Price != nil {
+		return json.Marshal(v.Price)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Throughput != nil {
+		return json.Marshal(v.Throughput)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.Latency != nil {
+		return json.Marshal(v.Latency)
 	}
 	return []byte("null"), nil
 }
@@ -38,7 +38,7 @@ func (v *AgentCompletionsRequestProviderSort) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestProviderSort{}
-			candidate.Variant1 = &try
+			candidate.Price = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -49,7 +49,7 @@ func (v *AgentCompletionsRequestProviderSort) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestProviderSort{}
-			candidate.Variant2 = &try
+			candidate.Throughput = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -60,7 +60,7 @@ func (v *AgentCompletionsRequestProviderSort) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestProviderSort{}
-			candidate.Variant3 = &try
+			candidate.Latency = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -72,37 +72,12 @@ func (v *AgentCompletionsRequestProviderSort) UnmarshalJSON(data []byte) error {
 
 func (v AgentCompletionsRequestProviderSort) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
+	if v.Price != nil { count++ }
+	if v.Throughput != nil { count++ }
+	if v.Latency != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentCompletionsRequestProviderSort: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentCompletionsRequestProviderSortSchema struct{}
-
-func (AgentCompletionsRequestProviderSortSchema) SchemaTitle() string { return "agent.completions.request.ProviderSort" }
-func (AgentCompletionsRequestProviderSortSchema) SchemaDescription() string { return "How to sort/prioritize providers." }
-func (AgentCompletionsRequestProviderSortSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Prioritize by price (cheapest first).",
-			"type": "string",
-			"enum": []any{"price"},
-		},
-			map[string]any{
-			"description": "Prioritize by throughput (fastest first).",
-			"type": "string",
-			"enum": []any{"throughput"},
-		},
-			map[string]any{
-			"description": "Prioritize by latency (lowest first).",
-			"type": "string",
-			"enum": []any{"latency"},
-		},
-		},
-	}
-}

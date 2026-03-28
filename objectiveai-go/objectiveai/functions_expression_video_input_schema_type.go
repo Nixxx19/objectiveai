@@ -7,15 +7,15 @@ import (
 )
 
 type FunctionsExpressionVideoInputSchemaType struct {
-	Variant1 string `validate:"oneof=video"`
+	Functions.expression.VideoInputSchemaType string `validate:"oneof=video"`
 }
 
 func (v FunctionsExpressionVideoInputSchemaType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Functions.expression.VideoInputSchemaType)
 }
 
 func (v *FunctionsExpressionVideoInputSchemaType) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Functions.expression.VideoInputSchemaType); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -25,13 +25,3 @@ func (v FunctionsExpressionVideoInputSchemaType) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type FunctionsExpressionVideoInputSchemaTypeSchema struct{}
-
-func (FunctionsExpressionVideoInputSchemaTypeSchema) SchemaTitle() string { return "functions.expression.VideoInputSchemaType" }
-func (FunctionsExpressionVideoInputSchemaTypeSchema) SchemaDescription() string { return "" }
-func (FunctionsExpressionVideoInputSchemaTypeSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"video"},
-	}
-}

@@ -4,6 +4,8 @@ package objectiveai
 
 // Expression variant of [`AssistantToolCallFunction`] for dynamic content.
 type AgentCompletionsMessageAssistantToolCallFunctionExpression struct {
+	// The arguments expression.
+	//
 	// A value that can be either a literal or an expression.
 	//
 	// This allows Function definitions to mix static values with dynamic
@@ -27,6 +29,8 @@ type AgentCompletionsMessageAssistantToolCallFunctionExpression struct {
 	// {"$starlark": "input['greeting']"}
 	// ```
 	Arguments any `json:"arguments"`
+	// The function name expression.
+	//
 	// A value that can be either a literal or an expression.
 	//
 	// This allows Function definitions to mix static values with dynamic
@@ -52,14 +56,6 @@ type AgentCompletionsMessageAssistantToolCallFunctionExpression struct {
 	Name any `json:"name"`
 }
 
-func (AgentCompletionsMessageAssistantToolCallFunctionExpression) SchemaTitle() string { return "agent.completions.message.AssistantToolCallFunctionExpression" }
-func (AgentCompletionsMessageAssistantToolCallFunctionExpression) SchemaDescription() string { return "Expression variant of [`AssistantToolCallFunction`] for dynamic content." }
-func (AgentCompletionsMessageAssistantToolCallFunctionExpression) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"arguments": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
-		"name": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
-	}
-}
 func (v AgentCompletionsMessageAssistantToolCallFunctionExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

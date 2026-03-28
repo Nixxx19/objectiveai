@@ -7,8 +7,6 @@ type FunctionsAlphaVectorExpressionVectorFunctionInputValue struct {
 	Items []FunctionsExpressionInputValue `json:"items"`
 }
 
-func (FunctionsAlphaVectorExpressionVectorFunctionInputValue) SchemaTitle() string { return "functions.alpha_vector.expression.VectorFunctionInputValue" }
-func (FunctionsAlphaVectorExpressionVectorFunctionInputValue) SchemaDescription() string { return "" }
 func (v FunctionsAlphaVectorExpressionVectorFunctionInputValue) Validate() error {
 	return variantValidator.Struct(v)
 }

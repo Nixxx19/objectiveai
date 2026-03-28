@@ -9,15 +9,15 @@ import (
 // Source filter for listing function-profile pairs.
 type FunctionsListFunctionProfilePairsSource struct {
 	// Source filter for listing function-profile pairs.
-	Variant1 string `validate:"oneof=objectiveai"`
+	Functions.ListFunctionProfilePairsSource string `validate:"oneof=objectiveai"`
 }
 
 func (v FunctionsListFunctionProfilePairsSource) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Functions.ListFunctionProfilePairsSource)
 }
 
 func (v *FunctionsListFunctionProfilePairsSource) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Functions.ListFunctionProfilePairsSource); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -27,13 +27,3 @@ func (v FunctionsListFunctionProfilePairsSource) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type FunctionsListFunctionProfilePairsSourceSchema struct{}
-
-func (FunctionsListFunctionProfilePairsSourceSchema) SchemaTitle() string { return "functions.ListFunctionProfilePairsSource" }
-func (FunctionsListFunctionProfilePairsSourceSchema) SchemaDescription() string { return "Source filter for listing function-profile pairs." }
-func (FunctionsListFunctionProfilePairsSourceSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"objectiveai"},
-	}
-}

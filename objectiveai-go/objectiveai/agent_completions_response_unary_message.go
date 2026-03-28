@@ -8,16 +8,16 @@ import (
 )
 
 type AgentCompletionsResponseUnaryMessage struct {
-	Variant1 *AgentCompletionsResponseUnaryAssistantResponse 
-	Variant2 *AgentCompletionsResponseToolResponse 
+	Assistant *AgentCompletionsResponseUnaryAssistantResponse 
+	Tool *AgentCompletionsResponseToolResponse 
 }
 
 func (v AgentCompletionsResponseUnaryMessage) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Assistant != nil {
+		return json.Marshal(v.Assistant)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Tool != nil {
+		return json.Marshal(v.Tool)
 	}
 	return []byte("null"), nil
 }
@@ -30,7 +30,7 @@ func (v *AgentCompletionsResponseUnaryMessage) UnmarshalJSON(data []byte) error 
 		var try AgentCompletionsResponseUnaryAssistantResponse
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsResponseUnaryMessage{}
-			candidate.Variant1 = &try
+			candidate.Assistant = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -41,7 +41,7 @@ func (v *AgentCompletionsResponseUnaryMessage) UnmarshalJSON(data []byte) error 
 		var try AgentCompletionsResponseToolResponse
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsResponseUnaryMessage{}
-			candidate.Variant2 = &try
+			candidate.Tool = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -53,27 +53,11 @@ func (v *AgentCompletionsResponseUnaryMessage) UnmarshalJSON(data []byte) error 
 
 func (v AgentCompletionsResponseUnaryMessage) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Assistant != nil { count++ }
+	if v.Tool != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentCompletionsResponseUnaryMessage: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentCompletionsResponseUnaryMessageSchema struct{}
-
-func (AgentCompletionsResponseUnaryMessageSchema) SchemaTitle() string { return "agent.completions.response.unary.Message" }
-func (AgentCompletionsResponseUnaryMessageSchema) SchemaDescription() string { return "" }
-func (AgentCompletionsResponseUnaryMessageSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"$ref": "agent.completions.response.unary.AssistantResponse",
-		},
-			map[string]any{
-			"$ref": "agent.completions.response.ToolResponse",
-		},
-		},
-	}
-}

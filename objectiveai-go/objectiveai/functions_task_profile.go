@@ -7,40 +7,27 @@ import (
 	"fmt"
 )
 
-// Profile for a nested function task (references another profile).
-type FunctionsTaskProfileVariant1 struct {
-	// Git commit SHA. Highly recommended for remote profiles to
-	// ensure compatibility if the referenced profile's shape changes.
-	Commit *string `json:"commit,omitempty"`
-	// Repository owner.
-	Owner string `json:"owner"`
-	// The remote source where the profile is hosted.
-	Remote FunctionsRemote `json:"remote"`
-	// Repository name.
-	Repository string `json:"repository"`
-}
-
 // Configuration for a single task within a Profile.
 //
 // Each variant corresponds to a task type in the Function definition.
 type FunctionsTaskProfile struct {
 	// Profile for a nested function task (references another profile).
-	Variant1 *FunctionsTaskProfileVariant1 
+	Remote *RemotePath 
 	// Inline profile for a task (tasks-based or auto).
-	Variant2 *FunctionsInlineProfile 
+	Inline *FunctionsInlineProfile 
 	// Placeholder task — no configuration needed, output is fixed.
-	Variant3 map[string]any 
+	Placeholder map[string]any 
 }
 
 func (v FunctionsTaskProfile) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Remote != nil {
+		return json.Marshal(v.Remote)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Inline != nil {
+		return json.Marshal(v.Inline)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.Placeholder != nil {
+		return json.Marshal(v.Placeholder)
 	}
 	return []byte("null"), nil
 }
@@ -50,10 +37,10 @@ func (v *FunctionsTaskProfile) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try FunctionsTaskProfileVariant1
+		var try RemotePath
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsTaskProfile{}
-			candidate.Variant1 = &try
+			candidate.Remote = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -64,7 +51,7 @@ func (v *FunctionsTaskProfile) UnmarshalJSON(data []byte) error {
 		var try FunctionsInlineProfile
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsTaskProfile{}
-			candidate.Variant2 = &try
+			candidate.Inline = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -75,7 +62,7 @@ func (v *FunctionsTaskProfile) UnmarshalJSON(data []byte) error {
 		var try map[string]any
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsTaskProfile{}
-			candidate.Variant3 = try
+			candidate.Placeholder = try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -87,35 +74,12 @@ func (v *FunctionsTaskProfile) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsTaskProfile) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
+	if v.Remote != nil { count++ }
+	if v.Inline != nil { count++ }
+	if v.Placeholder != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsTaskProfile: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsTaskProfileSchema struct{}
-
-func (FunctionsTaskProfileSchema) SchemaTitle() string { return "functions.TaskProfile" }
-func (FunctionsTaskProfileSchema) SchemaDescription() string { return "Configuration for a single task within a Profile.\n\nEach variant corresponds to a task type in the Function definition." }
-func (FunctionsTaskProfileSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Profile for a nested function task (references another profile).",
-			"type": "object",
-			"properties": map[string]any{"commit": map[string]any{"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}}, "description": "Git commit SHA. Highly recommended for remote profiles to\nensure compatibility if the referenced profile's shape changes."}, "owner": map[string]any{"description": "Repository owner.", "type": "string"}, "remote": map[string]any{"$ref": "functions.Remote", "description": "The remote source where the profile is hosted."}, "repository": map[string]any{"description": "Repository name.", "type": "string"}},
-		},
-			map[string]any{
-			"description": "Inline profile for a task (tasks-based or auto).",
-			"$ref": "functions.InlineProfile",
-		},
-			map[string]any{
-			"description": "Placeholder task — no configuration needed, output is fixed.",
-			"type": "object",
-		},
-		},
-	}
-}

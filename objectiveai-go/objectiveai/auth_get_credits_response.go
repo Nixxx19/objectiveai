@@ -15,15 +15,6 @@ type AuthGetCreditsResponse struct {
 	TotalCreditsUsed float64 `json:"total_credits_used" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }
 
-func (AuthGetCreditsResponse) SchemaTitle() string { return "auth.GetCreditsResponse" }
-func (AuthGetCreditsResponse) SchemaDescription() string { return "Response containing the user's credit balance information.\n\nCredits are the billing unit for ObjectiveAI. This response provides\na complete view of the user's credit status." }
-func (AuthGetCreditsResponse) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"credits": "The current available credit balance.",
-		"total_credits_purchased": "The total amount of credits ever purchased.",
-		"total_credits_used": "The total amount of credits consumed by API usage.",
-	}
-}
 func (v AuthGetCreditsResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

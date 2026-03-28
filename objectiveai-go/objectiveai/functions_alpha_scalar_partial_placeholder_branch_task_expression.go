@@ -7,14 +7,6 @@ type FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression struct {
 	Type string `json:"type" validate:"oneof=placeholder.alpha.scalar.function"`
 }
 
-func (FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression) SchemaTitle() string { return "functions.alpha_scalar.PartialPlaceholderBranchTaskExpression" }
-func (FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression) SchemaDescription() string { return "" }
 func (v FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
-}
-
-func (FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression) Body() map[string]any {
-	return map[string]any{
-		"$ref": "functions.alpha_scalar.PartialPlaceholderScalarFunctionTaskExpression",
-	}
 }

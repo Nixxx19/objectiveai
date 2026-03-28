@@ -9,13 +9,6 @@ type FunctionsExpressionImageInputSchema struct {
 	Type FunctionsExpressionImageInputSchemaType `json:"type"`
 }
 
-func (FunctionsExpressionImageInputSchema) SchemaTitle() string { return "functions.expression.ImageInputSchema" }
-func (FunctionsExpressionImageInputSchema) SchemaDescription() string { return "Schema for an image input (URL or base64-encoded)." }
-func (FunctionsExpressionImageInputSchema) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"description": "Human-readable description of the expected image.",
-	}
-}
 func (v FunctionsExpressionImageInputSchema) Validate() error {
 	return variantValidator.Struct(v)
 }

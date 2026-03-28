@@ -6,8 +6,6 @@ type FunctionsInventionsTasksLengthObject struct {
 	TasksLength uint64 `json:"tasks_length" validate:"min=0,max=18446744073709551615"`
 }
 
-func (FunctionsInventionsTasksLengthObject) SchemaTitle() string { return "functions.inventions.TasksLengthObject" }
-func (FunctionsInventionsTasksLengthObject) SchemaDescription() string { return "" }
 func (v FunctionsInventionsTasksLengthObject) Validate() error {
 	return variantValidator.Struct(v)
 }

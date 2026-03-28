@@ -10,43 +10,43 @@ import (
 // Predefined expression behaviors that require no user-authored code.
 type FunctionsExpressionSpecial struct {
 	// Returns the params input as-is.
-	Variant1 *string `validate:"oneof=input"`
+	Input *string `validate:"oneof=input"`
 	// Returns the params output as-is.
-	Variant2 *string `validate:"oneof=output"`
+	Output *string `validate:"oneof=output"`
 	// L1-normalizes the output. Scalar/Err pass through.
 	// Vector: L1 normalize. Vectors: L1 normalize each.
-	Variant3 *string `validate:"oneof=task_output_l1_normalized"`
+	TaskOutputL1Normalized *string `validate:"oneof=task_output_l1_normalized"`
 	// Weighted sum of the output. Vector → Scalar. Vectors → Vector.
-	Variant4 *string `validate:"oneof=task_output_weighted_sum"`
+	TaskOutputWeightedSum *string `validate:"oneof=task_output_weighted_sum"`
 	// Returns the length of input['items'] as u64
-	Variant5 *string `validate:"oneof=input_items_output_length"`
+	InputItemsOutputLength *string `validate:"oneof=input_items_output_length"`
 	// Splits an input containing items and optionally context into multiple inputs
-	Variant6 *string `validate:"oneof=input_items_optional_context_split"`
+	InputItemsOptionalContextSplit *string `validate:"oneof=input_items_optional_context_split"`
 	// Merges multiple inputs containing items and optionally context into a single input
-	Variant7 *string `validate:"oneof=input_items_optional_context_merge"`
+	InputItemsOptionalContextMerge *string `validate:"oneof=input_items_optional_context_merge"`
 }
 
 func (v FunctionsExpressionSpecial) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Input != nil {
+		return json.Marshal(v.Input)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Output != nil {
+		return json.Marshal(v.Output)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.TaskOutputL1Normalized != nil {
+		return json.Marshal(v.TaskOutputL1Normalized)
 	}
-	if v.Variant4 != nil {
-		return json.Marshal(v.Variant4)
+	if v.TaskOutputWeightedSum != nil {
+		return json.Marshal(v.TaskOutputWeightedSum)
 	}
-	if v.Variant5 != nil {
-		return json.Marshal(v.Variant5)
+	if v.InputItemsOutputLength != nil {
+		return json.Marshal(v.InputItemsOutputLength)
 	}
-	if v.Variant6 != nil {
-		return json.Marshal(v.Variant6)
+	if v.InputItemsOptionalContextSplit != nil {
+		return json.Marshal(v.InputItemsOptionalContextSplit)
 	}
-	if v.Variant7 != nil {
-		return json.Marshal(v.Variant7)
+	if v.InputItemsOptionalContextMerge != nil {
+		return json.Marshal(v.InputItemsOptionalContextMerge)
 	}
 	return []byte("null"), nil
 }
@@ -59,7 +59,7 @@ func (v *FunctionsExpressionSpecial) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionSpecial{}
-			candidate.Variant1 = &try
+			candidate.Input = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -70,7 +70,7 @@ func (v *FunctionsExpressionSpecial) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionSpecial{}
-			candidate.Variant2 = &try
+			candidate.Output = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -81,7 +81,7 @@ func (v *FunctionsExpressionSpecial) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionSpecial{}
-			candidate.Variant3 = &try
+			candidate.TaskOutputL1Normalized = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -92,7 +92,7 @@ func (v *FunctionsExpressionSpecial) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionSpecial{}
-			candidate.Variant4 = &try
+			candidate.TaskOutputWeightedSum = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -103,7 +103,7 @@ func (v *FunctionsExpressionSpecial) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionSpecial{}
-			candidate.Variant5 = &try
+			candidate.InputItemsOutputLength = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -114,7 +114,7 @@ func (v *FunctionsExpressionSpecial) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionSpecial{}
-			candidate.Variant6 = &try
+			candidate.InputItemsOptionalContextSplit = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -125,7 +125,7 @@ func (v *FunctionsExpressionSpecial) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionSpecial{}
-			candidate.Variant7 = &try
+			candidate.InputItemsOptionalContextMerge = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -137,61 +137,16 @@ func (v *FunctionsExpressionSpecial) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsExpressionSpecial) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
-	if v.Variant4 != nil { count++ }
-	if v.Variant5 != nil { count++ }
-	if v.Variant6 != nil { count++ }
-	if v.Variant7 != nil { count++ }
+	if v.Input != nil { count++ }
+	if v.Output != nil { count++ }
+	if v.TaskOutputL1Normalized != nil { count++ }
+	if v.TaskOutputWeightedSum != nil { count++ }
+	if v.InputItemsOutputLength != nil { count++ }
+	if v.InputItemsOptionalContextSplit != nil { count++ }
+	if v.InputItemsOptionalContextMerge != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsExpressionSpecial: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsExpressionSpecialSchema struct{}
-
-func (FunctionsExpressionSpecialSchema) SchemaTitle() string { return "functions.expression.Special" }
-func (FunctionsExpressionSpecialSchema) SchemaDescription() string { return "Predefined expression behaviors that require no user-authored code." }
-func (FunctionsExpressionSpecialSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Returns the params input as-is.",
-			"type": "string",
-			"enum": []any{"input"},
-		},
-			map[string]any{
-			"description": "Returns the params output as-is.",
-			"type": "string",
-			"enum": []any{"output"},
-		},
-			map[string]any{
-			"description": "L1-normalizes the output. Scalar/Err pass through.\nVector: L1 normalize. Vectors: L1 normalize each.",
-			"type": "string",
-			"enum": []any{"task_output_l1_normalized"},
-		},
-			map[string]any{
-			"description": "Weighted sum of the output. Vector → Scalar. Vectors → Vector.",
-			"type": "string",
-			"enum": []any{"task_output_weighted_sum"},
-		},
-			map[string]any{
-			"description": "Returns the length of input['items'] as u64",
-			"type": "string",
-			"enum": []any{"input_items_output_length"},
-		},
-			map[string]any{
-			"description": "Splits an input containing items and optionally context into multiple inputs",
-			"type": "string",
-			"enum": []any{"input_items_optional_context_split"},
-		},
-			map[string]any{
-			"description": "Merges multiple inputs containing items and optionally context into a single input",
-			"type": "string",
-			"enum": []any{"input_items_optional_context_merge"},
-		},
-		},
-	}
-}

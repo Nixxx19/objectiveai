@@ -14,16 +14,6 @@ type AgentCompletionsMessageFile struct {
 	Filename *string `json:"filename,omitempty"`
 }
 
-func (AgentCompletionsMessageFile) SchemaTitle() string { return "agent.completions.message.File" }
-func (AgentCompletionsMessageFile) SchemaDescription() string { return "A file attachment for multimodal input." }
-func (AgentCompletionsMessageFile) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"file_data": "Base64-encoded file data.",
-		"file_id": "The ID of a previously uploaded file.",
-		"file_url": "A URL to fetch the file from.",
-		"filename": "The filename for display purposes.",
-	}
-}
 func (v AgentCompletionsMessageFile) Validate() error {
 	return variantValidator.Struct(v)
 }

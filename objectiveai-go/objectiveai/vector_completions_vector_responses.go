@@ -4,15 +4,3 @@ package objectiveai
 
 type VectorCompletionsVectorResponses = []AgentCompletionsMessageRichContent
 
-type VectorCompletionsVectorResponsesSchema struct{}
-
-func (VectorCompletionsVectorResponsesSchema) SchemaTitle() string { return "vector.completions.VectorResponses" }
-func (VectorCompletionsVectorResponsesSchema) SchemaDescription() string { return "The list of response options in a vector completion request.\n\nEach element is a [`RichContent`] value that an LLM can vote for.\nResponses can be plain text strings or multi-part content containing\ntext, images, audio, video, or files.\n\n# Minimum Length\n\nA vector completion requires at least 2 responses to vote between.\n\n# Examples\n\nPlain text responses:\n```json\n[\"Yes\", \"No\", \"Maybe\"]\n```\n\nMultimodal responses:\n```json\n[\n  [{\"type\": \"text\", \"text\": \"Option A\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/a.png\"}}],\n  [{\"type\": \"text\", \"text\": \"Option B\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/b.png\"}}]\n]\n```" }
-func (VectorCompletionsVectorResponsesSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "array",
-		"items": map[string]any{
-			"$ref": "agent.completions.message.RichContent",
-		},
-	}
-}

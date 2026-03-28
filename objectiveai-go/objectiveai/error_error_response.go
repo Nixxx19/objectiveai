@@ -8,13 +8,6 @@ type ErrorErrorResponse struct {
 	Ok bool `json:"ok"`
 }
 
-func (ErrorErrorResponse) SchemaTitle() string { return "error.ErrorResponse" }
-func (ErrorErrorResponse) SchemaDescription() string { return "Response from the error endpoint." }
-func (ErrorErrorResponse) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"ok": "Whether the request completed successfully.",
-	}
-}
 func (v ErrorErrorResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

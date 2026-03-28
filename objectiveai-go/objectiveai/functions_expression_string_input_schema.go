@@ -11,14 +11,6 @@ type FunctionsExpressionStringInputSchema struct {
 	Type FunctionsExpressionStringInputSchemaType `json:"type"`
 }
 
-func (FunctionsExpressionStringInputSchema) SchemaTitle() string { return "functions.expression.StringInputSchema" }
-func (FunctionsExpressionStringInputSchema) SchemaDescription() string { return "Schema for a string input." }
-func (FunctionsExpressionStringInputSchema) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"description": "Human-readable description of the string.",
-		"enum": "If provided, the string must be one of these values.",
-	}
-}
 func (v FunctionsExpressionStringInputSchema) Validate() error {
 	return variantValidator.Struct(v)
 }

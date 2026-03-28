@@ -6,7 +6,7 @@ package objectiveai
 type FunctionsInventionsResponseUnaryAgentCompletion struct {
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
 	// Error details if this completion failed.
-	Error *ResponseError `json:"error,omitempty"`
+	Error *ErrorResponseError `json:"error,omitempty"`
 	ID string `json:"id"`
 	Index uint64 `json:"index" validate:"min=0,max=18446744073709551615"`
 	Messages []AgentCompletionsResponseUnaryMessage `json:"messages"`
@@ -17,15 +17,6 @@ type FunctionsInventionsResponseUnaryAgentCompletion struct {
 	Usage AgentCompletionsResponseUsage `json:"usage"`
 }
 
-func (FunctionsInventionsResponseUnaryAgentCompletion) SchemaTitle() string { return "functions.inventions.response.unary.AgentCompletion" }
-func (FunctionsInventionsResponseUnaryAgentCompletion) SchemaDescription() string { return "A complete agent completion response." }
-func (FunctionsInventionsResponseUnaryAgentCompletion) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"error": "Error details if this completion failed.",
-		"object": "The object type (always \"agent.completion\").",
-		"upstream": "Upstream provider",
-	}
-}
 func (v FunctionsInventionsResponseUnaryAgentCompletion) Validate() error {
 	return variantValidator.Struct(v)
 }

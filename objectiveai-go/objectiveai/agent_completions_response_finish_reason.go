@@ -10,32 +10,32 @@ import (
 // The reason the model stopped generating.
 type AgentCompletionsResponseFinishReason struct {
 	// The model reached a natural stop point or stop sequence.
-	Variant1 *string `validate:"oneof=stop"`
+	Stop *string `validate:"oneof=stop"`
 	// The model reached the maximum token limit.
-	Variant2 *string `validate:"oneof=length"`
+	Length *string `validate:"oneof=length"`
 	// The model decided to call one or more tools.
-	Variant3 *string `validate:"oneof=tool_calls"`
+	ToolCalls *string `validate:"oneof=tool_calls"`
 	// The response was filtered due to content policy.
-	Variant4 *string `validate:"oneof=content_filter"`
+	ContentFilter *string `validate:"oneof=content_filter"`
 	// An error occurred during generation.
-	Variant5 *string `validate:"oneof=error"`
+	Error *string `validate:"oneof=error"`
 }
 
 func (v AgentCompletionsResponseFinishReason) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Stop != nil {
+		return json.Marshal(v.Stop)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Length != nil {
+		return json.Marshal(v.Length)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.ToolCalls != nil {
+		return json.Marshal(v.ToolCalls)
 	}
-	if v.Variant4 != nil {
-		return json.Marshal(v.Variant4)
+	if v.ContentFilter != nil {
+		return json.Marshal(v.ContentFilter)
 	}
-	if v.Variant5 != nil {
-		return json.Marshal(v.Variant5)
+	if v.Error != nil {
+		return json.Marshal(v.Error)
 	}
 	return []byte("null"), nil
 }
@@ -48,7 +48,7 @@ func (v *AgentCompletionsResponseFinishReason) UnmarshalJSON(data []byte) error 
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsResponseFinishReason{}
-			candidate.Variant1 = &try
+			candidate.Stop = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -59,7 +59,7 @@ func (v *AgentCompletionsResponseFinishReason) UnmarshalJSON(data []byte) error 
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsResponseFinishReason{}
-			candidate.Variant2 = &try
+			candidate.Length = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -70,7 +70,7 @@ func (v *AgentCompletionsResponseFinishReason) UnmarshalJSON(data []byte) error 
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsResponseFinishReason{}
-			candidate.Variant3 = &try
+			candidate.ToolCalls = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -81,7 +81,7 @@ func (v *AgentCompletionsResponseFinishReason) UnmarshalJSON(data []byte) error 
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsResponseFinishReason{}
-			candidate.Variant4 = &try
+			candidate.ContentFilter = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -92,7 +92,7 @@ func (v *AgentCompletionsResponseFinishReason) UnmarshalJSON(data []byte) error 
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsResponseFinishReason{}
-			candidate.Variant5 = &try
+			candidate.Error = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -104,49 +104,14 @@ func (v *AgentCompletionsResponseFinishReason) UnmarshalJSON(data []byte) error 
 
 func (v AgentCompletionsResponseFinishReason) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
-	if v.Variant4 != nil { count++ }
-	if v.Variant5 != nil { count++ }
+	if v.Stop != nil { count++ }
+	if v.Length != nil { count++ }
+	if v.ToolCalls != nil { count++ }
+	if v.ContentFilter != nil { count++ }
+	if v.Error != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentCompletionsResponseFinishReason: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentCompletionsResponseFinishReasonSchema struct{}
-
-func (AgentCompletionsResponseFinishReasonSchema) SchemaTitle() string { return "agent.completions.response.FinishReason" }
-func (AgentCompletionsResponseFinishReasonSchema) SchemaDescription() string { return "The reason the model stopped generating." }
-func (AgentCompletionsResponseFinishReasonSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "The model reached a natural stop point or stop sequence.",
-			"type": "string",
-			"enum": []any{"stop"},
-		},
-			map[string]any{
-			"description": "The model reached the maximum token limit.",
-			"type": "string",
-			"enum": []any{"length"},
-		},
-			map[string]any{
-			"description": "The model decided to call one or more tools.",
-			"type": "string",
-			"enum": []any{"tool_calls"},
-		},
-			map[string]any{
-			"description": "The response was filtered due to content policy.",
-			"type": "string",
-			"enum": []any{"content_filter"},
-		},
-			map[string]any{
-			"description": "An error occurred during generation.",
-			"type": "string",
-			"enum": []any{"error"},
-		},
-		},
-	}
-}

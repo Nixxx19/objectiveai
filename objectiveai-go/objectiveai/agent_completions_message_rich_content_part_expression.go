@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-type AgentCompletionsMessageRichContentPartExpressionVariant1 struct {
+type AgentCompletionsMessageRichContentPartExpressionText struct {
 	// A value that can be either a literal or an expression.
 	//
 	// This allows Function definitions to mix static values with dynamic
@@ -34,7 +34,7 @@ type AgentCompletionsMessageRichContentPartExpressionVariant1 struct {
 	Type string `json:"type"`
 }
 
-type AgentCompletionsMessageRichContentPartExpressionVariant2 struct {
+type AgentCompletionsMessageRichContentPartExpressionImageUrl struct {
 	// A value that can be either a literal or an expression.
 	//
 	// This allows Function definitions to mix static values with dynamic
@@ -61,7 +61,7 @@ type AgentCompletionsMessageRichContentPartExpressionVariant2 struct {
 	Type string `json:"type"`
 }
 
-type AgentCompletionsMessageRichContentPartExpressionVariant3 struct {
+type AgentCompletionsMessageRichContentPartExpressionInputAudio struct {
 	// A value that can be either a literal or an expression.
 	//
 	// This allows Function definitions to mix static values with dynamic
@@ -88,7 +88,7 @@ type AgentCompletionsMessageRichContentPartExpressionVariant3 struct {
 	Type string `json:"type"`
 }
 
-type AgentCompletionsMessageRichContentPartExpressionVariant4 struct {
+type AgentCompletionsMessageRichContentPartExpressionInputVideo struct {
 	Type string `json:"type"`
 	// A value that can be either a literal or an expression.
 	//
@@ -115,7 +115,7 @@ type AgentCompletionsMessageRichContentPartExpressionVariant4 struct {
 	VideoURL any `json:"video_url"`
 }
 
-type AgentCompletionsMessageRichContentPartExpressionVariant5 struct {
+type AgentCompletionsMessageRichContentPartExpressionVideoUrl struct {
 	Type string `json:"type"`
 	// A value that can be either a literal or an expression.
 	//
@@ -142,7 +142,7 @@ type AgentCompletionsMessageRichContentPartExpressionVariant5 struct {
 	VideoURL any `json:"video_url"`
 }
 
-type AgentCompletionsMessageRichContentPartExpressionVariant6 struct {
+type AgentCompletionsMessageRichContentPartExpressionFile struct {
 	// A value that can be either a literal or an expression.
 	//
 	// This allows Function definitions to mix static values with dynamic
@@ -171,32 +171,32 @@ type AgentCompletionsMessageRichContentPartExpressionVariant6 struct {
 
 // Expression variant of [`RichContentPart`] for dynamic content.
 type AgentCompletionsMessageRichContentPartExpression struct {
-	Variant1 *AgentCompletionsMessageRichContentPartExpressionVariant1 
-	Variant2 *AgentCompletionsMessageRichContentPartExpressionVariant2 
-	Variant3 *AgentCompletionsMessageRichContentPartExpressionVariant3 
-	Variant4 *AgentCompletionsMessageRichContentPartExpressionVariant4 
-	Variant5 *AgentCompletionsMessageRichContentPartExpressionVariant5 
-	Variant6 *AgentCompletionsMessageRichContentPartExpressionVariant6 
+	Text *AgentCompletionsMessageRichContentPartExpressionText 
+	ImageUrl *AgentCompletionsMessageRichContentPartExpressionImageUrl 
+	InputAudio *AgentCompletionsMessageRichContentPartExpressionInputAudio 
+	InputVideo *AgentCompletionsMessageRichContentPartExpressionInputVideo 
+	VideoUrl *AgentCompletionsMessageRichContentPartExpressionVideoUrl 
+	File *AgentCompletionsMessageRichContentPartExpressionFile 
 }
 
 func (v AgentCompletionsMessageRichContentPartExpression) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Text != nil {
+		return json.Marshal(v.Text)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.ImageUrl != nil {
+		return json.Marshal(v.ImageUrl)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.InputAudio != nil {
+		return json.Marshal(v.InputAudio)
 	}
-	if v.Variant4 != nil {
-		return json.Marshal(v.Variant4)
+	if v.InputVideo != nil {
+		return json.Marshal(v.InputVideo)
 	}
-	if v.Variant5 != nil {
-		return json.Marshal(v.Variant5)
+	if v.VideoUrl != nil {
+		return json.Marshal(v.VideoUrl)
 	}
-	if v.Variant6 != nil {
-		return json.Marshal(v.Variant6)
+	if v.File != nil {
+		return json.Marshal(v.File)
 	}
 	return []byte("null"), nil
 }
@@ -206,10 +206,10 @@ func (v *AgentCompletionsMessageRichContentPartExpression) UnmarshalJSON(data []
 		return nil
 	}
 	{
-		var try AgentCompletionsMessageRichContentPartExpressionVariant1
+		var try AgentCompletionsMessageRichContentPartExpressionText
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageRichContentPartExpression{}
-			candidate.Variant1 = &try
+			candidate.Text = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -217,10 +217,10 @@ func (v *AgentCompletionsMessageRichContentPartExpression) UnmarshalJSON(data []
 		}
 	}
 	{
-		var try AgentCompletionsMessageRichContentPartExpressionVariant2
+		var try AgentCompletionsMessageRichContentPartExpressionImageUrl
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageRichContentPartExpression{}
-			candidate.Variant2 = &try
+			candidate.ImageUrl = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -228,10 +228,10 @@ func (v *AgentCompletionsMessageRichContentPartExpression) UnmarshalJSON(data []
 		}
 	}
 	{
-		var try AgentCompletionsMessageRichContentPartExpressionVariant3
+		var try AgentCompletionsMessageRichContentPartExpressionInputAudio
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageRichContentPartExpression{}
-			candidate.Variant3 = &try
+			candidate.InputAudio = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -239,10 +239,10 @@ func (v *AgentCompletionsMessageRichContentPartExpression) UnmarshalJSON(data []
 		}
 	}
 	{
-		var try AgentCompletionsMessageRichContentPartExpressionVariant4
+		var try AgentCompletionsMessageRichContentPartExpressionInputVideo
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageRichContentPartExpression{}
-			candidate.Variant4 = &try
+			candidate.InputVideo = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -250,10 +250,10 @@ func (v *AgentCompletionsMessageRichContentPartExpression) UnmarshalJSON(data []
 		}
 	}
 	{
-		var try AgentCompletionsMessageRichContentPartExpressionVariant5
+		var try AgentCompletionsMessageRichContentPartExpressionVideoUrl
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageRichContentPartExpression{}
-			candidate.Variant5 = &try
+			candidate.VideoUrl = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -261,10 +261,10 @@ func (v *AgentCompletionsMessageRichContentPartExpression) UnmarshalJSON(data []
 		}
 	}
 	{
-		var try AgentCompletionsMessageRichContentPartExpressionVariant6
+		var try AgentCompletionsMessageRichContentPartExpressionFile
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageRichContentPartExpression{}
-			candidate.Variant6 = &try
+			candidate.File = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -276,49 +276,15 @@ func (v *AgentCompletionsMessageRichContentPartExpression) UnmarshalJSON(data []
 
 func (v AgentCompletionsMessageRichContentPartExpression) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
-	if v.Variant4 != nil { count++ }
-	if v.Variant5 != nil { count++ }
-	if v.Variant6 != nil { count++ }
+	if v.Text != nil { count++ }
+	if v.ImageUrl != nil { count++ }
+	if v.InputAudio != nil { count++ }
+	if v.InputVideo != nil { count++ }
+	if v.VideoUrl != nil { count++ }
+	if v.File != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentCompletionsMessageRichContentPartExpression: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentCompletionsMessageRichContentPartExpressionSchema struct{}
-
-func (AgentCompletionsMessageRichContentPartExpressionSchema) SchemaTitle() string { return "agent.completions.message.RichContentPartExpression" }
-func (AgentCompletionsMessageRichContentPartExpressionSchema) SchemaDescription() string { return "Expression variant of [`RichContentPart`] for dynamic content." }
-func (AgentCompletionsMessageRichContentPartExpressionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"type": "object",
-			"properties": map[string]any{"text": map[string]any{"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression", "description": "An expression (JMESPath or Starlark) to evaluate."}, map[string]any{"description": "A literal value.", "type": "string"}}, "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```"}, "type": map[string]any{"enum": []any{"text"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"properties": map[string]any{"image_url": map[string]any{"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression", "description": "An expression (JMESPath or Starlark) to evaluate."}, map[string]any{"$ref": "agent.completions.message.ImageUrl", "description": "A literal value."}}, "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```"}, "type": map[string]any{"enum": []any{"image_url"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"properties": map[string]any{"input_audio": map[string]any{"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression", "description": "An expression (JMESPath or Starlark) to evaluate."}, map[string]any{"$ref": "agent.completions.message.InputAudio", "description": "A literal value."}}, "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```"}, "type": map[string]any{"enum": []any{"input_audio"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"input_video"}, "type": "string"}, "video_url": map[string]any{"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression", "description": "An expression (JMESPath or Starlark) to evaluate."}, map[string]any{"$ref": "agent.completions.message.VideoUrl", "description": "A literal value."}}, "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```"}},
-		},
-			map[string]any{
-			"type": "object",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"video_url"}, "type": "string"}, "video_url": map[string]any{"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression", "description": "An expression (JMESPath or Starlark) to evaluate."}, map[string]any{"$ref": "agent.completions.message.VideoUrl", "description": "A literal value."}}, "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```"}},
-		},
-			map[string]any{
-			"type": "object",
-			"properties": map[string]any{"file": map[string]any{"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression", "description": "An expression (JMESPath or Starlark) to evaluate."}, map[string]any{"$ref": "agent.completions.message.File", "description": "A literal value."}}, "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```"}, "type": map[string]any{"enum": []any{"file"}, "type": "string"}},
-		},
-		},
-	}
-}

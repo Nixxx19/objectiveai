@@ -9,15 +9,15 @@ import (
 // Source filter for listing profiles.
 type FunctionsProfilesListProfilesSource struct {
 	// Source filter for listing profiles.
-	Variant1 string `validate:"oneof=all mock filesystem objectiveai"`
+	Functions.profiles.ListProfilesSource string `validate:"oneof=all mock filesystem objectiveai"`
 }
 
 func (v FunctionsProfilesListProfilesSource) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Functions.profiles.ListProfilesSource)
 }
 
 func (v *FunctionsProfilesListProfilesSource) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Functions.profiles.ListProfilesSource); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -27,13 +27,3 @@ func (v FunctionsProfilesListProfilesSource) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type FunctionsProfilesListProfilesSourceSchema struct{}
-
-func (FunctionsProfilesListProfilesSourceSchema) SchemaTitle() string { return "functions.profiles.ListProfilesSource" }
-func (FunctionsProfilesListProfilesSourceSchema) SchemaDescription() string { return "Source filter for listing profiles." }
-func (FunctionsProfilesListProfilesSourceSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"all", "mock", "filesystem", "objectiveai"},
-	}
-}

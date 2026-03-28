@@ -14,17 +14,17 @@ import (
 // 0 to the evaluated count.
 type FunctionsCompiledTask struct {
 	// A single task (no mapping).
-	Variant1 *FunctionsTask 
+	One *FunctionsTask 
 	// Multiple task instances from mapped execution.
-	Variant2 []FunctionsTask 
+	Many []FunctionsTask 
 }
 
 func (v FunctionsCompiledTask) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.One != nil {
+		return json.Marshal(v.One)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Many != nil {
+		return json.Marshal(v.Many)
 	}
 	return []byte("null"), nil
 }
@@ -37,7 +37,7 @@ func (v *FunctionsCompiledTask) UnmarshalJSON(data []byte) error {
 		var try FunctionsTask
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsCompiledTask{}
-			candidate.Variant1 = &try
+			candidate.One = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -48,7 +48,7 @@ func (v *FunctionsCompiledTask) UnmarshalJSON(data []byte) error {
 		var try []FunctionsTask
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsCompiledTask{}
-			candidate.Variant2 = try
+			candidate.Many = try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -60,30 +60,11 @@ func (v *FunctionsCompiledTask) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsCompiledTask) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.One != nil { count++ }
+	if v.Many != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsCompiledTask: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsCompiledTaskSchema struct{}
-
-func (FunctionsCompiledTaskSchema) SchemaTitle() string { return "functions.CompiledTask" }
-func (FunctionsCompiledTaskSchema) SchemaDescription() string { return "The result of compiling a task expression.\n\nTasks without a `map` field compile to a single task. Tasks with a `map`\nexpression are expanded into multiple tasks, one per integer index from\n0 to the evaluated count." }
-func (FunctionsCompiledTaskSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "A single task (no mapping).",
-			"$ref": "functions.Task",
-		},
-			map[string]any{
-			"description": "Multiple task instances from mapped execution.",
-			"type": "array",
-			"items": map[string]any{"$ref": "functions.Task"},
-		},
-		},
-	}
-}

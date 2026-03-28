@@ -18,17 +18,17 @@ import (
 // for given inputs.
 type FunctionsFunction struct {
 	// A remote function with metadata (description, schema, etc.).
-	Variant1 *FunctionsRemoteFunction 
+	Remote *FunctionsRemoteFunction 
 	// An inline function definition without metadata.
-	Variant2 *FunctionsInlineFunction 
+	Inline *FunctionsInlineFunction 
 }
 
 func (v FunctionsFunction) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Remote != nil {
+		return json.Marshal(v.Remote)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Inline != nil {
+		return json.Marshal(v.Inline)
 	}
 	return []byte("null"), nil
 }
@@ -41,7 +41,7 @@ func (v *FunctionsFunction) UnmarshalJSON(data []byte) error {
 		var try FunctionsRemoteFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsFunction{}
-			candidate.Variant1 = &try
+			candidate.Remote = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -52,7 +52,7 @@ func (v *FunctionsFunction) UnmarshalJSON(data []byte) error {
 		var try FunctionsInlineFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsFunction{}
-			candidate.Variant2 = &try
+			candidate.Inline = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -64,29 +64,11 @@ func (v *FunctionsFunction) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsFunction) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Remote != nil { count++ }
+	if v.Inline != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsFunction: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsFunctionSchema struct{}
-
-func (FunctionsFunctionSchema) SchemaTitle() string { return "functions.Function" }
-func (FunctionsFunctionSchema) SchemaDescription() string { return "A Function definition, either remote or inline.\n\nFunctions are composable scoring pipelines that transform structured input\ninto scores. Each task has an `output` expression that transforms its raw result\ninto a `TaskOutputOwned`. The function's final output is the weighted average of\nall task outputs using profile weights.\n\nUse [`compile_tasks`](Self::compile_tasks) to preview how task expressions resolve\nfor given inputs." }
-func (FunctionsFunctionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "A remote function with metadata (description, schema, etc.).",
-			"$ref": "functions.RemoteFunction",
-		},
-			map[string]any{
-			"description": "An inline function definition without metadata.",
-			"$ref": "functions.InlineFunction",
-		},
-		},
-	}
-}

@@ -7,14 +7,6 @@ type FunctionsAlphaScalarLeafTaskExpression struct {
 	Type string `json:"type" validate:"oneof=vector.completion"`
 }
 
-func (FunctionsAlphaScalarLeafTaskExpression) SchemaTitle() string { return "functions.alpha_scalar.LeafTaskExpression" }
-func (FunctionsAlphaScalarLeafTaskExpression) SchemaDescription() string { return "" }
 func (v FunctionsAlphaScalarLeafTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
-}
-
-func (FunctionsAlphaScalarLeafTaskExpression) Body() map[string]any {
-	return map[string]any{
-		"$ref": "functions.alpha_scalar.VectorCompletionTaskExpression",
-	}
 }

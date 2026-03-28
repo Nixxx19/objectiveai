@@ -7,36 +7,36 @@ import (
 	"fmt"
 )
 
-type FunctionsProfilesComputationsRequestTargetVariant1 struct {
+type FunctionsProfilesComputationsRequestTargetScalar struct {
 	Type string `json:"type"`
 	Value float64 `json:"value"`
 }
 
-type FunctionsProfilesComputationsRequestTargetVariant2 struct {
+type FunctionsProfilesComputationsRequestTargetVector struct {
 	Type string `json:"type"`
 	Value []float64 `json:"value"`
 }
 
-type FunctionsProfilesComputationsRequestTargetVariant3 struct {
+type FunctionsProfilesComputationsRequestTargetVectorWinner struct {
 	Type string `json:"type"`
 	Value uint32 `json:"value"`
 }
 
 type FunctionsProfilesComputationsRequestTarget struct {
-	Variant1 *FunctionsProfilesComputationsRequestTargetVariant1 
-	Variant2 *FunctionsProfilesComputationsRequestTargetVariant2 
-	Variant3 *FunctionsProfilesComputationsRequestTargetVariant3 
+	Scalar *FunctionsProfilesComputationsRequestTargetScalar 
+	Vector *FunctionsProfilesComputationsRequestTargetVector 
+	VectorWinner *FunctionsProfilesComputationsRequestTargetVectorWinner 
 }
 
 func (v FunctionsProfilesComputationsRequestTarget) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Scalar != nil {
+		return json.Marshal(v.Scalar)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Vector != nil {
+		return json.Marshal(v.Vector)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.VectorWinner != nil {
+		return json.Marshal(v.VectorWinner)
 	}
 	return []byte("null"), nil
 }
@@ -46,10 +46,10 @@ func (v *FunctionsProfilesComputationsRequestTarget) UnmarshalJSON(data []byte) 
 		return nil
 	}
 	{
-		var try FunctionsProfilesComputationsRequestTargetVariant1
+		var try FunctionsProfilesComputationsRequestTargetScalar
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsProfilesComputationsRequestTarget{}
-			candidate.Variant1 = &try
+			candidate.Scalar = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -57,10 +57,10 @@ func (v *FunctionsProfilesComputationsRequestTarget) UnmarshalJSON(data []byte) 
 		}
 	}
 	{
-		var try FunctionsProfilesComputationsRequestTargetVariant2
+		var try FunctionsProfilesComputationsRequestTargetVector
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsProfilesComputationsRequestTarget{}
-			candidate.Variant2 = &try
+			candidate.Vector = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -68,10 +68,10 @@ func (v *FunctionsProfilesComputationsRequestTarget) UnmarshalJSON(data []byte) 
 		}
 	}
 	{
-		var try FunctionsProfilesComputationsRequestTargetVariant3
+		var try FunctionsProfilesComputationsRequestTargetVectorWinner
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsProfilesComputationsRequestTarget{}
-			candidate.Variant3 = &try
+			candidate.VectorWinner = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -83,34 +83,12 @@ func (v *FunctionsProfilesComputationsRequestTarget) UnmarshalJSON(data []byte) 
 
 func (v FunctionsProfilesComputationsRequestTarget) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
+	if v.Scalar != nil { count++ }
+	if v.Vector != nil { count++ }
+	if v.VectorWinner != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsProfilesComputationsRequestTarget: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsProfilesComputationsRequestTargetSchema struct{}
-
-func (FunctionsProfilesComputationsRequestTargetSchema) SchemaTitle() string { return "functions.profiles.computations.request.Target" }
-func (FunctionsProfilesComputationsRequestTargetSchema) SchemaDescription() string { return "" }
-func (FunctionsProfilesComputationsRequestTargetSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"type": "object",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"scalar"}, "type": "string"}, "value": map[string]any{"maximum": json.Number("3.4028234663852886e+38"), "minimum": json.Number("-3.4028234663852886e+38"), "type": "number"}},
-		},
-			map[string]any{
-			"type": "object",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"vector"}, "type": "string"}, "value": map[string]any{"items": map[string]any{"maximum": json.Number("3.4028234663852886e+38"), "minimum": json.Number("-3.4028234663852886e+38"), "type": "number"}, "type": "array"}},
-		},
-			map[string]any{
-			"type": "object",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"vector_winner"}, "type": "string"}, "value": map[string]any{"maximum": json.Number("4294967295"), "minimum": json.Number("0"), "type": "integer"}},
-		},
-		},
-	}
-}

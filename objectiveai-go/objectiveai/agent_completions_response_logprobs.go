@@ -10,14 +10,6 @@ type AgentCompletionsResponseLogprobs struct {
 	Refusal []AgentCompletionsResponseLogprob `json:"refusal,omitempty"`
 }
 
-func (AgentCompletionsResponseLogprobs) SchemaTitle() string { return "agent.completions.response.Logprobs" }
-func (AgentCompletionsResponseLogprobs) SchemaDescription() string { return "Log probabilities for generated tokens." }
-func (AgentCompletionsResponseLogprobs) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"content": "Log probabilities for content tokens.",
-		"refusal": "Log probabilities for refusal tokens.",
-	}
-}
 func (v AgentCompletionsResponseLogprobs) Validate() error {
 	return variantValidator.Struct(v)
 }

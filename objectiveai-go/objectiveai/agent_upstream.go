@@ -10,27 +10,27 @@ import (
 // Supported agent upstreams.
 type AgentUpstream struct {
 	// Unknown Upstream.
-	Variant1 *string `validate:"oneof=unknown"`
+	Unknown *string `validate:"oneof=unknown"`
 	// OpenRouter Upstream.
-	Variant2 *string `validate:"oneof=openrouter"`
+	Openrouter *string `validate:"oneof=openrouter"`
 	// Claude Agent SDK Upstream.
-	Variant3 *string `validate:"oneof=claude_agent_sdk"`
+	ClaudeAgentSdk *string `validate:"oneof=claude_agent_sdk"`
 	// Mock Upstream.
-	Variant4 *string `validate:"oneof=mock"`
+	Mock *string `validate:"oneof=mock"`
 }
 
 func (v AgentUpstream) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Unknown != nil {
+		return json.Marshal(v.Unknown)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Openrouter != nil {
+		return json.Marshal(v.Openrouter)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.ClaudeAgentSdk != nil {
+		return json.Marshal(v.ClaudeAgentSdk)
 	}
-	if v.Variant4 != nil {
-		return json.Marshal(v.Variant4)
+	if v.Mock != nil {
+		return json.Marshal(v.Mock)
 	}
 	return []byte("null"), nil
 }
@@ -43,7 +43,7 @@ func (v *AgentUpstream) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentUpstream{}
-			candidate.Variant1 = &try
+			candidate.Unknown = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -54,7 +54,7 @@ func (v *AgentUpstream) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentUpstream{}
-			candidate.Variant2 = &try
+			candidate.Openrouter = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -65,7 +65,7 @@ func (v *AgentUpstream) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentUpstream{}
-			candidate.Variant3 = &try
+			candidate.ClaudeAgentSdk = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -76,7 +76,7 @@ func (v *AgentUpstream) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentUpstream{}
-			candidate.Variant4 = &try
+			candidate.Mock = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -88,43 +88,13 @@ func (v *AgentUpstream) UnmarshalJSON(data []byte) error {
 
 func (v AgentUpstream) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
-	if v.Variant4 != nil { count++ }
+	if v.Unknown != nil { count++ }
+	if v.Openrouter != nil { count++ }
+	if v.ClaudeAgentSdk != nil { count++ }
+	if v.Mock != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentUpstream: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentUpstreamSchema struct{}
-
-func (AgentUpstreamSchema) SchemaTitle() string { return "agent.Upstream" }
-func (AgentUpstreamSchema) SchemaDescription() string { return "Supported agent upstreams." }
-func (AgentUpstreamSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Unknown Upstream.",
-			"type": "string",
-			"enum": []any{"unknown"},
-		},
-			map[string]any{
-			"description": "OpenRouter Upstream.",
-			"type": "string",
-			"enum": []any{"openrouter"},
-		},
-			map[string]any{
-			"description": "Claude Agent SDK Upstream.",
-			"type": "string",
-			"enum": []any{"claude_agent_sdk"},
-		},
-			map[string]any{
-			"description": "Mock Upstream.",
-			"type": "string",
-			"enum": []any{"mock"},
-		},
-		},
-	}
-}

@@ -8,35 +8,35 @@ import (
 )
 
 // Plain text response (default).
-type AgentCompletionsRequestResponseFormatVariant1 struct {
+type AgentCompletionsRequestResponseFormatText struct {
 	Type string `json:"type"`
 }
 
 // Response must be valid JSON.
-type AgentCompletionsRequestResponseFormatVariant2 struct {
+type AgentCompletionsRequestResponseFormatJsonObject struct {
 	Type string `json:"type"`
 }
 
 // Response must conform to a JSON schema.
-type AgentCompletionsRequestResponseFormatVariant3 struct {
+type AgentCompletionsRequestResponseFormatJsonSchema struct {
 	// The JSON Schema definition.
 	Schema map[string]any `json:"schema"`
 	Type string `json:"type"`
 }
 
 // Response must conform to a grammar.
-type AgentCompletionsRequestResponseFormatVariant4 struct {
+type AgentCompletionsRequestResponseFormatGrammar struct {
 	Grammar string `json:"grammar"`
 	Type string `json:"type"`
 }
 
 // Response must be valid Python code.
-type AgentCompletionsRequestResponseFormatVariant5 struct {
+type AgentCompletionsRequestResponseFormatPython struct {
 	Type string `json:"type"`
 }
 
 // The final assistant message will contain this tool call
-type AgentCompletionsRequestResponseFormatVariant6 struct {
+type AgentCompletionsRequestResponseFormatToolCall struct {
 	// A description of the tool.
 	Description string `json:"description"`
 	// The name of the tool.
@@ -51,37 +51,37 @@ type AgentCompletionsRequestResponseFormatVariant6 struct {
 // The format of the model's response.
 type AgentCompletionsRequestResponseFormat struct {
 	// Plain text response (default).
-	Variant1 *AgentCompletionsRequestResponseFormatVariant1 
+	Text *AgentCompletionsRequestResponseFormatText 
 	// Response must be valid JSON.
-	Variant2 *AgentCompletionsRequestResponseFormatVariant2 
+	JsonObject *AgentCompletionsRequestResponseFormatJsonObject 
 	// Response must conform to a JSON schema.
-	Variant3 *AgentCompletionsRequestResponseFormatVariant3 
+	JsonSchema *AgentCompletionsRequestResponseFormatJsonSchema 
 	// Response must conform to a grammar.
-	Variant4 *AgentCompletionsRequestResponseFormatVariant4 
+	Grammar *AgentCompletionsRequestResponseFormatGrammar 
 	// Response must be valid Python code.
-	Variant5 *AgentCompletionsRequestResponseFormatVariant5 
+	Python *AgentCompletionsRequestResponseFormatPython 
 	// The final assistant message will contain this tool call
-	Variant6 *AgentCompletionsRequestResponseFormatVariant6 
+	ToolCall *AgentCompletionsRequestResponseFormatToolCall 
 }
 
 func (v AgentCompletionsRequestResponseFormat) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Text != nil {
+		return json.Marshal(v.Text)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.JsonObject != nil {
+		return json.Marshal(v.JsonObject)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.JsonSchema != nil {
+		return json.Marshal(v.JsonSchema)
 	}
-	if v.Variant4 != nil {
-		return json.Marshal(v.Variant4)
+	if v.Grammar != nil {
+		return json.Marshal(v.Grammar)
 	}
-	if v.Variant5 != nil {
-		return json.Marshal(v.Variant5)
+	if v.Python != nil {
+		return json.Marshal(v.Python)
 	}
-	if v.Variant6 != nil {
-		return json.Marshal(v.Variant6)
+	if v.ToolCall != nil {
+		return json.Marshal(v.ToolCall)
 	}
 	return []byte("null"), nil
 }
@@ -91,10 +91,10 @@ func (v *AgentCompletionsRequestResponseFormat) UnmarshalJSON(data []byte) error
 		return nil
 	}
 	{
-		var try AgentCompletionsRequestResponseFormatVariant1
+		var try AgentCompletionsRequestResponseFormatText
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestResponseFormat{}
-			candidate.Variant1 = &try
+			candidate.Text = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -102,10 +102,10 @@ func (v *AgentCompletionsRequestResponseFormat) UnmarshalJSON(data []byte) error
 		}
 	}
 	{
-		var try AgentCompletionsRequestResponseFormatVariant2
+		var try AgentCompletionsRequestResponseFormatJsonObject
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestResponseFormat{}
-			candidate.Variant2 = &try
+			candidate.JsonObject = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -113,10 +113,10 @@ func (v *AgentCompletionsRequestResponseFormat) UnmarshalJSON(data []byte) error
 		}
 	}
 	{
-		var try AgentCompletionsRequestResponseFormatVariant3
+		var try AgentCompletionsRequestResponseFormatJsonSchema
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestResponseFormat{}
-			candidate.Variant3 = &try
+			candidate.JsonSchema = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -124,10 +124,10 @@ func (v *AgentCompletionsRequestResponseFormat) UnmarshalJSON(data []byte) error
 		}
 	}
 	{
-		var try AgentCompletionsRequestResponseFormatVariant4
+		var try AgentCompletionsRequestResponseFormatGrammar
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestResponseFormat{}
-			candidate.Variant4 = &try
+			candidate.Grammar = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -135,10 +135,10 @@ func (v *AgentCompletionsRequestResponseFormat) UnmarshalJSON(data []byte) error
 		}
 	}
 	{
-		var try AgentCompletionsRequestResponseFormatVariant5
+		var try AgentCompletionsRequestResponseFormatPython
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestResponseFormat{}
-			candidate.Variant5 = &try
+			candidate.Python = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -146,10 +146,10 @@ func (v *AgentCompletionsRequestResponseFormat) UnmarshalJSON(data []byte) error
 		}
 	}
 	{
-		var try AgentCompletionsRequestResponseFormatVariant6
+		var try AgentCompletionsRequestResponseFormatToolCall
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestResponseFormat{}
-			candidate.Variant6 = &try
+			candidate.ToolCall = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -161,55 +161,15 @@ func (v *AgentCompletionsRequestResponseFormat) UnmarshalJSON(data []byte) error
 
 func (v AgentCompletionsRequestResponseFormat) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
-	if v.Variant4 != nil { count++ }
-	if v.Variant5 != nil { count++ }
-	if v.Variant6 != nil { count++ }
+	if v.Text != nil { count++ }
+	if v.JsonObject != nil { count++ }
+	if v.JsonSchema != nil { count++ }
+	if v.Grammar != nil { count++ }
+	if v.Python != nil { count++ }
+	if v.ToolCall != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentCompletionsRequestResponseFormat: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentCompletionsRequestResponseFormatSchema struct{}
-
-func (AgentCompletionsRequestResponseFormatSchema) SchemaTitle() string { return "agent.completions.request.ResponseFormat" }
-func (AgentCompletionsRequestResponseFormatSchema) SchemaDescription() string { return "The format of the model's response." }
-func (AgentCompletionsRequestResponseFormatSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Plain text response (default).",
-			"type": "object",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"text"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "Response must be valid JSON.",
-			"type": "object",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"json_object"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "Response must conform to a JSON schema.",
-			"type": "object",
-			"properties": map[string]any{"schema": map[string]any{"additionalProperties": true, "description": "The JSON Schema definition.", "type": "object"}, "type": map[string]any{"enum": []any{"json_schema"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "Response must conform to a grammar.",
-			"type": "object",
-			"properties": map[string]any{"grammar": map[string]any{"type": "string"}, "type": map[string]any{"enum": []any{"grammar"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "Response must be valid Python code.",
-			"type": "object",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"python"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "The final assistant message will contain this tool call",
-			"type": "object",
-			"properties": map[string]any{"description": map[string]any{"description": "A description of the tool.", "type": "string"}, "name": map[string]any{"description": "The name of the tool.", "type": "string"}, "required": map[string]any{"anyOf": []any{map[string]any{"type": "boolean"}, map[string]any{"type": "null"}}, "description": "Whether the tool MUST be called."}, "schema": map[string]any{"additionalProperties": true, "description": "The JSON Schema definition.", "type": "object"}, "type": map[string]any{"enum": []any{"tool_call"}, "type": "string"}},
-		},
-		},
-	}
-}

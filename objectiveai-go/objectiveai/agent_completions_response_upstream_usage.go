@@ -31,22 +31,6 @@ type AgentCompletionsResponseUpstreamUsage struct {
 	TotalTokens uint64 `json:"total_tokens" validate:"min=0,max=18446744073709551615"`
 }
 
-func (AgentCompletionsResponseUpstreamUsage) SchemaTitle() string { return "agent.completions.response.UpstreamUsage" }
-func (AgentCompletionsResponseUpstreamUsage) SchemaDescription() string { return "Token usage and cost information from an upstream provider.\n\nThis is the per-assistant-response usage yielded by upstream clients.\nIt includes upstream-specific fields like `cost_multiplier` and `is_byok`." }
-func (AgentCompletionsResponseUpstreamUsage) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"completion_tokens": "Number of tokens in the completion.",
-		"completion_tokens_details": "Detailed breakdown of completion tokens.",
-		"cost": "The cost charged by ObjectiveAI for this request.",
-		"cost_details": "Detailed cost breakdown.",
-		"cost_multiplier": "The multiplier applied to compute ObjectiveAI's charge.",
-		"is_byok": "Whether this request used Bring Your Own Key (BYOK).",
-		"prompt_tokens": "Number of tokens in the prompt.",
-		"prompt_tokens_details": "Detailed breakdown of prompt tokens.",
-		"total_cost": "Total cost including ObjectiveAI's charge plus all upstream charges.\nFor BYOK requests, ObjectiveAI only charges the cost_multiplier difference,\nbut total_cost still includes what the upstream provider charged.",
-		"total_tokens": "Total tokens (prompt + completion).",
-	}
-}
 func (v AgentCompletionsResponseUpstreamUsage) Validate() error {
 	return variantValidator.Struct(v)
 }

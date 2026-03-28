@@ -8,16 +8,16 @@ import (
 )
 
 type FunctionsFullRemoteFunction struct {
-	Variant1 *FunctionsAlphaRemoteFunction 
-	Variant2 *FunctionsRemoteFunction 
+	Alpha *FunctionsAlphaRemoteFunction 
+	Standard *FunctionsRemoteFunction 
 }
 
 func (v FunctionsFullRemoteFunction) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Alpha != nil {
+		return json.Marshal(v.Alpha)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Standard != nil {
+		return json.Marshal(v.Standard)
 	}
 	return []byte("null"), nil
 }
@@ -30,7 +30,7 @@ func (v *FunctionsFullRemoteFunction) UnmarshalJSON(data []byte) error {
 		var try FunctionsAlphaRemoteFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsFullRemoteFunction{}
-			candidate.Variant1 = &try
+			candidate.Alpha = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -41,7 +41,7 @@ func (v *FunctionsFullRemoteFunction) UnmarshalJSON(data []byte) error {
 		var try FunctionsRemoteFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsFullRemoteFunction{}
-			candidate.Variant2 = &try
+			candidate.Standard = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -53,27 +53,11 @@ func (v *FunctionsFullRemoteFunction) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsFullRemoteFunction) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Alpha != nil { count++ }
+	if v.Standard != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsFullRemoteFunction: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsFullRemoteFunctionSchema struct{}
-
-func (FunctionsFullRemoteFunctionSchema) SchemaTitle() string { return "functions.FullRemoteFunction" }
-func (FunctionsFullRemoteFunctionSchema) SchemaDescription() string { return "" }
-func (FunctionsFullRemoteFunctionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"$ref": "functions.AlphaRemoteFunction",
-		},
-			map[string]any{
-			"$ref": "functions.RemoteFunction",
-		},
-		},
-	}
-}

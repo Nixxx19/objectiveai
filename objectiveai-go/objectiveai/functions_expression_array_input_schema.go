@@ -15,16 +15,6 @@ type FunctionsExpressionArrayInputSchema struct {
 	Type FunctionsExpressionArrayInputSchemaType `json:"type"`
 }
 
-func (FunctionsExpressionArrayInputSchema) SchemaTitle() string { return "functions.expression.ArrayInputSchema" }
-func (FunctionsExpressionArrayInputSchema) SchemaDescription() string { return "Schema for an array input." }
-func (FunctionsExpressionArrayInputSchema) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"description": "Human-readable description of the array.",
-		"items": "Schema for each item in the array.",
-		"maxItems": "Maximum number of items allowed.",
-		"minItems": "Minimum number of items required.",
-	}
-}
 func (v FunctionsExpressionArrayInputSchema) Validate() error {
 	return variantValidator.Struct(v)
 }

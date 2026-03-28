@@ -22,20 +22,6 @@ type AgentCompletionsRequestProvider struct {
 	Zdr *bool `json:"zdr,omitempty"`
 }
 
-func (AgentCompletionsRequestProvider) SchemaTitle() string { return "agent.completions.request.Provider" }
-func (AgentCompletionsRequestProvider) SchemaDescription() string { return "Provider routing and selection preferences." }
-func (AgentCompletionsRequestProvider) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"data_collection": "Whether to allow providers to collect data.",
-		"max_latency": "Hard maximum latency requirement (seconds).",
-		"max_price": "Maximum price constraints.",
-		"min_throughput": "Hard minimum throughput requirement (tokens/second).",
-		"preferred_max_latency": "Preferred maximum latency (seconds).",
-		"preferred_min_throughput": "Preferred minimum throughput (tokens/second).",
-		"sort": "How to sort/prioritize providers.",
-		"zdr": "Whether to use zero data retention providers only.",
-	}
-}
 func (v AgentCompletionsRequestProvider) Validate() error {
 	return variantValidator.Struct(v)
 }

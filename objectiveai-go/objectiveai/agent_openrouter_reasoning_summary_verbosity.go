@@ -12,22 +12,22 @@ import (
 // Only supported by some models.
 type AgentOpenrouterReasoningSummaryVerbosity struct {
 	// Let the model decide (default, normalized away).
-	Variant1 *string `validate:"oneof=auto"`
+	Auto *string `validate:"oneof=auto"`
 	// Brief summary of reasoning.
-	Variant2 *string `validate:"oneof=concise"`
+	Concise *string `validate:"oneof=concise"`
 	// Thorough summary of reasoning.
-	Variant3 *string `validate:"oneof=detailed"`
+	Detailed *string `validate:"oneof=detailed"`
 }
 
 func (v AgentOpenrouterReasoningSummaryVerbosity) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Auto != nil {
+		return json.Marshal(v.Auto)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Concise != nil {
+		return json.Marshal(v.Concise)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.Detailed != nil {
+		return json.Marshal(v.Detailed)
 	}
 	return []byte("null"), nil
 }
@@ -40,7 +40,7 @@ func (v *AgentOpenrouterReasoningSummaryVerbosity) UnmarshalJSON(data []byte) er
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterReasoningSummaryVerbosity{}
-			candidate.Variant1 = &try
+			candidate.Auto = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -51,7 +51,7 @@ func (v *AgentOpenrouterReasoningSummaryVerbosity) UnmarshalJSON(data []byte) er
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterReasoningSummaryVerbosity{}
-			candidate.Variant2 = &try
+			candidate.Concise = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -62,7 +62,7 @@ func (v *AgentOpenrouterReasoningSummaryVerbosity) UnmarshalJSON(data []byte) er
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterReasoningSummaryVerbosity{}
-			candidate.Variant3 = &try
+			candidate.Detailed = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -74,37 +74,12 @@ func (v *AgentOpenrouterReasoningSummaryVerbosity) UnmarshalJSON(data []byte) er
 
 func (v AgentOpenrouterReasoningSummaryVerbosity) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
+	if v.Auto != nil { count++ }
+	if v.Concise != nil { count++ }
+	if v.Detailed != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentOpenrouterReasoningSummaryVerbosity: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentOpenrouterReasoningSummaryVerbositySchema struct{}
-
-func (AgentOpenrouterReasoningSummaryVerbositySchema) SchemaTitle() string { return "agent.openrouter.ReasoningSummaryVerbosity" }
-func (AgentOpenrouterReasoningSummaryVerbositySchema) SchemaDescription() string { return "Verbosity of the reasoning summary included in responses.\n\nOnly supported by some models." }
-func (AgentOpenrouterReasoningSummaryVerbositySchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Let the model decide (default, normalized away).",
-			"type": "string",
-			"enum": []any{"auto"},
-		},
-			map[string]any{
-			"description": "Brief summary of reasoning.",
-			"type": "string",
-			"enum": []any{"concise"},
-		},
-			map[string]any{
-			"description": "Thorough summary of reasoning.",
-			"type": "string",
-			"enum": []any{"detailed"},
-		},
-		},
-	}
-}

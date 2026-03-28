@@ -7,17 +7,17 @@ type FunctionsExecutionsResponseUnaryFunctionExecution struct {
 	// Unix timestamp when the execution was created.
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
 	// Error details if the execution failed.
-	Error *ResponseError `json:"error,omitempty"`
-	// ID of the function used (if remote).
-	Function *string `json:"function,omitempty"`
+	Error *ErrorResponseError `json:"error,omitempty"`
+	// The function used (if remote).
+	Function *RemotePath `json:"function,omitempty"`
 	// Unique identifier for this execution.
 	ID string `json:"id"`
 	// Object type identifier.
 	Object FunctionsExecutionsResponseUnaryObject `json:"object"`
 	// The final output (scalar or vector score).
-	Output FunctionsExpressionTaskOutputOwned `json:"output"`
-	// ID of the profile used (if remote).
-	Profile *string `json:"profile,omitempty"`
+	Output FunctionsExecutionsResponseOutput `json:"output"`
+	// The profile used (if remote).
+	Profile *RemotePath `json:"profile,omitempty"`
 	// Reasoning summary if reasoning was enabled.
 	Reasoning *FunctionsExecutionsResponseUnaryReasoningSummary `json:"reasoning,omitempty"`
 	// Token for retrying this execution with cached votes.
@@ -30,24 +30,6 @@ type FunctionsExecutionsResponseUnaryFunctionExecution struct {
 	Usage AgentCompletionsResponseUsage `json:"usage"`
 }
 
-func (FunctionsExecutionsResponseUnaryFunctionExecution) SchemaTitle() string { return "functions.executions.response.unary.FunctionExecution" }
-func (FunctionsExecutionsResponseUnaryFunctionExecution) SchemaDescription() string { return "A complete function execution response (non-streaming)." }
-func (FunctionsExecutionsResponseUnaryFunctionExecution) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"created": "Unix timestamp when the execution was created.",
-		"error": "Error details if the execution failed.",
-		"function": "ID of the function used (if remote).",
-		"id": "Unique identifier for this execution.",
-		"object": "Object type identifier.",
-		"output": "The final output (scalar or vector score).",
-		"profile": "ID of the profile used (if remote).",
-		"reasoning": "Reasoning summary if reasoning was enabled.",
-		"retry_token": "Token for retrying this execution with cached votes.",
-		"tasks": "Results from each task in the function.",
-		"tasks_errors": "Whether any tasks encountered errors.",
-		"usage": "Aggregated token and cost usage.",
-	}
-}
 func (v FunctionsExecutionsResponseUnaryFunctionExecution) Validate() error {
 	return variantValidator.Struct(v)
 }

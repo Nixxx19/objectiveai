@@ -13,17 +13,17 @@ import (
 // a Function. They correspond to a Function's task structure.
 type FunctionsProfile struct {
 	// A remote profile with metadata.
-	Variant1 *FunctionsRemoteProfile 
+	Remote *FunctionsRemoteProfile 
 	// An inline profile definition.
-	Variant2 *FunctionsInlineProfile 
+	Inline *FunctionsInlineProfile 
 }
 
 func (v FunctionsProfile) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Remote != nil {
+		return json.Marshal(v.Remote)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Inline != nil {
+		return json.Marshal(v.Inline)
 	}
 	return []byte("null"), nil
 }
@@ -36,7 +36,7 @@ func (v *FunctionsProfile) UnmarshalJSON(data []byte) error {
 		var try FunctionsRemoteProfile
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsProfile{}
-			candidate.Variant1 = &try
+			candidate.Remote = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -47,7 +47,7 @@ func (v *FunctionsProfile) UnmarshalJSON(data []byte) error {
 		var try FunctionsInlineProfile
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsProfile{}
-			candidate.Variant2 = &try
+			candidate.Inline = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -59,29 +59,11 @@ func (v *FunctionsProfile) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsProfile) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Remote != nil { count++ }
+	if v.Inline != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsProfile: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsProfileSchema struct{}
-
-func (FunctionsProfileSchema) SchemaTitle() string { return "functions.Profile" }
-func (FunctionsProfileSchema) SchemaDescription() string { return "A Profile definition, either remote or inline.\n\nProfiles contain the weights and nested configurations needed to execute\na Function. They correspond to a Function's task structure." }
-func (FunctionsProfileSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "A remote profile with metadata.",
-			"$ref": "functions.RemoteProfile",
-		},
-			map[string]any{
-			"description": "An inline profile definition.",
-			"$ref": "functions.InlineProfile",
-		},
-		},
-	}
-}

@@ -4,15 +4,3 @@ package objectiveai
 
 type FunctionsExecutionsRetryToken = []*string
 
-type FunctionsExecutionsRetryTokenSchema struct{}
-
-func (FunctionsExecutionsRetryTokenSchema) SchemaTitle() string { return "functions.executions.RetryToken" }
-func (FunctionsExecutionsRetryTokenSchema) SchemaDescription() string { return "Token that enables reusing votes from a previous function execution.\n\nContains identifiers for each task's votes that can be reused in a\nsubsequent execution. Serialized as base64-encoded JSON." }
-func (FunctionsExecutionsRetryTokenSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "array",
-		"items": map[string]any{
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-	}
-}

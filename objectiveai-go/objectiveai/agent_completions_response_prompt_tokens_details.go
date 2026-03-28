@@ -14,16 +14,6 @@ type AgentCompletionsResponsePromptTokensDetails struct {
 	VideoTokens *uint64 `json:"video_tokens,omitempty" validate:"min=0,max=18446744073709551615"`
 }
 
-func (AgentCompletionsResponsePromptTokensDetails) SchemaTitle() string { return "agent.completions.response.PromptTokensDetails" }
-func (AgentCompletionsResponsePromptTokensDetails) SchemaDescription() string { return "Detailed breakdown of prompt token usage." }
-func (AgentCompletionsResponsePromptTokensDetails) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"audio_tokens": "Audio input tokens.",
-		"cache_write_tokens": "Tokens written to cache.",
-		"cached_tokens": "Tokens served from cache.",
-		"video_tokens": "Video input tokens.",
-	}
-}
 func (v AgentCompletionsResponsePromptTokensDetails) Validate() error {
 	return variantValidator.Struct(v)
 }

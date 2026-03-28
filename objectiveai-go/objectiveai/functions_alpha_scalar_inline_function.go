@@ -7,27 +7,27 @@ import (
 	"fmt"
 )
 
-type FunctionsAlphaScalarInlineFunctionVariant1 struct {
+type FunctionsAlphaScalarInlineFunctionBranch struct {
 	Tasks []FunctionsAlphaScalarBranchTaskExpression `json:"tasks"`
 	Type string `json:"type"`
 }
 
-type FunctionsAlphaScalarInlineFunctionVariant2 struct {
+type FunctionsAlphaScalarInlineFunctionLeaf struct {
 	Tasks []FunctionsAlphaScalarLeafTaskExpression `json:"tasks"`
 	Type string `json:"type"`
 }
 
 type FunctionsAlphaScalarInlineFunction struct {
-	Variant1 *FunctionsAlphaScalarInlineFunctionVariant1 
-	Variant2 *FunctionsAlphaScalarInlineFunctionVariant2 
+	Branch *FunctionsAlphaScalarInlineFunctionBranch 
+	Leaf *FunctionsAlphaScalarInlineFunctionLeaf 
 }
 
 func (v FunctionsAlphaScalarInlineFunction) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Branch != nil {
+		return json.Marshal(v.Branch)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Leaf != nil {
+		return json.Marshal(v.Leaf)
 	}
 	return []byte("null"), nil
 }
@@ -37,10 +37,10 @@ func (v *FunctionsAlphaScalarInlineFunction) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try FunctionsAlphaScalarInlineFunctionVariant1
+		var try FunctionsAlphaScalarInlineFunctionBranch
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsAlphaScalarInlineFunction{}
-			candidate.Variant1 = &try
+			candidate.Branch = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -48,10 +48,10 @@ func (v *FunctionsAlphaScalarInlineFunction) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsAlphaScalarInlineFunctionVariant2
+		var try FunctionsAlphaScalarInlineFunctionLeaf
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsAlphaScalarInlineFunction{}
-			candidate.Variant2 = &try
+			candidate.Leaf = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -63,29 +63,11 @@ func (v *FunctionsAlphaScalarInlineFunction) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsAlphaScalarInlineFunction) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Branch != nil { count++ }
+	if v.Leaf != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsAlphaScalarInlineFunction: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsAlphaScalarInlineFunctionSchema struct{}
-
-func (FunctionsAlphaScalarInlineFunctionSchema) SchemaTitle() string { return "functions.alpha_scalar.InlineFunction" }
-func (FunctionsAlphaScalarInlineFunctionSchema) SchemaDescription() string { return "" }
-func (FunctionsAlphaScalarInlineFunctionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"type": "object",
-			"properties": map[string]any{"tasks": map[string]any{"items": map[string]any{"$ref": "functions.alpha_scalar.BranchTaskExpression"}, "type": "array"}, "type": map[string]any{"enum": []any{"alpha.scalar.branch.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"properties": map[string]any{"tasks": map[string]any{"items": map[string]any{"$ref": "functions.alpha_scalar.LeafTaskExpression"}, "type": "array"}, "type": map[string]any{"enum": []any{"alpha.scalar.leaf.function"}, "type": "string"}},
-		},
-		},
-	}
-}

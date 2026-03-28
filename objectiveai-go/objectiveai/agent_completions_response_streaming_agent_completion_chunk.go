@@ -10,7 +10,7 @@ package objectiveai
 type AgentCompletionsResponseStreamingAgentCompletionChunk struct {
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
 	// Error details if this completion failed.
-	Error *ResponseError `json:"error,omitempty"`
+	Error *ErrorResponseError `json:"error,omitempty"`
 	ID string `json:"id"`
 	Messages []AgentCompletionsResponseStreamingMessageChunk `json:"messages"`
 	// The object type (always "agent.completion.chunk").
@@ -21,16 +21,6 @@ type AgentCompletionsResponseStreamingAgentCompletionChunk struct {
 	Usage *AgentCompletionsResponseUsage `json:"usage,omitempty"`
 }
 
-func (AgentCompletionsResponseStreamingAgentCompletionChunk) SchemaTitle() string { return "agent.completions.response.streaming.AgentCompletionChunk" }
-func (AgentCompletionsResponseStreamingAgentCompletionChunk) SchemaDescription() string { return "A chunk of a streaming agent completion response.\n\nMultiple chunks are received via Server-Sent Events and can be\naccumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)\nusing the [`push`](Self::push) method." }
-func (AgentCompletionsResponseStreamingAgentCompletionChunk) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"error": "Error details if this completion failed.",
-		"object": "The object type (always \"agent.completion.chunk\").",
-		"upstream": "Upstream provider",
-		"usage": "Token usage (only present in the final chunk).",
-	}
-}
 func (v AgentCompletionsResponseStreamingAgentCompletionChunk) Validate() error {
 	return variantValidator.Struct(v)
 }

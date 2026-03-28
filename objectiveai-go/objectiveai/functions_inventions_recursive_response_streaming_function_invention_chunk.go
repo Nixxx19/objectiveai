@@ -5,18 +5,16 @@ package objectiveai
 type FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk struct {
 	Completions []FunctionsInventionsResponseStreamingAgentCompletionChunk `json:"completions"`
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
-	Error *ResponseError `json:"error,omitempty"`
+	Error *ErrorResponseError `json:"error,omitempty"`
 	Function *FunctionsFullRemoteFunction `json:"function,omitempty"`
 	ID string `json:"id"`
 	Index uint64 `json:"index" validate:"min=0,max=18446744073709551615"`
 	Object FunctionsInventionsResponseStreamingObject `json:"object"`
-	Path *FunctionsRemoteFunctionPath `json:"path,omitempty"`
+	Path *RemotePath `json:"path,omitempty"`
 	State *FunctionsInventionsStateState `json:"state,omitempty"`
 	Usage *AgentCompletionsResponseUsage `json:"usage,omitempty"`
 }
 
-func (FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk) SchemaTitle() string { return "functions.inventions.recursive.response.streaming.FunctionInventionChunk" }
-func (FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk) SchemaDescription() string { return "" }
 func (v FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk) Validate() error {
 	return variantValidator.Struct(v)
 }

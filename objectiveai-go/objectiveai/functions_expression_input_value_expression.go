@@ -13,42 +13,42 @@ import (
 // expressions (JMESPath or Starlark) that are evaluated during compilation.
 type FunctionsExpressionInputValueExpression struct {
 	// Rich content (image, audio, video, file).
-	Variant1 *AgentCompletionsMessageRichContentPart 
+	RichContentPart *AgentCompletionsMessageRichContentPart 
 	// An object with values that may be expressions.
-	Variant2 map[string]any 
+	Object map[string]any 
 	// An array with elements that may be expressions.
-	Variant3 []any 
+	Array []any 
 	// A string value.
-	Variant4 *string 
+	String *string 
 	// An integer value.
-	Variant5 *int64 `validate:"min=-9223372036854775808,max=9223372036854775807"`
+	Integer *int64 `validate:"min=-9223372036854775808,max=9223372036854775807"`
 	// A floating-point number.
-	Variant6 *float64 `validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
+	Number *float64 `validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// A boolean value.
-	Variant7 *bool 
+	Boolean *bool 
 }
 
 func (v FunctionsExpressionInputValueExpression) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.RichContentPart != nil {
+		return json.Marshal(v.RichContentPart)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Object != nil {
+		return json.Marshal(v.Object)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.Array != nil {
+		return json.Marshal(v.Array)
 	}
-	if v.Variant4 != nil {
-		return json.Marshal(v.Variant4)
+	if v.String != nil {
+		return json.Marshal(v.String)
 	}
-	if v.Variant5 != nil {
-		return json.Marshal(v.Variant5)
+	if v.Integer != nil {
+		return json.Marshal(v.Integer)
 	}
-	if v.Variant6 != nil {
-		return json.Marshal(v.Variant6)
+	if v.Number != nil {
+		return json.Marshal(v.Number)
 	}
-	if v.Variant7 != nil {
-		return json.Marshal(v.Variant7)
+	if v.Boolean != nil {
+		return json.Marshal(v.Boolean)
 	}
 	return []byte("null"), nil
 }
@@ -61,7 +61,7 @@ func (v *FunctionsExpressionInputValueExpression) UnmarshalJSON(data []byte) err
 		var try AgentCompletionsMessageRichContentPart
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputValueExpression{}
-			candidate.Variant1 = &try
+			candidate.RichContentPart = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -72,7 +72,7 @@ func (v *FunctionsExpressionInputValueExpression) UnmarshalJSON(data []byte) err
 		var try map[string]any
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputValueExpression{}
-			candidate.Variant2 = try
+			candidate.Object = try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -83,7 +83,7 @@ func (v *FunctionsExpressionInputValueExpression) UnmarshalJSON(data []byte) err
 		var try []any
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputValueExpression{}
-			candidate.Variant3 = try
+			candidate.Array = try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -94,7 +94,7 @@ func (v *FunctionsExpressionInputValueExpression) UnmarshalJSON(data []byte) err
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputValueExpression{}
-			candidate.Variant4 = &try
+			candidate.String = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -105,7 +105,7 @@ func (v *FunctionsExpressionInputValueExpression) UnmarshalJSON(data []byte) err
 		var try int64
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputValueExpression{}
-			candidate.Variant5 = &try
+			candidate.Integer = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -116,7 +116,7 @@ func (v *FunctionsExpressionInputValueExpression) UnmarshalJSON(data []byte) err
 		var try float64
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputValueExpression{}
-			candidate.Variant6 = &try
+			candidate.Number = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -127,7 +127,7 @@ func (v *FunctionsExpressionInputValueExpression) UnmarshalJSON(data []byte) err
 		var try bool
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputValueExpression{}
-			candidate.Variant7 = &try
+			candidate.Boolean = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -139,60 +139,16 @@ func (v *FunctionsExpressionInputValueExpression) UnmarshalJSON(data []byte) err
 
 func (v FunctionsExpressionInputValueExpression) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
-	if v.Variant4 != nil { count++ }
-	if v.Variant5 != nil { count++ }
-	if v.Variant6 != nil { count++ }
-	if v.Variant7 != nil { count++ }
+	if v.RichContentPart != nil { count++ }
+	if v.Object != nil { count++ }
+	if v.Array != nil { count++ }
+	if v.String != nil { count++ }
+	if v.Integer != nil { count++ }
+	if v.Number != nil { count++ }
+	if v.Boolean != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsExpressionInputValueExpression: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsExpressionInputValueExpressionSchema struct{}
-
-func (FunctionsExpressionInputValueExpressionSchema) SchemaTitle() string { return "functions.expression.InputValueExpression" }
-func (FunctionsExpressionInputValueExpressionSchema) SchemaDescription() string { return "An input value that may contain expressions (pre-compilation).\n\nSimilar to [`InputValue`] but object values and array elements can be\nexpressions (JMESPath or Starlark) that are evaluated during compilation." }
-func (FunctionsExpressionInputValueExpressionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Rich content (image, audio, video, file).",
-			"$ref": "agent.completions.message.RichContentPart",
-		},
-			map[string]any{
-			"description": "An object with values that may be expressions.",
-			"type": "object",
-			"additionalProperties": map[string]any{"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression", "description": "An expression (JMESPath or Starlark) to evaluate."}, map[string]any{"$ref": "functions.expression.InputValueExpression", "description": "A literal value."}}, "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```"},
-		},
-			map[string]any{
-			"description": "An array with elements that may be expressions.",
-			"type": "array",
-			"items": map[string]any{"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression", "description": "An expression (JMESPath or Starlark) to evaluate."}, map[string]any{"$ref": "functions.expression.InputValueExpression", "description": "A literal value."}}, "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```"},
-		},
-			map[string]any{
-			"description": "A string value.",
-			"type": "string",
-		},
-			map[string]any{
-			"description": "An integer value.",
-			"type": "integer",
-			"minimum": json.Number("-9223372036854775808"),
-			"maximum": json.Number("9223372036854775807"),
-		},
-			map[string]any{
-			"description": "A floating-point number.",
-			"type": "number",
-			"minimum": json.Number("-3.4028234663852886e+38"),
-			"maximum": json.Number("3.4028234663852886e+38"),
-		},
-			map[string]any{
-			"description": "A boolean value.",
-			"type": "boolean",
-		},
-		},
-	}
-}

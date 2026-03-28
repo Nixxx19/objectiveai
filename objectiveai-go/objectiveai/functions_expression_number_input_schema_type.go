@@ -7,15 +7,15 @@ import (
 )
 
 type FunctionsExpressionNumberInputSchemaType struct {
-	Variant1 string `validate:"oneof=number"`
+	Functions.expression.NumberInputSchemaType string `validate:"oneof=number"`
 }
 
 func (v FunctionsExpressionNumberInputSchemaType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Functions.expression.NumberInputSchemaType)
 }
 
 func (v *FunctionsExpressionNumberInputSchemaType) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Functions.expression.NumberInputSchemaType); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -25,13 +25,3 @@ func (v FunctionsExpressionNumberInputSchemaType) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type FunctionsExpressionNumberInputSchemaTypeSchema struct{}
-
-func (FunctionsExpressionNumberInputSchemaTypeSchema) SchemaTitle() string { return "functions.expression.NumberInputSchemaType" }
-func (FunctionsExpressionNumberInputSchemaTypeSchema) SchemaDescription() string { return "" }
-func (FunctionsExpressionNumberInputSchemaTypeSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"number"},
-	}
-}

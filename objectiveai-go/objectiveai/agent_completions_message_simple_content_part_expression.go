@@ -4,6 +4,8 @@ package objectiveai
 
 // A text part expression.
 type AgentCompletionsMessageSimpleContentPartExpression struct {
+	// The text expression.
+	//
 	// A value that can be either a literal or an expression.
 	//
 	// This allows Function definitions to mix static values with dynamic
@@ -30,13 +32,6 @@ type AgentCompletionsMessageSimpleContentPartExpression struct {
 	Type string `json:"type" validate:"oneof=text"`
 }
 
-func (AgentCompletionsMessageSimpleContentPartExpression) SchemaTitle() string { return "agent.completions.message.SimpleContentPartExpression" }
-func (AgentCompletionsMessageSimpleContentPartExpression) SchemaDescription() string { return "A text part expression." }
-func (AgentCompletionsMessageSimpleContentPartExpression) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"text": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
-	}
-}
 func (v AgentCompletionsMessageSimpleContentPartExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

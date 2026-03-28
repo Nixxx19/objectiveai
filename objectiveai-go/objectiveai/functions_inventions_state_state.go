@@ -7,41 +7,41 @@ import (
 	"fmt"
 )
 
-type FunctionsInventionsStateStateVariant1 struct {
+type FunctionsInventionsStateStateAlphaScalarBranch struct {
 	Type string `json:"type"`
 }
 
-type FunctionsInventionsStateStateVariant2 struct {
+type FunctionsInventionsStateStateAlphaScalarLeaf struct {
 	Type string `json:"type"`
 }
 
-type FunctionsInventionsStateStateVariant3 struct {
+type FunctionsInventionsStateStateAlphaVectorBranch struct {
 	Type string `json:"type"`
 }
 
-type FunctionsInventionsStateStateVariant4 struct {
+type FunctionsInventionsStateStateAlphaVectorLeaf struct {
 	Type string `json:"type"`
 }
 
 type FunctionsInventionsStateState struct {
-	Variant1 *FunctionsInventionsStateStateVariant1 
-	Variant2 *FunctionsInventionsStateStateVariant2 
-	Variant3 *FunctionsInventionsStateStateVariant3 
-	Variant4 *FunctionsInventionsStateStateVariant4 
+	AlphaScalarBranch *FunctionsInventionsStateStateAlphaScalarBranch 
+	AlphaScalarLeaf *FunctionsInventionsStateStateAlphaScalarLeaf 
+	AlphaVectorBranch *FunctionsInventionsStateStateAlphaVectorBranch 
+	AlphaVectorLeaf *FunctionsInventionsStateStateAlphaVectorLeaf 
 }
 
 func (v FunctionsInventionsStateState) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.AlphaScalarBranch != nil {
+		return json.Marshal(v.AlphaScalarBranch)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.AlphaScalarLeaf != nil {
+		return json.Marshal(v.AlphaScalarLeaf)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.AlphaVectorBranch != nil {
+		return json.Marshal(v.AlphaVectorBranch)
 	}
-	if v.Variant4 != nil {
-		return json.Marshal(v.Variant4)
+	if v.AlphaVectorLeaf != nil {
+		return json.Marshal(v.AlphaVectorLeaf)
 	}
 	return []byte("null"), nil
 }
@@ -51,10 +51,10 @@ func (v *FunctionsInventionsStateState) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try FunctionsInventionsStateStateVariant1
+		var try FunctionsInventionsStateStateAlphaScalarBranch
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsInventionsStateState{}
-			candidate.Variant1 = &try
+			candidate.AlphaScalarBranch = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -62,10 +62,10 @@ func (v *FunctionsInventionsStateState) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsInventionsStateStateVariant2
+		var try FunctionsInventionsStateStateAlphaScalarLeaf
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsInventionsStateState{}
-			candidate.Variant2 = &try
+			candidate.AlphaScalarLeaf = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -73,10 +73,10 @@ func (v *FunctionsInventionsStateState) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsInventionsStateStateVariant3
+		var try FunctionsInventionsStateStateAlphaVectorBranch
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsInventionsStateState{}
-			candidate.Variant3 = &try
+			candidate.AlphaVectorBranch = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -84,10 +84,10 @@ func (v *FunctionsInventionsStateState) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsInventionsStateStateVariant4
+		var try FunctionsInventionsStateStateAlphaVectorLeaf
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsInventionsStateState{}
-			candidate.Variant4 = &try
+			candidate.AlphaVectorLeaf = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -99,43 +99,13 @@ func (v *FunctionsInventionsStateState) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsInventionsStateState) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
-	if v.Variant4 != nil { count++ }
+	if v.AlphaScalarBranch != nil { count++ }
+	if v.AlphaScalarLeaf != nil { count++ }
+	if v.AlphaVectorBranch != nil { count++ }
+	if v.AlphaVectorLeaf != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsInventionsStateState: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsInventionsStateStateSchema struct{}
-
-func (FunctionsInventionsStateStateSchema) SchemaTitle() string { return "functions.inventions.state.State" }
-func (FunctionsInventionsStateStateSchema) SchemaDescription() string { return "" }
-func (FunctionsInventionsStateStateSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.inventions.state.AlphaScalarBranchState",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"alpha.scalar.branch.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.inventions.state.AlphaScalarLeafState",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"alpha.scalar.leaf.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.inventions.state.AlphaVectorBranchState",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"alpha.vector.branch.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.inventions.state.AlphaVectorLeafState",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"alpha.vector.leaf.function"}, "type": "string"}},
-		},
-		},
-	}
-}

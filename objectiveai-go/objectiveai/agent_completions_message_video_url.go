@@ -8,13 +8,6 @@ type AgentCompletionsMessageVideoUrl struct {
 	URL string `json:"url"`
 }
 
-func (AgentCompletionsMessageVideoUrl) SchemaTitle() string { return "agent.completions.message.VideoUrl" }
-func (AgentCompletionsMessageVideoUrl) SchemaDescription() string { return "A video URL for multimodal input." }
-func (AgentCompletionsMessageVideoUrl) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"url": "The URL of the video.",
-	}
-}
 func (v AgentCompletionsMessageVideoUrl) Validate() error {
 	return variantValidator.Struct(v)
 }

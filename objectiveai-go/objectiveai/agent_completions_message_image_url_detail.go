@@ -10,22 +10,22 @@ import (
 // Detail level for image processing.
 type AgentCompletionsMessageImageUrlDetail struct {
 	// Let the model decide the detail level.
-	Variant1 *string `validate:"oneof=auto"`
+	Auto *string `validate:"oneof=auto"`
 	// Low detail mode (faster, less tokens).
-	Variant2 *string `validate:"oneof=low"`
+	Low *string `validate:"oneof=low"`
 	// High detail mode (more accurate, more tokens).
-	Variant3 *string `validate:"oneof=high"`
+	High *string `validate:"oneof=high"`
 }
 
 func (v AgentCompletionsMessageImageUrlDetail) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Auto != nil {
+		return json.Marshal(v.Auto)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Low != nil {
+		return json.Marshal(v.Low)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.High != nil {
+		return json.Marshal(v.High)
 	}
 	return []byte("null"), nil
 }
@@ -38,7 +38,7 @@ func (v *AgentCompletionsMessageImageUrlDetail) UnmarshalJSON(data []byte) error
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageImageUrlDetail{}
-			candidate.Variant1 = &try
+			candidate.Auto = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -49,7 +49,7 @@ func (v *AgentCompletionsMessageImageUrlDetail) UnmarshalJSON(data []byte) error
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageImageUrlDetail{}
-			candidate.Variant2 = &try
+			candidate.Low = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -60,7 +60,7 @@ func (v *AgentCompletionsMessageImageUrlDetail) UnmarshalJSON(data []byte) error
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageImageUrlDetail{}
-			candidate.Variant3 = &try
+			candidate.High = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -72,37 +72,12 @@ func (v *AgentCompletionsMessageImageUrlDetail) UnmarshalJSON(data []byte) error
 
 func (v AgentCompletionsMessageImageUrlDetail) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
+	if v.Auto != nil { count++ }
+	if v.Low != nil { count++ }
+	if v.High != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentCompletionsMessageImageUrlDetail: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentCompletionsMessageImageUrlDetailSchema struct{}
-
-func (AgentCompletionsMessageImageUrlDetailSchema) SchemaTitle() string { return "agent.completions.message.ImageUrlDetail" }
-func (AgentCompletionsMessageImageUrlDetailSchema) SchemaDescription() string { return "Detail level for image processing." }
-func (AgentCompletionsMessageImageUrlDetailSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Let the model decide the detail level.",
-			"type": "string",
-			"enum": []any{"auto"},
-		},
-			map[string]any{
-			"description": "Low detail mode (faster, less tokens).",
-			"type": "string",
-			"enum": []any{"low"},
-		},
-			map[string]any{
-			"description": "High detail mode (more accurate, more tokens).",
-			"type": "string",
-			"enum": []any{"high"},
-		},
-		},
-	}
-}

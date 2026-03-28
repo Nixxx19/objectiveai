@@ -4,13 +4,13 @@ package objectiveai
 
 type FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk struct {
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
-	Error *ResponseError `json:"error,omitempty"`
-	Function *string `json:"function,omitempty"`
+	Error *ErrorResponseError `json:"error,omitempty"`
+	Function *RemotePath `json:"function,omitempty"`
 	ID string `json:"id"`
 	Index uint64 `json:"index" validate:"min=0,max=18446744073709551615"`
 	Object FunctionsExecutionsResponseStreamingObject `json:"object"`
-	Output *FunctionsExpressionTaskOutputOwned `json:"output,omitempty"`
-	Profile *string `json:"profile,omitempty"`
+	Output *FunctionsExecutionsResponseOutput `json:"output,omitempty"`
+	Profile *RemotePath `json:"profile,omitempty"`
 	Reasoning *FunctionsExecutionsResponseStreamingReasoningSummaryChunk `json:"reasoning,omitempty"`
 	RetryToken *string `json:"retry_token,omitempty"`
 	SwissPoolIndex *uint64 `json:"swiss_pool_index,omitempty" validate:"min=0,max=18446744073709551615"`
@@ -22,8 +22,6 @@ type FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk struct {
 	Usage *AgentCompletionsResponseUsage `json:"usage,omitempty"`
 }
 
-func (FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk) SchemaTitle() string { return "functions.executions.response.streaming.FunctionExecutionTaskChunk" }
-func (FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk) SchemaDescription() string { return "" }
 func (v FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk) Validate() error {
 	return variantValidator.Struct(v)
 }

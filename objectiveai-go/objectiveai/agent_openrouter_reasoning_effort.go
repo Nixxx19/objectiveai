@@ -12,37 +12,37 @@ import (
 // Only supported by some models.
 type AgentOpenrouterReasoningEffort struct {
 	// No reasoning.
-	Variant1 *string `validate:"oneof=none"`
+	None *string `validate:"oneof=none"`
 	// Minimal reasoning effort.
-	Variant2 *string `validate:"oneof=minimal"`
+	Minimal *string `validate:"oneof=minimal"`
 	// Low reasoning effort.
-	Variant3 *string `validate:"oneof=low"`
+	Low *string `validate:"oneof=low"`
 	// Medium reasoning effort.
-	Variant4 *string `validate:"oneof=medium"`
+	Medium *string `validate:"oneof=medium"`
 	// High reasoning effort.
-	Variant5 *string `validate:"oneof=high"`
+	High *string `validate:"oneof=high"`
 	// Maximum reasoning effort.
-	Variant6 *string `validate:"oneof=xhigh"`
+	Xhigh *string `validate:"oneof=xhigh"`
 }
 
 func (v AgentOpenrouterReasoningEffort) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.None != nil {
+		return json.Marshal(v.None)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Minimal != nil {
+		return json.Marshal(v.Minimal)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.Low != nil {
+		return json.Marshal(v.Low)
 	}
-	if v.Variant4 != nil {
-		return json.Marshal(v.Variant4)
+	if v.Medium != nil {
+		return json.Marshal(v.Medium)
 	}
-	if v.Variant5 != nil {
-		return json.Marshal(v.Variant5)
+	if v.High != nil {
+		return json.Marshal(v.High)
 	}
-	if v.Variant6 != nil {
-		return json.Marshal(v.Variant6)
+	if v.Xhigh != nil {
+		return json.Marshal(v.Xhigh)
 	}
 	return []byte("null"), nil
 }
@@ -55,7 +55,7 @@ func (v *AgentOpenrouterReasoningEffort) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterReasoningEffort{}
-			candidate.Variant1 = &try
+			candidate.None = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -66,7 +66,7 @@ func (v *AgentOpenrouterReasoningEffort) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterReasoningEffort{}
-			candidate.Variant2 = &try
+			candidate.Minimal = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -77,7 +77,7 @@ func (v *AgentOpenrouterReasoningEffort) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterReasoningEffort{}
-			candidate.Variant3 = &try
+			candidate.Low = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -88,7 +88,7 @@ func (v *AgentOpenrouterReasoningEffort) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterReasoningEffort{}
-			candidate.Variant4 = &try
+			candidate.Medium = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -99,7 +99,7 @@ func (v *AgentOpenrouterReasoningEffort) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterReasoningEffort{}
-			candidate.Variant5 = &try
+			candidate.High = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -110,7 +110,7 @@ func (v *AgentOpenrouterReasoningEffort) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterReasoningEffort{}
-			candidate.Variant6 = &try
+			candidate.Xhigh = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -122,55 +122,15 @@ func (v *AgentOpenrouterReasoningEffort) UnmarshalJSON(data []byte) error {
 
 func (v AgentOpenrouterReasoningEffort) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
-	if v.Variant4 != nil { count++ }
-	if v.Variant5 != nil { count++ }
-	if v.Variant6 != nil { count++ }
+	if v.None != nil { count++ }
+	if v.Minimal != nil { count++ }
+	if v.Low != nil { count++ }
+	if v.Medium != nil { count++ }
+	if v.High != nil { count++ }
+	if v.Xhigh != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentOpenrouterReasoningEffort: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentOpenrouterReasoningEffortSchema struct{}
-
-func (AgentOpenrouterReasoningEffortSchema) SchemaTitle() string { return "agent.openrouter.ReasoningEffort" }
-func (AgentOpenrouterReasoningEffortSchema) SchemaDescription() string { return "The level of effort the model should put into reasoning.\n\nOnly supported by some models." }
-func (AgentOpenrouterReasoningEffortSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "No reasoning.",
-			"type": "string",
-			"enum": []any{"none"},
-		},
-			map[string]any{
-			"description": "Minimal reasoning effort.",
-			"type": "string",
-			"enum": []any{"minimal"},
-		},
-			map[string]any{
-			"description": "Low reasoning effort.",
-			"type": "string",
-			"enum": []any{"low"},
-		},
-			map[string]any{
-			"description": "Medium reasoning effort.",
-			"type": "string",
-			"enum": []any{"medium"},
-		},
-			map[string]any{
-			"description": "High reasoning effort.",
-			"type": "string",
-			"enum": []any{"high"},
-		},
-			map[string]any{
-			"description": "Maximum reasoning effort.",
-			"type": "string",
-			"enum": []any{"xhigh"},
-		},
-		},
-	}
-}

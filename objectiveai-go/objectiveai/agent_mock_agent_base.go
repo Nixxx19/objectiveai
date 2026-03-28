@@ -19,17 +19,6 @@ type AgentMockAgentBase struct {
 	Upstream AgentMockUpstream `json:"upstream"`
 }
 
-func (AgentMockAgentBase) SchemaTitle() string { return "agent.mock.AgentBase" }
-func (AgentMockAgentBase) SchemaDescription() string { return "The base configuration for a Mock Agent (without computed ID)." }
-func (AgentMockAgentBase) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"error": "If true, the mock client will return an error instead of a response.",
-		"invention": "If true, this mock agent supports invention tool calling.\nIncompatible with output modes other than `instruction`.",
-		"output_mode": "The output mode for vector completions. Ignored for agent completions.",
-		"top_logprobs": "Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.",
-		"upstream": "The upstream provider marker.",
-	}
-}
 func (v AgentMockAgentBase) Validate() error {
 	return variantValidator.Struct(v)
 }

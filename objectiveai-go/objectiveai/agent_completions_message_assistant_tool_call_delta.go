@@ -14,16 +14,6 @@ type AgentCompletionsMessageAssistantToolCallDelta struct {
 	Type *AgentCompletionsMessageAssistantToolCallType `json:"type,omitempty"`
 }
 
-func (AgentCompletionsMessageAssistantToolCallDelta) SchemaTitle() string { return "agent.completions.message.AssistantToolCallDelta" }
-func (AgentCompletionsMessageAssistantToolCallDelta) SchemaDescription() string { return "A tool call delta in a streaming response." }
-func (AgentCompletionsMessageAssistantToolCallDelta) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"function": "The function call details.",
-		"id": "The unique ID of this tool call.",
-		"index": "The index of this tool call.",
-		"type": "The type of tool call (always \"function\").",
-	}
-}
 func (v AgentCompletionsMessageAssistantToolCallDelta) Validate() error {
 	return variantValidator.Struct(v)
 }

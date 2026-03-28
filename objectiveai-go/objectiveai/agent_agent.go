@@ -7,24 +7,18 @@ import (
 	"fmt"
 )
 
-// A validated Agent with its computed content-addressed ID.
-//
-// This is an untagged enum that dispatches to the per-upstream Agent.
+// A validated Agent, either remote (with metadata) or inline.
 type AgentAgent struct {
-	Variant1 *AgentOpenrouterAgent 
-	Variant2 *AgentClaudeAgentSdkAgent 
-	Variant3 *AgentMockAgent 
+	Remote *AgentRemoteAgent 
+	Inline *AgentInlineAgent 
 }
 
 func (v AgentAgent) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Remote != nil {
+		return json.Marshal(v.Remote)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
-	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.Inline != nil {
+		return json.Marshal(v.Inline)
 	}
 	return []byte("null"), nil
 }
@@ -34,10 +28,10 @@ func (v *AgentAgent) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try AgentOpenrouterAgent
+		var try AgentRemoteAgent
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentAgent{}
-			candidate.Variant1 = &try
+			candidate.Remote = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -45,21 +39,10 @@ func (v *AgentAgent) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try AgentClaudeAgentSdkAgent
+		var try AgentInlineAgent
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentAgent{}
-			candidate.Variant2 = &try
-			if candidate.Validate() == nil {
-				*v = candidate
-				return nil
-			}
-		}
-	}
-	{
-		var try AgentMockAgent
-		if err := json.Unmarshal(data, &try); err == nil {
-			candidate := AgentAgent{}
-			candidate.Variant3 = &try
+			candidate.Inline = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -71,31 +54,11 @@ func (v *AgentAgent) UnmarshalJSON(data []byte) error {
 
 func (v AgentAgent) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
+	if v.Remote != nil { count++ }
+	if v.Inline != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentAgent: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentAgentSchema struct{}
-
-func (AgentAgentSchema) SchemaTitle() string { return "agent.Agent" }
-func (AgentAgentSchema) SchemaDescription() string { return "A validated Agent with its computed content-addressed ID.\n\nThis is an untagged enum that dispatches to the per-upstream Agent." }
-func (AgentAgentSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"$ref": "agent.openrouter.Agent",
-		},
-			map[string]any{
-			"$ref": "agent.claude_agent_sdk.Agent",
-		},
-			map[string]any{
-			"$ref": "agent.mock.Agent",
-		},
-		},
-	}
-}

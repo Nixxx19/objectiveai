@@ -18,15 +18,6 @@ type AuthCreateApiKeyRequest struct {
 	Name string `json:"name"`
 }
 
-func (AuthCreateApiKeyRequest) SchemaTitle() string { return "auth.CreateApiKeyRequest" }
-func (AuthCreateApiKeyRequest) SchemaDescription() string { return "Request to create a new API key.\n\n# Fields\n\n* `expires` - Optional expiration timestamp. If `None`, the key never expires.\n* `name` - A user-provided name for identifying the key.\n* `description` - Optional description providing additional context." }
-func (AuthCreateApiKeyRequest) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"description": "An optional description providing additional context about the key's purpose.",
-		"expires": "The expiration timestamp for the API key, or `None` for a non-expiring key.",
-		"name": "A user-provided name to identify this API key.",
-	}
-}
 func (v AuthCreateApiKeyRequest) Validate() error {
 	return variantValidator.Struct(v)
 }

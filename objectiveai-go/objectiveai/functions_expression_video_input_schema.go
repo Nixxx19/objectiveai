@@ -9,13 +9,6 @@ type FunctionsExpressionVideoInputSchema struct {
 	Type FunctionsExpressionVideoInputSchemaType `json:"type"`
 }
 
-func (FunctionsExpressionVideoInputSchema) SchemaTitle() string { return "functions.expression.VideoInputSchema" }
-func (FunctionsExpressionVideoInputSchema) SchemaDescription() string { return "Schema for a video input (URL or base64-encoded)." }
-func (FunctionsExpressionVideoInputSchema) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"description": "Human-readable description of the expected video.",
-	}
-}
 func (v FunctionsExpressionVideoInputSchema) Validate() error {
 	return variantValidator.Struct(v)
 }

@@ -8,13 +8,6 @@ type AuthListApiKeyResponse struct {
 	Data []AuthListApiKeyItem `json:"data"`
 }
 
-func (AuthListApiKeyResponse) SchemaTitle() string { return "auth.ListApiKeyResponse" }
-func (AuthListApiKeyResponse) SchemaDescription() string { return "Response containing a list of API keys." }
-func (AuthListApiKeyResponse) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"data": "The list of API keys with their metadata and usage costs.",
-	}
-}
 func (v AuthListApiKeyResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

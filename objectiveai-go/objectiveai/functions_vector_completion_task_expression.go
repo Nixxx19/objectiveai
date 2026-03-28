@@ -7,6 +7,9 @@ type FunctionsVectorCompletionTaskExpression struct {
 	// Expression that evaluates to the number of mapped task instances.
 	// Each instance receives `map` as an integer index (0-based).
 	Map *FunctionsExpressionExpression `json:"map,omitempty"`
+	// Expression for the conversation messages (the prompt).
+	// Receives: `input`, `map` (if mapped).
+	//
 	// A value that can be either a literal or an expression.
 	//
 	// This allows Function definitions to mix static values with dynamic
@@ -42,6 +45,9 @@ type FunctionsVectorCompletionTaskExpression struct {
 	// profile weights. If a function has only one task, that task's output becomes the function's
 	// output directly.
 	Output FunctionsExpressionExpression `json:"output"`
+	// Expression for the possible responses the LLMs can vote for.
+	// Receives: `input`, `map` (if mapped).
+	//
 	// A value that can be either a literal or an expression.
 	//
 	// This allows Function definitions to mix static values with dynamic
@@ -69,17 +75,6 @@ type FunctionsVectorCompletionTaskExpression struct {
 	Skip *FunctionsExpressionExpression `json:"skip,omitempty"`
 }
 
-func (FunctionsVectorCompletionTaskExpression) SchemaTitle() string { return "functions.VectorCompletionTaskExpression" }
-func (FunctionsVectorCompletionTaskExpression) SchemaDescription() string { return "Expression for a task that runs a vector completion (pre-compilation)." }
-func (FunctionsVectorCompletionTaskExpression) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"map": "Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).",
-		"messages": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
-		"output": "Expression to transform the task result into a valid function output.\n\nReceives `output` as the task's raw result (typically `Vector(scores)`).\n\nThe expression must return a `TaskOutputOwned` that is valid for the parent function's type:\n- For scalar functions: must return `Scalar(value)` where value is in [0, 1]\n- For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length\n\nThe function's final output is computed as a weighted average of all task outputs using\nprofile weights. If a function has only one task, that task's output becomes the function's\noutput directly.",
-		"responses": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
-		"skip": "If this expression evaluates to true, skip the task. Receives: `input`.",
-	}
-}
 func (v FunctionsVectorCompletionTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

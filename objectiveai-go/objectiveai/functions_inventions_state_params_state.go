@@ -7,57 +7,57 @@ import (
 	"fmt"
 )
 
-type FunctionsInventionsStateParamsStateVariant1 struct {
+type FunctionsInventionsStateParamsStateAlphaScalarBranch struct {
 	Type string `json:"type"`
 }
 
-type FunctionsInventionsStateParamsStateVariant2 struct {
+type FunctionsInventionsStateParamsStateAlphaScalarLeaf struct {
 	Type string `json:"type"`
 }
 
-type FunctionsInventionsStateParamsStateVariant3 struct {
+type FunctionsInventionsStateParamsStateAlphaVectorBranch struct {
 	Type string `json:"type"`
 }
 
-type FunctionsInventionsStateParamsStateVariant4 struct {
+type FunctionsInventionsStateParamsStateAlphaVectorLeaf struct {
 	Type string `json:"type"`
 }
 
-type FunctionsInventionsStateParamsStateVariant5 struct {
+type FunctionsInventionsStateParamsStateAlphaScalar struct {
 	Type string `json:"type"`
 }
 
-type FunctionsInventionsStateParamsStateVariant6 struct {
+type FunctionsInventionsStateParamsStateAlphaVector struct {
 	Type string `json:"type"`
 }
 
 type FunctionsInventionsStateParamsState struct {
-	Variant1 *FunctionsInventionsStateParamsStateVariant1 
-	Variant2 *FunctionsInventionsStateParamsStateVariant2 
-	Variant3 *FunctionsInventionsStateParamsStateVariant3 
-	Variant4 *FunctionsInventionsStateParamsStateVariant4 
-	Variant5 *FunctionsInventionsStateParamsStateVariant5 
-	Variant6 *FunctionsInventionsStateParamsStateVariant6 
+	AlphaScalarBranch *FunctionsInventionsStateParamsStateAlphaScalarBranch 
+	AlphaScalarLeaf *FunctionsInventionsStateParamsStateAlphaScalarLeaf 
+	AlphaVectorBranch *FunctionsInventionsStateParamsStateAlphaVectorBranch 
+	AlphaVectorLeaf *FunctionsInventionsStateParamsStateAlphaVectorLeaf 
+	AlphaScalar *FunctionsInventionsStateParamsStateAlphaScalar 
+	AlphaVector *FunctionsInventionsStateParamsStateAlphaVector 
 }
 
 func (v FunctionsInventionsStateParamsState) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.AlphaScalarBranch != nil {
+		return json.Marshal(v.AlphaScalarBranch)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.AlphaScalarLeaf != nil {
+		return json.Marshal(v.AlphaScalarLeaf)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.AlphaVectorBranch != nil {
+		return json.Marshal(v.AlphaVectorBranch)
 	}
-	if v.Variant4 != nil {
-		return json.Marshal(v.Variant4)
+	if v.AlphaVectorLeaf != nil {
+		return json.Marshal(v.AlphaVectorLeaf)
 	}
-	if v.Variant5 != nil {
-		return json.Marshal(v.Variant5)
+	if v.AlphaScalar != nil {
+		return json.Marshal(v.AlphaScalar)
 	}
-	if v.Variant6 != nil {
-		return json.Marshal(v.Variant6)
+	if v.AlphaVector != nil {
+		return json.Marshal(v.AlphaVector)
 	}
 	return []byte("null"), nil
 }
@@ -67,10 +67,10 @@ func (v *FunctionsInventionsStateParamsState) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try FunctionsInventionsStateParamsStateVariant1
+		var try FunctionsInventionsStateParamsStateAlphaScalarBranch
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsInventionsStateParamsState{}
-			candidate.Variant1 = &try
+			candidate.AlphaScalarBranch = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -78,10 +78,10 @@ func (v *FunctionsInventionsStateParamsState) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsInventionsStateParamsStateVariant2
+		var try FunctionsInventionsStateParamsStateAlphaScalarLeaf
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsInventionsStateParamsState{}
-			candidate.Variant2 = &try
+			candidate.AlphaScalarLeaf = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -89,10 +89,10 @@ func (v *FunctionsInventionsStateParamsState) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsInventionsStateParamsStateVariant3
+		var try FunctionsInventionsStateParamsStateAlphaVectorBranch
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsInventionsStateParamsState{}
-			candidate.Variant3 = &try
+			candidate.AlphaVectorBranch = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -100,10 +100,10 @@ func (v *FunctionsInventionsStateParamsState) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsInventionsStateParamsStateVariant4
+		var try FunctionsInventionsStateParamsStateAlphaVectorLeaf
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsInventionsStateParamsState{}
-			candidate.Variant4 = &try
+			candidate.AlphaVectorLeaf = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -111,10 +111,10 @@ func (v *FunctionsInventionsStateParamsState) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsInventionsStateParamsStateVariant5
+		var try FunctionsInventionsStateParamsStateAlphaScalar
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsInventionsStateParamsState{}
-			candidate.Variant5 = &try
+			candidate.AlphaScalar = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -122,10 +122,10 @@ func (v *FunctionsInventionsStateParamsState) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsInventionsStateParamsStateVariant6
+		var try FunctionsInventionsStateParamsStateAlphaVector
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsInventionsStateParamsState{}
-			candidate.Variant6 = &try
+			candidate.AlphaVector = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -137,55 +137,15 @@ func (v *FunctionsInventionsStateParamsState) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsInventionsStateParamsState) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
-	if v.Variant4 != nil { count++ }
-	if v.Variant5 != nil { count++ }
-	if v.Variant6 != nil { count++ }
+	if v.AlphaScalarBranch != nil { count++ }
+	if v.AlphaScalarLeaf != nil { count++ }
+	if v.AlphaVectorBranch != nil { count++ }
+	if v.AlphaVectorLeaf != nil { count++ }
+	if v.AlphaScalar != nil { count++ }
+	if v.AlphaVector != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsInventionsStateParamsState: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsInventionsStateParamsStateSchema struct{}
-
-func (FunctionsInventionsStateParamsStateSchema) SchemaTitle() string { return "functions.inventions.state.ParamsState" }
-func (FunctionsInventionsStateParamsStateSchema) SchemaDescription() string { return "" }
-func (FunctionsInventionsStateParamsStateSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.inventions.state.AlphaScalarBranchState",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"alpha.scalar.branch.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.inventions.state.AlphaScalarLeafState",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"alpha.scalar.leaf.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.inventions.state.AlphaVectorBranchState",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"alpha.vector.branch.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.inventions.state.AlphaVectorLeafState",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"alpha.vector.leaf.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.inventions.state.AlphaScalarState",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"alpha.scalar.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.inventions.state.AlphaVectorState",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"alpha.vector.function"}, "type": "string"}},
-		},
-		},
-	}
-}

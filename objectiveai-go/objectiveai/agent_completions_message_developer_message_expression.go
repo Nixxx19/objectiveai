@@ -4,6 +4,8 @@ package objectiveai
 
 // Expression variant of [`DeveloperMessage`] for dynamic content.
 type AgentCompletionsMessageDeveloperMessageExpression struct {
+	// The message content expression.
+	//
 	// A value that can be either a literal or an expression.
 	//
 	// This allows Function definitions to mix static values with dynamic
@@ -28,17 +30,32 @@ type AgentCompletionsMessageDeveloperMessageExpression struct {
 	// ```
 	Content any `json:"content"`
 	// Optional name expression.
-	Name any `json:"name,omitempty"`
+	//
+	// A value that can be either a literal or an expression.
+	//
+	// This allows Function definitions to mix static values with dynamic
+	// expressions. During compilation, expressions are evaluated while
+	// literal values pass through unchanged.
+	//
+	// # Example
+	//
+	// Literal value:
+	// ```json
+	// "hello world"
+	// ```
+	//
+	// JMESPath expression:
+	// ```json
+	// {"$jmespath": "input.greeting"}
+	// ```
+	//
+	// Starlark expression:
+	// ```json
+	// {"$starlark": "input['greeting']"}
+	// ```
+	Name any `json:"name"`
 }
 
-func (AgentCompletionsMessageDeveloperMessageExpression) SchemaTitle() string { return "agent.completions.message.DeveloperMessageExpression" }
-func (AgentCompletionsMessageDeveloperMessageExpression) SchemaDescription() string { return "Expression variant of [`DeveloperMessage`] for dynamic content." }
-func (AgentCompletionsMessageDeveloperMessageExpression) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"content": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
-		"name": "Optional name expression.",
-	}
-}
 func (v AgentCompletionsMessageDeveloperMessageExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

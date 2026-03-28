@@ -8,59 +8,59 @@ import (
 )
 
 // A developer message (similar to system, but from the developer).
-type AgentCompletionsMessageMessageVariant1 struct {
+type AgentCompletionsMessageMessageDeveloper struct {
 	Role string `json:"role"`
 }
 
 // A system message setting context or instructions.
-type AgentCompletionsMessageMessageVariant2 struct {
+type AgentCompletionsMessageMessageSystem struct {
 	Role string `json:"role"`
 }
 
 // A user message from the end user.
-type AgentCompletionsMessageMessageVariant3 struct {
+type AgentCompletionsMessageMessageUser struct {
 	Role string `json:"role"`
 }
 
 // An assistant message (model's previous response).
-type AgentCompletionsMessageMessageVariant4 struct {
+type AgentCompletionsMessageMessageAssistant struct {
 	Role string `json:"role"`
 }
 
 // A tool message containing the result of a tool call.
-type AgentCompletionsMessageMessageVariant5 struct {
+type AgentCompletionsMessageMessageTool struct {
 	Role string `json:"role"`
 }
 
 // A message in the conversation.
 type AgentCompletionsMessageMessage struct {
 	// A developer message (similar to system, but from the developer).
-	Variant1 *AgentCompletionsMessageMessageVariant1 
+	Developer *AgentCompletionsMessageMessageDeveloper 
 	// A system message setting context or instructions.
-	Variant2 *AgentCompletionsMessageMessageVariant2 
+	System *AgentCompletionsMessageMessageSystem 
 	// A user message from the end user.
-	Variant3 *AgentCompletionsMessageMessageVariant3 
+	User *AgentCompletionsMessageMessageUser 
 	// An assistant message (model's previous response).
-	Variant4 *AgentCompletionsMessageMessageVariant4 
+	Assistant *AgentCompletionsMessageMessageAssistant 
 	// A tool message containing the result of a tool call.
-	Variant5 *AgentCompletionsMessageMessageVariant5 
+	Tool *AgentCompletionsMessageMessageTool 
 }
 
 func (v AgentCompletionsMessageMessage) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Developer != nil {
+		return json.Marshal(v.Developer)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.System != nil {
+		return json.Marshal(v.System)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.User != nil {
+		return json.Marshal(v.User)
 	}
-	if v.Variant4 != nil {
-		return json.Marshal(v.Variant4)
+	if v.Assistant != nil {
+		return json.Marshal(v.Assistant)
 	}
-	if v.Variant5 != nil {
-		return json.Marshal(v.Variant5)
+	if v.Tool != nil {
+		return json.Marshal(v.Tool)
 	}
 	return []byte("null"), nil
 }
@@ -70,10 +70,10 @@ func (v *AgentCompletionsMessageMessage) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try AgentCompletionsMessageMessageVariant1
+		var try AgentCompletionsMessageMessageDeveloper
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageMessage{}
-			candidate.Variant1 = &try
+			candidate.Developer = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -81,10 +81,10 @@ func (v *AgentCompletionsMessageMessage) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try AgentCompletionsMessageMessageVariant2
+		var try AgentCompletionsMessageMessageSystem
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageMessage{}
-			candidate.Variant2 = &try
+			candidate.System = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -92,10 +92,10 @@ func (v *AgentCompletionsMessageMessage) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try AgentCompletionsMessageMessageVariant3
+		var try AgentCompletionsMessageMessageUser
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageMessage{}
-			candidate.Variant3 = &try
+			candidate.User = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -103,10 +103,10 @@ func (v *AgentCompletionsMessageMessage) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try AgentCompletionsMessageMessageVariant4
+		var try AgentCompletionsMessageMessageAssistant
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageMessage{}
-			candidate.Variant4 = &try
+			candidate.Assistant = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -114,10 +114,10 @@ func (v *AgentCompletionsMessageMessage) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try AgentCompletionsMessageMessageVariant5
+		var try AgentCompletionsMessageMessageTool
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageMessage{}
-			candidate.Variant5 = &try
+			candidate.Tool = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -129,54 +129,14 @@ func (v *AgentCompletionsMessageMessage) UnmarshalJSON(data []byte) error {
 
 func (v AgentCompletionsMessageMessage) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
-	if v.Variant4 != nil { count++ }
-	if v.Variant5 != nil { count++ }
+	if v.Developer != nil { count++ }
+	if v.System != nil { count++ }
+	if v.User != nil { count++ }
+	if v.Assistant != nil { count++ }
+	if v.Tool != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentCompletionsMessageMessage: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentCompletionsMessageMessageSchema struct{}
-
-func (AgentCompletionsMessageMessageSchema) SchemaTitle() string { return "agent.completions.message.Message" }
-func (AgentCompletionsMessageMessageSchema) SchemaDescription() string { return "A message in the conversation." }
-func (AgentCompletionsMessageMessageSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "A developer message (similar to system, but from the developer).",
-			"type": "object",
-			"$ref": "agent.completions.message.DeveloperMessage",
-			"properties": map[string]any{"role": map[string]any{"enum": []any{"developer"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "A system message setting context or instructions.",
-			"type": "object",
-			"$ref": "agent.completions.message.SystemMessage",
-			"properties": map[string]any{"role": map[string]any{"enum": []any{"system"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "A user message from the end user.",
-			"type": "object",
-			"$ref": "agent.completions.message.UserMessage",
-			"properties": map[string]any{"role": map[string]any{"enum": []any{"user"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "An assistant message (model's previous response).",
-			"type": "object",
-			"$ref": "agent.completions.message.AssistantMessage",
-			"properties": map[string]any{"role": map[string]any{"enum": []any{"assistant"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "A tool message containing the result of a tool call.",
-			"type": "object",
-			"$ref": "agent.completions.message.ToolMessage",
-			"properties": map[string]any{"role": map[string]any{"enum": []any{"tool"}, "type": "string"}},
-		},
-		},
-	}
-}

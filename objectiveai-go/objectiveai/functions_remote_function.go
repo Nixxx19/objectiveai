@@ -8,7 +8,7 @@ import (
 )
 
 // Produces a single score in [0, 1].
-type FunctionsRemoteFunctionVariant1 struct {
+type FunctionsRemoteFunctionScalar struct {
 	// Human-readable description of what the function does.
 	Description string `json:"description"`
 	// JSON Schema defining the expected input structure.
@@ -22,7 +22,7 @@ type FunctionsRemoteFunctionVariant1 struct {
 }
 
 // Produces a vector of scores that sums to 1.
-type FunctionsRemoteFunctionVariant2 struct {
+type FunctionsRemoteFunctionVector struct {
 	// Human-readable description of what the function does.
 	Description string `json:"description"`
 	// Expression transforming an array of inputs computed by `input_split`
@@ -54,17 +54,17 @@ type FunctionsRemoteFunctionVariant2 struct {
 // that inline functions lack.
 type FunctionsRemoteFunction struct {
 	// Produces a single score in [0, 1].
-	Variant1 *FunctionsRemoteFunctionVariant1 
+	Scalar *FunctionsRemoteFunctionScalar 
 	// Produces a vector of scores that sums to 1.
-	Variant2 *FunctionsRemoteFunctionVariant2 
+	Vector *FunctionsRemoteFunctionVector 
 }
 
 func (v FunctionsRemoteFunction) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Scalar != nil {
+		return json.Marshal(v.Scalar)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Vector != nil {
+		return json.Marshal(v.Vector)
 	}
 	return []byte("null"), nil
 }
@@ -74,10 +74,10 @@ func (v *FunctionsRemoteFunction) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try FunctionsRemoteFunctionVariant1
+		var try FunctionsRemoteFunctionScalar
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsRemoteFunction{}
-			candidate.Variant1 = &try
+			candidate.Scalar = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -85,10 +85,10 @@ func (v *FunctionsRemoteFunction) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsRemoteFunctionVariant2
+		var try FunctionsRemoteFunctionVector
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsRemoteFunction{}
-			candidate.Variant2 = &try
+			candidate.Vector = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -100,31 +100,11 @@ func (v *FunctionsRemoteFunction) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsRemoteFunction) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Scalar != nil { count++ }
+	if v.Vector != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsRemoteFunction: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsRemoteFunctionSchema struct{}
-
-func (FunctionsRemoteFunctionSchema) SchemaTitle() string { return "functions.RemoteFunction" }
-func (FunctionsRemoteFunctionSchema) SchemaDescription() string { return "A remote function with full metadata.\n\nRemote functions are stored as `function.json` in repositories and\nreferenced by `remote/owner/repository`. They include documentation fields\nthat inline functions lack." }
-func (FunctionsRemoteFunctionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Produces a single score in [0, 1].",
-			"type": "object",
-			"properties": map[string]any{"description": map[string]any{"description": "Human-readable description of what the function does.", "type": "string"}, "input_schema": map[string]any{"$ref": "functions.expression.InputSchema", "description": "JSON Schema defining the expected input structure."}, "tasks": map[string]any{"description": "The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped).", "items": map[string]any{"$ref": "functions.TaskExpression"}, "type": "array"}, "type": map[string]any{"enum": []any{"scalar.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "Produces a vector of scores that sums to 1.",
-			"type": "object",
-			"properties": map[string]any{"description": map[string]any{"description": "Human-readable description of what the function does.", "type": "string"}, "input_merge": map[string]any{"$ref": "functions.expression.Expression", "description": "Expression transforming an array of inputs computed by `input_split`\ninto a single Input object for the Function.\nReceives: `input` (as an array)."}, "input_schema": map[string]any{"$ref": "functions.expression.InputSchema", "description": "JSON Schema defining the expected input structure."}, "input_split": map[string]any{"$ref": "functions.expression.Expression", "description": "Expression transforming input into an input array of the output_length\nWhen the Function is executed with any input from the array,\nThe output_length should be 1.\nReceives: `input`."}, "output_length": map[string]any{"$ref": "functions.expression.Expression", "description": "Expression computing the expected output vector length for task outputs.\nReceives: `input`."}, "tasks": map[string]any{"description": "The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped).", "items": map[string]any{"$ref": "functions.TaskExpression"}, "type": "array"}, "type": map[string]any{"enum": []any{"vector.function"}, "type": "string"}},
-		},
-		},
-	}
-}

@@ -7,25 +7,25 @@ import (
 	"fmt"
 )
 
-type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionVariant1 struct {
+type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderScalarFunction struct {
 	Type string `json:"type"`
 }
 
-type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionVariant2 struct {
+type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderVectorFunction struct {
 	Type string `json:"type"`
 }
 
 type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression struct {
-	Variant1 *FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionVariant1 
-	Variant2 *FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionVariant2 
+	PlaceholderScalarFunction *FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderScalarFunction 
+	PlaceholderVectorFunction *FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderVectorFunction 
 }
 
 func (v FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.PlaceholderScalarFunction != nil {
+		return json.Marshal(v.PlaceholderScalarFunction)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.PlaceholderVectorFunction != nil {
+		return json.Marshal(v.PlaceholderVectorFunction)
 	}
 	return []byte("null"), nil
 }
@@ -35,10 +35,10 @@ func (v *FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression) UnmarshalJS
 		return nil
 	}
 	{
-		var try FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionVariant1
+		var try FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderScalarFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression{}
-			candidate.Variant1 = &try
+			candidate.PlaceholderScalarFunction = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -46,10 +46,10 @@ func (v *FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression) UnmarshalJS
 		}
 	}
 	{
-		var try FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionVariant2
+		var try FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderVectorFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression{}
-			candidate.Variant2 = &try
+			candidate.PlaceholderVectorFunction = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -61,31 +61,11 @@ func (v *FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression) UnmarshalJS
 
 func (v FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.PlaceholderScalarFunction != nil { count++ }
+	if v.PlaceholderVectorFunction != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema struct{}
-
-func (FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema) SchemaTitle() string { return "functions.alpha_vector.PartialPlaceholderBranchTaskExpression" }
-func (FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema) SchemaDescription() string { return "" }
-func (FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.alpha_vector.PartialPlaceholderScalarFunctionTaskExpression",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"placeholder.alpha.scalar.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.alpha_vector.PartialPlaceholderVectorFunctionTaskExpression",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"placeholder.alpha.vector.function"}, "type": "string"}},
-		},
-		},
-	}
-}

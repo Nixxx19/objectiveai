@@ -8,27 +8,27 @@ import (
 )
 
 // Calls a scalar function (produces a single score).
-type FunctionsTaskVariant1 struct {
+type FunctionsTaskScalarFunction struct {
 	Type string `json:"type"`
 }
 
 // Calls a vector function (produces a vector of scores).
-type FunctionsTaskVariant2 struct {
+type FunctionsTaskVectorFunction struct {
 	Type string `json:"type"`
 }
 
 // Runs a vector completion.
-type FunctionsTaskVariant3 struct {
+type FunctionsTaskVectorCompletion struct {
 	Type string `json:"type"`
 }
 
 // Placeholder scalar function (always outputs 0.5).
-type FunctionsTaskVariant4 struct {
+type FunctionsTaskPlaceholderScalarFunction struct {
 	Type string `json:"type"`
 }
 
 // Placeholder vector function (always outputs equalized vector).
-type FunctionsTaskVariant5 struct {
+type FunctionsTaskPlaceholderVectorFunction struct {
 	Type string `json:"type"`
 }
 
@@ -38,32 +38,32 @@ type FunctionsTaskVariant5 struct {
 // expressions have been resolved to concrete values.
 type FunctionsTask struct {
 	// Calls a scalar function (produces a single score).
-	Variant1 *FunctionsTaskVariant1 
+	ScalarFunction *FunctionsTaskScalarFunction 
 	// Calls a vector function (produces a vector of scores).
-	Variant2 *FunctionsTaskVariant2 
+	VectorFunction *FunctionsTaskVectorFunction 
 	// Runs a vector completion.
-	Variant3 *FunctionsTaskVariant3 
+	VectorCompletion *FunctionsTaskVectorCompletion 
 	// Placeholder scalar function (always outputs 0.5).
-	Variant4 *FunctionsTaskVariant4 
+	PlaceholderScalarFunction *FunctionsTaskPlaceholderScalarFunction 
 	// Placeholder vector function (always outputs equalized vector).
-	Variant5 *FunctionsTaskVariant5 
+	PlaceholderVectorFunction *FunctionsTaskPlaceholderVectorFunction 
 }
 
 func (v FunctionsTask) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.ScalarFunction != nil {
+		return json.Marshal(v.ScalarFunction)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.VectorFunction != nil {
+		return json.Marshal(v.VectorFunction)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.VectorCompletion != nil {
+		return json.Marshal(v.VectorCompletion)
 	}
-	if v.Variant4 != nil {
-		return json.Marshal(v.Variant4)
+	if v.PlaceholderScalarFunction != nil {
+		return json.Marshal(v.PlaceholderScalarFunction)
 	}
-	if v.Variant5 != nil {
-		return json.Marshal(v.Variant5)
+	if v.PlaceholderVectorFunction != nil {
+		return json.Marshal(v.PlaceholderVectorFunction)
 	}
 	return []byte("null"), nil
 }
@@ -73,10 +73,10 @@ func (v *FunctionsTask) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try FunctionsTaskVariant1
+		var try FunctionsTaskScalarFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsTask{}
-			candidate.Variant1 = &try
+			candidate.ScalarFunction = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -84,10 +84,10 @@ func (v *FunctionsTask) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsTaskVariant2
+		var try FunctionsTaskVectorFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsTask{}
-			candidate.Variant2 = &try
+			candidate.VectorFunction = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -95,10 +95,10 @@ func (v *FunctionsTask) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsTaskVariant3
+		var try FunctionsTaskVectorCompletion
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsTask{}
-			candidate.Variant3 = &try
+			candidate.VectorCompletion = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -106,10 +106,10 @@ func (v *FunctionsTask) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsTaskVariant4
+		var try FunctionsTaskPlaceholderScalarFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsTask{}
-			candidate.Variant4 = &try
+			candidate.PlaceholderScalarFunction = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -117,10 +117,10 @@ func (v *FunctionsTask) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsTaskVariant5
+		var try FunctionsTaskPlaceholderVectorFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsTask{}
-			candidate.Variant5 = &try
+			candidate.PlaceholderVectorFunction = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -132,54 +132,14 @@ func (v *FunctionsTask) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsTask) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
-	if v.Variant4 != nil { count++ }
-	if v.Variant5 != nil { count++ }
+	if v.ScalarFunction != nil { count++ }
+	if v.VectorFunction != nil { count++ }
+	if v.VectorCompletion != nil { count++ }
+	if v.PlaceholderScalarFunction != nil { count++ }
+	if v.PlaceholderVectorFunction != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsTask: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsTaskSchema struct{}
-
-func (FunctionsTaskSchema) SchemaTitle() string { return "functions.Task" }
-func (FunctionsTaskSchema) SchemaDescription() string { return "A compiled task ready for execution.\n\nProduced by compiling a [`TaskExpression`] against input data. All\nexpressions have been resolved to concrete values." }
-func (FunctionsTaskSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Calls a scalar function (produces a single score).",
-			"type": "object",
-			"$ref": "functions.ScalarFunctionTask",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"scalar.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "Calls a vector function (produces a vector of scores).",
-			"type": "object",
-			"$ref": "functions.VectorFunctionTask",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"vector.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "Runs a vector completion.",
-			"type": "object",
-			"$ref": "functions.VectorCompletionTask",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"vector.completion"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "Placeholder scalar function (always outputs 0.5).",
-			"type": "object",
-			"$ref": "functions.PlaceholderScalarFunctionTask",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"placeholder.scalar.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "Placeholder vector function (always outputs equalized vector).",
-			"type": "object",
-			"$ref": "functions.PlaceholderVectorFunctionTask",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"placeholder.vector.function"}, "type": "string"}},
-		},
-		},
-	}
-}

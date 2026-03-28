@@ -4,8 +4,10 @@ package objectiveai
 
 // Expression for a task that calls a vector function (pre-compilation).
 type FunctionsVectorFunctionTaskExpression struct {
-	// Git commit SHA for the function version.
-	Commit string `json:"commit"`
+	RemotePath
+	// Expression for the input to pass to the function.
+	// Receives: `input`, `map` (if mapped).
+	//
 	// A value that can be either a literal or an expression.
 	//
 	// This allows Function definitions to mix static values with dynamic
@@ -48,30 +50,10 @@ type FunctionsVectorFunctionTaskExpression struct {
 	// profile weights. If a function has only one task, that task's output becomes the function's
 	// output directly.
 	Output FunctionsExpressionExpression `json:"output"`
-	// Repository owner.
-	Owner string `json:"owner"`
-	// The remote source where the function is hosted.
-	Remote FunctionsRemote `json:"remote"`
-	// Repository name.
-	Repository string `json:"repository"`
 	// If this expression evaluates to true, skip the task. Receives: `input`.
 	Skip *FunctionsExpressionExpression `json:"skip,omitempty"`
 }
 
-func (FunctionsVectorFunctionTaskExpression) SchemaTitle() string { return "functions.VectorFunctionTaskExpression" }
-func (FunctionsVectorFunctionTaskExpression) SchemaDescription() string { return "Expression for a task that calls a vector function (pre-compilation)." }
-func (FunctionsVectorFunctionTaskExpression) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"commit": "Git commit SHA for the function version.",
-		"input": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
-		"map": "Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).",
-		"output": "Expression to transform the task result into a valid function output.\n\nReceives `output` which is one of 4 variants:\n- `Scalar(Decimal)` - a single score\n- `Vector(Vec<Decimal>)` - a vector of scores\n- `Vectors(Vec<Vec<Decimal>>)` - multiple vectors (from mapped tasks)\n- `Err(Value)` - an error\n\nThe expression must return a `TaskOutputOwned` that is valid for the parent function's type:\n- For scalar functions: must return `Scalar(value)` where value is in [0, 1]\n- For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length\n\nThe function's final output is computed as a weighted average of all task outputs using\nprofile weights. If a function has only one task, that task's output becomes the function's\noutput directly.",
-		"owner": "Repository owner.",
-		"remote": "The remote source where the function is hosted.",
-		"repository": "Repository name.",
-		"skip": "If this expression evaluates to true, skip the task. Receives: `input`.",
-	}
-}
 func (v FunctionsVectorFunctionTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

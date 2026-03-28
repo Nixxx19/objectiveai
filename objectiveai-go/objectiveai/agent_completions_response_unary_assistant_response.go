@@ -23,13 +23,6 @@ type AgentCompletionsResponseUnaryAssistantResponse struct {
 	Usage AgentCompletionsResponseUpstreamUsage `json:"usage"`
 }
 
-func (AgentCompletionsResponseUnaryAssistantResponse) SchemaTitle() string { return "agent.completions.response.unary.AssistantResponse" }
-func (AgentCompletionsResponseUnaryAssistantResponse) SchemaDescription() string { return "An assistant response in a unary agent completion." }
-func (AgentCompletionsResponseUnaryAssistantResponse) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"usage": "Upstream usage for this assistant response (set by upstream clients).",
-	}
-}
 func (v AgentCompletionsResponseUnaryAssistantResponse) Validate() error {
 	return variantValidator.Struct(v)
 }

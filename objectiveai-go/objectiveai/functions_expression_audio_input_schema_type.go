@@ -7,15 +7,15 @@ import (
 )
 
 type FunctionsExpressionAudioInputSchemaType struct {
-	Variant1 string `validate:"oneof=audio"`
+	Functions.expression.AudioInputSchemaType string `validate:"oneof=audio"`
 }
 
 func (v FunctionsExpressionAudioInputSchemaType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Functions.expression.AudioInputSchemaType)
 }
 
 func (v *FunctionsExpressionAudioInputSchemaType) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Functions.expression.AudioInputSchemaType); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -25,13 +25,3 @@ func (v FunctionsExpressionAudioInputSchemaType) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type FunctionsExpressionAudioInputSchemaTypeSchema struct{}
-
-func (FunctionsExpressionAudioInputSchemaTypeSchema) SchemaTitle() string { return "functions.expression.AudioInputSchemaType" }
-func (FunctionsExpressionAudioInputSchemaTypeSchema) SchemaDescription() string { return "" }
-func (FunctionsExpressionAudioInputSchemaTypeSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"audio"},
-	}
-}

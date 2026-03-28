@@ -9,8 +9,6 @@ type FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression struct {
 	Spec string `json:"spec"`
 }
 
-func (FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression) SchemaTitle() string { return "functions.alpha_vector.PartialPlaceholderVectorFunctionTaskExpression" }
-func (FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression) SchemaDescription() string { return "" }
 func (v FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

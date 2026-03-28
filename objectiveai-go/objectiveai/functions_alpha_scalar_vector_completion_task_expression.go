@@ -8,8 +8,6 @@ type FunctionsAlphaScalarVectorCompletionTaskExpression struct {
 	Skip *FunctionsExpressionExpression `json:"skip,omitempty"`
 }
 
-func (FunctionsAlphaScalarVectorCompletionTaskExpression) SchemaTitle() string { return "functions.alpha_scalar.VectorCompletionTaskExpression" }
-func (FunctionsAlphaScalarVectorCompletionTaskExpression) SchemaDescription() string { return "" }
 func (v FunctionsAlphaScalarVectorCompletionTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

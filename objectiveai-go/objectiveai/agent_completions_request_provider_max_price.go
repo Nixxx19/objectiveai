@@ -16,17 +16,6 @@ type AgentCompletionsRequestProviderMaxPrice struct {
 	Request *float64 `json:"request,omitempty" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }
 
-func (AgentCompletionsRequestProviderMaxPrice) SchemaTitle() string { return "agent.completions.request.ProviderMaxPrice" }
-func (AgentCompletionsRequestProviderMaxPrice) SchemaDescription() string { return "Maximum price constraints per token type." }
-func (AgentCompletionsRequestProviderMaxPrice) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"audio": "Maximum price per audio second.",
-		"completion": "Maximum price per completion token.",
-		"image": "Maximum price per image.",
-		"prompt": "Maximum price per prompt token.",
-		"request": "Maximum price per request.",
-	}
-}
 func (v AgentCompletionsRequestProviderMaxPrice) Validate() error {
 	return variantValidator.Struct(v)
 }

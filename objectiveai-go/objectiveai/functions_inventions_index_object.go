@@ -6,8 +6,6 @@ type FunctionsInventionsIndexObject struct {
 	Index uint64 `json:"index" validate:"min=0,max=18446744073709551615"`
 }
 
-func (FunctionsInventionsIndexObject) SchemaTitle() string { return "functions.inventions.IndexObject" }
-func (FunctionsInventionsIndexObject) SchemaDescription() string { return "" }
 func (v FunctionsInventionsIndexObject) Validate() error {
 	return variantValidator.Struct(v)
 }

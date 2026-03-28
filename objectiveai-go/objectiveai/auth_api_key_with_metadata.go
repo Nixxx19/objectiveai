@@ -22,18 +22,6 @@ type AuthApiKeyWithMetadata struct {
 	Name string `json:"name"`
 }
 
-func (AuthApiKeyWithMetadata) SchemaTitle() string { return "auth.ApiKeyWithMetadata" }
-func (AuthApiKeyWithMetadata) SchemaDescription() string { return "An ObjectiveAI API Key with associated metadata.\n\nThis struct contains the API key itself along with information about\nwhen it was created, when it expires (if ever), whether it has been\ndisabled, and user-provided name and description." }
-func (AuthApiKeyWithMetadata) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"api_key": "The API key itself.",
-		"created": "The timestamp when the API key was created (RFC 3339 format).",
-		"description": "The user-provided description of the API key, or `None` if not provided.",
-		"disabled": "The timestamp when the API key was disabled, or `None` if it is active.",
-		"expires": "The timestamp when the API key expires, or `None` if it does not expire.",
-		"name": "The user-provided name of the API key.",
-	}
-}
 func (v AuthApiKeyWithMetadata) Validate() error {
 	return variantValidator.Struct(v)
 }

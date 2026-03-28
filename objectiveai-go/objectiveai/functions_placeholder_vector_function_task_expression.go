@@ -7,6 +7,9 @@ package objectiveai
 // Like [`VectorFunctionTaskExpression`] but without owner/repository/commit.
 // Always produces an equalized vector of length `output_length`.
 type FunctionsPlaceholderVectorFunctionTaskExpression struct {
+	// Expression for the input to pass to the placeholder function.
+	// Receives: `input`, `map` (if mapped).
+	//
 	// A value that can be either a literal or an expression.
 	//
 	// This allows Function definitions to mix static values with dynamic
@@ -51,20 +54,6 @@ type FunctionsPlaceholderVectorFunctionTaskExpression struct {
 	Skip *FunctionsExpressionExpression `json:"skip,omitempty"`
 }
 
-func (FunctionsPlaceholderVectorFunctionTaskExpression) SchemaTitle() string { return "functions.PlaceholderVectorFunctionTaskExpression" }
-func (FunctionsPlaceholderVectorFunctionTaskExpression) SchemaDescription() string { return "Expression for a placeholder vector function task (pre-compilation).\n\nLike [`VectorFunctionTaskExpression`] but without owner/repository/commit.\nAlways produces an equalized vector of length `output_length`." }
-func (FunctionsPlaceholderVectorFunctionTaskExpression) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"input": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
-		"input_merge": "Expression merging sub-inputs back into one input.\nReceives: `input` (as an array).",
-		"input_schema": "JSON Schema defining the expected input structure.",
-		"input_split": "Expression transforming input into sub-inputs for swiss system.\nReceives: `input`.",
-		"map": "Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).",
-		"output": "Expression to transform the equalized vector output.\nReceives: `input`, `output` as `Vector(equalized)`.",
-		"output_length": "Expression computing the expected output vector length.\nReceives: `input`.",
-		"skip": "If this expression evaluates to true, skip the task. Receives: `input`.",
-	}
-}
 func (v FunctionsPlaceholderVectorFunctionTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

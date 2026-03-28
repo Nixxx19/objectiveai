@@ -7,23 +7,23 @@ import (
 	"fmt"
 )
 
-type FunctionsTaskExpressionVariant1 struct {
+type FunctionsTaskExpressionScalarFunction struct {
 	Type string `json:"type"`
 }
 
-type FunctionsTaskExpressionVariant2 struct {
+type FunctionsTaskExpressionVectorFunction struct {
 	Type string `json:"type"`
 }
 
-type FunctionsTaskExpressionVariant3 struct {
+type FunctionsTaskExpressionVectorCompletion struct {
 	Type string `json:"type"`
 }
 
-type FunctionsTaskExpressionVariant4 struct {
+type FunctionsTaskExpressionPlaceholderScalarFunction struct {
 	Type string `json:"type"`
 }
 
-type FunctionsTaskExpressionVariant5 struct {
+type FunctionsTaskExpressionPlaceholderVectorFunction struct {
 	Type string `json:"type"`
 }
 
@@ -33,28 +33,28 @@ type FunctionsTaskExpressionVariant5 struct {
 // resolved against input data during compilation. Use [`compile`](Self::compile)
 // to produce a concrete [`Task`].
 type FunctionsTaskExpression struct {
-	Variant1 *FunctionsTaskExpressionVariant1 
-	Variant2 *FunctionsTaskExpressionVariant2 
-	Variant3 *FunctionsTaskExpressionVariant3 
-	Variant4 *FunctionsTaskExpressionVariant4 
-	Variant5 *FunctionsTaskExpressionVariant5 
+	ScalarFunction *FunctionsTaskExpressionScalarFunction 
+	VectorFunction *FunctionsTaskExpressionVectorFunction 
+	VectorCompletion *FunctionsTaskExpressionVectorCompletion 
+	PlaceholderScalarFunction *FunctionsTaskExpressionPlaceholderScalarFunction 
+	PlaceholderVectorFunction *FunctionsTaskExpressionPlaceholderVectorFunction 
 }
 
 func (v FunctionsTaskExpression) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.ScalarFunction != nil {
+		return json.Marshal(v.ScalarFunction)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.VectorFunction != nil {
+		return json.Marshal(v.VectorFunction)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.VectorCompletion != nil {
+		return json.Marshal(v.VectorCompletion)
 	}
-	if v.Variant4 != nil {
-		return json.Marshal(v.Variant4)
+	if v.PlaceholderScalarFunction != nil {
+		return json.Marshal(v.PlaceholderScalarFunction)
 	}
-	if v.Variant5 != nil {
-		return json.Marshal(v.Variant5)
+	if v.PlaceholderVectorFunction != nil {
+		return json.Marshal(v.PlaceholderVectorFunction)
 	}
 	return []byte("null"), nil
 }
@@ -64,10 +64,10 @@ func (v *FunctionsTaskExpression) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try FunctionsTaskExpressionVariant1
+		var try FunctionsTaskExpressionScalarFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsTaskExpression{}
-			candidate.Variant1 = &try
+			candidate.ScalarFunction = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -75,10 +75,10 @@ func (v *FunctionsTaskExpression) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsTaskExpressionVariant2
+		var try FunctionsTaskExpressionVectorFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsTaskExpression{}
-			candidate.Variant2 = &try
+			candidate.VectorFunction = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -86,10 +86,10 @@ func (v *FunctionsTaskExpression) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsTaskExpressionVariant3
+		var try FunctionsTaskExpressionVectorCompletion
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsTaskExpression{}
-			candidate.Variant3 = &try
+			candidate.VectorCompletion = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -97,10 +97,10 @@ func (v *FunctionsTaskExpression) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsTaskExpressionVariant4
+		var try FunctionsTaskExpressionPlaceholderScalarFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsTaskExpression{}
-			candidate.Variant4 = &try
+			candidate.PlaceholderScalarFunction = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -108,10 +108,10 @@ func (v *FunctionsTaskExpression) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsTaskExpressionVariant5
+		var try FunctionsTaskExpressionPlaceholderVectorFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsTaskExpression{}
-			candidate.Variant5 = &try
+			candidate.PlaceholderVectorFunction = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -123,49 +123,14 @@ func (v *FunctionsTaskExpression) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsTaskExpression) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
-	if v.Variant4 != nil { count++ }
-	if v.Variant5 != nil { count++ }
+	if v.ScalarFunction != nil { count++ }
+	if v.VectorFunction != nil { count++ }
+	if v.VectorCompletion != nil { count++ }
+	if v.PlaceholderScalarFunction != nil { count++ }
+	if v.PlaceholderVectorFunction != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsTaskExpression: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsTaskExpressionSchema struct{}
-
-func (FunctionsTaskExpressionSchema) SchemaTitle() string { return "functions.TaskExpression" }
-func (FunctionsTaskExpressionSchema) SchemaDescription() string { return "A task definition with expressions (pre-compilation).\n\nTask expressions contain dynamic fields (JMESPath or Starlark) that are\nresolved against input data during compilation. Use [`compile`](Self::compile)\nto produce a concrete [`Task`]." }
-func (FunctionsTaskExpressionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.ScalarFunctionTaskExpression",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"scalar.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.VectorFunctionTaskExpression",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"vector.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.VectorCompletionTaskExpression",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"vector.completion"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.PlaceholderScalarFunctionTaskExpression",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"placeholder.scalar.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.PlaceholderVectorFunctionTaskExpression",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"placeholder.vector.function"}, "type": "string"}},
-		},
-		},
-	}
-}

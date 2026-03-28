@@ -9,15 +9,15 @@ import (
 // A complete vector completion response.
 type VectorCompletionsResponseUnaryObject struct {
 	// A complete vector completion response.
-	Variant1 string `validate:"oneof=vector.completion"`
+	Vector.completions.response.unary.Object string `validate:"oneof=vector.completion"`
 }
 
 func (v VectorCompletionsResponseUnaryObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Vector.completions.response.unary.Object)
 }
 
 func (v *VectorCompletionsResponseUnaryObject) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Vector.completions.response.unary.Object); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -27,13 +27,3 @@ func (v VectorCompletionsResponseUnaryObject) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type VectorCompletionsResponseUnaryObjectSchema struct{}
-
-func (VectorCompletionsResponseUnaryObjectSchema) SchemaTitle() string { return "vector.completions.response.unary.Object" }
-func (VectorCompletionsResponseUnaryObjectSchema) SchemaDescription() string { return "A complete vector completion response." }
-func (VectorCompletionsResponseUnaryObjectSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"vector.completion"},
-	}
-}

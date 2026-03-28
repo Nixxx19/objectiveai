@@ -7,7 +7,7 @@ type FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation struct
 	Executions []FunctionsProfilesComputationsResponseUnaryFunctionExecution `json:"executions"`
 	ExecutionsErrors bool `json:"executions_errors"`
 	FittingStats FunctionsProfilesComputationsResponseFittingStats `json:"fitting_stats"`
-	Function *string `json:"function,omitempty"`
+	Function *RemotePath `json:"function,omitempty"`
 	ID string `json:"id"`
 	Object FunctionsProfilesComputationsResponseUnaryObject `json:"object"`
 	Profile FunctionsInlineTasksProfile `json:"profile"`
@@ -15,8 +15,6 @@ type FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation struct
 	Usage AgentCompletionsResponseUsage `json:"usage"`
 }
 
-func (FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation) SchemaTitle() string { return "functions.profiles.computations.response.unary.FunctionProfileComputation" }
-func (FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation) SchemaDescription() string { return "" }
 func (v FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation) Validate() error {
 	return variantValidator.Struct(v)
 }

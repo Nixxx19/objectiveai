@@ -13,62 +13,62 @@ import (
 // Used by remote Functions to document and validate their inputs.
 type FunctionsExpressionInputSchema struct {
 	// A union of schemas - input must match at least one.
-	Variant1 *FunctionsExpressionAnyOfInputSchema 
+	AnyOf *FunctionsExpressionAnyOfInputSchema 
 	// An object with named properties.
-	Variant2 *FunctionsExpressionObjectInputSchema 
+	Object *FunctionsExpressionObjectInputSchema 
 	// An array of items.
-	Variant3 *FunctionsExpressionArrayInputSchema 
+	Array *FunctionsExpressionArrayInputSchema 
 	// A string value.
-	Variant4 *FunctionsExpressionStringInputSchema 
+	String *FunctionsExpressionStringInputSchema 
 	// An integer value.
-	Variant5 *FunctionsExpressionIntegerInputSchema 
+	Integer *FunctionsExpressionIntegerInputSchema 
 	// A floating-point number.
-	Variant6 *FunctionsExpressionNumberInputSchema 
+	Number *FunctionsExpressionNumberInputSchema 
 	// A boolean value.
-	Variant7 *FunctionsExpressionBooleanInputSchema 
+	Boolean *FunctionsExpressionBooleanInputSchema 
 	// An image (URL or base64).
-	Variant8 *FunctionsExpressionImageInputSchema 
+	Image *FunctionsExpressionImageInputSchema 
 	// Audio content.
-	Variant9 *FunctionsExpressionAudioInputSchema 
+	Audio *FunctionsExpressionAudioInputSchema 
 	// Video content.
-	Variant10 *FunctionsExpressionVideoInputSchema 
+	Video *FunctionsExpressionVideoInputSchema 
 	// A file.
-	Variant11 *FunctionsExpressionFileInputSchema 
+	File *FunctionsExpressionFileInputSchema 
 }
 
 func (v FunctionsExpressionInputSchema) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.AnyOf != nil {
+		return json.Marshal(v.AnyOf)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Object != nil {
+		return json.Marshal(v.Object)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.Array != nil {
+		return json.Marshal(v.Array)
 	}
-	if v.Variant4 != nil {
-		return json.Marshal(v.Variant4)
+	if v.String != nil {
+		return json.Marshal(v.String)
 	}
-	if v.Variant5 != nil {
-		return json.Marshal(v.Variant5)
+	if v.Integer != nil {
+		return json.Marshal(v.Integer)
 	}
-	if v.Variant6 != nil {
-		return json.Marshal(v.Variant6)
+	if v.Number != nil {
+		return json.Marshal(v.Number)
 	}
-	if v.Variant7 != nil {
-		return json.Marshal(v.Variant7)
+	if v.Boolean != nil {
+		return json.Marshal(v.Boolean)
 	}
-	if v.Variant8 != nil {
-		return json.Marshal(v.Variant8)
+	if v.Image != nil {
+		return json.Marshal(v.Image)
 	}
-	if v.Variant9 != nil {
-		return json.Marshal(v.Variant9)
+	if v.Audio != nil {
+		return json.Marshal(v.Audio)
 	}
-	if v.Variant10 != nil {
-		return json.Marshal(v.Variant10)
+	if v.Video != nil {
+		return json.Marshal(v.Video)
 	}
-	if v.Variant11 != nil {
-		return json.Marshal(v.Variant11)
+	if v.File != nil {
+		return json.Marshal(v.File)
 	}
 	return []byte("null"), nil
 }
@@ -81,7 +81,7 @@ func (v *FunctionsExpressionInputSchema) UnmarshalJSON(data []byte) error {
 		var try FunctionsExpressionAnyOfInputSchema
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputSchema{}
-			candidate.Variant1 = &try
+			candidate.AnyOf = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -92,7 +92,7 @@ func (v *FunctionsExpressionInputSchema) UnmarshalJSON(data []byte) error {
 		var try FunctionsExpressionObjectInputSchema
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputSchema{}
-			candidate.Variant2 = &try
+			candidate.Object = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -103,7 +103,7 @@ func (v *FunctionsExpressionInputSchema) UnmarshalJSON(data []byte) error {
 		var try FunctionsExpressionArrayInputSchema
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputSchema{}
-			candidate.Variant3 = &try
+			candidate.Array = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -114,7 +114,7 @@ func (v *FunctionsExpressionInputSchema) UnmarshalJSON(data []byte) error {
 		var try FunctionsExpressionStringInputSchema
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputSchema{}
-			candidate.Variant4 = &try
+			candidate.String = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -125,7 +125,7 @@ func (v *FunctionsExpressionInputSchema) UnmarshalJSON(data []byte) error {
 		var try FunctionsExpressionIntegerInputSchema
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputSchema{}
-			candidate.Variant5 = &try
+			candidate.Integer = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -136,7 +136,7 @@ func (v *FunctionsExpressionInputSchema) UnmarshalJSON(data []byte) error {
 		var try FunctionsExpressionNumberInputSchema
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputSchema{}
-			candidate.Variant6 = &try
+			candidate.Number = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -147,7 +147,7 @@ func (v *FunctionsExpressionInputSchema) UnmarshalJSON(data []byte) error {
 		var try FunctionsExpressionBooleanInputSchema
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputSchema{}
-			candidate.Variant7 = &try
+			candidate.Boolean = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -158,7 +158,7 @@ func (v *FunctionsExpressionInputSchema) UnmarshalJSON(data []byte) error {
 		var try FunctionsExpressionImageInputSchema
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputSchema{}
-			candidate.Variant8 = &try
+			candidate.Image = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -169,7 +169,7 @@ func (v *FunctionsExpressionInputSchema) UnmarshalJSON(data []byte) error {
 		var try FunctionsExpressionAudioInputSchema
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputSchema{}
-			candidate.Variant9 = &try
+			candidate.Audio = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -180,7 +180,7 @@ func (v *FunctionsExpressionInputSchema) UnmarshalJSON(data []byte) error {
 		var try FunctionsExpressionVideoInputSchema
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputSchema{}
-			candidate.Variant10 = &try
+			candidate.Video = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -191,7 +191,7 @@ func (v *FunctionsExpressionInputSchema) UnmarshalJSON(data []byte) error {
 		var try FunctionsExpressionFileInputSchema
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputSchema{}
-			candidate.Variant11 = &try
+			candidate.File = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -203,74 +203,20 @@ func (v *FunctionsExpressionInputSchema) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsExpressionInputSchema) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
-	if v.Variant4 != nil { count++ }
-	if v.Variant5 != nil { count++ }
-	if v.Variant6 != nil { count++ }
-	if v.Variant7 != nil { count++ }
-	if v.Variant8 != nil { count++ }
-	if v.Variant9 != nil { count++ }
-	if v.Variant10 != nil { count++ }
-	if v.Variant11 != nil { count++ }
+	if v.AnyOf != nil { count++ }
+	if v.Object != nil { count++ }
+	if v.Array != nil { count++ }
+	if v.String != nil { count++ }
+	if v.Integer != nil { count++ }
+	if v.Number != nil { count++ }
+	if v.Boolean != nil { count++ }
+	if v.Image != nil { count++ }
+	if v.Audio != nil { count++ }
+	if v.Video != nil { count++ }
+	if v.File != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsExpressionInputSchema: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsExpressionInputSchemaSchema struct{}
-
-func (FunctionsExpressionInputSchemaSchema) SchemaTitle() string { return "functions.expression.InputSchema" }
-func (FunctionsExpressionInputSchemaSchema) SchemaDescription() string { return "Schema for validating Function input.\n\nDefines the expected structure and constraints for input data.\nUsed by remote Functions to document and validate their inputs." }
-func (FunctionsExpressionInputSchemaSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "A union of schemas - input must match at least one.",
-			"$ref": "functions.expression.AnyOfInputSchema",
-		},
-			map[string]any{
-			"description": "An object with named properties.",
-			"$ref": "functions.expression.ObjectInputSchema",
-		},
-			map[string]any{
-			"description": "An array of items.",
-			"$ref": "functions.expression.ArrayInputSchema",
-		},
-			map[string]any{
-			"description": "A string value.",
-			"$ref": "functions.expression.StringInputSchema",
-		},
-			map[string]any{
-			"description": "An integer value.",
-			"$ref": "functions.expression.IntegerInputSchema",
-		},
-			map[string]any{
-			"description": "A floating-point number.",
-			"$ref": "functions.expression.NumberInputSchema",
-		},
-			map[string]any{
-			"description": "A boolean value.",
-			"$ref": "functions.expression.BooleanInputSchema",
-		},
-			map[string]any{
-			"description": "An image (URL or base64).",
-			"$ref": "functions.expression.ImageInputSchema",
-		},
-			map[string]any{
-			"description": "Audio content.",
-			"$ref": "functions.expression.AudioInputSchema",
-		},
-			map[string]any{
-			"description": "Video content.",
-			"$ref": "functions.expression.VideoInputSchema",
-		},
-			map[string]any{
-			"description": "A file.",
-			"$ref": "functions.expression.FileInputSchema",
-		},
-		},
-	}
-}

@@ -10,14 +10,6 @@ type ErrorErrorCreateParams struct {
 	Stream *bool `json:"stream,omitempty"`
 }
 
-func (ErrorErrorCreateParams) SchemaTitle() string { return "error.ErrorCreateParams" }
-func (ErrorErrorCreateParams) SchemaDescription() string { return "Request to trigger an error response for testing purposes." }
-func (ErrorErrorCreateParams) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"seed": "Random seed for deterministic error generation.",
-		"stream": "Whether to stream the response.",
-	}
-}
 func (v ErrorErrorCreateParams) Validate() error {
 	return variantValidator.Struct(v)
 }

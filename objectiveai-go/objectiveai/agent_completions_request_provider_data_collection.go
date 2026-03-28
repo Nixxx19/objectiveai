@@ -10,17 +10,17 @@ import (
 // Data collection policy for providers.
 type AgentCompletionsRequestProviderDataCollection struct {
 	// Do not allow data collection.
-	Variant1 *string `validate:"oneof=deny"`
+	Deny *string `validate:"oneof=deny"`
 	// Allow data collection.
-	Variant2 *string `validate:"oneof=allow"`
+	Allow *string `validate:"oneof=allow"`
 }
 
 func (v AgentCompletionsRequestProviderDataCollection) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Deny != nil {
+		return json.Marshal(v.Deny)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Allow != nil {
+		return json.Marshal(v.Allow)
 	}
 	return []byte("null"), nil
 }
@@ -33,7 +33,7 @@ func (v *AgentCompletionsRequestProviderDataCollection) UnmarshalJSON(data []byt
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestProviderDataCollection{}
-			candidate.Variant1 = &try
+			candidate.Deny = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -44,7 +44,7 @@ func (v *AgentCompletionsRequestProviderDataCollection) UnmarshalJSON(data []byt
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestProviderDataCollection{}
-			candidate.Variant2 = &try
+			candidate.Allow = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -56,31 +56,11 @@ func (v *AgentCompletionsRequestProviderDataCollection) UnmarshalJSON(data []byt
 
 func (v AgentCompletionsRequestProviderDataCollection) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Deny != nil { count++ }
+	if v.Allow != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentCompletionsRequestProviderDataCollection: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentCompletionsRequestProviderDataCollectionSchema struct{}
-
-func (AgentCompletionsRequestProviderDataCollectionSchema) SchemaTitle() string { return "agent.completions.request.ProviderDataCollection" }
-func (AgentCompletionsRequestProviderDataCollectionSchema) SchemaDescription() string { return "Data collection policy for providers." }
-func (AgentCompletionsRequestProviderDataCollectionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Do not allow data collection.",
-			"type": "string",
-			"enum": []any{"deny"},
-		},
-			map[string]any{
-			"description": "Allow data collection.",
-			"type": "string",
-			"enum": []any{"allow"},
-		},
-		},
-	}
-}

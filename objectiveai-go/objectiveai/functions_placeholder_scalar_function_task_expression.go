@@ -7,6 +7,9 @@ package objectiveai
 // Like [`ScalarFunctionTaskExpression`] but without owner/repository/commit.
 // Always produces a fixed output of 0.5.
 type FunctionsPlaceholderScalarFunctionTaskExpression struct {
+	// Expression for the input to pass to the placeholder function.
+	// Receives: `input`, `map` (if mapped).
+	//
 	// A value that can be either a literal or an expression.
 	//
 	// This allows Function definitions to mix static values with dynamic
@@ -42,17 +45,6 @@ type FunctionsPlaceholderScalarFunctionTaskExpression struct {
 	Skip *FunctionsExpressionExpression `json:"skip,omitempty"`
 }
 
-func (FunctionsPlaceholderScalarFunctionTaskExpression) SchemaTitle() string { return "functions.PlaceholderScalarFunctionTaskExpression" }
-func (FunctionsPlaceholderScalarFunctionTaskExpression) SchemaDescription() string { return "Expression for a placeholder scalar function task (pre-compilation).\n\nLike [`ScalarFunctionTaskExpression`] but without owner/repository/commit.\nAlways produces a fixed output of 0.5." }
-func (FunctionsPlaceholderScalarFunctionTaskExpression) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"input": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
-		"input_schema": "JSON Schema defining the expected input structure.",
-		"map": "Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).",
-		"output": "Expression to transform the fixed 0.5 output.\nReceives: `input`, `output` as `Scalar(0.5)`.",
-		"skip": "If this expression evaluates to true, skip the task. Receives: `input`.",
-	}
-}
 func (v FunctionsPlaceholderScalarFunctionTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

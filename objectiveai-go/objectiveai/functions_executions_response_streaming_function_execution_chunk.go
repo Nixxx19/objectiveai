@@ -4,12 +4,12 @@ package objectiveai
 
 type FunctionsExecutionsResponseStreamingFunctionExecutionChunk struct {
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
-	Error *ResponseError `json:"error,omitempty"`
-	Function *string `json:"function,omitempty"`
+	Error *ErrorResponseError `json:"error,omitempty"`
+	Function *RemotePath `json:"function,omitempty"`
 	ID string `json:"id"`
 	Object FunctionsExecutionsResponseStreamingObject `json:"object"`
-	Output *FunctionsExpressionTaskOutputOwned `json:"output,omitempty"`
-	Profile *string `json:"profile,omitempty"`
+	Output *FunctionsExecutionsResponseOutput `json:"output,omitempty"`
+	Profile *RemotePath `json:"profile,omitempty"`
 	Reasoning *FunctionsExecutionsResponseStreamingReasoningSummaryChunk `json:"reasoning,omitempty"`
 	RetryToken *string `json:"retry_token,omitempty"`
 	Tasks []FunctionsExecutionsResponseStreamingTaskChunk `json:"tasks"`
@@ -17,8 +17,6 @@ type FunctionsExecutionsResponseStreamingFunctionExecutionChunk struct {
 	Usage *AgentCompletionsResponseUsage `json:"usage,omitempty"`
 }
 
-func (FunctionsExecutionsResponseStreamingFunctionExecutionChunk) SchemaTitle() string { return "functions.executions.response.streaming.FunctionExecutionChunk" }
-func (FunctionsExecutionsResponseStreamingFunctionExecutionChunk) SchemaDescription() string { return "" }
 func (v FunctionsExecutionsResponseStreamingFunctionExecutionChunk) Validate() error {
 	return variantValidator.Struct(v)
 }

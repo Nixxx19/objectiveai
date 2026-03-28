@@ -7,41 +7,41 @@ import (
 	"fmt"
 )
 
-type FunctionsAlphaVectorBranchTaskExpressionVariant1 struct {
+type FunctionsAlphaVectorBranchTaskExpressionScalarFunction struct {
 	Type string `json:"type"`
 }
 
-type FunctionsAlphaVectorBranchTaskExpressionVariant2 struct {
+type FunctionsAlphaVectorBranchTaskExpressionVectorFunction struct {
 	Type string `json:"type"`
 }
 
-type FunctionsAlphaVectorBranchTaskExpressionVariant3 struct {
+type FunctionsAlphaVectorBranchTaskExpressionPlaceholderScalarFunction struct {
 	Type string `json:"type"`
 }
 
-type FunctionsAlphaVectorBranchTaskExpressionVariant4 struct {
+type FunctionsAlphaVectorBranchTaskExpressionPlaceholderVectorFunction struct {
 	Type string `json:"type"`
 }
 
 type FunctionsAlphaVectorBranchTaskExpression struct {
-	Variant1 *FunctionsAlphaVectorBranchTaskExpressionVariant1 
-	Variant2 *FunctionsAlphaVectorBranchTaskExpressionVariant2 
-	Variant3 *FunctionsAlphaVectorBranchTaskExpressionVariant3 
-	Variant4 *FunctionsAlphaVectorBranchTaskExpressionVariant4 
+	ScalarFunction *FunctionsAlphaVectorBranchTaskExpressionScalarFunction 
+	VectorFunction *FunctionsAlphaVectorBranchTaskExpressionVectorFunction 
+	PlaceholderScalarFunction *FunctionsAlphaVectorBranchTaskExpressionPlaceholderScalarFunction 
+	PlaceholderVectorFunction *FunctionsAlphaVectorBranchTaskExpressionPlaceholderVectorFunction 
 }
 
 func (v FunctionsAlphaVectorBranchTaskExpression) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.ScalarFunction != nil {
+		return json.Marshal(v.ScalarFunction)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.VectorFunction != nil {
+		return json.Marshal(v.VectorFunction)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.PlaceholderScalarFunction != nil {
+		return json.Marshal(v.PlaceholderScalarFunction)
 	}
-	if v.Variant4 != nil {
-		return json.Marshal(v.Variant4)
+	if v.PlaceholderVectorFunction != nil {
+		return json.Marshal(v.PlaceholderVectorFunction)
 	}
 	return []byte("null"), nil
 }
@@ -51,10 +51,10 @@ func (v *FunctionsAlphaVectorBranchTaskExpression) UnmarshalJSON(data []byte) er
 		return nil
 	}
 	{
-		var try FunctionsAlphaVectorBranchTaskExpressionVariant1
+		var try FunctionsAlphaVectorBranchTaskExpressionScalarFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsAlphaVectorBranchTaskExpression{}
-			candidate.Variant1 = &try
+			candidate.ScalarFunction = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -62,10 +62,10 @@ func (v *FunctionsAlphaVectorBranchTaskExpression) UnmarshalJSON(data []byte) er
 		}
 	}
 	{
-		var try FunctionsAlphaVectorBranchTaskExpressionVariant2
+		var try FunctionsAlphaVectorBranchTaskExpressionVectorFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsAlphaVectorBranchTaskExpression{}
-			candidate.Variant2 = &try
+			candidate.VectorFunction = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -73,10 +73,10 @@ func (v *FunctionsAlphaVectorBranchTaskExpression) UnmarshalJSON(data []byte) er
 		}
 	}
 	{
-		var try FunctionsAlphaVectorBranchTaskExpressionVariant3
+		var try FunctionsAlphaVectorBranchTaskExpressionPlaceholderScalarFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsAlphaVectorBranchTaskExpression{}
-			candidate.Variant3 = &try
+			candidate.PlaceholderScalarFunction = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -84,10 +84,10 @@ func (v *FunctionsAlphaVectorBranchTaskExpression) UnmarshalJSON(data []byte) er
 		}
 	}
 	{
-		var try FunctionsAlphaVectorBranchTaskExpressionVariant4
+		var try FunctionsAlphaVectorBranchTaskExpressionPlaceholderVectorFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsAlphaVectorBranchTaskExpression{}
-			candidate.Variant4 = &try
+			candidate.PlaceholderVectorFunction = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -99,43 +99,13 @@ func (v *FunctionsAlphaVectorBranchTaskExpression) UnmarshalJSON(data []byte) er
 
 func (v FunctionsAlphaVectorBranchTaskExpression) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
-	if v.Variant4 != nil { count++ }
+	if v.ScalarFunction != nil { count++ }
+	if v.VectorFunction != nil { count++ }
+	if v.PlaceholderScalarFunction != nil { count++ }
+	if v.PlaceholderVectorFunction != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsAlphaVectorBranchTaskExpression: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsAlphaVectorBranchTaskExpressionSchema struct{}
-
-func (FunctionsAlphaVectorBranchTaskExpressionSchema) SchemaTitle() string { return "functions.alpha_vector.BranchTaskExpression" }
-func (FunctionsAlphaVectorBranchTaskExpressionSchema) SchemaDescription() string { return "" }
-func (FunctionsAlphaVectorBranchTaskExpressionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.alpha_vector.ScalarFunctionTaskExpression",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"alpha.scalar.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.alpha_vector.VectorFunctionTaskExpression",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"alpha.vector.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.alpha_vector.PlaceholderScalarFunctionTaskExpression",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"placeholder.alpha.scalar.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.alpha_vector.PlaceholderVectorFunctionTaskExpression",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"placeholder.alpha.vector.function"}, "type": "string"}},
-		},
-		},
-	}
-}

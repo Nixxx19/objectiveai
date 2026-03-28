@@ -10,17 +10,17 @@ import (
 // An inline profile, either tasks-based or auto.
 type FunctionsInlineProfile struct {
 	// Tasks-based profile with per-task configuration.
-	Variant1 *FunctionsInlineTasksProfile 
-	// Auto profile that applies a single ensemble+weights to all vector completion tasks.
-	Variant2 *FunctionsInlineAutoProfile 
+	Tasks *FunctionsInlineTasksProfile 
+	// Auto profile that applies a single swarm+weights to all vector completion tasks.
+	Auto *SwarmInlineSwarmBase 
 }
 
 func (v FunctionsInlineProfile) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Tasks != nil {
+		return json.Marshal(v.Tasks)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Auto != nil {
+		return json.Marshal(v.Auto)
 	}
 	return []byte("null"), nil
 }
@@ -33,7 +33,7 @@ func (v *FunctionsInlineProfile) UnmarshalJSON(data []byte) error {
 		var try FunctionsInlineTasksProfile
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsInlineProfile{}
-			candidate.Variant1 = &try
+			candidate.Tasks = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -41,10 +41,10 @@ func (v *FunctionsInlineProfile) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsInlineAutoProfile
+		var try SwarmInlineSwarmBase
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsInlineProfile{}
-			candidate.Variant2 = &try
+			candidate.Auto = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -56,29 +56,11 @@ func (v *FunctionsInlineProfile) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsInlineProfile) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Tasks != nil { count++ }
+	if v.Auto != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsInlineProfile: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsInlineProfileSchema struct{}
-
-func (FunctionsInlineProfileSchema) SchemaTitle() string { return "functions.InlineProfile" }
-func (FunctionsInlineProfileSchema) SchemaDescription() string { return "An inline profile, either tasks-based or auto." }
-func (FunctionsInlineProfileSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Tasks-based profile with per-task configuration.",
-			"$ref": "functions.InlineTasksProfile",
-		},
-			map[string]any{
-			"description": "Auto profile that applies a single ensemble+weights to all vector completion tasks.",
-			"$ref": "functions.InlineAutoProfile",
-		},
-		},
-	}
-}

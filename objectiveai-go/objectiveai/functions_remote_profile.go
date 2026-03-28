@@ -10,17 +10,17 @@ import (
 // A remote profile, either tasks-based or auto.
 type FunctionsRemoteProfile struct {
 	// Tasks-based profile with per-task configuration.
-	Variant1 *FunctionsRemoteTasksProfile 
-	// Auto profile that applies a single ensemble+weights to all vector completion tasks.
-	Variant2 *FunctionsRemoteAutoProfile 
+	Tasks *FunctionsRemoteTasksProfile 
+	// Auto profile that applies a single swarm+weights to all vector completion tasks.
+	Auto *SwarmRemoteSwarmBase 
 }
 
 func (v FunctionsRemoteProfile) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Tasks != nil {
+		return json.Marshal(v.Tasks)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Auto != nil {
+		return json.Marshal(v.Auto)
 	}
 	return []byte("null"), nil
 }
@@ -33,7 +33,7 @@ func (v *FunctionsRemoteProfile) UnmarshalJSON(data []byte) error {
 		var try FunctionsRemoteTasksProfile
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsRemoteProfile{}
-			candidate.Variant1 = &try
+			candidate.Tasks = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -41,10 +41,10 @@ func (v *FunctionsRemoteProfile) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsRemoteAutoProfile
+		var try SwarmRemoteSwarmBase
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsRemoteProfile{}
-			candidate.Variant2 = &try
+			candidate.Auto = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -56,29 +56,11 @@ func (v *FunctionsRemoteProfile) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsRemoteProfile) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Tasks != nil { count++ }
+	if v.Auto != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsRemoteProfile: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsRemoteProfileSchema struct{}
-
-func (FunctionsRemoteProfileSchema) SchemaTitle() string { return "functions.RemoteProfile" }
-func (FunctionsRemoteProfileSchema) SchemaDescription() string { return "A remote profile, either tasks-based or auto." }
-func (FunctionsRemoteProfileSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Tasks-based profile with per-task configuration.",
-			"$ref": "functions.RemoteTasksProfile",
-		},
-			map[string]any{
-			"description": "Auto profile that applies a single ensemble+weights to all vector completion tasks.",
-			"$ref": "functions.RemoteAutoProfile",
-		},
-		},
-	}
-}

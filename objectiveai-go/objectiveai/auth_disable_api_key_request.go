@@ -11,13 +11,6 @@ type AuthDisableApiKeyRequest struct {
 	APIKey PrefixedUuid `json:"api_key"`
 }
 
-func (AuthDisableApiKeyRequest) SchemaTitle() string { return "auth.DisableApiKeyRequest" }
-func (AuthDisableApiKeyRequest) SchemaDescription() string { return "Request to disable an existing API key.\n\nOnce disabled, the API key can no longer be used for authentication.\nThis action is reversible only by creating a new key." }
-func (AuthDisableApiKeyRequest) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"api_key": "The API key to disable.",
-	}
-}
 func (v AuthDisableApiKeyRequest) Validate() error {
 	return variantValidator.Struct(v)
 }

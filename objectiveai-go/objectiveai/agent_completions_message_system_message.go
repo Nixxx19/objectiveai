@@ -10,14 +10,6 @@ type AgentCompletionsMessageSystemMessage struct {
 	Name *string `json:"name,omitempty"`
 }
 
-func (AgentCompletionsMessageSystemMessage) SchemaTitle() string { return "agent.completions.message.SystemMessage" }
-func (AgentCompletionsMessageSystemMessage) SchemaDescription() string { return "A system message setting context or instructions." }
-func (AgentCompletionsMessageSystemMessage) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"content": "The message content.",
-		"name": "Optional name for the message author.",
-	}
-}
 func (v AgentCompletionsMessageSystemMessage) Validate() error {
 	return variantValidator.Struct(v)
 }

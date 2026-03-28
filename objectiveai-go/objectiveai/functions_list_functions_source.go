@@ -9,15 +9,15 @@ import (
 // Source filter for listing functions.
 type FunctionsListFunctionsSource struct {
 	// Source filter for listing functions.
-	Variant1 string `validate:"oneof=all mock filesystem objectiveai"`
+	Functions.ListFunctionsSource string `validate:"oneof=all mock filesystem objectiveai"`
 }
 
 func (v FunctionsListFunctionsSource) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Functions.ListFunctionsSource)
 }
 
 func (v *FunctionsListFunctionsSource) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Functions.ListFunctionsSource); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -27,13 +27,3 @@ func (v FunctionsListFunctionsSource) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type FunctionsListFunctionsSourceSchema struct{}
-
-func (FunctionsListFunctionsSourceSchema) SchemaTitle() string { return "functions.ListFunctionsSource" }
-func (FunctionsListFunctionsSourceSchema) SchemaDescription() string { return "Source filter for listing functions." }
-func (FunctionsListFunctionsSourceSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"all", "mock", "filesystem", "objectiveai"},
-	}
-}

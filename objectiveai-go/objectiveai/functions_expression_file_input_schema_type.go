@@ -7,15 +7,15 @@ import (
 )
 
 type FunctionsExpressionFileInputSchemaType struct {
-	Variant1 string `validate:"oneof=file"`
+	Functions.expression.FileInputSchemaType string `validate:"oneof=file"`
 }
 
 func (v FunctionsExpressionFileInputSchemaType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Functions.expression.FileInputSchemaType)
 }
 
 func (v *FunctionsExpressionFileInputSchemaType) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Functions.expression.FileInputSchemaType); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -25,13 +25,3 @@ func (v FunctionsExpressionFileInputSchemaType) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type FunctionsExpressionFileInputSchemaTypeSchema struct{}
-
-func (FunctionsExpressionFileInputSchemaTypeSchema) SchemaTitle() string { return "functions.expression.FileInputSchemaType" }
-func (FunctionsExpressionFileInputSchemaTypeSchema) SchemaDescription() string { return "" }
-func (FunctionsExpressionFileInputSchemaTypeSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"file"},
-	}
-}

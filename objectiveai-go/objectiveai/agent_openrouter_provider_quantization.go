@@ -13,52 +13,52 @@ import (
 // increase inference speed, potentially at the cost of output quality.
 type AgentOpenrouterProviderQuantization struct {
 	// 4-bit integer quantization.
-	Variant1 *string `validate:"oneof=int4"`
+	Int4 *string `validate:"oneof=int4"`
 	// 8-bit integer quantization.
-	Variant2 *string `validate:"oneof=int8"`
+	Int8 *string `validate:"oneof=int8"`
 	// 4-bit floating point quantization.
-	Variant3 *string `validate:"oneof=fp4"`
+	Fp4 *string `validate:"oneof=fp4"`
 	// 6-bit floating point quantization.
-	Variant4 *string `validate:"oneof=fp6"`
+	Fp6 *string `validate:"oneof=fp6"`
 	// 8-bit floating point quantization.
-	Variant5 *string `validate:"oneof=fp8"`
+	Fp8 *string `validate:"oneof=fp8"`
 	// 16-bit floating point (half precision).
-	Variant6 *string `validate:"oneof=fp16"`
+	Fp16 *string `validate:"oneof=fp16"`
 	// 16-bit brain floating point.
-	Variant7 *string `validate:"oneof=bf16"`
+	Bf16 *string `validate:"oneof=bf16"`
 	// 32-bit floating point (full precision).
-	Variant8 *string `validate:"oneof=fp32"`
+	Fp32 *string `validate:"oneof=fp32"`
 	// Unknown quantization level.
-	Variant9 *string `validate:"oneof=unknown"`
+	Unknown *string `validate:"oneof=unknown"`
 }
 
 func (v AgentOpenrouterProviderQuantization) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Int4 != nil {
+		return json.Marshal(v.Int4)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Int8 != nil {
+		return json.Marshal(v.Int8)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.Fp4 != nil {
+		return json.Marshal(v.Fp4)
 	}
-	if v.Variant4 != nil {
-		return json.Marshal(v.Variant4)
+	if v.Fp6 != nil {
+		return json.Marshal(v.Fp6)
 	}
-	if v.Variant5 != nil {
-		return json.Marshal(v.Variant5)
+	if v.Fp8 != nil {
+		return json.Marshal(v.Fp8)
 	}
-	if v.Variant6 != nil {
-		return json.Marshal(v.Variant6)
+	if v.Fp16 != nil {
+		return json.Marshal(v.Fp16)
 	}
-	if v.Variant7 != nil {
-		return json.Marshal(v.Variant7)
+	if v.Bf16 != nil {
+		return json.Marshal(v.Bf16)
 	}
-	if v.Variant8 != nil {
-		return json.Marshal(v.Variant8)
+	if v.Fp32 != nil {
+		return json.Marshal(v.Fp32)
 	}
-	if v.Variant9 != nil {
-		return json.Marshal(v.Variant9)
+	if v.Unknown != nil {
+		return json.Marshal(v.Unknown)
 	}
 	return []byte("null"), nil
 }
@@ -71,7 +71,7 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterProviderQuantization{}
-			candidate.Variant1 = &try
+			candidate.Int4 = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -82,7 +82,7 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterProviderQuantization{}
-			candidate.Variant2 = &try
+			candidate.Int8 = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -93,7 +93,7 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterProviderQuantization{}
-			candidate.Variant3 = &try
+			candidate.Fp4 = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -104,7 +104,7 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterProviderQuantization{}
-			candidate.Variant4 = &try
+			candidate.Fp6 = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -115,7 +115,7 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterProviderQuantization{}
-			candidate.Variant5 = &try
+			candidate.Fp8 = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -126,7 +126,7 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterProviderQuantization{}
-			candidate.Variant6 = &try
+			candidate.Fp16 = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -137,7 +137,7 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterProviderQuantization{}
-			candidate.Variant7 = &try
+			candidate.Bf16 = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -148,7 +148,7 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterProviderQuantization{}
-			candidate.Variant8 = &try
+			candidate.Fp32 = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -159,7 +159,7 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterProviderQuantization{}
-			candidate.Variant9 = &try
+			candidate.Unknown = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -171,73 +171,18 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 
 func (v AgentOpenrouterProviderQuantization) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
-	if v.Variant4 != nil { count++ }
-	if v.Variant5 != nil { count++ }
-	if v.Variant6 != nil { count++ }
-	if v.Variant7 != nil { count++ }
-	if v.Variant8 != nil { count++ }
-	if v.Variant9 != nil { count++ }
+	if v.Int4 != nil { count++ }
+	if v.Int8 != nil { count++ }
+	if v.Fp4 != nil { count++ }
+	if v.Fp6 != nil { count++ }
+	if v.Fp8 != nil { count++ }
+	if v.Fp16 != nil { count++ }
+	if v.Bf16 != nil { count++ }
+	if v.Fp32 != nil { count++ }
+	if v.Unknown != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentOpenrouterProviderQuantization: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentOpenrouterProviderQuantizationSchema struct{}
-
-func (AgentOpenrouterProviderQuantizationSchema) SchemaTitle() string { return "agent.openrouter.ProviderQuantization" }
-func (AgentOpenrouterProviderQuantizationSchema) SchemaDescription() string { return "Model quantization levels for provider filtering.\n\nQuantization reduces model precision to decrease memory usage and\nincrease inference speed, potentially at the cost of output quality." }
-func (AgentOpenrouterProviderQuantizationSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "4-bit integer quantization.",
-			"type": "string",
-			"enum": []any{"int4"},
-		},
-			map[string]any{
-			"description": "8-bit integer quantization.",
-			"type": "string",
-			"enum": []any{"int8"},
-		},
-			map[string]any{
-			"description": "4-bit floating point quantization.",
-			"type": "string",
-			"enum": []any{"fp4"},
-		},
-			map[string]any{
-			"description": "6-bit floating point quantization.",
-			"type": "string",
-			"enum": []any{"fp6"},
-		},
-			map[string]any{
-			"description": "8-bit floating point quantization.",
-			"type": "string",
-			"enum": []any{"fp8"},
-		},
-			map[string]any{
-			"description": "16-bit floating point (half precision).",
-			"type": "string",
-			"enum": []any{"fp16"},
-		},
-			map[string]any{
-			"description": "16-bit brain floating point.",
-			"type": "string",
-			"enum": []any{"bf16"},
-		},
-			map[string]any{
-			"description": "32-bit floating point (full precision).",
-			"type": "string",
-			"enum": []any{"fp32"},
-		},
-			map[string]any{
-			"description": "Unknown quantization level.",
-			"type": "string",
-			"enum": []any{"unknown"},
-		},
-		},
-	}
-}

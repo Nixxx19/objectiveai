@@ -12,27 +12,27 @@ import (
 // This setting hints to the model how detailed its responses should be.
 type AgentClaudeAgentSdkEffort struct {
 	// Minimal output, concise responses.
-	Variant1 *string `validate:"oneof=low"`
+	Low *string `validate:"oneof=low"`
 	// Balanced output (default, normalized away during preparation).
-	Variant2 *string `validate:"oneof=medium"`
+	Medium *string `validate:"oneof=medium"`
 	// Detailed output with thorough explanations.
-	Variant3 *string `validate:"oneof=high"`
+	High *string `validate:"oneof=high"`
 	// Maximum effort, most detailed output possible.
-	Variant4 *string `validate:"oneof=max"`
+	Max *string `validate:"oneof=max"`
 }
 
 func (v AgentClaudeAgentSdkEffort) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Low != nil {
+		return json.Marshal(v.Low)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Medium != nil {
+		return json.Marshal(v.Medium)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.High != nil {
+		return json.Marshal(v.High)
 	}
-	if v.Variant4 != nil {
-		return json.Marshal(v.Variant4)
+	if v.Max != nil {
+		return json.Marshal(v.Max)
 	}
 	return []byte("null"), nil
 }
@@ -45,7 +45,7 @@ func (v *AgentClaudeAgentSdkEffort) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentClaudeAgentSdkEffort{}
-			candidate.Variant1 = &try
+			candidate.Low = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -56,7 +56,7 @@ func (v *AgentClaudeAgentSdkEffort) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentClaudeAgentSdkEffort{}
-			candidate.Variant2 = &try
+			candidate.Medium = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -67,7 +67,7 @@ func (v *AgentClaudeAgentSdkEffort) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentClaudeAgentSdkEffort{}
-			candidate.Variant3 = &try
+			candidate.High = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -78,7 +78,7 @@ func (v *AgentClaudeAgentSdkEffort) UnmarshalJSON(data []byte) error {
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentClaudeAgentSdkEffort{}
-			candidate.Variant4 = &try
+			candidate.Max = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -90,43 +90,13 @@ func (v *AgentClaudeAgentSdkEffort) UnmarshalJSON(data []byte) error {
 
 func (v AgentClaudeAgentSdkEffort) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
-	if v.Variant4 != nil { count++ }
+	if v.Low != nil { count++ }
+	if v.Medium != nil { count++ }
+	if v.High != nil { count++ }
+	if v.Max != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentClaudeAgentSdkEffort: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentClaudeAgentSdkEffortSchema struct{}
-
-func (AgentClaudeAgentSdkEffortSchema) SchemaTitle() string { return "agent.claude_agent_sdk.Effort" }
-func (AgentClaudeAgentSdkEffortSchema) SchemaDescription() string { return "The effort level for model output.\n\nThis setting hints to the model how detailed its responses should be." }
-func (AgentClaudeAgentSdkEffortSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Minimal output, concise responses.",
-			"type": "string",
-			"enum": []any{"low"},
-		},
-			map[string]any{
-			"description": "Balanced output (default, normalized away during preparation).",
-			"type": "string",
-			"enum": []any{"medium"},
-		},
-			map[string]any{
-			"description": "Detailed output with thorough explanations.",
-			"type": "string",
-			"enum": []any{"high"},
-		},
-			map[string]any{
-			"description": "Maximum effort, most detailed output possible.",
-			"type": "string",
-			"enum": []any{"max"},
-		},
-		},
-	}
-}

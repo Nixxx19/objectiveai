@@ -9,15 +9,15 @@ import (
 // OpenRouter upstream marker.
 type AgentOpenrouterUpstream struct {
 	// OpenRouter upstream marker.
-	Variant1 string `validate:"oneof=openrouter"`
+	Agent.openrouter.Upstream string `validate:"oneof=openrouter"`
 }
 
 func (v AgentOpenrouterUpstream) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Agent.openrouter.Upstream)
 }
 
 func (v *AgentOpenrouterUpstream) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Agent.openrouter.Upstream); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -27,13 +27,3 @@ func (v AgentOpenrouterUpstream) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type AgentOpenrouterUpstreamSchema struct{}
-
-func (AgentOpenrouterUpstreamSchema) SchemaTitle() string { return "agent.openrouter.Upstream" }
-func (AgentOpenrouterUpstreamSchema) SchemaDescription() string { return "OpenRouter upstream marker." }
-func (AgentOpenrouterUpstreamSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"openrouter"},
-	}
-}

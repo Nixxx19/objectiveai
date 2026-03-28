@@ -10,14 +10,6 @@ type AgentCompletionsMessageInputAudio struct {
 	Format string `json:"format"`
 }
 
-func (AgentCompletionsMessageInputAudio) SchemaTitle() string { return "agent.completions.message.InputAudio" }
-func (AgentCompletionsMessageInputAudio) SchemaDescription() string { return "Audio input for multimodal messages." }
-func (AgentCompletionsMessageInputAudio) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"data": "Base64-encoded audio data.",
-		"format": "The audio format (e.g., \"wav\", \"mp3\").",
-	}
-}
 func (v AgentCompletionsMessageInputAudio) Validate() error {
 	return variantValidator.Struct(v)
 }

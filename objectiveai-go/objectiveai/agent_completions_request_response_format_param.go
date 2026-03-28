@@ -10,17 +10,17 @@ import (
 // Either a single response format or a per-agent map.
 type AgentCompletionsRequestResponseFormatParam struct {
 	// A single response format applied to all agents.
-	Variant1 *AgentCompletionsRequestResponseFormat 
+	Single *AgentCompletionsRequestResponseFormat 
 	// Per-agent response formats, keyed by agent ID.
-	Variant2 map[string]AgentCompletionsRequestResponseFormat 
+	PerAgent map[string]AgentCompletionsRequestResponseFormat 
 }
 
 func (v AgentCompletionsRequestResponseFormatParam) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Single != nil {
+		return json.Marshal(v.Single)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.PerAgent != nil {
+		return json.Marshal(v.PerAgent)
 	}
 	return []byte("null"), nil
 }
@@ -33,7 +33,7 @@ func (v *AgentCompletionsRequestResponseFormatParam) UnmarshalJSON(data []byte) 
 		var try AgentCompletionsRequestResponseFormat
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestResponseFormatParam{}
-			candidate.Variant1 = &try
+			candidate.Single = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -44,7 +44,7 @@ func (v *AgentCompletionsRequestResponseFormatParam) UnmarshalJSON(data []byte) 
 		var try map[string]AgentCompletionsRequestResponseFormat
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestResponseFormatParam{}
-			candidate.Variant2 = try
+			candidate.PerAgent = try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -56,30 +56,11 @@ func (v *AgentCompletionsRequestResponseFormatParam) UnmarshalJSON(data []byte) 
 
 func (v AgentCompletionsRequestResponseFormatParam) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Single != nil { count++ }
+	if v.PerAgent != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentCompletionsRequestResponseFormatParam: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentCompletionsRequestResponseFormatParamSchema struct{}
-
-func (AgentCompletionsRequestResponseFormatParamSchema) SchemaTitle() string { return "agent.completions.request.ResponseFormatParam" }
-func (AgentCompletionsRequestResponseFormatParamSchema) SchemaDescription() string { return "Either a single response format or a per-agent map." }
-func (AgentCompletionsRequestResponseFormatParamSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "A single response format applied to all agents.",
-			"$ref": "agent.completions.request.ResponseFormat",
-		},
-			map[string]any{
-			"description": "Per-agent response formats, keyed by agent ID.",
-			"type": "object",
-			"additionalProperties": map[string]any{"$ref": "agent.completions.request.ResponseFormat"},
-		},
-		},
-	}
-}

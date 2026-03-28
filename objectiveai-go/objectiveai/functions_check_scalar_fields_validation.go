@@ -7,8 +7,6 @@ type FunctionsCheckScalarFieldsValidation struct {
 	InputSchema FunctionsExpressionInputSchema `json:"input_schema"`
 }
 
-func (FunctionsCheckScalarFieldsValidation) SchemaTitle() string { return "functions.check.ScalarFieldsValidation" }
-func (FunctionsCheckScalarFieldsValidation) SchemaDescription() string { return "The fields needed to validate a scalar function's input behavior." }
 func (v FunctionsCheckScalarFieldsValidation) Validate() error {
 	return variantValidator.Struct(v)
 }

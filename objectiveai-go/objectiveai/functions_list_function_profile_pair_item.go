@@ -5,19 +5,11 @@ package objectiveai
 // A function-profile pair in a list response.
 type FunctionsListFunctionProfilePairItem struct {
 	// The function.
-	Function FunctionsListFunctionItem `json:"function"`
+	Function RemotePath `json:"function"`
 	// The profile.
-	Profile FunctionsProfilesListProfileItem `json:"profile"`
+	Profile RemotePath `json:"profile"`
 }
 
-func (FunctionsListFunctionProfilePairItem) SchemaTitle() string { return "functions.ListFunctionProfilePairItem" }
-func (FunctionsListFunctionProfilePairItem) SchemaDescription() string { return "A function-profile pair in a list response." }
-func (FunctionsListFunctionProfilePairItem) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"function": "The function.",
-		"profile": "The profile.",
-	}
-}
 func (v FunctionsListFunctionProfilePairItem) Validate() error {
 	return variantValidator.Struct(v)
 }

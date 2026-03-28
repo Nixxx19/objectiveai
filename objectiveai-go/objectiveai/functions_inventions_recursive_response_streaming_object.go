@@ -7,15 +7,15 @@ import (
 )
 
 type FunctionsInventionsRecursiveResponseStreamingObject struct {
-	Variant1 string `validate:"oneof=alpha.scalar.function.invention.recursive.chunk alpha.vector.function.invention.recursive.chunk"`
+	Functions.inventions.recursive.response.streaming.Object string `validate:"oneof=alpha.scalar.function.invention.recursive.chunk alpha.vector.function.invention.recursive.chunk"`
 }
 
 func (v FunctionsInventionsRecursiveResponseStreamingObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Functions.inventions.recursive.response.streaming.Object)
 }
 
 func (v *FunctionsInventionsRecursiveResponseStreamingObject) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Functions.inventions.recursive.response.streaming.Object); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -25,13 +25,3 @@ func (v FunctionsInventionsRecursiveResponseStreamingObject) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type FunctionsInventionsRecursiveResponseStreamingObjectSchema struct{}
-
-func (FunctionsInventionsRecursiveResponseStreamingObjectSchema) SchemaTitle() string { return "functions.inventions.recursive.response.streaming.Object" }
-func (FunctionsInventionsRecursiveResponseStreamingObjectSchema) SchemaDescription() string { return "" }
-func (FunctionsInventionsRecursiveResponseStreamingObjectSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"alpha.scalar.function.invention.recursive.chunk", "alpha.vector.function.invention.recursive.chunk"},
-	}
-}

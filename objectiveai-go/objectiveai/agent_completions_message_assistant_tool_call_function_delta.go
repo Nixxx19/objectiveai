@@ -10,14 +10,6 @@ type AgentCompletionsMessageAssistantToolCallFunctionDelta struct {
 	Name *string `json:"name,omitempty"`
 }
 
-func (AgentCompletionsMessageAssistantToolCallFunctionDelta) SchemaTitle() string { return "agent.completions.message.AssistantToolCallFunctionDelta" }
-func (AgentCompletionsMessageAssistantToolCallFunctionDelta) SchemaDescription() string { return "Function call details in a streaming tool call." }
-func (AgentCompletionsMessageAssistantToolCallFunctionDelta) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"arguments": "The arguments being streamed (accumulated across deltas).",
-		"name": "The function name (only present in the first delta).",
-	}
-}
 func (v AgentCompletionsMessageAssistantToolCallFunctionDelta) Validate() error {
 	return variantValidator.Struct(v)
 }

@@ -7,15 +7,15 @@ import (
 )
 
 type FunctionsInventionsResponseUnaryObject struct {
-	Variant1 string `validate:"oneof=alpha.scalar.function.invention alpha.vector.function.invention"`
+	Functions.inventions.response.unary.Object string `validate:"oneof=alpha.scalar.function.invention alpha.vector.function.invention"`
 }
 
 func (v FunctionsInventionsResponseUnaryObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Functions.inventions.response.unary.Object)
 }
 
 func (v *FunctionsInventionsResponseUnaryObject) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Functions.inventions.response.unary.Object); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -25,13 +25,3 @@ func (v FunctionsInventionsResponseUnaryObject) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type FunctionsInventionsResponseUnaryObjectSchema struct{}
-
-func (FunctionsInventionsResponseUnaryObjectSchema) SchemaTitle() string { return "functions.inventions.response.unary.Object" }
-func (FunctionsInventionsResponseUnaryObjectSchema) SchemaDescription() string { return "" }
-func (FunctionsInventionsResponseUnaryObjectSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"alpha.scalar.function.invention", "alpha.vector.function.invention"},
-	}
-}

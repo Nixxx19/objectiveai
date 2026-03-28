@@ -7,25 +7,25 @@ import (
 	"fmt"
 )
 
-type FunctionsAlphaScalarBranchTaskExpressionVariant1 struct {
+type FunctionsAlphaScalarBranchTaskExpressionScalarFunction struct {
 	Type string `json:"type"`
 }
 
-type FunctionsAlphaScalarBranchTaskExpressionVariant2 struct {
+type FunctionsAlphaScalarBranchTaskExpressionPlaceholderScalarFunction struct {
 	Type string `json:"type"`
 }
 
 type FunctionsAlphaScalarBranchTaskExpression struct {
-	Variant1 *FunctionsAlphaScalarBranchTaskExpressionVariant1 
-	Variant2 *FunctionsAlphaScalarBranchTaskExpressionVariant2 
+	ScalarFunction *FunctionsAlphaScalarBranchTaskExpressionScalarFunction 
+	PlaceholderScalarFunction *FunctionsAlphaScalarBranchTaskExpressionPlaceholderScalarFunction 
 }
 
 func (v FunctionsAlphaScalarBranchTaskExpression) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.ScalarFunction != nil {
+		return json.Marshal(v.ScalarFunction)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.PlaceholderScalarFunction != nil {
+		return json.Marshal(v.PlaceholderScalarFunction)
 	}
 	return []byte("null"), nil
 }
@@ -35,10 +35,10 @@ func (v *FunctionsAlphaScalarBranchTaskExpression) UnmarshalJSON(data []byte) er
 		return nil
 	}
 	{
-		var try FunctionsAlphaScalarBranchTaskExpressionVariant1
+		var try FunctionsAlphaScalarBranchTaskExpressionScalarFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsAlphaScalarBranchTaskExpression{}
-			candidate.Variant1 = &try
+			candidate.ScalarFunction = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -46,10 +46,10 @@ func (v *FunctionsAlphaScalarBranchTaskExpression) UnmarshalJSON(data []byte) er
 		}
 	}
 	{
-		var try FunctionsAlphaScalarBranchTaskExpressionVariant2
+		var try FunctionsAlphaScalarBranchTaskExpressionPlaceholderScalarFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsAlphaScalarBranchTaskExpression{}
-			candidate.Variant2 = &try
+			candidate.PlaceholderScalarFunction = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -61,31 +61,11 @@ func (v *FunctionsAlphaScalarBranchTaskExpression) UnmarshalJSON(data []byte) er
 
 func (v FunctionsAlphaScalarBranchTaskExpression) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.ScalarFunction != nil { count++ }
+	if v.PlaceholderScalarFunction != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsAlphaScalarBranchTaskExpression: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsAlphaScalarBranchTaskExpressionSchema struct{}
-
-func (FunctionsAlphaScalarBranchTaskExpressionSchema) SchemaTitle() string { return "functions.alpha_scalar.BranchTaskExpression" }
-func (FunctionsAlphaScalarBranchTaskExpressionSchema) SchemaDescription() string { return "" }
-func (FunctionsAlphaScalarBranchTaskExpressionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.alpha_scalar.ScalarFunctionTaskExpression",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"alpha.scalar.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"type": "object",
-			"$ref": "functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression",
-			"properties": map[string]any{"type": map[string]any{"enum": []any{"placeholder.alpha.scalar.function"}, "type": "string"}},
-		},
-		},
-	}
-}

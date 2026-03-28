@@ -27,13 +27,6 @@ type AgentCompletionsResponseStreamingAssistantResponseChunk struct {
 	Usage *AgentCompletionsResponseUpstreamUsage `json:"usage,omitempty"`
 }
 
-func (AgentCompletionsResponseStreamingAssistantResponseChunk) SchemaTitle() string { return "agent.completions.response.streaming.AssistantResponseChunk" }
-func (AgentCompletionsResponseStreamingAssistantResponseChunk) SchemaDescription() string { return "A chunk of a streaming agent completion response.\n\nMultiple chunks are received via Server-Sent Events and can be\naccumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)\nusing the [`push`](Self::push) method." }
-func (AgentCompletionsResponseStreamingAssistantResponseChunk) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"usage": "Upstream usage for this assistant response (set by upstream clients).",
-	}
-}
 func (v AgentCompletionsResponseStreamingAssistantResponseChunk) Validate() error {
 	return variantValidator.Struct(v)
 }

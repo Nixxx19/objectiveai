@@ -4,24 +4,13 @@ package objectiveai
 
 // An inline tasks-based profile definition without metadata.
 type FunctionsInlineTasksProfile struct {
-	// Weights for each Task in the corresponding Function.
-	//
-	// Must have the same length as `tasks`. Can be either:
-	// - A vector of decimals (legacy representation), or
-	// - A vector of objects with `weight` and optional `invert` fields.
-	Profile VectorCompletionsRequestProfile `json:"profile"`
 	// Configuration for each task in the corresponding Function.
 	Tasks []FunctionsTaskProfile `json:"tasks"`
+	// Optional weights for each Task in the corresponding Function.
+	// If `None`, uniform weights are used.
+	Weights *Weights `json:"weights,omitempty"`
 }
 
-func (FunctionsInlineTasksProfile) SchemaTitle() string { return "functions.InlineTasksProfile" }
-func (FunctionsInlineTasksProfile) SchemaDescription() string { return "An inline tasks-based profile definition without metadata." }
-func (FunctionsInlineTasksProfile) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"profile": "Weights for each Task in the corresponding Function.\n\nMust have the same length as `tasks`. Can be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields.",
-		"tasks": "Configuration for each task in the corresponding Function.",
-	}
-}
 func (v FunctionsInlineTasksProfile) Validate() error {
 	return variantValidator.Struct(v)
 }

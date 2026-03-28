@@ -7,15 +7,15 @@ import (
 )
 
 type FunctionsExpressionBooleanInputSchemaType struct {
-	Variant1 string `validate:"oneof=boolean"`
+	Functions.expression.BooleanInputSchemaType string `validate:"oneof=boolean"`
 }
 
 func (v FunctionsExpressionBooleanInputSchemaType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.Variant1)
+	return json.Marshal(v.Functions.expression.BooleanInputSchemaType)
 }
 
 func (v *FunctionsExpressionBooleanInputSchemaType) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.Variant1); err != nil {
+	if err := json.Unmarshal(data, &v.Functions.expression.BooleanInputSchemaType); err != nil {
 		return err
 	}
 	return v.Validate()
@@ -25,13 +25,3 @@ func (v FunctionsExpressionBooleanInputSchemaType) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-type FunctionsExpressionBooleanInputSchemaTypeSchema struct{}
-
-func (FunctionsExpressionBooleanInputSchemaTypeSchema) SchemaTitle() string { return "functions.expression.BooleanInputSchemaType" }
-func (FunctionsExpressionBooleanInputSchemaTypeSchema) SchemaDescription() string { return "" }
-func (FunctionsExpressionBooleanInputSchemaTypeSchema) Body() map[string]any {
-	return map[string]any{
-		"type": "string",
-		"enum": []any{"boolean"},
-	}
-}

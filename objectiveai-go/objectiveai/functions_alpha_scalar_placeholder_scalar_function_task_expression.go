@@ -15,8 +15,6 @@ type FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpression struct {
 	Spec string `json:"spec"`
 }
 
-func (FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpression) SchemaTitle() string { return "functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression" }
-func (FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpression) SchemaDescription() string { return "" }
 func (v FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
 }

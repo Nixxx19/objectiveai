@@ -10,14 +10,6 @@ type AgentCompletionsResponseCostDetails struct {
 	UpstreamUpstreamInferenceCost float64 `json:"upstream_upstream_inference_cost" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }
 
-func (AgentCompletionsResponseCostDetails) SchemaTitle() string { return "agent.completions.response.CostDetails" }
-func (AgentCompletionsResponseCostDetails) SchemaDescription() string { return "Detailed cost breakdown." }
-func (AgentCompletionsResponseCostDetails) FieldDescriptions() map[string]string {
-	return map[string]string{
-		"upstream_inference_cost": "Cost charged by the immediate upstream (e.g., OpenRouter).",
-		"upstream_upstream_inference_cost": "Cost charged by the upstream's upstream (e.g., the actual model provider).",
-	}
-}
 func (v AgentCompletionsResponseCostDetails) Validate() error {
 	return variantValidator.Struct(v)
 }

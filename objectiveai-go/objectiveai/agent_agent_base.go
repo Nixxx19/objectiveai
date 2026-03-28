@@ -7,25 +7,18 @@ import (
 	"fmt"
 )
 
-// The base configuration for an Agent (without computed ID).
-//
-// This is an untagged enum that dispatches to the per-upstream AgentBase.
-// Deserialization tries each variant in order until one matches.
+// An Agent base definition, either remote (with metadata) or inline.
 type AgentAgentBase struct {
-	Variant1 *AgentOpenrouterAgentBase 
-	Variant2 *AgentClaudeAgentSdkAgentBase 
-	Variant3 *AgentMockAgentBase 
+	Remote *AgentRemoteAgentBase 
+	Inline *AgentInlineAgentBase 
 }
 
 func (v AgentAgentBase) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Remote != nil {
+		return json.Marshal(v.Remote)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
-	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.Inline != nil {
+		return json.Marshal(v.Inline)
 	}
 	return []byte("null"), nil
 }
@@ -35,10 +28,10 @@ func (v *AgentAgentBase) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try AgentOpenrouterAgentBase
+		var try AgentRemoteAgentBase
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentAgentBase{}
-			candidate.Variant1 = &try
+			candidate.Remote = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -46,21 +39,10 @@ func (v *AgentAgentBase) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try AgentClaudeAgentSdkAgentBase
+		var try AgentInlineAgentBase
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentAgentBase{}
-			candidate.Variant2 = &try
-			if candidate.Validate() == nil {
-				*v = candidate
-				return nil
-			}
-		}
-	}
-	{
-		var try AgentMockAgentBase
-		if err := json.Unmarshal(data, &try); err == nil {
-			candidate := AgentAgentBase{}
-			candidate.Variant3 = &try
+			candidate.Inline = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -72,31 +54,11 @@ func (v *AgentAgentBase) UnmarshalJSON(data []byte) error {
 
 func (v AgentAgentBase) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
+	if v.Remote != nil { count++ }
+	if v.Inline != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("AgentAgentBase: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type AgentAgentBaseSchema struct{}
-
-func (AgentAgentBaseSchema) SchemaTitle() string { return "agent.AgentBase" }
-func (AgentAgentBaseSchema) SchemaDescription() string { return "The base configuration for an Agent (without computed ID).\n\nThis is an untagged enum that dispatches to the per-upstream AgentBase.\nDeserialization tries each variant in order until one matches." }
-func (AgentAgentBaseSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"$ref": "agent.openrouter.AgentBase",
-		},
-			map[string]any{
-			"$ref": "agent.claude_agent_sdk.AgentBase",
-		},
-			map[string]any{
-			"$ref": "agent.mock.AgentBase",
-		},
-		},
-	}
-}

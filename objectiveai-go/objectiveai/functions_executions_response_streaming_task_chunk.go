@@ -8,16 +8,16 @@ import (
 )
 
 type FunctionsExecutionsResponseStreamingTaskChunk struct {
-	Variant1 *FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk 
-	Variant2 *FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk 
+	FunctionExecution *FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk 
+	VectorCompletion *FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk 
 }
 
 func (v FunctionsExecutionsResponseStreamingTaskChunk) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.FunctionExecution != nil {
+		return json.Marshal(v.FunctionExecution)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.VectorCompletion != nil {
+		return json.Marshal(v.VectorCompletion)
 	}
 	return []byte("null"), nil
 }
@@ -30,7 +30,7 @@ func (v *FunctionsExecutionsResponseStreamingTaskChunk) UnmarshalJSON(data []byt
 		var try FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExecutionsResponseStreamingTaskChunk{}
-			candidate.Variant1 = &try
+			candidate.FunctionExecution = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -41,7 +41,7 @@ func (v *FunctionsExecutionsResponseStreamingTaskChunk) UnmarshalJSON(data []byt
 		var try FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExecutionsResponseStreamingTaskChunk{}
-			candidate.Variant2 = &try
+			candidate.VectorCompletion = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -53,27 +53,11 @@ func (v *FunctionsExecutionsResponseStreamingTaskChunk) UnmarshalJSON(data []byt
 
 func (v FunctionsExecutionsResponseStreamingTaskChunk) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.FunctionExecution != nil { count++ }
+	if v.VectorCompletion != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsExecutionsResponseStreamingTaskChunk: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsExecutionsResponseStreamingTaskChunkSchema struct{}
-
-func (FunctionsExecutionsResponseStreamingTaskChunkSchema) SchemaTitle() string { return "functions.executions.response.streaming.TaskChunk" }
-func (FunctionsExecutionsResponseStreamingTaskChunkSchema) SchemaDescription() string { return "" }
-func (FunctionsExecutionsResponseStreamingTaskChunkSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"$ref": "functions.executions.response.streaming.FunctionExecutionTaskChunk",
-		},
-			map[string]any{
-			"$ref": "functions.executions.response.streaming.VectorCompletionTaskChunk",
-		},
-		},
-	}
-}

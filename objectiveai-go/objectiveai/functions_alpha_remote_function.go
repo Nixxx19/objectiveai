@@ -8,16 +8,16 @@ import (
 )
 
 type FunctionsAlphaRemoteFunction struct {
-	Variant1 *FunctionsAlphaScalarRemoteFunction 
-	Variant2 *FunctionsAlphaVectorRemoteFunction 
+	Scalar *FunctionsAlphaScalarRemoteFunction 
+	Vector *FunctionsAlphaVectorRemoteFunction 
 }
 
 func (v FunctionsAlphaRemoteFunction) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Scalar != nil {
+		return json.Marshal(v.Scalar)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Vector != nil {
+		return json.Marshal(v.Vector)
 	}
 	return []byte("null"), nil
 }
@@ -30,7 +30,7 @@ func (v *FunctionsAlphaRemoteFunction) UnmarshalJSON(data []byte) error {
 		var try FunctionsAlphaScalarRemoteFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsAlphaRemoteFunction{}
-			candidate.Variant1 = &try
+			candidate.Scalar = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -41,7 +41,7 @@ func (v *FunctionsAlphaRemoteFunction) UnmarshalJSON(data []byte) error {
 		var try FunctionsAlphaVectorRemoteFunction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsAlphaRemoteFunction{}
-			candidate.Variant2 = &try
+			candidate.Vector = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -53,27 +53,11 @@ func (v *FunctionsAlphaRemoteFunction) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsAlphaRemoteFunction) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Scalar != nil { count++ }
+	if v.Vector != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsAlphaRemoteFunction: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsAlphaRemoteFunctionSchema struct{}
-
-func (FunctionsAlphaRemoteFunctionSchema) SchemaTitle() string { return "functions.AlphaRemoteFunction" }
-func (FunctionsAlphaRemoteFunctionSchema) SchemaDescription() string { return "" }
-func (FunctionsAlphaRemoteFunctionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"$ref": "functions.alpha_scalar.RemoteFunction",
-		},
-			map[string]any{
-			"$ref": "functions.alpha_vector.RemoteFunction",
-		},
-		},
-	}
-}

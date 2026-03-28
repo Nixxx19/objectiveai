@@ -8,17 +8,17 @@ import (
 )
 
 // A JMESPath expression.
-type FunctionsExpressionExpressionVariant1 struct {
+type FunctionsExpressionExpressionJMESPath struct {
 	Jmespath string `json:"$jmespath"`
 }
 
 // A Starlark expression.
-type FunctionsExpressionExpressionVariant2 struct {
+type FunctionsExpressionExpressionStarlark struct {
 	Starlark string `json:"$starlark"`
 }
 
 // A predefined special expression variant.
-type FunctionsExpressionExpressionVariant3 struct {
+type FunctionsExpressionExpressionSpecial struct {
 	Special FunctionsExpressionSpecial `json:"$special"`
 }
 
@@ -39,22 +39,22 @@ type FunctionsExpressionExpressionVariant3 struct {
 // ```
 type FunctionsExpressionExpression struct {
 	// A JMESPath expression.
-	Variant1 *FunctionsExpressionExpressionVariant1 
+	JMESPath *FunctionsExpressionExpressionJMESPath 
 	// A Starlark expression.
-	Variant2 *FunctionsExpressionExpressionVariant2 
+	Starlark *FunctionsExpressionExpressionStarlark 
 	// A predefined special expression variant.
-	Variant3 *FunctionsExpressionExpressionVariant3 
+	Special *FunctionsExpressionExpressionSpecial 
 }
 
 func (v FunctionsExpressionExpression) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.JMESPath != nil {
+		return json.Marshal(v.JMESPath)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Starlark != nil {
+		return json.Marshal(v.Starlark)
 	}
-	if v.Variant3 != nil {
-		return json.Marshal(v.Variant3)
+	if v.Special != nil {
+		return json.Marshal(v.Special)
 	}
 	return []byte("null"), nil
 }
@@ -64,10 +64,10 @@ func (v *FunctionsExpressionExpression) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try FunctionsExpressionExpressionVariant1
+		var try FunctionsExpressionExpressionJMESPath
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionExpression{}
-			candidate.Variant1 = &try
+			candidate.JMESPath = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -75,10 +75,10 @@ func (v *FunctionsExpressionExpression) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsExpressionExpressionVariant2
+		var try FunctionsExpressionExpressionStarlark
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionExpression{}
-			candidate.Variant2 = &try
+			candidate.Starlark = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -86,10 +86,10 @@ func (v *FunctionsExpressionExpression) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsExpressionExpressionVariant3
+		var try FunctionsExpressionExpressionSpecial
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionExpression{}
-			candidate.Variant3 = &try
+			candidate.Special = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -101,40 +101,12 @@ func (v *FunctionsExpressionExpression) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsExpressionExpression) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
-	if v.Variant3 != nil { count++ }
+	if v.JMESPath != nil { count++ }
+	if v.Starlark != nil { count++ }
+	if v.Special != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsExpressionExpression: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsExpressionExpressionSchema struct{}
-
-func (FunctionsExpressionExpressionSchema) SchemaTitle() string { return "functions.expression.Expression" }
-func (FunctionsExpressionExpressionSchema) SchemaDescription() string { return "An expression that can be either JMESPath or Starlark.\n\nSerializes as `{\"$jmespath\": \"...\"}` or `{\"$starlark\": \"...\"}` in JSON.\n\n# Examples\n\nJMESPath:\n```json\n{\"$jmespath\": \"input.items[0].name\"}\n```\n\nStarlark:\n```json\n{\"$starlark\": \"input['items'][0]['name']\"}\n```" }
-func (FunctionsExpressionExpressionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "A JMESPath expression.",
-			"type": "object",
-			"properties": map[string]any{"$jmespath": map[string]any{"type": "string"}},
-			"additionalProperties": false,
-		},
-			map[string]any{
-			"description": "A Starlark expression.",
-			"type": "object",
-			"properties": map[string]any{"$starlark": map[string]any{"type": "string"}},
-			"additionalProperties": false,
-		},
-			map[string]any{
-			"description": "A predefined special expression variant.",
-			"type": "object",
-			"properties": map[string]any{"$special": map[string]any{"$ref": "functions.expression.Special"}},
-			"additionalProperties": false,
-		},
-		},
-	}
-}

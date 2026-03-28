@@ -8,7 +8,7 @@ import (
 )
 
 // Produces a single score in [0, 1].
-type FunctionsInlineFunctionVariant1 struct {
+type FunctionsInlineFunctionScalar struct {
 	// The list of tasks to execute. Tasks with a `map` expression are
 	// expanded into multiple instances. Each instance is compiled with
 	// `map` set to the current integer index.
@@ -18,7 +18,7 @@ type FunctionsInlineFunctionVariant1 struct {
 }
 
 // Produces a vector of scores that sums to 1.
-type FunctionsInlineFunctionVariant2 struct {
+type FunctionsInlineFunctionVector struct {
 	// Expression transforming an array of inputs computed by `input_split`
 	// into a single Input object for the Function.
 	// Receives: `input` (as an array).
@@ -45,17 +45,17 @@ type FunctionsInlineFunctionVariant2 struct {
 // schema fields.
 type FunctionsInlineFunction struct {
 	// Produces a single score in [0, 1].
-	Variant1 *FunctionsInlineFunctionVariant1 
+	Scalar *FunctionsInlineFunctionScalar 
 	// Produces a vector of scores that sums to 1.
-	Variant2 *FunctionsInlineFunctionVariant2 
+	Vector *FunctionsInlineFunctionVector 
 }
 
 func (v FunctionsInlineFunction) MarshalJSON() ([]byte, error) {
-	if v.Variant1 != nil {
-		return json.Marshal(v.Variant1)
+	if v.Scalar != nil {
+		return json.Marshal(v.Scalar)
 	}
-	if v.Variant2 != nil {
-		return json.Marshal(v.Variant2)
+	if v.Vector != nil {
+		return json.Marshal(v.Vector)
 	}
 	return []byte("null"), nil
 }
@@ -65,10 +65,10 @@ func (v *FunctionsInlineFunction) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try FunctionsInlineFunctionVariant1
+		var try FunctionsInlineFunctionScalar
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsInlineFunction{}
-			candidate.Variant1 = &try
+			candidate.Scalar = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -76,10 +76,10 @@ func (v *FunctionsInlineFunction) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try FunctionsInlineFunctionVariant2
+		var try FunctionsInlineFunctionVector
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsInlineFunction{}
-			candidate.Variant2 = &try
+			candidate.Vector = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -91,31 +91,11 @@ func (v *FunctionsInlineFunction) UnmarshalJSON(data []byte) error {
 
 func (v FunctionsInlineFunction) Validate() error {
 	count := 0
-	if v.Variant1 != nil { count++ }
-	if v.Variant2 != nil { count++ }
+	if v.Scalar != nil { count++ }
+	if v.Vector != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("FunctionsInlineFunction: exactly one variant must be set, got %d", count)
 	}
 	return variantValidator.Struct(v)
 }
 
-type FunctionsInlineFunctionSchema struct{}
-
-func (FunctionsInlineFunctionSchema) SchemaTitle() string { return "functions.InlineFunction" }
-func (FunctionsInlineFunctionSchema) SchemaDescription() string { return "An inline function definition without metadata.\n\nUsed when embedding function logic directly in requests rather than\nreferencing a remote function. Lacks description and input\nschema fields." }
-func (FunctionsInlineFunctionSchema) Body() map[string]any {
-	return map[string]any{
-		"anyOf": []any{
-			map[string]any{
-			"description": "Produces a single score in [0, 1].",
-			"type": "object",
-			"properties": map[string]any{"tasks": map[string]any{"description": "The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped).", "items": map[string]any{"$ref": "functions.TaskExpression"}, "type": "array"}, "type": map[string]any{"enum": []any{"scalar.function"}, "type": "string"}},
-		},
-			map[string]any{
-			"description": "Produces a vector of scores that sums to 1.",
-			"type": "object",
-			"properties": map[string]any{"input_merge": map[string]any{"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression"}, map[string]any{"type": "null"}}, "description": "Expression transforming an array of inputs computed by `input_split`\ninto a single Input object for the Function.\nReceives: `input` (as an array).\nOnly required if the request uses a strategy that needs input splitting."}, "input_split": map[string]any{"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression"}, map[string]any{"type": "null"}}, "description": "Expression transforming input into an input array of the output_length\nWhen the Function is executed with any input from the array,\nThe output_length should be 1.\nReceives: `input`.\nOnly required if the request uses a strategy that needs input splitting."}, "tasks": map[string]any{"description": "The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped).", "items": map[string]any{"$ref": "functions.TaskExpression"}, "type": "array"}, "type": map[string]any{"enum": []any{"vector.function"}, "type": "string"}},
-		},
-		},
-	}
-}

@@ -6,8 +6,6 @@ type FunctionsInventionsEssayTasksObject struct {
 	EssayTasks string `json:"essay_tasks"`
 }
 
-func (FunctionsInventionsEssayTasksObject) SchemaTitle() string { return "functions.inventions.EssayTasksObject" }
-func (FunctionsInventionsEssayTasksObject) SchemaDescription() string { return "" }
 func (v FunctionsInventionsEssayTasksObject) Validate() error {
 	return variantValidator.Struct(v)
 }
