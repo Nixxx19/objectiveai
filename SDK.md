@@ -1,43 +1,61 @@
-# SDK Strategy
+# SDK
 
-## Overview
+## Pipeline
 
-All SDKs are auto-generated from a single source of truth: the JSON Schema files in `objectiveai-json-schema/`. Each SDK has a generation script that reads these schemas and produces idiomatic types, and a roundtrip test that verifies the generated types perfectly reconstruct the original schemas.
-
-## JSON Schema Source
-
-`objectiveai-json-schema/` contains ~317 `.json` files, one per public serializable type in `objectiveai-rs`. Names use dot-separated module paths (e.g., `functions.executions.RetryToken.json`).
-
-**Rebuilding schemas:**
-```bash
-cargo run --package objectiveai-json-schema-builder
+```
+objectiveai-rs (Rust types + JsonSchema derives)
+    ↓  cargo run --package objectiveai-json-schema-builder
+objectiveai-json-schema/ (328 .json files, one per type)
+    ↓                           ↓
+objectiveai-js/                 objectiveai-py/
+  scripts/install-zod.cjs         scripts/install_pydantic.py
+  → Zod schemas in src/           → Pydantic v2 models in objectiveai/
+  scripts/install-wasm.cjs        scripts/install_pyo3.py
+  → WASM binary embedded           → PyO3 wheel installed into venv
 ```
 
-The builder enforces 12 structural guarantees (canonical key order, no `$defs`, no `oneOf`, all `$ref` targets resolve, etc.) — see [`objectiveai-json-schema/builder/tests/schema_properties.rs`](objectiveai-json-schema/builder/tests/schema_properties.rs).
+## JSON Schemas
 
-## Auto-Generation
+`objectiveai-json-schema/` contains one `.json` file per public serializable type in `objectiveai-rs`. Names use dot-separated module paths (e.g., `functions.executions.RetryToken.json`).
 
-Each SDK has a script that reads the JSON schemas and generates idiomatic types.
+The builder normalizes schemas (strips `$defs`, rewrites `$ref`, canonical key order) and enforces structural guarantees tested in `objectiveai-json-schema/builder/tests/schema_properties.rs`.
 
-| SDK | Script | Generates |
-|-----|--------|-----------|
-| TypeScript | [`objectiveai-js/scripts/install-zod.cjs`](objectiveai-js/scripts/install-zod.cjs) | Zod schemas + barrel exports (`generatedIndex.ts`) |
-| Python | [`objectiveai-py/scripts/install_pydantic.py`](objectiveai-py/scripts/install_pydantic.py) | Pydantic models + `__init__.py` barrel exports |
+Types gated behind Cargo features (e.g., `config`) are conditionally included in `json_schemas()`.
 
-## Roundtrip Testing
+## TypeScript SDK (`objectiveai-js`)
 
-Each SDK has a test harness (forbidden from modification) and a roundtrip test that converts generated types back to JSON Schema and asserts equality with the originals.
+Published as `objectiveai` on npm.
+
+- **Types:** Auto-generated Zod schemas from JSON schemas. Circular dependencies use `z.lazy()` with explicit `z.ZodType<T>` annotations. Each module gets a `generatedIndex.ts` barrel export.
+- **Client:** `src/client.ts` — HTTP client with Zod-validated options, env var fallbacks, streaming support.
+- **Merge system:** `src/merge.ts` — Immutable `merge(a, b) → [result, boolean]` for streaming chunk accumulation. Returns original reference when unchanged (React identity optimization).
+- **WASM:** Compiled from `objectiveai-rs-wasm-js`, embedded as base64 at build time (no filesystem dependency).
+- **Build:** `npm run build` via tsup → `dist/` with CJS + ESM.
+- **Tests:** vitest + `tsc --noEmit`. HTTP integration tests use shared API server.
+
+## Python SDK (`objectiveai-py`)
+
+- **Types:** Auto-generated Pydantic v2 models from JSON schemas. Each module gets `__init__.py` barrel exports.
+- **Client:** `objectiveai/client.py` — httpx-based HTTP client with env var fallbacks, streaming support.
+- **Push system:** `objectiveai/push_utils.py` — Mutable push-style streaming chunk accumulation (Python equivalent of merge).
+- **PyO3:** Compiled Rust bindings from `objectiveai-rs-pyo3`, distributed as wheel, installed into venv at build time.
+- **Build:** venv-based. Never run bare `python`/`pip` — always use `objectiveai-py/venv/Scripts/python.exe`.
+- **Tests:** pytest. HTTP integration tests use shared API server.
+
+## Roundtrip Tests
+
+Each SDK has a roundtrip test that converts generated types back to JSON Schema and asserts equality with the originals. The tests are fully generic — no schema-specific logic.
 
 | SDK | Harness | Test |
 |-----|---------|------|
-| TypeScript | [`objectiveai-js/src/tests/test-zod-roundtrip-harness.ts`](objectiveai-js/src/tests/test-zod-roundtrip-harness.ts) | [`objectiveai-js/src/tests/test-zod-roundtrip.test.ts`](objectiveai-js/src/tests/test-zod-roundtrip.test.ts) |
-| Python | [`objectiveai-py/tests/test_pydantic_roundtrip_harness.py`](objectiveai-py/tests/test_pydantic_roundtrip_harness.py) | [`objectiveai-py/tests/test_pydantic_roundtrip.py`](objectiveai-py/tests/test_pydantic_roundtrip.py) |
+| TypeScript | `src/tests/test-zod-roundtrip-harness.ts` | `src/tests/test-zod-roundtrip.test.ts` |
+| Python | `tests/test_pydantic_roundtrip_harness.py` | `tests/test_pydantic_roundtrip.py` |
 
-The tests are 100% generic — no schema-specific logic or hardcoded titles. If a generated type doesn't perfectly reconstruct its source schema, the test fails.
+## Build & Test
 
-## Adding a New SDK
+```bash
+bash build.sh   # 3-phase parallel build (schemas → WASM/PyO3 → JS/Python)
+bash test.sh     # spawns API server, runs all suites in parallel
+```
 
-1. Write a generation script that reads `objectiveai-json-schema/*.json` and produces idiomatic types for the target language
-2. Write a roundtrip test harness that loads original schemas and provides an assertion function
-3. Write a roundtrip test that converts generated types back to JSON Schema and asserts equality
-4. The generation script and roundtrip test should be fully generic — they must work for all schemas without any schema-specific logic
+Individual suites: `bash objectiveai-{js,py,rs}/test.sh`
