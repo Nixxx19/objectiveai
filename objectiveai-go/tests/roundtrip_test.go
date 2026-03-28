@@ -206,9 +206,8 @@ func reconstructSchema(
 		return result
 	}
 
-	// Variant struct: has MarshalJSON and fields without json tags
-	_, hasMarshal := ti.methods["MarshalJSON"]
-	isVariant := hasMarshal && len(ti.fields) > 0 && getTagValue(ti.fields[0].tags, "json") == ""
+	// Variant struct: all fields lack json tags (union type, not a regular struct)
+	isVariant := len(ti.fields) > 0 && getTagValue(ti.fields[0].tags, "json") == ""
 
 	if isVariant {
 		return reconstructVariantSchema(ti, types, titleMap, result)
@@ -422,6 +421,9 @@ func reconstructVariant(
 	titleMap map[string]string,
 ) map[string]any {
 	variant := map[string]any{"title": f.name}
+	if f.doc != "" {
+		variant["description"] = f.doc
+	}
 
 	typeName := f.typeName
 	if strings.HasPrefix(typeName, "*") {
