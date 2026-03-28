@@ -431,7 +431,13 @@ func reconstructVariant(
 	}
 
 	if subTi, ok := types[typeName]; ok && !subTi.isAlias {
-		// Embedded type → adjacently-tagged ($ref + properties)
+		// If the sub-type has its own SchemaTitle, it's a standalone type → $ref
+		if subTitle, ok := titleMap[typeName]; ok {
+			variant["$ref"] = subTitle
+			return variant
+		}
+
+		// Inline sub-struct with embedded type → adjacently-tagged ($ref + properties)
 		if len(subTi.embeds) > 0 {
 			embedType := subTi.embeds[0]
 			if embedTitle, ok := titleMap[embedType]; ok {
@@ -454,11 +460,6 @@ func reconstructVariant(
 			return variant
 		}
 
-		// Sub-struct with SchemaTitle → $ref
-		if subTitle, ok := titleMap[typeName]; ok {
-			variant["$ref"] = subTitle
-			return variant
-		}
 
 		// Inline object without embedding
 		variant["type"] = "object"
