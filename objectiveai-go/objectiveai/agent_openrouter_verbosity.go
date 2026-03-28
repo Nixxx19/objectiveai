@@ -7,19 +7,35 @@ import (
 	"fmt"
 )
 
+type AgentOpenrouterVerbosityLow string
+
+func (AgentOpenrouterVerbosityLow) SchemaVariantTitle() string { return "Low" }
+
+type AgentOpenrouterVerbosityMedium string
+
+func (AgentOpenrouterVerbosityMedium) SchemaVariantTitle() string { return "Medium" }
+
+type AgentOpenrouterVerbosityHigh string
+
+func (AgentOpenrouterVerbosityHigh) SchemaVariantTitle() string { return "High" }
+
+type AgentOpenrouterVerbosityMax string
+
+func (AgentOpenrouterVerbosityMax) SchemaVariantTitle() string { return "Max" }
+
 // The verbosity level for model output.
 //
 // This setting hints to the model how detailed its responses should be.
 // Not all models support this parameter.
 type AgentOpenrouterVerbosity struct {
 	// Minimal output, concise responses.
-	Low *string `validate:"oneof=low"`
+	Low *AgentOpenrouterVerbosityLow `validate:"oneof=low"`
 	// Balanced output (default, normalized away during preparation).
-	Medium *string `validate:"oneof=medium"`
+	Medium *AgentOpenrouterVerbosityMedium `validate:"oneof=medium"`
 	// Detailed output with thorough explanations.
-	High *string `validate:"oneof=high"`
+	High *AgentOpenrouterVerbosityHigh `validate:"oneof=high"`
 	// Maximum verbosity, most detailed output possible.
-	Max *string `validate:"oneof=max"`
+	Max *AgentOpenrouterVerbosityMax `validate:"oneof=max"`
 }
 
 func (v AgentOpenrouterVerbosity) MarshalJSON() ([]byte, error) {
@@ -43,7 +59,7 @@ func (v *AgentOpenrouterVerbosity) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try string
+		var try AgentOpenrouterVerbosityLow
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterVerbosity{}
 			candidate.Low = &try
@@ -54,7 +70,7 @@ func (v *AgentOpenrouterVerbosity) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterVerbosityMedium
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterVerbosity{}
 			candidate.Medium = &try
@@ -65,7 +81,7 @@ func (v *AgentOpenrouterVerbosity) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterVerbosityHigh
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterVerbosity{}
 			candidate.High = &try
@@ -76,7 +92,7 @@ func (v *AgentOpenrouterVerbosity) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterVerbosityMax
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterVerbosity{}
 			candidate.Max = &try

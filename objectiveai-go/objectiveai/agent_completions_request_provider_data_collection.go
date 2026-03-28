@@ -7,12 +7,20 @@ import (
 	"fmt"
 )
 
+type AgentCompletionsRequestProviderDataCollectionDeny string
+
+func (AgentCompletionsRequestProviderDataCollectionDeny) SchemaVariantTitle() string { return "Deny" }
+
+type AgentCompletionsRequestProviderDataCollectionAllow string
+
+func (AgentCompletionsRequestProviderDataCollectionAllow) SchemaVariantTitle() string { return "Allow" }
+
 // Data collection policy for providers.
 type AgentCompletionsRequestProviderDataCollection struct {
 	// Do not allow data collection.
-	Deny *string `validate:"oneof=deny"`
+	Deny *AgentCompletionsRequestProviderDataCollectionDeny `validate:"oneof=deny"`
 	// Allow data collection.
-	Allow *string `validate:"oneof=allow"`
+	Allow *AgentCompletionsRequestProviderDataCollectionAllow `validate:"oneof=allow"`
 }
 
 func (v AgentCompletionsRequestProviderDataCollection) MarshalJSON() ([]byte, error) {
@@ -30,7 +38,7 @@ func (v *AgentCompletionsRequestProviderDataCollection) UnmarshalJSON(data []byt
 		return nil
 	}
 	{
-		var try string
+		var try AgentCompletionsRequestProviderDataCollectionDeny
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestProviderDataCollection{}
 			candidate.Deny = &try
@@ -41,7 +49,7 @@ func (v *AgentCompletionsRequestProviderDataCollection) UnmarshalJSON(data []byt
 		}
 	}
 	{
-		var try string
+		var try AgentCompletionsRequestProviderDataCollectionAllow
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestProviderDataCollection{}
 			candidate.Allow = &try

@@ -7,6 +7,10 @@ import (
 	"fmt"
 )
 
+type FunctionsTaskProfilePlaceholder map[string]any
+
+func (FunctionsTaskProfilePlaceholder) SchemaVariantTitle() string { return "Placeholder" }
+
 // Configuration for a single task within a Profile.
 //
 // Each variant corresponds to a task type in the Function definition.
@@ -16,7 +20,7 @@ type FunctionsTaskProfile struct {
 	// Inline profile for a task (tasks-based or auto).
 	Inline *FunctionsInlineProfile 
 	// Placeholder task — no configuration needed, output is fixed.
-	Placeholder map[string]any 
+	Placeholder *FunctionsTaskProfilePlaceholder 
 }
 
 func (v FunctionsTaskProfile) MarshalJSON() ([]byte, error) {
@@ -59,10 +63,10 @@ func (v *FunctionsTaskProfile) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try map[string]any
+		var try FunctionsTaskProfilePlaceholder
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsTaskProfile{}
-			candidate.Placeholder = try
+			candidate.Placeholder = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil

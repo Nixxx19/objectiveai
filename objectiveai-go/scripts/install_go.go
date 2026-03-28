@@ -604,7 +604,7 @@ func buildStructTags(jsonTag string, propSchema Schema, selfTitle string, allTit
 
 // generateAnyOfStruct generates a struct with nullable Variant1..VariantN fields,
 // plus any needed VariantN sub-structs for inline object variants.
-func generateAnyOfStruct(typeName string, anyOf []any, selfTitle string, schema Schema, allTitles map[string]bool) string {
+func generateAnyOfStruct(typeName string, anyOf []any, selfTitle string, schema Schema, allTitles map[string]bool, isEnum bool) string {
 	var auxiliary strings.Builder // sub-structs generated before the main type
 	var fields []string
 
@@ -649,19 +649,40 @@ func generateAnyOfStruct(typeName string, anyOf []any, selfTitle string, schema 
 		// Determine Go type for the variant field
 		var fieldType string
 		if _, ok := m["properties"].(map[string]any); ok {
-			// Inline object variant → generate a sub-struct
+			// Inline object variant → generate a sub-struct + SchemaVariantTitle
 			auxiliary.WriteString(generateInlineVariantStruct(vStructName, m, selfTitle, allTitles))
-			auxiliary.WriteString("\n")
+			auxiliary.WriteString(fmt.Sprintf("func (%s) SchemaVariantTitle() string { return %q }\n\n", vStructName, variantTitle))
+			if singleVariant {
+				fieldType = vStructName
+			} else {
+				fieldType = "*" + vStructName
+			}
+		} else if _, ok := m["$ref"].(string); ok {
+			// $ref variant → use the referenced type directly (it has SchemaTitle)
+			goT := goType(m, selfTitle, allTitles)
+			if singleVariant {
+				fieldType = goT
+			} else if strings.HasPrefix(goT, "*") {
+				fieldType = goT
+			} else {
+				fieldType = "*" + goT
+			}
+		} else if !isEnum {
+			// Primitive variant (string, etc.) → type definition + SchemaVariantTitle
+			goT := goType(m, selfTitle, allTitles)
+			auxiliary.WriteString(fmt.Sprintf("type %s %s\n\n", vStructName, goT))
+			auxiliary.WriteString(fmt.Sprintf("func (%s) SchemaVariantTitle() string { return %q }\n\n", vStructName, variantTitle))
 			if singleVariant {
 				fieldType = vStructName
 			} else {
 				fieldType = "*" + vStructName
 			}
 		} else {
+			// Root enum variant → bare type
 			goT := goType(m, selfTitle, allTitles)
 			if singleVariant {
 				fieldType = goT
-			} else if goT == "any" || strings.HasPrefix(goT, "[]") || strings.HasPrefix(goT, "map[") {
+			} else if goT == "any" || strings.HasPrefix(goT, "*") {
 				fieldType = goT
 			} else {
 				fieldType = "*" + goT
@@ -897,7 +918,7 @@ func generateTypeCode(title string, schema Schema, allTitles map[string]bool) st
 			b.WriteString(fmt.Sprintf("func (%s) SchemaTitle() string { return %q }\n", typeName, title))
 		} else {
 			// anyOf struct with variant fields
-			b.WriteString(generateAnyOfStruct(typeName, anyOf, title, schema, allTitles))
+			b.WriteString(generateAnyOfStruct(typeName, anyOf, title, schema, allTitles, false))
 			b.WriteString(fmt.Sprintf("func (%s) SchemaTitle() string { return %q }\n", typeName, title))
 			b.WriteString("\n")
 		}
@@ -916,7 +937,7 @@ func generateTypeCode(title string, schema Schema, allTitles map[string]bool) st
 				"enum":  []any{ev},
 			})
 		}
-		b.WriteString(generateAnyOfStruct(typeName, syntheticAnyOf, title, schema, allTitles))
+		b.WriteString(generateAnyOfStruct(typeName, syntheticAnyOf, title, schema, allTitles, true))
 		b.WriteString(fmt.Sprintf("func (%s) SchemaTitle() string { return %q }\n", typeName, title))
 		b.WriteString("\n")
 		return b.String()

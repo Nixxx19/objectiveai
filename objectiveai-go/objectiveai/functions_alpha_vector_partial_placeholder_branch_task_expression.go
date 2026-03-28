@@ -11,11 +11,13 @@ type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderScalar
 	FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpression
 	Type string `json:"type" validate:"oneof=placeholder.alpha.scalar.function"`
 }
+func (FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderScalarFunction) SchemaVariantTitle() string { return "PlaceholderScalarFunction" }
 
 type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderVectorFunction struct {
 	FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression
 	Type string `json:"type" validate:"oneof=placeholder.alpha.vector.function"`
 }
+func (FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderVectorFunction) SchemaVariantTitle() string { return "PlaceholderVectorFunction" }
 
 type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression struct {
 	PlaceholderScalarFunction *FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderScalarFunction 

@@ -7,12 +7,20 @@ import (
 	"fmt"
 )
 
+type AgentCompletionsMessageRichContentText string
+
+func (AgentCompletionsMessageRichContentText) SchemaVariantTitle() string { return "Text" }
+
+type AgentCompletionsMessageRichContentParts []AgentCompletionsMessageRichContentPart
+
+func (AgentCompletionsMessageRichContentParts) SchemaVariantTitle() string { return "Parts" }
+
 // Rich content for user/assistant messages (supports multimodal input).
 type AgentCompletionsMessageRichContent struct {
 	// Plain text content.
-	Text *string 
+	Text *AgentCompletionsMessageRichContentText 
 	// Multi-part content (text, images, audio, video, files).
-	Parts []AgentCompletionsMessageRichContentPart 
+	Parts *AgentCompletionsMessageRichContentParts 
 }
 
 func (v AgentCompletionsMessageRichContent) MarshalJSON() ([]byte, error) {
@@ -30,7 +38,7 @@ func (v *AgentCompletionsMessageRichContent) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try string
+		var try AgentCompletionsMessageRichContentText
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageRichContent{}
 			candidate.Text = &try
@@ -41,10 +49,10 @@ func (v *AgentCompletionsMessageRichContent) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try []AgentCompletionsMessageRichContentPart
+		var try AgentCompletionsMessageRichContentParts
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageRichContent{}
-			candidate.Parts = try
+			candidate.Parts = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil

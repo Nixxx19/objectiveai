@@ -13,6 +13,7 @@ type RemotePathGithub struct {
 	Remote string `json:"remote" validate:"oneof=github"`
 	Repository string `json:"repository"`
 }
+func (RemotePathGithub) SchemaVariantTitle() string { return "Github" }
 
 type RemotePathFilesystem struct {
 	Commit string `json:"commit"`
@@ -20,11 +21,13 @@ type RemotePathFilesystem struct {
 	Remote string `json:"remote" validate:"oneof=filesystem"`
 	Repository string `json:"repository"`
 }
+func (RemotePathFilesystem) SchemaVariantTitle() string { return "Filesystem" }
 
 type RemotePathMock struct {
 	Name string `json:"name"`
 	Remote string `json:"remote" validate:"oneof=mock"`
 }
+func (RemotePathMock) SchemaVariantTitle() string { return "Mock" }
 
 type RemotePath struct {
 	Github *RemotePathGithub 

@@ -7,15 +7,23 @@ import (
 	"fmt"
 )
 
+type WeightsWeights []float64
+
+func (WeightsWeights) SchemaVariantTitle() string { return "Weights" }
+
+type WeightsEntries []WeightsEntry
+
+func (WeightsEntries) SchemaVariantTitle() string { return "Entries" }
+
 // Weights for a swarm's agents.
 //
 // - `Weights(Vec<Decimal>)` - simple representation (no inversion)
 // - `Entries(Vec<WeightsEntry>)` - weights with optional per-agent `invert`
 type Weights struct {
 	// Simple vector of decimal weights.
-	Weights []float64 `validate:"dive,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
+	Weights *WeightsWeights `validate:"dive,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// Vector of entries with optional invert flags.
-	Entries []WeightsEntry 
+	Entries *WeightsEntries 
 }
 
 func (v Weights) MarshalJSON() ([]byte, error) {
@@ -33,10 +41,10 @@ func (v *Weights) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try []float64
+		var try WeightsWeights
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := Weights{}
-			candidate.Weights = try
+			candidate.Weights = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -44,10 +52,10 @@ func (v *Weights) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try []WeightsEntry
+		var try WeightsEntries
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := Weights{}
-			candidate.Entries = try
+			candidate.Entries = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil

@@ -7,9 +7,17 @@ import (
 	"fmt"
 )
 
+type FunctionsFunctionTypeScalar string
+
+func (FunctionsFunctionTypeScalar) SchemaVariantTitle() string { return "Scalar" }
+
+type FunctionsFunctionTypeVector string
+
+func (FunctionsFunctionTypeVector) SchemaVariantTitle() string { return "Vector" }
+
 type FunctionsFunctionType struct {
-	Scalar *string `validate:"oneof=scalar.function"`
-	Vector *string `validate:"oneof=vector.function"`
+	Scalar *FunctionsFunctionTypeScalar `validate:"oneof=scalar.function"`
+	Vector *FunctionsFunctionTypeVector `validate:"oneof=vector.function"`
 }
 
 func (v FunctionsFunctionType) MarshalJSON() ([]byte, error) {
@@ -27,7 +35,7 @@ func (v *FunctionsFunctionType) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try string
+		var try FunctionsFunctionTypeScalar
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsFunctionType{}
 			candidate.Scalar = &try
@@ -38,7 +46,7 @@ func (v *FunctionsFunctionType) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try FunctionsFunctionTypeVector
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsFunctionType{}
 			candidate.Vector = &try

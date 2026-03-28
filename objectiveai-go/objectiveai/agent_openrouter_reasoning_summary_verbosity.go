@@ -7,16 +7,28 @@ import (
 	"fmt"
 )
 
+type AgentOpenrouterReasoningSummaryVerbosityAuto string
+
+func (AgentOpenrouterReasoningSummaryVerbosityAuto) SchemaVariantTitle() string { return "Auto" }
+
+type AgentOpenrouterReasoningSummaryVerbosityConcise string
+
+func (AgentOpenrouterReasoningSummaryVerbosityConcise) SchemaVariantTitle() string { return "Concise" }
+
+type AgentOpenrouterReasoningSummaryVerbosityDetailed string
+
+func (AgentOpenrouterReasoningSummaryVerbosityDetailed) SchemaVariantTitle() string { return "Detailed" }
+
 // Verbosity of the reasoning summary included in responses.
 //
 // Only supported by some models.
 type AgentOpenrouterReasoningSummaryVerbosity struct {
 	// Let the model decide (default, normalized away).
-	Auto *string `validate:"oneof=auto"`
+	Auto *AgentOpenrouterReasoningSummaryVerbosityAuto `validate:"oneof=auto"`
 	// Brief summary of reasoning.
-	Concise *string `validate:"oneof=concise"`
+	Concise *AgentOpenrouterReasoningSummaryVerbosityConcise `validate:"oneof=concise"`
 	// Thorough summary of reasoning.
-	Detailed *string `validate:"oneof=detailed"`
+	Detailed *AgentOpenrouterReasoningSummaryVerbosityDetailed `validate:"oneof=detailed"`
 }
 
 func (v AgentOpenrouterReasoningSummaryVerbosity) MarshalJSON() ([]byte, error) {
@@ -37,7 +49,7 @@ func (v *AgentOpenrouterReasoningSummaryVerbosity) UnmarshalJSON(data []byte) er
 		return nil
 	}
 	{
-		var try string
+		var try AgentOpenrouterReasoningSummaryVerbosityAuto
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterReasoningSummaryVerbosity{}
 			candidate.Auto = &try
@@ -48,7 +60,7 @@ func (v *AgentOpenrouterReasoningSummaryVerbosity) UnmarshalJSON(data []byte) er
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterReasoningSummaryVerbosityConcise
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterReasoningSummaryVerbosity{}
 			candidate.Concise = &try
@@ -59,7 +71,7 @@ func (v *AgentOpenrouterReasoningSummaryVerbosity) UnmarshalJSON(data []byte) er
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterReasoningSummaryVerbosityDetailed
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterReasoningSummaryVerbosity{}
 			candidate.Detailed = &try

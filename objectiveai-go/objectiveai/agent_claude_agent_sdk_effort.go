@@ -7,18 +7,34 @@ import (
 	"fmt"
 )
 
+type AgentClaudeAgentSdkEffortLow string
+
+func (AgentClaudeAgentSdkEffortLow) SchemaVariantTitle() string { return "Low" }
+
+type AgentClaudeAgentSdkEffortMedium string
+
+func (AgentClaudeAgentSdkEffortMedium) SchemaVariantTitle() string { return "Medium" }
+
+type AgentClaudeAgentSdkEffortHigh string
+
+func (AgentClaudeAgentSdkEffortHigh) SchemaVariantTitle() string { return "High" }
+
+type AgentClaudeAgentSdkEffortMax string
+
+func (AgentClaudeAgentSdkEffortMax) SchemaVariantTitle() string { return "Max" }
+
 // The effort level for model output.
 //
 // This setting hints to the model how detailed its responses should be.
 type AgentClaudeAgentSdkEffort struct {
 	// Minimal output, concise responses.
-	Low *string `validate:"oneof=low"`
+	Low *AgentClaudeAgentSdkEffortLow `validate:"oneof=low"`
 	// Balanced output (default, normalized away during preparation).
-	Medium *string `validate:"oneof=medium"`
+	Medium *AgentClaudeAgentSdkEffortMedium `validate:"oneof=medium"`
 	// Detailed output with thorough explanations.
-	High *string `validate:"oneof=high"`
+	High *AgentClaudeAgentSdkEffortHigh `validate:"oneof=high"`
 	// Maximum effort, most detailed output possible.
-	Max *string `validate:"oneof=max"`
+	Max *AgentClaudeAgentSdkEffortMax `validate:"oneof=max"`
 }
 
 func (v AgentClaudeAgentSdkEffort) MarshalJSON() ([]byte, error) {
@@ -42,7 +58,7 @@ func (v *AgentClaudeAgentSdkEffort) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try string
+		var try AgentClaudeAgentSdkEffortLow
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentClaudeAgentSdkEffort{}
 			candidate.Low = &try
@@ -53,7 +69,7 @@ func (v *AgentClaudeAgentSdkEffort) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentClaudeAgentSdkEffortMedium
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentClaudeAgentSdkEffort{}
 			candidate.Medium = &try
@@ -64,7 +80,7 @@ func (v *AgentClaudeAgentSdkEffort) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentClaudeAgentSdkEffortHigh
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentClaudeAgentSdkEffort{}
 			candidate.High = &try
@@ -75,7 +91,7 @@ func (v *AgentClaudeAgentSdkEffort) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentClaudeAgentSdkEffortMax
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentClaudeAgentSdkEffort{}
 			candidate.Max = &try

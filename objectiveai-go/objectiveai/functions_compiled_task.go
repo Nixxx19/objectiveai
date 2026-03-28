@@ -7,6 +7,10 @@ import (
 	"fmt"
 )
 
+type FunctionsCompiledTaskMany []FunctionsTask
+
+func (FunctionsCompiledTaskMany) SchemaVariantTitle() string { return "Many" }
+
 // The result of compiling a task expression.
 //
 // Tasks without a `map` field compile to a single task. Tasks with a `map`
@@ -16,7 +20,7 @@ type FunctionsCompiledTask struct {
 	// A single task (no mapping).
 	One *FunctionsTask 
 	// Multiple task instances from mapped execution.
-	Many []FunctionsTask 
+	Many *FunctionsCompiledTaskMany 
 }
 
 func (v FunctionsCompiledTask) MarshalJSON() ([]byte, error) {
@@ -45,10 +49,10 @@ func (v *FunctionsCompiledTask) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try []FunctionsTask
+		var try FunctionsCompiledTaskMany
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsCompiledTask{}
-			candidate.Many = try
+			candidate.Many = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil

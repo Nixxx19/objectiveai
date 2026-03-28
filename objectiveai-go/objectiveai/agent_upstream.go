@@ -7,16 +7,32 @@ import (
 	"fmt"
 )
 
+type AgentUpstreamUnknown string
+
+func (AgentUpstreamUnknown) SchemaVariantTitle() string { return "Unknown" }
+
+type AgentUpstreamOpenrouter string
+
+func (AgentUpstreamOpenrouter) SchemaVariantTitle() string { return "Openrouter" }
+
+type AgentUpstreamClaudeAgentSdk string
+
+func (AgentUpstreamClaudeAgentSdk) SchemaVariantTitle() string { return "ClaudeAgentSdk" }
+
+type AgentUpstreamMock string
+
+func (AgentUpstreamMock) SchemaVariantTitle() string { return "Mock" }
+
 // Supported agent upstreams.
 type AgentUpstream struct {
 	// Unknown Upstream.
-	Unknown *string `validate:"oneof=unknown"`
+	Unknown *AgentUpstreamUnknown `validate:"oneof=unknown"`
 	// OpenRouter Upstream.
-	Openrouter *string `validate:"oneof=openrouter"`
+	Openrouter *AgentUpstreamOpenrouter `validate:"oneof=openrouter"`
 	// Claude Agent SDK Upstream.
-	ClaudeAgentSdk *string `validate:"oneof=claude_agent_sdk"`
+	ClaudeAgentSdk *AgentUpstreamClaudeAgentSdk `validate:"oneof=claude_agent_sdk"`
 	// Mock Upstream.
-	Mock *string `validate:"oneof=mock"`
+	Mock *AgentUpstreamMock `validate:"oneof=mock"`
 }
 
 func (v AgentUpstream) MarshalJSON() ([]byte, error) {
@@ -40,7 +56,7 @@ func (v *AgentUpstream) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try string
+		var try AgentUpstreamUnknown
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentUpstream{}
 			candidate.Unknown = &try
@@ -51,7 +67,7 @@ func (v *AgentUpstream) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentUpstreamOpenrouter
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentUpstream{}
 			candidate.Openrouter = &try
@@ -62,7 +78,7 @@ func (v *AgentUpstream) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentUpstreamClaudeAgentSdk
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentUpstream{}
 			candidate.ClaudeAgentSdk = &try
@@ -73,7 +89,7 @@ func (v *AgentUpstream) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentUpstreamMock
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentUpstream{}
 			candidate.Mock = &try

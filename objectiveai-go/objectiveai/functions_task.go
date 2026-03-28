@@ -12,30 +12,35 @@ type FunctionsTaskScalarFunction struct {
 	FunctionsScalarFunctionTask
 	Type string `json:"type" validate:"oneof=scalar.function"`
 }
+func (FunctionsTaskScalarFunction) SchemaVariantTitle() string { return "ScalarFunction" }
 
 // Calls a vector function (produces a vector of scores).
 type FunctionsTaskVectorFunction struct {
 	FunctionsVectorFunctionTask
 	Type string `json:"type" validate:"oneof=vector.function"`
 }
+func (FunctionsTaskVectorFunction) SchemaVariantTitle() string { return "VectorFunction" }
 
 // Runs a vector completion.
 type FunctionsTaskVectorCompletion struct {
 	FunctionsVectorCompletionTask
 	Type string `json:"type" validate:"oneof=vector.completion"`
 }
+func (FunctionsTaskVectorCompletion) SchemaVariantTitle() string { return "VectorCompletion" }
 
 // Placeholder scalar function (always outputs 0.5).
 type FunctionsTaskPlaceholderScalarFunction struct {
 	FunctionsPlaceholderScalarFunctionTask
 	Type string `json:"type" validate:"oneof=placeholder.scalar.function"`
 }
+func (FunctionsTaskPlaceholderScalarFunction) SchemaVariantTitle() string { return "PlaceholderScalarFunction" }
 
 // Placeholder vector function (always outputs equalized vector).
 type FunctionsTaskPlaceholderVectorFunction struct {
 	FunctionsPlaceholderVectorFunctionTask
 	Type string `json:"type" validate:"oneof=placeholder.vector.function"`
 }
+func (FunctionsTaskPlaceholderVectorFunction) SchemaVariantTitle() string { return "PlaceholderVectorFunction" }
 
 // A compiled task ready for execution.
 //

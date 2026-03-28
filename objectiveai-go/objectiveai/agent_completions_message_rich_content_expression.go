@@ -7,12 +7,20 @@ import (
 	"fmt"
 )
 
+type AgentCompletionsMessageRichContentExpressionText string
+
+func (AgentCompletionsMessageRichContentExpressionText) SchemaVariantTitle() string { return "Text" }
+
+type AgentCompletionsMessageRichContentExpressionParts []any
+
+func (AgentCompletionsMessageRichContentExpressionParts) SchemaVariantTitle() string { return "Parts" }
+
 // Expression variant of [`RichContent`] for dynamic content.
 type AgentCompletionsMessageRichContentExpression struct {
 	// Plain text content.
-	Text *string 
+	Text *AgentCompletionsMessageRichContentExpressionText 
 	// Multi-part content expressions.
-	Parts []any 
+	Parts *AgentCompletionsMessageRichContentExpressionParts 
 }
 
 func (v AgentCompletionsMessageRichContentExpression) MarshalJSON() ([]byte, error) {
@@ -30,7 +38,7 @@ func (v *AgentCompletionsMessageRichContentExpression) UnmarshalJSON(data []byte
 		return nil
 	}
 	{
-		var try string
+		var try AgentCompletionsMessageRichContentExpressionText
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageRichContentExpression{}
 			candidate.Text = &try
@@ -41,10 +49,10 @@ func (v *AgentCompletionsMessageRichContentExpression) UnmarshalJSON(data []byte
 		}
 	}
 	{
-		var try []any
+		var try AgentCompletionsMessageRichContentExpressionParts
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageRichContentExpression{}
-			candidate.Parts = try
+			candidate.Parts = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil

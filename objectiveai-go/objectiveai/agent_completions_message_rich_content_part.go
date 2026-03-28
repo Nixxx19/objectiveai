@@ -12,36 +12,42 @@ type AgentCompletionsMessageRichContentPartText struct {
 	Text string `json:"text"`
 	Type string `json:"type" validate:"oneof=text"`
 }
+func (AgentCompletionsMessageRichContentPartText) SchemaVariantTitle() string { return "Text" }
 
 // An image URL.
 type AgentCompletionsMessageRichContentPartImageUrl struct {
 	ImageURL AgentCompletionsMessageImageUrl `json:"image_url"`
 	Type string `json:"type" validate:"oneof=image_url"`
 }
+func (AgentCompletionsMessageRichContentPartImageUrl) SchemaVariantTitle() string { return "ImageUrl" }
 
 // Audio input.
 type AgentCompletionsMessageRichContentPartInputAudio struct {
 	InputAudio AgentCompletionsMessageInputAudio `json:"input_audio"`
 	Type string `json:"type" validate:"oneof=input_audio"`
 }
+func (AgentCompletionsMessageRichContentPartInputAudio) SchemaVariantTitle() string { return "InputAudio" }
 
 // Video input.
 type AgentCompletionsMessageRichContentPartInputVideo struct {
 	Type string `json:"type" validate:"oneof=input_video"`
 	VideoURL AgentCompletionsMessageVideoUrl `json:"video_url"`
 }
+func (AgentCompletionsMessageRichContentPartInputVideo) SchemaVariantTitle() string { return "InputVideo" }
 
 // A video URL.
 type AgentCompletionsMessageRichContentPartVideoUrl struct {
 	Type string `json:"type" validate:"oneof=video_url"`
 	VideoURL AgentCompletionsMessageVideoUrl `json:"video_url"`
 }
+func (AgentCompletionsMessageRichContentPartVideoUrl) SchemaVariantTitle() string { return "VideoUrl" }
 
 // A file.
 type AgentCompletionsMessageRichContentPartFile struct {
 	File AgentCompletionsMessageFile `json:"file"`
 	Type string `json:"type" validate:"oneof=file"`
 }
+func (AgentCompletionsMessageRichContentPartFile) SchemaVariantTitle() string { return "File" }
 
 // A part of rich content.
 type AgentCompletionsMessageRichContentPart struct {

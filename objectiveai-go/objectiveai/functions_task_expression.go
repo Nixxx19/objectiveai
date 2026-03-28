@@ -11,26 +11,31 @@ type FunctionsTaskExpressionScalarFunction struct {
 	FunctionsScalarFunctionTaskExpression
 	Type string `json:"type" validate:"oneof=scalar.function"`
 }
+func (FunctionsTaskExpressionScalarFunction) SchemaVariantTitle() string { return "ScalarFunction" }
 
 type FunctionsTaskExpressionVectorFunction struct {
 	FunctionsVectorFunctionTaskExpression
 	Type string `json:"type" validate:"oneof=vector.function"`
 }
+func (FunctionsTaskExpressionVectorFunction) SchemaVariantTitle() string { return "VectorFunction" }
 
 type FunctionsTaskExpressionVectorCompletion struct {
 	FunctionsVectorCompletionTaskExpression
 	Type string `json:"type" validate:"oneof=vector.completion"`
 }
+func (FunctionsTaskExpressionVectorCompletion) SchemaVariantTitle() string { return "VectorCompletion" }
 
 type FunctionsTaskExpressionPlaceholderScalarFunction struct {
 	FunctionsPlaceholderScalarFunctionTaskExpression
 	Type string `json:"type" validate:"oneof=placeholder.scalar.function"`
 }
+func (FunctionsTaskExpressionPlaceholderScalarFunction) SchemaVariantTitle() string { return "PlaceholderScalarFunction" }
 
 type FunctionsTaskExpressionPlaceholderVectorFunction struct {
 	FunctionsPlaceholderVectorFunctionTaskExpression
 	Type string `json:"type" validate:"oneof=placeholder.vector.function"`
 }
+func (FunctionsTaskExpressionPlaceholderVectorFunction) SchemaVariantTitle() string { return "PlaceholderVectorFunction" }
 
 // A task definition with expressions (pre-compilation).
 //

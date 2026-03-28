@@ -11,11 +11,13 @@ type FunctionsInventionsStateInputSchemaScalarFunctionInputSchema struct {
 	Schema FunctionsExpressionObjectInputSchema `json:"schema"`
 	Type string `json:"type" validate:"oneof=alpha.scalar.function"`
 }
+func (FunctionsInventionsStateInputSchemaScalarFunctionInputSchema) SchemaVariantTitle() string { return "ScalarFunctionInputSchema" }
 
 type FunctionsInventionsStateInputSchemaVectorFunctionInputSchema struct {
 	Schema FunctionsAlphaVectorExpressionVectorFunctionInputSchema `json:"schema"`
 	Type string `json:"type" validate:"oneof=alpha.vector.function"`
 }
+func (FunctionsInventionsStateInputSchemaVectorFunctionInputSchema) SchemaVariantTitle() string { return "VectorFunctionInputSchema" }
 
 // Tagged union of input schema types for invention state serialization.
 // The actual schema is nested under a `schema` key to avoid conflicts

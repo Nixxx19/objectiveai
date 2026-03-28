@@ -11,16 +11,19 @@ type FunctionsProfilesComputationsRequestTargetScalar struct {
 	Type string `json:"type" validate:"oneof=scalar"`
 	Value float64 `json:"value" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }
+func (FunctionsProfilesComputationsRequestTargetScalar) SchemaVariantTitle() string { return "Scalar" }
 
 type FunctionsProfilesComputationsRequestTargetVector struct {
 	Type string `json:"type" validate:"oneof=vector"`
 	Value []float64 `json:"value" validate:"dive,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }
+func (FunctionsProfilesComputationsRequestTargetVector) SchemaVariantTitle() string { return "Vector" }
 
 type FunctionsProfilesComputationsRequestTargetVectorWinner struct {
 	Type string `json:"type" validate:"oneof=vector_winner"`
 	Value uint32 `json:"value" validate:"min=0,max=4294967295"`
 }
+func (FunctionsProfilesComputationsRequestTargetVectorWinner) SchemaVariantTitle() string { return "VectorWinner" }
 
 type FunctionsProfilesComputationsRequestTarget struct {
 	Scalar *FunctionsProfilesComputationsRequestTargetScalar 

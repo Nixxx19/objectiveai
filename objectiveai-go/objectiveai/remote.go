@@ -7,14 +7,26 @@ import (
 	"fmt"
 )
 
+type RemoteGithub string
+
+func (RemoteGithub) SchemaVariantTitle() string { return "Github" }
+
+type RemoteFilesystem string
+
+func (RemoteFilesystem) SchemaVariantTitle() string { return "Filesystem" }
+
+type RemoteMock string
+
+func (RemoteMock) SchemaVariantTitle() string { return "Mock" }
+
 // The remote source where a function, profile, or agent is hosted.
 type Remote struct {
 	// GitHub repository.
-	Github *string `validate:"oneof=github"`
+	Github *RemoteGithub `validate:"oneof=github"`
 	// Local filesystem.
-	Filesystem *string `validate:"oneof=filesystem"`
+	Filesystem *RemoteFilesystem `validate:"oneof=filesystem"`
 	// Mock (for testing).
-	Mock *string `validate:"oneof=mock"`
+	Mock *RemoteMock `validate:"oneof=mock"`
 }
 
 func (v Remote) MarshalJSON() ([]byte, error) {
@@ -35,7 +47,7 @@ func (v *Remote) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try string
+		var try RemoteGithub
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := Remote{}
 			candidate.Github = &try
@@ -46,7 +58,7 @@ func (v *Remote) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try RemoteFilesystem
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := Remote{}
 			candidate.Filesystem = &try
@@ -57,7 +69,7 @@ func (v *Remote) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try RemoteMock
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := Remote{}
 			candidate.Mock = &try

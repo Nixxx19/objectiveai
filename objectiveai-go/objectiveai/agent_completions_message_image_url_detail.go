@@ -7,14 +7,26 @@ import (
 	"fmt"
 )
 
+type AgentCompletionsMessageImageUrlDetailAuto string
+
+func (AgentCompletionsMessageImageUrlDetailAuto) SchemaVariantTitle() string { return "Auto" }
+
+type AgentCompletionsMessageImageUrlDetailLow string
+
+func (AgentCompletionsMessageImageUrlDetailLow) SchemaVariantTitle() string { return "Low" }
+
+type AgentCompletionsMessageImageUrlDetailHigh string
+
+func (AgentCompletionsMessageImageUrlDetailHigh) SchemaVariantTitle() string { return "High" }
+
 // Detail level for image processing.
 type AgentCompletionsMessageImageUrlDetail struct {
 	// Let the model decide the detail level.
-	Auto *string `validate:"oneof=auto"`
+	Auto *AgentCompletionsMessageImageUrlDetailAuto `validate:"oneof=auto"`
 	// Low detail mode (faster, less tokens).
-	Low *string `validate:"oneof=low"`
+	Low *AgentCompletionsMessageImageUrlDetailLow `validate:"oneof=low"`
 	// High detail mode (more accurate, more tokens).
-	High *string `validate:"oneof=high"`
+	High *AgentCompletionsMessageImageUrlDetailHigh `validate:"oneof=high"`
 }
 
 func (v AgentCompletionsMessageImageUrlDetail) MarshalJSON() ([]byte, error) {
@@ -35,7 +47,7 @@ func (v *AgentCompletionsMessageImageUrlDetail) UnmarshalJSON(data []byte) error
 		return nil
 	}
 	{
-		var try string
+		var try AgentCompletionsMessageImageUrlDetailAuto
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageImageUrlDetail{}
 			candidate.Auto = &try
@@ -46,7 +58,7 @@ func (v *AgentCompletionsMessageImageUrlDetail) UnmarshalJSON(data []byte) error
 		}
 	}
 	{
-		var try string
+		var try AgentCompletionsMessageImageUrlDetailLow
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageImageUrlDetail{}
 			candidate.Low = &try
@@ -57,7 +69,7 @@ func (v *AgentCompletionsMessageImageUrlDetail) UnmarshalJSON(data []byte) error
 		}
 	}
 	{
-		var try string
+		var try AgentCompletionsMessageImageUrlDetailHigh
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageImageUrlDetail{}
 			candidate.High = &try

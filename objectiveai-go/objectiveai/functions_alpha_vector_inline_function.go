@@ -11,11 +11,13 @@ type FunctionsAlphaVectorInlineFunctionBranch struct {
 	Tasks []FunctionsAlphaVectorBranchTaskExpression `json:"tasks"`
 	Type string `json:"type" validate:"oneof=alpha.vector.branch.function"`
 }
+func (FunctionsAlphaVectorInlineFunctionBranch) SchemaVariantTitle() string { return "Branch" }
 
 type FunctionsAlphaVectorInlineFunctionLeaf struct {
 	Tasks []FunctionsAlphaVectorLeafTaskExpression `json:"tasks"`
 	Type string `json:"type" validate:"oneof=alpha.vector.leaf.function"`
 }
+func (FunctionsAlphaVectorInlineFunctionLeaf) SchemaVariantTitle() string { return "Leaf" }
 
 type FunctionsAlphaVectorInlineFunction struct {
 	Branch *FunctionsAlphaVectorInlineFunctionBranch 

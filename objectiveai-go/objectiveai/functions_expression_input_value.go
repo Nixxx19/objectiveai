@@ -7,6 +7,30 @@ import (
 	"fmt"
 )
 
+type FunctionsExpressionInputValueObject map[string]FunctionsExpressionInputValue
+
+func (FunctionsExpressionInputValueObject) SchemaVariantTitle() string { return "Object" }
+
+type FunctionsExpressionInputValueArray []FunctionsExpressionInputValue
+
+func (FunctionsExpressionInputValueArray) SchemaVariantTitle() string { return "Array" }
+
+type FunctionsExpressionInputValueString string
+
+func (FunctionsExpressionInputValueString) SchemaVariantTitle() string { return "String" }
+
+type FunctionsExpressionInputValueInteger int64
+
+func (FunctionsExpressionInputValueInteger) SchemaVariantTitle() string { return "Integer" }
+
+type FunctionsExpressionInputValueNumber float64
+
+func (FunctionsExpressionInputValueNumber) SchemaVariantTitle() string { return "Number" }
+
+type FunctionsExpressionInputValueBoolean bool
+
+func (FunctionsExpressionInputValueBoolean) SchemaVariantTitle() string { return "Boolean" }
+
 // A concrete input value (post-compilation).
 //
 // Represents any JSON-like value that can be passed to a Function,
@@ -15,17 +39,17 @@ type FunctionsExpressionInputValue struct {
 	// Rich content (image, audio, video, file).
 	RichContentPart *AgentCompletionsMessageRichContentPart 
 	// An object with string keys.
-	Object map[string]FunctionsExpressionInputValue 
+	Object *FunctionsExpressionInputValueObject 
 	// An array of values.
-	Array []FunctionsExpressionInputValue 
+	Array *FunctionsExpressionInputValueArray 
 	// A string value.
-	String *string 
+	String *FunctionsExpressionInputValueString 
 	// An integer value.
-	Integer *int64 `validate:"min=-9223372036854775808,max=9223372036854775807"`
+	Integer *FunctionsExpressionInputValueInteger `validate:"min=-9223372036854775808,max=9223372036854775807"`
 	// A floating-point number.
-	Number *float64 `validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
+	Number *FunctionsExpressionInputValueNumber `validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// A boolean value.
-	Boolean *bool 
+	Boolean *FunctionsExpressionInputValueBoolean 
 }
 
 func (v FunctionsExpressionInputValue) MarshalJSON() ([]byte, error) {
@@ -69,10 +93,10 @@ func (v *FunctionsExpressionInputValue) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try map[string]FunctionsExpressionInputValue
+		var try FunctionsExpressionInputValueObject
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputValue{}
-			candidate.Object = try
+			candidate.Object = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -80,10 +104,10 @@ func (v *FunctionsExpressionInputValue) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try []FunctionsExpressionInputValue
+		var try FunctionsExpressionInputValueArray
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputValue{}
-			candidate.Array = try
+			candidate.Array = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -91,7 +115,7 @@ func (v *FunctionsExpressionInputValue) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try FunctionsExpressionInputValueString
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputValue{}
 			candidate.String = &try
@@ -102,7 +126,7 @@ func (v *FunctionsExpressionInputValue) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try int64
+		var try FunctionsExpressionInputValueInteger
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputValue{}
 			candidate.Integer = &try
@@ -113,7 +137,7 @@ func (v *FunctionsExpressionInputValue) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try float64
+		var try FunctionsExpressionInputValueNumber
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputValue{}
 			candidate.Number = &try
@@ -124,7 +148,7 @@ func (v *FunctionsExpressionInputValue) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try bool
+		var try FunctionsExpressionInputValueBoolean
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionInputValue{}
 			candidate.Boolean = &try

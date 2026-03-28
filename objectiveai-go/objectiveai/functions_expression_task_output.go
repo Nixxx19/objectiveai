@@ -7,16 +7,32 @@ import (
 	"fmt"
 )
 
+type FunctionsExpressionTaskOutputScalar float64
+
+func (FunctionsExpressionTaskOutputScalar) SchemaVariantTitle() string { return "Scalar" }
+
+type FunctionsExpressionTaskOutputVector []float64
+
+func (FunctionsExpressionTaskOutputVector) SchemaVariantTitle() string { return "Vector" }
+
+type FunctionsExpressionTaskOutputVectors [][]float64
+
+func (FunctionsExpressionTaskOutputVectors) SchemaVariantTitle() string { return "Vectors" }
+
+type FunctionsExpressionTaskOutputErr any
+
+func (FunctionsExpressionTaskOutputErr) SchemaVariantTitle() string { return "Err" }
+
 // Owned task output variants.
 type FunctionsExpressionTaskOutput struct {
 	// A single scalar score.
-	Scalar *float64 `validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
+	Scalar *FunctionsExpressionTaskOutputScalar `validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// A vector of scores.
-	Vector []float64 `validate:"dive,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
+	Vector *FunctionsExpressionTaskOutputVector `validate:"dive,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// Multiple vectors of scores (from mapped tasks).
-	Vectors [][]float64 
+	Vectors *FunctionsExpressionTaskOutputVectors 
 	// An error occurred during execution.
-	Err any 
+	Err *FunctionsExpressionTaskOutputErr 
 }
 
 func (v FunctionsExpressionTaskOutput) MarshalJSON() ([]byte, error) {
@@ -40,7 +56,7 @@ func (v *FunctionsExpressionTaskOutput) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try float64
+		var try FunctionsExpressionTaskOutputScalar
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionTaskOutput{}
 			candidate.Scalar = &try
@@ -51,10 +67,10 @@ func (v *FunctionsExpressionTaskOutput) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try []float64
+		var try FunctionsExpressionTaskOutputVector
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionTaskOutput{}
-			candidate.Vector = try
+			candidate.Vector = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -62,10 +78,10 @@ func (v *FunctionsExpressionTaskOutput) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try [][]float64
+		var try FunctionsExpressionTaskOutputVectors
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionTaskOutput{}
-			candidate.Vectors = try
+			candidate.Vectors = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -73,10 +89,10 @@ func (v *FunctionsExpressionTaskOutput) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try any
+		var try FunctionsExpressionTaskOutputErr
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionTaskOutput{}
-			candidate.Err = try
+			candidate.Err = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil

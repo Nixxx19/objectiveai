@@ -11,26 +11,31 @@ type AgentCompletionsMessageMessageExpressionDeveloper struct {
 	AgentCompletionsMessageDeveloperMessageExpression
 	Role string `json:"role" validate:"oneof=developer"`
 }
+func (AgentCompletionsMessageMessageExpressionDeveloper) SchemaVariantTitle() string { return "Developer" }
 
 type AgentCompletionsMessageMessageExpressionSystem struct {
 	AgentCompletionsMessageSystemMessageExpression
 	Role string `json:"role" validate:"oneof=system"`
 }
+func (AgentCompletionsMessageMessageExpressionSystem) SchemaVariantTitle() string { return "System" }
 
 type AgentCompletionsMessageMessageExpressionUser struct {
 	AgentCompletionsMessageUserMessageExpression
 	Role string `json:"role" validate:"oneof=user"`
 }
+func (AgentCompletionsMessageMessageExpressionUser) SchemaVariantTitle() string { return "User" }
 
 type AgentCompletionsMessageMessageExpressionAssistant struct {
 	AgentCompletionsMessageAssistantMessageExpression
 	Role string `json:"role" validate:"oneof=assistant"`
 }
+func (AgentCompletionsMessageMessageExpressionAssistant) SchemaVariantTitle() string { return "Assistant" }
 
 type AgentCompletionsMessageMessageExpressionTool struct {
 	AgentCompletionsMessageToolMessageExpression
 	Role string `json:"role" validate:"oneof=tool"`
 }
+func (AgentCompletionsMessageMessageExpressionTool) SchemaVariantTitle() string { return "Tool" }
 
 // A message with expressions for dynamic content.
 //

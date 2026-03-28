@@ -7,29 +7,65 @@ import (
 	"fmt"
 )
 
+type AgentOpenrouterProviderQuantizationInt4 string
+
+func (AgentOpenrouterProviderQuantizationInt4) SchemaVariantTitle() string { return "Int4" }
+
+type AgentOpenrouterProviderQuantizationInt8 string
+
+func (AgentOpenrouterProviderQuantizationInt8) SchemaVariantTitle() string { return "Int8" }
+
+type AgentOpenrouterProviderQuantizationFp4 string
+
+func (AgentOpenrouterProviderQuantizationFp4) SchemaVariantTitle() string { return "Fp4" }
+
+type AgentOpenrouterProviderQuantizationFp6 string
+
+func (AgentOpenrouterProviderQuantizationFp6) SchemaVariantTitle() string { return "Fp6" }
+
+type AgentOpenrouterProviderQuantizationFp8 string
+
+func (AgentOpenrouterProviderQuantizationFp8) SchemaVariantTitle() string { return "Fp8" }
+
+type AgentOpenrouterProviderQuantizationFp16 string
+
+func (AgentOpenrouterProviderQuantizationFp16) SchemaVariantTitle() string { return "Fp16" }
+
+type AgentOpenrouterProviderQuantizationBf16 string
+
+func (AgentOpenrouterProviderQuantizationBf16) SchemaVariantTitle() string { return "Bf16" }
+
+type AgentOpenrouterProviderQuantizationFp32 string
+
+func (AgentOpenrouterProviderQuantizationFp32) SchemaVariantTitle() string { return "Fp32" }
+
+type AgentOpenrouterProviderQuantizationUnknown string
+
+func (AgentOpenrouterProviderQuantizationUnknown) SchemaVariantTitle() string { return "Unknown" }
+
 // Model quantization levels for provider filtering.
 //
 // Quantization reduces model precision to decrease memory usage and
 // increase inference speed, potentially at the cost of output quality.
 type AgentOpenrouterProviderQuantization struct {
 	// 4-bit integer quantization.
-	Int4 *string `validate:"oneof=int4"`
+	Int4 *AgentOpenrouterProviderQuantizationInt4 `validate:"oneof=int4"`
 	// 8-bit integer quantization.
-	Int8 *string `validate:"oneof=int8"`
+	Int8 *AgentOpenrouterProviderQuantizationInt8 `validate:"oneof=int8"`
 	// 4-bit floating point quantization.
-	Fp4 *string `validate:"oneof=fp4"`
+	Fp4 *AgentOpenrouterProviderQuantizationFp4 `validate:"oneof=fp4"`
 	// 6-bit floating point quantization.
-	Fp6 *string `validate:"oneof=fp6"`
+	Fp6 *AgentOpenrouterProviderQuantizationFp6 `validate:"oneof=fp6"`
 	// 8-bit floating point quantization.
-	Fp8 *string `validate:"oneof=fp8"`
+	Fp8 *AgentOpenrouterProviderQuantizationFp8 `validate:"oneof=fp8"`
 	// 16-bit floating point (half precision).
-	Fp16 *string `validate:"oneof=fp16"`
+	Fp16 *AgentOpenrouterProviderQuantizationFp16 `validate:"oneof=fp16"`
 	// 16-bit brain floating point.
-	Bf16 *string `validate:"oneof=bf16"`
+	Bf16 *AgentOpenrouterProviderQuantizationBf16 `validate:"oneof=bf16"`
 	// 32-bit floating point (full precision).
-	Fp32 *string `validate:"oneof=fp32"`
+	Fp32 *AgentOpenrouterProviderQuantizationFp32 `validate:"oneof=fp32"`
 	// Unknown quantization level.
-	Unknown *string `validate:"oneof=unknown"`
+	Unknown *AgentOpenrouterProviderQuantizationUnknown `validate:"oneof=unknown"`
 }
 
 func (v AgentOpenrouterProviderQuantization) MarshalJSON() ([]byte, error) {
@@ -68,7 +104,7 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try string
+		var try AgentOpenrouterProviderQuantizationInt4
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterProviderQuantization{}
 			candidate.Int4 = &try
@@ -79,7 +115,7 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterProviderQuantizationInt8
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterProviderQuantization{}
 			candidate.Int8 = &try
@@ -90,7 +126,7 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterProviderQuantizationFp4
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterProviderQuantization{}
 			candidate.Fp4 = &try
@@ -101,7 +137,7 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterProviderQuantizationFp6
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterProviderQuantization{}
 			candidate.Fp6 = &try
@@ -112,7 +148,7 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterProviderQuantizationFp8
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterProviderQuantization{}
 			candidate.Fp8 = &try
@@ -123,7 +159,7 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterProviderQuantizationFp16
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterProviderQuantization{}
 			candidate.Fp16 = &try
@@ -134,7 +170,7 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterProviderQuantizationBf16
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterProviderQuantization{}
 			candidate.Bf16 = &try
@@ -145,7 +181,7 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterProviderQuantizationFp32
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterProviderQuantization{}
 			candidate.Fp32 = &try
@@ -156,7 +192,7 @@ func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterProviderQuantizationUnknown
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterProviderQuantization{}
 			candidate.Unknown = &try

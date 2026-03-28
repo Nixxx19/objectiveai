@@ -7,12 +7,20 @@ import (
 	"fmt"
 )
 
+type AgentCompletionsMessageSimpleContentText string
+
+func (AgentCompletionsMessageSimpleContentText) SchemaVariantTitle() string { return "Text" }
+
+type AgentCompletionsMessageSimpleContentParts []AgentCompletionsMessageSimpleContentPart
+
+func (AgentCompletionsMessageSimpleContentParts) SchemaVariantTitle() string { return "Parts" }
+
 // Simple text content for system/developer messages.
 type AgentCompletionsMessageSimpleContent struct {
 	// Plain text content.
-	Text *string 
+	Text *AgentCompletionsMessageSimpleContentText 
 	// Multi-part text content.
-	Parts []AgentCompletionsMessageSimpleContentPart 
+	Parts *AgentCompletionsMessageSimpleContentParts 
 }
 
 func (v AgentCompletionsMessageSimpleContent) MarshalJSON() ([]byte, error) {
@@ -30,7 +38,7 @@ func (v *AgentCompletionsMessageSimpleContent) UnmarshalJSON(data []byte) error 
 		return nil
 	}
 	{
-		var try string
+		var try AgentCompletionsMessageSimpleContentText
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageSimpleContent{}
 			candidate.Text = &try
@@ -41,10 +49,10 @@ func (v *AgentCompletionsMessageSimpleContent) UnmarshalJSON(data []byte) error 
 		}
 	}
 	{
-		var try []AgentCompletionsMessageSimpleContentPart
+		var try AgentCompletionsMessageSimpleContentParts
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageSimpleContent{}
-			candidate.Parts = try
+			candidate.Parts = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil

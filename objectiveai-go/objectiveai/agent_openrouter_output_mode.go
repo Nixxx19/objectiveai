@@ -7,6 +7,18 @@ import (
 	"fmt"
 )
 
+type AgentOpenrouterOutputModeInstruction string
+
+func (AgentOpenrouterOutputModeInstruction) SchemaVariantTitle() string { return "Instruction" }
+
+type AgentOpenrouterOutputModeJsonSchema string
+
+func (AgentOpenrouterOutputModeJsonSchema) SchemaVariantTitle() string { return "JsonSchema" }
+
+type AgentOpenrouterOutputModeToolCall string
+
+func (AgentOpenrouterOutputModeToolCall) SchemaVariantTitle() string { return "ToolCall" }
+
 // The method used to constrain LLM output to valid response keys.
 //
 // In vector completions, the model must select from a predefined set of
@@ -18,15 +30,15 @@ type AgentOpenrouterOutputMode struct {
 	// The model is instructed via the prompt to output a specific key.
 	//
 	// This is the default and most widely supported mode.
-	Instruction *string `validate:"oneof=instruction"`
+	Instruction *AgentOpenrouterOutputModeInstruction `validate:"oneof=instruction"`
 	// A JSON schema response format is used with an enum of possible keys.
 	//
 	// Requires model support for structured JSON output.
-	JsonSchema *string `validate:"oneof=json_schema"`
+	JsonSchema *AgentOpenrouterOutputModeJsonSchema `validate:"oneof=json_schema"`
 	// A forced tool call with an argument schema containing possible keys.
 	//
 	// Requires model support for tool/function calling.
-	ToolCall *string `validate:"oneof=tool_call"`
+	ToolCall *AgentOpenrouterOutputModeToolCall `validate:"oneof=tool_call"`
 }
 
 func (v AgentOpenrouterOutputMode) MarshalJSON() ([]byte, error) {
@@ -47,7 +59,7 @@ func (v *AgentOpenrouterOutputMode) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try string
+		var try AgentOpenrouterOutputModeInstruction
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterOutputMode{}
 			candidate.Instruction = &try
@@ -58,7 +70,7 @@ func (v *AgentOpenrouterOutputMode) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterOutputModeJsonSchema
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterOutputMode{}
 			candidate.JsonSchema = &try
@@ -69,7 +81,7 @@ func (v *AgentOpenrouterOutputMode) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterOutputModeToolCall
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterOutputMode{}
 			candidate.ToolCall = &try

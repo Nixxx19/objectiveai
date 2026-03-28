@@ -13,6 +13,7 @@ type FunctionsExpressionExpressionJMESPath struct {
 }
 
 func (FunctionsExpressionExpressionJMESPath) AdditionalProperties() bool { return false }
+func (FunctionsExpressionExpressionJMESPath) SchemaVariantTitle() string { return "JMESPath" }
 
 // A Starlark expression.
 type FunctionsExpressionExpressionStarlark struct {
@@ -20,6 +21,7 @@ type FunctionsExpressionExpressionStarlark struct {
 }
 
 func (FunctionsExpressionExpressionStarlark) AdditionalProperties() bool { return false }
+func (FunctionsExpressionExpressionStarlark) SchemaVariantTitle() string { return "Starlark" }
 
 // A predefined special expression variant.
 type FunctionsExpressionExpressionSpecial struct {
@@ -27,6 +29,7 @@ type FunctionsExpressionExpressionSpecial struct {
 }
 
 func (FunctionsExpressionExpressionSpecial) AdditionalProperties() bool { return false }
+func (FunctionsExpressionExpressionSpecial) SchemaVariantTitle() string { return "Special" }
 
 // An expression that can be either JMESPath or Starlark.
 //

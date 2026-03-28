@@ -7,15 +7,23 @@ import (
 	"fmt"
 )
 
+type AgentOpenrouterStopString string
+
+func (AgentOpenrouterStopString) SchemaVariantTitle() string { return "String" }
+
+type AgentOpenrouterStopStrings []string
+
+func (AgentOpenrouterStopStrings) SchemaVariantTitle() string { return "Strings" }
+
 // Stop sequences that terminate model generation.
 //
 // When the model generates any of these sequences, it immediately
 // stops producing further tokens.
 type AgentOpenrouterStop struct {
 	// A single stop sequence.
-	String *string 
+	String *AgentOpenrouterStopString 
 	// Multiple stop sequences (up to 4 typically supported).
-	Strings []string 
+	Strings *AgentOpenrouterStopStrings 
 }
 
 func (v AgentOpenrouterStop) MarshalJSON() ([]byte, error) {
@@ -33,7 +41,7 @@ func (v *AgentOpenrouterStop) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try string
+		var try AgentOpenrouterStopString
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterStop{}
 			candidate.String = &try
@@ -44,10 +52,10 @@ func (v *AgentOpenrouterStop) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try []string
+		var try AgentOpenrouterStopStrings
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterStop{}
-			candidate.Strings = try
+			candidate.Strings = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil

@@ -7,14 +7,26 @@ import (
 	"fmt"
 )
 
+type AgentCompletionsRequestProviderSortPrice string
+
+func (AgentCompletionsRequestProviderSortPrice) SchemaVariantTitle() string { return "Price" }
+
+type AgentCompletionsRequestProviderSortThroughput string
+
+func (AgentCompletionsRequestProviderSortThroughput) SchemaVariantTitle() string { return "Throughput" }
+
+type AgentCompletionsRequestProviderSortLatency string
+
+func (AgentCompletionsRequestProviderSortLatency) SchemaVariantTitle() string { return "Latency" }
+
 // How to sort/prioritize providers.
 type AgentCompletionsRequestProviderSort struct {
 	// Prioritize by price (cheapest first).
-	Price *string `validate:"oneof=price"`
+	Price *AgentCompletionsRequestProviderSortPrice `validate:"oneof=price"`
 	// Prioritize by throughput (fastest first).
-	Throughput *string `validate:"oneof=throughput"`
+	Throughput *AgentCompletionsRequestProviderSortThroughput `validate:"oneof=throughput"`
 	// Prioritize by latency (lowest first).
-	Latency *string `validate:"oneof=latency"`
+	Latency *AgentCompletionsRequestProviderSortLatency `validate:"oneof=latency"`
 }
 
 func (v AgentCompletionsRequestProviderSort) MarshalJSON() ([]byte, error) {
@@ -35,7 +47,7 @@ func (v *AgentCompletionsRequestProviderSort) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try string
+		var try AgentCompletionsRequestProviderSortPrice
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestProviderSort{}
 			candidate.Price = &try
@@ -46,7 +58,7 @@ func (v *AgentCompletionsRequestProviderSort) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentCompletionsRequestProviderSortThroughput
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestProviderSort{}
 			candidate.Throughput = &try
@@ -57,7 +69,7 @@ func (v *AgentCompletionsRequestProviderSort) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentCompletionsRequestProviderSortLatency
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestProviderSort{}
 			candidate.Latency = &try

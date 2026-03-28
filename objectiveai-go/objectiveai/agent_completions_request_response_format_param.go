@@ -7,12 +7,16 @@ import (
 	"fmt"
 )
 
+type AgentCompletionsRequestResponseFormatParamPerAgent map[string]AgentCompletionsRequestResponseFormat
+
+func (AgentCompletionsRequestResponseFormatParamPerAgent) SchemaVariantTitle() string { return "PerAgent" }
+
 // Either a single response format or a per-agent map.
 type AgentCompletionsRequestResponseFormatParam struct {
 	// A single response format applied to all agents.
 	Single *AgentCompletionsRequestResponseFormat 
 	// Per-agent response formats, keyed by agent ID.
-	PerAgent map[string]AgentCompletionsRequestResponseFormat 
+	PerAgent *AgentCompletionsRequestResponseFormatParamPerAgent 
 }
 
 func (v AgentCompletionsRequestResponseFormatParam) MarshalJSON() ([]byte, error) {
@@ -41,10 +45,10 @@ func (v *AgentCompletionsRequestResponseFormatParam) UnmarshalJSON(data []byte) 
 		}
 	}
 	{
-		var try map[string]AgentCompletionsRequestResponseFormat
+		var try AgentCompletionsRequestResponseFormatParamPerAgent
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsRequestResponseFormatParam{}
-			candidate.PerAgent = try
+			candidate.PerAgent = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil

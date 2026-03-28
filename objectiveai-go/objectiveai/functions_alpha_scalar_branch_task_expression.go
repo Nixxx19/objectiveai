@@ -11,11 +11,13 @@ type FunctionsAlphaScalarBranchTaskExpressionScalarFunction struct {
 	FunctionsAlphaScalarScalarFunctionTaskExpression
 	Type string `json:"type" validate:"oneof=alpha.scalar.function"`
 }
+func (FunctionsAlphaScalarBranchTaskExpressionScalarFunction) SchemaVariantTitle() string { return "ScalarFunction" }
 
 type FunctionsAlphaScalarBranchTaskExpressionPlaceholderScalarFunction struct {
 	FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpression
 	Type string `json:"type" validate:"oneof=placeholder.alpha.scalar.function"`
 }
+func (FunctionsAlphaScalarBranchTaskExpressionPlaceholderScalarFunction) SchemaVariantTitle() string { return "PlaceholderScalarFunction" }
 
 type FunctionsAlphaScalarBranchTaskExpression struct {
 	ScalarFunction *FunctionsAlphaScalarBranchTaskExpressionScalarFunction 

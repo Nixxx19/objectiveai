@@ -33,6 +33,7 @@ type AgentCompletionsMessageRichContentPartExpressionText struct {
 	Text any `json:"text"`
 	Type string `json:"type" validate:"oneof=text"`
 }
+func (AgentCompletionsMessageRichContentPartExpressionText) SchemaVariantTitle() string { return "Text" }
 
 type AgentCompletionsMessageRichContentPartExpressionImageUrl struct {
 	// A value that can be either a literal or an expression.
@@ -60,6 +61,7 @@ type AgentCompletionsMessageRichContentPartExpressionImageUrl struct {
 	ImageURL any `json:"image_url"`
 	Type string `json:"type" validate:"oneof=image_url"`
 }
+func (AgentCompletionsMessageRichContentPartExpressionImageUrl) SchemaVariantTitle() string { return "ImageUrl" }
 
 type AgentCompletionsMessageRichContentPartExpressionInputAudio struct {
 	// A value that can be either a literal or an expression.
@@ -87,6 +89,7 @@ type AgentCompletionsMessageRichContentPartExpressionInputAudio struct {
 	InputAudio any `json:"input_audio"`
 	Type string `json:"type" validate:"oneof=input_audio"`
 }
+func (AgentCompletionsMessageRichContentPartExpressionInputAudio) SchemaVariantTitle() string { return "InputAudio" }
 
 type AgentCompletionsMessageRichContentPartExpressionInputVideo struct {
 	Type string `json:"type" validate:"oneof=input_video"`
@@ -114,6 +117,7 @@ type AgentCompletionsMessageRichContentPartExpressionInputVideo struct {
 	// ```
 	VideoURL any `json:"video_url"`
 }
+func (AgentCompletionsMessageRichContentPartExpressionInputVideo) SchemaVariantTitle() string { return "InputVideo" }
 
 type AgentCompletionsMessageRichContentPartExpressionVideoUrl struct {
 	Type string `json:"type" validate:"oneof=video_url"`
@@ -141,6 +145,7 @@ type AgentCompletionsMessageRichContentPartExpressionVideoUrl struct {
 	// ```
 	VideoURL any `json:"video_url"`
 }
+func (AgentCompletionsMessageRichContentPartExpressionVideoUrl) SchemaVariantTitle() string { return "VideoUrl" }
 
 type AgentCompletionsMessageRichContentPartExpressionFile struct {
 	// A value that can be either a literal or an expression.
@@ -168,6 +173,7 @@ type AgentCompletionsMessageRichContentPartExpressionFile struct {
 	File any `json:"file"`
 	Type string `json:"type" validate:"oneof=file"`
 }
+func (AgentCompletionsMessageRichContentPartExpressionFile) SchemaVariantTitle() string { return "File" }
 
 // Expression variant of [`RichContentPart`] for dynamic content.
 type AgentCompletionsMessageRichContentPartExpression struct {

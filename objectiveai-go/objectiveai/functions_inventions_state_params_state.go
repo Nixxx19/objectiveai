@@ -11,31 +11,37 @@ type FunctionsInventionsStateParamsStateAlphaScalarBranch struct {
 	FunctionsInventionsStateAlphaScalarBranchState
 	Type string `json:"type" validate:"oneof=alpha.scalar.branch.function"`
 }
+func (FunctionsInventionsStateParamsStateAlphaScalarBranch) SchemaVariantTitle() string { return "AlphaScalarBranch" }
 
 type FunctionsInventionsStateParamsStateAlphaScalarLeaf struct {
 	FunctionsInventionsStateAlphaScalarLeafState
 	Type string `json:"type" validate:"oneof=alpha.scalar.leaf.function"`
 }
+func (FunctionsInventionsStateParamsStateAlphaScalarLeaf) SchemaVariantTitle() string { return "AlphaScalarLeaf" }
 
 type FunctionsInventionsStateParamsStateAlphaVectorBranch struct {
 	FunctionsInventionsStateAlphaVectorBranchState
 	Type string `json:"type" validate:"oneof=alpha.vector.branch.function"`
 }
+func (FunctionsInventionsStateParamsStateAlphaVectorBranch) SchemaVariantTitle() string { return "AlphaVectorBranch" }
 
 type FunctionsInventionsStateParamsStateAlphaVectorLeaf struct {
 	FunctionsInventionsStateAlphaVectorLeafState
 	Type string `json:"type" validate:"oneof=alpha.vector.leaf.function"`
 }
+func (FunctionsInventionsStateParamsStateAlphaVectorLeaf) SchemaVariantTitle() string { return "AlphaVectorLeaf" }
 
 type FunctionsInventionsStateParamsStateAlphaScalar struct {
 	FunctionsInventionsStateAlphaScalarState
 	Type string `json:"type" validate:"oneof=alpha.scalar.function"`
 }
+func (FunctionsInventionsStateParamsStateAlphaScalar) SchemaVariantTitle() string { return "AlphaScalar" }
 
 type FunctionsInventionsStateParamsStateAlphaVector struct {
 	FunctionsInventionsStateAlphaVectorState
 	Type string `json:"type" validate:"oneof=alpha.vector.function"`
 }
+func (FunctionsInventionsStateParamsStateAlphaVector) SchemaVariantTitle() string { return "AlphaVector" }
 
 type FunctionsInventionsStateParamsState struct {
 	AlphaScalarBranch *FunctionsInventionsStateParamsStateAlphaScalarBranch 

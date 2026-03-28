@@ -13,6 +13,7 @@ type FunctionsAlphaVectorRemoteFunctionBranch struct {
 	Tasks []FunctionsAlphaVectorBranchTaskExpression `json:"tasks"`
 	Type string `json:"type" validate:"oneof=alpha.vector.branch.function"`
 }
+func (FunctionsAlphaVectorRemoteFunctionBranch) SchemaVariantTitle() string { return "Branch" }
 
 type FunctionsAlphaVectorRemoteFunctionLeaf struct {
 	Description string `json:"description"`
@@ -20,6 +21,7 @@ type FunctionsAlphaVectorRemoteFunctionLeaf struct {
 	Tasks []FunctionsAlphaVectorLeafTaskExpression `json:"tasks"`
 	Type string `json:"type" validate:"oneof=alpha.vector.leaf.function"`
 }
+func (FunctionsAlphaVectorRemoteFunctionLeaf) SchemaVariantTitle() string { return "Leaf" }
 
 type FunctionsAlphaVectorRemoteFunction struct {
 	Branch *FunctionsAlphaVectorRemoteFunctionBranch 

@@ -7,18 +7,38 @@ import (
 	"fmt"
 )
 
+type AgentCompletionsResponseFinishReasonStop string
+
+func (AgentCompletionsResponseFinishReasonStop) SchemaVariantTitle() string { return "Stop" }
+
+type AgentCompletionsResponseFinishReasonLength string
+
+func (AgentCompletionsResponseFinishReasonLength) SchemaVariantTitle() string { return "Length" }
+
+type AgentCompletionsResponseFinishReasonToolCalls string
+
+func (AgentCompletionsResponseFinishReasonToolCalls) SchemaVariantTitle() string { return "ToolCalls" }
+
+type AgentCompletionsResponseFinishReasonContentFilter string
+
+func (AgentCompletionsResponseFinishReasonContentFilter) SchemaVariantTitle() string { return "ContentFilter" }
+
+type AgentCompletionsResponseFinishReasonError string
+
+func (AgentCompletionsResponseFinishReasonError) SchemaVariantTitle() string { return "Error" }
+
 // The reason the model stopped generating.
 type AgentCompletionsResponseFinishReason struct {
 	// The model reached a natural stop point or stop sequence.
-	Stop *string `validate:"oneof=stop"`
+	Stop *AgentCompletionsResponseFinishReasonStop `validate:"oneof=stop"`
 	// The model reached the maximum token limit.
-	Length *string `validate:"oneof=length"`
+	Length *AgentCompletionsResponseFinishReasonLength `validate:"oneof=length"`
 	// The model decided to call one or more tools.
-	ToolCalls *string `validate:"oneof=tool_calls"`
+	ToolCalls *AgentCompletionsResponseFinishReasonToolCalls `validate:"oneof=tool_calls"`
 	// The response was filtered due to content policy.
-	ContentFilter *string `validate:"oneof=content_filter"`
+	ContentFilter *AgentCompletionsResponseFinishReasonContentFilter `validate:"oneof=content_filter"`
 	// An error occurred during generation.
-	Error *string `validate:"oneof=error"`
+	Error *AgentCompletionsResponseFinishReasonError `validate:"oneof=error"`
 }
 
 func (v AgentCompletionsResponseFinishReason) MarshalJSON() ([]byte, error) {
@@ -45,7 +65,7 @@ func (v *AgentCompletionsResponseFinishReason) UnmarshalJSON(data []byte) error 
 		return nil
 	}
 	{
-		var try string
+		var try AgentCompletionsResponseFinishReasonStop
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsResponseFinishReason{}
 			candidate.Stop = &try
@@ -56,7 +76,7 @@ func (v *AgentCompletionsResponseFinishReason) UnmarshalJSON(data []byte) error 
 		}
 	}
 	{
-		var try string
+		var try AgentCompletionsResponseFinishReasonLength
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsResponseFinishReason{}
 			candidate.Length = &try
@@ -67,7 +87,7 @@ func (v *AgentCompletionsResponseFinishReason) UnmarshalJSON(data []byte) error 
 		}
 	}
 	{
-		var try string
+		var try AgentCompletionsResponseFinishReasonToolCalls
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsResponseFinishReason{}
 			candidate.ToolCalls = &try
@@ -78,7 +98,7 @@ func (v *AgentCompletionsResponseFinishReason) UnmarshalJSON(data []byte) error 
 		}
 	}
 	{
-		var try string
+		var try AgentCompletionsResponseFinishReasonContentFilter
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsResponseFinishReason{}
 			candidate.ContentFilter = &try
@@ -89,7 +109,7 @@ func (v *AgentCompletionsResponseFinishReason) UnmarshalJSON(data []byte) error 
 		}
 	}
 	{
-		var try string
+		var try AgentCompletionsResponseFinishReasonError
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsResponseFinishReason{}
 			candidate.Error = &try

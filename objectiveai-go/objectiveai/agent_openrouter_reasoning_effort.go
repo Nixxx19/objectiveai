@@ -7,22 +7,46 @@ import (
 	"fmt"
 )
 
+type AgentOpenrouterReasoningEffortNone string
+
+func (AgentOpenrouterReasoningEffortNone) SchemaVariantTitle() string { return "None" }
+
+type AgentOpenrouterReasoningEffortMinimal string
+
+func (AgentOpenrouterReasoningEffortMinimal) SchemaVariantTitle() string { return "Minimal" }
+
+type AgentOpenrouterReasoningEffortLow string
+
+func (AgentOpenrouterReasoningEffortLow) SchemaVariantTitle() string { return "Low" }
+
+type AgentOpenrouterReasoningEffortMedium string
+
+func (AgentOpenrouterReasoningEffortMedium) SchemaVariantTitle() string { return "Medium" }
+
+type AgentOpenrouterReasoningEffortHigh string
+
+func (AgentOpenrouterReasoningEffortHigh) SchemaVariantTitle() string { return "High" }
+
+type AgentOpenrouterReasoningEffortXhigh string
+
+func (AgentOpenrouterReasoningEffortXhigh) SchemaVariantTitle() string { return "Xhigh" }
+
 // The level of effort the model should put into reasoning.
 //
 // Only supported by some models.
 type AgentOpenrouterReasoningEffort struct {
 	// No reasoning.
-	None *string `validate:"oneof=none"`
+	None *AgentOpenrouterReasoningEffortNone `validate:"oneof=none"`
 	// Minimal reasoning effort.
-	Minimal *string `validate:"oneof=minimal"`
+	Minimal *AgentOpenrouterReasoningEffortMinimal `validate:"oneof=minimal"`
 	// Low reasoning effort.
-	Low *string `validate:"oneof=low"`
+	Low *AgentOpenrouterReasoningEffortLow `validate:"oneof=low"`
 	// Medium reasoning effort.
-	Medium *string `validate:"oneof=medium"`
+	Medium *AgentOpenrouterReasoningEffortMedium `validate:"oneof=medium"`
 	// High reasoning effort.
-	High *string `validate:"oneof=high"`
+	High *AgentOpenrouterReasoningEffortHigh `validate:"oneof=high"`
 	// Maximum reasoning effort.
-	Xhigh *string `validate:"oneof=xhigh"`
+	Xhigh *AgentOpenrouterReasoningEffortXhigh `validate:"oneof=xhigh"`
 }
 
 func (v AgentOpenrouterReasoningEffort) MarshalJSON() ([]byte, error) {
@@ -52,7 +76,7 @@ func (v *AgentOpenrouterReasoningEffort) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try string
+		var try AgentOpenrouterReasoningEffortNone
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterReasoningEffort{}
 			candidate.None = &try
@@ -63,7 +87,7 @@ func (v *AgentOpenrouterReasoningEffort) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterReasoningEffortMinimal
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterReasoningEffort{}
 			candidate.Minimal = &try
@@ -74,7 +98,7 @@ func (v *AgentOpenrouterReasoningEffort) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterReasoningEffortLow
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterReasoningEffort{}
 			candidate.Low = &try
@@ -85,7 +109,7 @@ func (v *AgentOpenrouterReasoningEffort) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterReasoningEffortMedium
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterReasoningEffort{}
 			candidate.Medium = &try
@@ -96,7 +120,7 @@ func (v *AgentOpenrouterReasoningEffort) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterReasoningEffortHigh
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterReasoningEffort{}
 			candidate.High = &try
@@ -107,7 +131,7 @@ func (v *AgentOpenrouterReasoningEffort) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try AgentOpenrouterReasoningEffortXhigh
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentOpenrouterReasoningEffort{}
 			candidate.Xhigh = &try

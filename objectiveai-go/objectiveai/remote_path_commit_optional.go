@@ -13,6 +13,7 @@ type RemotePathCommitOptionalGithub struct {
 	Remote string `json:"remote" validate:"oneof=github"`
 	Repository string `json:"repository"`
 }
+func (RemotePathCommitOptionalGithub) SchemaVariantTitle() string { return "Github" }
 
 type RemotePathCommitOptionalFilesystem struct {
 	Commit *string `json:"commit,omitempty"`
@@ -20,11 +21,13 @@ type RemotePathCommitOptionalFilesystem struct {
 	Remote string `json:"remote" validate:"oneof=filesystem"`
 	Repository string `json:"repository"`
 }
+func (RemotePathCommitOptionalFilesystem) SchemaVariantTitle() string { return "Filesystem" }
 
 type RemotePathCommitOptionalMock struct {
 	Name string `json:"name"`
 	Remote string `json:"remote" validate:"oneof=mock"`
 }
+func (RemotePathCommitOptionalMock) SchemaVariantTitle() string { return "Mock" }
 
 type RemotePathCommitOptional struct {
 	Github *RemotePathCommitOptionalGithub 

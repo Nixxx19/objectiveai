@@ -20,6 +20,7 @@ type FunctionsRemoteFunctionScalar struct {
 	Tasks []FunctionsTaskExpression `json:"tasks"`
 	Type string `json:"type" validate:"oneof=scalar.function"`
 }
+func (FunctionsRemoteFunctionScalar) SchemaVariantTitle() string { return "Scalar" }
 
 // Produces a vector of scores that sums to 1.
 type FunctionsRemoteFunctionVector struct {
@@ -46,6 +47,7 @@ type FunctionsRemoteFunctionVector struct {
 	Tasks []FunctionsTaskExpression `json:"tasks"`
 	Type string `json:"type" validate:"oneof=vector.function"`
 }
+func (FunctionsRemoteFunctionVector) SchemaVariantTitle() string { return "Vector" }
 
 // A remote function with full metadata.
 //

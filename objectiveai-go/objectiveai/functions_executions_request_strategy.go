@@ -11,6 +11,7 @@ import (
 type FunctionsExecutionsRequestStrategyDefault struct {
 	Type string `json:"type" validate:"oneof=default"`
 }
+func (FunctionsExecutionsRequestStrategyDefault) SchemaVariantTitle() string { return "Default" }
 
 // Vector
 type FunctionsExecutionsRequestStrategySwissSystem struct {
@@ -20,6 +21,7 @@ type FunctionsExecutionsRequestStrategySwissSystem struct {
 	Rounds *uint32 `json:"rounds,omitempty" validate:"min=0,max=4294967295"`
 	Type string `json:"type" validate:"oneof=swiss_system"`
 }
+func (FunctionsExecutionsRequestStrategySwissSystem) SchemaVariantTitle() string { return "SwissSystem" }
 
 type FunctionsExecutionsRequestStrategy struct {
 	// Scalar or Vector

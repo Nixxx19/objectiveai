@@ -458,20 +458,17 @@ func reconstructVariantSchema(
 	titleMap map[string]string,
 	result map[string]any,
 ) map[string]any {
-	var anyOf []any
-	for _, f := range ti.fields {
-		variant := reconstructVariant(f, types, titleMap)
-		anyOf = append(anyOf, variant)
-	}
-
-	// Detect flat root enum: all variants are {title, type:string, enum:[single value]}
-	// with no descriptions. Collapse into {type:string, enum:[all values]}.
-	if isRootEnum(anyOf) {
+	// Detect flat root enum: no variant type has SchemaVariantTitle
+	if isRootEnum(ti, types, titleMap) {
 		var allEnumVals []any
-		for _, v := range anyOf {
-			m := v.(map[string]any)
-			if enumVals, ok := m["enum"].([]any); ok {
-				allEnumVals = append(allEnumVals, enumVals...)
+		for _, f := range ti.fields {
+			validateTag := getTagValue(f.tags, "validate")
+			for _, part := range strings.Split(validateTag, ",") {
+				if strings.HasPrefix(part, "oneof=") {
+					for _, v := range strings.Split(strings.TrimPrefix(part, "oneof="), " ") {
+						allEnumVals = append(allEnumVals, v)
+					}
+				}
 			}
 		}
 		result["type"] = "string"
@@ -479,37 +476,33 @@ func reconstructVariantSchema(
 		return result
 	}
 
+	// anyOf with titled variants
+	var anyOf []any
+	for _, f := range ti.fields {
+		variant := reconstructVariant(f, types, titleMap)
+		anyOf = append(anyOf, variant)
+	}
 	result["anyOf"] = anyOf
 	return result
 }
 
-// isRootEnum returns true if all anyOf variants are simple string enums
-// with no descriptions, $ref, or properties — meaning this was originally
-// a flat {type: string, enum: [...]} that the generator split into variants.
-func isRootEnum(anyOf []any) bool {
-	for _, v := range anyOf {
-		m, ok := v.(map[string]any)
-		if !ok {
-			return false
+// isRootEnum checks if a variant struct represents a flat root enum
+// (no SchemaVariantTitle on any variant type) vs an anyOf with titled variants.
+func isRootEnum(ti *typeInfo, types map[string]*typeInfo, titleMap map[string]string) bool {
+	for _, f := range ti.fields {
+		typeName := strings.TrimPrefix(f.typeName, "*")
+		// If the variant type has SchemaVariantTitle → anyOf
+		if subTi, ok := types[typeName]; ok {
+			if _, has := subTi.methods["SchemaVariantTitle"]; has {
+				return false
+			}
 		}
-		if _, hasRef := m["$ref"]; hasRef {
-			return false
-		}
-		if _, hasProps := m["properties"]; hasProps {
-			return false
-		}
-		if _, hasDesc := m["description"]; hasDesc {
-			return false
-		}
-		if m["type"] != "string" {
-			return false
-		}
-		enumVals, ok := m["enum"].([]any)
-		if !ok || len(enumVals) != 1 {
+		// If the variant type has SchemaTitle → it's a $ref variant, not enum
+		if _, ok := titleMap[typeName]; ok {
 			return false
 		}
 	}
-	return len(anyOf) > 0
+	return true
 }
 
 // addInlineStructProps adds properties and additionalProperties to a variant
@@ -541,20 +534,39 @@ func reconstructVariant(
 	types map[string]*typeInfo,
 	titleMap map[string]string,
 ) map[string]any {
-	variant := map[string]any{"title": f.name}
-	if f.doc != "" {
-		variant["description"] = f.doc
-	}
-
 	typeName := f.typeName
 	if strings.HasPrefix(typeName, "*") {
 		typeName = strings.TrimPrefix(typeName, "*")
+	}
+
+	// Get variant title from SchemaVariantTitle() if available, else field name
+	variantTitle := f.name
+	if subTi, ok := types[typeName]; ok {
+		if svt, ok := subTi.methods["SchemaVariantTitle"]; ok {
+			variantTitle = svt
+		}
+	}
+
+	variant := map[string]any{"title": variantTitle}
+	if f.doc != "" {
+		variant["description"] = f.doc
 	}
 
 	if subTi, ok := types[typeName]; ok && !subTi.isAlias {
 		// If the sub-type has its own SchemaTitle, it's a standalone type → $ref
 		if subTitle, ok := titleMap[typeName]; ok {
 			variant["$ref"] = subTitle
+			return variant
+		}
+
+		// Type definition with underlyingType (primitive variant, e.g., type FooBar string)
+		if subTi.underlyingType != "" {
+			inner := buildFieldTypeSchema(subTi.underlyingType, types, titleMap)
+			validateTag := getTagValue(f.tags, "validate")
+			addValidateConstraints(inner, validateTag)
+			for k, v := range inner {
+				variant[k] = v
+			}
 			return variant
 		}
 

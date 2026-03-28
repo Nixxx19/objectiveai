@@ -11,21 +11,25 @@ type FunctionsInventionsStateStateAlphaScalarBranch struct {
 	FunctionsInventionsStateAlphaScalarBranchState
 	Type string `json:"type" validate:"oneof=alpha.scalar.branch.function"`
 }
+func (FunctionsInventionsStateStateAlphaScalarBranch) SchemaVariantTitle() string { return "AlphaScalarBranch" }
 
 type FunctionsInventionsStateStateAlphaScalarLeaf struct {
 	FunctionsInventionsStateAlphaScalarLeafState
 	Type string `json:"type" validate:"oneof=alpha.scalar.leaf.function"`
 }
+func (FunctionsInventionsStateStateAlphaScalarLeaf) SchemaVariantTitle() string { return "AlphaScalarLeaf" }
 
 type FunctionsInventionsStateStateAlphaVectorBranch struct {
 	FunctionsInventionsStateAlphaVectorBranchState
 	Type string `json:"type" validate:"oneof=alpha.vector.branch.function"`
 }
+func (FunctionsInventionsStateStateAlphaVectorBranch) SchemaVariantTitle() string { return "AlphaVectorBranch" }
 
 type FunctionsInventionsStateStateAlphaVectorLeaf struct {
 	FunctionsInventionsStateAlphaVectorLeafState
 	Type string `json:"type" validate:"oneof=alpha.vector.leaf.function"`
 }
+func (FunctionsInventionsStateStateAlphaVectorLeaf) SchemaVariantTitle() string { return "AlphaVectorLeaf" }
 
 type FunctionsInventionsStateState struct {
 	AlphaScalarBranch *FunctionsInventionsStateStateAlphaScalarBranch 

@@ -7,23 +7,51 @@ import (
 	"fmt"
 )
 
+type FunctionsExpressionSpecialInput string
+
+func (FunctionsExpressionSpecialInput) SchemaVariantTitle() string { return "Input" }
+
+type FunctionsExpressionSpecialOutput string
+
+func (FunctionsExpressionSpecialOutput) SchemaVariantTitle() string { return "Output" }
+
+type FunctionsExpressionSpecialTaskOutputL1Normalized string
+
+func (FunctionsExpressionSpecialTaskOutputL1Normalized) SchemaVariantTitle() string { return "TaskOutputL1Normalized" }
+
+type FunctionsExpressionSpecialTaskOutputWeightedSum string
+
+func (FunctionsExpressionSpecialTaskOutputWeightedSum) SchemaVariantTitle() string { return "TaskOutputWeightedSum" }
+
+type FunctionsExpressionSpecialInputItemsOutputLength string
+
+func (FunctionsExpressionSpecialInputItemsOutputLength) SchemaVariantTitle() string { return "InputItemsOutputLength" }
+
+type FunctionsExpressionSpecialInputItemsOptionalContextSplit string
+
+func (FunctionsExpressionSpecialInputItemsOptionalContextSplit) SchemaVariantTitle() string { return "InputItemsOptionalContextSplit" }
+
+type FunctionsExpressionSpecialInputItemsOptionalContextMerge string
+
+func (FunctionsExpressionSpecialInputItemsOptionalContextMerge) SchemaVariantTitle() string { return "InputItemsOptionalContextMerge" }
+
 // Predefined expression behaviors that require no user-authored code.
 type FunctionsExpressionSpecial struct {
 	// Returns the params input as-is.
-	Input *string `validate:"oneof=input"`
+	Input *FunctionsExpressionSpecialInput `validate:"oneof=input"`
 	// Returns the params output as-is.
-	Output *string `validate:"oneof=output"`
+	Output *FunctionsExpressionSpecialOutput `validate:"oneof=output"`
 	// L1-normalizes the output. Scalar/Err pass through.
 	// Vector: L1 normalize. Vectors: L1 normalize each.
-	TaskOutputL1Normalized *string `validate:"oneof=task_output_l1_normalized"`
+	TaskOutputL1Normalized *FunctionsExpressionSpecialTaskOutputL1Normalized `validate:"oneof=task_output_l1_normalized"`
 	// Weighted sum of the output. Vector → Scalar. Vectors → Vector.
-	TaskOutputWeightedSum *string `validate:"oneof=task_output_weighted_sum"`
+	TaskOutputWeightedSum *FunctionsExpressionSpecialTaskOutputWeightedSum `validate:"oneof=task_output_weighted_sum"`
 	// Returns the length of input['items'] as u64
-	InputItemsOutputLength *string `validate:"oneof=input_items_output_length"`
+	InputItemsOutputLength *FunctionsExpressionSpecialInputItemsOutputLength `validate:"oneof=input_items_output_length"`
 	// Splits an input containing items and optionally context into multiple inputs
-	InputItemsOptionalContextSplit *string `validate:"oneof=input_items_optional_context_split"`
+	InputItemsOptionalContextSplit *FunctionsExpressionSpecialInputItemsOptionalContextSplit `validate:"oneof=input_items_optional_context_split"`
 	// Merges multiple inputs containing items and optionally context into a single input
-	InputItemsOptionalContextMerge *string `validate:"oneof=input_items_optional_context_merge"`
+	InputItemsOptionalContextMerge *FunctionsExpressionSpecialInputItemsOptionalContextMerge `validate:"oneof=input_items_optional_context_merge"`
 }
 
 func (v FunctionsExpressionSpecial) MarshalJSON() ([]byte, error) {
@@ -56,7 +84,7 @@ func (v *FunctionsExpressionSpecial) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	{
-		var try string
+		var try FunctionsExpressionSpecialInput
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionSpecial{}
 			candidate.Input = &try
@@ -67,7 +95,7 @@ func (v *FunctionsExpressionSpecial) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try FunctionsExpressionSpecialOutput
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionSpecial{}
 			candidate.Output = &try
@@ -78,7 +106,7 @@ func (v *FunctionsExpressionSpecial) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try FunctionsExpressionSpecialTaskOutputL1Normalized
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionSpecial{}
 			candidate.TaskOutputL1Normalized = &try
@@ -89,7 +117,7 @@ func (v *FunctionsExpressionSpecial) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try FunctionsExpressionSpecialTaskOutputWeightedSum
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionSpecial{}
 			candidate.TaskOutputWeightedSum = &try
@@ -100,7 +128,7 @@ func (v *FunctionsExpressionSpecial) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try FunctionsExpressionSpecialInputItemsOutputLength
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionSpecial{}
 			candidate.InputItemsOutputLength = &try
@@ -111,7 +139,7 @@ func (v *FunctionsExpressionSpecial) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try FunctionsExpressionSpecialInputItemsOptionalContextSplit
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionSpecial{}
 			candidate.InputItemsOptionalContextSplit = &try
@@ -122,7 +150,7 @@ func (v *FunctionsExpressionSpecial) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try string
+		var try FunctionsExpressionSpecialInputItemsOptionalContextMerge
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := FunctionsExpressionSpecial{}
 			candidate.InputItemsOptionalContextMerge = &try

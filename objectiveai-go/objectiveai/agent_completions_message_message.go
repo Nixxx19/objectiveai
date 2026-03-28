@@ -12,30 +12,35 @@ type AgentCompletionsMessageMessageDeveloper struct {
 	AgentCompletionsMessageDeveloperMessage
 	Role string `json:"role" validate:"oneof=developer"`
 }
+func (AgentCompletionsMessageMessageDeveloper) SchemaVariantTitle() string { return "Developer" }
 
 // A system message setting context or instructions.
 type AgentCompletionsMessageMessageSystem struct {
 	AgentCompletionsMessageSystemMessage
 	Role string `json:"role" validate:"oneof=system"`
 }
+func (AgentCompletionsMessageMessageSystem) SchemaVariantTitle() string { return "System" }
 
 // A user message from the end user.
 type AgentCompletionsMessageMessageUser struct {
 	AgentCompletionsMessageUserMessage
 	Role string `json:"role" validate:"oneof=user"`
 }
+func (AgentCompletionsMessageMessageUser) SchemaVariantTitle() string { return "User" }
 
 // An assistant message (model's previous response).
 type AgentCompletionsMessageMessageAssistant struct {
 	AgentCompletionsMessageAssistantMessage
 	Role string `json:"role" validate:"oneof=assistant"`
 }
+func (AgentCompletionsMessageMessageAssistant) SchemaVariantTitle() string { return "Assistant" }
 
 // A tool message containing the result of a tool call.
 type AgentCompletionsMessageMessageTool struct {
 	AgentCompletionsMessageToolMessage
 	Role string `json:"role" validate:"oneof=tool"`
 }
+func (AgentCompletionsMessageMessageTool) SchemaVariantTitle() string { return "Tool" }
 
 // A message in the conversation.
 type AgentCompletionsMessageMessage struct {

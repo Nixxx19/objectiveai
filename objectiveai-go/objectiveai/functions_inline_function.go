@@ -16,6 +16,7 @@ type FunctionsInlineFunctionScalar struct {
 	Tasks []FunctionsTaskExpression `json:"tasks"`
 	Type string `json:"type" validate:"oneof=scalar.function"`
 }
+func (FunctionsInlineFunctionScalar) SchemaVariantTitle() string { return "Scalar" }
 
 // Produces a vector of scores that sums to 1.
 type FunctionsInlineFunctionVector struct {
@@ -37,6 +38,7 @@ type FunctionsInlineFunctionVector struct {
 	Tasks []FunctionsTaskExpression `json:"tasks"`
 	Type string `json:"type" validate:"oneof=vector.function"`
 }
+func (FunctionsInlineFunctionVector) SchemaVariantTitle() string { return "Vector" }
 
 // An inline function definition without metadata.
 //

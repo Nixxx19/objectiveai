@@ -11,11 +11,13 @@ import (
 type AgentCompletionsRequestResponseFormatText struct {
 	Type string `json:"type" validate:"oneof=text"`
 }
+func (AgentCompletionsRequestResponseFormatText) SchemaVariantTitle() string { return "Text" }
 
 // Response must be valid JSON.
 type AgentCompletionsRequestResponseFormatJsonObject struct {
 	Type string `json:"type" validate:"oneof=json_object"`
 }
+func (AgentCompletionsRequestResponseFormatJsonObject) SchemaVariantTitle() string { return "JsonObject" }
 
 // Response must conform to a JSON schema.
 type AgentCompletionsRequestResponseFormatJsonSchema struct {
@@ -23,17 +25,20 @@ type AgentCompletionsRequestResponseFormatJsonSchema struct {
 	Schema map[string]any `json:"schema"`
 	Type string `json:"type" validate:"oneof=json_schema"`
 }
+func (AgentCompletionsRequestResponseFormatJsonSchema) SchemaVariantTitle() string { return "JsonSchema" }
 
 // Response must conform to a grammar.
 type AgentCompletionsRequestResponseFormatGrammar struct {
 	Grammar string `json:"grammar"`
 	Type string `json:"type" validate:"oneof=grammar"`
 }
+func (AgentCompletionsRequestResponseFormatGrammar) SchemaVariantTitle() string { return "Grammar" }
 
 // Response must be valid Python code.
 type AgentCompletionsRequestResponseFormatPython struct {
 	Type string `json:"type" validate:"oneof=python"`
 }
+func (AgentCompletionsRequestResponseFormatPython) SchemaVariantTitle() string { return "Python" }
 
 // The final assistant message will contain this tool call
 type AgentCompletionsRequestResponseFormatToolCall struct {
@@ -47,6 +52,7 @@ type AgentCompletionsRequestResponseFormatToolCall struct {
 	Schema map[string]any `json:"schema"`
 	Type string `json:"type" validate:"oneof=tool_call"`
 }
+func (AgentCompletionsRequestResponseFormatToolCall) SchemaVariantTitle() string { return "ToolCall" }
 
 // The format of the model's response.
 type AgentCompletionsRequestResponseFormat struct {
