@@ -3,14 +3,8 @@
   "type": "object",
   "properties": {
     "remote": {
-      "anyOf": [
-        {
-          "$ref": "Remote"
-        },
-        {
-          "type": "null"
-        }
-      ]
+      "$ref": "Remote",
+      "default": "filesystem"
     }
   }
 }
