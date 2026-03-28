@@ -58,6 +58,15 @@ where
         Ok(crate::mock::get_profile(name))
     }
 
+    async fn get_function_invention_state_file<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
+        &self,
+        _ctx: &ctx::Context<CTXEXT, PC>,
+        _path: &objectiveai::RemotePath,
+        _filename: &'static str,
+    ) -> Result<Option<String>, ResponseError> {
+        Ok(None)
+    }
+
     async fn resolve_latest<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
         _ctx: &ctx::Context<CTXEXT, PC>,

@@ -165,25 +165,23 @@ impl Client {
         .await
     }
 
-    /// Fetches a JSON file from a GitHub repository and deserializes it.
-    pub async fn read_json<T, CTXEXT: ctx::ContextExt>(
+    /// Fetches a file from a GitHub repository and returns the raw text content.
+    /// Tries raw.githubusercontent.com first, falls back to the Contents API.
+    pub async fn read_file<CTXEXT: ctx::ContextExt>(
         &self,
         ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         owner: &str,
         repository: &str,
         commit: &str,
         path: &str,
-    ) -> Result<Option<T>, super::Error>
-    where
-        T: serde::de::DeserializeOwned,
-    {
+    ) -> Result<Option<String>, super::Error> {
         let token = self.resolve_authorization(ctx).await;
         let token_str: Option<&str> = token.as_deref().map(|s| s.as_str());
         backoff::future::retry(self.backoff(), || async {
-            match self.fetch_file_raw::<T>(token_str, owner, repository, commit, path).await {
+            match self.fetch_file_raw(token_str, owner, repository, commit, path).await {
                 Ok(opt) => Ok(opt),
                 Err(e1) => match self
-                    .fetch_file_api::<T>(token_str, owner, repository, commit, path)
+                    .fetch_file_api(token_str, owner, repository, commit, path)
                     .await
                 {
                     Ok(opt) => Ok(opt),
@@ -196,11 +194,10 @@ impl Client {
         .await
     }
 
-    // ── Private fetch helpers ──────────────────────────────────────
-
-    async fn fetch_file_raw<T>(
+    /// Fetches a JSON file from a GitHub repository and deserializes it.
+    pub async fn read_json<T, CTXEXT: ctx::ContextExt>(
         &self,
-        token: Option<&str>,
+        ctx: &ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         owner: &str,
         repository: &str,
         commit: &str,
@@ -209,6 +206,28 @@ impl Client {
     where
         T: serde::de::DeserializeOwned,
     {
+        match self.read_file(ctx, owner, repository, commit, path).await? {
+            Some(text) => {
+                let mut de = serde_json::Deserializer::from_str(&text);
+                match serde_path_to_error::deserialize::<_, T>(&mut de) {
+                    Ok(value) => Ok(Some(value)),
+                    Err(e) => Err(super::Error::DeserializationError(e)),
+                }
+            }
+            None => Ok(None),
+        }
+    }
+
+    // ── Private fetch helpers ──────────────────────────────────────
+
+    async fn fetch_file_raw(
+        &self,
+        token: Option<&str>,
+        owner: &str,
+        repository: &str,
+        commit: &str,
+        path: &str,
+    ) -> Result<Option<String>, super::Error> {
         let http_request = self.request_headers(
             self.http_client.get(format!(
                 "https://raw.githubusercontent.com/{}/{}/{}/{}",
@@ -223,11 +242,7 @@ impl Client {
         let code = response.status();
         if code.is_success() {
             let text = response.text().await.map_err(super::Error::ResponseError)?;
-            let mut de = serde_json::Deserializer::from_str(&text);
-            match serde_path_to_error::deserialize::<_, T>(&mut de) {
-                Ok(value) => Ok(Some(value)),
-                Err(e) => Err(super::Error::DeserializationError(e)),
-            }
+            Ok(Some(text))
         } else if code == reqwest::StatusCode::NOT_FOUND {
             Ok(None)
         } else {
@@ -235,24 +250,21 @@ impl Client {
         }
     }
 
-    async fn fetch_file_api<T>(
+    async fn fetch_file_api(
         &self,
         token: Option<&str>,
         owner: &str,
         repository: &str,
         commit: &str,
         path: &str,
-    ) -> Result<Option<T>, super::Error>
-    where
-        T: serde::de::DeserializeOwned,
-    {
+    ) -> Result<Option<String>, super::Error> {
         let http_request = self.request_headers(
             self.http_client
                 .get(format!(
                     "https://api.github.com/repos/{}/{}/contents/{}?ref={}",
                     owner, repository, path, commit,
                 ))
-                .header("accept", "application/vnd.github+json"),
+                .header("accept", "application/vnd.github.raw+json"),
             token,
         );
         let response = http_request
@@ -262,11 +274,7 @@ impl Client {
         let code = response.status();
         if code.is_success() {
             let text = response.text().await.map_err(super::Error::ResponseError)?;
-            let mut de = serde_json::Deserializer::from_str(&text);
-            match serde_path_to_error::deserialize::<_, T>(&mut de) {
-                Ok(value) => Ok(Some(value)),
-                Err(e) => Err(super::Error::DeserializationError(e)),
-            }
+            Ok(Some(text))
         } else if code == reqwest::StatusCode::NOT_FOUND {
             Ok(None)
         } else {
