@@ -4,8 +4,13 @@ mod alpha_scalar_state;
 mod alpha_vector_branch_state;
 mod alpha_vector_leaf_state;
 mod alpha_vector_state;
+pub mod error;
+pub(super) mod files;
+mod input_schema;
 mod params;
 mod readme;
+
+pub use input_schema::*;
 
 pub use alpha_scalar_branch_state::*;
 pub use alpha_scalar_leaf_state::*;
@@ -243,6 +248,17 @@ impl State {
             }
         }
     }
+
+    pub fn serialize_into_files(&self) -> std::collections::HashMap<&'static str, String> {
+        let files = match self {
+            State::AlphaScalarBranch(s) => s.serialize_into_files(),
+            State::AlphaScalarLeaf(s) => s.serialize_into_files(),
+            State::AlphaVectorBranch(s) => s.serialize_into_files(),
+            State::AlphaVectorLeaf(s) => s.serialize_into_files(),
+        };
+        files.into_hashmap()
+    }
+
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
@@ -334,6 +350,85 @@ impl ParamsState {
                         readme: None,
                         checker_seed: None,
                     })
+                }
+            }
+        }
+    }
+
+    pub const fn filenames() -> &'static [&'static str] {
+        files::Files::filenames()
+    }
+
+    pub fn serialize_into_files(&self) -> std::collections::HashMap<&'static str, String> {
+        let files = match self {
+            ParamsState::AlphaScalarBranch(s) => s.serialize_into_files(),
+            ParamsState::AlphaScalarLeaf(s) => s.serialize_into_files(),
+            ParamsState::AlphaVectorBranch(s) => s.serialize_into_files(),
+            ParamsState::AlphaVectorLeaf(s) => s.serialize_into_files(),
+            ParamsState::AlphaScalar(s) => s.serialize_into_files(),
+            ParamsState::AlphaVector(s) => s.serialize_into_files(),
+        };
+        files.into_hashmap()
+    }
+
+    pub fn deserialize_from_files(map: std::collections::HashMap<&'static str, String>) -> Result<Option<Self>, error::Error> {
+        let files = files::Files::from_hashmap(map)?;
+
+        // Deserialize function.json if present to determine the routed variant
+        let function: Option<crate::functions::FullRemoteFunction> = files.function_json.as_ref()
+            .map(|json| {
+                let mut de = serde_json::Deserializer::from_str(json);
+                serde_path_to_error::deserialize(&mut de)
+                    .map_err(|e| error::Error::Deserialize {
+                        file: files::Files::FUNCTION_JSON,
+                        source: e,
+                    })
+            })
+            .transpose()?;
+
+        match function {
+            Some(crate::functions::FullRemoteFunction::Alpha(
+                crate::functions::AlphaRemoteFunction::Scalar(
+                    scalar @ crate::functions::alpha_scalar::RemoteFunction::Leaf { .. }
+                )
+            )) => Ok(Some(ParamsState::AlphaScalarLeaf(AlphaScalarLeafState::deserialize_from_files(Some(scalar), &files)?))),
+            Some(crate::functions::FullRemoteFunction::Alpha(
+                crate::functions::AlphaRemoteFunction::Scalar(
+                    scalar @ crate::functions::alpha_scalar::RemoteFunction::Branch { .. }
+                )
+            )) => Ok(Some(ParamsState::AlphaScalarBranch(AlphaScalarBranchState::deserialize_from_files(Some(scalar), &files)?))),
+            Some(crate::functions::FullRemoteFunction::Alpha(
+                crate::functions::AlphaRemoteFunction::Vector(
+                    vector @ crate::functions::alpha_vector::RemoteFunction::Leaf { .. }
+                )
+            )) => Ok(Some(ParamsState::AlphaVectorLeaf(AlphaVectorLeafState::deserialize_from_files(Some(vector), &files)?))),
+            Some(crate::functions::FullRemoteFunction::Alpha(
+                crate::functions::AlphaRemoteFunction::Vector(
+                    vector @ crate::functions::alpha_vector::RemoteFunction::Branch { .. }
+                )
+            )) => Ok(Some(ParamsState::AlphaVectorBranch(AlphaVectorBranchState::deserialize_from_files(Some(vector), &files)?))),
+            Some(other) => Err(error::Error::UnrecognizedFunctionType(format!("{:?}", std::mem::discriminant(&other)))),
+            // No function.json — composite AlphaScalar/AlphaVector from params + optional input_schema
+            None => {
+                let input_schema: Option<InputSchema> = files.input_schema_json.as_ref()
+                    .map(|json| {
+                        let mut de = serde_json::Deserializer::from_str(json);
+                        serde_path_to_error::deserialize(&mut de)
+                            .map_err(|e| error::Error::Deserialize {
+                                file: files::Files::INPUT_SCHEMA_JSON,
+                                source: e,
+                            })
+                    })
+                    .transpose()?;
+
+                match input_schema {
+                    Some(InputSchema::Scalar { schema }) => {
+                        Ok(Some(ParamsState::AlphaScalar(AlphaScalarState::deserialize_from_files(Some(schema), &files)?)))
+                    }
+                    Some(InputSchema::Vector { schema }) => {
+                        Ok(Some(ParamsState::AlphaVector(AlphaVectorState::deserialize_from_files(Some(schema), &files)?)))
+                    }
+                    None => Ok(None),
                 }
             }
         }

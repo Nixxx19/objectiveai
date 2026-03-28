@@ -820,6 +820,52 @@ impl AlphaVectorBranchState {
     }
 }
 
+impl AlphaVectorBranchState {
+    pub(super) fn serialize_into_files(&self) -> super::files::Files {
+        super::files::Files {
+            parameters_json: serde_json::to_string_pretty(&self.params).unwrap_or_default(),
+            function_json: self.build_function().map(|f| serde_json::to_string_pretty(&f).unwrap_or_default()),
+            input_schema_json: self.input_schema.as_ref().map(|s|
+                serde_json::to_string_pretty(&super::InputSchema::Vector { schema: s.clone() }).unwrap_or_default()
+            ),
+            essay_md: self.essay.clone(),
+            essay_tasks_md: self.essay_tasks.clone(),
+            readme_md: self.readme.clone(),
+        }
+    }
+
+    pub(super) fn deserialize_from_files(
+        function: Option<functions::alpha_vector::RemoteFunction>,
+        files: &super::files::Files,
+    ) -> Result<Self, super::error::Error> {
+        let params: super::Params = {
+            let mut de = serde_json::Deserializer::from_str(&files.parameters_json);
+            serde_path_to_error::deserialize(&mut de)
+                .map_err(|e| super::error::Error::Deserialize {
+                    file: super::files::Files::PARAMETERS_JSON,
+                    source: e,
+                })?
+        };
+        let (input_schema, tasks, description) = match function {
+            Some(functions::alpha_vector::RemoteFunction::Branch { description, input_schema, tasks }) => {
+                (Some(input_schema), Some(tasks), Some(description))
+            }
+            _ => (None, None, None),
+        };
+        Ok(Self {
+            params,
+            essay: files.essay_md.clone(),
+            input_schema,
+            essay_tasks: files.essay_tasks_md.clone(),
+            tasks_length: tasks.as_ref().map(|t| t.len() as u64),
+            tasks,
+            description,
+            readme: files.readme_md.clone(),
+            checker_seed: None,
+        })
+    }
+}
+
 impl super::InventionState for AlphaVectorBranchState {
     fn params(this: &Arc<Mutex<Self>>) -> super::Params {
         this.lock().unwrap().params.clone()
