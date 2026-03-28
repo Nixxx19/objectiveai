@@ -173,6 +173,13 @@ where
         impl Stream<Item = RecursiveChunk> + Send + 'static,
         super::Error,
     > {
+        // Resolve state (inline or from remote files).
+        let resolved_state = self.invention_client.retrieve_router
+            .get_function_invention_state(&ctx, request.state.clone())
+            .await
+            .map_err(|e| crate::functions::inventions::Error::InvalidState(e.to_string()))?
+            .ok_or(crate::functions::inventions::Error::StateNotFound)?;
+
         let created = time::SystemTime::now()
             .duration_since(time::UNIX_EPOCH)
             .unwrap()
@@ -186,7 +193,7 @@ where
             request.clone(),
         );
 
-        let is_scalar = match &request.state {
+        let is_scalar = match &resolved_state {
             objectiveai::functions::inventions::state::ParamsState::AlphaScalarBranch(_)
             | objectiveai::functions::inventions::state::ParamsState::AlphaScalarLeaf(_)
             | objectiveai::functions::inventions::state::ParamsState::AlphaScalar(_) => true,
@@ -207,6 +214,7 @@ where
             self.invention_client.clone(),
             ctx,
             request,
+            resolved_state,
             id.clone(),
             created,
             object,
@@ -274,6 +282,7 @@ fn run_recursive<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, 
     >,
     ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
     request: Arc<objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams>,
+    resolved_state: objectiveai::functions::inventions::ParamsState,
     id: String,
     created: u64,
     object: RecursiveObject,
@@ -305,12 +314,12 @@ where
     FFNM: crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
 {
     Box::pin(async_stream::stream! {
-        // Build the single-level invention request from the recursive params.
+        // Build the single-level invention request using the resolved state (Inline).
         let invention_request = Arc::new(
             objectiveai::functions::inventions::request::FunctionInventionCreateParams {
                 remote: Some(request.remote),
                 overwrite: Some(true),
-                state: request.state.clone(),
+                state: objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(resolved_state),
                 provider: request.provider.clone(),
                 agent: request.agent.clone(),
                 seed: request.seed,
@@ -416,15 +425,15 @@ where
         for (i, child_state) in children.into_iter().enumerate() {
             let child_native = base_native + i;
 
-            // Build the child's recursive request with the child's state.
+            // Build the child's recursive request with the child's state wrapped in Inline.
             let child_request = Arc::new(
                 objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams {
                     remote: request.remote,
                     name: request.name.clone(),
-                    state: child_state,
+                    state: objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(child_state.clone()),
                     provider: request.provider.clone(),
                     agent: request.agent.clone(),
-                        seed: request.seed,
+                    seed: request.seed,
                     stream: request.stream,
                     max_step_retries: request.max_step_retries,
                 },
@@ -434,6 +443,7 @@ where
                 invention_client.clone(),
                 ctx.clone(),
                 child_request,
+                child_state,
                 id.clone(),
                 created,
                 object,
