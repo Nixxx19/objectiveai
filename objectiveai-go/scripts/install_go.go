@@ -257,7 +257,7 @@ func goTypeSingle(t string, schema Schema, selfTitle string, allTitles map[strin
 			}
 		}
 		if _, ok := schema["properties"]; !ok {
-			return "map[string]any"
+			return "struct{}"
 		}
 		return "any"
 	}
@@ -540,7 +540,6 @@ func resolveFieldTypeWithInline(propSchema Schema, selfTitle string, allTitles m
 			// Generate an inline variant struct
 			inlineName := parentType + fieldName
 			inlineSchema := Schema{}
-			// Copy description if present
 			if desc, ok := propSchema["description"].(string); ok {
 				inlineSchema["description"] = desc
 			}
@@ -549,6 +548,56 @@ func resolveFieldTypeWithInline(propSchema Schema, selfTitle string, allTitles m
 				return "*" + inlineName
 			}
 			return inlineName
+		}
+	}
+
+	// Check for array with items containing multi-variant anyOf
+	if cs["type"] == "array" {
+		if items, ok := cs["items"].(map[string]any); ok {
+			if itemsAnyOf, ok := items["anyOf"].([]any); ok {
+				nonNull, _ := splitNullVariants(itemsAnyOf)
+				if len(nonNull) >= 2 {
+					itemName := parentType + fieldName + "Item"
+					if fieldName == "" {
+						itemName = parentType + "Item"
+					}
+					itemSchema := Schema{}
+					if desc, ok := items["description"].(string); ok {
+						itemSchema["description"] = desc
+					}
+					aux.WriteString(generateAnyOfStruct(itemName, itemsAnyOf, selfTitle, itemSchema, allTitles, false))
+					goT := "[]" + itemName
+					if nullable {
+						return "*" + goT
+					}
+					return goT
+				}
+			}
+		}
+	}
+
+	// Check for object with additionalProperties containing multi-variant anyOf
+	if cs["type"] == "object" {
+		if ap, ok := cs["additionalProperties"].(map[string]any); ok {
+			if apAnyOf, ok := ap["anyOf"].([]any); ok {
+				nonNull, _ := splitNullVariants(apAnyOf)
+				if len(nonNull) >= 2 {
+					valName := parentType + fieldName + "Value"
+					if fieldName == "" {
+						valName = parentType + "Value"
+					}
+					valSchema := Schema{}
+					if desc, ok := ap["description"].(string); ok {
+						valSchema["description"] = desc
+					}
+					aux.WriteString(generateAnyOfStruct(valName, apAnyOf, selfTitle, valSchema, allTitles, false))
+					goT := "map[string]" + valName
+					if nullable {
+						return "*" + goT
+					}
+					return goT
+				}
+			}
 		}
 	}
 
@@ -597,22 +646,38 @@ func buildStructTags(jsonTag string, propSchema Schema, selfTitle string, allTit
 		validates = append(validates, "max="+formatTagNumber(v))
 	}
 
-	// Array items / map value constraints via dive
-	var diveTarget Schema
-	if items, ok := cs["items"].(map[string]any); ok {
-		diveTarget = items
-	} else if ap, ok := cs["additionalProperties"].(map[string]any); ok {
-		diveTarget = ap
-	}
-	if diveTarget != nil {
-		if v, ok := diveTarget["minimum"]; ok {
-			validates = append(validates, "dive", "min="+formatTagNumber(v))
-			if v, ok := diveTarget["maximum"]; ok {
+	// Array items / map value constraints via dive (recursive for nested arrays)
+	// Each nesting level adds a "dive" before the final min/max constraints.
+	cur := cs
+	diveDepth := 0
+	for {
+		var next Schema
+		if items, ok := cur["items"].(map[string]any); ok {
+			next = items
+		} else if ap, ok := cur["additionalProperties"].(map[string]any); ok {
+			next = ap
+		}
+		if next == nil {
+			break
+		}
+		diveDepth++
+		if _, hasMin := next["minimum"]; hasMin {
+			for i := 0; i < diveDepth; i++ {
+				validates = append(validates, "dive")
+			}
+			validates = append(validates, "min="+formatTagNumber(next["minimum"]))
+			if v, ok := next["maximum"]; ok {
 				validates = append(validates, "max="+formatTagNumber(v))
 			}
-		} else if v, ok := diveTarget["maximum"]; ok {
-			validates = append(validates, "dive", "max="+formatTagNumber(v))
+			break
+		} else if _, hasMax := next["maximum"]; hasMax {
+			for i := 0; i < diveDepth; i++ {
+				validates = append(validates, "dive")
+			}
+			validates = append(validates, "max="+formatTagNumber(next["maximum"]))
+			break
 		}
+		cur = next
 	}
 
 	if len(validates) > 0 {
@@ -706,7 +771,7 @@ func generateAnyOfStruct(typeName string, anyOf []any, selfTitle string, schema 
 			}
 		} else if !isEnum {
 			// Primitive variant (string, etc.) → type definition + SchemaVariantTitle
-			goT := goType(m, selfTitle, allTitles)
+			goT := resolveFieldTypeWithInline(m, selfTitle, allTitles, vStructName, "", &auxiliary)
 			auxiliary.WriteString(fmt.Sprintf("type %s %s\n\n", vStructName, goT))
 			auxiliary.WriteString(fmt.Sprintf("func (%s) SchemaVariantTitle() string { return %q }\n\n", vStructName, variantTitle))
 			if singleVariant {

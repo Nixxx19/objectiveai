@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-type FunctionsTaskProfilePlaceholder map[string]any
+type FunctionsTaskProfilePlaceholder struct{}
 
 func (FunctionsTaskProfilePlaceholder) SchemaVariantTitle() string { return "Placeholder" }
 

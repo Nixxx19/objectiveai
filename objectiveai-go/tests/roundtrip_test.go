@@ -346,7 +346,11 @@ func buildFieldTypeSchema(
 			variant := reconstructVariant(f, types, titleMap)
 			anyOf = append(anyOf, variant)
 		}
-		return map[string]any{"anyOf": anyOf}
+		result := map[string]any{"anyOf": anyOf}
+		if ti.doc != "" {
+			result["description"] = ti.doc
+		}
+		return result
 	}
 
 	switch typeName {
@@ -358,6 +362,8 @@ func buildFieldTypeSchema(
 		return map[string]any{"type": "number"}
 	case "int8", "int16", "int32", "int64", "uint8", "uint16", "uint32", "uint64":
 		return map[string]any{"type": "integer"}
+	case "struct{}":
+		return map[string]any{"type": "object"}
 	case "any":
 		return map[string]any{}
 	case "time.Time":
@@ -422,23 +428,26 @@ func addValidateConstraints(schema map[string]any, validateTag string) {
 		}
 	}
 
-	// Item/value-level constraints (after dive) — applies to array items or map additionalProperties
+	// Item/value-level constraints (after dive) — each "dive" navigates one
+	// level deeper into items/additionalProperties before applying constraints.
 	if diveIdx >= 0 && diveIdx+1 < len(parts) {
-		itemParts := parts[diveIdx+1:]
-		var target map[string]any
-		if items, ok := schema["items"].(map[string]any); ok {
-			target = items
-		} else if ap, ok := schema["additionalProperties"].(map[string]any); ok {
-			target = ap
-		}
-		if target != nil {
-			for _, part := range itemParts {
-				if strings.HasPrefix(part, "min=") {
-					target["minimum"] = json.Number(strings.TrimPrefix(part, "min="))
+		target := schema
+		for _, part := range parts[diveIdx:] {
+			if part == "dive" {
+				if items, ok := target["items"].(map[string]any); ok {
+					target = items
+				} else if ap, ok := target["additionalProperties"].(map[string]any); ok {
+					target = ap
+				} else {
+					break
 				}
-				if strings.HasPrefix(part, "max=") {
-					target["maximum"] = json.Number(strings.TrimPrefix(part, "max="))
-				}
+				continue
+			}
+			if strings.HasPrefix(part, "min=") {
+				target["minimum"] = json.Number(strings.TrimPrefix(part, "min="))
+			}
+			if strings.HasPrefix(part, "max=") {
+				target["maximum"] = json.Number(strings.TrimPrefix(part, "max="))
 			}
 		}
 	}

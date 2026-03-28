@@ -11,7 +11,84 @@ type AgentCompletionsMessageRichContentExpressionText string
 
 func (AgentCompletionsMessageRichContentExpressionText) SchemaVariantTitle() string { return "Text" }
 
-type AgentCompletionsMessageRichContentExpressionParts []any
+// A value that can be either a literal or an expression.
+//
+// This allows Function definitions to mix static values with dynamic
+// expressions. During compilation, expressions are evaluated while
+// literal values pass through unchanged.
+//
+// # Example
+//
+// Literal value:
+// ```json
+// "hello world"
+// ```
+//
+// JMESPath expression:
+// ```json
+// {"$jmespath": "input.greeting"}
+// ```
+//
+// Starlark expression:
+// ```json
+// {"$starlark": "input['greeting']"}
+// ```
+type AgentCompletionsMessageRichContentExpressionPartsItem struct {
+	// An expression (JMESPath or Starlark) to evaluate.
+	Expression *FunctionsExpressionExpression 
+	// A literal value.
+	Value *AgentCompletionsMessageRichContentPartExpression 
+}
+
+func (v AgentCompletionsMessageRichContentExpressionPartsItem) MarshalJSON() ([]byte, error) {
+	if v.Expression != nil {
+		return json.Marshal(v.Expression)
+	}
+	if v.Value != nil {
+		return json.Marshal(v.Value)
+	}
+	return []byte("null"), nil
+}
+
+func (v *AgentCompletionsMessageRichContentExpressionPartsItem) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	{
+		var try FunctionsExpressionExpression
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := AgentCompletionsMessageRichContentExpressionPartsItem{}
+			candidate.Expression = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try AgentCompletionsMessageRichContentPartExpression
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := AgentCompletionsMessageRichContentExpressionPartsItem{}
+			candidate.Value = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of AgentCompletionsMessageRichContentExpressionPartsItem")
+}
+
+func (v AgentCompletionsMessageRichContentExpressionPartsItem) Validate() error {
+	count := 0
+	if v.Expression != nil { count++ }
+	if v.Value != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("AgentCompletionsMessageRichContentExpressionPartsItem: exactly one variant must be set, got %d", count)
+	}
+	return variantValidator.Struct(v)
+}
+type AgentCompletionsMessageRichContentExpressionParts []AgentCompletionsMessageRichContentExpressionPartsItem
 
 func (AgentCompletionsMessageRichContentExpressionParts) SchemaVariantTitle() string { return "Parts" }
 

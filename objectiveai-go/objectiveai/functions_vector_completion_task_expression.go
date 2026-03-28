@@ -7,7 +7,84 @@ import (
 	"fmt"
 )
 
-type FunctionsVectorCompletionTaskExpressionMessagesValue []any
+// A value that can be either a literal or an expression.
+//
+// This allows Function definitions to mix static values with dynamic
+// expressions. During compilation, expressions are evaluated while
+// literal values pass through unchanged.
+//
+// # Example
+//
+// Literal value:
+// ```json
+// "hello world"
+// ```
+//
+// JMESPath expression:
+// ```json
+// {"$jmespath": "input.greeting"}
+// ```
+//
+// Starlark expression:
+// ```json
+// {"$starlark": "input['greeting']"}
+// ```
+type FunctionsVectorCompletionTaskExpressionMessagesValueItem struct {
+	// An expression (JMESPath or Starlark) to evaluate.
+	Expression *FunctionsExpressionExpression 
+	// A literal value.
+	Value *AgentCompletionsMessageMessageExpression 
+}
+
+func (v FunctionsVectorCompletionTaskExpressionMessagesValueItem) MarshalJSON() ([]byte, error) {
+	if v.Expression != nil {
+		return json.Marshal(v.Expression)
+	}
+	if v.Value != nil {
+		return json.Marshal(v.Value)
+	}
+	return []byte("null"), nil
+}
+
+func (v *FunctionsVectorCompletionTaskExpressionMessagesValueItem) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	{
+		var try FunctionsExpressionExpression
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsVectorCompletionTaskExpressionMessagesValueItem{}
+			candidate.Expression = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try AgentCompletionsMessageMessageExpression
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsVectorCompletionTaskExpressionMessagesValueItem{}
+			candidate.Value = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of FunctionsVectorCompletionTaskExpressionMessagesValueItem")
+}
+
+func (v FunctionsVectorCompletionTaskExpressionMessagesValueItem) Validate() error {
+	count := 0
+	if v.Expression != nil { count++ }
+	if v.Value != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("FunctionsVectorCompletionTaskExpressionMessagesValueItem: exactly one variant must be set, got %d", count)
+	}
+	return variantValidator.Struct(v)
+}
+type FunctionsVectorCompletionTaskExpressionMessagesValue []FunctionsVectorCompletionTaskExpressionMessagesValueItem
 
 func (FunctionsVectorCompletionTaskExpressionMessagesValue) SchemaVariantTitle() string { return "Value" }
 
@@ -91,7 +168,84 @@ func (v FunctionsVectorCompletionTaskExpressionMessages) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
-type FunctionsVectorCompletionTaskExpressionResponsesValue []any
+// A value that can be either a literal or an expression.
+//
+// This allows Function definitions to mix static values with dynamic
+// expressions. During compilation, expressions are evaluated while
+// literal values pass through unchanged.
+//
+// # Example
+//
+// Literal value:
+// ```json
+// "hello world"
+// ```
+//
+// JMESPath expression:
+// ```json
+// {"$jmespath": "input.greeting"}
+// ```
+//
+// Starlark expression:
+// ```json
+// {"$starlark": "input['greeting']"}
+// ```
+type FunctionsVectorCompletionTaskExpressionResponsesValueItem struct {
+	// An expression (JMESPath or Starlark) to evaluate.
+	Expression *FunctionsExpressionExpression 
+	// A literal value.
+	Value *AgentCompletionsMessageRichContentExpression 
+}
+
+func (v FunctionsVectorCompletionTaskExpressionResponsesValueItem) MarshalJSON() ([]byte, error) {
+	if v.Expression != nil {
+		return json.Marshal(v.Expression)
+	}
+	if v.Value != nil {
+		return json.Marshal(v.Value)
+	}
+	return []byte("null"), nil
+}
+
+func (v *FunctionsVectorCompletionTaskExpressionResponsesValueItem) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	{
+		var try FunctionsExpressionExpression
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsVectorCompletionTaskExpressionResponsesValueItem{}
+			candidate.Expression = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try AgentCompletionsMessageRichContentExpression
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := FunctionsVectorCompletionTaskExpressionResponsesValueItem{}
+			candidate.Value = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of FunctionsVectorCompletionTaskExpressionResponsesValueItem")
+}
+
+func (v FunctionsVectorCompletionTaskExpressionResponsesValueItem) Validate() error {
+	count := 0
+	if v.Expression != nil { count++ }
+	if v.Value != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("FunctionsVectorCompletionTaskExpressionResponsesValueItem: exactly one variant must be set, got %d", count)
+	}
+	return variantValidator.Struct(v)
+}
+type FunctionsVectorCompletionTaskExpressionResponsesValue []FunctionsVectorCompletionTaskExpressionResponsesValueItem
 
 func (FunctionsVectorCompletionTaskExpressionResponsesValue) SchemaVariantTitle() string { return "Value" }
 

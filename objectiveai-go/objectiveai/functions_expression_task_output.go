@@ -30,7 +30,7 @@ type FunctionsExpressionTaskOutput struct {
 	// A vector of scores.
 	Vector *FunctionsExpressionTaskOutputVector `validate:"dive,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// Multiple vectors of scores (from mapped tasks).
-	Vectors *FunctionsExpressionTaskOutputVectors 
+	Vectors *FunctionsExpressionTaskOutputVectors `validate:"dive,dive,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// An error occurred during execution.
 	Err *FunctionsExpressionTaskOutputErr 
 }
