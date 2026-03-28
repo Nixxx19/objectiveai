@@ -260,7 +260,22 @@ where
             viewer_client.send_function_invention_recursive_continue(viewer_ctx.clone(), chunk.clone());
         });
 
-        Ok(stream)
+        // Await the first chunk. If it contains an error, return Err.
+        let mut stream = Box::pin(stream);
+        match stream.next().await {
+            Some(first) => {
+                if first.inventions_errors == Some(true) {
+                    // Extract the first error from the inventions
+                    if let Some(err) = first.inventions.iter()
+                        .find_map(|inv| inv.inner.error.clone())
+                    {
+                        return Err(super::Error::InventionFirstChunk(err));
+                    }
+                }
+                Ok(crate::util::StreamOnce::new(first).chain(stream))
+            }
+            None => unreachable!(),
+        }
     }
 }
 
