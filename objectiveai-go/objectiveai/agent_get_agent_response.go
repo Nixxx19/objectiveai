@@ -3,6 +3,11 @@
 package objectiveai
 
 // Response containing a single Agent with creation timestamp.
-type AgentGetAgentResponse any
+type AgentGetAgentResponse struct {
+	RemotePath
+}
 
 func (AgentGetAgentResponse) SchemaTitle() string { return "agent.GetAgentResponse" }
+func (v AgentGetAgentResponse) Validate() error {
+	return variantValidator.Struct(v)
+}

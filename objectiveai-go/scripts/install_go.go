@@ -912,7 +912,17 @@ func generateTypeCode(title string, schema Schema, allTitles map[string]bool) st
 		return b.String()
 	}
 
-	// Case 4: Non-anyOf, non-struct, non-enum (primitive, array, map, $ref)
+	// Case 4a: $ref without properties → struct embedding the referenced type
+	if ref, ok := schema["$ref"].(string); ok {
+		desc, _ := schema["description"].(string)
+		b.WriteString(goDocComment(desc, ""))
+		b.WriteString(fmt.Sprintf("type %s struct {\n\t%s\n}\n\n", typeName, toPascal(ref)))
+		b.WriteString(fmt.Sprintf("func (%s) SchemaTitle() string { return %q }\n", typeName, title))
+		b.WriteString(generateValidateMethod(typeName, nil))
+		return b.String()
+	}
+
+	// Case 4b: Non-anyOf, non-struct, non-enum, non-ref (primitive, array, map)
 	goT := determinePrimitiveGoType(schema, title, allTitles)
 	desc, _ := schema["description"].(string)
 	b.WriteString(goDocComment(desc, ""))

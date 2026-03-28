@@ -3,6 +3,11 @@
 package objectiveai
 
 // Response containing a single Swarm.
-type SwarmGetSwarmResponse any
+type SwarmGetSwarmResponse struct {
+	RemotePath
+}
 
 func (SwarmGetSwarmResponse) SchemaTitle() string { return "swarm.GetSwarmResponse" }
+func (v SwarmGetSwarmResponse) Validate() error {
+	return variantValidator.Struct(v)
+}

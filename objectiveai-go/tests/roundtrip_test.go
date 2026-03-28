@@ -444,8 +444,53 @@ func reconstructVariantSchema(
 		variant := reconstructVariant(f, types, titleMap)
 		anyOf = append(anyOf, variant)
 	}
+
+	// Detect flat root enum: all variants are {title, type:string, enum:[single value]}
+	// with no descriptions. Collapse into {type:string, enum:[all values]}.
+	if isRootEnum(anyOf) {
+		var allEnumVals []any
+		for _, v := range anyOf {
+			m := v.(map[string]any)
+			if enumVals, ok := m["enum"].([]any); ok {
+				allEnumVals = append(allEnumVals, enumVals...)
+			}
+		}
+		result["type"] = "string"
+		result["enum"] = allEnumVals
+		return result
+	}
+
 	result["anyOf"] = anyOf
 	return result
+}
+
+// isRootEnum returns true if all anyOf variants are simple string enums
+// with no descriptions, $ref, or properties — meaning this was originally
+// a flat {type: string, enum: [...]} that the generator split into variants.
+func isRootEnum(anyOf []any) bool {
+	for _, v := range anyOf {
+		m, ok := v.(map[string]any)
+		if !ok {
+			return false
+		}
+		if _, hasRef := m["$ref"]; hasRef {
+			return false
+		}
+		if _, hasProps := m["properties"]; hasProps {
+			return false
+		}
+		if _, hasDesc := m["description"]; hasDesc {
+			return false
+		}
+		if m["type"] != "string" {
+			return false
+		}
+		enumVals, ok := m["enum"].([]any)
+		if !ok || len(enumVals) != 1 {
+			return false
+		}
+	}
+	return len(anyOf) > 0
 }
 
 func reconstructVariant(
