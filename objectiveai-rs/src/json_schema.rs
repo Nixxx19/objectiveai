@@ -234,6 +234,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(crate::functions::inventions::AlphaVectorState),
         schemars::schema_for!(crate::functions::inventions::State),
         schemars::schema_for!(crate::functions::inventions::ParamsState),
+        schemars::schema_for!(crate::functions::inventions::InputSchema),
         schemars::schema_for!(crate::functions::inventions::Params),
         schemars::schema_for!(crate::RemotePath),
         schemars::schema_for!(crate::RemotePathCommitOptional),
