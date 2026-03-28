@@ -318,7 +318,7 @@ where
         let invention_request = Arc::new(
             objectiveai::functions::inventions::request::FunctionInventionCreateParams {
                 remote: Some(request.remote),
-                overwrite: Some(true),
+                overwrite: request.overwrite,
                 state: objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(resolved_state),
                 provider: request.provider.clone(),
                 agent: request.agent.clone(),
@@ -429,7 +429,7 @@ where
             let child_request = Arc::new(
                 objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams {
                     remote: request.remote,
-                    name: request.name.clone(),
+                    overwrite: request.overwrite,
                     state: objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(child_state.clone()),
                     provider: request.provider.clone(),
                     agent: request.agent.clone(),
