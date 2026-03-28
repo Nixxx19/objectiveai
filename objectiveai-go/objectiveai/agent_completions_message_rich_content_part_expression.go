@@ -7,6 +7,87 @@ import (
 	"fmt"
 )
 
+type AgentCompletionsMessageRichContentPartExpressionTextTextValue string
+
+func (AgentCompletionsMessageRichContentPartExpressionTextTextValue) SchemaVariantTitle() string { return "Value" }
+
+// A value that can be either a literal or an expression.
+//
+// This allows Function definitions to mix static values with dynamic
+// expressions. During compilation, expressions are evaluated while
+// literal values pass through unchanged.
+//
+// # Example
+//
+// Literal value:
+// ```json
+// "hello world"
+// ```
+//
+// JMESPath expression:
+// ```json
+// {"$jmespath": "input.greeting"}
+// ```
+//
+// Starlark expression:
+// ```json
+// {"$starlark": "input['greeting']"}
+// ```
+type AgentCompletionsMessageRichContentPartExpressionTextText struct {
+	// An expression (JMESPath or Starlark) to evaluate.
+	Expression *FunctionsExpressionExpression 
+	// A literal value.
+	Value *AgentCompletionsMessageRichContentPartExpressionTextTextValue 
+}
+
+func (v AgentCompletionsMessageRichContentPartExpressionTextText) MarshalJSON() ([]byte, error) {
+	if v.Expression != nil {
+		return json.Marshal(v.Expression)
+	}
+	if v.Value != nil {
+		return json.Marshal(v.Value)
+	}
+	return []byte("null"), nil
+}
+
+func (v *AgentCompletionsMessageRichContentPartExpressionTextText) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	{
+		var try FunctionsExpressionExpression
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := AgentCompletionsMessageRichContentPartExpressionTextText{}
+			candidate.Expression = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try AgentCompletionsMessageRichContentPartExpressionTextTextValue
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := AgentCompletionsMessageRichContentPartExpressionTextText{}
+			candidate.Value = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of AgentCompletionsMessageRichContentPartExpressionTextText")
+}
+
+func (v AgentCompletionsMessageRichContentPartExpressionTextText) Validate() error {
+	count := 0
+	if v.Expression != nil { count++ }
+	if v.Value != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("AgentCompletionsMessageRichContentPartExpressionTextText: exactly one variant must be set, got %d", count)
+	}
+	return variantValidator.Struct(v)
+}
 type AgentCompletionsMessageRichContentPartExpressionText struct {
 	// A value that can be either a literal or an expression.
 	//
@@ -30,11 +111,88 @@ type AgentCompletionsMessageRichContentPartExpressionText struct {
 	// ```json
 	// {"$starlark": "input['greeting']"}
 	// ```
-	Text any `json:"text"`
+	Text AgentCompletionsMessageRichContentPartExpressionTextText `json:"text"`
 	Type string `json:"type" validate:"oneof=text"`
 }
 func (AgentCompletionsMessageRichContentPartExpressionText) SchemaVariantTitle() string { return "Text" }
 
+// A value that can be either a literal or an expression.
+//
+// This allows Function definitions to mix static values with dynamic
+// expressions. During compilation, expressions are evaluated while
+// literal values pass through unchanged.
+//
+// # Example
+//
+// Literal value:
+// ```json
+// "hello world"
+// ```
+//
+// JMESPath expression:
+// ```json
+// {"$jmespath": "input.greeting"}
+// ```
+//
+// Starlark expression:
+// ```json
+// {"$starlark": "input['greeting']"}
+// ```
+type AgentCompletionsMessageRichContentPartExpressionImageUrlImageURL struct {
+	// An expression (JMESPath or Starlark) to evaluate.
+	Expression *FunctionsExpressionExpression 
+	// A literal value.
+	Value *AgentCompletionsMessageImageUrl 
+}
+
+func (v AgentCompletionsMessageRichContentPartExpressionImageUrlImageURL) MarshalJSON() ([]byte, error) {
+	if v.Expression != nil {
+		return json.Marshal(v.Expression)
+	}
+	if v.Value != nil {
+		return json.Marshal(v.Value)
+	}
+	return []byte("null"), nil
+}
+
+func (v *AgentCompletionsMessageRichContentPartExpressionImageUrlImageURL) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	{
+		var try FunctionsExpressionExpression
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := AgentCompletionsMessageRichContentPartExpressionImageUrlImageURL{}
+			candidate.Expression = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try AgentCompletionsMessageImageUrl
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := AgentCompletionsMessageRichContentPartExpressionImageUrlImageURL{}
+			candidate.Value = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of AgentCompletionsMessageRichContentPartExpressionImageUrlImageURL")
+}
+
+func (v AgentCompletionsMessageRichContentPartExpressionImageUrlImageURL) Validate() error {
+	count := 0
+	if v.Expression != nil { count++ }
+	if v.Value != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("AgentCompletionsMessageRichContentPartExpressionImageUrlImageURL: exactly one variant must be set, got %d", count)
+	}
+	return variantValidator.Struct(v)
+}
 type AgentCompletionsMessageRichContentPartExpressionImageUrl struct {
 	// A value that can be either a literal or an expression.
 	//
@@ -58,11 +216,88 @@ type AgentCompletionsMessageRichContentPartExpressionImageUrl struct {
 	// ```json
 	// {"$starlark": "input['greeting']"}
 	// ```
-	ImageURL any `json:"image_url"`
+	ImageURL AgentCompletionsMessageRichContentPartExpressionImageUrlImageURL `json:"image_url"`
 	Type string `json:"type" validate:"oneof=image_url"`
 }
 func (AgentCompletionsMessageRichContentPartExpressionImageUrl) SchemaVariantTitle() string { return "ImageUrl" }
 
+// A value that can be either a literal or an expression.
+//
+// This allows Function definitions to mix static values with dynamic
+// expressions. During compilation, expressions are evaluated while
+// literal values pass through unchanged.
+//
+// # Example
+//
+// Literal value:
+// ```json
+// "hello world"
+// ```
+//
+// JMESPath expression:
+// ```json
+// {"$jmespath": "input.greeting"}
+// ```
+//
+// Starlark expression:
+// ```json
+// {"$starlark": "input['greeting']"}
+// ```
+type AgentCompletionsMessageRichContentPartExpressionInputAudioInputAudio struct {
+	// An expression (JMESPath or Starlark) to evaluate.
+	Expression *FunctionsExpressionExpression 
+	// A literal value.
+	Value *AgentCompletionsMessageInputAudio 
+}
+
+func (v AgentCompletionsMessageRichContentPartExpressionInputAudioInputAudio) MarshalJSON() ([]byte, error) {
+	if v.Expression != nil {
+		return json.Marshal(v.Expression)
+	}
+	if v.Value != nil {
+		return json.Marshal(v.Value)
+	}
+	return []byte("null"), nil
+}
+
+func (v *AgentCompletionsMessageRichContentPartExpressionInputAudioInputAudio) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	{
+		var try FunctionsExpressionExpression
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := AgentCompletionsMessageRichContentPartExpressionInputAudioInputAudio{}
+			candidate.Expression = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try AgentCompletionsMessageInputAudio
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := AgentCompletionsMessageRichContentPartExpressionInputAudioInputAudio{}
+			candidate.Value = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of AgentCompletionsMessageRichContentPartExpressionInputAudioInputAudio")
+}
+
+func (v AgentCompletionsMessageRichContentPartExpressionInputAudioInputAudio) Validate() error {
+	count := 0
+	if v.Expression != nil { count++ }
+	if v.Value != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("AgentCompletionsMessageRichContentPartExpressionInputAudioInputAudio: exactly one variant must be set, got %d", count)
+	}
+	return variantValidator.Struct(v)
+}
 type AgentCompletionsMessageRichContentPartExpressionInputAudio struct {
 	// A value that can be either a literal or an expression.
 	//
@@ -86,11 +321,88 @@ type AgentCompletionsMessageRichContentPartExpressionInputAudio struct {
 	// ```json
 	// {"$starlark": "input['greeting']"}
 	// ```
-	InputAudio any `json:"input_audio"`
+	InputAudio AgentCompletionsMessageRichContentPartExpressionInputAudioInputAudio `json:"input_audio"`
 	Type string `json:"type" validate:"oneof=input_audio"`
 }
 func (AgentCompletionsMessageRichContentPartExpressionInputAudio) SchemaVariantTitle() string { return "InputAudio" }
 
+// A value that can be either a literal or an expression.
+//
+// This allows Function definitions to mix static values with dynamic
+// expressions. During compilation, expressions are evaluated while
+// literal values pass through unchanged.
+//
+// # Example
+//
+// Literal value:
+// ```json
+// "hello world"
+// ```
+//
+// JMESPath expression:
+// ```json
+// {"$jmespath": "input.greeting"}
+// ```
+//
+// Starlark expression:
+// ```json
+// {"$starlark": "input['greeting']"}
+// ```
+type AgentCompletionsMessageRichContentPartExpressionInputVideoVideoURL struct {
+	// An expression (JMESPath or Starlark) to evaluate.
+	Expression *FunctionsExpressionExpression 
+	// A literal value.
+	Value *AgentCompletionsMessageVideoUrl 
+}
+
+func (v AgentCompletionsMessageRichContentPartExpressionInputVideoVideoURL) MarshalJSON() ([]byte, error) {
+	if v.Expression != nil {
+		return json.Marshal(v.Expression)
+	}
+	if v.Value != nil {
+		return json.Marshal(v.Value)
+	}
+	return []byte("null"), nil
+}
+
+func (v *AgentCompletionsMessageRichContentPartExpressionInputVideoVideoURL) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	{
+		var try FunctionsExpressionExpression
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := AgentCompletionsMessageRichContentPartExpressionInputVideoVideoURL{}
+			candidate.Expression = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try AgentCompletionsMessageVideoUrl
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := AgentCompletionsMessageRichContentPartExpressionInputVideoVideoURL{}
+			candidate.Value = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of AgentCompletionsMessageRichContentPartExpressionInputVideoVideoURL")
+}
+
+func (v AgentCompletionsMessageRichContentPartExpressionInputVideoVideoURL) Validate() error {
+	count := 0
+	if v.Expression != nil { count++ }
+	if v.Value != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("AgentCompletionsMessageRichContentPartExpressionInputVideoVideoURL: exactly one variant must be set, got %d", count)
+	}
+	return variantValidator.Struct(v)
+}
 type AgentCompletionsMessageRichContentPartExpressionInputVideo struct {
 	Type string `json:"type" validate:"oneof=input_video"`
 	// A value that can be either a literal or an expression.
@@ -115,10 +427,87 @@ type AgentCompletionsMessageRichContentPartExpressionInputVideo struct {
 	// ```json
 	// {"$starlark": "input['greeting']"}
 	// ```
-	VideoURL any `json:"video_url"`
+	VideoURL AgentCompletionsMessageRichContentPartExpressionInputVideoVideoURL `json:"video_url"`
 }
 func (AgentCompletionsMessageRichContentPartExpressionInputVideo) SchemaVariantTitle() string { return "InputVideo" }
 
+// A value that can be either a literal or an expression.
+//
+// This allows Function definitions to mix static values with dynamic
+// expressions. During compilation, expressions are evaluated while
+// literal values pass through unchanged.
+//
+// # Example
+//
+// Literal value:
+// ```json
+// "hello world"
+// ```
+//
+// JMESPath expression:
+// ```json
+// {"$jmespath": "input.greeting"}
+// ```
+//
+// Starlark expression:
+// ```json
+// {"$starlark": "input['greeting']"}
+// ```
+type AgentCompletionsMessageRichContentPartExpressionVideoUrlVideoURL struct {
+	// An expression (JMESPath or Starlark) to evaluate.
+	Expression *FunctionsExpressionExpression 
+	// A literal value.
+	Value *AgentCompletionsMessageVideoUrl 
+}
+
+func (v AgentCompletionsMessageRichContentPartExpressionVideoUrlVideoURL) MarshalJSON() ([]byte, error) {
+	if v.Expression != nil {
+		return json.Marshal(v.Expression)
+	}
+	if v.Value != nil {
+		return json.Marshal(v.Value)
+	}
+	return []byte("null"), nil
+}
+
+func (v *AgentCompletionsMessageRichContentPartExpressionVideoUrlVideoURL) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	{
+		var try FunctionsExpressionExpression
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := AgentCompletionsMessageRichContentPartExpressionVideoUrlVideoURL{}
+			candidate.Expression = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try AgentCompletionsMessageVideoUrl
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := AgentCompletionsMessageRichContentPartExpressionVideoUrlVideoURL{}
+			candidate.Value = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of AgentCompletionsMessageRichContentPartExpressionVideoUrlVideoURL")
+}
+
+func (v AgentCompletionsMessageRichContentPartExpressionVideoUrlVideoURL) Validate() error {
+	count := 0
+	if v.Expression != nil { count++ }
+	if v.Value != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("AgentCompletionsMessageRichContentPartExpressionVideoUrlVideoURL: exactly one variant must be set, got %d", count)
+	}
+	return variantValidator.Struct(v)
+}
 type AgentCompletionsMessageRichContentPartExpressionVideoUrl struct {
 	Type string `json:"type" validate:"oneof=video_url"`
 	// A value that can be either a literal or an expression.
@@ -143,10 +532,87 @@ type AgentCompletionsMessageRichContentPartExpressionVideoUrl struct {
 	// ```json
 	// {"$starlark": "input['greeting']"}
 	// ```
-	VideoURL any `json:"video_url"`
+	VideoURL AgentCompletionsMessageRichContentPartExpressionVideoUrlVideoURL `json:"video_url"`
 }
 func (AgentCompletionsMessageRichContentPartExpressionVideoUrl) SchemaVariantTitle() string { return "VideoUrl" }
 
+// A value that can be either a literal or an expression.
+//
+// This allows Function definitions to mix static values with dynamic
+// expressions. During compilation, expressions are evaluated while
+// literal values pass through unchanged.
+//
+// # Example
+//
+// Literal value:
+// ```json
+// "hello world"
+// ```
+//
+// JMESPath expression:
+// ```json
+// {"$jmespath": "input.greeting"}
+// ```
+//
+// Starlark expression:
+// ```json
+// {"$starlark": "input['greeting']"}
+// ```
+type AgentCompletionsMessageRichContentPartExpressionFileFile struct {
+	// An expression (JMESPath or Starlark) to evaluate.
+	Expression *FunctionsExpressionExpression 
+	// A literal value.
+	Value *AgentCompletionsMessageFile 
+}
+
+func (v AgentCompletionsMessageRichContentPartExpressionFileFile) MarshalJSON() ([]byte, error) {
+	if v.Expression != nil {
+		return json.Marshal(v.Expression)
+	}
+	if v.Value != nil {
+		return json.Marshal(v.Value)
+	}
+	return []byte("null"), nil
+}
+
+func (v *AgentCompletionsMessageRichContentPartExpressionFileFile) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	{
+		var try FunctionsExpressionExpression
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := AgentCompletionsMessageRichContentPartExpressionFileFile{}
+			candidate.Expression = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try AgentCompletionsMessageFile
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := AgentCompletionsMessageRichContentPartExpressionFileFile{}
+			candidate.Value = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of AgentCompletionsMessageRichContentPartExpressionFileFile")
+}
+
+func (v AgentCompletionsMessageRichContentPartExpressionFileFile) Validate() error {
+	count := 0
+	if v.Expression != nil { count++ }
+	if v.Value != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("AgentCompletionsMessageRichContentPartExpressionFileFile: exactly one variant must be set, got %d", count)
+	}
+	return variantValidator.Struct(v)
+}
 type AgentCompletionsMessageRichContentPartExpressionFile struct {
 	// A value that can be either a literal or an expression.
 	//
@@ -170,7 +636,7 @@ type AgentCompletionsMessageRichContentPartExpressionFile struct {
 	// ```json
 	// {"$starlark": "input['greeting']"}
 	// ```
-	File any `json:"file"`
+	File AgentCompletionsMessageRichContentPartExpressionFileFile `json:"file"`
 	Type string `json:"type" validate:"oneof=file"`
 }
 func (AgentCompletionsMessageRichContentPartExpressionFile) SchemaVariantTitle() string { return "File" }

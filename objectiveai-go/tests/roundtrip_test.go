@@ -339,6 +339,16 @@ func buildFieldTypeSchema(
 		return map[string]any{"$ref": schemaTitle}
 	}
 
+	// Inline variant struct (multi-variant anyOf generated for a field)
+	if ti, ok := types[typeName]; ok && len(ti.fields) > 0 && getTagValue(ti.fields[0].tags, "json") == "" {
+		var anyOf []any
+		for _, f := range ti.fields {
+			variant := reconstructVariant(f, types, titleMap)
+			anyOf = append(anyOf, variant)
+		}
+		return map[string]any{"anyOf": anyOf}
+	}
+
 	switch typeName {
 	case "string":
 		return map[string]any{"type": "string"}

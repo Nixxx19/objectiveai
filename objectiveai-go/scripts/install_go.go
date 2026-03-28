@@ -479,6 +479,7 @@ func goDocComment(description string, indent string) string {
 
 func generateStruct(typeName string, schema Schema, selfTitle string, allTitles map[string]bool) string {
 	properties, _ := schema["properties"].(map[string]any)
+	var auxiliary strings.Builder
 	var b strings.Builder
 
 	// Type doc comment
@@ -498,7 +499,9 @@ func generateStruct(typeName string, schema Schema, selfTitle string, allTitles 
 			continue
 		}
 		fieldName := goFieldName(propName)
-		fieldType := resolveFieldType(propSchema, selfTitle, allTitles)
+
+		// Check if this field needs an inline variant struct (multi-variant anyOf)
+		fieldType := resolveFieldTypeWithInline(propSchema, selfTitle, allTitles, typeName, fieldName, &auxiliary)
 
 		// Field doc comment
 		fieldDesc, _ := propSchema["description"].(string)
@@ -515,7 +518,41 @@ func generateStruct(typeName string, schema Schema, selfTitle string, allTitles 
 		b.WriteString(fmt.Sprintf("\t%s %s %s\n", fieldName, fieldType, tags))
 	}
 	b.WriteString("}\n")
-	return b.String()
+
+	// Prepend any inline types before the struct
+	return auxiliary.String() + b.String()
+}
+
+// resolveFieldTypeWithInline handles multi-variant anyOf by generating inline
+// variant structs. Falls back to resolveFieldType for everything else.
+func resolveFieldTypeWithInline(propSchema Schema, selfTitle string, allTitles map[string]bool, parentType string, fieldName string, aux *strings.Builder) string {
+	// Get the constraint schema (strip nullable wrapper if present)
+	cs := propSchema
+	nullable := isNullable(propSchema)
+	if nullable {
+		cs = getNonNullVariant(propSchema)
+	}
+
+	// Check for multi-variant anyOf that would resolve to "any"
+	if anyOf, ok := cs["anyOf"].([]any); ok {
+		nonNull, _ := splitNullVariants(anyOf)
+		if len(nonNull) >= 2 {
+			// Generate an inline variant struct
+			inlineName := parentType + fieldName
+			inlineSchema := Schema{}
+			// Copy description if present
+			if desc, ok := propSchema["description"].(string); ok {
+				inlineSchema["description"] = desc
+			}
+			aux.WriteString(generateAnyOfStruct(inlineName, anyOf, selfTitle, inlineSchema, allTitles, false))
+			if nullable {
+				return "*" + inlineName
+			}
+			return inlineName
+		}
+	}
+
+	return resolveFieldType(propSchema, selfTitle, allTitles)
 }
 
 func resolveFieldType(propSchema Schema, selfTitle string, allTitles map[string]bool) string {
@@ -818,6 +855,7 @@ func generateVariantMarshal(typeName string, variants []variantInfo, single bool
 // If the schema has a $ref, the referenced type is embedded (Go struct embedding = inheritance).
 func generateInlineVariantStruct(structName string, schema Schema, selfTitle string, allTitles map[string]bool) string {
 	props, _ := schema["properties"].(map[string]any)
+	var auxiliary strings.Builder
 	var b strings.Builder
 	desc, _ := schema["description"].(string)
 	b.WriteString(goDocComment(desc, ""))
@@ -834,7 +872,7 @@ func generateInlineVariantStruct(structName string, schema Schema, selfTitle str
 			continue
 		}
 		fn := goFieldName(pn)
-		ft := resolveFieldType(ps, selfTitle, allTitles)
+		ft := resolveFieldTypeWithInline(ps, selfTitle, allTitles, structName, fn, &auxiliary)
 		fieldDesc, _ := ps["description"].(string)
 		b.WriteString(goDocComment(fieldDesc, "\t"))
 		jt := pn
@@ -858,7 +896,7 @@ func generateInlineVariantStruct(structName string, schema Schema, selfTitle str
 		}
 	}
 
-	return b.String()
+	return auxiliary.String() + b.String()
 }
 
 
