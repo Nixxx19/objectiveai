@@ -7,7 +7,7 @@ use schemars::JsonSchema;
 pub struct FunctionInventionRecursiveCreateParams {
     pub remote: crate::Remote,
     pub name: String,
-    pub state: functions::inventions::ParamsState,
+    pub state: functions::inventions::ParamsStateOrRemoteCommitOptional,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<agent::completions::request::Provider>,
     pub agent: agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,

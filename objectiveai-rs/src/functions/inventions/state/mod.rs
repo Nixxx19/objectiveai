@@ -8,10 +8,11 @@ pub mod error;
 pub(super) mod files;
 mod input_schema;
 mod params;
+mod params_state_or_remote;
 mod readme;
 
 pub use input_schema::*;
-
+pub use params_state_or_remote::*;
 pub use alpha_scalar_branch_state::*;
 pub use alpha_scalar_leaf_state::*;
 pub use alpha_scalar_state::*;
@@ -21,7 +22,6 @@ pub use alpha_vector_state::*;
 pub use params::*;
 
 use std::sync::{Arc, Mutex};
-
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
