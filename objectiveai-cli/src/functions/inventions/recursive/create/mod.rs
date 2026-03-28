@@ -131,24 +131,61 @@ pub enum Commands {
         #[arg(long)]
         seed: Option<i64>,
     },
+    /// Invent from a remote state (previously saved invention state files)
+    Remote {
+        /// Name for the recursive invention
+        #[arg(long)]
+        name: String,
+        /// Remote source for the state
+        #[arg(long, value_enum)]
+        state_remote: crate::remote::Remote,
+        /// State owner
+        #[arg(long)]
+        state_owner: String,
+        /// State repository
+        #[arg(long)]
+        state_repository: String,
+        /// State commit (optional)
+        #[arg(long)]
+        state_commit: Option<String>,
+        #[command(flatten)]
+        agent: AgentArgs,
+        /// Seed for deterministic mock responses
+        #[arg(long)]
+        seed: Option<i64>,
+        /// Maximum step retries
+        #[arg(long)]
+        max_step_retries: Option<u32>,
+    },
 }
 
 impl Commands {
     pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
-        let (params, agent_args, seed, state) = match self {
+        let (name, agent_args, seed, state, max_step_retries) = match self {
             Commands::AlphaScalar { params, agent, seed } => {
                 let p = params.into_params();
-                let state = objectiveai::functions::inventions::ParamsState::AlphaScalar(
-                    objectiveai::functions::inventions::state::AlphaScalarState { params: p.clone(), input_schema: None },
+                let name = p.name.clone();
+                let state = objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(
+                    objectiveai::functions::inventions::ParamsState::AlphaScalar(
+                        objectiveai::functions::inventions::state::AlphaScalarState { params: p, input_schema: None },
+                    ),
                 );
-                (p, agent, seed, state)
+                (name, agent, seed, state, None)
             }
             Commands::AlphaVector { params, agent, seed } => {
                 let p = params.into_params();
-                let state = objectiveai::functions::inventions::ParamsState::AlphaVector(
-                    objectiveai::functions::inventions::state::AlphaVectorState { params: p.clone(), input_schema: None },
+                let name = p.name.clone();
+                let state = objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(
+                    objectiveai::functions::inventions::ParamsState::AlphaVector(
+                        objectiveai::functions::inventions::state::AlphaVectorState { params: p, input_schema: None },
+                    ),
                 );
-                (p, agent, seed, state)
+                (name, agent, seed, state, None)
+            }
+            Commands::Remote { name, state_remote, state_owner, state_repository, state_commit, agent, seed, max_step_retries } => {
+                let remote_path = state_remote.into_path(state_owner, state_repository, state_commit);
+                let state = objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Remote(remote_path);
+                (name, agent, seed, state, max_step_retries)
             }
         };
 
@@ -160,13 +197,13 @@ impl Commands {
 
         let request = objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams {
             remote,
-            name: params.name,
+            name,
             state,
             provider: None,
             agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::Remote(agent_path),
             seed,
             stream: Some(true),
-            max_step_retries: None,
+            max_step_retries,
         };
 
         crate::api::run(|http_client| async move {
