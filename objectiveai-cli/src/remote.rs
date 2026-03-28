@@ -15,6 +15,40 @@ impl Remote {
     }
 }
 
+/// Remote source including Mock (for executions only).
+#[derive(Clone, clap::ValueEnum)]
+pub enum RemoteWithMock {
+    Github,
+    Filesystem,
+    Mock,
+}
+
+impl RemoteWithMock {
+    pub fn into_path(self, owner: Option<String>, repository: Option<String>, name: Option<String>, commit: Option<String>) -> Option<objectiveai::RemotePathCommitOptional> {
+        match self {
+            RemoteWithMock::Github => {
+                Some(objectiveai::RemotePathCommitOptional::Github {
+                    owner: owner?,
+                    repository: repository?,
+                    commit,
+                })
+            }
+            RemoteWithMock::Filesystem => {
+                Some(objectiveai::RemotePathCommitOptional::Filesystem {
+                    owner: owner?,
+                    repository: repository?,
+                    commit,
+                })
+            }
+            RemoteWithMock::Mock => {
+                Some(objectiveai::RemotePathCommitOptional::Mock {
+                    name: name?,
+                })
+            }
+        }
+    }
+}
+
 /// CLI args for specifying a remote path with an optional commit.
 #[derive(Args)]
 pub struct RemotePathCommitOptional {
