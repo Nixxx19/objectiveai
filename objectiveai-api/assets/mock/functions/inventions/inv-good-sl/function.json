@@ -1,0 +1,24 @@
+{
+  "type": "alpha.scalar.function",
+  "variant": "leaf",
+  "description": "A valid scalar function.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "sentiment": { "type": "string", "enum": ["positive", "negative"] }
+    },
+    "required": ["sentiment"]
+  },
+  "tasks": [
+    {
+      "type": "vector.completion",
+      "messages": { "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]" },
+      "responses": ["yes", "no"]
+    },
+    {
+      "type": "vector.completion",
+      "messages": { "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]" },
+      "responses": ["yes", "no"]
+    }
+  ]
+}
