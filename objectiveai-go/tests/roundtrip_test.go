@@ -306,9 +306,7 @@ func buildFieldTypeSchema(
 	case "float64":
 		return map[string]any{"type": "number"}
 	case "int8", "int16", "int32", "int64", "uint8", "uint16", "uint32", "uint64":
-		result := map[string]any{"type": "integer"}
-		addIntConstraints(result, typeName)
-		return result
+		return map[string]any{"type": "integer"}
 	case "any":
 		return map[string]any{}
 	case "time.Time":
@@ -357,31 +355,6 @@ func addValidateConstraints(schema map[string]any, validateTag string) {
 	}
 }
 
-func addIntConstraints(result map[string]any, typeName string) {
-	switch typeName {
-	case "int8":
-		result["minimum"] = json.Number("-128")
-		result["maximum"] = json.Number("127")
-	case "int16":
-		result["minimum"] = json.Number("-32768")
-		result["maximum"] = json.Number("32767")
-	case "int32":
-		result["minimum"] = json.Number("-2147483648")
-		result["maximum"] = json.Number("2147483647")
-	case "uint8":
-		result["minimum"] = json.Number("0")
-		result["maximum"] = json.Number("255")
-	case "uint16":
-		result["minimum"] = json.Number("0")
-		result["maximum"] = json.Number("65535")
-	case "uint32":
-		result["minimum"] = json.Number("0")
-		result["maximum"] = json.Number("4294967295")
-	case "uint64":
-		result["minimum"] = json.Number("0")
-		result["maximum"] = json.Number("18446744073709551615")
-	}
-}
 
 func parseDefaultValue(s string) any {
 	if s == "true" {
