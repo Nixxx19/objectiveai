@@ -132,6 +132,36 @@ fn get_function_json(repository: &str) -> Option<&'static str> {
     }
 }
 
+/// Returns a mock invention state file by name and filename.
+pub fn get_invention_state_file(name: &str, filename: &str) -> Option<&'static str> {
+    macro_rules! inv {
+        ($name:expr, $file:expr) => {
+            include_str!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/assets/mock/functions/inventions/",
+                $name, "/", $file,
+            ))
+        };
+    }
+    match (name, filename) {
+        // inv-good-sl
+        ("inv-good-sl", "parameters.json") => Some(inv!("inv-good-sl", "parameters.json")),
+        ("inv-good-sl", "function.json") => Some(inv!("inv-good-sl", "function.json")),
+        ("inv-good-sl", "input_schema.json") => Some(inv!("inv-good-sl", "input_schema.json")),
+        ("inv-good-sl", "ESSAY_TASKS.md") => Some(inv!("inv-good-sl", "ESSAY_TASKS.md")),
+        // inv-good-vl
+        ("inv-good-vl", "parameters.json") => Some(inv!("inv-good-vl", "parameters.json")),
+        ("inv-good-vl", "function.json") => Some(inv!("inv-good-vl", "function.json")),
+        ("inv-good-vl", "input_schema.json") => Some(inv!("inv-good-vl", "input_schema.json")),
+        ("inv-good-vl", "ESSAY.md") => Some(inv!("inv-good-vl", "ESSAY.md")),
+        // inv-schema-only
+        ("inv-schema-only", "parameters.json") => Some(inv!("inv-schema-only", "parameters.json")),
+        ("inv-schema-only", "input_schema.json") => Some(inv!("inv-schema-only", "input_schema.json")),
+        ("inv-schema-only", "ESSAY.md") => Some(inv!("inv-schema-only", "ESSAY.md")),
+        _ => None,
+    }
+}
+
 /// All mock Function repository names.
 const FUNCTION_REPOSITORIES: &[&str] = &[
     "binary-classifier", "spam-with-optional-sentiment", "five-star-rating",
