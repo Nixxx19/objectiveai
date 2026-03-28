@@ -314,15 +314,24 @@ impl HttpClient {
         + use<T, P, B>,
         super::HttpError,
     > {
+        // Stop the stream at [DONE] to prevent reqwest_eventsource from
+        // auto-reconnecting. Uses take_while on the raw SSE events, then
+        // maps/filters the remaining events into typed chunks.
         Ok(
             self.request(method, path.as_ref(), body)
                 .eventsource()?
+                .take_while(|result| {
+                    let dominated = matches!(
+                        result,
+                        Ok(Event::Message(MessageEvent { data, .. })) if data == "[DONE]"
+                    );
+                    async move { !dominated }
+                })
                 .then(|result| async {
                     match result {
                         Ok(Event::Open) => None,
                         Ok(Event::Message(MessageEvent { data, .. }))
-                            if data == "[DONE]"
-                                || data.starts_with(":")
+                            if data.starts_with(":")
                                 || data.is_empty() =>
                         {
                             None
