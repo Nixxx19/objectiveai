@@ -8,8 +8,8 @@ import (
 )
 
 type FunctionsExecutionsResponseStreamingTaskChunk struct {
-	FunctionExecution *FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk `ref:"functions.executions.response.streaming.FunctionExecutionTaskChunk"`
-	VectorCompletion *FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk `ref:"functions.executions.response.streaming.VectorCompletionTaskChunk"`
+	FunctionExecution *FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk 
+	VectorCompletion *FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk 
 }
 
 func (v FunctionsExecutionsResponseStreamingTaskChunk) MarshalJSON() ([]byte, error) {

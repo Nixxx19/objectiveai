@@ -9,27 +9,32 @@ import (
 
 // Calls a scalar function (produces a single score).
 type FunctionsTaskScalarFunction struct {
-	Type string `json:"type"`
+	FunctionsScalarFunctionTask
+	Type string `json:"type" validate:"oneof=scalar.function"`
 }
 
 // Calls a vector function (produces a vector of scores).
 type FunctionsTaskVectorFunction struct {
-	Type string `json:"type"`
+	FunctionsVectorFunctionTask
+	Type string `json:"type" validate:"oneof=vector.function"`
 }
 
 // Runs a vector completion.
 type FunctionsTaskVectorCompletion struct {
-	Type string `json:"type"`
+	FunctionsVectorCompletionTask
+	Type string `json:"type" validate:"oneof=vector.completion"`
 }
 
 // Placeholder scalar function (always outputs 0.5).
 type FunctionsTaskPlaceholderScalarFunction struct {
-	Type string `json:"type"`
+	FunctionsPlaceholderScalarFunctionTask
+	Type string `json:"type" validate:"oneof=placeholder.scalar.function"`
 }
 
 // Placeholder vector function (always outputs equalized vector).
 type FunctionsTaskPlaceholderVectorFunction struct {
-	Type string `json:"type"`
+	FunctionsPlaceholderVectorFunctionTask
+	Type string `json:"type" validate:"oneof=placeholder.vector.function"`
 }
 
 // A compiled task ready for execution.
@@ -38,15 +43,15 @@ type FunctionsTaskPlaceholderVectorFunction struct {
 // expressions have been resolved to concrete values.
 type FunctionsTask struct {
 	// Calls a scalar function (produces a single score).
-	ScalarFunction *FunctionsTaskScalarFunction `ref:"functions.ScalarFunctionTask"`
+	ScalarFunction *FunctionsTaskScalarFunction 
 	// Calls a vector function (produces a vector of scores).
-	VectorFunction *FunctionsTaskVectorFunction `ref:"functions.VectorFunctionTask"`
+	VectorFunction *FunctionsTaskVectorFunction 
 	// Runs a vector completion.
-	VectorCompletion *FunctionsTaskVectorCompletion `ref:"functions.VectorCompletionTask"`
+	VectorCompletion *FunctionsTaskVectorCompletion 
 	// Placeholder scalar function (always outputs 0.5).
-	PlaceholderScalarFunction *FunctionsTaskPlaceholderScalarFunction `ref:"functions.PlaceholderScalarFunctionTask"`
+	PlaceholderScalarFunction *FunctionsTaskPlaceholderScalarFunction 
 	// Placeholder vector function (always outputs equalized vector).
-	PlaceholderVectorFunction *FunctionsTaskPlaceholderVectorFunction `ref:"functions.PlaceholderVectorFunctionTask"`
+	PlaceholderVectorFunction *FunctionsTaskPlaceholderVectorFunction 
 }
 
 func (v FunctionsTask) MarshalJSON() ([]byte, error) {

@@ -8,18 +8,18 @@ import (
 )
 
 type FunctionsProfilesComputationsRequestTargetScalar struct {
-	Type string `json:"type"`
-	Value float64 `json:"value"`
+	Type string `json:"type" validate:"oneof=scalar"`
+	Value float64 `json:"value" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }
 
 type FunctionsProfilesComputationsRequestTargetVector struct {
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=vector"`
 	Value []float64 `json:"value"`
 }
 
 type FunctionsProfilesComputationsRequestTargetVectorWinner struct {
-	Type string `json:"type"`
-	Value uint32 `json:"value"`
+	Type string `json:"type" validate:"oneof=vector_winner"`
+	Value uint32 `json:"value" validate:"min=0,max=4294967295"`
 }
 
 type FunctionsProfilesComputationsRequestTarget struct {

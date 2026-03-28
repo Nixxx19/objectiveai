@@ -10,8 +10,8 @@ import (
 // A profile specification that is either an inline profile definition
 // or a remote path reference.
 type FunctionsInlineProfileOrRemoteCommitOptional struct {
-	Inline *FunctionsInlineProfile `ref:"functions.InlineProfile"`
-	Remote *RemotePathCommitOptional `ref:"RemotePathCommitOptional"`
+	Inline *FunctionsInlineProfile 
+	Remote *RemotePathCommitOptional 
 }
 
 func (v FunctionsInlineProfileOrRemoteCommitOptional) MarshalJSON() ([]byte, error) {

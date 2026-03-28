@@ -9,12 +9,12 @@ import (
 
 type FunctionsAlphaVectorInlineFunctionBranch struct {
 	Tasks []FunctionsAlphaVectorBranchTaskExpression `json:"tasks"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=alpha.vector.branch.function"`
 }
 
 type FunctionsAlphaVectorInlineFunctionLeaf struct {
 	Tasks []FunctionsAlphaVectorLeafTaskExpression `json:"tasks"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=alpha.vector.leaf.function"`
 }
 
 type FunctionsAlphaVectorInlineFunction struct {

@@ -8,16 +8,18 @@ import (
 )
 
 type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderScalarFunction struct {
-	Type string `json:"type"`
+	FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpression
+	Type string `json:"type" validate:"oneof=placeholder.alpha.scalar.function"`
 }
 
 type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderVectorFunction struct {
-	Type string `json:"type"`
+	FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression
+	Type string `json:"type" validate:"oneof=placeholder.alpha.vector.function"`
 }
 
 type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression struct {
-	PlaceholderScalarFunction *FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderScalarFunction `ref:"functions.alpha_vector.PartialPlaceholderScalarFunctionTaskExpression"`
-	PlaceholderVectorFunction *FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderVectorFunction `ref:"functions.alpha_vector.PartialPlaceholderVectorFunctionTaskExpression"`
+	PlaceholderScalarFunction *FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderScalarFunction 
+	PlaceholderVectorFunction *FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderVectorFunction 
 }
 
 func (v FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression) MarshalJSON() ([]byte, error) {

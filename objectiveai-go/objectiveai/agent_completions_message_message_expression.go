@@ -8,23 +8,28 @@ import (
 )
 
 type AgentCompletionsMessageMessageExpressionDeveloper struct {
-	Role string `json:"role"`
+	AgentCompletionsMessageDeveloperMessageExpression
+	Role string `json:"role" validate:"oneof=developer"`
 }
 
 type AgentCompletionsMessageMessageExpressionSystem struct {
-	Role string `json:"role"`
+	AgentCompletionsMessageSystemMessageExpression
+	Role string `json:"role" validate:"oneof=system"`
 }
 
 type AgentCompletionsMessageMessageExpressionUser struct {
-	Role string `json:"role"`
+	AgentCompletionsMessageUserMessageExpression
+	Role string `json:"role" validate:"oneof=user"`
 }
 
 type AgentCompletionsMessageMessageExpressionAssistant struct {
-	Role string `json:"role"`
+	AgentCompletionsMessageAssistantMessageExpression
+	Role string `json:"role" validate:"oneof=assistant"`
 }
 
 type AgentCompletionsMessageMessageExpressionTool struct {
-	Role string `json:"role"`
+	AgentCompletionsMessageToolMessageExpression
+	Role string `json:"role" validate:"oneof=tool"`
 }
 
 // A message with expressions for dynamic content.
@@ -33,11 +38,11 @@ type AgentCompletionsMessageMessageExpressionTool struct {
 // where message content can be computed from the function input at runtime.
 // Supports both JMESPath and Starlark expressions.
 type AgentCompletionsMessageMessageExpression struct {
-	Developer *AgentCompletionsMessageMessageExpressionDeveloper `ref:"agent.completions.message.DeveloperMessageExpression"`
-	System *AgentCompletionsMessageMessageExpressionSystem `ref:"agent.completions.message.SystemMessageExpression"`
-	User *AgentCompletionsMessageMessageExpressionUser `ref:"agent.completions.message.UserMessageExpression"`
-	Assistant *AgentCompletionsMessageMessageExpressionAssistant `ref:"agent.completions.message.AssistantMessageExpression"`
-	Tool *AgentCompletionsMessageMessageExpressionTool `ref:"agent.completions.message.ToolMessageExpression"`
+	Developer *AgentCompletionsMessageMessageExpressionDeveloper 
+	System *AgentCompletionsMessageMessageExpressionSystem 
+	User *AgentCompletionsMessageMessageExpressionUser 
+	Assistant *AgentCompletionsMessageMessageExpressionAssistant 
+	Tool *AgentCompletionsMessageMessageExpressionTool 
 }
 
 func (v AgentCompletionsMessageMessageExpression) MarshalJSON() ([]byte, error) {

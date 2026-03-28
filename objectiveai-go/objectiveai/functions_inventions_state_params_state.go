@@ -8,36 +8,42 @@ import (
 )
 
 type FunctionsInventionsStateParamsStateAlphaScalarBranch struct {
-	Type string `json:"type"`
+	FunctionsInventionsStateAlphaScalarBranchState
+	Type string `json:"type" validate:"oneof=alpha.scalar.branch.function"`
 }
 
 type FunctionsInventionsStateParamsStateAlphaScalarLeaf struct {
-	Type string `json:"type"`
+	FunctionsInventionsStateAlphaScalarLeafState
+	Type string `json:"type" validate:"oneof=alpha.scalar.leaf.function"`
 }
 
 type FunctionsInventionsStateParamsStateAlphaVectorBranch struct {
-	Type string `json:"type"`
+	FunctionsInventionsStateAlphaVectorBranchState
+	Type string `json:"type" validate:"oneof=alpha.vector.branch.function"`
 }
 
 type FunctionsInventionsStateParamsStateAlphaVectorLeaf struct {
-	Type string `json:"type"`
+	FunctionsInventionsStateAlphaVectorLeafState
+	Type string `json:"type" validate:"oneof=alpha.vector.leaf.function"`
 }
 
 type FunctionsInventionsStateParamsStateAlphaScalar struct {
-	Type string `json:"type"`
+	FunctionsInventionsStateAlphaScalarState
+	Type string `json:"type" validate:"oneof=alpha.scalar.function"`
 }
 
 type FunctionsInventionsStateParamsStateAlphaVector struct {
-	Type string `json:"type"`
+	FunctionsInventionsStateAlphaVectorState
+	Type string `json:"type" validate:"oneof=alpha.vector.function"`
 }
 
 type FunctionsInventionsStateParamsState struct {
-	AlphaScalarBranch *FunctionsInventionsStateParamsStateAlphaScalarBranch `ref:"functions.inventions.state.AlphaScalarBranchState"`
-	AlphaScalarLeaf *FunctionsInventionsStateParamsStateAlphaScalarLeaf `ref:"functions.inventions.state.AlphaScalarLeafState"`
-	AlphaVectorBranch *FunctionsInventionsStateParamsStateAlphaVectorBranch `ref:"functions.inventions.state.AlphaVectorBranchState"`
-	AlphaVectorLeaf *FunctionsInventionsStateParamsStateAlphaVectorLeaf `ref:"functions.inventions.state.AlphaVectorLeafState"`
-	AlphaScalar *FunctionsInventionsStateParamsStateAlphaScalar `ref:"functions.inventions.state.AlphaScalarState"`
-	AlphaVector *FunctionsInventionsStateParamsStateAlphaVector `ref:"functions.inventions.state.AlphaVectorState"`
+	AlphaScalarBranch *FunctionsInventionsStateParamsStateAlphaScalarBranch 
+	AlphaScalarLeaf *FunctionsInventionsStateParamsStateAlphaScalarLeaf 
+	AlphaVectorBranch *FunctionsInventionsStateParamsStateAlphaVectorBranch 
+	AlphaVectorLeaf *FunctionsInventionsStateParamsStateAlphaVectorLeaf 
+	AlphaScalar *FunctionsInventionsStateParamsStateAlphaScalar 
+	AlphaVector *FunctionsInventionsStateParamsStateAlphaVector 
 }
 
 func (v FunctionsInventionsStateParamsState) MarshalJSON() ([]byte, error) {

@@ -11,9 +11,9 @@ import (
 //
 // This is an untagged enum that dispatches to the per-upstream Agent.
 type AgentInlineAgent struct {
-	Openrouter *AgentOpenrouterAgent `ref:"agent.openrouter.Agent"`
-	ClaudeAgentSdk *AgentClaudeAgentSdkAgent `ref:"agent.claude_agent_sdk.Agent"`
-	Mock *AgentMockAgent `ref:"agent.mock.Agent"`
+	Openrouter *AgentOpenrouterAgent 
+	ClaudeAgentSdk *AgentClaudeAgentSdkAgent 
+	Mock *AgentMockAgent 
 }
 
 func (v AgentInlineAgent) MarshalJSON() ([]byte, error) {

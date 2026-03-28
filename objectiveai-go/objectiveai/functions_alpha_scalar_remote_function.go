@@ -11,14 +11,14 @@ type FunctionsAlphaScalarRemoteFunctionBranch struct {
 	Description string `json:"description"`
 	InputSchema FunctionsExpressionObjectInputSchema `json:"input_schema"`
 	Tasks []FunctionsAlphaScalarBranchTaskExpression `json:"tasks"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=alpha.scalar.branch.function"`
 }
 
 type FunctionsAlphaScalarRemoteFunctionLeaf struct {
 	Description string `json:"description"`
 	InputSchema FunctionsExpressionObjectInputSchema `json:"input_schema"`
 	Tasks []FunctionsAlphaScalarLeafTaskExpression `json:"tasks"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=alpha.scalar.leaf.function"`
 }
 
 type FunctionsAlphaScalarRemoteFunction struct {

@@ -9,41 +9,46 @@ import (
 
 // A developer message (similar to system, but from the developer).
 type AgentCompletionsMessageMessageDeveloper struct {
-	Role string `json:"role"`
+	AgentCompletionsMessageDeveloperMessage
+	Role string `json:"role" validate:"oneof=developer"`
 }
 
 // A system message setting context or instructions.
 type AgentCompletionsMessageMessageSystem struct {
-	Role string `json:"role"`
+	AgentCompletionsMessageSystemMessage
+	Role string `json:"role" validate:"oneof=system"`
 }
 
 // A user message from the end user.
 type AgentCompletionsMessageMessageUser struct {
-	Role string `json:"role"`
+	AgentCompletionsMessageUserMessage
+	Role string `json:"role" validate:"oneof=user"`
 }
 
 // An assistant message (model's previous response).
 type AgentCompletionsMessageMessageAssistant struct {
-	Role string `json:"role"`
+	AgentCompletionsMessageAssistantMessage
+	Role string `json:"role" validate:"oneof=assistant"`
 }
 
 // A tool message containing the result of a tool call.
 type AgentCompletionsMessageMessageTool struct {
-	Role string `json:"role"`
+	AgentCompletionsMessageToolMessage
+	Role string `json:"role" validate:"oneof=tool"`
 }
 
 // A message in the conversation.
 type AgentCompletionsMessageMessage struct {
 	// A developer message (similar to system, but from the developer).
-	Developer *AgentCompletionsMessageMessageDeveloper `ref:"agent.completions.message.DeveloperMessage"`
+	Developer *AgentCompletionsMessageMessageDeveloper 
 	// A system message setting context or instructions.
-	System *AgentCompletionsMessageMessageSystem `ref:"agent.completions.message.SystemMessage"`
+	System *AgentCompletionsMessageMessageSystem 
 	// A user message from the end user.
-	User *AgentCompletionsMessageMessageUser `ref:"agent.completions.message.UserMessage"`
+	User *AgentCompletionsMessageMessageUser 
 	// An assistant message (model's previous response).
-	Assistant *AgentCompletionsMessageMessageAssistant `ref:"agent.completions.message.AssistantMessage"`
+	Assistant *AgentCompletionsMessageMessageAssistant 
 	// A tool message containing the result of a tool call.
-	Tool *AgentCompletionsMessageMessageTool `ref:"agent.completions.message.ToolMessage"`
+	Tool *AgentCompletionsMessageMessageTool 
 }
 
 func (v AgentCompletionsMessageMessage) MarshalJSON() ([]byte, error) {

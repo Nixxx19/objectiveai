@@ -9,16 +9,16 @@ import (
 
 // Scalar or Vector
 type FunctionsExecutionsRequestStrategyDefault struct {
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=default"`
 }
 
 // Vector
 type FunctionsExecutionsRequestStrategySwissSystem struct {
 	// How many vector responses for each execution
-	Pool *uint32 `json:"pool,omitempty"`
+	Pool *uint32 `json:"pool,omitempty" validate:"min=0,max=4294967295"`
 	// How many sequential rounds of comparison
-	Rounds *uint32 `json:"rounds,omitempty"`
-	Type string `json:"type"`
+	Rounds *uint32 `json:"rounds,omitempty" validate:"min=0,max=4294967295"`
+	Type string `json:"type" validate:"oneof=swiss_system"`
 }
 
 type FunctionsExecutionsRequestStrategy struct {

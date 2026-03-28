@@ -13,27 +13,27 @@ import (
 // Used by remote Functions to document and validate their inputs.
 type FunctionsExpressionInputSchema struct {
 	// A union of schemas - input must match at least one.
-	AnyOf *FunctionsExpressionAnyOfInputSchema `ref:"functions.expression.AnyOfInputSchema"`
+	AnyOf *FunctionsExpressionAnyOfInputSchema 
 	// An object with named properties.
-	Object *FunctionsExpressionObjectInputSchema `ref:"functions.expression.ObjectInputSchema"`
+	Object *FunctionsExpressionObjectInputSchema 
 	// An array of items.
-	Array *FunctionsExpressionArrayInputSchema `ref:"functions.expression.ArrayInputSchema"`
+	Array *FunctionsExpressionArrayInputSchema 
 	// A string value.
-	String *FunctionsExpressionStringInputSchema `ref:"functions.expression.StringInputSchema"`
+	String *FunctionsExpressionStringInputSchema 
 	// An integer value.
-	Integer *FunctionsExpressionIntegerInputSchema `ref:"functions.expression.IntegerInputSchema"`
+	Integer *FunctionsExpressionIntegerInputSchema 
 	// A floating-point number.
-	Number *FunctionsExpressionNumberInputSchema `ref:"functions.expression.NumberInputSchema"`
+	Number *FunctionsExpressionNumberInputSchema 
 	// A boolean value.
-	Boolean *FunctionsExpressionBooleanInputSchema `ref:"functions.expression.BooleanInputSchema"`
+	Boolean *FunctionsExpressionBooleanInputSchema 
 	// An image (URL or base64).
-	Image *FunctionsExpressionImageInputSchema `ref:"functions.expression.ImageInputSchema"`
+	Image *FunctionsExpressionImageInputSchema 
 	// Audio content.
-	Audio *FunctionsExpressionAudioInputSchema `ref:"functions.expression.AudioInputSchema"`
+	Audio *FunctionsExpressionAudioInputSchema 
 	// Video content.
-	Video *FunctionsExpressionVideoInputSchema `ref:"functions.expression.VideoInputSchema"`
+	Video *FunctionsExpressionVideoInputSchema 
 	// A file.
-	File *FunctionsExpressionFileInputSchema `ref:"functions.expression.FileInputSchema"`
+	File *FunctionsExpressionFileInputSchema 
 }
 
 func (v FunctionsExpressionInputSchema) MarshalJSON() ([]byte, error) {

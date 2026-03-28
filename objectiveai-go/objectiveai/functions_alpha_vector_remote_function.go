@@ -11,14 +11,14 @@ type FunctionsAlphaVectorRemoteFunctionBranch struct {
 	Description string `json:"description"`
 	InputSchema FunctionsAlphaVectorExpressionVectorFunctionInputSchema `json:"input_schema"`
 	Tasks []FunctionsAlphaVectorBranchTaskExpression `json:"tasks"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=alpha.vector.branch.function"`
 }
 
 type FunctionsAlphaVectorRemoteFunctionLeaf struct {
 	Description string `json:"description"`
 	InputSchema FunctionsAlphaVectorExpressionVectorFunctionInputSchema `json:"input_schema"`
 	Tasks []FunctionsAlphaVectorLeafTaskExpression `json:"tasks"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=alpha.vector.leaf.function"`
 }
 
 type FunctionsAlphaVectorRemoteFunction struct {

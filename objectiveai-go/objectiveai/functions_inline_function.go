@@ -14,7 +14,7 @@ type FunctionsInlineFunctionScalar struct {
 	// `map` set to the current integer index.
 	// Receives: `input`, `map` (if mapped).
 	Tasks []FunctionsTaskExpression `json:"tasks"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=scalar.function"`
 }
 
 // Produces a vector of scores that sums to 1.
@@ -35,7 +35,7 @@ type FunctionsInlineFunctionVector struct {
 	// `map` set to the current integer index.
 	// Receives: `input`, `map` (if mapped).
 	Tasks []FunctionsTaskExpression `json:"tasks"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=vector.function"`
 }
 
 // An inline function definition without metadata.

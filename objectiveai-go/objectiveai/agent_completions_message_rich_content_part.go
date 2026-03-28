@@ -10,37 +10,37 @@ import (
 // Text content.
 type AgentCompletionsMessageRichContentPartText struct {
 	Text string `json:"text"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=text"`
 }
 
 // An image URL.
 type AgentCompletionsMessageRichContentPartImageUrl struct {
 	ImageURL AgentCompletionsMessageImageUrl `json:"image_url"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=image_url"`
 }
 
 // Audio input.
 type AgentCompletionsMessageRichContentPartInputAudio struct {
 	InputAudio AgentCompletionsMessageInputAudio `json:"input_audio"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=input_audio"`
 }
 
 // Video input.
 type AgentCompletionsMessageRichContentPartInputVideo struct {
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=input_video"`
 	VideoURL AgentCompletionsMessageVideoUrl `json:"video_url"`
 }
 
 // A video URL.
 type AgentCompletionsMessageRichContentPartVideoUrl struct {
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=video_url"`
 	VideoURL AgentCompletionsMessageVideoUrl `json:"video_url"`
 }
 
 // A file.
 type AgentCompletionsMessageRichContentPartFile struct {
 	File AgentCompletionsMessageFile `json:"file"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=file"`
 }
 
 // A part of rich content.

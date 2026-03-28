@@ -18,9 +18,9 @@ import (
 // for given inputs.
 type FunctionsFunction struct {
 	// A remote function with metadata (description, schema, etc.).
-	Remote *FunctionsRemoteFunction `ref:"functions.RemoteFunction"`
+	Remote *FunctionsRemoteFunction 
 	// An inline function definition without metadata.
-	Inline *FunctionsInlineFunction `ref:"functions.InlineFunction"`
+	Inline *FunctionsInlineFunction 
 }
 
 func (v FunctionsFunction) MarshalJSON() ([]byte, error) {

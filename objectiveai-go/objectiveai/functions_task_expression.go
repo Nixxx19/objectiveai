@@ -8,23 +8,28 @@ import (
 )
 
 type FunctionsTaskExpressionScalarFunction struct {
-	Type string `json:"type"`
+	FunctionsScalarFunctionTaskExpression
+	Type string `json:"type" validate:"oneof=scalar.function"`
 }
 
 type FunctionsTaskExpressionVectorFunction struct {
-	Type string `json:"type"`
+	FunctionsVectorFunctionTaskExpression
+	Type string `json:"type" validate:"oneof=vector.function"`
 }
 
 type FunctionsTaskExpressionVectorCompletion struct {
-	Type string `json:"type"`
+	FunctionsVectorCompletionTaskExpression
+	Type string `json:"type" validate:"oneof=vector.completion"`
 }
 
 type FunctionsTaskExpressionPlaceholderScalarFunction struct {
-	Type string `json:"type"`
+	FunctionsPlaceholderScalarFunctionTaskExpression
+	Type string `json:"type" validate:"oneof=placeholder.scalar.function"`
 }
 
 type FunctionsTaskExpressionPlaceholderVectorFunction struct {
-	Type string `json:"type"`
+	FunctionsPlaceholderVectorFunctionTaskExpression
+	Type string `json:"type" validate:"oneof=placeholder.vector.function"`
 }
 
 // A task definition with expressions (pre-compilation).
@@ -33,11 +38,11 @@ type FunctionsTaskExpressionPlaceholderVectorFunction struct {
 // resolved against input data during compilation. Use [`compile`](Self::compile)
 // to produce a concrete [`Task`].
 type FunctionsTaskExpression struct {
-	ScalarFunction *FunctionsTaskExpressionScalarFunction `ref:"functions.ScalarFunctionTaskExpression"`
-	VectorFunction *FunctionsTaskExpressionVectorFunction `ref:"functions.VectorFunctionTaskExpression"`
-	VectorCompletion *FunctionsTaskExpressionVectorCompletion `ref:"functions.VectorCompletionTaskExpression"`
-	PlaceholderScalarFunction *FunctionsTaskExpressionPlaceholderScalarFunction `ref:"functions.PlaceholderScalarFunctionTaskExpression"`
-	PlaceholderVectorFunction *FunctionsTaskExpressionPlaceholderVectorFunction `ref:"functions.PlaceholderVectorFunctionTaskExpression"`
+	ScalarFunction *FunctionsTaskExpressionScalarFunction 
+	VectorFunction *FunctionsTaskExpressionVectorFunction 
+	VectorCompletion *FunctionsTaskExpressionVectorCompletion 
+	PlaceholderScalarFunction *FunctionsTaskExpressionPlaceholderScalarFunction 
+	PlaceholderVectorFunction *FunctionsTaskExpressionPlaceholderVectorFunction 
 }
 
 func (v FunctionsTaskExpression) MarshalJSON() ([]byte, error) {

@@ -565,12 +565,12 @@ func buildStructTags(jsonTag string, propSchema Schema, selfTitle string, allTit
 
 	// pattern tag
 	if pat, ok := cs["pattern"].(string); ok {
-		tags = append(tags, fmt.Sprintf("pat:%q", pat))
+		tags = append(tags, fmt.Sprintf("pattern:%q", pat))
 	}
 
 	// default tag
 	if def, ok := cs["default"]; ok {
-		tags = append(tags, fmt.Sprintf("def:%q", formatTagDefault(def)))
+		tags = append(tags, fmt.Sprintf("default:%q", formatTagDefault(def)))
 	}
 
 	if len(tags) == 0 {
@@ -656,21 +656,8 @@ func generateAnyOfStruct(typeName string, anyOf []any, selfTitle string, schema 
 		variantIsPointer = append(variantIsPointer, strings.HasPrefix(fieldType, "*"))
 		variantValidateTags = append(variantValidateTags, buildValidateValue(m))
 
-		// Build tags: ref tag for $ref, plus any constraint tags
-		var variantTags []string
-		if ref, ok := m["$ref"].(string); ok {
-			variantTags = append(variantTags, fmt.Sprintf("ref:%q", ref))
-		}
-		if constraintTags := buildStructTags("", m, selfTitle, allTitles); constraintTags != "" {
-			// Strip the backticks from buildStructTags result and merge
-			inner := strings.TrimPrefix(strings.TrimSuffix(constraintTags, "`"), "`")
-			variantTags = append(variantTags, inner)
-		}
-		var tagStr string
-		if len(variantTags) > 0 {
-			tagStr = "`" + strings.Join(variantTags, " ") + "`"
-		}
-		fields = append(fields, goDocComment(variantDesc, "\t")+fmt.Sprintf("\t%s %s %s", fieldName, fieldType, tagStr))
+		tags := buildStructTags("", m, selfTitle, allTitles)
+		fields = append(fields, goDocComment(variantDesc, "\t")+fmt.Sprintf("\t%s %s %s", fieldName, fieldType, tags))
 	}
 
 	var b strings.Builder
@@ -788,12 +775,19 @@ func generateVariantMarshal(typeName string, variants []variantInfo, single bool
 }
 
 // generateInlineVariantStruct generates a struct for an inline object anyOf variant.
+// If the schema has a $ref, the referenced type is embedded (Go struct embedding = inheritance).
 func generateInlineVariantStruct(structName string, schema Schema, selfTitle string, allTitles map[string]bool) string {
 	props, _ := schema["properties"].(map[string]any)
 	var b strings.Builder
 	desc, _ := schema["description"].(string)
 	b.WriteString(goDocComment(desc, ""))
 	b.WriteString(fmt.Sprintf("type %s struct {\n", structName))
+
+	// Embed $ref type if present (inheritance)
+	if ref, ok := schema["$ref"].(string); ok {
+		b.WriteString(fmt.Sprintf("\t%s\n", toPascal(ref)))
+	}
+
 	for _, pn := range sortedKeys(props) {
 		ps, ok := props[pn].(map[string]any)
 		if !ok {
@@ -810,7 +804,8 @@ func generateInlineVariantStruct(structName string, schema Schema, selfTitle str
 		if _, hd := ps["default"]; hd && !strings.Contains(jt, "omitempty") {
 			jt += ",omitempty"
 		}
-		b.WriteString(fmt.Sprintf("\t%s %s `json:%q`\n", fn, ft, jt))
+		tags := buildStructTags(jt, ps, selfTitle, allTitles)
+		b.WriteString(fmt.Sprintf("\t%s %s %s\n", fn, ft, tags))
 	}
 	b.WriteString("}\n")
 	return b.String()

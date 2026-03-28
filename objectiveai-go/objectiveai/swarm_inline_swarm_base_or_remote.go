@@ -10,8 +10,8 @@ import (
 // A swarm specification that is either an inline swarm base
 // or a remote path reference.
 type SwarmInlineSwarmBaseOrRemote struct {
-	SwarmBase *SwarmInlineSwarmBase `ref:"swarm.InlineSwarmBase"`
-	Remote *RemotePath `ref:"RemotePath"`
+	SwarmBase *SwarmInlineSwarmBase 
+	Remote *RemotePath 
 }
 
 func (v SwarmInlineSwarmBaseOrRemote) MarshalJSON() ([]byte, error) {

@@ -12,9 +12,9 @@ import (
 // Each variant corresponds to a task type in the Function definition.
 type FunctionsTaskProfile struct {
 	// Profile for a nested function task (references another profile).
-	Remote *RemotePath `ref:"RemotePath"`
+	Remote *RemotePath 
 	// Inline profile for a task (tasks-based or auto).
-	Inline *FunctionsInlineProfile `ref:"functions.InlineProfile"`
+	Inline *FunctionsInlineProfile 
 	// Placeholder task — no configuration needed, output is fixed.
 	Placeholder map[string]any 
 }

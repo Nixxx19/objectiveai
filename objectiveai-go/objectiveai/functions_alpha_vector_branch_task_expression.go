@@ -8,26 +8,30 @@ import (
 )
 
 type FunctionsAlphaVectorBranchTaskExpressionScalarFunction struct {
-	Type string `json:"type"`
+	FunctionsAlphaVectorScalarFunctionTaskExpression
+	Type string `json:"type" validate:"oneof=alpha.scalar.function"`
 }
 
 type FunctionsAlphaVectorBranchTaskExpressionVectorFunction struct {
-	Type string `json:"type"`
+	FunctionsAlphaVectorVectorFunctionTaskExpression
+	Type string `json:"type" validate:"oneof=alpha.vector.function"`
 }
 
 type FunctionsAlphaVectorBranchTaskExpressionPlaceholderScalarFunction struct {
-	Type string `json:"type"`
+	FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpression
+	Type string `json:"type" validate:"oneof=placeholder.alpha.scalar.function"`
 }
 
 type FunctionsAlphaVectorBranchTaskExpressionPlaceholderVectorFunction struct {
-	Type string `json:"type"`
+	FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpression
+	Type string `json:"type" validate:"oneof=placeholder.alpha.vector.function"`
 }
 
 type FunctionsAlphaVectorBranchTaskExpression struct {
-	ScalarFunction *FunctionsAlphaVectorBranchTaskExpressionScalarFunction `ref:"functions.alpha_vector.ScalarFunctionTaskExpression"`
-	VectorFunction *FunctionsAlphaVectorBranchTaskExpressionVectorFunction `ref:"functions.alpha_vector.VectorFunctionTaskExpression"`
-	PlaceholderScalarFunction *FunctionsAlphaVectorBranchTaskExpressionPlaceholderScalarFunction `ref:"functions.alpha_vector.PlaceholderScalarFunctionTaskExpression"`
-	PlaceholderVectorFunction *FunctionsAlphaVectorBranchTaskExpressionPlaceholderVectorFunction `ref:"functions.alpha_vector.PlaceholderVectorFunctionTaskExpression"`
+	ScalarFunction *FunctionsAlphaVectorBranchTaskExpressionScalarFunction 
+	VectorFunction *FunctionsAlphaVectorBranchTaskExpressionVectorFunction 
+	PlaceholderScalarFunction *FunctionsAlphaVectorBranchTaskExpressionPlaceholderScalarFunction 
+	PlaceholderVectorFunction *FunctionsAlphaVectorBranchTaskExpressionPlaceholderVectorFunction 
 }
 
 func (v FunctionsAlphaVectorBranchTaskExpression) MarshalJSON() ([]byte, error) {

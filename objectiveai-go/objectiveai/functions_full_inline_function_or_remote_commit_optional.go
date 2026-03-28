@@ -10,8 +10,8 @@ import (
 // A function specification that is either a full inline function definition
 // or a remote path reference.
 type FunctionsFullInlineFunctionOrRemoteCommitOptional struct {
-	Inline *FunctionsFullInlineFunction `ref:"functions.FullInlineFunction"`
-	Remote *RemotePathCommitOptional `ref:"RemotePathCommitOptional"`
+	Inline *FunctionsFullInlineFunction 
+	Remote *RemotePathCommitOptional 
 }
 
 func (v FunctionsFullInlineFunctionOrRemoteCommitOptional) MarshalJSON() ([]byte, error) {

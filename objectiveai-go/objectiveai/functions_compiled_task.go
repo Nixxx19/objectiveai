@@ -14,7 +14,7 @@ import (
 // 0 to the evaluated count.
 type FunctionsCompiledTask struct {
 	// A single task (no mapping).
-	One *FunctionsTask `ref:"functions.Task"`
+	One *FunctionsTask 
 	// Multiple task instances from mapped execution.
 	Many []FunctionsTask 
 }

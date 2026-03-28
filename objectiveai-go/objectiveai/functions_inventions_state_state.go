@@ -8,26 +8,30 @@ import (
 )
 
 type FunctionsInventionsStateStateAlphaScalarBranch struct {
-	Type string `json:"type"`
+	FunctionsInventionsStateAlphaScalarBranchState
+	Type string `json:"type" validate:"oneof=alpha.scalar.branch.function"`
 }
 
 type FunctionsInventionsStateStateAlphaScalarLeaf struct {
-	Type string `json:"type"`
+	FunctionsInventionsStateAlphaScalarLeafState
+	Type string `json:"type" validate:"oneof=alpha.scalar.leaf.function"`
 }
 
 type FunctionsInventionsStateStateAlphaVectorBranch struct {
-	Type string `json:"type"`
+	FunctionsInventionsStateAlphaVectorBranchState
+	Type string `json:"type" validate:"oneof=alpha.vector.branch.function"`
 }
 
 type FunctionsInventionsStateStateAlphaVectorLeaf struct {
-	Type string `json:"type"`
+	FunctionsInventionsStateAlphaVectorLeafState
+	Type string `json:"type" validate:"oneof=alpha.vector.leaf.function"`
 }
 
 type FunctionsInventionsStateState struct {
-	AlphaScalarBranch *FunctionsInventionsStateStateAlphaScalarBranch `ref:"functions.inventions.state.AlphaScalarBranchState"`
-	AlphaScalarLeaf *FunctionsInventionsStateStateAlphaScalarLeaf `ref:"functions.inventions.state.AlphaScalarLeafState"`
-	AlphaVectorBranch *FunctionsInventionsStateStateAlphaVectorBranch `ref:"functions.inventions.state.AlphaVectorBranchState"`
-	AlphaVectorLeaf *FunctionsInventionsStateStateAlphaVectorLeaf `ref:"functions.inventions.state.AlphaVectorLeafState"`
+	AlphaScalarBranch *FunctionsInventionsStateStateAlphaScalarBranch 
+	AlphaScalarLeaf *FunctionsInventionsStateStateAlphaScalarLeaf 
+	AlphaVectorBranch *FunctionsInventionsStateStateAlphaVectorBranch 
+	AlphaVectorLeaf *FunctionsInventionsStateStateAlphaVectorLeaf 
 }
 
 func (v FunctionsInventionsStateState) MarshalJSON() ([]byte, error) {

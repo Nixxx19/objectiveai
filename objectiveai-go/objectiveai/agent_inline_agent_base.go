@@ -12,9 +12,9 @@ import (
 // This is an untagged enum that dispatches to the per-upstream AgentBase.
 // Deserialization tries each variant in order until one matches.
 type AgentInlineAgentBase struct {
-	Openrouter *AgentOpenrouterAgentBase `ref:"agent.openrouter.AgentBase"`
-	ClaudeAgentSdk *AgentClaudeAgentSdkAgentBase `ref:"agent.claude_agent_sdk.AgentBase"`
-	Mock *AgentMockAgentBase `ref:"agent.mock.AgentBase"`
+	Openrouter *AgentOpenrouterAgentBase 
+	ClaudeAgentSdk *AgentClaudeAgentSdkAgentBase 
+	Mock *AgentMockAgentBase 
 }
 
 func (v AgentInlineAgentBase) MarshalJSON() ([]byte, error) {

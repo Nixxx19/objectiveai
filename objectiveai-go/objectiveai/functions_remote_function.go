@@ -18,7 +18,7 @@ type FunctionsRemoteFunctionScalar struct {
 	// `map` set to the current integer index.
 	// Receives: `input`, `map` (if mapped).
 	Tasks []FunctionsTaskExpression `json:"tasks"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=scalar.function"`
 }
 
 // Produces a vector of scores that sums to 1.
@@ -44,7 +44,7 @@ type FunctionsRemoteFunctionVector struct {
 	// `map` set to the current integer index.
 	// Receives: `input`, `map` (if mapped).
 	Tasks []FunctionsTaskExpression `json:"tasks"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=vector.function"`
 }
 
 // A remote function with full metadata.

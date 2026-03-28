@@ -10,20 +10,20 @@ import (
 type RemotePathCommitOptionalGithub struct {
 	Commit *string `json:"commit,omitempty"`
 	Owner string `json:"owner"`
-	Remote string `json:"remote"`
+	Remote string `json:"remote" validate:"oneof=github"`
 	Repository string `json:"repository"`
 }
 
 type RemotePathCommitOptionalFilesystem struct {
 	Commit *string `json:"commit,omitempty"`
 	Owner string `json:"owner"`
-	Remote string `json:"remote"`
+	Remote string `json:"remote" validate:"oneof=filesystem"`
 	Repository string `json:"repository"`
 }
 
 type RemotePathCommitOptionalMock struct {
 	Name string `json:"name"`
-	Remote string `json:"remote"`
+	Remote string `json:"remote" validate:"oneof=mock"`
 }
 
 type RemotePathCommitOptional struct {

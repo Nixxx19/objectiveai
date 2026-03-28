@@ -5,7 +5,7 @@ package objectiveai
 type ConfigApiConfig struct {
 	Headers *ConfigApiHeadersConfig `json:"headers,omitempty"`
 	Local *ConfigApiLocalConfig `json:"local,omitempty"`
-	Mode ConfigApiMode `json:"mode,omitempty" def:"local"`
+	Mode ConfigApiMode `json:"mode,omitempty" default:"local"`
 	Remote *ConfigApiRemoteConfig `json:"remote,omitempty"`
 }
 

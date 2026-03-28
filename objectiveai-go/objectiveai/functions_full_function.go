@@ -9,8 +9,8 @@ import (
 
 // A full function, either remote or inline.
 type FunctionsFullFunction struct {
-	Remote *FunctionsFullRemoteFunction `ref:"functions.FullRemoteFunction"`
-	Inline *FunctionsFullInlineFunction `ref:"functions.FullInlineFunction"`
+	Remote *FunctionsFullRemoteFunction 
+	Inline *FunctionsFullInlineFunction 
 }
 
 func (v FunctionsFullFunction) MarshalJSON() ([]byte, error) {

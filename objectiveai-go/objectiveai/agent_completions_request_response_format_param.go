@@ -10,7 +10,7 @@ import (
 // Either a single response format or a per-agent map.
 type AgentCompletionsRequestResponseFormatParam struct {
 	// A single response format applied to all agents.
-	Single *AgentCompletionsRequestResponseFormat `ref:"agent.completions.request.ResponseFormat"`
+	Single *AgentCompletionsRequestResponseFormat 
 	// Per-agent response formats, keyed by agent ID.
 	PerAgent map[string]AgentCompletionsRequestResponseFormat 
 }

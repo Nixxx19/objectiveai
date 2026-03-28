@@ -8,8 +8,8 @@ import (
 )
 
 type FunctionsAlphaRemoteFunction struct {
-	Scalar *FunctionsAlphaScalarRemoteFunction `ref:"functions.alpha_scalar.RemoteFunction"`
-	Vector *FunctionsAlphaVectorRemoteFunction `ref:"functions.alpha_vector.RemoteFunction"`
+	Scalar *FunctionsAlphaScalarRemoteFunction 
+	Vector *FunctionsAlphaVectorRemoteFunction 
 }
 
 func (v FunctionsAlphaRemoteFunction) MarshalJSON() ([]byte, error) {

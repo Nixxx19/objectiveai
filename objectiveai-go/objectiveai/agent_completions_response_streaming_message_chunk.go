@@ -8,8 +8,8 @@ import (
 )
 
 type AgentCompletionsResponseStreamingMessageChunk struct {
-	Assistant *AgentCompletionsResponseStreamingAssistantResponseChunk `ref:"agent.completions.response.streaming.AssistantResponseChunk"`
-	Tool *AgentCompletionsResponseToolResponse `ref:"agent.completions.response.ToolResponse"`
+	Assistant *AgentCompletionsResponseStreamingAssistantResponseChunk 
+	Tool *AgentCompletionsResponseToolResponse 
 }
 
 func (v AgentCompletionsResponseStreamingMessageChunk) MarshalJSON() ([]byte, error) {

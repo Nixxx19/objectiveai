@@ -13,7 +13,7 @@ import (
 // including rich content types (images, audio, video, files).
 type FunctionsExpressionInputValue struct {
 	// Rich content (image, audio, video, file).
-	RichContentPart *AgentCompletionsMessageRichContentPart `ref:"agent.completions.message.RichContentPart"`
+	RichContentPart *AgentCompletionsMessageRichContentPart 
 	// An object with string keys.
 	Object map[string]FunctionsExpressionInputValue 
 	// An array of values.

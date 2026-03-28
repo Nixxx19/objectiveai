@@ -9,30 +9,30 @@ import (
 
 // Plain text response (default).
 type AgentCompletionsRequestResponseFormatText struct {
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=text"`
 }
 
 // Response must be valid JSON.
 type AgentCompletionsRequestResponseFormatJsonObject struct {
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=json_object"`
 }
 
 // Response must conform to a JSON schema.
 type AgentCompletionsRequestResponseFormatJsonSchema struct {
 	// The JSON Schema definition.
 	Schema map[string]any `json:"schema"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=json_schema"`
 }
 
 // Response must conform to a grammar.
 type AgentCompletionsRequestResponseFormatGrammar struct {
 	Grammar string `json:"grammar"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=grammar"`
 }
 
 // Response must be valid Python code.
 type AgentCompletionsRequestResponseFormatPython struct {
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=python"`
 }
 
 // The final assistant message will contain this tool call
@@ -45,7 +45,7 @@ type AgentCompletionsRequestResponseFormatToolCall struct {
 	Required *bool `json:"required,omitempty"`
 	// The JSON Schema definition.
 	Schema map[string]any `json:"schema"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=tool_call"`
 }
 
 // The format of the model's response.

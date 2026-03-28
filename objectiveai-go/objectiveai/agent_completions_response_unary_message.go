@@ -8,8 +8,8 @@ import (
 )
 
 type AgentCompletionsResponseUnaryMessage struct {
-	Assistant *AgentCompletionsResponseUnaryAssistantResponse `ref:"agent.completions.response.unary.AssistantResponse"`
-	Tool *AgentCompletionsResponseToolResponse `ref:"agent.completions.response.ToolResponse"`
+	Assistant *AgentCompletionsResponseUnaryAssistantResponse 
+	Tool *AgentCompletionsResponseToolResponse 
 }
 
 func (v AgentCompletionsResponseUnaryMessage) MarshalJSON() ([]byte, error) {

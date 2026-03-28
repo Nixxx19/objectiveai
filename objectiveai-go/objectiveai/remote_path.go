@@ -10,20 +10,20 @@ import (
 type RemotePathGithub struct {
 	Commit string `json:"commit"`
 	Owner string `json:"owner"`
-	Remote string `json:"remote"`
+	Remote string `json:"remote" validate:"oneof=github"`
 	Repository string `json:"repository"`
 }
 
 type RemotePathFilesystem struct {
 	Commit string `json:"commit"`
 	Owner string `json:"owner"`
-	Remote string `json:"remote"`
+	Remote string `json:"remote" validate:"oneof=filesystem"`
 	Repository string `json:"repository"`
 }
 
 type RemotePathMock struct {
 	Name string `json:"name"`
-	Remote string `json:"remote"`
+	Remote string `json:"remote" validate:"oneof=mock"`
 }
 
 type RemotePath struct {

@@ -13,7 +13,7 @@ import (
 // expressions (JMESPath or Starlark) that are evaluated during compilation.
 type FunctionsExpressionInputValueExpression struct {
 	// Rich content (image, audio, video, file).
-	RichContentPart *AgentCompletionsMessageRichContentPart `ref:"agent.completions.message.RichContentPart"`
+	RichContentPart *AgentCompletionsMessageRichContentPart 
 	// An object with values that may be expressions.
 	Object map[string]any 
 	// An array with elements that may be expressions.

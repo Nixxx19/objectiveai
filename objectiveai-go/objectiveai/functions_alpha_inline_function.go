@@ -8,8 +8,8 @@ import (
 )
 
 type FunctionsAlphaInlineFunction struct {
-	Scalar *FunctionsAlphaScalarInlineFunction `ref:"functions.alpha_scalar.InlineFunction"`
-	Vector *FunctionsAlphaVectorInlineFunction `ref:"functions.alpha_vector.InlineFunction"`
+	Scalar *FunctionsAlphaScalarInlineFunction 
+	Vector *FunctionsAlphaVectorInlineFunction 
 }
 
 func (v FunctionsAlphaInlineFunction) MarshalJSON() ([]byte, error) {

@@ -8,8 +8,8 @@ import (
 )
 
 type FunctionsExecutionsResponseUnaryTask struct {
-	FunctionExecution *FunctionsExecutionsResponseUnaryFunctionExecutionTask `ref:"functions.executions.response.unary.FunctionExecutionTask"`
-	VectorCompletion *FunctionsExecutionsResponseUnaryVectorCompletionTask `ref:"functions.executions.response.unary.VectorCompletionTask"`
+	FunctionExecution *FunctionsExecutionsResponseUnaryFunctionExecutionTask 
+	VectorCompletion *FunctionsExecutionsResponseUnaryVectorCompletionTask 
 }
 
 func (v FunctionsExecutionsResponseUnaryTask) MarshalJSON() ([]byte, error) {

@@ -10,9 +10,9 @@ import (
 // A remote profile, either tasks-based or auto.
 type FunctionsRemoteProfile struct {
 	// Tasks-based profile with per-task configuration.
-	Tasks *FunctionsRemoteTasksProfile `ref:"functions.RemoteTasksProfile"`
+	Tasks *FunctionsRemoteTasksProfile 
 	// Auto profile that applies a single swarm+weights to all vector completion tasks.
-	Auto *SwarmRemoteSwarmBase `ref:"swarm.RemoteSwarmBase"`
+	Auto *SwarmRemoteSwarmBase 
 }
 
 func (v FunctionsRemoteProfile) MarshalJSON() ([]byte, error) {

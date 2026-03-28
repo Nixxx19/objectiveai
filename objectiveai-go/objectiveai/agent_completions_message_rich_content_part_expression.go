@@ -31,7 +31,7 @@ type AgentCompletionsMessageRichContentPartExpressionText struct {
 	// {"$starlark": "input['greeting']"}
 	// ```
 	Text any `json:"text"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=text"`
 }
 
 type AgentCompletionsMessageRichContentPartExpressionImageUrl struct {
@@ -58,7 +58,7 @@ type AgentCompletionsMessageRichContentPartExpressionImageUrl struct {
 	// {"$starlark": "input['greeting']"}
 	// ```
 	ImageURL any `json:"image_url"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=image_url"`
 }
 
 type AgentCompletionsMessageRichContentPartExpressionInputAudio struct {
@@ -85,11 +85,11 @@ type AgentCompletionsMessageRichContentPartExpressionInputAudio struct {
 	// {"$starlark": "input['greeting']"}
 	// ```
 	InputAudio any `json:"input_audio"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=input_audio"`
 }
 
 type AgentCompletionsMessageRichContentPartExpressionInputVideo struct {
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=input_video"`
 	// A value that can be either a literal or an expression.
 	//
 	// This allows Function definitions to mix static values with dynamic
@@ -116,7 +116,7 @@ type AgentCompletionsMessageRichContentPartExpressionInputVideo struct {
 }
 
 type AgentCompletionsMessageRichContentPartExpressionVideoUrl struct {
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=video_url"`
 	// A value that can be either a literal or an expression.
 	//
 	// This allows Function definitions to mix static values with dynamic
@@ -166,7 +166,7 @@ type AgentCompletionsMessageRichContentPartExpressionFile struct {
 	// {"$starlark": "input['greeting']"}
 	// ```
 	File any `json:"file"`
-	Type string `json:"type"`
+	Type string `json:"type" validate:"oneof=file"`
 }
 
 // Expression variant of [`RichContentPart`] for dynamic content.
