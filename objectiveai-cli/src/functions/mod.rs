@@ -87,7 +87,7 @@ impl Commands {
             Commands::Executions { command } => command.handle().await,
             Commands::Config { command } => command.handle(),
             Commands::Favorites { command } => command.handle(),
-            Commands::Inventions { command } => command.handle(),
+            Commands::Inventions { command } => command.handle().await,
             Commands::Profiles { command } => command.handle().await,
         }
     }
