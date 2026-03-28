@@ -560,14 +560,20 @@ func buildStructTags(jsonTag string, propSchema Schema, selfTitle string, allTit
 		validates = append(validates, "max="+formatTagNumber(v))
 	}
 
-	// Array items constraints via dive
+	// Array items / map value constraints via dive
+	var diveTarget Schema
 	if items, ok := cs["items"].(map[string]any); ok {
-		if v, ok := items["minimum"]; ok {
+		diveTarget = items
+	} else if ap, ok := cs["additionalProperties"].(map[string]any); ok {
+		diveTarget = ap
+	}
+	if diveTarget != nil {
+		if v, ok := diveTarget["minimum"]; ok {
 			validates = append(validates, "dive", "min="+formatTagNumber(v))
-			if v, ok := items["maximum"]; ok {
+			if v, ok := diveTarget["maximum"]; ok {
 				validates = append(validates, "max="+formatTagNumber(v))
 			}
-		} else if v, ok := items["maximum"]; ok {
+		} else if v, ok := diveTarget["maximum"]; ok {
 			validates = append(validates, "dive", "max="+formatTagNumber(v))
 		}
 	}

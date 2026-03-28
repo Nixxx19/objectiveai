@@ -14,7 +14,7 @@ type FunctionsInventionsRequestFunctionInventionCreateParams struct {
 	Provider *AgentCompletionsRequestProvider `json:"provider,omitempty"`
 	Remote *Remote `json:"remote,omitempty"`
 	Seed *int64 `json:"seed,omitempty" validate:"min=-9223372036854775808,max=9223372036854775807"`
-	State FunctionsInventionsStateParamsState `json:"state"`
+	State FunctionsInventionsStateParamsStateOrRemoteCommitOptional `json:"state"`
 	Stream *bool `json:"stream,omitempty"`
 }
 

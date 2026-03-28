@@ -7,7 +7,7 @@ type AgentOpenrouterAgentBase struct {
 	// Penalizes tokens based on their frequency in the output so far (-2.0 to 2.0).
 	FrequencyPenalty *float64 `json:"frequency_penalty,omitempty" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// Token ID to bias mapping (-100 to 100). Positive values increase likelihood.
-	LogitBias *map[string]int64 `json:"logit_bias,omitempty"`
+	LogitBias *map[string]int64 `json:"logit_bias,omitempty" validate:"dive,min=-9223372036854775808,max=9223372036854775807"`
 	// Maximum tokens in the completion.
 	MaxCompletionTokens *uint64 `json:"max_completion_tokens,omitempty" validate:"min=0,max=18446744073709551615"`
 	// Maximum tokens (OpenRouter variant of max_completion_tokens).

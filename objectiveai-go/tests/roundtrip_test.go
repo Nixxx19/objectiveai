@@ -393,17 +393,22 @@ func addValidateConstraints(schema map[string]any, validateTag string) {
 		}
 	}
 
-	// Item-level constraints (after dive)
+	// Item/value-level constraints (after dive) — applies to array items or map additionalProperties
 	if diveIdx >= 0 && diveIdx+1 < len(parts) {
 		itemParts := parts[diveIdx+1:]
-		items, _ := schema["items"].(map[string]any)
-		if items != nil {
+		var target map[string]any
+		if items, ok := schema["items"].(map[string]any); ok {
+			target = items
+		} else if ap, ok := schema["additionalProperties"].(map[string]any); ok {
+			target = ap
+		}
+		if target != nil {
 			for _, part := range itemParts {
 				if strings.HasPrefix(part, "min=") {
-					items["minimum"] = json.Number(strings.TrimPrefix(part, "min="))
+					target["minimum"] = json.Number(strings.TrimPrefix(part, "min="))
 				}
 				if strings.HasPrefix(part, "max=") {
-					items["maximum"] = json.Number(strings.TrimPrefix(part, "max="))
+					target["maximum"] = json.Number(strings.TrimPrefix(part, "max="))
 				}
 			}
 		}

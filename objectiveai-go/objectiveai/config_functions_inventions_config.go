@@ -3,7 +3,7 @@
 package objectiveai
 
 type ConfigFunctionsInventionsConfig struct {
-	Remote *Remote `json:"remote,omitempty"`
+	Remote Remote `json:"remote,omitempty" default:"filesystem"`
 }
 
 func (ConfigFunctionsInventionsConfig) SchemaTitle() string { return "config.FunctionsInventionsConfig" }
