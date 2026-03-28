@@ -827,6 +827,16 @@ func generateInlineVariantStruct(structName string, schema Schema, selfTitle str
 		b.WriteString(fmt.Sprintf("\t%s %s %s\n", fn, ft, tags))
 	}
 	b.WriteString("}\n")
+
+	// additionalProperties method (only when explicitly set in schema)
+	if ap, ok := schema["additionalProperties"]; ok {
+		if ap == false {
+			b.WriteString(fmt.Sprintf("\nfunc (%s) AdditionalProperties() bool { return false }\n", structName))
+		} else if ap == true {
+			b.WriteString(fmt.Sprintf("\nfunc (%s) AdditionalProperties() bool { return true }\n", structName))
+		}
+	}
+
 	return b.String()
 }
 

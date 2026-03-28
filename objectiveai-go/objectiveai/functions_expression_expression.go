@@ -12,15 +12,21 @@ type FunctionsExpressionExpressionJMESPath struct {
 	Jmespath string `json:"$jmespath"`
 }
 
+func (FunctionsExpressionExpressionJMESPath) AdditionalProperties() bool { return false }
+
 // A Starlark expression.
 type FunctionsExpressionExpressionStarlark struct {
 	Starlark string `json:"$starlark"`
 }
 
+func (FunctionsExpressionExpressionStarlark) AdditionalProperties() bool { return false }
+
 // A predefined special expression variant.
 type FunctionsExpressionExpressionSpecial struct {
 	Special FunctionsExpressionSpecial `json:"$special"`
 }
+
+func (FunctionsExpressionExpressionSpecial) AdditionalProperties() bool { return false }
 
 // An expression that can be either JMESPath or Starlark.
 //

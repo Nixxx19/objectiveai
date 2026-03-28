@@ -116,8 +116,19 @@ func parseSourceDir(t *testing.T) map[string]*typeInfo {
 
 				if d.Body != nil && len(d.Body.List) == 1 {
 					if ret, ok := d.Body.List[0].(*ast.ReturnStmt); ok && len(ret.Results) == 1 {
-						if lit, ok := ret.Results[0].(*ast.BasicLit); ok && lit.Kind == token.STRING {
-							val := strings.Trim(lit.Value, "\"")
+						var val string
+						switch r := ret.Results[0].(type) {
+						case *ast.BasicLit:
+							if r.Kind == token.STRING {
+								val = strings.Trim(r.Value, "\"")
+							}
+						case *ast.Ident:
+							// Captures true/false returns
+							if r.Name == "true" || r.Name == "false" {
+								val = r.Name
+							}
+						}
+						if val != "" {
 							if ti, ok := types[recvType]; ok {
 								ti.methods[methodName] = val
 							} else {
@@ -501,6 +512,30 @@ func isRootEnum(anyOf []any) bool {
 	return len(anyOf) > 0
 }
 
+// addInlineStructProps adds properties and additionalProperties to a variant
+// schema from an inline sub-struct's fields and methods.
+func addInlineStructProps(variant map[string]any, subTi *typeInfo, types map[string]*typeInfo, titleMap map[string]string) {
+	props := map[string]any{}
+	for _, sf := range subTi.fields {
+		jsonTag := getTagValue(sf.tags, "json")
+		if jsonTag == "" || jsonTag == "-" {
+			continue
+		}
+		propName := strings.Split(jsonTag, ",")[0]
+		propSchema := reconstructFieldSchema(sf, strings.Contains(jsonTag, "omitempty"), types, titleMap)
+		if sf.doc != "" {
+			propSchema["description"] = sf.doc
+		}
+		props[propName] = propSchema
+	}
+	if len(props) > 0 {
+		variant["properties"] = props
+	}
+	if ap, ok := subTi.methods["AdditionalProperties"]; ok {
+		variant["additionalProperties"] = ap == "true"
+	}
+}
+
 func reconstructVariant(
 	f fieldInfo,
 	types map[string]*typeInfo,
@@ -530,44 +565,14 @@ func reconstructVariant(
 				variant["$ref"] = embedTitle
 			}
 			variant["type"] = "object"
-			props := map[string]any{}
-			for _, sf := range subTi.fields {
-				jsonTag := getTagValue(sf.tags, "json")
-				if jsonTag == "" {
-					continue
-				}
-				propName := strings.Split(jsonTag, ",")[0]
-				propSchema := reconstructFieldSchema(sf, strings.Contains(jsonTag, "omitempty"), types, titleMap)
-				if sf.doc != "" {
-					propSchema["description"] = sf.doc
-				}
-				props[propName] = propSchema
-			}
-			if len(props) > 0 {
-				variant["properties"] = props
-			}
+			addInlineStructProps(variant, subTi, types, titleMap)
 			return variant
 		}
 
 
 		// Inline object without embedding
 		variant["type"] = "object"
-		props := map[string]any{}
-		for _, sf := range subTi.fields {
-			jsonTag := getTagValue(sf.tags, "json")
-			if jsonTag == "" {
-				continue
-			}
-			propName := strings.Split(jsonTag, ",")[0]
-			propSchema := reconstructFieldSchema(sf, strings.Contains(jsonTag, "omitempty"), types, titleMap)
-			if sf.doc != "" {
-				propSchema["description"] = sf.doc
-			}
-			props[propName] = propSchema
-		}
-		if len(props) > 0 {
-			variant["properties"] = props
-		}
+		addInlineStructProps(variant, subTi, types, titleMap)
 		return variant
 	}
 
