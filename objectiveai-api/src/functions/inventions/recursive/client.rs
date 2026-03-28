@@ -315,6 +315,7 @@ where
 {
     Box::pin(async_stream::stream! {
         // Build the single-level invention request using the resolved state (Inline).
+        let resolved_state_for_error = resolved_state.clone();
         let invention_request = Arc::new(
             objectiveai::functions::inventions::request::FunctionInventionCreateParams {
                 remote: Some(request.remote),
@@ -336,7 +337,7 @@ where
         {
             Ok(stream) => stream,
             Err(e) => {
-                // Yield an error chunk and return.
+                // Yield an error chunk with the resolved state included.
                 yield RecursiveChunk {
                     id: id.clone(),
                     inventions: vec![RecursiveInventionChunk {
@@ -344,7 +345,7 @@ where
                         inner: FunctionInventionChunk {
                             id: id.clone(),
                             completions: vec![],
-                            state: None,
+                            state: Some(resolved_state_for_error.route()),
                             path: None,
                             function: None,
                             created,
