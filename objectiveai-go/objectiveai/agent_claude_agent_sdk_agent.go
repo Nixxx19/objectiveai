@@ -9,7 +9,7 @@ type AgentClaudeAgentSdkAgent struct {
 	// The deterministic content-addressed ID (22-character base62 string).
 	ID string `json:"id"`
 	// MCP servers the agent can connect to.
-	MCPServers []AgentMcpServer `json:"mcp_servers,omitempty"`
+	MCPServers *[]AgentMcpServer `json:"mcp_servers,omitempty"`
 	// The upstream language model identifier.
 	Model string `json:"model"`
 	// The output mode for vector completions. Ignored for agent completions.

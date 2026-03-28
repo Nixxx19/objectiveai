@@ -13,7 +13,7 @@ type AgentCompletionsMessageAssistantMessage struct {
 	// Refusal message if the model declined to respond.
 	Refusal *string `json:"refusal,omitempty"`
 	// Tool calls made by the assistant.
-	ToolCalls []AgentCompletionsMessageAssistantToolCall `json:"tool_calls,omitempty"`
+	ToolCalls *[]AgentCompletionsMessageAssistantToolCall `json:"tool_calls,omitempty"`
 }
 
 func (AgentCompletionsMessageAssistantMessage) SchemaTitle() string { return "agent.completions.message.AssistantMessage" }

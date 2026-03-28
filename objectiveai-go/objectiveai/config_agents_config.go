@@ -3,7 +3,7 @@
 package objectiveai
 
 type ConfigAgentsConfig struct {
-	Favorites []ConfigFavorite `json:"favorites,omitempty"`
+	Favorites *[]ConfigFavorite `json:"favorites,omitempty"`
 }
 
 func (ConfigAgentsConfig) SchemaTitle() string { return "config.AgentsConfig" }

@@ -9,7 +9,7 @@ type FunctionsExpressionObjectInputSchema struct {
 	// Schema for each property in the object.
 	Properties map[string]FunctionsExpressionInputSchema `json:"properties"`
 	// List of property names that must be present.
-	Required []string `json:"required,omitempty"`
+	Required *[]string `json:"required,omitempty"`
 	Type FunctionsExpressionObjectInputSchemaType `json:"type"`
 }
 

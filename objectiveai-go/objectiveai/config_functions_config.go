@@ -3,7 +3,7 @@
 package objectiveai
 
 type ConfigFunctionsConfig struct {
-	Favorites []ConfigFavorite `json:"favorites,omitempty"`
+	Favorites *[]ConfigFavorite `json:"favorites,omitempty"`
 	Inventions *ConfigFunctionsInventionsConfig `json:"inventions,omitempty"`
 	Profiles *ConfigFunctionsProfilesConfig `json:"profiles,omitempty"`
 }

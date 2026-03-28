@@ -6,7 +6,7 @@ package objectiveai
 type AgentInlineAgentBaseWithFallbacks struct {
 	AgentInlineAgentBase
 	// Fallback agents to try if the primary fails.
-	Fallbacks []AgentInlineAgentBase `json:"fallbacks,omitempty"`
+	Fallbacks *[]AgentInlineAgentBase `json:"fallbacks,omitempty"`
 }
 
 func (AgentInlineAgentBaseWithFallbacks) SchemaTitle() string { return "agent.InlineAgentBaseWithFallbacks" }

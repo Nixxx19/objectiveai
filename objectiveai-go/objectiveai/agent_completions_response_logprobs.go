@@ -5,9 +5,9 @@ package objectiveai
 // Log probabilities for generated tokens.
 type AgentCompletionsResponseLogprobs struct {
 	// Log probabilities for content tokens.
-	Content []AgentCompletionsResponseLogprob `json:"content,omitempty"`
+	Content *[]AgentCompletionsResponseLogprob `json:"content,omitempty"`
 	// Log probabilities for refusal tokens.
-	Refusal []AgentCompletionsResponseLogprob `json:"refusal,omitempty"`
+	Refusal *[]AgentCompletionsResponseLogprob `json:"refusal,omitempty"`
 }
 
 func (AgentCompletionsResponseLogprobs) SchemaTitle() string { return "agent.completions.response.Logprobs" }

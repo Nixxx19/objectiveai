@@ -5,7 +5,7 @@ package objectiveai
 // A top alternative token with its log probability.
 type AgentCompletionsResponseTopLogprob struct {
 	// The raw bytes of the token.
-	Bytes []uint32 `json:"bytes,omitempty"`
+	Bytes *[]uint32 `json:"bytes,omitempty"`
 	// The log probability of this token.
 	Logprob *float64 `json:"logprob,omitempty" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// The token string.

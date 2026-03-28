@@ -17,7 +17,7 @@ type AgentCompletionsResponseUnaryAssistantResponse struct {
 	Role AgentCompletionsResponseAssistantRole `json:"role"`
 	ServiceTier *string `json:"service_tier,omitempty"`
 	SystemFingerprint *string `json:"system_fingerprint,omitempty"`
-	ToolCalls []AgentCompletionsMessageAssistantToolCall `json:"tool_calls,omitempty"`
+	ToolCalls *[]AgentCompletionsMessageAssistantToolCall `json:"tool_calls,omitempty"`
 	UpstreamID string `json:"upstream_id"`
 	// Upstream usage for this assistant response (set by upstream clients).
 	Usage AgentCompletionsResponseUpstreamUsage `json:"usage"`

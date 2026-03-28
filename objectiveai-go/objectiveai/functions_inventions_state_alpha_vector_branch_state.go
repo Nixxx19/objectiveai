@@ -15,7 +15,7 @@ type FunctionsInventionsStateAlphaVectorBranchState struct {
 	Name string `json:"name"`
 	Readme *string `json:"readme,omitempty"`
 	Spec string `json:"spec"`
-	Tasks []FunctionsAlphaVectorBranchTaskExpression `json:"tasks,omitempty"`
+	Tasks *[]FunctionsAlphaVectorBranchTaskExpression `json:"tasks,omitempty"`
 	TasksLength *uint64 `json:"tasks_length,omitempty" validate:"min=0,max=18446744073709551615"`
 }
 

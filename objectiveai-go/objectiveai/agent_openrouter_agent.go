@@ -9,13 +9,13 @@ type AgentOpenrouterAgent struct {
 	// The deterministic content-addressed ID (22-character base62 string).
 	ID string `json:"id"`
 	// Token ID to bias mapping (-100 to 100). Positive values increase likelihood.
-	LogitBias map[string]int64 `json:"logit_bias,omitempty"`
+	LogitBias *map[string]int64 `json:"logit_bias,omitempty"`
 	// Maximum tokens in the completion.
 	MaxCompletionTokens *uint64 `json:"max_completion_tokens,omitempty" validate:"min=0,max=18446744073709551615"`
 	// Maximum tokens (OpenRouter variant of max_completion_tokens).
 	MaxTokens *uint64 `json:"max_tokens,omitempty" validate:"min=0,max=18446744073709551615"`
 	// MCP servers the agent can connect to.
-	MCPServers []AgentMcpServer `json:"mcp_servers,omitempty"`
+	MCPServers *[]AgentMcpServer `json:"mcp_servers,omitempty"`
 	// Minimum probability threshold for sampling (0.0 to 1.0).
 	MinP *float64 `json:"min_p,omitempty" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// The upstream language model identifier (e.g., `"gpt-4"`, `"claude-3-opus"`).
@@ -23,9 +23,9 @@ type AgentOpenrouterAgent struct {
 	// The output mode for vector completions. Ignored for agent completions.
 	OutputMode AgentOpenrouterOutputMode `json:"output_mode,omitempty" default:"instruction"`
 	// Messages inserted after the leading chain of system/developer messages.
-	PostSystemPrefixMessages []AgentCompletionsMessageMessage `json:"post_system_prefix_messages,omitempty"`
+	PostSystemPrefixMessages *[]AgentCompletionsMessageMessage `json:"post_system_prefix_messages,omitempty"`
 	// Messages prepended to the user's prompt.
-	PrefixMessages []AgentCompletionsMessageMessage `json:"prefix_messages,omitempty"`
+	PrefixMessages *[]AgentCompletionsMessageMessage `json:"prefix_messages,omitempty"`
 	// Penalizes tokens based on their presence in the output so far (-2.0 to 2.0).
 	PresencePenalty *float64 `json:"presence_penalty,omitempty" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// Provider routing preferences.
@@ -37,7 +37,7 @@ type AgentOpenrouterAgent struct {
 	// Stop sequences that halt generation.
 	Stop *AgentOpenrouterStop `json:"stop,omitempty"`
 	// Messages appended after the user's prompt.
-	SuffixMessages []AgentCompletionsMessageMessage `json:"suffix_messages,omitempty"`
+	SuffixMessages *[]AgentCompletionsMessageMessage `json:"suffix_messages,omitempty"`
 	// Enable synthetic reasoning for non-reasoning LLMs.
 	//
 	// **Vector completions only.** Ignored for agent completions.

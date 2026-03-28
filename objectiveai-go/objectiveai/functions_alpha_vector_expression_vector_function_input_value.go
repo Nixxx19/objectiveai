@@ -3,7 +3,7 @@
 package objectiveai
 
 type FunctionsAlphaVectorExpressionVectorFunctionInputValue struct {
-	Context map[string]FunctionsExpressionInputValue `json:"context,omitempty"`
+	Context *map[string]FunctionsExpressionInputValue `json:"context,omitempty"`
 	Items []FunctionsExpressionInputValue `json:"items"`
 }
 

@@ -11,13 +11,13 @@ type AgentOpenrouterProvider struct {
 	// Defaults to `true`.
 	AllowFallbacks *bool `json:"allow_fallbacks,omitempty"`
 	// Providers to exclude from routing.
-	Ignore []string `json:"ignore,omitempty"`
+	Ignore *[]string `json:"ignore,omitempty"`
 	// Exclusive list of allowed providers. If set, only these providers are used.
-	Only []string `json:"only,omitempty"`
+	Only *[]string `json:"only,omitempty"`
 	// Preferred provider order. Earlier providers are tried first.
-	Order []string `json:"order,omitempty"`
+	Order *[]string `json:"order,omitempty"`
 	// Allowed model quantization levels.
-	Quantizations []AgentOpenrouterProviderQuantization `json:"quantizations,omitempty"`
+	Quantizations *[]AgentOpenrouterProviderQuantization `json:"quantizations,omitempty"`
 	// Whether to require that the provider supports all request parameters.
 	// Defaults to `false`.
 	RequireParameters *bool `json:"require_parameters,omitempty"`

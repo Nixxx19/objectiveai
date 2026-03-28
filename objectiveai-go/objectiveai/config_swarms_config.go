@@ -3,7 +3,7 @@
 package objectiveai
 
 type ConfigSwarmsConfig struct {
-	Favorites []ConfigFavorite `json:"favorites,omitempty"`
+	Favorites *[]ConfigFavorite `json:"favorites,omitempty"`
 }
 
 func (ConfigSwarmsConfig) SchemaTitle() string { return "config.SwarmsConfig" }

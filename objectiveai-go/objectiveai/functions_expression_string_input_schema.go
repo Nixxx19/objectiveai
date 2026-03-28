@@ -7,7 +7,7 @@ type FunctionsExpressionStringInputSchema struct {
 	// Human-readable description of the string.
 	Description *string `json:"description,omitempty"`
 	// If provided, the string must be one of these values.
-	Enum []string `json:"enum,omitempty"`
+	Enum *[]string `json:"enum,omitempty"`
 	Type FunctionsExpressionStringInputSchemaType `json:"type"`
 }
 

@@ -214,7 +214,7 @@ func goTypeAnyOf(anyOf []any, selfTitle string, allTitles map[string]bool) strin
 	}
 	if hasNull && len(nonNull) == 1 {
 		inner := goType(nonNull[0], selfTitle, allTitles)
-		if inner == "any" || strings.HasPrefix(inner, "*") || strings.HasPrefix(inner, "[]") || strings.HasPrefix(inner, "map[") {
+		if inner == "any" || strings.HasPrefix(inner, "*") {
 			return inner
 		}
 		return "*" + inner
@@ -522,7 +522,7 @@ func resolveFieldType(propSchema Schema, selfTitle string, allTitles map[string]
 	if isNullable(propSchema) {
 		nonNull := getNonNullVariant(propSchema)
 		inner := goType(nonNull, selfTitle, allTitles)
-		if inner == "any" || strings.HasPrefix(inner, "*") || strings.HasPrefix(inner, "[]") || strings.HasPrefix(inner, "map[") {
+		if inner == "any" || strings.HasPrefix(inner, "*") {
 			return inner
 		}
 		return "*" + inner
@@ -859,7 +859,7 @@ func generateTypeCode(title string, schema Schema, allTitles map[string]bool) st
 		if hasNull && len(nonNull) == 1 {
 			// Simple nullable — type alias (no SchemaTitle since it's an alias)
 			goT := goType(nonNull[0], title, allTitles)
-			if goT != "any" && !strings.HasPrefix(goT, "*") && !strings.HasPrefix(goT, "[]") && !strings.HasPrefix(goT, "map[") {
+			if goT != "any" && !strings.HasPrefix(goT, "*") {
 				goT = "*" + goT
 			}
 			b.WriteString(fmt.Sprintf("type %s = %s\n\n", typeName, goT))

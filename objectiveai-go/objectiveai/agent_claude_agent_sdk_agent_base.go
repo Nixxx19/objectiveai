@@ -7,7 +7,7 @@ type AgentClaudeAgentSdkAgentBase struct {
 	// The effort level for model output.
 	Effort *AgentClaudeAgentSdkEffort `json:"effort,omitempty"`
 	// MCP servers the agent can connect to.
-	MCPServers []AgentMcpServer `json:"mcp_servers,omitempty"`
+	MCPServers *[]AgentMcpServer `json:"mcp_servers,omitempty"`
 	// The upstream language model identifier.
 	Model string `json:"model"`
 	// The output mode for vector completions. Ignored for agent completions.
