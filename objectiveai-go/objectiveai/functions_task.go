@@ -12,12 +12,40 @@ type FunctionsTaskScalarFunction struct {
 	FunctionsScalarFunctionTask
 	Type string `json:"type" validate:"oneof=scalar.function"`
 }
+
+func (v *FunctionsTaskScalarFunction) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsScalarFunctionTask); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
+}
 func (FunctionsTaskScalarFunction) SchemaVariantTitle() string { return "ScalarFunction" }
 
 // Calls a vector function (produces a vector of scores).
 type FunctionsTaskVectorFunction struct {
 	FunctionsVectorFunctionTask
 	Type string `json:"type" validate:"oneof=vector.function"`
+}
+
+func (v *FunctionsTaskVectorFunction) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsVectorFunctionTask); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
 }
 func (FunctionsTaskVectorFunction) SchemaVariantTitle() string { return "VectorFunction" }
 
@@ -26,6 +54,20 @@ type FunctionsTaskVectorCompletion struct {
 	FunctionsVectorCompletionTask
 	Type string `json:"type" validate:"oneof=vector.completion"`
 }
+
+func (v *FunctionsTaskVectorCompletion) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsVectorCompletionTask); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
+}
 func (FunctionsTaskVectorCompletion) SchemaVariantTitle() string { return "VectorCompletion" }
 
 // Placeholder scalar function (always outputs 0.5).
@@ -33,12 +75,40 @@ type FunctionsTaskPlaceholderScalarFunction struct {
 	FunctionsPlaceholderScalarFunctionTask
 	Type string `json:"type" validate:"oneof=placeholder.scalar.function"`
 }
+
+func (v *FunctionsTaskPlaceholderScalarFunction) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsPlaceholderScalarFunctionTask); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
+}
 func (FunctionsTaskPlaceholderScalarFunction) SchemaVariantTitle() string { return "PlaceholderScalarFunction" }
 
 // Placeholder vector function (always outputs equalized vector).
 type FunctionsTaskPlaceholderVectorFunction struct {
 	FunctionsPlaceholderVectorFunctionTask
 	Type string `json:"type" validate:"oneof=placeholder.vector.function"`
+}
+
+func (v *FunctionsTaskPlaceholderVectorFunction) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsPlaceholderVectorFunctionTask); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
 }
 func (FunctionsTaskPlaceholderVectorFunction) SchemaVariantTitle() string { return "PlaceholderVectorFunction" }
 

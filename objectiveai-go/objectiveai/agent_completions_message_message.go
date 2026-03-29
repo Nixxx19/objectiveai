@@ -12,12 +12,40 @@ type AgentCompletionsMessageMessageDeveloper struct {
 	AgentCompletionsMessageDeveloperMessage
 	Role string `json:"role" validate:"oneof=developer"`
 }
+
+func (v *AgentCompletionsMessageMessageDeveloper) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.AgentCompletionsMessageDeveloperMessage); err != nil {
+		return err
+	}
+	var local struct {
+		Role string `json:"role"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Role = local.Role
+	return nil
+}
 func (AgentCompletionsMessageMessageDeveloper) SchemaVariantTitle() string { return "Developer" }
 
 // A system message setting context or instructions.
 type AgentCompletionsMessageMessageSystem struct {
 	AgentCompletionsMessageSystemMessage
 	Role string `json:"role" validate:"oneof=system"`
+}
+
+func (v *AgentCompletionsMessageMessageSystem) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.AgentCompletionsMessageSystemMessage); err != nil {
+		return err
+	}
+	var local struct {
+		Role string `json:"role"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Role = local.Role
+	return nil
 }
 func (AgentCompletionsMessageMessageSystem) SchemaVariantTitle() string { return "System" }
 
@@ -26,6 +54,20 @@ type AgentCompletionsMessageMessageUser struct {
 	AgentCompletionsMessageUserMessage
 	Role string `json:"role" validate:"oneof=user"`
 }
+
+func (v *AgentCompletionsMessageMessageUser) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.AgentCompletionsMessageUserMessage); err != nil {
+		return err
+	}
+	var local struct {
+		Role string `json:"role"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Role = local.Role
+	return nil
+}
 func (AgentCompletionsMessageMessageUser) SchemaVariantTitle() string { return "User" }
 
 // An assistant message (model's previous response).
@@ -33,12 +75,40 @@ type AgentCompletionsMessageMessageAssistant struct {
 	AgentCompletionsMessageAssistantMessage
 	Role string `json:"role" validate:"oneof=assistant"`
 }
+
+func (v *AgentCompletionsMessageMessageAssistant) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.AgentCompletionsMessageAssistantMessage); err != nil {
+		return err
+	}
+	var local struct {
+		Role string `json:"role"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Role = local.Role
+	return nil
+}
 func (AgentCompletionsMessageMessageAssistant) SchemaVariantTitle() string { return "Assistant" }
 
 // A tool message containing the result of a tool call.
 type AgentCompletionsMessageMessageTool struct {
 	AgentCompletionsMessageToolMessage
 	Role string `json:"role" validate:"oneof=tool"`
+}
+
+func (v *AgentCompletionsMessageMessageTool) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.AgentCompletionsMessageToolMessage); err != nil {
+		return err
+	}
+	var local struct {
+		Role string `json:"role"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Role = local.Role
+	return nil
 }
 func (AgentCompletionsMessageMessageTool) SchemaVariantTitle() string { return "Tool" }
 

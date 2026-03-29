@@ -11,11 +11,39 @@ type FunctionsInventionsStateStateAlphaScalarBranch struct {
 	FunctionsInventionsStateAlphaScalarBranchState
 	Type string `json:"type" validate:"oneof=alpha.scalar.branch.function"`
 }
+
+func (v *FunctionsInventionsStateStateAlphaScalarBranch) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsInventionsStateAlphaScalarBranchState); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
+}
 func (FunctionsInventionsStateStateAlphaScalarBranch) SchemaVariantTitle() string { return "AlphaScalarBranch" }
 
 type FunctionsInventionsStateStateAlphaScalarLeaf struct {
 	FunctionsInventionsStateAlphaScalarLeafState
 	Type string `json:"type" validate:"oneof=alpha.scalar.leaf.function"`
+}
+
+func (v *FunctionsInventionsStateStateAlphaScalarLeaf) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsInventionsStateAlphaScalarLeafState); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
 }
 func (FunctionsInventionsStateStateAlphaScalarLeaf) SchemaVariantTitle() string { return "AlphaScalarLeaf" }
 
@@ -23,11 +51,39 @@ type FunctionsInventionsStateStateAlphaVectorBranch struct {
 	FunctionsInventionsStateAlphaVectorBranchState
 	Type string `json:"type" validate:"oneof=alpha.vector.branch.function"`
 }
+
+func (v *FunctionsInventionsStateStateAlphaVectorBranch) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsInventionsStateAlphaVectorBranchState); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
+}
 func (FunctionsInventionsStateStateAlphaVectorBranch) SchemaVariantTitle() string { return "AlphaVectorBranch" }
 
 type FunctionsInventionsStateStateAlphaVectorLeaf struct {
 	FunctionsInventionsStateAlphaVectorLeafState
 	Type string `json:"type" validate:"oneof=alpha.vector.leaf.function"`
+}
+
+func (v *FunctionsInventionsStateStateAlphaVectorLeaf) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsInventionsStateAlphaVectorLeafState); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
 }
 func (FunctionsInventionsStateStateAlphaVectorLeaf) SchemaVariantTitle() string { return "AlphaVectorLeaf" }
 

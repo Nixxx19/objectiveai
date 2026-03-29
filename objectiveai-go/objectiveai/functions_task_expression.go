@@ -11,11 +11,39 @@ type FunctionsTaskExpressionScalarFunction struct {
 	FunctionsScalarFunctionTaskExpression
 	Type string `json:"type" validate:"oneof=scalar.function"`
 }
+
+func (v *FunctionsTaskExpressionScalarFunction) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsScalarFunctionTaskExpression); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
+}
 func (FunctionsTaskExpressionScalarFunction) SchemaVariantTitle() string { return "ScalarFunction" }
 
 type FunctionsTaskExpressionVectorFunction struct {
 	FunctionsVectorFunctionTaskExpression
 	Type string `json:"type" validate:"oneof=vector.function"`
+}
+
+func (v *FunctionsTaskExpressionVectorFunction) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsVectorFunctionTaskExpression); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
 }
 func (FunctionsTaskExpressionVectorFunction) SchemaVariantTitle() string { return "VectorFunction" }
 
@@ -23,17 +51,59 @@ type FunctionsTaskExpressionVectorCompletion struct {
 	FunctionsVectorCompletionTaskExpression
 	Type string `json:"type" validate:"oneof=vector.completion"`
 }
+
+func (v *FunctionsTaskExpressionVectorCompletion) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsVectorCompletionTaskExpression); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
+}
 func (FunctionsTaskExpressionVectorCompletion) SchemaVariantTitle() string { return "VectorCompletion" }
 
 type FunctionsTaskExpressionPlaceholderScalarFunction struct {
 	FunctionsPlaceholderScalarFunctionTaskExpression
 	Type string `json:"type" validate:"oneof=placeholder.scalar.function"`
 }
+
+func (v *FunctionsTaskExpressionPlaceholderScalarFunction) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsPlaceholderScalarFunctionTaskExpression); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
+}
 func (FunctionsTaskExpressionPlaceholderScalarFunction) SchemaVariantTitle() string { return "PlaceholderScalarFunction" }
 
 type FunctionsTaskExpressionPlaceholderVectorFunction struct {
 	FunctionsPlaceholderVectorFunctionTaskExpression
 	Type string `json:"type" validate:"oneof=placeholder.vector.function"`
+}
+
+func (v *FunctionsTaskExpressionPlaceholderVectorFunction) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsPlaceholderVectorFunctionTaskExpression); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
 }
 func (FunctionsTaskExpressionPlaceholderVectorFunction) SchemaVariantTitle() string { return "PlaceholderVectorFunction" }
 

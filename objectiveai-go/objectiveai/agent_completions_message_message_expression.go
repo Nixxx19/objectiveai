@@ -11,11 +11,39 @@ type AgentCompletionsMessageMessageExpressionDeveloper struct {
 	AgentCompletionsMessageDeveloperMessageExpression
 	Role string `json:"role" validate:"oneof=developer"`
 }
+
+func (v *AgentCompletionsMessageMessageExpressionDeveloper) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.AgentCompletionsMessageDeveloperMessageExpression); err != nil {
+		return err
+	}
+	var local struct {
+		Role string `json:"role"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Role = local.Role
+	return nil
+}
 func (AgentCompletionsMessageMessageExpressionDeveloper) SchemaVariantTitle() string { return "Developer" }
 
 type AgentCompletionsMessageMessageExpressionSystem struct {
 	AgentCompletionsMessageSystemMessageExpression
 	Role string `json:"role" validate:"oneof=system"`
+}
+
+func (v *AgentCompletionsMessageMessageExpressionSystem) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.AgentCompletionsMessageSystemMessageExpression); err != nil {
+		return err
+	}
+	var local struct {
+		Role string `json:"role"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Role = local.Role
+	return nil
 }
 func (AgentCompletionsMessageMessageExpressionSystem) SchemaVariantTitle() string { return "System" }
 
@@ -23,17 +51,59 @@ type AgentCompletionsMessageMessageExpressionUser struct {
 	AgentCompletionsMessageUserMessageExpression
 	Role string `json:"role" validate:"oneof=user"`
 }
+
+func (v *AgentCompletionsMessageMessageExpressionUser) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.AgentCompletionsMessageUserMessageExpression); err != nil {
+		return err
+	}
+	var local struct {
+		Role string `json:"role"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Role = local.Role
+	return nil
+}
 func (AgentCompletionsMessageMessageExpressionUser) SchemaVariantTitle() string { return "User" }
 
 type AgentCompletionsMessageMessageExpressionAssistant struct {
 	AgentCompletionsMessageAssistantMessageExpression
 	Role string `json:"role" validate:"oneof=assistant"`
 }
+
+func (v *AgentCompletionsMessageMessageExpressionAssistant) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.AgentCompletionsMessageAssistantMessageExpression); err != nil {
+		return err
+	}
+	var local struct {
+		Role string `json:"role"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Role = local.Role
+	return nil
+}
 func (AgentCompletionsMessageMessageExpressionAssistant) SchemaVariantTitle() string { return "Assistant" }
 
 type AgentCompletionsMessageMessageExpressionTool struct {
 	AgentCompletionsMessageToolMessageExpression
 	Role string `json:"role" validate:"oneof=tool"`
+}
+
+func (v *AgentCompletionsMessageMessageExpressionTool) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.AgentCompletionsMessageToolMessageExpression); err != nil {
+		return err
+	}
+	var local struct {
+		Role string `json:"role"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Role = local.Role
+	return nil
 }
 func (AgentCompletionsMessageMessageExpressionTool) SchemaVariantTitle() string { return "Tool" }
 

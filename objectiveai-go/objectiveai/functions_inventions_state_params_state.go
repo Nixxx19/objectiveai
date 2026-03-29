@@ -11,11 +11,39 @@ type FunctionsInventionsStateParamsStateAlphaScalarBranch struct {
 	FunctionsInventionsStateAlphaScalarBranchState
 	Type string `json:"type" validate:"oneof=alpha.scalar.branch.function"`
 }
+
+func (v *FunctionsInventionsStateParamsStateAlphaScalarBranch) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsInventionsStateAlphaScalarBranchState); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
+}
 func (FunctionsInventionsStateParamsStateAlphaScalarBranch) SchemaVariantTitle() string { return "AlphaScalarBranch" }
 
 type FunctionsInventionsStateParamsStateAlphaScalarLeaf struct {
 	FunctionsInventionsStateAlphaScalarLeafState
 	Type string `json:"type" validate:"oneof=alpha.scalar.leaf.function"`
+}
+
+func (v *FunctionsInventionsStateParamsStateAlphaScalarLeaf) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsInventionsStateAlphaScalarLeafState); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
 }
 func (FunctionsInventionsStateParamsStateAlphaScalarLeaf) SchemaVariantTitle() string { return "AlphaScalarLeaf" }
 
@@ -23,11 +51,39 @@ type FunctionsInventionsStateParamsStateAlphaVectorBranch struct {
 	FunctionsInventionsStateAlphaVectorBranchState
 	Type string `json:"type" validate:"oneof=alpha.vector.branch.function"`
 }
+
+func (v *FunctionsInventionsStateParamsStateAlphaVectorBranch) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsInventionsStateAlphaVectorBranchState); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
+}
 func (FunctionsInventionsStateParamsStateAlphaVectorBranch) SchemaVariantTitle() string { return "AlphaVectorBranch" }
 
 type FunctionsInventionsStateParamsStateAlphaVectorLeaf struct {
 	FunctionsInventionsStateAlphaVectorLeafState
 	Type string `json:"type" validate:"oneof=alpha.vector.leaf.function"`
+}
+
+func (v *FunctionsInventionsStateParamsStateAlphaVectorLeaf) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsInventionsStateAlphaVectorLeafState); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
 }
 func (FunctionsInventionsStateParamsStateAlphaVectorLeaf) SchemaVariantTitle() string { return "AlphaVectorLeaf" }
 
@@ -35,11 +91,39 @@ type FunctionsInventionsStateParamsStateAlphaScalar struct {
 	FunctionsInventionsStateAlphaScalarState
 	Type string `json:"type" validate:"oneof=alpha.scalar.function"`
 }
+
+func (v *FunctionsInventionsStateParamsStateAlphaScalar) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsInventionsStateAlphaScalarState); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
+}
 func (FunctionsInventionsStateParamsStateAlphaScalar) SchemaVariantTitle() string { return "AlphaScalar" }
 
 type FunctionsInventionsStateParamsStateAlphaVector struct {
 	FunctionsInventionsStateAlphaVectorState
 	Type string `json:"type" validate:"oneof=alpha.vector.function"`
+}
+
+func (v *FunctionsInventionsStateParamsStateAlphaVector) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.FunctionsInventionsStateAlphaVectorState); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
 }
 func (FunctionsInventionsStateParamsStateAlphaVector) SchemaVariantTitle() string { return "AlphaVector" }
 

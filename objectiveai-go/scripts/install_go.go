@@ -988,6 +988,38 @@ func generateInlineVariantStruct(structName string, schema Schema, selfTitle str
 		}
 	}
 
+	// Custom UnmarshalJSON for structs with embedding + local fields.
+	// Go's json.Unmarshal gives the embedded type's UnmarshalJSON precedence,
+	// which prevents the parent's own fields from being populated.
+	if ref, ok := schema["$ref"].(string); ok && len(props) > 0 {
+		embedType := toPascal(ref)
+		b.WriteString(fmt.Sprintf("\nfunc (v *%s) UnmarshalJSON(data []byte) error {\n", structName))
+		// Unmarshal into the embedded type
+		b.WriteString(fmt.Sprintf("\tif err := json.Unmarshal(data, &v.%s); err != nil {\n\t\treturn err\n\t}\n", embedType))
+		// Unmarshal local fields via anonymous struct
+		b.WriteString("\tvar local struct {\n")
+		for _, pn := range sortedKeys(props) {
+			ps, ok := props[pn].(map[string]any)
+			if !ok {
+				continue
+			}
+			fn := goFieldName(pn)
+			ft := resolveFieldType(ps, selfTitle, allTitles)
+			jt := pn
+			if isNullable(ps) {
+				jt += ",omitempty"
+			}
+			b.WriteString(fmt.Sprintf("\t\t%s %s `json:%q`\n", fn, ft, jt))
+		}
+		b.WriteString("\t}\n")
+		b.WriteString("\tif err := json.Unmarshal(data, &local); err != nil {\n\t\treturn err\n\t}\n")
+		for _, pn := range sortedKeys(props) {
+			fn := goFieldName(pn)
+			b.WriteString(fmt.Sprintf("\tv.%s = local.%s\n", fn, fn))
+		}
+		b.WriteString("\treturn nil\n}\n")
+	}
+
 	return auxiliary.String() + b.String()
 }
 
