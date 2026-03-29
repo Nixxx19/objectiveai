@@ -3,45 +3,47 @@ package objectiveai
 // Push accumulates another RichContent into this one.
 // Union dispatch: text+text -> concat, text+parts -> convert, parts+text -> append, parts+parts -> extend.
 func (v *AgentCompletionsMessageRichContent) Push(other *AgentCompletionsMessageRichContent) {
-	selfIsText := v.Variant1 != nil
-	otherIsText := other.Variant1 != nil
+	selfIsText := v.Text != nil
+	otherIsText := other.Text != nil
 
 	switch {
 	case selfIsText && otherIsText:
 		// text + text -> concatenate
-		s := *v.Variant1 + *other.Variant1
-		v.Variant1 = &s
+		s := AgentCompletionsMessageRichContentText(string(*v.Text) + string(*other.Text))
+		v.Text = &s
 
 	case selfIsText && !otherIsText:
 		// text + parts -> convert self to parts, extend
+		textStr := string(*v.Text)
 		textPart := AgentCompletionsMessageRichContentPart{
-			Variant1: &AgentCompletionsMessageRichContentPartVariant1{
-				Text: *v.Variant1,
+			Text: &AgentCompletionsMessageRichContentPartText{
+				Text: textStr,
 				Type: "text",
 			},
 		}
-		parts := make([]AgentCompletionsMessageRichContentPart, 0, 1+len(other.Variant2))
+		parts := make(AgentCompletionsMessageRichContentParts, 0, 1+len(*other.Parts))
 		parts = append(parts, textPart)
-		parts = append(parts, other.Variant2...)
-		v.Variant1 = nil
-		v.Variant2 = parts
+		parts = append(parts, *other.Parts...)
+		v.Text = nil
+		v.Parts = &parts
 
 	case !selfIsText && otherIsText:
 		// parts + text -> append text as new part
-		if other.Variant1 != nil && *other.Variant1 != "" {
+		if other.Text != nil && string(*other.Text) != "" {
+			textStr := string(*other.Text)
 			textPart := AgentCompletionsMessageRichContentPart{
-				Variant1: &AgentCompletionsMessageRichContentPartVariant1{
-					Text: *other.Variant1,
+				Text: &AgentCompletionsMessageRichContentPartText{
+					Text: textStr,
 					Type: "text",
 				},
 			}
-			v.Variant2 = append(v.Variant2, textPart)
+			*v.Parts = append(*v.Parts, textPart)
 		}
 
 	default:
 		// parts + parts -> extend
-		if len(other.Variant2) > 0 {
-			v.Variant2 = append(v.Variant2, other.Variant2...)
+		if other.Parts != nil && len(*other.Parts) > 0 {
+			*v.Parts = append(*v.Parts, *other.Parts...)
 		}
 	}
 }

@@ -86,7 +86,7 @@ func (v AgentCompletionsMessageSystemMessageExpressionContent) Validate() error 
 	}
 	return variantValidator.Struct(v)
 }
-type AgentCompletionsMessageSystemMessageExpressionNameValue *string
+type AgentCompletionsMessageSystemMessageExpressionNameValue string
 
 func (AgentCompletionsMessageSystemMessageExpressionNameValue) SchemaVariantTitle() string { return "Value" }
 
@@ -118,7 +118,7 @@ type AgentCompletionsMessageSystemMessageExpressionName struct {
 	// An expression (JMESPath or Starlark) to evaluate.
 	Expression *FunctionsExpressionExpression 
 	// A literal value.
-	Value *AgentCompletionsMessageSystemMessageExpressionNameValue 
+	Value *AgentCompletionsMessageSystemMessageExpressionNameValue `nullable:"true"`
 }
 
 func (v AgentCompletionsMessageSystemMessageExpressionName) MarshalJSON() ([]byte, error) {

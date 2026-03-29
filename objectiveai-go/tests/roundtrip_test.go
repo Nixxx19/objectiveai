@@ -221,7 +221,7 @@ func reconstructSchema(
 		return result
 	}
 
-	// Non-struct type definition (e.g., type Foo *string)
+	// Non-struct type definition (e.g., type Foo string, type Foo []Bar)
 	if ti.underlyingType != "" {
 		ut := ti.underlyingType
 		isPtr := strings.HasPrefix(ut, "*")
@@ -566,16 +566,37 @@ func reconstructVariant(
 		}
 	}
 
+	// Build the inner schema (without title/description)
+	inner := reconstructVariantInner(f, typeName, types, titleMap)
+
+	// Check if this variant is nullable (parent field has nullable:"true")
+	isNullable := getTagValue(f.tags, "nullable") == "true"
+
+	// Assemble the variant with title, description, and inner schema
 	variant := map[string]any{"title": variantTitle}
 	if f.doc != "" {
 		variant["description"] = f.doc
 	}
+	if isNullable {
+		variant["anyOf"] = []any{inner, map[string]any{"type": "null"}}
+	} else {
+		for k, v := range inner {
+			variant[k] = v
+		}
+	}
+	return variant
+}
 
+func reconstructVariantInner(
+	f fieldInfo,
+	typeName string,
+	types map[string]*typeInfo,
+	titleMap map[string]string,
+) map[string]any {
 	if subTi, ok := types[typeName]; ok && !subTi.isAlias {
 		// If the sub-type has its own SchemaTitle, it's a standalone type → $ref
 		if subTitle, ok := titleMap[typeName]; ok {
-			variant["$ref"] = subTitle
-			return variant
+			return map[string]any{"$ref": subTitle}
 		}
 
 		// Type definition with underlyingType (primitive variant, e.g., type FooBar string)
@@ -583,44 +604,36 @@ func reconstructVariant(
 			inner := buildFieldTypeSchema(subTi.underlyingType, types, titleMap)
 			validateTag := getTagValue(f.tags, "validate")
 			addValidateConstraints(inner, validateTag)
-			for k, v := range inner {
-				variant[k] = v
-			}
-			return variant
+			return inner
 		}
 
 		// Inline sub-struct with embedded type → adjacently-tagged ($ref + properties)
 		if len(subTi.embeds) > 0 {
+			result := map[string]any{"type": "object"}
 			embedType := subTi.embeds[0]
 			if embedTitle, ok := titleMap[embedType]; ok {
-				variant["$ref"] = embedTitle
+				result["$ref"] = embedTitle
 			}
-			variant["type"] = "object"
-			addInlineStructProps(variant, subTi, types, titleMap)
-			return variant
+			addInlineStructProps(result, subTi, types, titleMap)
+			return result
 		}
 
-
 		// Inline object without embedding
-		variant["type"] = "object"
-		addInlineStructProps(variant, subTi, types, titleMap)
-		return variant
+		result := map[string]any{"type": "object"}
+		addInlineStructProps(result, subTi, types, titleMap)
+		return result
 	}
 
 	// Known schema type → $ref
 	if refTitle, ok := titleMap[typeName]; ok {
-		variant["$ref"] = refTitle
-		return variant
+		return map[string]any{"$ref": refTitle}
 	}
 
 	// Primitive variant (string with enum)
 	validateTag := getTagValue(f.tags, "validate")
 	inner := buildFieldTypeSchema(typeName, types, titleMap)
 	addValidateConstraints(inner, validateTag)
-	for k, v := range inner {
-		variant[k] = v
-	}
-	return variant
+	return inner
 }
 
 // ---------------------------------------------------------------------------

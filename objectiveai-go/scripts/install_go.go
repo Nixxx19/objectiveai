@@ -770,8 +770,10 @@ func generateAnyOfStruct(typeName string, anyOf []any, selfTitle string, schema 
 				fieldType = "*" + goT
 			}
 		} else if !isEnum {
-			// Primitive variant (string, etc.) → type definition + SchemaVariantTitle
+			// Primitive variant → type definition + SchemaVariantTitle
 			goT := resolveFieldTypeWithInline(m, selfTitle, allTitles, vStructName, "", &auxiliary)
+			// Strip pointer — nullable is tracked on the parent field via nullable tag
+			goT = strings.TrimPrefix(goT, "*")
 			auxiliary.WriteString(fmt.Sprintf("type %s %s\n\n", vStructName, goT))
 			auxiliary.WriteString(fmt.Sprintf("func (%s) SchemaVariantTitle() string { return %q }\n\n", vStructName, variantTitle))
 			if singleVariant {
@@ -798,8 +800,20 @@ func generateAnyOfStruct(typeName string, anyOf []any, selfTitle string, schema 
 		variantIsPointer = append(variantIsPointer, strings.HasPrefix(fieldType, "*"))
 		variantValidateTags = append(variantValidateTags, buildValidateValue(m))
 
-		tags := buildStructTags("", m, selfTitle, allTitles)
-		fields = append(fields, goDocComment(variantDesc, "\t")+fmt.Sprintf("\t%s %s %s", fieldName, fieldType, tags))
+		// Build variant field tags — add nullable if the variant schema was nullable
+		var variantTags []string
+		if isNullable(m) {
+			variantTags = append(variantTags, `nullable:"true"`)
+		}
+		if constraintTags := buildStructTags("", m, selfTitle, allTitles); constraintTags != "" {
+			inner := strings.TrimPrefix(strings.TrimSuffix(constraintTags, "`"), "`")
+			variantTags = append(variantTags, inner)
+		}
+		var tagStr string
+		if len(variantTags) > 0 {
+			tagStr = "`" + strings.Join(variantTags, " ") + "`"
+		}
+		fields = append(fields, goDocComment(variantDesc, "\t")+fmt.Sprintf("\t%s %s %s", fieldName, fieldType, tagStr))
 	}
 
 	var b strings.Builder

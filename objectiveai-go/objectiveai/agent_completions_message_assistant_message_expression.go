@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-type AgentCompletionsMessageAssistantMessageExpressionContentValue *AgentCompletionsMessageRichContentExpression
+type AgentCompletionsMessageAssistantMessageExpressionContentValue AgentCompletionsMessageRichContentExpression
 
 func (AgentCompletionsMessageAssistantMessageExpressionContentValue) SchemaVariantTitle() string { return "Value" }
 
@@ -39,7 +39,7 @@ type AgentCompletionsMessageAssistantMessageExpressionContent struct {
 	// An expression (JMESPath or Starlark) to evaluate.
 	Expression *FunctionsExpressionExpression 
 	// A literal value.
-	Value *AgentCompletionsMessageAssistantMessageExpressionContentValue 
+	Value *AgentCompletionsMessageAssistantMessageExpressionContentValue `nullable:"true"`
 }
 
 func (v AgentCompletionsMessageAssistantMessageExpressionContent) MarshalJSON() ([]byte, error) {
@@ -90,7 +90,7 @@ func (v AgentCompletionsMessageAssistantMessageExpressionContent) Validate() err
 	}
 	return variantValidator.Struct(v)
 }
-type AgentCompletionsMessageAssistantMessageExpressionNameValue *string
+type AgentCompletionsMessageAssistantMessageExpressionNameValue string
 
 func (AgentCompletionsMessageAssistantMessageExpressionNameValue) SchemaVariantTitle() string { return "Value" }
 
@@ -120,7 +120,7 @@ type AgentCompletionsMessageAssistantMessageExpressionName struct {
 	// An expression (JMESPath or Starlark) to evaluate.
 	Expression *FunctionsExpressionExpression 
 	// A literal value.
-	Value *AgentCompletionsMessageAssistantMessageExpressionNameValue 
+	Value *AgentCompletionsMessageAssistantMessageExpressionNameValue `nullable:"true"`
 }
 
 func (v AgentCompletionsMessageAssistantMessageExpressionName) MarshalJSON() ([]byte, error) {
@@ -171,7 +171,7 @@ func (v AgentCompletionsMessageAssistantMessageExpressionName) Validate() error 
 	}
 	return variantValidator.Struct(v)
 }
-type AgentCompletionsMessageAssistantMessageExpressionReasoningValue *string
+type AgentCompletionsMessageAssistantMessageExpressionReasoningValue string
 
 func (AgentCompletionsMessageAssistantMessageExpressionReasoningValue) SchemaVariantTitle() string { return "Value" }
 
@@ -201,7 +201,7 @@ type AgentCompletionsMessageAssistantMessageExpressionReasoning struct {
 	// An expression (JMESPath or Starlark) to evaluate.
 	Expression *FunctionsExpressionExpression 
 	// A literal value.
-	Value *AgentCompletionsMessageAssistantMessageExpressionReasoningValue 
+	Value *AgentCompletionsMessageAssistantMessageExpressionReasoningValue `nullable:"true"`
 }
 
 func (v AgentCompletionsMessageAssistantMessageExpressionReasoning) MarshalJSON() ([]byte, error) {
@@ -252,7 +252,7 @@ func (v AgentCompletionsMessageAssistantMessageExpressionReasoning) Validate() e
 	}
 	return variantValidator.Struct(v)
 }
-type AgentCompletionsMessageAssistantMessageExpressionRefusalValue *string
+type AgentCompletionsMessageAssistantMessageExpressionRefusalValue string
 
 func (AgentCompletionsMessageAssistantMessageExpressionRefusalValue) SchemaVariantTitle() string { return "Value" }
 
@@ -282,7 +282,7 @@ type AgentCompletionsMessageAssistantMessageExpressionRefusal struct {
 	// An expression (JMESPath or Starlark) to evaluate.
 	Expression *FunctionsExpressionExpression 
 	// A literal value.
-	Value *AgentCompletionsMessageAssistantMessageExpressionRefusalValue 
+	Value *AgentCompletionsMessageAssistantMessageExpressionRefusalValue `nullable:"true"`
 }
 
 func (v AgentCompletionsMessageAssistantMessageExpressionRefusal) MarshalJSON() ([]byte, error) {
@@ -410,7 +410,7 @@ func (v AgentCompletionsMessageAssistantMessageExpressionToolCallsValueItem) Val
 	}
 	return variantValidator.Struct(v)
 }
-type AgentCompletionsMessageAssistantMessageExpressionToolCallsValue *[]AgentCompletionsMessageAssistantMessageExpressionToolCallsValueItem
+type AgentCompletionsMessageAssistantMessageExpressionToolCallsValue []AgentCompletionsMessageAssistantMessageExpressionToolCallsValueItem
 
 func (AgentCompletionsMessageAssistantMessageExpressionToolCallsValue) SchemaVariantTitle() string { return "Value" }
 
@@ -440,7 +440,7 @@ type AgentCompletionsMessageAssistantMessageExpressionToolCalls struct {
 	// An expression (JMESPath or Starlark) to evaluate.
 	Expression *FunctionsExpressionExpression 
 	// A literal value.
-	Value *AgentCompletionsMessageAssistantMessageExpressionToolCallsValue 
+	Value *AgentCompletionsMessageAssistantMessageExpressionToolCallsValue `nullable:"true"`
 }
 
 func (v AgentCompletionsMessageAssistantMessageExpressionToolCalls) MarshalJSON() ([]byte, error) {
