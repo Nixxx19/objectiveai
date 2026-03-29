@@ -53,6 +53,15 @@ impl crate::retrieval::retrieve::Client<ctx::DefaultContextExt> for StubRetrieve
     ) -> Result<Option<objectiveai::functions::RemoteProfile>, objectiveai::error::ResponseError> {
         unimplemented!()
     }
+    async fn get_function_invention_state_file<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
+        &self,
+        _ctx: &ctx::Context<ctx::DefaultContextExt, PC>,
+        _path: &objectiveai::RemotePath,
+        _filename: &'static str,
+    ) -> Result<Option<String>, objectiveai::error::ResponseError> {
+        unimplemented!()
+    }
+
     async fn resolve_latest<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
         _ctx: &ctx::Context<ctx::DefaultContextExt, PC>,
@@ -235,8 +244,8 @@ fn make_client() -> Arc<TestClient> {
 fn make_request(state: ParamsState, seed: i64) -> Arc<FunctionInventionRecursiveCreateParams> {
     Arc::new(FunctionInventionRecursiveCreateParams {
         remote: objectiveai::Remote::Mock,
-        name: "test/recursive".to_string(),
-        state,
+        overwrite: None,
+        state: objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(state),
         provider: None,
         agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
             objectiveai::agent::InlineAgentBaseWithFallbacks {
@@ -619,36 +628,16 @@ use objectiveai::functions::alpha_vector;
 use indexmap::IndexMap;
 
 /// Helper: run a recursive invention that is expected to produce an error.
-/// The recursive client emits errors as stream chunks, not as Err returns.
+/// The recursive client returns validation errors as Err from create_streaming.
 async fn run_recursive_invention_err(
     client: &Arc<TestClient>,
     request: Arc<FunctionInventionRecursiveCreateParams>,
 ) -> String {
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
-    let stream = client
-        .clone()
-        .create_streaming(ctx, request)
-        .await
-        .expect("create_streaming should return Ok (errors come as chunks)");
-    let chunk_agg = crate::stream_harness::consume_stream(
-        Box::pin(stream),
-        |agg, c| agg.push(c),
-        |_, _| {},
-        |_, _| {},
-        |_, _| {},
-    ).await;
-    let agg = FunctionInventionRecursive::from(chunk_agg);
-    assert!(
-        agg.inventions_errors,
-        "expected inventions_errors to be true",
-    );
-    // Find the first invention with an error and return its message.
-    for inv in &agg.inventions {
-        if let Some(ref err) = inv.inner.error {
-            return err.message.to_string();
-        }
+    match client.clone().create_streaming(ctx, request).await {
+        Err(err) => err.to_string(),
+        Ok(_) => panic!("create_streaming should return Err for invalid state"),
     }
-    panic!("expected at least one invention with an error, but none found");
 }
 
 /// A valid scalar input schema: object with a required string enum of 2 values.
@@ -710,8 +699,12 @@ fn valid_scalar_leaf_task() -> alpha_scalar::LeafTaskExpression {
                 "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]".to_string(),
             ),
             responses: vec![
-                objectiveai::agent::completions::message::RichContent::Text("yes".to_string()),
-                objectiveai::agent::completions::message::RichContent::Text("no".to_string()),
+                objectiveai::agent::completions::message::RichContent::Parts(vec![
+                    objectiveai::agent::completions::message::RichContentPart::Text { text: "yes".to_string() },
+                ]),
+                objectiveai::agent::completions::message::RichContent::Parts(vec![
+                    objectiveai::agent::completions::message::RichContentPart::Text { text: "no".to_string() },
+                ]),
             ],
         },
     )
@@ -726,8 +719,12 @@ fn invalid_scalar_leaf_task() -> alpha_scalar::LeafTaskExpression {
                 "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"hardcoded\"}]}]".to_string(),
             ),
             responses: vec![
-                objectiveai::agent::completions::message::RichContent::Text("yes".to_string()),
-                objectiveai::agent::completions::message::RichContent::Text("no".to_string()),
+                objectiveai::agent::completions::message::RichContent::Parts(vec![
+                    objectiveai::agent::completions::message::RichContentPart::Text { text: "yes".to_string() },
+                ]),
+                objectiveai::agent::completions::message::RichContent::Parts(vec![
+                    objectiveai::agent::completions::message::RichContentPart::Text { text: "no".to_string() },
+                ]),
             ],
         },
     )

@@ -38,12 +38,12 @@ httpTestSuite<FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
             {
               type: "vector.completion",
               messages: { $starlark: "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]" },
-              responses: ["yes", "no"],
+              responses: [[{ type: "text", text: "yes" }], [{ type: "text", text: "no" }]],
             },
             {
               type: "vector.completion",
               messages: { $starlark: "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]" },
-              responses: ["yes", "no"],
+              responses: [[{ type: "text", text: "yes" }], [{ type: "text", text: "no" }]],
             },
           ],
           tasks_length: 2,

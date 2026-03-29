@@ -59,6 +59,15 @@ impl crate::retrieval::retrieve::Client<ctx::DefaultContextExt> for StubRetrieve
     ) -> Result<Option<objectiveai::functions::RemoteProfile>, objectiveai::error::ResponseError> {
         unimplemented!()
     }
+    async fn get_function_invention_state_file<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
+        &self,
+        _ctx: &ctx::Context<ctx::DefaultContextExt, PC>,
+        _path: &objectiveai::RemotePath,
+        _filename: &'static str,
+    ) -> Result<Option<String>, objectiveai::error::ResponseError> {
+        unimplemented!()
+    }
+
     async fn resolve_latest<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
         _ctx: &ctx::Context<ctx::DefaultContextExt, PC>,
@@ -193,7 +202,7 @@ fn make_request(state: ParamsState, seed: i64) -> Arc<FunctionInventionCreatePar
     Arc::new(FunctionInventionCreateParams {
         remote: None,
         overwrite: None,
-        state,
+        state: objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(state),
         provider: None,
         agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
             objectiveai::agent::InlineAgentBaseWithFallbacks {
