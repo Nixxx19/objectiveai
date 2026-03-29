@@ -23,6 +23,9 @@ type FunctionsExpressionTaskOutputErr JsonValue
 
 func (FunctionsExpressionTaskOutputErr) SchemaVariantTitle() string { return "Err" }
 
+func (v FunctionsExpressionTaskOutputErr) MarshalJSON() ([]byte, error) { return json.Marshal(JsonValue(v)) }
+func (v *FunctionsExpressionTaskOutputErr) UnmarshalJSON(data []byte) error { return json.Unmarshal(data, (*JsonValue)(v)) }
+
 // Owned task output variants.
 type FunctionsExpressionTaskOutput struct {
 	// A single scalar score.

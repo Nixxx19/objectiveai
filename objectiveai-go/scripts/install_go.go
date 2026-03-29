@@ -780,6 +780,12 @@ func generateAnyOfStruct(typeName string, anyOf []any, selfTitle string, schema 
 			goT = strings.TrimPrefix(goT, "*")
 			auxiliary.WriteString(fmt.Sprintf("type %s %s\n\n", vStructName, goT))
 			auxiliary.WriteString(fmt.Sprintf("func (%s) SchemaVariantTitle() string { return %q }\n\n", vStructName, variantTitle))
+			// JsonValue type definitions need marshal/unmarshal forwarding
+			// (Go type definitions don't inherit methods from the underlying type)
+			if goT == "JsonValue" {
+				auxiliary.WriteString(fmt.Sprintf("func (v %s) MarshalJSON() ([]byte, error) { return json.Marshal(JsonValue(v)) }\n", vStructName))
+				auxiliary.WriteString(fmt.Sprintf("func (v *%s) UnmarshalJSON(data []byte) error { return json.Unmarshal(data, (*JsonValue)(v)) }\n\n", vStructName))
+			}
 			if singleVariant {
 				fieldType = vStructName
 			} else {
