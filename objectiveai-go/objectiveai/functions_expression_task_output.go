@@ -19,7 +19,7 @@ type FunctionsExpressionTaskOutputVectors [][]float64
 
 func (FunctionsExpressionTaskOutputVectors) SchemaVariantTitle() string { return "Vectors" }
 
-type FunctionsExpressionTaskOutputErr any
+type FunctionsExpressionTaskOutputErr JsonValue
 
 func (FunctionsExpressionTaskOutputErr) SchemaVariantTitle() string { return "Err" }
 

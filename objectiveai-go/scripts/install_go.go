@@ -175,7 +175,7 @@ func titleToFilePath(title string) string {
 // $ref fields are now properly typed since everything is one package.
 func goType(schema Schema, selfTitle string, allTitles map[string]bool) string {
 	if schema == nil || len(schema) == 0 {
-		return "any"
+		return "JsonValue"
 	}
 	if ref, ok := schema["$ref"].(string); ok {
 		if ref == "#" {
@@ -193,9 +193,9 @@ func goType(schema Schema, selfTitle string, allTitles map[string]bool) string {
 		return goTypeSingle(t, schema, selfTitle, allTitles)
 	}
 	if _, ok := schema["properties"]; ok {
-		return "any"
+		return "JsonValue"
 	}
-	return "any"
+	return "JsonValue"
 }
 
 func goTypeAnyOf(anyOf []any, selfTitle string, allTitles map[string]bool) string {
@@ -214,12 +214,12 @@ func goTypeAnyOf(anyOf []any, selfTitle string, allTitles map[string]bool) strin
 	}
 	if hasNull && len(nonNull) == 1 {
 		inner := goType(nonNull[0], selfTitle, allTitles)
-		if inner == "any" || strings.HasPrefix(inner, "*") {
+		if inner == "JsonValue" || strings.HasPrefix(inner, "*") {
 			return inner
 		}
 		return "*" + inner
 	}
-	return "any"
+	return "JsonValue"
 }
 
 func goTypeSingle(t string, schema Schema, selfTitle string, allTitles map[string]bool) string {
@@ -241,27 +241,27 @@ func goTypeSingle(t string, schema Schema, selfTitle string, allTitles map[strin
 	case "boolean":
 		return "bool"
 	case "null":
-		return "any"
+		return "JsonValue"
 	case "array":
 		if items, ok := schema["items"].(map[string]any); ok {
 			return "[]" + goType(items, selfTitle, allTitles)
 		}
-		return "[]any"
+		return "[]JsonValue"
 	case "object":
 		if ap, ok := schema["additionalProperties"]; ok {
 			if apMap, ok := ap.(map[string]any); ok {
 				return "map[string]" + goType(apMap, selfTitle, allTitles)
 			}
 			if ap == true {
-				return "map[string]any"
+				return "map[string]JsonValue"
 			}
 		}
 		if _, ok := schema["properties"]; !ok {
 			return "struct{}"
 		}
-		return "any"
+		return "JsonValue"
 	}
-	return "any"
+	return "JsonValue"
 }
 
 func goIntType(schema Schema) string {
@@ -1084,7 +1084,7 @@ func determinePrimitiveGoType(schema Schema, title string, allTitles map[string]
 		return "string"
 	}
 	if _, ok := schema["$ref"]; ok {
-		return "any"
+		return "JsonValue"
 	}
 	t, _ := schema["type"].(string)
 	switch t {
@@ -1092,15 +1092,15 @@ func determinePrimitiveGoType(schema Schema, title string, allTitles map[string]
 		if items, ok := schema["items"].(map[string]any); ok {
 			return "[]" + goType(items, title, allTitles)
 		}
-		return "[]any"
+		return "[]JsonValue"
 	case "object":
 		if ap, ok := schema["additionalProperties"]; ok {
 			if apMap, ok := ap.(map[string]any); ok {
 				return "map[string]" + goType(apMap, title, allTitles)
 			}
-			return "map[string]any"
+			return "map[string]JsonValue"
 		}
-		return "map[string]any"
+		return "map[string]JsonValue"
 	case "string":
 		return "string"
 	case "integer":
@@ -1110,7 +1110,7 @@ func determinePrimitiveGoType(schema Schema, title string, allTitles map[string]
 	case "boolean":
 		return "bool"
 	}
-	return "any"
+	return "JsonValue"
 }
 
 // ---------------------------------------------------------------------------

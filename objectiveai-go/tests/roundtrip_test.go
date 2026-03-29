@@ -364,7 +364,7 @@ func buildFieldTypeSchema(
 		return map[string]any{"type": "integer"}
 	case "struct{}":
 		return map[string]any{"type": "object"}
-	case "any":
+	case "JsonValue":
 		return map[string]any{}
 	case "time.Time":
 		return map[string]any{"type": "string", "format": "date-time"}
@@ -380,7 +380,7 @@ func buildFieldTypeSchema(
 
 	if strings.HasPrefix(typeName, "map[string]") {
 		valType := strings.TrimPrefix(typeName, "map[string]")
-		if valType == "any" {
+		if valType == "JsonValue" {
 			return map[string]any{"type": "object", "additionalProperties": true}
 		}
 		valSchema := buildFieldTypeSchema(valType, types, titleMap)

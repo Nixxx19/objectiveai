@@ -11,7 +11,7 @@ type ErrorResponseError struct {
 	// The HTTP status code of the error response.
 	Code uint32 `json:"code" validate:"min=0,max=65535"`
 	// The error message or details as a JSON value.
-	Message any `json:"message"`
+	Message JsonValue `json:"message"`
 }
 
 func (ErrorResponseError) SchemaTitle() string { return "error.ResponseError" }

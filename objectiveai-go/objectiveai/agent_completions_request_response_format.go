@@ -22,7 +22,7 @@ func (AgentCompletionsRequestResponseFormatJsonObject) SchemaVariantTitle() stri
 // Response must conform to a JSON schema.
 type AgentCompletionsRequestResponseFormatJsonSchema struct {
 	// The JSON Schema definition.
-	Schema map[string]any `json:"schema"`
+	Schema map[string]JsonValue `json:"schema"`
 	Type string `json:"type" validate:"oneof=json_schema"`
 }
 func (AgentCompletionsRequestResponseFormatJsonSchema) SchemaVariantTitle() string { return "JsonSchema" }
@@ -49,7 +49,7 @@ type AgentCompletionsRequestResponseFormatToolCall struct {
 	// Whether the tool MUST be called.
 	Required *bool `json:"required,omitempty"`
 	// The JSON Schema definition.
-	Schema map[string]any `json:"schema"`
+	Schema map[string]JsonValue `json:"schema"`
 	Type string `json:"type" validate:"oneof=tool_call"`
 }
 func (AgentCompletionsRequestResponseFormatToolCall) SchemaVariantTitle() string { return "ToolCall" }
