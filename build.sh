@@ -2,6 +2,7 @@
 # Builds all packages in dependency order with parallelism.
 #
 # Phase 1 (parallel): build-bin + objectiveai-json-schema
+# Background: objectiveai-cli (after phase 1, concurrent with phases 2+3)
 # Phase 2 (parallel): objectiveai-rs-wasm-js + objectiveai-rs-pyo3 + objectiveai-rs-cffi
 # Phase 3 (parallel): objectiveai-js + objectiveai-py + objectiveai-go
 #
@@ -35,8 +36,17 @@ run_phase() {
 # Phase 1: build tools + json schema
 run_phase build-bin.sh objectiveai-json-schema/build.sh
 
+# CLI schema codegen (depends on phase 1, runs concurrently with phases 2+3)
+bash "$REPO_ROOT/objectiveai-cli/build.sh" &
+CLI_PID=$!
+
 # Phase 2: wasm + pyo3 + cffi (need build tools from phase 1)
 run_phase objectiveai-rs-wasm-js/build.sh objectiveai-rs-pyo3/build.sh objectiveai-rs-cffi/build.sh
 
-# Phase 3: js + py + go (need wasm/pyo3 from phase 2, schemas from phase 1)
+# Phase 3: js + py + go (need wasm/pyo3/cffi from phase 2)
 run_phase objectiveai-js/build.sh objectiveai-py/build.sh objectiveai-go/build.sh
+
+# Wait for CLI build
+if ! wait "$CLI_PID"; then
+  exit 1
+fi
