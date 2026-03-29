@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Generates Go types from JSON schemas and installs CFFI WASM binary.
+# Output is captured to .logs/build/objectiveai-go.txt.
+#
+# Usage:
+#   bash objectiveai-go/build.sh
+
+set -euo pipefail
+
+MODULE="objectiveai-go"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+LOG_DIR="$REPO_ROOT/.logs/build"
+LOG_FILE="$LOG_DIR/$MODULE.txt"
+
+mkdir -p "$LOG_DIR"
+
+run() {
+  # Generate types from JSON schemas
+  go run "$SCRIPT_DIR/scripts/install_go.go"
+
+  # Install CFFI WASM binary
+  go run "$SCRIPT_DIR/scripts/install_cffi.go"
+}
+
+if run > "$LOG_FILE" 2>&1; then
+  echo "$MODULE: SUCCESS"
+else
+  echo "$MODULE: ERROR"
+  exit 1
+fi
