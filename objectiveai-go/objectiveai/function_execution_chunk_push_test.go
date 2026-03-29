@@ -13,7 +13,7 @@ func TestFunctionExecutionChunkPush(t *testing.T) {
 			if err != nil {
 				t.Fatalf("generate init: %v", err)
 			}
-			cffiAcc := *goAcc
+			cffiAcc := deepCopy(t, goAcc)
 			seed++
 
 			for j := 0; j < 20; j++ {

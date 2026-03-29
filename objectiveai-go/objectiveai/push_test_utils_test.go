@@ -63,6 +63,20 @@ func toMap(t *testing.T, v any) map[string]any {
 	return m
 }
 
+// deepCopy creates a deep copy of a value via JSON round-trip.
+func deepCopy[T any](t *testing.T, v *T) T {
+	t.Helper()
+	data, err := json.Marshal(v)
+	if err != nil {
+		t.Fatalf("deepCopy marshal: %v", err)
+	}
+	var copy T
+	if err := json.Unmarshal(data, &copy); err != nil {
+		t.Fatalf("deepCopy unmarshal: %v", err)
+	}
+	return copy
+}
+
 // assertRoundedEqual compares two values after rounding floats.
 func assertRoundedEqual(t *testing.T, label string, got, want any) {
 	t.Helper()
