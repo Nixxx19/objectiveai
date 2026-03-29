@@ -1007,6 +1007,65 @@ func generateValidateMethod(typeName string, variantFieldNames []string) string 
 }
 
 // ---------------------------------------------------------------------------
+// Strict UnmarshalJSON generation
+// ---------------------------------------------------------------------------
+
+// generateStrictUnmarshal generates UnmarshalJSON that rejects missing required fields.
+// Required = non-pointer Go type. Returns empty string if no required fields.
+func generateStrictUnmarshal(typeName string, schema Schema, selfTitle string, allTitles map[string]bool) string {
+	properties, _ := schema["properties"].(map[string]any)
+	if len(properties) == 0 {
+		return ""
+	}
+
+	var required []string
+	for _, propName := range sortedKeys(properties) {
+		propSchema, ok := properties[propName].(map[string]any)
+		if !ok {
+			continue
+		}
+		var discard strings.Builder
+		fieldType := resolveFieldTypeWithInline(propSchema, selfTitle, allTitles, typeName, goFieldName(propName), &discard)
+		if !strings.HasPrefix(fieldType, "*") {
+			jsonName := strings.Split(propName, ",")[0]
+			required = append(required, jsonName)
+		}
+	}
+
+	if len(required) == 0 {
+		return ""
+	}
+
+	var b strings.Builder
+	b.WriteString(fmt.Sprintf("func (v *%s) UnmarshalJSON(data []byte) error {\n", typeName))
+	b.WriteString("\tvar raw map[string]json.RawMessage\n")
+	b.WriteString("\tif err := json.Unmarshal(data, &raw); err != nil {\n\t\treturn err\n\t}\n")
+
+	// Build required keys list
+	b.WriteString("\tfor _, key := range []string{")
+	for i, r := range required {
+		if i > 0 {
+			b.WriteString(", ")
+		}
+		b.WriteString(fmt.Sprintf("%q", r))
+	}
+	b.WriteString("} {\n")
+	b.WriteString("\t\tif _, ok := raw[key]; !ok {\n")
+	b.WriteString(fmt.Sprintf("\t\t\treturn fmt.Errorf(\"%s: missing required field %%q\", key)\n", typeName))
+	b.WriteString("\t\t}\n\t}\n")
+
+	// Unmarshal via alias to avoid recursion
+	b.WriteString(fmt.Sprintf("\ttype Alias %s\n", typeName))
+	b.WriteString("\tvar alias Alias\n")
+	b.WriteString("\tif err := json.Unmarshal(data, &alias); err != nil {\n\t\treturn err\n\t}\n")
+	b.WriteString(fmt.Sprintf("\t*v = %s(alias)\n", typeName))
+	b.WriteString("\treturn nil\n")
+	b.WriteString("}\n")
+
+	return b.String()
+}
+
+// ---------------------------------------------------------------------------
 // Type code generation
 // ---------------------------------------------------------------------------
 
@@ -1020,6 +1079,10 @@ func generateTypeCode(title string, schema Schema, allTitles map[string]bool) st
 		b.WriteString("\n")
 		b.WriteString(fmt.Sprintf("func (%s) SchemaTitle() string { return %q }\n", typeName, title))
 		b.WriteString(generateValidateMethod(typeName, nil))
+		if unmarshal := generateStrictUnmarshal(typeName, schema, title, allTitles); unmarshal != "" {
+			b.WriteString("\n")
+			b.WriteString(unmarshal)
+		}
 		return b.String()
 	}
 
@@ -1204,7 +1267,7 @@ func main() {
 		}
 
 		fullCode := strings.Join(codes, "\n")
-		needsJSON := strings.Contains(fullCode, "json.Marshal") || strings.Contains(fullCode, "json.Number")
+		needsJSON := strings.Contains(fullCode, "json.Marshal") || strings.Contains(fullCode, "json.Unmarshal") || strings.Contains(fullCode, "json.Number") || strings.Contains(fullCode, "json.RawMessage")
 		needsFmt := strings.Contains(fullCode, "fmt.Errorf")
 		needsTime := strings.Contains(fullCode, "time.Time")
 		needsUUID := strings.Contains(fullCode, "uuid.UUID")

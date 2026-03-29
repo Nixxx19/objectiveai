@@ -143,3 +143,22 @@ func (FunctionsScalarFunctionTaskExpression) SchemaTitle() string { return "func
 func (v FunctionsScalarFunctionTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
 }
+
+func (v *FunctionsScalarFunctionTaskExpression) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"input", "output"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsScalarFunctionTaskExpression: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsScalarFunctionTaskExpression
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsScalarFunctionTaskExpression(alias)
+	return nil
+}

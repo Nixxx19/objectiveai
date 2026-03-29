@@ -3,6 +3,8 @@
 package objectiveai
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -25,4 +27,23 @@ type AuthCreateApiKeyRequest struct {
 func (AuthCreateApiKeyRequest) SchemaTitle() string { return "auth.CreateApiKeyRequest" }
 func (v AuthCreateApiKeyRequest) Validate() error {
 	return variantValidator.Struct(v)
+}
+
+func (v *AuthCreateApiKeyRequest) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"name"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AuthCreateApiKeyRequest: missing required field %q", key)
+		}
+	}
+	type Alias AuthCreateApiKeyRequest
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AuthCreateApiKeyRequest(alias)
+	return nil
 }

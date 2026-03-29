@@ -3,6 +3,8 @@
 package objectiveai
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/google/uuid"
 )
 
@@ -39,4 +41,23 @@ type PrefixedUuid struct {
 func (PrefixedUuid) SchemaTitle() string { return "PrefixedUuid" }
 func (v PrefixedUuid) Validate() error {
 	return variantValidator.Struct(v)
+}
+
+func (v *PrefixedUuid) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"uuid"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("PrefixedUuid: missing required field %q", key)
+		}
+	}
+	type Alias PrefixedUuid
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = PrefixedUuid(alias)
+	return nil
 }

@@ -124,3 +124,22 @@ func (AgentCompletionsMessageSimpleContentPartExpression) SchemaTitle() string {
 func (v AgentCompletionsMessageSimpleContentPartExpression) Validate() error {
 	return variantValidator.Struct(v)
 }
+
+func (v *AgentCompletionsMessageSimpleContentPartExpression) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"text", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsMessageSimpleContentPartExpression: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsMessageSimpleContentPartExpression
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsMessageSimpleContentPartExpression(alias)
+	return nil
+}

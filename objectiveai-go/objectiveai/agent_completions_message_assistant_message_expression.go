@@ -616,3 +616,22 @@ func (AgentCompletionsMessageAssistantMessageExpression) SchemaTitle() string { 
 func (v AgentCompletionsMessageAssistantMessageExpression) Validate() error {
 	return variantValidator.Struct(v)
 }
+
+func (v *AgentCompletionsMessageAssistantMessageExpression) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"content", "name", "reasoning", "refusal", "tool_calls"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsMessageAssistantMessageExpression: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsMessageAssistantMessageExpression
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsMessageAssistantMessageExpression(alias)
+	return nil
+}

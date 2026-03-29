@@ -406,3 +406,22 @@ func (FunctionsVectorCompletionTaskExpression) SchemaTitle() string { return "fu
 func (v FunctionsVectorCompletionTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
 }
+
+func (v *FunctionsVectorCompletionTaskExpression) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"messages", "output", "responses"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsVectorCompletionTaskExpression: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsVectorCompletionTaskExpression
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsVectorCompletionTaskExpression(alias)
+	return nil
+}

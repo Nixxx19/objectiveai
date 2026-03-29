@@ -143,3 +143,22 @@ func (FunctionsPlaceholderVectorFunctionTaskExpression) SchemaTitle() string { r
 func (v FunctionsPlaceholderVectorFunctionTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
 }
+
+func (v *FunctionsPlaceholderVectorFunctionTaskExpression) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"input", "input_merge", "input_schema", "input_split", "output", "output_length"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsPlaceholderVectorFunctionTaskExpression: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsPlaceholderVectorFunctionTaskExpression
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsPlaceholderVectorFunctionTaskExpression(alias)
+	return nil
+}

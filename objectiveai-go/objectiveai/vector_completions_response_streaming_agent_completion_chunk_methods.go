@@ -3,13 +3,8 @@ package objectiveai
 // Push accumulates another vector completions AgentCompletionChunk into this one.
 func (v *VectorCompletionsResponseStreamingAgentCompletionChunk) Push(other *VectorCompletionsResponseStreamingAgentCompletionChunk) {
 	// messages: merge by index
-	pushByIndex(&v.Messages, other.Messages,
-		func(m *AgentCompletionsResponseStreamingMessageChunk) uint64 {
-			if m.Assistant != nil {
-				return m.Assistant.Index
-			}
-			return 0
-		},
+	pushByNullableIndex(&v.Messages, other.Messages,
+		func(m *AgentCompletionsResponseStreamingMessageChunk) *uint64 { return m.Index() },
 		func(a, b *AgentCompletionsResponseStreamingMessageChunk) { a.Push(b) },
 	)
 

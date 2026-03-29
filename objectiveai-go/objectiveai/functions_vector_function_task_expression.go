@@ -143,3 +143,22 @@ func (FunctionsVectorFunctionTaskExpression) SchemaTitle() string { return "func
 func (v FunctionsVectorFunctionTaskExpression) Validate() error {
 	return variantValidator.Struct(v)
 }
+
+func (v *FunctionsVectorFunctionTaskExpression) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"input", "output"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsVectorFunctionTaskExpression: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsVectorFunctionTaskExpression
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsVectorFunctionTaskExpression(alias)
+	return nil
+}

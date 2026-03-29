@@ -3,16 +3,8 @@ package objectiveai
 // Push accumulates another profile computations FunctionExecutionChunk into this one.
 func (v *FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk) Push(other *FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk) {
 	// tasks: merge by index
-	pushByIndex(&v.Tasks, other.Tasks,
-		func(t *FunctionsExecutionsResponseStreamingTaskChunk) uint64 {
-			if t.FunctionExecution != nil {
-				return t.FunctionExecution.Index
-			}
-			if t.VectorCompletion != nil {
-				return t.VectorCompletion.Index
-			}
-			return 0
-		},
+	pushByNullableIndex(&v.Tasks, other.Tasks,
+		func(t *FunctionsExecutionsResponseStreamingTaskChunk) *uint64 { return t.Index() },
 		func(a, b *FunctionsExecutionsResponseStreamingTaskChunk) { a.Push(b) },
 	)
 

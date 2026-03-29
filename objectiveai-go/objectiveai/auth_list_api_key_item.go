@@ -3,6 +3,8 @@
 package objectiveai
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -30,4 +32,23 @@ type AuthListApiKeyItem struct {
 func (AuthListApiKeyItem) SchemaTitle() string { return "auth.ListApiKeyItem" }
 func (v AuthListApiKeyItem) Validate() error {
 	return variantValidator.Struct(v)
+}
+
+func (v *AuthListApiKeyItem) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"api_key", "cost", "created", "name"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AuthListApiKeyItem: missing required field %q", key)
+		}
+	}
+	type Alias AuthListApiKeyItem
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AuthListApiKeyItem(alias)
+	return nil
 }

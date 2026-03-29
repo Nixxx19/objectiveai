@@ -227,3 +227,22 @@ func (AgentCompletionsMessageToolMessageExpression) SchemaTitle() string { retur
 func (v AgentCompletionsMessageToolMessageExpression) Validate() error {
 	return variantValidator.Struct(v)
 }
+
+func (v *AgentCompletionsMessageToolMessageExpression) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"content", "tool_call_id"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsMessageToolMessageExpression: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsMessageToolMessageExpression
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsMessageToolMessageExpression(alias)
+	return nil
+}
