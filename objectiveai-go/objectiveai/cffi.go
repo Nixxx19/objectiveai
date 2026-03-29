@@ -381,9 +381,10 @@ func ValidateAgent(agent AgentAgentBase) (*AgentAgent, error) {
 	return cffi1[AgentAgentBase, AgentAgent]("objectiveai_validate_agent", agent)
 }
 
-// ValidateEnsemble validates an Ensemble configuration and computes its content-addressed ID.
-func ValidateEnsemble(ensemble EnsembleEnsembleBase) (*EnsembleEnsemble, error) {
-	return cffi1[EnsembleEnsembleBase, EnsembleEnsemble]("objectiveai_validate_ensemble", ensemble)
+// ValidateSwarm validates a Swarm configuration and computes its content-addressed ID.
+// Pass nil for remoteAgents if no remote agent definitions are available.
+func ValidateSwarm(swarm SwarmSwarmBase, remoteAgents map[string]AgentRemoteAgentBaseWithFallbacks) (*SwarmSwarm, error) {
+	return cffi2[SwarmSwarmBase, map[string]AgentRemoteAgentBaseWithFallbacks, SwarmSwarm]("objectiveai_validate_swarm", swarm, remoteAgents)
 }
 
 // PromptId computes a content-addressed ID for chat messages.
@@ -488,7 +489,7 @@ func AlphaCheckLeafScalarFunction(function FunctionsAlphaScalarRemoteFunction) e
 }
 
 // AlphaCheckBranchScalarFunction validates a branch scalar function (depth > 0).
-func AlphaCheckBranchScalarFunction(function FunctionsAlphaScalarRemoteFunction, children map[string]FunctionsRemoteFunction) error {
+func AlphaCheckBranchScalarFunction(function FunctionsAlphaScalarRemoteFunction, children map[string]FunctionsFullRemoteFunction) error {
 	return cffi2Void("objectiveai_alpha_check_branch_scalar_function", function, children)
 }
 
@@ -498,7 +499,7 @@ func AlphaCheckLeafVectorFunction(function FunctionsAlphaVectorRemoteFunction) e
 }
 
 // AlphaCheckBranchVectorFunction validates a branch vector function (depth > 0).
-func AlphaCheckBranchVectorFunction(function FunctionsAlphaVectorRemoteFunction, children map[string]FunctionsRemoteFunction) error {
+func AlphaCheckBranchVectorFunction(function FunctionsAlphaVectorRemoteFunction, children map[string]FunctionsFullRemoteFunction) error {
 	return cffi2Void("objectiveai_alpha_check_branch_vector_function", function, children)
 }
 
