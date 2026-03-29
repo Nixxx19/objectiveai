@@ -28,9 +28,11 @@ run() {
 
   # Build
   echo "Building maturin (release)..."
-  "$MATURIN" build --release --manifest-path "$SCRIPT_DIR/Cargo.toml" --out "$SCRIPT_DIR/dist"
+  if ! "$MATURIN" build --release --manifest-path "$SCRIPT_DIR/Cargo.toml" --out "$SCRIPT_DIR/dist"; then
+    return 1
+  fi
 
-  # Stamp the fingerprint
+  # Stamp the fingerprint only after successful build
   echo "$CURRENT_FP" > "$FINGERPRINT_FILE"
   echo "Build complete (fingerprint: ${CURRENT_FP:0:12}...)"
 }

@@ -28,9 +28,11 @@ run() {
 
   # Build
   echo "Building wasm-pack (nodejs, release)..."
-  "$WASM_PACK" build "$SCRIPT_DIR" --target nodejs --release --out-dir dist
+  if ! "$WASM_PACK" build "$SCRIPT_DIR" --target nodejs --release --out-dir dist; then
+    return 1
+  fi
 
-  # Stamp the fingerprint
+  # Stamp the fingerprint only after successful build
   echo "$CURRENT_FP" > "$FINGERPRINT_FILE"
   echo "Build complete (fingerprint: ${CURRENT_FP:0:12}...)"
 }
