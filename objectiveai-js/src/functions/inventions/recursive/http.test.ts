@@ -22,7 +22,6 @@ httpTestSuite<FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
       snapshot: "valid_schema_valid_tasks_scalar_leaf",
       body: {
         remote: "mock",
-        name: "test/recursive",
         state: {
           type: "alpha.scalar.leaf.function",
           depth: 0, min_branch_width: 1, max_branch_width: 1, min_leaf_width: 2, max_leaf_width: 4,
@@ -60,7 +59,6 @@ httpTestSuite<FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
       snapshot: "valid_vector_schema_valid_tasks",
       body: {
         remote: "mock",
-        name: "test/recursive",
         state: {
           type: "alpha.vector.leaf.function",
           depth: 0, min_branch_width: 1, max_branch_width: 1, min_leaf_width: 2, max_leaf_width: 4,
@@ -93,7 +91,6 @@ httpTestSuite<FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
       snapshot: "valid_schema_no_tasks_with_essay",
       body: {
         remote: "mock",
-        name: "test/recursive",
         state: {
           type: "alpha.scalar.leaf.function",
           depth: 0, min_branch_width: 1, max_branch_width: 1, min_leaf_width: 2, max_leaf_width: 4,
