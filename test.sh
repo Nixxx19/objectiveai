@@ -37,6 +37,7 @@ for suite in \
   objectiveai-rs \
   objectiveai-api \
   objectiveai-json-schema \
+  objectiveai-cli \
   objectiveai-js \
   objectiveai-py \
 ; do
