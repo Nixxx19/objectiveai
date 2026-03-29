@@ -188,3 +188,9 @@ func SourceDir() string {
 	_, filename, _, _ := runtime.Caller(0)
 	return filepath.Join(filepath.Dir(filename), "..", "objectiveai")
 }
+
+// RepoRoot returns the path to the repository root.
+func RepoRoot() string {
+	_, filename, _, _ := runtime.Caller(0)
+	return filepath.Join(filepath.Dir(filename), "..", "..")
+}

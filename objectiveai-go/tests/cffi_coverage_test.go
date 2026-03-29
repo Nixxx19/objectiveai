@@ -1,10 +1,9 @@
-package objectiveai
+package tests
 
 import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strings"
 	"testing"
 	"unicode"
@@ -16,10 +15,8 @@ import (
 // Rust function names like objectiveai_validate_ensemble are expected to appear
 // in cffi.go as PascalCase Go functions like ValidateEnsemble.
 func TestCFFICoverage(t *testing.T) {
-	// Locate repo root relative to this test file.
-	// Test is in objectiveai-go/objectiveai/, repo root is two levels up.
-	_, thisFile, _, _ := runtime.Caller(0)
-	repoRoot := filepath.Dir(filepath.Dir(filepath.Dir(thisFile)))
+	// Locate repo root (tests/ -> objectiveai-go/ -> repo root)
+	repoRoot := RepoRoot()
 
 	// Read Rust lib.rs
 	rustPath := filepath.Join(repoRoot, "objectiveai-rs-cffi", "src", "lib.rs")
