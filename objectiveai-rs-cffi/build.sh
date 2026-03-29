@@ -26,13 +26,17 @@ run() {
 
   # Build
   echo "Building cffi (wasm32-unknown-unknown, release)..."
-  cargo build --manifest-path "$SCRIPT_DIR/Cargo.toml" --target "$TARGET" --release
+  if ! cargo build --manifest-path "$SCRIPT_DIR/Cargo.toml" --target "$TARGET" --release; then
+    return 1
+  fi
 
   # Copy wasm to dist/
   mkdir -p "$SCRIPT_DIR/dist"
-  cp "$REPO_ROOT/target/$TARGET/release/objectiveai_cffi.wasm" "$SCRIPT_DIR/dist/"
+  if ! cp "$REPO_ROOT/target/$TARGET/release/objectiveai_cffi.wasm" "$SCRIPT_DIR/dist/"; then
+    return 1
+  fi
 
-  # Stamp the fingerprint
+  # Stamp the fingerprint only after successful build + copy
   echo "$CURRENT_FP" > "$FINGERPRINT_FILE"
   echo "Build complete (fingerprint: ${CURRENT_FP:0:12}...)"
 }
