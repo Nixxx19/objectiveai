@@ -14,11 +14,11 @@ type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams s
 	// via tool calls). If the step's validation still fails after the
 	// agent loop ends, the step is retried up to this many times.
 	// Defaults to 3 if not specified.
-	MaxStepRetries *uint32 `json:"max_step_retries,omitempty" validate:"min=0,max=4294967295"`
+	MaxStepRetries *uint32 `json:"max_step_retries,omitempty" validate:"omitempty,min=0,max=4294967295"`
 	Overwrite *bool `json:"overwrite,omitempty"`
 	Provider *AgentCompletionsRequestProvider `json:"provider,omitempty"`
 	Remote Remote `json:"remote"`
-	Seed *int64 `json:"seed,omitempty" validate:"min=-9223372036854775808,max=9223372036854775807"`
+	Seed *int64 `json:"seed,omitempty" validate:"omitempty,min=-9223372036854775808,max=9223372036854775807"`
 	State FunctionsInventionsStateParamsStateOrRemoteCommitOptional `json:"state"`
 	Stream *bool `json:"stream,omitempty"`
 }

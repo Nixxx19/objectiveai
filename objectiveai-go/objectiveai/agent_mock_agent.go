@@ -21,7 +21,7 @@ type AgentMockAgent struct {
 	// Number of top log probabilities to return (2-20).
 	//
 	// **Vector completions only.** Ignored for agent completions.
-	TopLogprobs *uint64 `json:"top_logprobs,omitempty" validate:"min=0,max=18446744073709551615"`
+	TopLogprobs *uint64 `json:"top_logprobs,omitempty" validate:"omitempty,min=0,max=18446744073709551615"`
 	// The upstream provider marker.
 	Upstream AgentMockUpstream `json:"upstream"`
 }

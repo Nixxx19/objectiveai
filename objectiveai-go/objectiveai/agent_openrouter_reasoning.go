@@ -20,7 +20,7 @@ type AgentOpenrouterReasoning struct {
 	// Maximum tokens for the reasoning/thinking output.
 	//
 	// Only supported by some models.
-	MaxTokens *uint64 `json:"max_tokens,omitempty" validate:"min=0,max=18446744073709551615"`
+	MaxTokens *uint64 `json:"max_tokens,omitempty" validate:"omitempty,min=0,max=18446744073709551615"`
 	// Verbosity of reasoning summaries in the response.
 	//
 	// Only supported by some models.

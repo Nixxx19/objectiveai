@@ -21,7 +21,7 @@ type FunctionsInventionsStateAlphaScalarLeafState struct {
 	Readme *string `json:"readme,omitempty"`
 	Spec string `json:"spec"`
 	Tasks *[]FunctionsAlphaScalarLeafTaskExpression `json:"tasks,omitempty"`
-	TasksLength *uint64 `json:"tasks_length,omitempty" validate:"min=0,max=18446744073709551615"`
+	TasksLength *uint64 `json:"tasks_length,omitempty" validate:"omitempty,min=0,max=18446744073709551615"`
 }
 
 func (FunctionsInventionsStateAlphaScalarLeafState) SchemaTitle() string { return "functions.inventions.state.AlphaScalarLeafState" }

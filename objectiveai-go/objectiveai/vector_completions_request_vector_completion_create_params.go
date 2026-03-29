@@ -24,7 +24,7 @@ type VectorCompletionsRequestVectorCompletionCreateParams struct {
 	// If present, reuses votes from a previous request with this ID.
 	Retry *string `json:"retry,omitempty"`
 	// Random seed for deterministic results.
-	Seed *int64 `json:"seed,omitempty" validate:"min=-9223372036854775808,max=9223372036854775807"`
+	Seed *int64 `json:"seed,omitempty" validate:"omitempty,min=-9223372036854775808,max=9223372036854775807"`
 	// Whether to stream the response.
 	Stream *bool `json:"stream,omitempty"`
 	// The Swarm of agents to use.

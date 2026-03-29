@@ -10,17 +10,17 @@ import (
 // The base configuration for an OpenRouter Agent (without computed ID).
 type AgentOpenrouterAgentBase struct {
 	// Penalizes tokens based on their frequency in the output so far (-2.0 to 2.0).
-	FrequencyPenalty *float64 `json:"frequency_penalty,omitempty" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
+	FrequencyPenalty *float64 `json:"frequency_penalty,omitempty" validate:"omitempty,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// Token ID to bias mapping (-100 to 100). Positive values increase likelihood.
-	LogitBias *map[string]int64 `json:"logit_bias,omitempty" validate:"dive,min=-9223372036854775808,max=9223372036854775807"`
+	LogitBias *map[string]int64 `json:"logit_bias,omitempty" validate:"omitempty,dive,min=-9223372036854775808,max=9223372036854775807"`
 	// Maximum tokens in the completion.
-	MaxCompletionTokens *uint64 `json:"max_completion_tokens,omitempty" validate:"min=0,max=18446744073709551615"`
+	MaxCompletionTokens *uint64 `json:"max_completion_tokens,omitempty" validate:"omitempty,min=0,max=18446744073709551615"`
 	// Maximum tokens (OpenRouter variant of max_completion_tokens).
-	MaxTokens *uint64 `json:"max_tokens,omitempty" validate:"min=0,max=18446744073709551615"`
+	MaxTokens *uint64 `json:"max_tokens,omitempty" validate:"omitempty,min=0,max=18446744073709551615"`
 	// MCP servers the agent can connect to.
 	MCPServers *[]AgentMcpServer `json:"mcp_servers,omitempty"`
 	// Minimum probability threshold for sampling (0.0 to 1.0).
-	MinP *float64 `json:"min_p,omitempty" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
+	MinP *float64 `json:"min_p,omitempty" validate:"omitempty,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// The upstream language model identifier (e.g., `"gpt-4"`, `"claude-3-opus"`).
 	Model string `json:"model"`
 	// The output mode for vector completions. Ignored for agent completions.
@@ -30,13 +30,13 @@ type AgentOpenrouterAgentBase struct {
 	// Messages prepended to the user's prompt.
 	PrefixMessages *[]AgentCompletionsMessageMessage `json:"prefix_messages,omitempty"`
 	// Penalizes tokens based on their presence in the output so far (-2.0 to 2.0).
-	PresencePenalty *float64 `json:"presence_penalty,omitempty" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
+	PresencePenalty *float64 `json:"presence_penalty,omitempty" validate:"omitempty,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// Provider routing preferences.
 	Provider *AgentOpenrouterProvider `json:"provider,omitempty"`
 	// Reasoning/thinking configuration for supported models.
 	Reasoning *AgentOpenrouterReasoning `json:"reasoning,omitempty"`
 	// Repetition penalty (0.0 to 2.0). Values > 1.0 penalize repetition.
-	RepetitionPenalty *float64 `json:"repetition_penalty,omitempty" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
+	RepetitionPenalty *float64 `json:"repetition_penalty,omitempty" validate:"omitempty,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// Stop sequences that halt generation.
 	Stop *AgentOpenrouterStop `json:"stop,omitempty"`
 	// Messages appended after the user's prompt.
@@ -46,17 +46,17 @@ type AgentOpenrouterAgentBase struct {
 	// **Vector completions only.** Ignored for agent completions.
 	SyntheticReasoning *bool `json:"synthetic_reasoning,omitempty"`
 	// Sampling temperature (0.0 to 2.0). Higher = more random.
-	Temperature *float64 `json:"temperature,omitempty" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
+	Temperature *float64 `json:"temperature,omitempty" validate:"omitempty,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// Top-a sampling parameter (0.0 to 1.0).
-	TopA *float64 `json:"top_a,omitempty" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
+	TopA *float64 `json:"top_a,omitempty" validate:"omitempty,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// Top-k sampling: only consider the k most likely tokens.
-	TopK *uint64 `json:"top_k,omitempty" validate:"min=0,max=18446744073709551615"`
+	TopK *uint64 `json:"top_k,omitempty" validate:"omitempty,min=0,max=18446744073709551615"`
 	// Number of top log probabilities to return (2-20).
 	//
 	// **Vector completions only.** Ignored for agent completions.
-	TopLogprobs *uint64 `json:"top_logprobs,omitempty" validate:"min=0,max=18446744073709551615"`
+	TopLogprobs *uint64 `json:"top_logprobs,omitempty" validate:"omitempty,min=0,max=18446744073709551615"`
 	// Nucleus sampling probability (0.0 to 1.0).
-	TopP *float64 `json:"top_p,omitempty" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
+	TopP *float64 `json:"top_p,omitempty" validate:"omitempty,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// The upstream provider marker.
 	Upstream AgentOpenrouterUpstream `json:"upstream"`
 	// Output verbosity hint for supported models.

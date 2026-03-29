@@ -681,6 +681,10 @@ func buildStructTags(jsonTag string, propSchema Schema, selfTitle string, allTit
 	}
 
 	if len(validates) > 0 {
+		// Nullable fields need omitempty so the validator skips nil pointers
+		if nullable {
+			validates = append([]string{"omitempty"}, validates...)
+		}
 		tags = append(tags, fmt.Sprintf("validate:%q", strings.Join(validates, ",")))
 	}
 

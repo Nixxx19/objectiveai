@@ -5,13 +5,13 @@ package objectiveai
 // Detailed breakdown of prompt token usage.
 type AgentCompletionsResponsePromptTokensDetails struct {
 	// Audio input tokens.
-	AudioTokens *uint64 `json:"audio_tokens,omitempty" validate:"min=0,max=18446744073709551615"`
+	AudioTokens *uint64 `json:"audio_tokens,omitempty" validate:"omitempty,min=0,max=18446744073709551615"`
 	// Tokens written to cache.
-	CacheWriteTokens *uint64 `json:"cache_write_tokens,omitempty" validate:"min=0,max=18446744073709551615"`
+	CacheWriteTokens *uint64 `json:"cache_write_tokens,omitempty" validate:"omitempty,min=0,max=18446744073709551615"`
 	// Tokens served from cache.
-	CachedTokens *uint64 `json:"cached_tokens,omitempty" validate:"min=0,max=18446744073709551615"`
+	CachedTokens *uint64 `json:"cached_tokens,omitempty" validate:"omitempty,min=0,max=18446744073709551615"`
 	// Video input tokens.
-	VideoTokens *uint64 `json:"video_tokens,omitempty" validate:"min=0,max=18446744073709551615"`
+	VideoTokens *uint64 `json:"video_tokens,omitempty" validate:"omitempty,min=0,max=18446744073709551615"`
 }
 
 func (AgentCompletionsResponsePromptTokensDetails) SchemaTitle() string { return "agent.completions.response.PromptTokensDetails" }

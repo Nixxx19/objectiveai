@@ -14,9 +14,9 @@ type FunctionsExpressionArrayInputSchema struct {
 	// Schema for each item in the array.
 	Items FunctionsExpressionInputSchema `json:"items"`
 	// Maximum number of items allowed.
-	MaxItems *uint64 `json:"maxItems,omitempty" validate:"min=0,max=18446744073709551615"`
+	MaxItems *uint64 `json:"maxItems,omitempty" validate:"omitempty,min=0,max=18446744073709551615"`
 	// Minimum number of items required.
-	MinItems *uint64 `json:"minItems,omitempty" validate:"min=0,max=18446744073709551615"`
+	MinItems *uint64 `json:"minItems,omitempty" validate:"omitempty,min=0,max=18446744073709551615"`
 	Type FunctionsExpressionArrayInputSchemaType `json:"type"`
 }
 

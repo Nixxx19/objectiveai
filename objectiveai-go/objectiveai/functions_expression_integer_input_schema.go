@@ -12,9 +12,9 @@ type FunctionsExpressionIntegerInputSchema struct {
 	// Human-readable description of the integer.
 	Description *string `json:"description,omitempty"`
 	// Maximum allowed value (inclusive).
-	Maximum *int64 `json:"maximum,omitempty" validate:"min=-9223372036854775808,max=9223372036854775807"`
+	Maximum *int64 `json:"maximum,omitempty" validate:"omitempty,min=-9223372036854775808,max=9223372036854775807"`
 	// Minimum allowed value (inclusive).
-	Minimum *int64 `json:"minimum,omitempty" validate:"min=-9223372036854775808,max=9223372036854775807"`
+	Minimum *int64 `json:"minimum,omitempty" validate:"omitempty,min=-9223372036854775808,max=9223372036854775807"`
 	Type FunctionsExpressionIntegerInputSchemaType `json:"type"`
 }
 

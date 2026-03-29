@@ -18,7 +18,7 @@ type FunctionsExecutionsRequestFunctionExecutionCreateParams struct {
 	Provider *AgentCompletionsRequestProvider `json:"provider,omitempty"`
 	Reasoning *FunctionsExecutionsRequestReasoning `json:"reasoning,omitempty"`
 	RetryToken *string `json:"retry_token,omitempty"`
-	Seed *int64 `json:"seed,omitempty" validate:"min=-9223372036854775808,max=9223372036854775807"`
+	Seed *int64 `json:"seed,omitempty" validate:"omitempty,min=-9223372036854775808,max=9223372036854775807"`
 	Strategy *FunctionsExecutionsRequestStrategy `json:"strategy,omitempty"`
 	Stream *bool `json:"stream,omitempty"`
 }

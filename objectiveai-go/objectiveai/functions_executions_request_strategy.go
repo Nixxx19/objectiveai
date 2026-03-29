@@ -16,9 +16,9 @@ func (FunctionsExecutionsRequestStrategyDefault) SchemaVariantTitle() string { r
 // Vector
 type FunctionsExecutionsRequestStrategySwissSystem struct {
 	// How many vector responses for each execution
-	Pool *uint32 `json:"pool,omitempty" validate:"min=0,max=4294967295"`
+	Pool *uint32 `json:"pool,omitempty" validate:"omitempty,min=0,max=4294967295"`
 	// How many sequential rounds of comparison
-	Rounds *uint32 `json:"rounds,omitempty" validate:"min=0,max=4294967295"`
+	Rounds *uint32 `json:"rounds,omitempty" validate:"omitempty,min=0,max=4294967295"`
 	Type string `json:"type" validate:"oneof=swiss_system"`
 }
 func (FunctionsExecutionsRequestStrategySwissSystem) SchemaVariantTitle() string { return "SwissSystem" }
