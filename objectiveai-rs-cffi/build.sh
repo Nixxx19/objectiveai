@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds objectiveai-rs-cffi to dist/ (wasm32-unknown-unknown).
+# Builds objectiveai-rs-cffi to dist/ (wasm32-wasip1).
 # Skips the build if the source fingerprint hasn't changed (SHA-based, like cargo).
 # Output is captured to .logs/build/objectiveai-rs-cffi.txt.
 #
@@ -22,10 +22,10 @@ run() {
     return 0
   fi
 
-  TARGET="wasm32-unknown-unknown"
+  TARGET="wasm32-wasip1"
 
   # Build
-  echo "Building cffi (wasm32-unknown-unknown, release)..."
+  echo "Building cffi (wasm32-wasip1, release)..."
   if ! cargo build --manifest-path "$SCRIPT_DIR/Cargo.toml" --target "$TARGET" --release; then
     return 1
   fi
