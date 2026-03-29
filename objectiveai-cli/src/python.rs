@@ -65,22 +65,28 @@ import ast as __oai_ast, json as __oai_json, sys as __oai_sys, io as __oai_io, b
 __oai_code = __oai_b64.b64decode("{}").decode()
 __oai_tree = __oai_ast.parse(__oai_code)
 __oai_capture = __oai_io.StringIO()
+__oai_getvalue = __oai_capture.getvalue
+__oai_encode = __oai_json.JSONEncoder().encode
 __oai_old_stdout = __oai_sys.stdout
-__oai_old_dunder_stdout = __oai_sys.__stdout__
+__oai_old_dunder = __oai_sys.__stdout__
 __oai_sys.stdout = __oai_capture
 __oai_sys.__stdout__ = __oai_capture
 __oai_print = print
 __oai_eval = None
-if __oai_tree.body and isinstance(__oai_tree.body[-1], __oai_ast.Expr):
-    __oai_last = __oai_tree.body.pop()
-    exec(compile(__oai_tree, "<inline>", "exec"))
-    __oai_eval = eval(compile(__oai_ast.Expression(__oai_last.value), "<inline>", "eval"))
-else:
-    exec(compile(__oai_tree, "<inline>", "exec"))
-__oai_stdout = __oai_capture.getvalue()
-__oai_sys.stdout = __oai_old_stdout
-__oai_sys.__stdout__ = __oai_old_dunder_stdout
-__oai_print(__oai_json.dumps({{"eval": __oai_eval, "stdout": __oai_stdout}}))
+__oai_user_globals = {{"__name__": "__main__", "__builtins__": __builtins__}}
+try:
+    if __oai_tree.body and isinstance(__oai_tree.body[-1], __oai_ast.Expr):
+        __oai_last = __oai_tree.body.pop()
+        exec(compile(__oai_tree, "<inline>", "exec"), __oai_user_globals)
+        __oai_eval = eval(compile(__oai_ast.Expression(__oai_last.value), "<inline>", "eval"), __oai_user_globals)
+    else:
+        exec(compile(__oai_tree, "<inline>", "exec"), __oai_user_globals)
+    __oai_stdout = __oai_getvalue()
+finally:
+    __oai_sys.stdout = __oai_old_stdout
+    __oai_sys.__stdout__ = __oai_old_dunder
+__oai_result = __oai_encode({{"eval": __oai_eval, "stdout": __oai_stdout}})
+__oai_print(__oai_result)
 "#,
         encoded
     )
@@ -152,8 +158,22 @@ fn exec_code_rustpython(code: &str) -> Result<String, crate::error::Error> {
 
     interp.enter(|vm| {
         let scope = vm.new_scope_with_builtins();
-        match vm.run_code_string(scope, code, "<inline>".to_owned()) {
-            Ok(_) => Ok(String::new()),
+        match vm.run_code_string(scope.clone(), code, "<inline>".to_owned()) {
+            Ok(_) => {
+                // Extract __oai_result from the scope
+                match scope.globals.get_item("__oai_result", vm) {
+                    Ok(val) => {
+                        let result = val.str(vm)
+                            .map_err(|exc| {
+                                let mut stderr = String::new();
+                                vm.write_exception(&mut stderr, &exc).ok();
+                                crate::error::Error::PythonException(stderr)
+                            })?;
+                        Ok(result.to_string())
+                    }
+                    Err(_) => Ok(String::new()),
+                }
+            }
             Err(exc) => {
                 let mut stderr = String::new();
                 vm.write_exception(&mut stderr, &exc).ok();

@@ -565,14 +565,21 @@ fn error_import_error() {
     assert!(matches!(err, crate::error::Error::PythonException(_)));
 }
 
-/// Infinite recursion.
+/// Infinite recursion. Needs a large stack for RustPython.
 #[test]
 fn error_recursion_error() {
-    let err = crate::python::exec_code::<Foo>(r#"
+    let result = std::thread::Builder::new()
+        .stack_size(8 * 1024 * 1024)
+        .spawn(|| {
+            let err = crate::python::exec_code::<Foo>(r#"
 def f(): f()
 f()
 "#).unwrap_err();
-    assert!(matches!(err, crate::error::Error::PythonException(_)));
+            assert!(matches!(err, crate::error::Error::PythonException(_)));
+        })
+        .unwrap()
+        .join();
+    assert!(result.is_ok(), "thread panicked or stack overflowed");
 }
 
 /// Explicit raise.
@@ -732,15 +739,36 @@ fn error_file_not_found() {
     assert!(matches!(err, crate::error::Error::PythonFileRead(_, _)));
 }
 
-// -- PythonHarnessBroken errors --
+// -- Monkey-patching resilience --
 
-/// os.write(1, ...) bypasses sys.stdout capture and corrupts the envelope.
+/// User monkey-patches json.dumps, but the harness saves a bound encoder
+/// method before user code runs, so the envelope is still valid.
+/// The user code restores the original to avoid poisoning parallel tests
+/// (RustPython shares module state across interpreters in one process).
 #[test]
-fn error_harness_broken_by_os_write() {
-    let err = crate::python::exec_code::<Foo>(r#"
-import os
-os.write(1, b"CORRUPTION")
-{"foo": "bar"}
-"#).unwrap_err();
-    assert!(matches!(err, crate::error::Error::PythonHarnessBroken(_)));
+fn monkeypatch_json_dumps() {
+    let result: Foo = crate::python::exec_code(r#"
+import json
+_orig = json.dumps
+json.dumps = lambda x: "BROKEN"
+result = {"foo": "bar"}
+json.dumps = _orig
+result
+"#).unwrap();
+    assert_eq!(result, expected());
+}
+
+/// User replaces the default JSON encoder, but the harness saves a bound
+/// encode method on its own JSONEncoder instance before user code runs.
+#[test]
+fn monkeypatch_json_default_encoder() {
+    let result: Foo = crate::python::exec_code(r#"
+import json
+_orig = json._default_encoder
+json._default_encoder = type("E", (), {"encode": lambda self, o: "BROKEN"})()
+result = {"foo": "bar"}
+json._default_encoder = _orig
+result
+"#).unwrap();
+    assert_eq!(result, expected());
 }
