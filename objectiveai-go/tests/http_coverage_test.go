@@ -17,8 +17,8 @@ import (
 // Naming convention:
 //   Rust module path: agent/completions/http.rs
 //   Go file:          agent_completions_http.go
-//   Rust fn:          create_agent_completion_unary / create_agent_completion_streaming
-//   Go fn:            AgentCompletionsCreateAgentCompletion (PascalCase, streaming/unary collapsed)
+//   Rust fn:          create_agent_completion_unary
+//   Go fn:            AgentCompletionsCreateAgentCompletionUnary (PascalCase, 1:1 with Rust)
 func TestHTTPCoverage(t *testing.T) {
 	repoRoot := RepoRoot()
 	rustSrc := filepath.Join(repoRoot, "objectiveai-rs", "src")
@@ -51,16 +51,15 @@ func TestHTTPCoverage(t *testing.T) {
 			goFnSet[m[1]] = true
 		}
 
-		// Extract Rust functions and collapse streaming/unary pairs
+		// Extract Rust functions (1:1 mapping, no collapsing)
 		rustFns := extractRustHTTPFunctions(entry.content)
-		rustBaseNames := dedup(mapSlice(rustFns, stripStreamingSuffix))
 
 		// Build expected Go function names
-		for _, rustBase := range rustBaseNames {
-			expectedGoName := buildGoHTTPName(entry.modulePath, rustBase)
+		for _, rustFn := range rustFns {
+			expectedGoName := buildGoHTTPName(entry.modulePath, rustFn)
 			if !goFnSet[expectedGoName] {
 				allErrors = append(allErrors,
-					entry.modulePath+": expected Go function "+expectedGoName+" (from Rust "+rustBase+")")
+					entry.modulePath+": expected Go function "+expectedGoName+" (from Rust "+rustFn+")")
 			}
 		}
 	}
@@ -112,14 +111,8 @@ func extractRustHTTPFunctions(content string) []string {
 	return names
 }
 
-func stripStreamingSuffix(name string) string {
-	name = strings.TrimSuffix(name, "_unary")
-	name = strings.TrimSuffix(name, "_streaming")
-	return name
-}
-
 // buildGoHTTPName builds a PascalCase Go function name from module path + Rust fn name.
-// e.g., modulePath="agent_completions", rustFn="create_agent_completion" → "AgentCompletionsCreateAgentCompletion"
+// e.g., modulePath="agent_completions", rustFn="create_agent_completion_unary" → "AgentCompletionsCreateAgentCompletionUnary"
 func buildGoHTTPName(modulePath, rustFnName string) string {
 	parts := strings.Split(modulePath, "_")
 	fnParts := strings.Split(rustFnName, "_")
@@ -136,22 +129,3 @@ func buildGoHTTPName(modulePath, rustFnName string) string {
 	return b.String()
 }
 
-func mapSlice(s []string, f func(string) string) []string {
-	result := make([]string, len(s))
-	for i, v := range s {
-		result[i] = f(v)
-	}
-	return result
-}
-
-func dedup(s []string) []string {
-	seen := make(map[string]bool)
-	var result []string
-	for _, v := range s {
-		if !seen[v] {
-			seen[v] = true
-			result = append(result, v)
-		}
-	}
-	return result
-}

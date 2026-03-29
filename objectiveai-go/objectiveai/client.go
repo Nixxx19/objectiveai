@@ -248,6 +248,21 @@ func DeleteUnary[T any](ctx context.Context, c *Client, path string, body any) (
 	return &result, nil
 }
 
+// DeleteNoContent sends a DELETE request that expects no response body.
+func DeleteNoContent(ctx context.Context, c *Client, path string, body any) error {
+	resp, err := c.doRequest(ctx, "DELETE", path, body, nil)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, _ := io.ReadAll(resp.Body)
+		return newResponseError(resp.StatusCode, respBody)
+	}
+	return nil
+}
+
 // Stream is a typed SSE event stream from the API.
 // Call Next() to read events, Close() when done.
 // The context passed to PostStreaming controls cancellation.
