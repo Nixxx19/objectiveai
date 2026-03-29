@@ -26,6 +26,19 @@ func (v *AgentCompletionsMessageMessageDeveloper) UnmarshalJSON(data []byte) err
 	v.Role = local.Role
 	return nil
 }
+
+func (v AgentCompletionsMessageMessageDeveloper) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.AgentCompletionsMessageDeveloperMessage)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Role); err == nil {
+		merged["role"] = raw
+	}
+	return json.Marshal(merged)
+}
 func (AgentCompletionsMessageMessageDeveloper) SchemaVariantTitle() string { return "Developer" }
 
 // A system message setting context or instructions.
@@ -46,6 +59,19 @@ func (v *AgentCompletionsMessageMessageSystem) UnmarshalJSON(data []byte) error 
 	}
 	v.Role = local.Role
 	return nil
+}
+
+func (v AgentCompletionsMessageMessageSystem) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.AgentCompletionsMessageSystemMessage)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Role); err == nil {
+		merged["role"] = raw
+	}
+	return json.Marshal(merged)
 }
 func (AgentCompletionsMessageMessageSystem) SchemaVariantTitle() string { return "System" }
 
@@ -68,6 +94,19 @@ func (v *AgentCompletionsMessageMessageUser) UnmarshalJSON(data []byte) error {
 	v.Role = local.Role
 	return nil
 }
+
+func (v AgentCompletionsMessageMessageUser) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.AgentCompletionsMessageUserMessage)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Role); err == nil {
+		merged["role"] = raw
+	}
+	return json.Marshal(merged)
+}
 func (AgentCompletionsMessageMessageUser) SchemaVariantTitle() string { return "User" }
 
 // An assistant message (model's previous response).
@@ -89,6 +128,19 @@ func (v *AgentCompletionsMessageMessageAssistant) UnmarshalJSON(data []byte) err
 	v.Role = local.Role
 	return nil
 }
+
+func (v AgentCompletionsMessageMessageAssistant) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.AgentCompletionsMessageAssistantMessage)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Role); err == nil {
+		merged["role"] = raw
+	}
+	return json.Marshal(merged)
+}
 func (AgentCompletionsMessageMessageAssistant) SchemaVariantTitle() string { return "Assistant" }
 
 // A tool message containing the result of a tool call.
@@ -109,6 +161,19 @@ func (v *AgentCompletionsMessageMessageTool) UnmarshalJSON(data []byte) error {
 	}
 	v.Role = local.Role
 	return nil
+}
+
+func (v AgentCompletionsMessageMessageTool) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.AgentCompletionsMessageToolMessage)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Role); err == nil {
+		merged["role"] = raw
+	}
+	return json.Marshal(merged)
 }
 func (AgentCompletionsMessageMessageTool) SchemaVariantTitle() string { return "Tool" }
 

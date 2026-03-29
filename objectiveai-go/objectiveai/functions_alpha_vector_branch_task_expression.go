@@ -25,6 +25,19 @@ func (v *FunctionsAlphaVectorBranchTaskExpressionScalarFunction) UnmarshalJSON(d
 	v.Type = local.Type
 	return nil
 }
+
+func (v FunctionsAlphaVectorBranchTaskExpressionScalarFunction) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsAlphaVectorScalarFunctionTaskExpression)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
+}
 func (FunctionsAlphaVectorBranchTaskExpressionScalarFunction) SchemaVariantTitle() string { return "ScalarFunction" }
 
 type FunctionsAlphaVectorBranchTaskExpressionVectorFunction struct {
@@ -44,6 +57,19 @@ func (v *FunctionsAlphaVectorBranchTaskExpressionVectorFunction) UnmarshalJSON(d
 	}
 	v.Type = local.Type
 	return nil
+}
+
+func (v FunctionsAlphaVectorBranchTaskExpressionVectorFunction) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsAlphaVectorVectorFunctionTaskExpression)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
 }
 func (FunctionsAlphaVectorBranchTaskExpressionVectorFunction) SchemaVariantTitle() string { return "VectorFunction" }
 
@@ -65,6 +91,19 @@ func (v *FunctionsAlphaVectorBranchTaskExpressionPlaceholderScalarFunction) Unma
 	v.Type = local.Type
 	return nil
 }
+
+func (v FunctionsAlphaVectorBranchTaskExpressionPlaceholderScalarFunction) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpression)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
+}
 func (FunctionsAlphaVectorBranchTaskExpressionPlaceholderScalarFunction) SchemaVariantTitle() string { return "PlaceholderScalarFunction" }
 
 type FunctionsAlphaVectorBranchTaskExpressionPlaceholderVectorFunction struct {
@@ -84,6 +123,19 @@ func (v *FunctionsAlphaVectorBranchTaskExpressionPlaceholderVectorFunction) Unma
 	}
 	v.Type = local.Type
 	return nil
+}
+
+func (v FunctionsAlphaVectorBranchTaskExpressionPlaceholderVectorFunction) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpression)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
 }
 func (FunctionsAlphaVectorBranchTaskExpressionPlaceholderVectorFunction) SchemaVariantTitle() string { return "PlaceholderVectorFunction" }
 

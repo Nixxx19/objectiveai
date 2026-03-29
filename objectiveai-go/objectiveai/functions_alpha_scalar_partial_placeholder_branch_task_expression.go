@@ -27,11 +27,26 @@ func (v *FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression) UnmarshalJS
 			return fmt.Errorf("FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression: missing required field %q", key)
 		}
 	}
-	type Alias FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression
-	var alias Alias
-	if err := json.Unmarshal(data, &alias); err != nil {
+	if err := json.Unmarshal(data, &v.FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpression); err != nil {
 		return err
 	}
-	*v = FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression(alias)
+	if rawField, ok := raw["type"]; ok {
+		if err := json.Unmarshal(rawField, &v.Type); err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+func (v FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpression)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
 }

@@ -32,11 +32,26 @@ func (v *FunctionsRemoteTasksProfile) UnmarshalJSON(data []byte) error {
 			return fmt.Errorf("FunctionsRemoteTasksProfile: missing required field %q", key)
 		}
 	}
-	type Alias FunctionsRemoteTasksProfile
-	var alias Alias
-	if err := json.Unmarshal(data, &alias); err != nil {
+	if err := json.Unmarshal(data, &v.FunctionsInlineTasksProfile); err != nil {
 		return err
 	}
-	*v = FunctionsRemoteTasksProfile(alias)
+	if rawField, ok := raw["description"]; ok {
+		if err := json.Unmarshal(rawField, &v.Description); err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+func (v FunctionsRemoteTasksProfile) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsInlineTasksProfile)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Description); err == nil {
+		merged["description"] = raw
+	}
+	return json.Marshal(merged)
 }

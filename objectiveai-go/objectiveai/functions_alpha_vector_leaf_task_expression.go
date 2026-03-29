@@ -27,11 +27,26 @@ func (v *FunctionsAlphaVectorLeafTaskExpression) UnmarshalJSON(data []byte) erro
 			return fmt.Errorf("FunctionsAlphaVectorLeafTaskExpression: missing required field %q", key)
 		}
 	}
-	type Alias FunctionsAlphaVectorLeafTaskExpression
-	var alias Alias
-	if err := json.Unmarshal(data, &alias); err != nil {
+	if err := json.Unmarshal(data, &v.FunctionsAlphaVectorVectorCompletionTaskExpression); err != nil {
 		return err
 	}
-	*v = FunctionsAlphaVectorLeafTaskExpression(alias)
+	if rawField, ok := raw["type"]; ok {
+		if err := json.Unmarshal(rawField, &v.Type); err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+func (v FunctionsAlphaVectorLeafTaskExpression) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsAlphaVectorVectorCompletionTaskExpression)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
 }

@@ -25,6 +25,19 @@ func (v *AgentCompletionsMessageMessageExpressionDeveloper) UnmarshalJSON(data [
 	v.Role = local.Role
 	return nil
 }
+
+func (v AgentCompletionsMessageMessageExpressionDeveloper) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.AgentCompletionsMessageDeveloperMessageExpression)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Role); err == nil {
+		merged["role"] = raw
+	}
+	return json.Marshal(merged)
+}
 func (AgentCompletionsMessageMessageExpressionDeveloper) SchemaVariantTitle() string { return "Developer" }
 
 type AgentCompletionsMessageMessageExpressionSystem struct {
@@ -44,6 +57,19 @@ func (v *AgentCompletionsMessageMessageExpressionSystem) UnmarshalJSON(data []by
 	}
 	v.Role = local.Role
 	return nil
+}
+
+func (v AgentCompletionsMessageMessageExpressionSystem) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.AgentCompletionsMessageSystemMessageExpression)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Role); err == nil {
+		merged["role"] = raw
+	}
+	return json.Marshal(merged)
 }
 func (AgentCompletionsMessageMessageExpressionSystem) SchemaVariantTitle() string { return "System" }
 
@@ -65,6 +91,19 @@ func (v *AgentCompletionsMessageMessageExpressionUser) UnmarshalJSON(data []byte
 	v.Role = local.Role
 	return nil
 }
+
+func (v AgentCompletionsMessageMessageExpressionUser) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.AgentCompletionsMessageUserMessageExpression)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Role); err == nil {
+		merged["role"] = raw
+	}
+	return json.Marshal(merged)
+}
 func (AgentCompletionsMessageMessageExpressionUser) SchemaVariantTitle() string { return "User" }
 
 type AgentCompletionsMessageMessageExpressionAssistant struct {
@@ -85,6 +124,19 @@ func (v *AgentCompletionsMessageMessageExpressionAssistant) UnmarshalJSON(data [
 	v.Role = local.Role
 	return nil
 }
+
+func (v AgentCompletionsMessageMessageExpressionAssistant) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.AgentCompletionsMessageAssistantMessageExpression)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Role); err == nil {
+		merged["role"] = raw
+	}
+	return json.Marshal(merged)
+}
 func (AgentCompletionsMessageMessageExpressionAssistant) SchemaVariantTitle() string { return "Assistant" }
 
 type AgentCompletionsMessageMessageExpressionTool struct {
@@ -104,6 +156,19 @@ func (v *AgentCompletionsMessageMessageExpressionTool) UnmarshalJSON(data []byte
 	}
 	v.Role = local.Role
 	return nil
+}
+
+func (v AgentCompletionsMessageMessageExpressionTool) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.AgentCompletionsMessageToolMessageExpression)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Role); err == nil {
+		merged["role"] = raw
+	}
+	return json.Marshal(merged)
 }
 func (AgentCompletionsMessageMessageExpressionTool) SchemaVariantTitle() string { return "Tool" }
 

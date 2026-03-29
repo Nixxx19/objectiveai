@@ -28,11 +28,34 @@ func (v *ConfigFavorite) UnmarshalJSON(data []byte) error {
 			return fmt.Errorf("ConfigFavorite: missing required field %q", key)
 		}
 	}
-	type Alias ConfigFavorite
-	var alias Alias
-	if err := json.Unmarshal(data, &alias); err != nil {
+	if err := json.Unmarshal(data, &v.RemotePathCommitOptional); err != nil {
 		return err
 	}
-	*v = ConfigFavorite(alias)
+	if rawField, ok := raw["name"]; ok {
+		if err := json.Unmarshal(rawField, &v.Name); err != nil {
+			return err
+		}
+	}
+	if rawField, ok := raw["note"]; ok {
+		if err := json.Unmarshal(rawField, &v.Note); err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+func (v ConfigFavorite) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.RemotePathCommitOptional)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Name); err == nil {
+		merged["name"] = raw
+	}
+	if raw, err := json.Marshal(v.Note); err == nil {
+		merged["note"] = raw
+	}
+	return json.Marshal(merged)
 }

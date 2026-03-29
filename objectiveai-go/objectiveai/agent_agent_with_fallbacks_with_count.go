@@ -29,11 +29,26 @@ func (v *AgentAgentWithFallbacksWithCount) UnmarshalJSON(data []byte) error {
 			return fmt.Errorf("AgentAgentWithFallbacksWithCount: missing required field %q", key)
 		}
 	}
-	type Alias AgentAgentWithFallbacksWithCount
-	var alias Alias
-	if err := json.Unmarshal(data, &alias); err != nil {
+	if err := json.Unmarshal(data, &v.AgentAgentWithFallbacks); err != nil {
 		return err
 	}
-	*v = AgentAgentWithFallbacksWithCount(alias)
+	if rawField, ok := raw["count"]; ok {
+		if err := json.Unmarshal(rawField, &v.Count); err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+func (v AgentAgentWithFallbacksWithCount) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.AgentAgentWithFallbacks)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Count); err == nil {
+		merged["count"] = raw
+	}
+	return json.Marshal(merged)
 }

@@ -28,11 +28,36 @@ func (v *FunctionsAlphaScalarScalarFunctionTaskExpression) UnmarshalJSON(data []
 			return fmt.Errorf("FunctionsAlphaScalarScalarFunctionTaskExpression: missing required field %q", key)
 		}
 	}
-	type Alias FunctionsAlphaScalarScalarFunctionTaskExpression
-	var alias Alias
-	if err := json.Unmarshal(data, &alias); err != nil {
+	if err := json.Unmarshal(data, &v.RemotePath); err != nil {
 		return err
 	}
-	*v = FunctionsAlphaScalarScalarFunctionTaskExpression(alias)
+	if rawField, ok := raw["input"]; ok {
+		if err := json.Unmarshal(rawField, &v.Input); err != nil {
+			return err
+		}
+	}
+	if rawField, ok := raw["skip"]; ok {
+		if err := json.Unmarshal(rawField, &v.Skip); err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+func (v FunctionsAlphaScalarScalarFunctionTaskExpression) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.RemotePath)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Input); err == nil {
+		merged["input"] = raw
+	}
+	if v.Skip != nil {
+		if raw, err := json.Marshal(v.Skip); err == nil {
+			merged["skip"] = raw
+		}
+	}
+	return json.Marshal(merged)
 }

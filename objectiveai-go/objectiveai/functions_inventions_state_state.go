@@ -25,6 +25,19 @@ func (v *FunctionsInventionsStateStateAlphaScalarBranch) UnmarshalJSON(data []by
 	v.Type = local.Type
 	return nil
 }
+
+func (v FunctionsInventionsStateStateAlphaScalarBranch) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsInventionsStateAlphaScalarBranchState)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
+}
 func (FunctionsInventionsStateStateAlphaScalarBranch) SchemaVariantTitle() string { return "AlphaScalarBranch" }
 
 type FunctionsInventionsStateStateAlphaScalarLeaf struct {
@@ -44,6 +57,19 @@ func (v *FunctionsInventionsStateStateAlphaScalarLeaf) UnmarshalJSON(data []byte
 	}
 	v.Type = local.Type
 	return nil
+}
+
+func (v FunctionsInventionsStateStateAlphaScalarLeaf) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsInventionsStateAlphaScalarLeafState)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
 }
 func (FunctionsInventionsStateStateAlphaScalarLeaf) SchemaVariantTitle() string { return "AlphaScalarLeaf" }
 
@@ -65,6 +91,19 @@ func (v *FunctionsInventionsStateStateAlphaVectorBranch) UnmarshalJSON(data []by
 	v.Type = local.Type
 	return nil
 }
+
+func (v FunctionsInventionsStateStateAlphaVectorBranch) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsInventionsStateAlphaVectorBranchState)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
+}
 func (FunctionsInventionsStateStateAlphaVectorBranch) SchemaVariantTitle() string { return "AlphaVectorBranch" }
 
 type FunctionsInventionsStateStateAlphaVectorLeaf struct {
@@ -84,6 +123,19 @@ func (v *FunctionsInventionsStateStateAlphaVectorLeaf) UnmarshalJSON(data []byte
 	}
 	v.Type = local.Type
 	return nil
+}
+
+func (v FunctionsInventionsStateStateAlphaVectorLeaf) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsInventionsStateAlphaVectorLeafState)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
 }
 func (FunctionsInventionsStateStateAlphaVectorLeaf) SchemaVariantTitle() string { return "AlphaVectorLeaf" }
 

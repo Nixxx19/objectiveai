@@ -154,11 +154,54 @@ func (v *FunctionsScalarFunctionTaskExpression) UnmarshalJSON(data []byte) error
 			return fmt.Errorf("FunctionsScalarFunctionTaskExpression: missing required field %q", key)
 		}
 	}
-	type Alias FunctionsScalarFunctionTaskExpression
-	var alias Alias
-	if err := json.Unmarshal(data, &alias); err != nil {
+	if err := json.Unmarshal(data, &v.RemotePath); err != nil {
 		return err
 	}
-	*v = FunctionsScalarFunctionTaskExpression(alias)
+	if rawField, ok := raw["input"]; ok {
+		if err := json.Unmarshal(rawField, &v.Input); err != nil {
+			return err
+		}
+	}
+	if rawField, ok := raw["map"]; ok {
+		if err := json.Unmarshal(rawField, &v.Map); err != nil {
+			return err
+		}
+	}
+	if rawField, ok := raw["output"]; ok {
+		if err := json.Unmarshal(rawField, &v.Output); err != nil {
+			return err
+		}
+	}
+	if rawField, ok := raw["skip"]; ok {
+		if err := json.Unmarshal(rawField, &v.Skip); err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+func (v FunctionsScalarFunctionTaskExpression) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.RemotePath)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Input); err == nil {
+		merged["input"] = raw
+	}
+	if v.Map != nil {
+		if raw, err := json.Marshal(v.Map); err == nil {
+			merged["map"] = raw
+		}
+	}
+	if raw, err := json.Marshal(v.Output); err == nil {
+		merged["output"] = raw
+	}
+	if v.Skip != nil {
+		if raw, err := json.Marshal(v.Skip); err == nil {
+			merged["skip"] = raw
+		}
+	}
+	return json.Marshal(merged)
 }

@@ -26,6 +26,19 @@ func (v *FunctionsTaskScalarFunction) UnmarshalJSON(data []byte) error {
 	v.Type = local.Type
 	return nil
 }
+
+func (v FunctionsTaskScalarFunction) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsScalarFunctionTask)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
+}
 func (FunctionsTaskScalarFunction) SchemaVariantTitle() string { return "ScalarFunction" }
 
 // Calls a vector function (produces a vector of scores).
@@ -46,6 +59,19 @@ func (v *FunctionsTaskVectorFunction) UnmarshalJSON(data []byte) error {
 	}
 	v.Type = local.Type
 	return nil
+}
+
+func (v FunctionsTaskVectorFunction) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsVectorFunctionTask)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
 }
 func (FunctionsTaskVectorFunction) SchemaVariantTitle() string { return "VectorFunction" }
 
@@ -68,6 +94,19 @@ func (v *FunctionsTaskVectorCompletion) UnmarshalJSON(data []byte) error {
 	v.Type = local.Type
 	return nil
 }
+
+func (v FunctionsTaskVectorCompletion) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsVectorCompletionTask)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
+}
 func (FunctionsTaskVectorCompletion) SchemaVariantTitle() string { return "VectorCompletion" }
 
 // Placeholder scalar function (always outputs 0.5).
@@ -89,6 +128,19 @@ func (v *FunctionsTaskPlaceholderScalarFunction) UnmarshalJSON(data []byte) erro
 	v.Type = local.Type
 	return nil
 }
+
+func (v FunctionsTaskPlaceholderScalarFunction) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsPlaceholderScalarFunctionTask)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
+}
 func (FunctionsTaskPlaceholderScalarFunction) SchemaVariantTitle() string { return "PlaceholderScalarFunction" }
 
 // Placeholder vector function (always outputs equalized vector).
@@ -109,6 +161,19 @@ func (v *FunctionsTaskPlaceholderVectorFunction) UnmarshalJSON(data []byte) erro
 	}
 	v.Type = local.Type
 	return nil
+}
+
+func (v FunctionsTaskPlaceholderVectorFunction) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsPlaceholderVectorFunctionTask)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
 }
 func (FunctionsTaskPlaceholderVectorFunction) SchemaVariantTitle() string { return "PlaceholderVectorFunction" }
 

@@ -30,11 +30,26 @@ func (v *AgentInlineAgentBaseWithFallbacksOrRemoteWithCount) UnmarshalJSON(data 
 			return fmt.Errorf("AgentInlineAgentBaseWithFallbacksOrRemoteWithCount: missing required field %q", key)
 		}
 	}
-	type Alias AgentInlineAgentBaseWithFallbacksOrRemoteWithCount
-	var alias Alias
-	if err := json.Unmarshal(data, &alias); err != nil {
+	if err := json.Unmarshal(data, &v.AgentInlineAgentBaseWithFallbacksOrRemote); err != nil {
 		return err
 	}
-	*v = AgentInlineAgentBaseWithFallbacksOrRemoteWithCount(alias)
+	if rawField, ok := raw["count"]; ok {
+		if err := json.Unmarshal(rawField, &v.Count); err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+func (v AgentInlineAgentBaseWithFallbacksOrRemoteWithCount) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.AgentInlineAgentBaseWithFallbacksOrRemote)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Count); err == nil {
+		merged["count"] = raw
+	}
+	return json.Marshal(merged)
 }

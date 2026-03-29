@@ -25,6 +25,19 @@ func (v *FunctionsInventionsStateParamsStateAlphaScalarBranch) UnmarshalJSON(dat
 	v.Type = local.Type
 	return nil
 }
+
+func (v FunctionsInventionsStateParamsStateAlphaScalarBranch) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsInventionsStateAlphaScalarBranchState)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
+}
 func (FunctionsInventionsStateParamsStateAlphaScalarBranch) SchemaVariantTitle() string { return "AlphaScalarBranch" }
 
 type FunctionsInventionsStateParamsStateAlphaScalarLeaf struct {
@@ -44,6 +57,19 @@ func (v *FunctionsInventionsStateParamsStateAlphaScalarLeaf) UnmarshalJSON(data 
 	}
 	v.Type = local.Type
 	return nil
+}
+
+func (v FunctionsInventionsStateParamsStateAlphaScalarLeaf) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsInventionsStateAlphaScalarLeafState)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
 }
 func (FunctionsInventionsStateParamsStateAlphaScalarLeaf) SchemaVariantTitle() string { return "AlphaScalarLeaf" }
 
@@ -65,6 +91,19 @@ func (v *FunctionsInventionsStateParamsStateAlphaVectorBranch) UnmarshalJSON(dat
 	v.Type = local.Type
 	return nil
 }
+
+func (v FunctionsInventionsStateParamsStateAlphaVectorBranch) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsInventionsStateAlphaVectorBranchState)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
+}
 func (FunctionsInventionsStateParamsStateAlphaVectorBranch) SchemaVariantTitle() string { return "AlphaVectorBranch" }
 
 type FunctionsInventionsStateParamsStateAlphaVectorLeaf struct {
@@ -84,6 +123,19 @@ func (v *FunctionsInventionsStateParamsStateAlphaVectorLeaf) UnmarshalJSON(data 
 	}
 	v.Type = local.Type
 	return nil
+}
+
+func (v FunctionsInventionsStateParamsStateAlphaVectorLeaf) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsInventionsStateAlphaVectorLeafState)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
 }
 func (FunctionsInventionsStateParamsStateAlphaVectorLeaf) SchemaVariantTitle() string { return "AlphaVectorLeaf" }
 
@@ -105,6 +157,19 @@ func (v *FunctionsInventionsStateParamsStateAlphaScalar) UnmarshalJSON(data []by
 	v.Type = local.Type
 	return nil
 }
+
+func (v FunctionsInventionsStateParamsStateAlphaScalar) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsInventionsStateAlphaScalarState)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
+}
 func (FunctionsInventionsStateParamsStateAlphaScalar) SchemaVariantTitle() string { return "AlphaScalar" }
 
 type FunctionsInventionsStateParamsStateAlphaVector struct {
@@ -124,6 +189,19 @@ func (v *FunctionsInventionsStateParamsStateAlphaVector) UnmarshalJSON(data []by
 	}
 	v.Type = local.Type
 	return nil
+}
+
+func (v FunctionsInventionsStateParamsStateAlphaVector) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.FunctionsInventionsStateAlphaVectorState)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
 }
 func (FunctionsInventionsStateParamsStateAlphaVector) SchemaVariantTitle() string { return "AlphaVector" }
 

@@ -1018,6 +1018,30 @@ func generateInlineVariantStruct(structName string, schema Schema, selfTitle str
 			b.WriteString(fmt.Sprintf("\tv.%s = local.%s\n", fn, fn))
 		}
 		b.WriteString("\treturn nil\n}\n")
+
+		// Custom MarshalJSON: same issue in reverse — the embedded type's
+		// MarshalJSON only outputs its own fields, losing local fields.
+		b.WriteString(fmt.Sprintf("\nfunc (v %s) MarshalJSON() ([]byte, error) {\n", structName))
+		b.WriteString(fmt.Sprintf("\tbase, err := json.Marshal(v.%s)\n", embedType))
+		b.WriteString("\tif err != nil {\n\t\treturn nil, err\n\t}\n")
+		b.WriteString("\tvar merged map[string]json.RawMessage\n")
+		b.WriteString("\tjson.Unmarshal(base, &merged)\n")
+		for _, pn := range sortedKeys(props) {
+			fn := goFieldName(pn)
+			nullable := false
+			if ps, ok := props[pn].(map[string]any); ok {
+				nullable = isNullable(ps)
+			}
+			if nullable {
+				b.WriteString(fmt.Sprintf("\tif v.%s != nil {\n", fn))
+				b.WriteString(fmt.Sprintf("\t\tif raw, err := json.Marshal(v.%s); err == nil {\n\t\t\tmerged[%q] = raw\n\t\t}\n", fn, pn))
+				b.WriteString("\t}\n")
+			} else {
+				b.WriteString(fmt.Sprintf("\tif raw, err := json.Marshal(v.%s); err == nil {\n\t\tmerged[%q] = raw\n\t}\n", fn, pn))
+			}
+		}
+		b.WriteString("\treturn json.Marshal(merged)\n")
+		b.WriteString("}\n")
 	}
 
 	return auxiliary.String() + b.String()
@@ -1096,14 +1120,55 @@ func generateStrictUnmarshal(typeName string, schema Schema, selfTitle string, a
 	b.WriteString(fmt.Sprintf("\t\t\treturn fmt.Errorf(\"%s: missing required field %%q\", key)\n", typeName))
 	b.WriteString("\t\t}\n\t}\n")
 
-	// Unmarshal via alias to avoid recursion
-	b.WriteString(fmt.Sprintf("\ttype Alias %s\n", typeName))
-	b.WriteString("\tvar alias Alias\n")
-	b.WriteString("\tif err := json.Unmarshal(data, &alias); err != nil {\n\t\treturn err\n\t}\n")
-	b.WriteString(fmt.Sprintf("\t*v = %s(alias)\n", typeName))
+	// Unmarshal — handle embedded types separately to avoid their UnmarshalJSON
+	if ref, ok := schema["$ref"].(string); ok {
+		embedType := toPascal(ref)
+		b.WriteString(fmt.Sprintf("\tif err := json.Unmarshal(data, &v.%s); err != nil {\n\t\treturn err\n\t}\n", embedType))
+		// Unmarshal local fields individually from raw
+		for _, pn := range sortedKeys(properties) {
+			fn := goFieldName(pn)
+			b.WriteString(fmt.Sprintf("\tif rawField, ok := raw[%q]; ok {\n", pn))
+			b.WriteString(fmt.Sprintf("\t\tif err := json.Unmarshal(rawField, &v.%s); err != nil {\n\t\t\treturn err\n\t\t}\n", fn))
+			b.WriteString("\t}\n")
+		}
+	} else {
+		b.WriteString(fmt.Sprintf("\ttype Alias %s\n", typeName))
+		b.WriteString("\tvar alias Alias\n")
+		b.WriteString("\tif err := json.Unmarshal(data, &alias); err != nil {\n\t\treturn err\n\t}\n")
+		b.WriteString(fmt.Sprintf("\t*v = %s(alias)\n", typeName))
+	}
 	b.WriteString("\treturn nil\n")
 	b.WriteString("}\n")
 
+	return b.String()
+}
+
+// generateEmbedMarshal generates MarshalJSON for structs that embed a type
+// with its own MarshalJSON. Merges the embedded type's JSON with local fields.
+func generateEmbedMarshal(typeName string, embedType string, properties map[string]any, selfTitle string, allTitles map[string]bool) string {
+	var b strings.Builder
+	b.WriteString(fmt.Sprintf("\nfunc (v %s) MarshalJSON() ([]byte, error) {\n", typeName))
+	b.WriteString(fmt.Sprintf("\tbase, err := json.Marshal(v.%s)\n", embedType))
+	b.WriteString("\tif err != nil {\n\t\treturn nil, err\n\t}\n")
+	b.WriteString("\tvar merged map[string]json.RawMessage\n")
+	b.WriteString("\tjson.Unmarshal(base, &merged)\n")
+	// Marshal each local field individually
+	for _, pn := range sortedKeys(properties) {
+		fn := goFieldName(pn)
+		nullable := false
+		if ps, ok := properties[pn].(map[string]any); ok {
+			nullable = isNullable(ps)
+		}
+		if nullable {
+			b.WriteString(fmt.Sprintf("\tif v.%s != nil {\n", fn))
+			b.WriteString(fmt.Sprintf("\t\tif raw, err := json.Marshal(v.%s); err == nil {\n\t\t\tmerged[%q] = raw\n\t\t}\n", fn, pn))
+			b.WriteString("\t}\n")
+		} else {
+			b.WriteString(fmt.Sprintf("\tif raw, err := json.Marshal(v.%s); err == nil {\n\t\tmerged[%q] = raw\n\t}\n", fn, pn))
+		}
+	}
+	b.WriteString("\treturn json.Marshal(merged)\n")
+	b.WriteString("}\n")
 	return b.String()
 }
 
@@ -1124,6 +1189,13 @@ func generateTypeCode(title string, schema Schema, allTitles map[string]bool) st
 		if unmarshal := generateStrictUnmarshal(typeName, schema, title, allTitles); unmarshal != "" {
 			b.WriteString("\n")
 			b.WriteString(unmarshal)
+		}
+		// Structs with $ref embedding need custom MarshalJSON to merge
+		// embedded and local fields (embedded MarshalJSON shadows local fields)
+		if ref, ok := schema["$ref"].(string); ok {
+			if properties, ok := schema["properties"].(map[string]any); ok && len(properties) > 0 {
+				b.WriteString(generateEmbedMarshal(typeName, toPascal(ref), properties, title, allTitles))
+			}
 		}
 		return b.String()
 	}
