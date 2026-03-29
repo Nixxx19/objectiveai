@@ -11,17 +11,13 @@ func (v *VectorCompletionsResponseStreamingVectorCompletionChunk) Push(other *Ve
 	// votes: extend
 	v.Votes = append(v.Votes, other.Votes...)
 
-	// scores: replace (if non-empty)
-	if len(other.Scores) > 0 {
-		v.Scores = make([]float64, len(other.Scores))
-		copy(v.Scores, other.Scores)
-	}
+	// scores: always replace
+	v.Scores = make([]float64, len(other.Scores))
+	copy(v.Scores, other.Scores)
 
-	// weights: replace (if non-empty)
-	if len(other.Weights) > 0 {
-		v.Weights = make([]float64, len(other.Weights))
-		copy(v.Weights, other.Weights)
-	}
+	// weights: always replace
+	v.Weights = make([]float64, len(other.Weights))
+	copy(v.Weights, other.Weights)
 
 	// usage: delegate
 	if v.Usage != nil && other.Usage != nil {
