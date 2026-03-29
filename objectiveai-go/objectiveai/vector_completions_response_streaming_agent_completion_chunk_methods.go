@@ -5,8 +5,8 @@ func (v *VectorCompletionsResponseStreamingAgentCompletionChunk) Push(other *Vec
 	// messages: merge by index
 	pushByIndex(&v.Messages, other.Messages,
 		func(m *AgentCompletionsResponseStreamingMessageChunk) uint64 {
-			if m.Variant1 != nil {
-				return m.Variant1.Index
+			if m.Assistant != nil {
+				return m.Assistant.Index
 			}
 			return 0
 		},

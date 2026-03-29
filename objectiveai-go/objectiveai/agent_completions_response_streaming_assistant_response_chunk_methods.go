@@ -7,13 +7,14 @@ func (v *AgentCompletionsResponseStreamingAssistantResponseChunk) Push(other *Ag
 
 	// tool_calls: merge by index
 	if v.ToolCalls != nil && other.ToolCalls != nil {
-		pushByIndex(&v.ToolCalls, other.ToolCalls,
+		pushByIndex(v.ToolCalls, *other.ToolCalls,
 			func(t *AgentCompletionsMessageAssistantToolCallDelta) uint64 { return t.Index },
 			func(a, b *AgentCompletionsMessageAssistantToolCallDelta) { a.Push(b) },
 		)
 	} else if other.ToolCalls != nil {
-		v.ToolCalls = make([]AgentCompletionsMessageAssistantToolCallDelta, len(other.ToolCalls))
-		copy(v.ToolCalls, other.ToolCalls)
+		cp := make([]AgentCompletionsMessageAssistantToolCallDelta, len(*other.ToolCalls))
+		copy(cp, *other.ToolCalls)
+		v.ToolCalls = &cp
 	}
 
 	// content: delegate

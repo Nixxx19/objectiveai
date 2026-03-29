@@ -5,11 +5,11 @@ func (v *FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk) P
 	// tasks: merge by index
 	pushByIndex(&v.Tasks, other.Tasks,
 		func(t *FunctionsExecutionsResponseStreamingTaskChunk) uint64 {
-			if t.Variant1 != nil {
-				return t.Variant1.Index
+			if t.FunctionExecution != nil {
+				return t.FunctionExecution.Index
 			}
-			if t.Variant2 != nil {
-				return t.Variant2.Index
+			if t.VectorCompletion != nil {
+				return t.VectorCompletion.Index
 			}
 			return 0
 		},
