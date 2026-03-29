@@ -2076,11 +2076,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0de51e6874e94e7bf76d726fc5d13ba782deca734ff60d5bb2fb2607c7406555"
 dependencies = [
  "cfg-if",
+ "js-sys",
  "libc",
  "r-efi 6.0.0",
  "rand_core 0.10.0",
  "wasip2",
  "wasip3",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -3981,6 +3983,7 @@ name = "objectiveai-cffi"
 version = "2.0.0"
 dependencies = [
  "arbitrary",
+ "getrandom 0.4.2",
  "objectiveai",
  "rand 0.10.0",
  "rust_decimal",
@@ -4080,9 +4083,9 @@ name = "objectiveai-wasm-js"
 version = "2.0.0"
 dependencies = [
  "arbitrary",
- "getrandom 0.3.4",
+ "getrandom 0.4.2",
  "objectiveai",
- "rand 0.9.2",
+ "rand 0.10.0",
  "rust_decimal",
  "serde-wasm-bindgen",
  "serde_json",
