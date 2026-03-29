@@ -5,7 +5,7 @@ from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
 from objectiveai.agent.completions.request.provider import Provider
 from objectiveai.agent.inline_agent_base_with_fallbacks_or_remote_commit_optional import InlineAgentBaseWithFallbacksOrRemoteCommitOptional
-from objectiveai.functions.inventions.state.params_state import ParamsState
+from objectiveai.functions.inventions.state.params_state_or_remote_commit_optional import ParamsStateOrRemoteCommitOptional
 from objectiveai.remote import Remote
 
 
@@ -18,6 +18,6 @@ class FunctionInventionCreateParams(BaseModel):
     provider: Optional[Provider] = None
     remote: Optional[Remote] = None
     seed: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = None
-    state: ParamsState
+    state: ParamsStateOrRemoteCommitOptional
     stream: Optional[bool] = None
 

@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { AgentCompletionsRequestProviderSchema } from "../../../agent/completions/request/provider";
 import { AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema } from "../../../agent/inlineAgentBaseWithFallbacksOrRemoteCommitOptional";
-import { FunctionsInventionsStateParamsStateSchema } from "../state/paramsState";
+import { FunctionsInventionsStateParamsStateOrRemoteCommitOptionalSchema } from "../state/paramsStateOrRemoteCommitOptional";
 import { RemoteSchema } from "../../../remote";
 
 export const FunctionsInventionsRequestFunctionInventionCreateParamsSchema = z.object({
@@ -13,7 +13,7 @@ export const FunctionsInventionsRequestFunctionInventionCreateParamsSchema = z.o
   provider: AgentCompletionsRequestProviderSchema.nullable().optional(),
   remote: RemoteSchema.nullable().optional(),
   seed: z.number().int().min(-9223372036854776000).max(9223372036854776000).nullable().optional(),
-  state: FunctionsInventionsStateParamsStateSchema,
+  state: FunctionsInventionsStateParamsStateOrRemoteCommitOptionalSchema,
   stream: z.boolean().nullable().optional(),
 }).meta({ title: "functions.inventions.request.FunctionInventionCreateParams" });
 export type FunctionsInventionsRequestFunctionInventionCreateParams = z.infer<typeof FunctionsInventionsRequestFunctionInventionCreateParamsSchema>;

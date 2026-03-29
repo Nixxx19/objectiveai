@@ -4,6 +4,6 @@ import { z } from "zod";
 import { RemoteSchema } from "../remote";
 
 export const ConfigFunctionsInventionsConfigSchema = z.object({
-  remote: RemoteSchema.nullable().optional(),
+  remote: RemoteSchema.default("filesystem"),
 }).meta({ title: "config.FunctionsInventionsConfig" });
 export type ConfigFunctionsInventionsConfig = z.infer<typeof ConfigFunctionsInventionsConfigSchema>;

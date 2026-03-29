@@ -3,17 +3,17 @@
 import { z } from "zod";
 import { AgentCompletionsRequestProviderSchema } from "../../../../agent/completions/request/provider";
 import { AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema } from "../../../../agent/inlineAgentBaseWithFallbacksOrRemoteCommitOptional";
-import { FunctionsInventionsStateParamsStateSchema } from "../../state/paramsState";
+import { FunctionsInventionsStateParamsStateOrRemoteCommitOptionalSchema } from "../../state/paramsStateOrRemoteCommitOptional";
 import { RemoteSchema } from "../../../../remote";
 
 export const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema = z.object({
   agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema,
   max_step_retries: z.number().int().min(0).max(4294967295).nullable().describe("Maximum number of retries per invention step.\nEach step is one agent completion (which itself may loop internally\nvia tool calls). If the step's validation still fails after the\nagent loop ends, the step is retried up to this many times.\nDefaults to 3 if not specified.").optional(),
-  name: z.string(),
+  overwrite: z.boolean().nullable().optional(),
   provider: AgentCompletionsRequestProviderSchema.nullable().optional(),
   remote: RemoteSchema,
   seed: z.number().int().min(-9223372036854776000).max(9223372036854776000).nullable().optional(),
-  state: FunctionsInventionsStateParamsStateSchema,
+  state: FunctionsInventionsStateParamsStateOrRemoteCommitOptionalSchema,
   stream: z.boolean().nullable().optional(),
 }).meta({ title: "functions.inventions.recursive.request.FunctionInventionRecursiveCreateParams" });
 export type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams = z.infer<typeof FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema>;

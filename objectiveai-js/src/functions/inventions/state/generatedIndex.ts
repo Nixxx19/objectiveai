@@ -6,6 +6,8 @@ export * from "./alphaScalarState";
 export * from "./alphaVectorBranchState";
 export * from "./alphaVectorLeafState";
 export * from "./alphaVectorState";
+export * from "./inputSchema";
 export * from "./params";
 export * from "./paramsState";
+export * from "./paramsStateOrRemoteCommitOptional";
 export * from "./state";

@@ -5,7 +5,7 @@ from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
 from objectiveai.agent.completions.request.provider import Provider
 from objectiveai.agent.inline_agent_base_with_fallbacks_or_remote_commit_optional import InlineAgentBaseWithFallbacksOrRemoteCommitOptional
-from objectiveai.functions.inventions.state.params_state import ParamsState
+from objectiveai.functions.inventions.state.params_state_or_remote_commit_optional import ParamsStateOrRemoteCommitOptional
 from objectiveai.remote import Remote
 
 
@@ -14,10 +14,10 @@ class FunctionInventionRecursiveCreateParams(BaseModel):
 
     agent: InlineAgentBaseWithFallbacksOrRemoteCommitOptional
     max_step_retries: Optional[Annotated[int, Field(ge=0, le=4294967295)]] = Field(None, description="Maximum number of retries per invention step.\nEach step is one agent completion (which itself may loop internally\nvia tool calls). If the step's validation still fails after the\nagent loop ends, the step is retried up to this many times.\nDefaults to 3 if not specified.")
-    name: str
+    overwrite: Optional[bool] = None
     provider: Optional[Provider] = None
     remote: Remote
     seed: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = None
-    state: ParamsState
+    state: ParamsStateOrRemoteCommitOptional
     stream: Optional[bool] = None
 

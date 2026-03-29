@@ -39,11 +39,19 @@ pub enum Commands {
         #[command(subcommand)]
         command: GetCommand,
     },
+    InputSchema {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
     Params {
         #[command(subcommand)]
         command: GetCommand,
     },
     ParamsState {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
+    ParamsStateOrRemoteCommitOptional {
         #[command(subcommand)]
         command: GetCommand,
     },
@@ -56,7 +64,7 @@ pub enum Commands {
 impl Commands {
     pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
         match self {
-            Commands::List => Ok(crate::Output::Schema("[\"AlphaScalarBranchState\",\"AlphaScalarLeafState\",\"AlphaScalarState\",\"AlphaVectorBranchState\",\"AlphaVectorLeafState\",\"AlphaVectorState\",\"Params\",\"ParamsState\",\"State\"]")),
+            Commands::List => Ok(crate::Output::Schema("[\"AlphaScalarBranchState\",\"AlphaScalarLeafState\",\"AlphaScalarState\",\"AlphaVectorBranchState\",\"AlphaVectorLeafState\",\"AlphaVectorState\",\"InputSchema\",\"Params\",\"ParamsState\",\"ParamsStateOrRemoteCommitOptional\",\"State\"]")),
             Commands::AlphaScalarBranchState { .. } => Ok(crate::Output::Schema(
                 include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.AlphaScalarBranchState.json"),
             )),
@@ -75,11 +83,17 @@ impl Commands {
             Commands::AlphaVectorState { .. } => Ok(crate::Output::Schema(
                 include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.AlphaVectorState.json"),
             )),
+            Commands::InputSchema { .. } => Ok(crate::Output::Schema(
+                include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.InputSchema.json"),
+            )),
             Commands::Params { .. } => Ok(crate::Output::Schema(
                 include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.Params.json"),
             )),
             Commands::ParamsState { .. } => Ok(crate::Output::Schema(
                 include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.ParamsState.json"),
+            )),
+            Commands::ParamsStateOrRemoteCommitOptional { .. } => Ok(crate::Output::Schema(
+                include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.ParamsStateOrRemoteCommitOptional.json"),
             )),
             Commands::State { .. } => Ok(crate::Output::Schema(
                 include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.State.json"),
