@@ -8,8 +8,8 @@ import (
 )
 
 type FunctionsExecutionsResponseUnaryObject struct {
-	ScalarFunctionExecution *string `validate:"oneof=scalar.function.execution"`
-	VectorFunctionExecution *string `validate:"oneof=vector.function.execution"`
+	ScalarFunctionExecution *string `validate:"omitempty,oneof=scalar.function.execution"`
+	VectorFunctionExecution *string `validate:"omitempty,oneof=vector.function.execution"`
 }
 
 func (v FunctionsExecutionsResponseUnaryObject) MarshalJSON() ([]byte, error) {

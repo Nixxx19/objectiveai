@@ -22,11 +22,11 @@ func (AgentCompletionsMessageImageUrlDetailHigh) SchemaVariantTitle() string { r
 // Detail level for image processing.
 type AgentCompletionsMessageImageUrlDetail struct {
 	// Let the model decide the detail level.
-	Auto *AgentCompletionsMessageImageUrlDetailAuto `validate:"oneof=auto"`
+	Auto *AgentCompletionsMessageImageUrlDetailAuto `validate:"omitempty,oneof=auto"`
 	// Low detail mode (faster, less tokens).
-	Low *AgentCompletionsMessageImageUrlDetailLow `validate:"oneof=low"`
+	Low *AgentCompletionsMessageImageUrlDetailLow `validate:"omitempty,oneof=low"`
 	// High detail mode (more accurate, more tokens).
-	High *AgentCompletionsMessageImageUrlDetailHigh `validate:"oneof=high"`
+	High *AgentCompletionsMessageImageUrlDetailHigh `validate:"omitempty,oneof=high"`
 }
 
 func (v AgentCompletionsMessageImageUrlDetail) MarshalJSON() ([]byte, error) {

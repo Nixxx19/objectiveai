@@ -26,13 +26,13 @@ func (AgentUpstreamMock) SchemaVariantTitle() string { return "Mock" }
 // Supported agent upstreams.
 type AgentUpstream struct {
 	// Unknown Upstream.
-	Unknown *AgentUpstreamUnknown `validate:"oneof=unknown"`
+	Unknown *AgentUpstreamUnknown `validate:"omitempty,oneof=unknown"`
 	// OpenRouter Upstream.
-	Openrouter *AgentUpstreamOpenrouter `validate:"oneof=openrouter"`
+	Openrouter *AgentUpstreamOpenrouter `validate:"omitempty,oneof=openrouter"`
 	// Claude Agent SDK Upstream.
-	ClaudeAgentSdk *AgentUpstreamClaudeAgentSdk `validate:"oneof=claude_agent_sdk"`
+	ClaudeAgentSdk *AgentUpstreamClaudeAgentSdk `validate:"omitempty,oneof=claude_agent_sdk"`
 	// Mock Upstream.
-	Mock *AgentUpstreamMock `validate:"oneof=mock"`
+	Mock *AgentUpstreamMock `validate:"omitempty,oneof=mock"`
 }
 
 func (v AgentUpstream) MarshalJSON() ([]byte, error) {

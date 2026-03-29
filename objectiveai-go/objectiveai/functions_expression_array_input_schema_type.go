@@ -7,7 +7,7 @@ import (
 )
 
 type FunctionsExpressionArrayInputSchemaType struct {
-	Array string `validate:"oneof=array"`
+	Array string `validate:"omitempty,oneof=array"`
 }
 
 func (v FunctionsExpressionArrayInputSchemaType) MarshalJSON() ([]byte, error) {

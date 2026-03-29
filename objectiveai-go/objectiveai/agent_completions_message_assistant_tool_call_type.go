@@ -8,7 +8,7 @@ import (
 
 // A function call.
 type AgentCompletionsMessageAssistantToolCallType struct {
-	Function string `validate:"oneof=function"`
+	Function string `validate:"omitempty,oneof=function"`
 }
 
 func (v AgentCompletionsMessageAssistantToolCallType) MarshalJSON() ([]byte, error) {

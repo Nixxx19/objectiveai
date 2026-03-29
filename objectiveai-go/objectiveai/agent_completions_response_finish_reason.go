@@ -30,15 +30,15 @@ func (AgentCompletionsResponseFinishReasonError) SchemaVariantTitle() string { r
 // The reason the model stopped generating.
 type AgentCompletionsResponseFinishReason struct {
 	// The model reached a natural stop point or stop sequence.
-	Stop *AgentCompletionsResponseFinishReasonStop `validate:"oneof=stop"`
+	Stop *AgentCompletionsResponseFinishReasonStop `validate:"omitempty,oneof=stop"`
 	// The model reached the maximum token limit.
-	Length *AgentCompletionsResponseFinishReasonLength `validate:"oneof=length"`
+	Length *AgentCompletionsResponseFinishReasonLength `validate:"omitempty,oneof=length"`
 	// The model decided to call one or more tools.
-	ToolCalls *AgentCompletionsResponseFinishReasonToolCalls `validate:"oneof=tool_calls"`
+	ToolCalls *AgentCompletionsResponseFinishReasonToolCalls `validate:"omitempty,oneof=tool_calls"`
 	// The response was filtered due to content policy.
-	ContentFilter *AgentCompletionsResponseFinishReasonContentFilter `validate:"oneof=content_filter"`
+	ContentFilter *AgentCompletionsResponseFinishReasonContentFilter `validate:"omitempty,oneof=content_filter"`
 	// An error occurred during generation.
-	Error *AgentCompletionsResponseFinishReasonError `validate:"oneof=error"`
+	Error *AgentCompletionsResponseFinishReasonError `validate:"omitempty,oneof=error"`
 }
 
 func (v AgentCompletionsResponseFinishReason) MarshalJSON() ([]byte, error) {

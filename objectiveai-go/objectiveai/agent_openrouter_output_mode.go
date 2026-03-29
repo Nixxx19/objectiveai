@@ -30,15 +30,15 @@ type AgentOpenrouterOutputMode struct {
 	// The model is instructed via the prompt to output a specific key.
 	//
 	// This is the default and most widely supported mode.
-	Instruction *AgentOpenrouterOutputModeInstruction `validate:"oneof=instruction"`
+	Instruction *AgentOpenrouterOutputModeInstruction `validate:"omitempty,oneof=instruction"`
 	// A JSON schema response format is used with an enum of possible keys.
 	//
 	// Requires model support for structured JSON output.
-	JsonSchema *AgentOpenrouterOutputModeJsonSchema `validate:"oneof=json_schema"`
+	JsonSchema *AgentOpenrouterOutputModeJsonSchema `validate:"omitempty,oneof=json_schema"`
 	// A forced tool call with an argument schema containing possible keys.
 	//
 	// Requires model support for tool/function calling.
-	ToolCall *AgentOpenrouterOutputModeToolCall `validate:"oneof=tool_call"`
+	ToolCall *AgentOpenrouterOutputModeToolCall `validate:"omitempty,oneof=tool_call"`
 }
 
 func (v AgentOpenrouterOutputMode) MarshalJSON() ([]byte, error) {

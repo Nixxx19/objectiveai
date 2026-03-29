@@ -8,8 +8,8 @@ import (
 )
 
 type ConfigViewerMode struct {
-	Remote *string `validate:"oneof=remote"`
-	Local *string `validate:"oneof=local"`
+	Remote *string `validate:"omitempty,oneof=remote"`
+	Local *string `validate:"omitempty,oneof=local"`
 }
 
 func (v ConfigViewerMode) MarshalJSON() ([]byte, error) {

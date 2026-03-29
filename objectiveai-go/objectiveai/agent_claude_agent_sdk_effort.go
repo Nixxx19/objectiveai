@@ -28,13 +28,13 @@ func (AgentClaudeAgentSdkEffortMax) SchemaVariantTitle() string { return "Max" }
 // This setting hints to the model how detailed its responses should be.
 type AgentClaudeAgentSdkEffort struct {
 	// Minimal output, concise responses.
-	Low *AgentClaudeAgentSdkEffortLow `validate:"oneof=low"`
+	Low *AgentClaudeAgentSdkEffortLow `validate:"omitempty,oneof=low"`
 	// Balanced output (default, normalized away during preparation).
-	Medium *AgentClaudeAgentSdkEffortMedium `validate:"oneof=medium"`
+	Medium *AgentClaudeAgentSdkEffortMedium `validate:"omitempty,oneof=medium"`
 	// Detailed output with thorough explanations.
-	High *AgentClaudeAgentSdkEffortHigh `validate:"oneof=high"`
+	High *AgentClaudeAgentSdkEffortHigh `validate:"omitempty,oneof=high"`
 	// Maximum effort, most detailed output possible.
-	Max *AgentClaudeAgentSdkEffortMax `validate:"oneof=max"`
+	Max *AgentClaudeAgentSdkEffortMax `validate:"omitempty,oneof=max"`
 }
 
 func (v AgentClaudeAgentSdkEffort) MarshalJSON() ([]byte, error) {

@@ -8,8 +8,8 @@ import (
 )
 
 type FunctionsInventionsResponseStreamingObject struct {
-	AlphaScalarFunctionInventionChunk *string `validate:"oneof=alpha.scalar.function.invention.chunk"`
-	AlphaVectorFunctionInventionChunk *string `validate:"oneof=alpha.vector.function.invention.chunk"`
+	AlphaScalarFunctionInventionChunk *string `validate:"omitempty,oneof=alpha.scalar.function.invention.chunk"`
+	AlphaVectorFunctionInventionChunk *string `validate:"omitempty,oneof=alpha.vector.function.invention.chunk"`
 }
 
 func (v FunctionsInventionsResponseStreamingObject) MarshalJSON() ([]byte, error) {

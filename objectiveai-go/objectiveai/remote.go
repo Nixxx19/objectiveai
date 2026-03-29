@@ -22,11 +22,11 @@ func (RemoteMock) SchemaVariantTitle() string { return "Mock" }
 // The remote source where a function, profile, or agent is hosted.
 type Remote struct {
 	// GitHub repository.
-	Github *RemoteGithub `validate:"oneof=github"`
+	Github *RemoteGithub `validate:"omitempty,oneof=github"`
 	// Local filesystem.
-	Filesystem *RemoteFilesystem `validate:"oneof=filesystem"`
+	Filesystem *RemoteFilesystem `validate:"omitempty,oneof=filesystem"`
 	// Mock (for testing).
-	Mock *RemoteMock `validate:"oneof=mock"`
+	Mock *RemoteMock `validate:"omitempty,oneof=mock"`
 }
 
 func (v Remote) MarshalJSON() ([]byte, error) {

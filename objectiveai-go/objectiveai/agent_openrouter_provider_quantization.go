@@ -49,23 +49,23 @@ func (AgentOpenrouterProviderQuantizationUnknown) SchemaVariantTitle() string { 
 // increase inference speed, potentially at the cost of output quality.
 type AgentOpenrouterProviderQuantization struct {
 	// 4-bit integer quantization.
-	Int4 *AgentOpenrouterProviderQuantizationInt4 `validate:"oneof=int4"`
+	Int4 *AgentOpenrouterProviderQuantizationInt4 `validate:"omitempty,oneof=int4"`
 	// 8-bit integer quantization.
-	Int8 *AgentOpenrouterProviderQuantizationInt8 `validate:"oneof=int8"`
+	Int8 *AgentOpenrouterProviderQuantizationInt8 `validate:"omitempty,oneof=int8"`
 	// 4-bit floating point quantization.
-	Fp4 *AgentOpenrouterProviderQuantizationFp4 `validate:"oneof=fp4"`
+	Fp4 *AgentOpenrouterProviderQuantizationFp4 `validate:"omitempty,oneof=fp4"`
 	// 6-bit floating point quantization.
-	Fp6 *AgentOpenrouterProviderQuantizationFp6 `validate:"oneof=fp6"`
+	Fp6 *AgentOpenrouterProviderQuantizationFp6 `validate:"omitempty,oneof=fp6"`
 	// 8-bit floating point quantization.
-	Fp8 *AgentOpenrouterProviderQuantizationFp8 `validate:"oneof=fp8"`
+	Fp8 *AgentOpenrouterProviderQuantizationFp8 `validate:"omitempty,oneof=fp8"`
 	// 16-bit floating point (half precision).
-	Fp16 *AgentOpenrouterProviderQuantizationFp16 `validate:"oneof=fp16"`
+	Fp16 *AgentOpenrouterProviderQuantizationFp16 `validate:"omitempty,oneof=fp16"`
 	// 16-bit brain floating point.
-	Bf16 *AgentOpenrouterProviderQuantizationBf16 `validate:"oneof=bf16"`
+	Bf16 *AgentOpenrouterProviderQuantizationBf16 `validate:"omitempty,oneof=bf16"`
 	// 32-bit floating point (full precision).
-	Fp32 *AgentOpenrouterProviderQuantizationFp32 `validate:"oneof=fp32"`
+	Fp32 *AgentOpenrouterProviderQuantizationFp32 `validate:"omitempty,oneof=fp32"`
 	// Unknown quantization level.
-	Unknown *AgentOpenrouterProviderQuantizationUnknown `validate:"oneof=unknown"`
+	Unknown *AgentOpenrouterProviderQuantizationUnknown `validate:"omitempty,oneof=unknown"`
 }
 
 func (v AgentOpenrouterProviderQuantization) MarshalJSON() ([]byte, error) {

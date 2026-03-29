@@ -36,17 +36,17 @@ func (AgentOpenrouterReasoningEffortXhigh) SchemaVariantTitle() string { return 
 // Only supported by some models.
 type AgentOpenrouterReasoningEffort struct {
 	// No reasoning.
-	None *AgentOpenrouterReasoningEffortNone `validate:"oneof=none"`
+	None *AgentOpenrouterReasoningEffortNone `validate:"omitempty,oneof=none"`
 	// Minimal reasoning effort.
-	Minimal *AgentOpenrouterReasoningEffortMinimal `validate:"oneof=minimal"`
+	Minimal *AgentOpenrouterReasoningEffortMinimal `validate:"omitempty,oneof=minimal"`
 	// Low reasoning effort.
-	Low *AgentOpenrouterReasoningEffortLow `validate:"oneof=low"`
+	Low *AgentOpenrouterReasoningEffortLow `validate:"omitempty,oneof=low"`
 	// Medium reasoning effort.
-	Medium *AgentOpenrouterReasoningEffortMedium `validate:"oneof=medium"`
+	Medium *AgentOpenrouterReasoningEffortMedium `validate:"omitempty,oneof=medium"`
 	// High reasoning effort.
-	High *AgentOpenrouterReasoningEffortHigh `validate:"oneof=high"`
+	High *AgentOpenrouterReasoningEffortHigh `validate:"omitempty,oneof=high"`
 	// Maximum reasoning effort.
-	Xhigh *AgentOpenrouterReasoningEffortXhigh `validate:"oneof=xhigh"`
+	Xhigh *AgentOpenrouterReasoningEffortXhigh `validate:"omitempty,oneof=xhigh"`
 }
 
 func (v AgentOpenrouterReasoningEffort) MarshalJSON() ([]byte, error) {

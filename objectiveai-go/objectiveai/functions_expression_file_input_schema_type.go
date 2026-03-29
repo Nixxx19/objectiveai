@@ -7,7 +7,7 @@ import (
 )
 
 type FunctionsExpressionFileInputSchemaType struct {
-	File string `validate:"oneof=file"`
+	File string `validate:"omitempty,oneof=file"`
 }
 
 func (v FunctionsExpressionFileInputSchemaType) MarshalJSON() ([]byte, error) {

@@ -8,7 +8,7 @@ import (
 
 // OpenRouter upstream marker.
 type AgentOpenrouterUpstream struct {
-	Openrouter string `validate:"oneof=openrouter"`
+	Openrouter string `validate:"omitempty,oneof=openrouter"`
 }
 
 func (v AgentOpenrouterUpstream) MarshalJSON() ([]byte, error) {

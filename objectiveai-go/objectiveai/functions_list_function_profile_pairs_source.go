@@ -8,7 +8,7 @@ import (
 
 // Source filter for listing function-profile pairs.
 type FunctionsListFunctionProfilePairsSource struct {
-	Objectiveai string `validate:"oneof=objectiveai"`
+	Objectiveai string `validate:"omitempty,oneof=objectiveai"`
 }
 
 func (v FunctionsListFunctionProfilePairsSource) MarshalJSON() ([]byte, error) {

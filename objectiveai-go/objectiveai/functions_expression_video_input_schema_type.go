@@ -7,7 +7,7 @@ import (
 )
 
 type FunctionsExpressionVideoInputSchemaType struct {
-	Video string `validate:"oneof=video"`
+	Video string `validate:"omitempty,oneof=video"`
 }
 
 func (v FunctionsExpressionVideoInputSchemaType) MarshalJSON() ([]byte, error) {

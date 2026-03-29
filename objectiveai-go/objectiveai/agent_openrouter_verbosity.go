@@ -29,13 +29,13 @@ func (AgentOpenrouterVerbosityMax) SchemaVariantTitle() string { return "Max" }
 // Not all models support this parameter.
 type AgentOpenrouterVerbosity struct {
 	// Minimal output, concise responses.
-	Low *AgentOpenrouterVerbosityLow `validate:"oneof=low"`
+	Low *AgentOpenrouterVerbosityLow `validate:"omitempty,oneof=low"`
 	// Balanced output (default, normalized away during preparation).
-	Medium *AgentOpenrouterVerbosityMedium `validate:"oneof=medium"`
+	Medium *AgentOpenrouterVerbosityMedium `validate:"omitempty,oneof=medium"`
 	// Detailed output with thorough explanations.
-	High *AgentOpenrouterVerbosityHigh `validate:"oneof=high"`
+	High *AgentOpenrouterVerbosityHigh `validate:"omitempty,oneof=high"`
 	// Maximum verbosity, most detailed output possible.
-	Max *AgentOpenrouterVerbosityMax `validate:"oneof=max"`
+	Max *AgentOpenrouterVerbosityMax `validate:"omitempty,oneof=max"`
 }
 
 func (v AgentOpenrouterVerbosity) MarshalJSON() ([]byte, error) {

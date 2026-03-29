@@ -24,11 +24,11 @@ func (AgentOpenrouterReasoningSummaryVerbosityDetailed) SchemaVariantTitle() str
 // Only supported by some models.
 type AgentOpenrouterReasoningSummaryVerbosity struct {
 	// Let the model decide (default, normalized away).
-	Auto *AgentOpenrouterReasoningSummaryVerbosityAuto `validate:"oneof=auto"`
+	Auto *AgentOpenrouterReasoningSummaryVerbosityAuto `validate:"omitempty,oneof=auto"`
 	// Brief summary of reasoning.
-	Concise *AgentOpenrouterReasoningSummaryVerbosityConcise `validate:"oneof=concise"`
+	Concise *AgentOpenrouterReasoningSummaryVerbosityConcise `validate:"omitempty,oneof=concise"`
 	// Thorough summary of reasoning.
-	Detailed *AgentOpenrouterReasoningSummaryVerbosityDetailed `validate:"oneof=detailed"`
+	Detailed *AgentOpenrouterReasoningSummaryVerbosityDetailed `validate:"omitempty,oneof=detailed"`
 }
 
 func (v AgentOpenrouterReasoningSummaryVerbosity) MarshalJSON() ([]byte, error) {

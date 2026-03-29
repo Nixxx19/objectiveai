@@ -7,7 +7,7 @@ import (
 )
 
 type FunctionsProfilesComputationsResponseUnaryObject struct {
-	FunctionProfileComputation string `validate:"oneof=function.profile.computation"`
+	FunctionProfileComputation string `validate:"omitempty,oneof=function.profile.computation"`
 }
 
 func (v FunctionsProfilesComputationsResponseUnaryObject) MarshalJSON() ([]byte, error) {

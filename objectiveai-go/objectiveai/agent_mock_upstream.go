@@ -8,7 +8,7 @@ import (
 
 // Mock upstream marker.
 type AgentMockUpstream struct {
-	Mock string `validate:"oneof=mock"`
+	Mock string `validate:"omitempty,oneof=mock"`
 }
 
 func (v AgentMockUpstream) MarshalJSON() ([]byte, error) {

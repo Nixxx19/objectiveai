@@ -10,7 +10,7 @@ import (
 //
 // This is the default and most widely supported mode.
 type AgentClaudeAgentSdkOutputMode struct {
-	Instruction string `validate:"oneof=instruction"`
+	Instruction string `validate:"omitempty,oneof=instruction"`
 }
 
 func (v AgentClaudeAgentSdkOutputMode) MarshalJSON() ([]byte, error) {

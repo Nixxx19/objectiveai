@@ -8,8 +8,8 @@ import (
 )
 
 type FunctionsInventionsRecursiveResponseStreamingObject struct {
-	AlphaScalarFunctionInventionRecursiveChunk *string `validate:"oneof=alpha.scalar.function.invention.recursive.chunk"`
-	AlphaVectorFunctionInventionRecursiveChunk *string `validate:"oneof=alpha.vector.function.invention.recursive.chunk"`
+	AlphaScalarFunctionInventionRecursiveChunk *string `validate:"omitempty,oneof=alpha.scalar.function.invention.recursive.chunk"`
+	AlphaVectorFunctionInventionRecursiveChunk *string `validate:"omitempty,oneof=alpha.vector.function.invention.recursive.chunk"`
 }
 
 func (v FunctionsInventionsRecursiveResponseStreamingObject) MarshalJSON() ([]byte, error) {

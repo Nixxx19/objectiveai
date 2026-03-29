@@ -7,7 +7,7 @@ import (
 )
 
 type FunctionsExpressionBooleanInputSchemaType struct {
-	Boolean string `validate:"oneof=boolean"`
+	Boolean string `validate:"omitempty,oneof=boolean"`
 }
 
 func (v FunctionsExpressionBooleanInputSchemaType) MarshalJSON() ([]byte, error) {

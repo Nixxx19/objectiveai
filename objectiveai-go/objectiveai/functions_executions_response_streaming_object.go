@@ -8,8 +8,8 @@ import (
 )
 
 type FunctionsExecutionsResponseStreamingObject struct {
-	ScalarFunctionExecutionChunk *string `validate:"oneof=scalar.function.execution.chunk"`
-	VectorFunctionExecutionChunk *string `validate:"oneof=vector.function.execution.chunk"`
+	ScalarFunctionExecutionChunk *string `validate:"omitempty,oneof=scalar.function.execution.chunk"`
+	VectorFunctionExecutionChunk *string `validate:"omitempty,oneof=vector.function.execution.chunk"`
 }
 
 func (v FunctionsExecutionsResponseStreamingObject) MarshalJSON() ([]byte, error) {

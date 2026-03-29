@@ -8,8 +8,8 @@ import (
 )
 
 type FunctionsInventionsRecursiveResponseUnaryObject struct {
-	AlphaScalarFunctionInventionRecursive *string `validate:"oneof=alpha.scalar.function.invention.recursive"`
-	AlphaVectorFunctionInventionRecursive *string `validate:"oneof=alpha.vector.function.invention.recursive"`
+	AlphaScalarFunctionInventionRecursive *string `validate:"omitempty,oneof=alpha.scalar.function.invention.recursive"`
+	AlphaVectorFunctionInventionRecursive *string `validate:"omitempty,oneof=alpha.vector.function.invention.recursive"`
 }
 
 func (v FunctionsInventionsRecursiveResponseUnaryObject) MarshalJSON() ([]byte, error) {

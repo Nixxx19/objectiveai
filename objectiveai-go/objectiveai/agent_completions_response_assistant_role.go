@@ -8,7 +8,7 @@ import (
 
 // The assistant role.
 type AgentCompletionsResponseAssistantRole struct {
-	Assistant string `validate:"oneof=assistant"`
+	Assistant string `validate:"omitempty,oneof=assistant"`
 }
 
 func (v AgentCompletionsResponseAssistantRole) MarshalJSON() ([]byte, error) {

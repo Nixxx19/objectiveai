@@ -7,7 +7,7 @@ import (
 )
 
 type FunctionsProfilesComputationsResponseStreamingObject struct {
-	FunctionProfileComputationChunk string `validate:"oneof=function.profile.computation.chunk"`
+	FunctionProfileComputationChunk string `validate:"omitempty,oneof=function.profile.computation.chunk"`
 }
 
 func (v FunctionsProfilesComputationsResponseStreamingObject) MarshalJSON() ([]byte, error) {

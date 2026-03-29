@@ -7,7 +7,7 @@ import (
 )
 
 type FunctionsExpressionImageInputSchemaType struct {
-	Image string `validate:"oneof=image"`
+	Image string `validate:"omitempty,oneof=image"`
 }
 
 func (v FunctionsExpressionImageInputSchemaType) MarshalJSON() ([]byte, error) {

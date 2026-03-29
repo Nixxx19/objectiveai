@@ -8,7 +8,7 @@ import (
 
 // A streaming vector completion chunk.
 type VectorCompletionsResponseStreamingObject struct {
-	VectorCompletionChunk string `validate:"oneof=vector.completion.chunk"`
+	VectorCompletionChunk string `validate:"omitempty,oneof=vector.completion.chunk"`
 }
 
 func (v VectorCompletionsResponseStreamingObject) MarshalJSON() ([]byte, error) {

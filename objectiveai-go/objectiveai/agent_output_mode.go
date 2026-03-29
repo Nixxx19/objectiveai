@@ -30,15 +30,15 @@ type AgentOutputMode struct {
 	// The model is instructed via the prompt to output a specific key.
 	//
 	// This is the default and most widely supported mode.
-	Instruction *AgentOutputModeInstruction `validate:"oneof=instruction"`
+	Instruction *AgentOutputModeInstruction `validate:"omitempty,oneof=instruction"`
 	// A JSON schema response format is used with an enum of possible keys.
 	//
 	// Requires model support for structured JSON output.
-	JsonSchema *AgentOutputModeJsonSchema `validate:"oneof=json_schema"`
+	JsonSchema *AgentOutputModeJsonSchema `validate:"omitempty,oneof=json_schema"`
 	// A forced tool call with an argument schema containing possible keys.
 	//
 	// Requires model support for tool/function calling.
-	ToolCall *AgentOutputModeToolCall `validate:"oneof=tool_call"`
+	ToolCall *AgentOutputModeToolCall `validate:"omitempty,oneof=tool_call"`
 }
 
 func (v AgentOutputMode) MarshalJSON() ([]byte, error) {

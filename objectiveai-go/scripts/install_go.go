@@ -800,13 +800,16 @@ func generateAnyOfStruct(typeName string, anyOf []any, selfTitle string, schema 
 		variantIsPointer = append(variantIsPointer, strings.HasPrefix(fieldType, "*"))
 		variantValidateTags = append(variantValidateTags, buildValidateValue(m))
 
-		// Build variant field tags — add nullable if the variant schema was nullable
+		// Build variant field tags — add nullable, and prepend omitempty to validate
+		// (nil variant fields must pass validation)
 		var variantTags []string
 		if isNullable(m) {
 			variantTags = append(variantTags, `nullable:"true"`)
 		}
 		if constraintTags := buildStructTags("", m, selfTitle, allTitles); constraintTags != "" {
 			inner := strings.TrimPrefix(strings.TrimSuffix(constraintTags, "`"), "`")
+			// Prepend omitempty to validate tag so nil fields are skipped
+			inner = strings.Replace(inner, `validate:"`, `validate:"omitempty,`, 1)
 			variantTags = append(variantTags, inner)
 		}
 		var tagStr string

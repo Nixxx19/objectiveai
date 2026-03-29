@@ -8,7 +8,7 @@ import (
 
 // A agent completion chunk object.
 type AgentCompletionsResponseStreamingObject struct {
-	AgentCompletionChunk string `validate:"oneof=agent.completion.chunk"`
+	AgentCompletionChunk string `validate:"omitempty,oneof=agent.completion.chunk"`
 }
 
 func (v AgentCompletionsResponseStreamingObject) MarshalJSON() ([]byte, error) {

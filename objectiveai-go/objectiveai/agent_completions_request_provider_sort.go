@@ -22,11 +22,11 @@ func (AgentCompletionsRequestProviderSortLatency) SchemaVariantTitle() string { 
 // How to sort/prioritize providers.
 type AgentCompletionsRequestProviderSort struct {
 	// Prioritize by price (cheapest first).
-	Price *AgentCompletionsRequestProviderSortPrice `validate:"oneof=price"`
+	Price *AgentCompletionsRequestProviderSortPrice `validate:"omitempty,oneof=price"`
 	// Prioritize by throughput (fastest first).
-	Throughput *AgentCompletionsRequestProviderSortThroughput `validate:"oneof=throughput"`
+	Throughput *AgentCompletionsRequestProviderSortThroughput `validate:"omitempty,oneof=throughput"`
 	// Prioritize by latency (lowest first).
-	Latency *AgentCompletionsRequestProviderSortLatency `validate:"oneof=latency"`
+	Latency *AgentCompletionsRequestProviderSortLatency `validate:"omitempty,oneof=latency"`
 }
 
 func (v AgentCompletionsRequestProviderSort) MarshalJSON() ([]byte, error) {

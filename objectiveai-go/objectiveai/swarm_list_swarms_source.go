@@ -9,10 +9,10 @@ import (
 
 // Source filter for listing swarms.
 type SwarmListSwarmsSource struct {
-	All *string `validate:"oneof=all"`
-	Mock *string `validate:"oneof=mock"`
-	Filesystem *string `validate:"oneof=filesystem"`
-	Objectiveai *string `validate:"oneof=objectiveai"`
+	All *string `validate:"omitempty,oneof=all"`
+	Mock *string `validate:"omitempty,oneof=mock"`
+	Filesystem *string `validate:"omitempty,oneof=filesystem"`
+	Objectiveai *string `validate:"omitempty,oneof=objectiveai"`
 }
 
 func (v SwarmListSwarmsSource) MarshalJSON() ([]byte, error) {

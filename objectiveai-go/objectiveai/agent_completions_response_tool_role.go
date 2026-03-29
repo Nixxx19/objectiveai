@@ -7,7 +7,7 @@ import (
 )
 
 type AgentCompletionsResponseToolRole struct {
-	Tool string `validate:"oneof=tool"`
+	Tool string `validate:"omitempty,oneof=tool"`
 }
 
 func (v AgentCompletionsResponseToolRole) MarshalJSON() ([]byte, error) {

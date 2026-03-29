@@ -8,8 +8,8 @@ import (
 )
 
 type FunctionsInventionsResponseUnaryObject struct {
-	AlphaScalarFunctionInvention *string `validate:"oneof=alpha.scalar.function.invention"`
-	AlphaVectorFunctionInvention *string `validate:"oneof=alpha.vector.function.invention"`
+	AlphaScalarFunctionInvention *string `validate:"omitempty,oneof=alpha.scalar.function.invention"`
+	AlphaVectorFunctionInvention *string `validate:"omitempty,oneof=alpha.vector.function.invention"`
 }
 
 func (v FunctionsInventionsResponseUnaryObject) MarshalJSON() ([]byte, error) {

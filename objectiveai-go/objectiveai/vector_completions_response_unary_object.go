@@ -8,7 +8,7 @@ import (
 
 // A complete vector completion response.
 type VectorCompletionsResponseUnaryObject struct {
-	VectorCompletion string `validate:"oneof=vector.completion"`
+	VectorCompletion string `validate:"omitempty,oneof=vector.completion"`
 }
 
 func (v VectorCompletionsResponseUnaryObject) MarshalJSON() ([]byte, error) {

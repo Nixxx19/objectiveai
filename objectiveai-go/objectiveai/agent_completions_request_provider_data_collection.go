@@ -18,9 +18,9 @@ func (AgentCompletionsRequestProviderDataCollectionAllow) SchemaVariantTitle() s
 // Data collection policy for providers.
 type AgentCompletionsRequestProviderDataCollection struct {
 	// Do not allow data collection.
-	Deny *AgentCompletionsRequestProviderDataCollectionDeny `validate:"oneof=deny"`
+	Deny *AgentCompletionsRequestProviderDataCollectionDeny `validate:"omitempty,oneof=deny"`
 	// Allow data collection.
-	Allow *AgentCompletionsRequestProviderDataCollectionAllow `validate:"oneof=allow"`
+	Allow *AgentCompletionsRequestProviderDataCollectionAllow `validate:"omitempty,oneof=allow"`
 }
 
 func (v AgentCompletionsRequestProviderDataCollection) MarshalJSON() ([]byte, error) {

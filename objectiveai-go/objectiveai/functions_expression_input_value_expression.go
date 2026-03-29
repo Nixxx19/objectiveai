@@ -199,9 +199,9 @@ type FunctionsExpressionInputValueExpression struct {
 	// A string value.
 	String *FunctionsExpressionInputValueExpressionString 
 	// An integer value.
-	Integer *FunctionsExpressionInputValueExpressionInteger `validate:"min=-9223372036854775808,max=9223372036854775807"`
+	Integer *FunctionsExpressionInputValueExpressionInteger `validate:"omitempty,min=-9223372036854775808,max=9223372036854775807"`
 	// A floating-point number.
-	Number *FunctionsExpressionInputValueExpressionNumber `validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
+	Number *FunctionsExpressionInputValueExpressionNumber `validate:"omitempty,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 	// A boolean value.
 	Boolean *FunctionsExpressionInputValueExpressionBoolean 
 }

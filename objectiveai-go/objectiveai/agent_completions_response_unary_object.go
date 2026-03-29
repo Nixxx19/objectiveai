@@ -8,7 +8,7 @@ import (
 
 // A agent completion object.
 type AgentCompletionsResponseUnaryObject struct {
-	AgentCompletion string `validate:"oneof=agent.completion"`
+	AgentCompletion string `validate:"omitempty,oneof=agent.completion"`
 }
 
 func (v AgentCompletionsResponseUnaryObject) MarshalJSON() ([]byte, error) {

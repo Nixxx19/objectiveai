@@ -16,8 +16,8 @@ type FunctionsFunctionTypeVector string
 func (FunctionsFunctionTypeVector) SchemaVariantTitle() string { return "Vector" }
 
 type FunctionsFunctionType struct {
-	Scalar *FunctionsFunctionTypeScalar `validate:"oneof=scalar.function"`
-	Vector *FunctionsFunctionTypeVector `validate:"oneof=vector.function"`
+	Scalar *FunctionsFunctionTypeScalar `validate:"omitempty,oneof=scalar.function"`
+	Vector *FunctionsFunctionTypeVector `validate:"omitempty,oneof=vector.function"`
 }
 
 func (v FunctionsFunctionType) MarshalJSON() ([]byte, error) {

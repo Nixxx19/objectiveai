@@ -7,7 +7,7 @@ import (
 )
 
 type FunctionsExpressionObjectInputSchemaType struct {
-	Object string `validate:"oneof=object"`
+	Object string `validate:"omitempty,oneof=object"`
 }
 
 func (v FunctionsExpressionObjectInputSchemaType) MarshalJSON() ([]byte, error) {

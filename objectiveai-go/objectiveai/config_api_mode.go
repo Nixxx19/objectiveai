@@ -8,8 +8,8 @@ import (
 )
 
 type ConfigApiMode struct {
-	Remote *string `validate:"oneof=remote"`
-	Local *string `validate:"oneof=local"`
+	Remote *string `validate:"omitempty,oneof=remote"`
+	Local *string `validate:"omitempty,oneof=local"`
 }
 
 func (v ConfigApiMode) MarshalJSON() ([]byte, error) {

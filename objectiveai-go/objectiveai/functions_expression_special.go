@@ -38,20 +38,20 @@ func (FunctionsExpressionSpecialInputItemsOptionalContextMerge) SchemaVariantTit
 // Predefined expression behaviors that require no user-authored code.
 type FunctionsExpressionSpecial struct {
 	// Returns the params input as-is.
-	Input *FunctionsExpressionSpecialInput `validate:"oneof=input"`
+	Input *FunctionsExpressionSpecialInput `validate:"omitempty,oneof=input"`
 	// Returns the params output as-is.
-	Output *FunctionsExpressionSpecialOutput `validate:"oneof=output"`
+	Output *FunctionsExpressionSpecialOutput `validate:"omitempty,oneof=output"`
 	// L1-normalizes the output. Scalar/Err pass through.
 	// Vector: L1 normalize. Vectors: L1 normalize each.
-	TaskOutputL1Normalized *FunctionsExpressionSpecialTaskOutputL1Normalized `validate:"oneof=task_output_l1_normalized"`
+	TaskOutputL1Normalized *FunctionsExpressionSpecialTaskOutputL1Normalized `validate:"omitempty,oneof=task_output_l1_normalized"`
 	// Weighted sum of the output. Vector → Scalar. Vectors → Vector.
-	TaskOutputWeightedSum *FunctionsExpressionSpecialTaskOutputWeightedSum `validate:"oneof=task_output_weighted_sum"`
+	TaskOutputWeightedSum *FunctionsExpressionSpecialTaskOutputWeightedSum `validate:"omitempty,oneof=task_output_weighted_sum"`
 	// Returns the length of input['items'] as u64
-	InputItemsOutputLength *FunctionsExpressionSpecialInputItemsOutputLength `validate:"oneof=input_items_output_length"`
+	InputItemsOutputLength *FunctionsExpressionSpecialInputItemsOutputLength `validate:"omitempty,oneof=input_items_output_length"`
 	// Splits an input containing items and optionally context into multiple inputs
-	InputItemsOptionalContextSplit *FunctionsExpressionSpecialInputItemsOptionalContextSplit `validate:"oneof=input_items_optional_context_split"`
+	InputItemsOptionalContextSplit *FunctionsExpressionSpecialInputItemsOptionalContextSplit `validate:"omitempty,oneof=input_items_optional_context_split"`
 	// Merges multiple inputs containing items and optionally context into a single input
-	InputItemsOptionalContextMerge *FunctionsExpressionSpecialInputItemsOptionalContextMerge `validate:"oneof=input_items_optional_context_merge"`
+	InputItemsOptionalContextMerge *FunctionsExpressionSpecialInputItemsOptionalContextMerge `validate:"omitempty,oneof=input_items_optional_context_merge"`
 }
 
 func (v FunctionsExpressionSpecial) MarshalJSON() ([]byte, error) {

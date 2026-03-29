@@ -8,7 +8,7 @@ import (
 
 // Claude Agent SDK upstream marker.
 type AgentClaudeAgentSdkUpstream struct {
-	ClaudeAgentSdk string `validate:"oneof=claude_agent_sdk"`
+	ClaudeAgentSdk string `validate:"omitempty,oneof=claude_agent_sdk"`
 }
 
 func (v AgentClaudeAgentSdkUpstream) MarshalJSON() ([]byte, error) {

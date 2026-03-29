@@ -7,7 +7,7 @@ import (
 )
 
 type FunctionsExpressionAudioInputSchemaType struct {
-	Audio string `validate:"oneof=audio"`
+	Audio string `validate:"omitempty,oneof=audio"`
 }
 
 func (v FunctionsExpressionAudioInputSchemaType) MarshalJSON() ([]byte, error) {
