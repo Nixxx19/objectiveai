@@ -45,7 +45,7 @@ globals().update(http_test_suite(
                         {"upstream": "mock", "output_mode": "json_schema"},
                         {"upstream": "mock", "output_mode": "tool_call"},
                     ],
-                    "weights": ["0.4", "0.3", "0.3"],
+                    "weights": [0.4, 0.3, 0.3],
                 },
                 "responses": [
                     "Kyoto, Japan",

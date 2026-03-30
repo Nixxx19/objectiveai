@@ -50,7 +50,7 @@ func TestVectorCompletionsHTTP(t *testing.T) {
 						map[string]any{"upstream": "mock", "output_mode": "json_schema"},
 						map[string]any{"upstream": "mock", "output_mode": "tool_call"},
 					},
-					"weights": []any{"0.4", "0.3", "0.3"},
+					"weights": []any{0.4, 0.3, 0.3},
 				},
 				"responses": []any{"Kyoto, Japan", "Reykjavik, Iceland", "Patagonia, Argentina"},
 				"seed":      88,
