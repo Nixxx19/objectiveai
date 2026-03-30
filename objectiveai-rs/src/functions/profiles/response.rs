@@ -37,6 +37,7 @@ pub struct UsageProfileResponse {
     /// Total prompt tokens used.
     pub prompt_tokens: u64,
     /// Total cost incurred.
+    #[serde(deserialize_with = "crate::serde_util::decimal")]
     #[schemars(with = "f64")]
     pub total_cost: rust_decimal::Decimal,
 }

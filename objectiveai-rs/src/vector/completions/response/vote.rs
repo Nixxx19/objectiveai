@@ -40,11 +40,13 @@ pub struct Vote {
 
     /// The vote distribution. Each index corresponds to a response from the
     /// request. Typically one element is 1.0 (selected) and the rest are 0.0.
+    #[serde(deserialize_with = "crate::serde_util::vec_decimal")]
     #[schemars(with = "Vec<f64>")]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_vec_rust_decimal)]
     pub vote: Vec<rust_decimal::Decimal>,
 
     /// The weight applied to this vote when computing final scores.
+    #[serde(deserialize_with = "crate::serde_util::decimal")]
     #[schemars(with = "f64")]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub weight: rust_decimal::Decimal,

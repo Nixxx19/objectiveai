@@ -15,6 +15,7 @@ use schemars::JsonSchema;
 #[schemars(rename = "WeightsEntry")]
 pub struct WeightsEntry {
     /// The weight for this agent in the swarm. Must be in [0, 1].
+    #[serde(deserialize_with = "crate::serde_util::decimal")]
     #[schemars(with = "f64")]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub weight: Decimal,
@@ -35,7 +36,7 @@ pub struct WeightsEntry {
 pub enum Weights {
     /// Simple vector of decimal weights.
     #[schemars(title = "Weights")]
-    Weights(#[schemars(with = "Vec<f64>")] #[arbitrary(with = crate::arbitrary_util::arbitrary_vec_rust_decimal)] Vec<Decimal>),
+    Weights(#[serde(deserialize_with = "crate::serde_util::vec_decimal")] #[schemars(with = "Vec<f64>")] #[arbitrary(with = crate::arbitrary_util::arbitrary_vec_rust_decimal)] Vec<Decimal>),
     /// Vector of entries with optional invert flags.
     #[schemars(title = "Entries")]
     Entries(Vec<WeightsEntry>),

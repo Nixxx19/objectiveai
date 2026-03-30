@@ -27,6 +27,7 @@ pub struct UpstreamUsage {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prompt_tokens_details: Option<PromptTokensDetails>,
     /// The cost charged by ObjectiveAI for this request.
+    #[serde(deserialize_with = "crate::serde_util::decimal")]
     #[schemars(with = "f64")]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub cost: rust_decimal::Decimal,
@@ -36,10 +37,12 @@ pub struct UpstreamUsage {
     /// Total cost including ObjectiveAI's charge plus all upstream charges.
     /// For BYOK requests, ObjectiveAI only charges the cost_multiplier difference,
     /// but total_cost still includes what the upstream provider charged.
+    #[serde(deserialize_with = "crate::serde_util::decimal")]
     #[schemars(with = "f64")]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub total_cost: rust_decimal::Decimal,
     /// The multiplier applied to compute ObjectiveAI's charge.
+    #[serde(deserialize_with = "crate::serde_util::decimal")]
     #[schemars(with = "f64")]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub cost_multiplier: rust_decimal::Decimal,

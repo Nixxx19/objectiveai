@@ -67,23 +67,23 @@ pub enum ProviderSort {
 #[schemars(rename = "agent.completions.request.ProviderMaxPrice")]
 pub struct ProviderMaxPrice {
     /// Maximum price per prompt token.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none", deserialize_with = "crate::serde_util::option_decimal")]
     #[schemars(with = "Option<f64>")]
     pub prompt: Option<rust_decimal::Decimal>,
     /// Maximum price per completion token.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none", deserialize_with = "crate::serde_util::option_decimal")]
     #[schemars(with = "Option<f64>")]
     pub completion: Option<rust_decimal::Decimal>,
     /// Maximum price per image.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none", deserialize_with = "crate::serde_util::option_decimal")]
     #[schemars(with = "Option<f64>")]
     pub image: Option<rust_decimal::Decimal>,
     /// Maximum price per audio second.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none", deserialize_with = "crate::serde_util::option_decimal")]
     #[schemars(with = "Option<f64>")]
     pub audio: Option<rust_decimal::Decimal>,
     /// Maximum price per request.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none", deserialize_with = "crate::serde_util::option_decimal")]
     #[schemars(with = "Option<f64>")]
     pub request: Option<rust_decimal::Decimal>,
 }

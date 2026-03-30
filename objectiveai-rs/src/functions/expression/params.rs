@@ -118,13 +118,13 @@ impl<'de> serde::Deserialize<'de> for TaskOutput<'static> {
 pub enum TaskOutputOwned {
     /// A single scalar score.
     #[schemars(title = "Scalar")]
-    Scalar(#[schemars(with = "f64")] #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)] rust_decimal::Decimal),
+    Scalar(#[serde(deserialize_with = "crate::serde_util::decimal")] #[schemars(with = "f64")] #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)] rust_decimal::Decimal),
     /// A vector of scores.
     #[schemars(title = "Vector")]
-    Vector(#[schemars(with = "Vec<f64>")] #[arbitrary(with = crate::arbitrary_util::arbitrary_vec_rust_decimal)] Vec<rust_decimal::Decimal>),
+    Vector(#[serde(deserialize_with = "crate::serde_util::vec_decimal")] #[schemars(with = "Vec<f64>")] #[arbitrary(with = crate::arbitrary_util::arbitrary_vec_rust_decimal)] Vec<rust_decimal::Decimal>),
     /// Multiple vectors of scores (from mapped tasks).
     #[schemars(title = "Vectors")]
-    Vectors(#[schemars(with = "Vec<Vec<f64>>")] #[arbitrary(with = crate::arbitrary_util::arbitrary_vec_vec_rust_decimal)] Vec<Vec<rust_decimal::Decimal>>),
+    Vectors(#[serde(deserialize_with = "crate::serde_util::vec_vec_decimal")] #[schemars(with = "Vec<Vec<f64>>")] #[arbitrary(with = crate::arbitrary_util::arbitrary_vec_vec_rust_decimal)] Vec<Vec<rust_decimal::Decimal>>),
     /// An error occurred during execution.
     #[schemars(title = "Err")]
     Err(#[arbitrary(with = crate::arbitrary_util::arbitrary_json_value)] serde_json::Value),
@@ -354,6 +354,52 @@ fn params_output<'a>(
             }
             None => Err(super::ExpressionError::UnsupportedSpecial),
         },
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_task_output_deserialize_number_vs_string() {
+        // JSON number → Scalar
+        let parsed: TaskOutputOwned = serde_json::from_str("94").unwrap();
+        assert!(matches!(parsed, TaskOutputOwned::Scalar(_)));
+
+        // JSON string containing a number → Err (NOT Scalar)
+        let parsed: TaskOutputOwned = serde_json::from_str(r#""94""#).unwrap();
+        assert!(matches!(parsed, TaskOutputOwned::Err(serde_json::Value::String(_))));
+
+        // JSON array of numbers → Vector
+        let parsed: TaskOutputOwned = serde_json::from_str("[1, 2, 3]").unwrap();
+        assert!(matches!(parsed, TaskOutputOwned::Vector(_)));
+
+        // JSON array of arrays → Vectors
+        let parsed: TaskOutputOwned = serde_json::from_str("[[1, 2], [3, 4]]").unwrap();
+        assert!(matches!(parsed, TaskOutputOwned::Vectors(_)));
+
+        // JSON null → Err
+        let parsed: TaskOutputOwned = serde_json::from_str("null").unwrap();
+        assert!(matches!(parsed, TaskOutputOwned::Err(serde_json::Value::Null)));
+
+        // JSON bool → Err
+        let parsed: TaskOutputOwned = serde_json::from_str("true").unwrap();
+        assert!(matches!(parsed, TaskOutputOwned::Err(serde_json::Value::Bool(true))));
+
+        // JSON object → Err
+        let parsed: TaskOutputOwned = serde_json::from_str(r#"{"error": "something"}"#).unwrap();
+        assert!(matches!(parsed, TaskOutputOwned::Err(serde_json::Value::Object(_))));
+
+        // Err(String("94")) round-trips correctly (preserves string type)
+        let original = TaskOutputOwned::Err(serde_json::Value::String("94".to_string()));
+        let json = serde_json::to_string(&original).unwrap();
+        let roundtripped: TaskOutputOwned = serde_json::from_str(&json).unwrap();
+        assert!(matches!(roundtripped, TaskOutputOwned::Err(serde_json::Value::String(_))));
+
+        // Empty array → Vector (not Vectors, since no inner arrays)
+        let parsed: TaskOutputOwned = serde_json::from_str("[]").unwrap();
+        assert!(matches!(parsed, TaskOutputOwned::Vector(_)) || matches!(parsed, TaskOutputOwned::Vectors(_)));
     }
 }
 

@@ -102,10 +102,12 @@ impl PromptTokensDetails {
 #[schemars(rename = "agent.completions.response.CostDetails")]
 pub struct CostDetails {
     /// Cost charged by the immediate upstream (e.g., OpenRouter).
+    #[serde(deserialize_with = "crate::serde_util::decimal")]
     #[schemars(with = "f64")]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub upstream_inference_cost: rust_decimal::Decimal,
     /// Cost charged by the upstream's upstream (e.g., the actual model provider).
+    #[serde(deserialize_with = "crate::serde_util::decimal")]
     #[schemars(with = "f64")]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub upstream_upstream_inference_cost: rust_decimal::Decimal,

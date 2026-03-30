@@ -40,6 +40,7 @@ mod json_schema;
 pub use json_schema::*;
 pub mod prefixed_uuid;
 mod remote;
+pub(crate) mod serde_util;
 pub mod vector;
 mod weights;
 mod util;
@@ -47,6 +48,8 @@ mod util;
 pub use remote::*;
 pub use weights::*;
 
+#[cfg(test)]
+mod serde_util_tests;
 #[cfg(test)]
 mod tests;
 

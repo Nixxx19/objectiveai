@@ -18,11 +18,13 @@ pub struct VectorCompletion {
     /// Individual votes from each agent, showing their selections.
     pub votes: Vec<response::Vote>,
     /// Final weighted scores for each response option. Sums to 1.
+    #[serde(deserialize_with = "crate::serde_util::vec_decimal")]
     #[schemars(with = "Vec<f64>")]
     pub scores: Vec<rust_decimal::Decimal>,
     /// Total weight allocated to each response option. Same length as `scores`.
     /// For discrete votes, an LLM's full weight goes to its selected response.
     /// For probabilistic votes, the weight is divided according to the distribution.
+    #[serde(deserialize_with = "crate::serde_util::vec_decimal")]
     #[schemars(with = "Vec<f64>")]
     pub weights: Vec<rust_decimal::Decimal>,
     /// Unix timestamp when the completion was created.

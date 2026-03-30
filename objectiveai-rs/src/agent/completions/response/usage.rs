@@ -27,6 +27,7 @@ pub struct Usage {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prompt_tokens_details: Option<PromptTokensDetails>,
     /// Cost charged by ObjectiveAI for this request.
+    #[serde(deserialize_with = "crate::serde_util::decimal")]
     #[schemars(with = "f64")]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub cost: rust_decimal::Decimal,
@@ -35,6 +36,7 @@ pub struct Usage {
     pub cost_details: Option<CostDetails>,
     /// Total cost including upstream provider charges. Only differs from `cost`
     /// when using BYOK (Bring Your Own Key).
+    #[serde(deserialize_with = "crate::serde_util::decimal")]
     #[schemars(with = "f64")]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub total_cost: rust_decimal::Decimal,

@@ -18,10 +18,12 @@ pub struct VectorCompletionChunk {
     /// Votes received so far. New votes are appended in subsequent chunks.
     pub votes: Vec<response::Vote>,
     /// Current weighted scores. Updated as new votes arrive.
+    #[serde(deserialize_with = "crate::serde_util::vec_decimal")]
     #[schemars(with = "Vec<f64>")]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_vec_rust_decimal)]
     pub scores: Vec<rust_decimal::Decimal>,
     /// Current weight distribution across responses. Updated as new votes arrive.
+    #[serde(deserialize_with = "crate::serde_util::vec_decimal")]
     #[schemars(with = "Vec<f64>")]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_vec_rust_decimal)]
     pub weights: Vec<rust_decimal::Decimal>,

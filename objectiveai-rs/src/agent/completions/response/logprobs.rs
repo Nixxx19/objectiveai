@@ -46,6 +46,7 @@ pub struct Logprob {
     /// The raw bytes of the token.
     pub bytes: Option<Vec<u8>>,
     /// The log probability of this token.
+    #[serde(deserialize_with = "crate::serde_util::decimal")]
     #[schemars(with = "f64")]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub logprob: rust_decimal::Decimal,
@@ -62,6 +63,7 @@ pub struct TopLogprob {
     /// The raw bytes of the token.
     pub bytes: Option<Vec<u8>>,
     /// The log probability of this token.
+    #[serde(deserialize_with = "crate::serde_util::option_decimal")]
     #[schemars(with = "Option<f64>")]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_rust_decimal)]
     pub logprob: Option<rust_decimal::Decimal>,
