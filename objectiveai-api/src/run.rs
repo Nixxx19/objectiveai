@@ -1129,17 +1129,17 @@ async fn create_agent_completion(
         agent::completions::Client<
             ctx::DefaultContextExt,
             impl agent::completions::UpstreamClient<
-                objectiveai::agent::openrouter::Agent,
+                objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation,
             > + Send
             + Sync
             + 'static,
             impl agent::completions::UpstreamClient<
-                objectiveai::agent::claude_agent_sdk::Agent,
+                objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
             > + Send
             + Sync
             + 'static,
             impl agent::completions::UpstreamClient<
-                objectiveai::agent::mock::Agent,
+                objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation,
             > + Send
             + Sync
             + 'static,
@@ -1225,17 +1225,17 @@ async fn create_vector_completion(
         vector::completions::Client<
             ctx::DefaultContextExt,
             impl agent::completions::UpstreamClient<
-                objectiveai::agent::openrouter::Agent,
+                objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation,
             > + Send
             + Sync
             + 'static,
             impl agent::completions::UpstreamClient<
-                objectiveai::agent::claude_agent_sdk::Agent,
+                objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
             > + Send
             + Sync
             + 'static,
             impl agent::completions::UpstreamClient<
-                objectiveai::agent::mock::Agent,
+                objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation,
             > + Send
             + Sync
             + 'static,
@@ -1348,17 +1348,17 @@ async fn execute_function(
         functions::executions::Client<
             ctx::DefaultContextExt,
             impl agent::completions::UpstreamClient<
-                objectiveai::agent::openrouter::Agent,
+                objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation,
             > + Send
             + Sync
             + 'static,
             impl agent::completions::UpstreamClient<
-                objectiveai::agent::claude_agent_sdk::Agent,
+                objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
             > + Send
             + Sync
             + 'static,
             impl agent::completions::UpstreamClient<
-                objectiveai::agent::mock::Agent,
+                objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation,
             > + Send
             + Sync
             + 'static,
@@ -1866,17 +1866,17 @@ async fn create_function_invention(
         functions::inventions::Client<
             ctx::DefaultContextExt,
             impl agent::completions::UpstreamClient<
-                objectiveai::agent::openrouter::Agent,
+                objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation,
             > + Send
             + Sync
             + 'static,
             impl agent::completions::UpstreamClient<
-                objectiveai::agent::claude_agent_sdk::Agent,
+                objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
             > + Send
             + Sync
             + 'static,
             impl agent::completions::UpstreamClient<
-                objectiveai::agent::mock::Agent,
+                objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation,
             > + Send
             + Sync
             + 'static,
@@ -1960,17 +1960,17 @@ async fn create_function_invention_recursive(
         functions::inventions::recursive::Client<
             ctx::DefaultContextExt,
             impl agent::completions::UpstreamClient<
-                objectiveai::agent::openrouter::Agent,
+                objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation,
             > + Send
             + Sync
             + 'static,
             impl agent::completions::UpstreamClient<
-                objectiveai::agent::claude_agent_sdk::Agent,
+                objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
             > + Send
             + Sync
             + 'static,
             impl agent::completions::UpstreamClient<
-                objectiveai::agent::mock::Agent,
+                objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation,
             > + Send
             + Sync
             + 'static,

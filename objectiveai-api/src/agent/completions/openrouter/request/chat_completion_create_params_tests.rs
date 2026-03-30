@@ -93,6 +93,7 @@ fn test_no_tools_empty_params() {
         response_format: None,
         seed: None,
         stream: None,
+        continuation: None,
     };
 
     let mcp_connections: Vec<Arc<crate::mcp::Connection>> = vec![];
@@ -196,6 +197,7 @@ fn test_invention_response_format_name_conflict() {
         ),
         seed: None,
         stream: None,
+        continuation: None,
     };
 
     let mut inv_params = indexmap::IndexMap::new();
@@ -310,6 +312,7 @@ fn test_top_logprobs_zero_omits_logprobs() {
         response_format: None,
         seed: None,
         stream: None,
+        continuation: None,
     };
 
     let messages: Vec<objectiveai::agent::completions::message::Message> = vec![];
@@ -385,6 +388,7 @@ fn test_multiple_invention_tools_no_conflicts() {
         response_format: None,
         seed: None,
         stream: None,
+        continuation: None,
     };
 
     let messages = vec![objectiveai::agent::completions::message::Message::User(
@@ -567,6 +571,7 @@ fn test_toolcall_not_required_uses_auto_choice() {
         ),
         seed: None,
         stream: None,
+        continuation: None,
     };
 
     let messages: Vec<objectiveai::agent::completions::message::Message> = vec![];
@@ -666,6 +671,7 @@ fn test_invention_tool_parameters_preserved() {
         response_format: None,
         seed: None,
         stream: None,
+        continuation: None,
     };
 
     let mut inv_params = indexmap::IndexMap::new();
@@ -797,6 +803,7 @@ fn test_agent_base_fields_passthrough() {
             response_format: None,
             seed: None,
             stream: None,
+            continuation: None,
             };
 
     let messages = vec![
@@ -907,6 +914,7 @@ fn test_provider_merging_both_sides() {
             response_format: None,
             seed: None,
             stream: None,
+            continuation: None,
             };
 
     let messages: Vec<objectiveai::agent::completions::message::Message> = vec![];
@@ -1010,6 +1018,7 @@ fn test_per_agent_response_format_miss() {
         ),
         seed: None,
         stream: None,
+        continuation: None,
     };
 
     let messages: Vec<objectiveai::agent::completions::message::Message> = vec![];
@@ -1112,6 +1121,7 @@ fn test_json_schema_response_format_extracts_title() {
         ),
         seed: None,
         stream: None,
+        continuation: None,
     };
 
     let messages: Vec<objectiveai::agent::completions::message::Message> = vec![];
@@ -1215,6 +1225,7 @@ fn test_seed_passthrough() {
         response_format: None,
         seed: Some(42),
         stream: None,
+        continuation: None,
     };
 
     let messages = vec![
@@ -1356,6 +1367,7 @@ fn test_toolcall_required_forces_function_choice() {
         ),
         seed: None,
         stream: None,
+        continuation: None,
     };
 
     let mcp_connections: Vec<Arc<crate::mcp::Connection>> = vec![];
@@ -1454,6 +1466,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
         response_format: None,
         seed: None,
         stream: None,
+        continuation: None,
     };
 
     // Server 1: file operations
@@ -2049,6 +2062,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
         response_format: None,
         seed: Some(7),
         stream: None,
+        continuation: None,
     };
 
     // Server 1: knowledge base — has "search" (the duplicate)
@@ -2634,6 +2648,7 @@ fn test_mcp_tool_conflicts_with_invention_tool() {
         response_format: None,
         seed: None,
         stream: None,
+        continuation: None,
     };
 
     // MCP server has a tool named "analyze"
@@ -2839,6 +2854,7 @@ fn test_mcp_tool_conflicts_with_response_format_tool() {
         ),
         seed: None,
         stream: None,
+        continuation: None,
     };
 
     // MCP server also has a tool named "evaluate"
@@ -3048,6 +3064,7 @@ fn test_four_way_name_conflict_mcp_x2_invention_response_format() {
         ),
         seed: None,
         stream: None,
+        continuation: None,
     };
 
     // MCP server 1 has "output"
@@ -3328,6 +3345,7 @@ fn test_continuation_assistant_message_appended() {
         response_format: None,
         seed: None,
         stream: None,
+        continuation: None,
     };
 
     let messages = vec![objectiveai::agent::completions::message::Message::User(
@@ -3446,6 +3464,7 @@ fn test_continuation_mixed_items() {
         response_format: None,
         seed: None,
         stream: None,
+        continuation: None,
     };
 
     let messages = vec![objectiveai::agent::completions::message::Message::User(
@@ -3622,6 +3641,7 @@ fn test_tools_disabled_sets_tool_choice_none() {
         ),
         seed: None,
         stream: None,
+        continuation: None,
     };
 
     let result = build_params_with_tools_enabled(
@@ -3664,6 +3684,7 @@ fn test_tools_disabled_no_tools_no_tool_choice() {
         response_format: None,
         seed: None,
         stream: None,
+        continuation: None,
     };
 
     let result = build_params_with_tools_enabled(

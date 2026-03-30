@@ -222,7 +222,7 @@ impl Client {
     }
 }
 
-impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
+impl UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation> for Client {
     type State = objectiveai::agent::completions::message::AssistantMessage;
     type Stream = Pin<
         Box<dyn Stream<Item = StreamItem<Self::State>> + Send + 'static>,
@@ -234,6 +234,7 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
         id: &str,
         created: u64,
         agent: &objectiveai::agent::openrouter::Agent,
+        request_continuation: Option<objectiveai::agent::openrouter::Continuation>,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         messages: &[objectiveai::agent::completions::message::Message],
         _mcp_connections: &[Arc<crate::mcp::Connection>],

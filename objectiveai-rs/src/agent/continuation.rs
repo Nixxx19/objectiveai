@@ -38,6 +38,24 @@ impl From<super::mock::Continuation> for Continuation {
 }
 
 impl Continuation {
+    /// Returns the MCP sessions map for this continuation.
+    pub fn mcp_sessions(&self) -> &indexmap::IndexMap<String, String> {
+        match self {
+            Self::Openrouter(c) => &c.mcp_sessions,
+            Self::ClaudeAgentSdk(c) => &c.mcp_sessions,
+            Self::Mock(c) => &c.mcp_sessions,
+        }
+    }
+
+    /// Returns the upstream type for this continuation.
+    pub fn upstream(&self) -> super::Upstream {
+        match self {
+            Self::Openrouter(_) => super::Upstream::Openrouter,
+            Self::ClaudeAgentSdk(_) => super::Upstream::ClaudeAgentSdk,
+            Self::Mock(_) => super::Upstream::Mock,
+        }
+    }
+
     /// Serializes the continuation to a base64-encoded string.
     pub fn to_string(&self) -> String {
         let json = serde_json::to_string(self).unwrap();

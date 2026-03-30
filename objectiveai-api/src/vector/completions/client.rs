@@ -77,9 +77,9 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG, FVVOT
     Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG, FVVOTE, FCVOTE, VUSG>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
-    OPENROUTER: agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent> + Send + Sync + 'static,
-    CLAUDEAGENTSDK: agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> + Send + Sync + 'static,
-    MOCK: agent::completions::UpstreamClient<objectiveai::agent::mock::Agent> + Send + Sync + 'static,
+    OPENROUTER: agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation> + Send + Sync + 'static,
+    CLAUDEAGENTSDK: agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation> + Send + Sync + 'static,
+    MOCK: agent::completions::UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation> + Send + Sync + 'static,
     RETRG: crate::retrieval::retrieve::Client<CTXEXT>,
     RETRF: crate::retrieval::retrieve::Client<CTXEXT>,
     RETRM: crate::retrieval::retrieve::Client<CTXEXT>,
@@ -182,9 +182,9 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG, FVVOT
     Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG, FVVOTE, FCVOTE, VUSG>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
-    OPENROUTER: agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent> + Send + Sync + 'static,
-    CLAUDEAGENTSDK: agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> + Send + Sync + 'static,
-    MOCK: agent::completions::UpstreamClient<objectiveai::agent::mock::Agent> + Send + Sync + 'static,
+    OPENROUTER: agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation> + Send + Sync + 'static,
+    CLAUDEAGENTSDK: agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation> + Send + Sync + 'static,
+    MOCK: agent::completions::UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation> + Send + Sync + 'static,
     RETRG: crate::retrieval::retrieve::Client<CTXEXT>,
     RETRF: crate::retrieval::retrieve::Client<CTXEXT>,
     RETRM: crate::retrieval::retrieve::Client<CTXEXT>,
@@ -700,6 +700,7 @@ where
             response_format: response_format.clone(),
             seed: request.seed.map(|s| per_agent_seed(s, &primary_id, flat_swarm_index, &prompt_id, &responses_ids)),
             stream: Some(false),
+            continuation: None,
         });
 
         // Call the agent completions client, yielding each chunk immediately

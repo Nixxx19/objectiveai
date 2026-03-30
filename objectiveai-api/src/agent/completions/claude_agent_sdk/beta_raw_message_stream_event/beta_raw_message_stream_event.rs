@@ -209,6 +209,7 @@ impl BetaRawMessageStreamEvent {
                 usage: None,
                 upstream: objectiveai::agent::Upstream::ClaudeAgentSdk,
                 error: None,
+                continuation: None,
             }
         })
     }

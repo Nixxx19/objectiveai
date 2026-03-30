@@ -50,7 +50,7 @@ enum MockResponse {
     ToolCalls(Vec<MockToolCall>),
 }
 
-impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
+impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation> for Client {
     type State = State;
     type Stream = Pin<
         Box<dyn Stream<Item = StreamItem<Self::State>> + Send + 'static>,
@@ -62,6 +62,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
         id: &str,
         created: u64,
         agent: &objectiveai::agent::mock::Agent,
+        request_continuation: Option<objectiveai::agent::mock::Continuation>,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         _messages: &[objectiveai::agent::completions::message::Message],
         _mcp_connections: &[std::sync::Arc<crate::mcp::Connection>],
@@ -280,6 +281,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                         usage: None,
                         upstream: objectiveai::agent::Upstream::Mock,
                         error: None,
+                        continuation: None,
                     });
                 }
 
@@ -318,6 +320,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                                 usage: None,
                                 upstream: objectiveai::agent::Upstream::Mock,
                                 error: None,
+                                continuation: None,
                             });
                         }
                     }
@@ -380,6 +383,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                                     usage: None,
                                     upstream: objectiveai::agent::Upstream::Mock,
                                     error: None,
+                                    continuation: None,
                                 });
                             }
                         }

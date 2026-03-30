@@ -19,7 +19,7 @@ impl<T> UpstreamError for T where
 /// The stream must never be empty. If the upstream produces no chunks
 /// at all, it must return `Err(...)` from `create` instead of an
 /// empty stream.
-pub trait UpstreamClient<AGENT> {
+pub trait UpstreamClient<AGENT, CONTINUATION> {
     type State: Send + Sync + 'static;
     type Stream: futures::Stream<Item = StreamItem<Self::State>>
         + Send
@@ -33,6 +33,8 @@ pub trait UpstreamClient<AGENT> {
         created: u64,
         // the agent that the upstream client uses
         agent: &AGENT,
+        // optional continuation from the public API request
+        request_continuation: Option<CONTINUATION>,
         // the original request params for the agent completion
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         // contains the full prompt, including from the params and from the agent
@@ -71,7 +73,7 @@ pub trait UpstreamClient<AGENT> {
 
 pub struct UnimplementedUpstreamClient;
 
-impl<AGENT> UpstreamClient<AGENT> for UnimplementedUpstreamClient {
+impl<AGENT, CONTINUATION> UpstreamClient<AGENT, CONTINUATION> for UnimplementedUpstreamClient {
     type State = ();
     type Stream = futures::stream::Empty<StreamItem<Self::State>>;
     type Error = objectiveai::error::ResponseError;
@@ -80,6 +82,7 @@ impl<AGENT> UpstreamClient<AGENT> for UnimplementedUpstreamClient {
         _id: &str,
         _created: u64,
         _agent: &AGENT,
+        _request_continuation: Option<CONTINUATION>,
         _params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         _messages: &[objectiveai::agent::completions::message::Message],
         _mcp_connections: &[Arc<crate::mcp::Connection>],

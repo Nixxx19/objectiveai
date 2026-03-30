@@ -17,12 +17,53 @@ pub fn response_id(created: u64) -> String {
 
 // ---------------------------------------------------------------------------
 
-/// A shared, re-awaitable handle to an agent's MCP connections.
+/// Extracts the set of required MCP URLs from whichever continuation source is active.
+/// Internal continuation takes precedence over request continuation.
+fn required_mcp_urls<O, C, M>(
+    internal: Option<&super::Continuation<O, C, M>>,
+    request: Option<&objectiveai::agent::Continuation>,
+) -> std::collections::HashSet<String> {
+    if let Some(ic) = internal {
+        ic.mcp_urls()
+    } else if let Some(rc) = request {
+        rc.mcp_sessions().keys().cloned().collect()
+    } else {
+        std::collections::HashSet::new()
+    }
+}
+
+/// Filters agents to those whose MCP server URLs are a superset of `required_urls`
+/// and (if `required_upstream` is set) match the required upstream type.
+fn filter_agents(
+    agents: Vec<objectiveai::agent::InlineAgent>,
+    required_urls: &std::collections::HashSet<String>,
+    required_upstream: Option<objectiveai::agent::Upstream>,
+) -> Vec<objectiveai::agent::InlineAgent> {
+    agents.into_iter().filter(|agent| {
+        // Filter by upstream type if required.
+        if let Some(upstream) = required_upstream {
+            if agent.base().upstream() != upstream {
+                return false;
+            }
+        }
+        // Filter by MCP superset: agent's URLs must contain all required URLs.
+        if required_urls.is_empty() {
+            return true;
+        }
+        let agent_urls: std::collections::HashSet<&str> = agent.base().mcp_servers()
+            .map(|s| s.iter().map(|s| s.url.as_str()).collect())
+            .unwrap_or_default();
+        required_urls.iter().all(|url| agent_urls.contains(url.as_str()))
+    }).collect()
+}
+
+// ---------------------------------------------------------------------------
+
+/// A shared, re-awaitable handle to a single MCP connection.
 /// Uses `Arc<crate::mcp::Error>` so the result is `Clone` (required by `Shared`).
-/// `Ok(None)` means the agent should be skipped (e.g. missing MCP auth).
 pub type McpHandle = futures::future::Shared<
     tokio::sync::oneshot::Receiver<
-        Result<Option<Arc<Vec<Arc<crate::mcp::Connection>>>>, Arc<crate::mcp::Error>>
+        Result<Arc<crate::mcp::Connection>, Arc<crate::mcp::Error>>
     >
 >;
 
@@ -128,9 +169,9 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> Clone
 impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
-    OPENROUTER: super::UpstreamClient<objectiveai::agent::openrouter::Agent> + Send + Sync + 'static,
-    CLAUDEAGENTSDK: super::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> + Send + Sync + 'static,
-    MOCK: super::UpstreamClient<objectiveai::agent::mock::Agent> + Send + Sync + 'static,
+    OPENROUTER: super::UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation> + Send + Sync + 'static,
+    CLAUDEAGENTSDK: super::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation> + Send + Sync + 'static,
+    MOCK: super::UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation> + Send + Sync + 'static,
     RETRG: crate::retrieval::retrieve::Client<CTXEXT>,
     RETRF: crate::retrieval::retrieve::Client<CTXEXT>,
     RETRM: crate::retrieval::retrieve::Client<CTXEXT>,
@@ -281,71 +322,84 @@ where
         super::Error,
     > {
 
+        // Parse request continuation from base64 string if provided.
+        let request_continuation = match &params.continuation {
+            Some(s) => Some(
+                objectiveai::agent::Continuation::try_from_string(s)
+                    .ok_or(super::Error::InvalidContinuation)?,
+            ),
+            None => None,
+        };
+
         let created = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
             .as_secs();
         let id = response_id(created);
 
-        // 1. Resolve agent + spawn MCP connections (skip if continuation).
-        // 2. Extract continuation items.
-        let (mut cont_items_or, mut cont_items_cas, mut cont_items_mock, attempts) = match continuation {
-            Some(super::Continuation::Openrouter { items, agent, mcp_connections }) => {
-                let attempts = vec![AgentAttempt {
-                    agent: objectiveai::agent::InlineAgent::Openrouter(agent),
-                    mcp: AgentMcp::Ready(mcp_connections),
-                }];
-                (items, vec![], vec![], attempts)
-            }
-            Some(super::Continuation::ClaudeAgentSdk { items, agent, mcp_connections }) => {
-                let attempts = vec![AgentAttempt {
-                    agent: objectiveai::agent::InlineAgent::ClaudeAgentSdk(agent),
-                    mcp: AgentMcp::Ready(mcp_connections),
-                }];
-                (vec![], items, vec![], attempts)
-            }
-            Some(super::Continuation::Mock { items, agent, mcp_connections }) => {
-                let attempts = vec![AgentAttempt {
-                    agent: objectiveai::agent::InlineAgent::Mock(agent),
-                    mcp: AgentMcp::Ready(mcp_connections),
-                }];
-                (vec![], vec![], items, attempts)
-            }
-            None => {
-                let agent_wf = self.retrieve_router.get_agent(&ctx, params.agent.clone()).await
-                    .map_err(|e| super::Error::InvalidAgent(e.message.to_string()))?;
-                let mcp_handles = self.resolve_agents_mcp_connections(
-                    &agent_wf,
-                    &ctx,
-                );
-                let inline = agent_wf.inline();
-                let mut agents: Vec<objectiveai::agent::InlineAgent> = vec![inline.inner.clone()];
-                if let Some(fallbacks) = &inline.fallbacks {
-                    agents.extend(fallbacks.iter().cloned());
-                }
-                let attempts = agents.into_iter().zip(mcp_handles).map(|(agent, handle)| {
-                    AgentAttempt { agent, mcp: AgentMcp::Handle(handle) }
-                }).collect();
-                (vec![], vec![], vec![], attempts)
-            }
+        // 1. Panic if internal and request continuation upstream types conflict.
+        if let (Some(ic), Some(rc)) = (&continuation, &request_continuation) {
+            assert_eq!(
+                ic.upstream(), rc.upstream(),
+                "internal and request continuation upstream types must match"
+            );
+        }
+
+        // 2. Extract continuation items, MCP connections, and upstream type.
+        let cont_upstream = continuation.as_ref().map(|c| c.upstream());
+        let (mut cont_items_or, mut cont_items_cas, mut cont_items_mock, internal_conns) = match continuation {
+            Some(super::Continuation::Openrouter { items, mcp_connections }) => (items, vec![], vec![], Some(mcp_connections)),
+            Some(super::Continuation::ClaudeAgentSdk { items, mcp_connections }) => (vec![], items, vec![], Some(mcp_connections)),
+            Some(super::Continuation::Mock { items, mcp_connections }) => (vec![], vec![], items, Some(mcp_connections)),
+            None => (vec![], vec![], vec![], None),
         };
 
-        // 3. Build the list of (InlineAgent, MCP connections) to try.
-        //
-        // For continuations, we have a single agent with existing connections.
-        // For fresh requests, we have primary + fallbacks with spawned MCP handles.
-        struct AgentAttempt {
-            agent: objectiveai::agent::InlineAgent,
-            mcp: AgentMcp,
-        }
-        enum AgentMcp {
-            /// Already connected (from continuation).
-            Ready(Arc<Vec<Arc<crate::mcp::Connection>>>),
-            /// Spawned, await lazily.
-            Handle(McpHandle),
+        // 3. Always resolve agents from params.agent.
+        let agent_wf = self.retrieve_router.get_agent(&ctx, params.agent.clone()).await
+            .map_err(|e| super::Error::InvalidAgent(e.message.to_string()))?;
+        let inline = agent_wf.inline();
+        let mut all_agents: Vec<objectiveai::agent::InlineAgent> = vec![inline.inner.clone()];
+        if let Some(fallbacks) = &inline.fallbacks {
+            all_agents.extend(fallbacks.iter().cloned());
         }
 
-        // 3. Backoff retry loop — try each agent in order.
+        // 4. Determine required MCP URLs and upstream type from continuation.
+        let required_mcp_urls: std::collections::HashSet<String> = if let Some(conns) = &internal_conns {
+            conns.iter().map(|c| c.url.clone()).collect()
+        } else if let Some(rc) = &request_continuation {
+            rc.mcp_sessions().keys().cloned().collect()
+        } else {
+            std::collections::HashSet::new()
+        };
+        let required_upstream = cont_upstream
+            .or_else(|| request_continuation.as_ref().map(|c| c.upstream()));
+
+        // 5. Filter agents by upstream type + MCP superset.
+        let filtered_agents = filter_agents(all_agents, &required_mcp_urls, required_upstream);
+
+        // 6. Spawn shared MCP connection map.
+        let request_sessions = if internal_conns.is_none() {
+            request_continuation.as_ref().map(|c| c.mcp_sessions())
+        } else {
+            None
+        };
+        let mcp_map = self.spawn_mcp_connection_map(
+            &filtered_agents, &ctx, internal_conns.as_ref(), request_sessions,
+        );
+
+        // 7. Build agent attempts.
+        struct AgentAttempt {
+            agent: objectiveai::agent::InlineAgent,
+            mcp_urls: Vec<String>,
+        }
+        let attempts: Vec<AgentAttempt> = filtered_agents.into_iter().map(|agent| {
+            let mcp_urls = agent.base().mcp_servers()
+                .map(|s| s.iter().map(|s| s.url.clone()).collect())
+                .unwrap_or_default();
+            AgentAttempt { agent, mcp_urls }
+        }).collect();
+
+        // 8. Backoff retry loop — try each agent in order.
         let mut backoff = backoff::ExponentialBackoff {
             current_interval: self.backoff_current_interval,
             initial_interval: self.backoff_initial_interval,
@@ -361,20 +415,24 @@ where
             let mut errors: Vec<super::Error> = Vec::new();
 
             for attempt in &attempts {
-                // Await MCP connections for THIS agent only.
-                let mcp_connections: Arc<Vec<Arc<crate::mcp::Connection>>> = match &attempt.mcp {
-                    AgentMcp::Ready(conns) => conns.clone(),
-                    AgentMcp::Handle(handle) => {
-                        match handle.clone().await.expect("MCP connection task panicked") {
-                            Ok(Some(conns)) => conns,
-                            Ok(None) => continue, // skip — missing MCP auth
-                            Err(mcp_err) => {
-                                errors.push(super::Error::McpConnectionArc(mcp_err));
-                                continue;
-                            }
+                // Await MCP connections for THIS agent from the shared map.
+                let mut mcp_connections_vec = Vec::with_capacity(attempt.mcp_urls.len());
+                let mut mcp_ok = true;
+                for url in &attempt.mcp_urls {
+                    let handle = mcp_map.get(url).expect("MCP URL missing from shared map");
+                    match handle.clone().await.unwrap() {
+                        Ok(conn) => mcp_connections_vec.push(conn),
+                        Err(e) => {
+                            errors.push(super::Error::McpConnectionArc(e));
+                            mcp_ok = false;
+                            break;
                         }
                     }
-                };
+                }
+                if !mcp_ok {
+                    continue;
+                }
+                let mcp_connections = Arc::new(mcp_connections_vec);
 
                 // a. List MCP tools for each connection.
                 let mut mcp_tools = Vec::new();
@@ -423,15 +481,18 @@ where
                 for byok_attempt in &byok_attempts {
                     let err = match &attempt.agent {
                         objectiveai::agent::InlineAgent::Openrouter(or_agent) => {
-                            let a = or_agent.clone();
                             let c = mcp_connections.clone();
+                            let rc = match &request_continuation {
+                                Some(objectiveai::agent::Continuation::Openrouter(c)) => Some(c.clone()),
+                                _ => None,
+                            };
                             match self.run_agent_loop(
-                                self.openrouter.clone(), or_agent, &params, &mcp_connections,
+                                self.openrouter.clone(), or_agent, rc, &params, &mcp_connections,
                                 invention_tools.as_deref(), &tool_names, &tool_map,
                                 &mut cont_items_or, &id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 move |items| super::Continuation::Openrouter {
-                                    items, agent: a, mcp_connections: c,
+                                    items, mcp_connections: c,
                                 },
                                 |e| super::Error::UpstreamOpenrouter(Box::new(e)),
                                 objectiveai::agent::InlineAgentRef::Openrouter(&or_agent.base),
@@ -443,15 +504,18 @@ where
                             }
                         }
                         objectiveai::agent::InlineAgent::ClaudeAgentSdk(cas_agent) => {
-                            let a = cas_agent.clone();
                             let c = mcp_connections.clone();
+                            let rc = match &request_continuation {
+                                Some(objectiveai::agent::Continuation::ClaudeAgentSdk(c)) => Some(c.clone()),
+                                _ => None,
+                            };
                             match self.run_agent_loop(
-                                self.claude_agent_sdk.clone(), cas_agent, &params, &mcp_connections,
+                                self.claude_agent_sdk.clone(), cas_agent, rc, &params, &mcp_connections,
                                 invention_tools.as_deref(), &tool_names, &tool_map,
                                 &mut cont_items_cas, &id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 move |items| super::Continuation::ClaudeAgentSdk {
-                                    items, agent: a, mcp_connections: c,
+                                    items, mcp_connections: c,
                                 },
                                 |e| super::Error::UpstreamClaudeAgentSdk(Box::new(e)),
                                 objectiveai::agent::InlineAgentRef::ClaudeAgentSdk(&cas_agent.base),
@@ -463,15 +527,18 @@ where
                             }
                         }
                         objectiveai::agent::InlineAgent::Mock(mock_agent) => {
-                            let a = mock_agent.clone();
                             let c = mcp_connections.clone();
+                            let rc = match &request_continuation {
+                                Some(objectiveai::agent::Continuation::Mock(c)) => Some(c.clone()),
+                                _ => None,
+                            };
                             match self.run_agent_loop(
-                                self.mock.clone(), mock_agent, &params, &mcp_connections,
+                                self.mock.clone(), mock_agent, rc, &params, &mcp_connections,
                                 invention_tools.as_deref(), &tool_names, &tool_map,
                                 &mut cont_items_mock, &id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 move |items| super::Continuation::Mock {
-                                    items, agent: a, mcp_connections: c,
+                                    items, mcp_connections: c,
                                 },
                                 |e| super::Error::UpstreamMock(Box::new(e)),
                                 objectiveai::agent::InlineAgentRef::Mock(&mock_agent.base),
@@ -515,10 +582,11 @@ where
     ///
     /// On success, takes ownership of `cont_items` (via `std::mem::take`).
     /// On failure, `cont_items` remains intact for BYOK retry.
-    async fn run_agent_loop<A, U, CONT>(
+    async fn run_agent_loop<A, U, RC, CONT>(
         &self,
         upstream: Arc<U>,
         agent: &A,
+        request_continuation: Option<RC>,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         mcp_connections: &[Arc<crate::mcp::Connection>],
         invention_tools: Option<&[objectiveai::functions::inventions::InventionTool]>,
@@ -539,8 +607,9 @@ where
         super::Error,
     >
     where
-        U: super::UpstreamClient<A> + Send + Sync + 'static,
+        U: super::UpstreamClient<A, RC> + Send + Sync + 'static,
         A: Send + Sync + Clone + 'static,
+        RC: Send + Clone + 'static,
         CONT: Send + 'static,
     {
         // --- Merge messages, prepare, and apply transform. ---
@@ -561,6 +630,7 @@ where
             id,
             created,
             agent,
+            request_continuation.clone(),
             params,
             &messages,
             mcp_connections,
@@ -754,6 +824,7 @@ where
                         &id,
                         created,
                         &agent,
+                        request_continuation.clone(),
                         &params,
                         &messages,
                         &mcp_connections,
@@ -799,110 +870,84 @@ where
         }))
     }
 
-    /// Resolves agents and connects to their MCP servers concurrently.
+    /// Spawns a shared map of MCP connections keyed by URL.
     ///
-    /// If `continuation` is provided, returns the agent and MCP connections
-    /// stored in it directly (single-element vec, no spawned tasks).
+    /// Collects all unique MCP URLs across all agents, then for each URL:
+    /// - If an internal continuation has a live connection for this URL, reuses it.
+    /// - Otherwise, spawns a fresh connection (with session ID from request
+    ///   continuation if available).
     ///
-    /// Otherwise, for each agent in `params` (primary + fallbacks), spawns a
-    /// Spawns MCP connections for all agents (primary + fallbacks) simultaneously.
-    ///
-    /// This is non-async — it spawns tasks immediately and returns handles.
-    /// No network waiting happens here. The backoff/retry loop awaits each
-    /// handle lazily as it tries each agent.
-    ///
-    pub fn resolve_agents_mcp_connections(
+    /// Connections are shared: if two agents use the same MCP URL, they share
+    /// one handle.
+    pub fn spawn_mcp_connection_map(
         &self,
-        agent: &objectiveai::agent::AgentWithFallbacks,
+        agents: &[objectiveai::agent::InlineAgent],
         ctx: &crate::ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
-    ) -> Vec<McpHandle> {
-        let inline = agent.inline();
-        let mut handles = Vec::with_capacity(
-            1 + inline.fallbacks.as_ref().map_or(0, |f| f.len()),
-        );
-
-        // Primary
-        handles.push(self.spawn_agent_mcp_connections(&inline.inner, ctx));
-
-        // Fallbacks
-        if let Some(fallbacks) = &inline.fallbacks {
-            for fallback in fallbacks {
-                handles.push(self.spawn_agent_mcp_connections(fallback, ctx));
+        internal_connections: Option<&Arc<Vec<Arc<crate::mcp::Connection>>>>,
+        request_sessions: Option<&indexmap::IndexMap<String, String>>,
+    ) -> HashMap<String, McpHandle> {
+        // Collect all unique MCP URLs across all agents, with their authorization flag.
+        let mut unique_urls: indexmap::IndexMap<String, bool> = indexmap::IndexMap::new();
+        for agent in agents {
+            if let Some(servers) = agent.base().mcp_servers() {
+                for server in servers {
+                    unique_urls.entry(server.url.clone())
+                        .or_insert(server.authorization);
+                }
             }
         }
 
-        handles
-    }
+        // Build a lookup of existing internal connections by URL.
+        let internal_by_url: HashMap<&str, &Arc<crate::mcp::Connection>> = internal_connections
+            .map(|conns| conns.iter().map(|c| (c.url.as_str(), c)).collect())
+            .unwrap_or_default();
 
-    /// Resolves a request agent (inline or remote reference) into a validated Agent
-    /// and connects to its MCP servers.
-    ///
-    /// Returns `Ok(None)` if:
-    /// - The agent's upstream kind doesn't match the continuation
-    /// - An MCP server requires authorization but none was provided
-    /// Spawns MCP server connections for a single agent.
-    ///
-    /// Returns `None` synchronously if an MCP server requires authorization
-    /// but none was provided (agent should be skipped).
-    /// Returns `Some(Shared<...>)` that can be awaited multiple times (for
-    /// backoff retries). The task is spawned immediately — no network
-    /// waiting happens here.
-    pub fn spawn_agent_mcp_connections(
-        &self,
-        agent: &objectiveai::agent::InlineAgent,
-        ctx: &crate::ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
-    ) -> McpHandle {
-        match agent.base().mcp_servers() {
-            Some(servers) if !servers.is_empty() => {
-                let server_urls: Vec<_> = servers.iter().map(|s| (s.url.clone(), s.authorization)).collect();
+        let mut map = HashMap::with_capacity(unique_urls.len());
+
+        for (url, requires_auth) in &unique_urls {
+            // If internal continuation already has a live connection, reuse it.
+            if let Some(existing) = internal_by_url.get(url.as_str()) {
+                let conn = (*existing).clone();
                 let (tx, rx) = tokio::sync::oneshot::channel();
-                let mcp_client = self.mcp_client.clone();
-                let self_mcp_auth = self.mcp_authorization.clone();
-                let ctx = ctx.clone();
-                tokio::spawn(async move {
-                    let mcp_auth = ctx.mcp_authorization().await;
-                    let mut connect_args = Vec::with_capacity(server_urls.len());
-                    for (url, requires_auth) in &server_urls {
-                        let authorization = if *requires_auth {
-                            match mcp_auth.as_ref().and_then(|m| m.get(url))
-                                .or_else(|| self_mcp_auth.as_ref().and_then(|m| m.get(url)))
-                            {
-                                Some(auth) => Some(auth.clone()),
-                                None => {
-                                    let _ = tx.send(Ok(None)); // skip agent
-                                    return;
-                                }
-                            }
-                        } else {
-                            None
-                        };
-                        connect_args.push((url.clone(), authorization));
-                    }
-                    let mut futs = Vec::with_capacity(connect_args.len());
-                    for (url, auth) in connect_args {
-                        futs.push(mcp_client.connect(url, auth));
-                    }
-                    let results = futures::future::join_all(futs).await;
-                    let mut connections = Vec::with_capacity(results.len());
-                    for result in results {
-                        match result {
-                            Ok(conn) => connections.push(conn),
-                            Err(e) => {
-                                let _ = tx.send(Err(Arc::new(e)));
-                                return;
-                            }
+                let _ = tx.send(Ok(conn));
+                map.insert(url.clone(), futures::FutureExt::shared(rx));
+                continue;
+            }
+
+            // Spawn a fresh connection.
+            let map_key = url.clone();
+            let url = url.clone();
+            let requires_auth = *requires_auth;
+            let session_id = request_sessions.and_then(|m| m.get(&url).cloned());
+            let mcp_client = self.mcp_client.clone();
+            let self_mcp_auth = self.mcp_authorization.clone();
+            let ctx = ctx.clone();
+
+            let (tx, rx) = tokio::sync::oneshot::channel();
+            tokio::spawn(async move {
+                let mcp_auth = ctx.mcp_authorization().await;
+                let authorization = if requires_auth {
+                    match mcp_auth.as_ref().and_then(|m| m.get(&url))
+                        .or_else(|| self_mcp_auth.as_ref().and_then(|m| m.get(&url)))
+                    {
+                        Some(auth) => Some(auth.clone()),
+                        None => {
+                            let _ = tx.send(Err(Arc::new(crate::mcp::Error::MissingAuthorization(url))));
+                            return;
                         }
                     }
-                    let _ = tx.send(Ok(Some(Arc::new(connections))));
-                });
-                futures::FutureExt::shared(rx)
-            }
-            _ => {
-                let (tx, rx) = tokio::sync::oneshot::channel();
-                let _ = tx.send(Ok(Some(Arc::new(Vec::new()))));
-                futures::FutureExt::shared(rx)
-            }
+                } else {
+                    None
+                };
+                match mcp_client.connect(url, authorization, session_id).await {
+                    Ok(conn) => { let _ = tx.send(Ok(conn)); }
+                    Err(e) => { let _ = tx.send(Err(Arc::new(e))); }
+                }
+            });
+            map.insert(map_key, futures::FutureExt::shared(rx));
         }
+
+        map
     }
 }
 

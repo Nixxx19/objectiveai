@@ -66,16 +66,16 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, 
     Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM, RIUSG>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
-    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent>
+    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation>
         + Send
         + Sync
         + 'static,
     CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<
-            objectiveai::agent::claude_agent_sdk::Agent,
+            objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
         > + Send
         + Sync
         + 'static,
-    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent>
+    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation>
         + Send
         + Sync
         + 'static,
@@ -306,16 +306,16 @@ fn run_recursive<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, 
 ) -> Pin<Box<dyn Stream<Item = RecursiveChunk> + Send>>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
-    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent>
+    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation>
         + Send
         + Sync
         + 'static,
     CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<
-            objectiveai::agent::claude_agent_sdk::Agent,
+            objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
         > + Send
         + Sync
         + 'static,
-    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent>
+    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation>
         + Send
         + Sync
         + 'static,

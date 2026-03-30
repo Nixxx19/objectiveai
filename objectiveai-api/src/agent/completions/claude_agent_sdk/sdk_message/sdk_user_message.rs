@@ -107,6 +107,7 @@ impl SDKUserMessage {
                 usage: None,
                 upstream: objectiveai::agent::Upstream::ClaudeAgentSdk,
                 error: None,
+                continuation: None,
             },
         )
     }

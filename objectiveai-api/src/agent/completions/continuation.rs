@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::sync::Arc;
 use crate::mcp;
 
@@ -5,17 +6,14 @@ use crate::mcp;
 pub enum Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK> {
     Openrouter {
         items: Vec<ContinuationItem<OPENROUTER>>,
-        agent: objectiveai::agent::openrouter::Agent,
         mcp_connections: Arc<Vec<Arc<mcp::Connection>>>,
     },
     ClaudeAgentSdk {
         items: Vec<ContinuationItem<CLAUDEAGENTSDK>>,
-        agent: objectiveai::agent::claude_agent_sdk::Agent,
         mcp_connections: Arc<Vec<Arc<mcp::Connection>>>,
     },
     Mock {
         items: Vec<ContinuationItem<MOCK>>,
-        agent: objectiveai::agent::mock::Agent,
         mcp_connections: Arc<Vec<Arc<mcp::Connection>>>,
     },
 }
@@ -35,6 +33,26 @@ impl<OPENROUTER, CLAUDEAGENTSDK, MOCK> Continuation<OPENROUTER, CLAUDEAGENTSDK, 
             Self::ClaudeAgentSdk { items, .. } => items.push(ContinuationItem::ToolMessage(message)),
             Self::Mock { items, .. } => items.push(ContinuationItem::ToolMessage(message)),
         }
+    }
+
+    pub fn upstream(&self) -> objectiveai::agent::Upstream {
+        match self {
+            Self::Openrouter { .. } => objectiveai::agent::Upstream::Openrouter,
+            Self::ClaudeAgentSdk { .. } => objectiveai::agent::Upstream::ClaudeAgentSdk,
+            Self::Mock { .. } => objectiveai::agent::Upstream::Mock,
+        }
+    }
+
+    pub fn mcp_connections(&self) -> &Arc<Vec<Arc<mcp::Connection>>> {
+        match self {
+            Self::Openrouter { mcp_connections, .. }
+            | Self::ClaudeAgentSdk { mcp_connections, .. }
+            | Self::Mock { mcp_connections, .. } => mcp_connections,
+        }
+    }
+
+    pub fn mcp_urls(&self) -> HashSet<String> {
+        self.mcp_connections().iter().map(|c| c.url.clone()).collect()
     }
 }
 

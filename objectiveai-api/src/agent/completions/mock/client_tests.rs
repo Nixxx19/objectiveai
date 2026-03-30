@@ -46,6 +46,7 @@ fn default_params_with_seed(seed: i64) -> AgentCompletionCreateParams {
         response_format: None,
         seed: Some(seed),
         stream: None,
+        continuation: None,
     }
 }
 
@@ -79,6 +80,7 @@ async fn run_mock(
             "mock-test-id",
             1000,
             agent,
+            None,
             params,
             &messages,
             &mcp_connections,
@@ -240,7 +242,7 @@ async fn test_grammar_response_format_rejected() {
 
     let result = client
         .create(
-            "test", 1000, &agent, &params, &[], &[], None, &[],
+            "test", 1000, &agent, None, &params, &[], &[], None, &[],
             &HashMap::new(), None, None, rust_decimal::Decimal::ONE, true,
         )
         .await;
@@ -258,7 +260,7 @@ async fn test_python_response_format_rejected() {
 
     let result = client
         .create(
-            "test", 1000, &agent, &params, &[], &[], None, &[],
+            "test", 1000, &agent, None, &params, &[], &[], None, &[],
             &HashMap::new(), None, None, rust_decimal::Decimal::ONE, true,
         )
         .await;
@@ -581,6 +583,7 @@ async fn collect_assistant_chunks(
             "mock-test-id",
             1000,
             agent,
+            None,
             params,
             &messages,
             &mcp_connections,
@@ -1012,7 +1015,7 @@ async fn test_tools_not_allowed_with_required_tool_call() {
 
     let result = client
         .create(
-            "test", 1000, &agent, &params, &[], &[], None, &[],
+            "test", 1000, &agent, None, &params, &[], &[], None, &[],
             &HashMap::new(), None, None, rust_decimal::Decimal::ONE, false,
         )
         .await;
@@ -1037,7 +1040,7 @@ async fn test_tools_not_allowed_with_optional_tool_call_ok() {
     // Optional tool call should succeed even with tools_enabled = false.
     let result = client
         .create(
-            "test", 1000, &agent, &params, &[], &[], None, &[],
+            "test", 1000, &agent, None, &params, &[], &[], None, &[],
             &HashMap::new(), None, None, rust_decimal::Decimal::ONE, false,
         )
         .await;
@@ -1060,7 +1063,7 @@ async fn test_tools_not_allowed_no_tool_calls_generated() {
 
     let stream = client
         .create(
-            "test", 1000, &agent, &params, &[], &[], None, &tool_names,
+            "test", 1000, &agent, None, &params, &[], &[], None, &tool_names,
             &tool_map, None, None, rust_decimal::Decimal::ONE, false,
         )
         .await
@@ -1093,7 +1096,7 @@ async fn test_invention_agent_without_invention_tools() {
 
     let result = client
         .create(
-            "test", 1000, &agent, &params, &[], &[], None, &[],
+            "test", 1000, &agent, None, &params, &[], &[], None, &[],
             &HashMap::new(), None, None, rust_decimal::Decimal::ONE, true,
         )
         .await;
@@ -1125,7 +1128,7 @@ async fn test_invention_agent_with_invention_tools_ok() {
     let client = default_client();
     let result = client
         .create(
-            "test", 1000, &agent, &params, &[], &[], Some(&[inv2]),
+            "test", 1000, &agent, None, &params, &[], &[], Some(&[inv2]),
             &tool_names, &tool_map, None, None, rust_decimal::Decimal::ONE, true,
         )
         .await;

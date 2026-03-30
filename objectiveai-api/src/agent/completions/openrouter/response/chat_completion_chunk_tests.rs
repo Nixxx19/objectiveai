@@ -76,6 +76,7 @@ fn test_text_only_content() {
         usage: None,
         upstream: objectiveai::agent::Upstream::Openrouter,
         error: None,
+        continuation: None,
     };
 
     assert_eq!(result, expected);
@@ -127,6 +128,7 @@ fn test_empty_delta() {
         usage: None,
         upstream: objectiveai::agent::Upstream::Openrouter,
         error: None,
+        continuation: None,
     };
 
     assert_eq!(result, expected);
@@ -207,6 +209,7 @@ fn test_images_only() {
         usage: None,
         upstream: objectiveai::agent::Upstream::Openrouter,
         error: None,
+        continuation: None,
     };
 
     assert_eq!(result, expected);
@@ -278,6 +281,7 @@ fn test_text_and_images_merged() {
         usage: None,
         upstream: objectiveai::agent::Upstream::Openrouter,
         error: None,
+        continuation: None,
     };
 
     assert_eq!(result, expected);
@@ -371,6 +375,7 @@ fn test_usage_with_cost_multiplier() {
         usage: None,
         upstream: objectiveai::agent::Upstream::Openrouter,
         error: None,
+        continuation: None,
     };
 
     assert_eq!(result, expected);
@@ -454,6 +459,7 @@ fn test_reasoning_and_tool_calls() {
         usage: None,
         upstream: objectiveai::agent::Upstream::Openrouter,
         error: None,
+        continuation: None,
     };
 
     assert_eq!(result, expected);
@@ -548,6 +554,7 @@ fn test_byok_cost_splitting() {
         usage: None,
         upstream: objectiveai::agent::Upstream::Openrouter,
         error: None,
+        continuation: None,
     };
 
     assert_eq!(result, expected);

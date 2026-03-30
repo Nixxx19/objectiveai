@@ -46,6 +46,7 @@ fn test_text_delta() {
             usage: None,
             upstream: objectiveai::agent::Upstream::ClaudeAgentSdk,
             error: None,
+            continuation: None,
         }))
     );
 }
@@ -94,6 +95,7 @@ fn test_thinking_delta() {
             usage: None,
             upstream: objectiveai::agent::Upstream::ClaudeAgentSdk,
             error: None,
+            continuation: None,
         }))
     );
 }
@@ -155,6 +157,7 @@ fn test_tool_use_content_block_start() {
             usage: None,
             upstream: objectiveai::agent::Upstream::ClaudeAgentSdk,
             error: None,
+            continuation: None,
         }))
     );
 }
@@ -213,6 +216,7 @@ fn test_input_json_delta() {
             usage: None,
             upstream: objectiveai::agent::Upstream::ClaudeAgentSdk,
             error: None,
+            continuation: None,
         }))
     );
 }
@@ -268,6 +272,7 @@ fn test_message_delta_tool_use_stop_reason() {
             usage: None,
             upstream: objectiveai::agent::Upstream::ClaudeAgentSdk,
             error: None,
+            continuation: None,
         }))
     );
 }
@@ -350,6 +355,7 @@ fn test_user_message_tool_result() {
             usage: None,
             upstream: objectiveai::agent::Upstream::ClaudeAgentSdk,
             error: None,
+            continuation: None,
         }))
     );
 }
@@ -473,6 +479,7 @@ fn test_result_success_byok() {
             usage: None,
             upstream: objectiveai::agent::Upstream::ClaudeAgentSdk,
             error: None,
+            continuation: None,
         }))
     );
 }

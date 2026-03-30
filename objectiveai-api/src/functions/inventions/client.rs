@@ -110,13 +110,13 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, 
 type Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK> =
     crate::agent::completions::Continuation<
         <OPENROUTER as crate::agent::completions::UpstreamClient<
-            objectiveai::agent::openrouter::Agent,
+            objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation,
         >>::State,
         <CLAUDEAGENTSDK as crate::agent::completions::UpstreamClient<
-            objectiveai::agent::claude_agent_sdk::Agent,
+            objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
         >>::State,
         <MOCK as crate::agent::completions::UpstreamClient<
-            objectiveai::agent::mock::Agent,
+            objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation,
         >>::State,
     >;
 
@@ -124,16 +124,16 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, 
     Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
-    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent>
+    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation>
         + Send
         + Sync
         + 'static,
     CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<
-            objectiveai::agent::claude_agent_sdk::Agent,
+            objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
         > + Send
         + Sync
         + 'static,
-    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent>
+    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation>
         + Send
         + Sync
         + 'static,
@@ -436,16 +436,16 @@ fn run_all_steps<T, CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETR
 where
     T: InventionState,
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
-    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent>
+    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation>
         + Send
         + Sync
         + 'static,
     CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<
-            objectiveai::agent::claude_agent_sdk::Agent,
+            objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
         > + Send
         + Sync
         + 'static,
-    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent>
+    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation>
         + Send
         + Sync
         + 'static,
@@ -1020,9 +1020,9 @@ pub(crate) async fn publish_github<CTXEXT: ctx::ContextExt + Send + Sync>(
 /// Output from a single step.
 enum StepOutput<OPENROUTER, CLAUDEAGENTSDK, MOCK>
 where
-    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent>,
-    CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent>,
-    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent>,
+    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation>,
+    CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation>,
+    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation>,
 {
     Chunk(FunctionInventionChunk),
     Continuation(Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK>),
@@ -1046,6 +1046,7 @@ fn build_agent_params(
         response_format: None,
         seed: request.seed,
         stream: Some(true),
+        continuation: None,
     }
 }
 
@@ -1083,16 +1084,16 @@ fn run_step<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG>
 >
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
-    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent>
+    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation>
         + Send
         + Sync
         + 'static,
     CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<
-            objectiveai::agent::claude_agent_sdk::Agent,
+            objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
         > + Send
         + Sync
         + 'static,
-    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent>
+    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation>
         + Send
         + Sync
         + 'static,

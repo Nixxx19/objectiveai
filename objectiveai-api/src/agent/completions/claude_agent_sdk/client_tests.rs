@@ -32,6 +32,7 @@ fn default_params() -> AgentCompletionCreateParams {
         response_format: None,
         seed: None,
         stream: None,
+        continuation: None,
     }
 }
 
@@ -52,7 +53,7 @@ async fn test_tools_not_allowed_with_tools_present() {
 
     let result = client
         .create(
-            "test", 1000, &agent, &params, &[], &[], None,
+            "test", 1000, &agent, None, &params, &[], &[], None,
             &tool_names, &tool_map, None, None,
             rust_decimal::Decimal::ONE, false,
         )
@@ -74,7 +75,7 @@ async fn test_tools_not_allowed_without_tools_proceeds() {
     // It will fail for other reasons (no SDK installed), but NOT with ToolsNotAllowed.
     let result = client
         .create(
-            "test", 1000, &agent, &params, &[], &[], None,
+            "test", 1000, &agent, None, &params, &[], &[], None,
             &[], &HashMap::new(), None, None,
             rust_decimal::Decimal::ONE, false,
         )

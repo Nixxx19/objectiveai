@@ -107,6 +107,7 @@ impl ChatCompletionChunk {
             usage: None,
             upstream: objectiveai::agent::Upstream::Openrouter,
             error: None,
+            continuation: None,
         }
     }
 

@@ -33,4 +33,7 @@ pub enum Error {
     /// The server did not return a session ID on initialization.
     #[error("server did not return Mcp-Session-Id header")]
     NoSessionId,
+    /// Authorization required but not provided for this MCP server URL.
+    #[error("missing authorization for MCP server: {0}")]
+    MissingAuthorization(String),
 }

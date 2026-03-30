@@ -77,7 +77,7 @@ fn validate_response_format(
     }
 }
 
-impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
+impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation> for Client {
     type State = super::State;
     type Stream = Pin<
         Box<dyn Stream<Item = StreamItem<Self::State>> + Send + 'static>,
@@ -90,6 +90,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
         id: &str,
         created: u64,
         agent: &objectiveai::agent::claude_agent_sdk::Agent,
+        request_continuation: Option<objectiveai::agent::claude_agent_sdk::Continuation>,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         messages: &[objectiveai::agent::completions::message::Message],
         mcp_connections: &[Arc<crate::mcp::Connection>],

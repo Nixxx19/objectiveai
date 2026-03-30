@@ -3,6 +3,9 @@ pub enum Error {
     #[error("invalid agent: {0}")]
     InvalidAgent(String),
 
+    #[error("invalid continuation")]
+    InvalidContinuation,
+
     #[error("agent not found: {0}")]
     AgentNotFound(String),
 
@@ -51,6 +54,7 @@ impl objectiveai::error::StatusError for Error {
         use objectiveai::error::StatusError;
         match self {
             Self::InvalidAgent(_) => 400,
+            Self::InvalidContinuation => 400,
             Self::AgentNotFound(_) => 404,
             Self::McpConnection(_) | Self::McpConnectionArc(_) => 502,
             Self::McpListTools { .. } => 502,

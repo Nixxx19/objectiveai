@@ -431,9 +431,9 @@ impl<
     >
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
-    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent> + Send + Sync + 'static,
-    CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> + Send + Sync + 'static,
-    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent> + Send + Sync + 'static,
+    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation> + Send + Sync + 'static,
+    CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation> + Send + Sync + 'static,
+    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation> + Send + Sync + 'static,
     ACUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT>
         + Send
         + Sync
@@ -570,9 +570,9 @@ impl<
     >
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
-    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent> + Send + Sync + 'static,
-    CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> + Send + Sync + 'static,
-    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent> + Send + Sync + 'static,
+    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation> + Send + Sync + 'static,
+    CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation> + Send + Sync + 'static,
+    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation> + Send + Sync + 'static,
     ACUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT>
         + Send
         + Sync
@@ -2649,6 +2649,7 @@ where
                         response_format: None,
                         seed: request.seed,
                         stream: Some(true),
+                        continuation: None,
                     },
                 ),
                 None,

@@ -184,6 +184,7 @@ impl SDKResultMessage {
             usage: None,
             upstream: objectiveai::agent::Upstream::ClaudeAgentSdk,
             error,
+            continuation: None,
         }
     }
 }

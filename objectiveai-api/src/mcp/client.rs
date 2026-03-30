@@ -78,6 +78,7 @@ impl Client {
         &self,
         url: String,
         authorization: Option<String>,
+        session_id: Option<String>,
     ) -> Result<Arc<super::Connection>, super::Error> {
         let init_request = serde_json::json!({
             "jsonrpc": "2.0",
@@ -101,6 +102,9 @@ impl Client {
             .header("Accept", "application/json, text/event-stream")
             .json(&init_request);
 
+        if let Some(sid) = &session_id {
+            request = request.header("Mcp-Session-Id", sid);
+        }
         if let Some(auth) = &authorization {
             request = request.header("Authorization", auth);
         }
