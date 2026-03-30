@@ -6,8 +6,8 @@ import { ConfigFunctionsInventionsConfigSchema } from "./functionsInventionsConf
 import { ConfigFunctionsProfilesConfigSchema } from "./functionsProfilesConfig";
 
 export const ConfigFunctionsConfigSchema = z.object({
-  favorites: z.array(ConfigFavoriteSchema).nullable().optional(),
-  inventions: ConfigFunctionsInventionsConfigSchema.nullable().optional(),
-  profiles: ConfigFunctionsProfilesConfigSchema.nullable().optional(),
+  favorites: z.array(ConfigFavoriteSchema).nullable().meta({ omitempty: true }).optional(),
+  inventions: ConfigFunctionsInventionsConfigSchema.nullable().meta({ omitempty: true }).optional(),
+  profiles: ConfigFunctionsProfilesConfigSchema.nullable().meta({ omitempty: true }).optional(),
 }).meta({ title: "config.FunctionsConfig" });
 export type ConfigFunctionsConfig = z.infer<typeof ConfigFunctionsConfigSchema>;

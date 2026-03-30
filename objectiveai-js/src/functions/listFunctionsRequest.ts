@@ -4,6 +4,6 @@ import { z } from "zod";
 import { FunctionsListFunctionsSourceSchema } from "./listFunctionsSource";
 
 export const FunctionsListFunctionsRequestSchema = z.object({
-  source: FunctionsListFunctionsSourceSchema.nullable().describe("Optional source filter for listing functions.").optional(),
+  source: FunctionsListFunctionsSourceSchema.nullable().describe("Optional source filter for listing functions.").meta({ omitempty: true }).optional(),
 }).describe("Query parameters for the list functions endpoint.").meta({ title: "functions.ListFunctionsRequest" });
 export type FunctionsListFunctionsRequest = z.infer<typeof FunctionsListFunctionsRequestSchema>;

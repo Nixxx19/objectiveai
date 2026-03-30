@@ -3,9 +3,9 @@
 import { z } from "zod";
 
 export const AgentCompletionsResponseCompletionTokensDetailsSchema = z.object({
-  accepted_prediction_tokens: z.number().int().min(0).max(18446744073709552000).nullable().describe("Tokens from accepted predictions (speculative decoding).").optional(),
-  audio_tokens: z.number().int().min(0).max(18446744073709552000).nullable().describe("Audio output tokens.").optional(),
-  reasoning_tokens: z.number().int().min(0).max(18446744073709552000).nullable().describe("Tokens used for reasoning/thinking.").optional(),
-  rejected_prediction_tokens: z.number().int().min(0).max(18446744073709552000).nullable().describe("Tokens from rejected predictions (speculative decoding).").optional(),
+  accepted_prediction_tokens: z.number().int().min(0).max(18446744073709552000).nullable().describe("Tokens from accepted predictions (speculative decoding).").meta({ omitempty: true }).optional(),
+  audio_tokens: z.number().int().min(0).max(18446744073709552000).nullable().describe("Audio output tokens.").meta({ omitempty: true }).optional(),
+  reasoning_tokens: z.number().int().min(0).max(18446744073709552000).nullable().describe("Tokens used for reasoning/thinking.").meta({ omitempty: true }).optional(),
+  rejected_prediction_tokens: z.number().int().min(0).max(18446744073709552000).nullable().describe("Tokens from rejected predictions (speculative decoding).").meta({ omitempty: true }).optional(),
 }).describe("Detailed breakdown of completion token usage.").meta({ title: "agent.completions.response.CompletionTokensDetails" });
 export type AgentCompletionsResponseCompletionTokensDetails = z.infer<typeof AgentCompletionsResponseCompletionTokensDetailsSchema>;

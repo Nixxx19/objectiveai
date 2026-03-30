@@ -8,10 +8,10 @@ import { ConfigSwarmsConfigSchema } from "./swarmsConfig";
 import { ConfigViewerConfigSchema } from "./viewerConfig";
 
 export const ConfigConfigSchema = z.object({
-  agents: ConfigAgentsConfigSchema.nullable().optional(),
-  api: ConfigApiConfigSchema.nullable().optional(),
-  functions: ConfigFunctionsConfigSchema.nullable().optional(),
-  swarms: ConfigSwarmsConfigSchema.nullable().optional(),
-  viewer: ConfigViewerConfigSchema.nullable().optional(),
+  agents: ConfigAgentsConfigSchema.nullable().meta({ omitempty: true }).optional(),
+  api: ConfigApiConfigSchema.nullable().meta({ omitempty: true }).optional(),
+  functions: ConfigFunctionsConfigSchema.nullable().meta({ omitempty: true }).optional(),
+  swarms: ConfigSwarmsConfigSchema.nullable().meta({ omitempty: true }).optional(),
+  viewer: ConfigViewerConfigSchema.nullable().meta({ omitempty: true }).optional(),
 }).meta({ title: "config.Config" });
 export type ConfigConfig = z.infer<typeof ConfigConfigSchema>;

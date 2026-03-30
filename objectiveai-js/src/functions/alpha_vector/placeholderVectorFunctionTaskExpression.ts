@@ -14,7 +14,7 @@ export const FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema =
   min_branch_width: z.number().int().min(0).max(18446744073709552000),
   min_leaf_width: z.number().int().min(0).max(18446744073709552000),
   name: z.string(),
-  skip: FunctionsExpressionExpressionSchema.nullable().optional(),
+  skip: FunctionsExpressionExpressionSchema.nullable().meta({ omitempty: true }).optional(),
   spec: z.string(),
 }).meta({ title: "functions.alpha_vector.PlaceholderVectorFunctionTaskExpression" });
 export type FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpression = z.infer<typeof FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema>;

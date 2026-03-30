@@ -279,8 +279,11 @@ function convert(schema, refs, lazyRefs, selfTitle, cyclicTitles) {
     if (schema.properties) {
       const props = [];
       for (const [key, propSchema] of Object.entries(schema.properties)) {
-        const propCode = convert(propSchema, refs, lazyRefs, selfTitle, cyclicTitles);
+        let propCode = convert(propSchema, refs, lazyRefs, selfTitle, cyclicTitles);
         const safeKey = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key) ? key : JSON.stringify(key);
+        if (propSchema.omitempty) {
+          propCode += `.meta({ omitempty: true })`;
+        }
         if (isNullableSchema(propSchema)) {
           props.push(`  ${safeKey}: ${propCode}.optional()`);
         } else {
@@ -475,8 +478,11 @@ function convertObject(schema, refs, lazyRefs, selfTitle, cyclicTitles) {
   // Nullable properties (anyOf with a null variant) are optional; all others are required
   const props = [];
   for (const [key, propSchema] of Object.entries(schema.properties)) {
-    const propCode = convert(propSchema, refs, lazyRefs, selfTitle, cyclicTitles);
+    let propCode = convert(propSchema, refs, lazyRefs, selfTitle, cyclicTitles);
     const safeKey = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key) ? key : JSON.stringify(key);
+    if (propSchema.omitempty) {
+      propCode += `.meta({ omitempty: true })`;
+    }
     if (isNullableSchema(propSchema)) {
       props.push(`  ${safeKey}: ${propCode}.optional()`);
     } else {

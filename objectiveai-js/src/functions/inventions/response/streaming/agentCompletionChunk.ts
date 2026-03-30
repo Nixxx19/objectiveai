@@ -8,14 +8,14 @@ import { AgentUpstreamSchema } from "../../../../agent/upstream";
 import { ErrorResponseErrorSchema } from "../../../../error/responseError";
 
 export const FunctionsInventionsResponseStreamingAgentCompletionChunkSchema = z.object({
-  continuation: z.string().nullable().describe("Continuation state for multi-turn conversations (only present in the final chunk).").optional(),
+  continuation: z.string().nullable().describe("Continuation state for multi-turn conversations (only present in the final chunk).").meta({ omitempty: true }).optional(),
   created: z.number().int().min(0).max(18446744073709552000),
-  error: ErrorResponseErrorSchema.nullable().describe("Error details if this completion failed.").optional(),
+  error: ErrorResponseErrorSchema.nullable().describe("Error details if this completion failed.").meta({ omitempty: true }).optional(),
   id: z.string(),
   index: z.number().int().min(0).max(18446744073709552000),
   messages: z.array(AgentCompletionsResponseStreamingMessageChunkSchema),
   object: AgentCompletionsResponseStreamingObjectSchema.describe("The object type (always \"agent.completion.chunk\")."),
   upstream: AgentUpstreamSchema.describe("Upstream provider"),
-  usage: AgentCompletionsResponseUsageSchema.nullable().describe("Token usage (only present in the final chunk).").optional(),
+  usage: AgentCompletionsResponseUsageSchema.nullable().describe("Token usage (only present in the final chunk).").meta({ omitempty: true }).optional(),
 }).describe("A chunk of a streaming agent completion response.\n\nMultiple chunks are received via Server-Sent Events and can be\naccumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)\nusing the [`push`](Self::push) method.").meta({ title: "functions.inventions.response.streaming.AgentCompletionChunk" });
 export type FunctionsInventionsResponseStreamingAgentCompletionChunk = z.infer<typeof FunctionsInventionsResponseStreamingAgentCompletionChunkSchema>;

@@ -6,6 +6,6 @@ import { WeightsSchema } from "../weights";
 
 export const SwarmInlineSwarmBaseSchema = z.object({
   agents: z.array(AgentInlineAgentBaseWithFallbacksOrRemoteWithCountSchema).describe("The LLMs in this swarm, with optional counts and fallbacks."),
-  weights: WeightsSchema.nullable().describe("Optional weights for each agent. If `None`, uniform weights are used.").optional(),
+  weights: WeightsSchema.nullable().describe("Optional weights for each agent. If `None`, uniform weights are used.").meta({ omitempty: true }).optional(),
 }).describe("An inline swarm base definition (without computed ID or metadata).\n\nContains a list of agent configurations that will be validated, deduplicated,\nand sorted when converting to an [`InlineSwarm`].").meta({ title: "swarm.InlineSwarmBase" });
 export type SwarmInlineSwarmBase = z.infer<typeof SwarmInlineSwarmBaseSchema>;

@@ -12,9 +12,9 @@ export interface FunctionsExpressionArrayInputSchema {
   type: FunctionsExpressionArrayInputSchemaType;
 }
 export const FunctionsExpressionArrayInputSchemaSchema: z.ZodType<FunctionsExpressionArrayInputSchema> = z.object({
-  description: z.string().nullable().describe("Human-readable description of the array.").optional(),
+  description: z.string().nullable().describe("Human-readable description of the array.").meta({ omitempty: true }).optional(),
   items: z.lazy(() => FunctionsExpressionInputSchemaSchema).describe("Schema for each item in the array."),
-  maxItems: z.number().int().min(0).max(18446744073709552000).nullable().describe("Maximum number of items allowed.").optional(),
-  minItems: z.number().int().min(0).max(18446744073709552000).nullable().describe("Minimum number of items required.").optional(),
+  maxItems: z.number().int().min(0).max(18446744073709552000).nullable().describe("Maximum number of items allowed.").meta({ omitempty: true }).optional(),
+  minItems: z.number().int().min(0).max(18446744073709552000).nullable().describe("Minimum number of items required.").meta({ omitempty: true }).optional(),
   type: FunctionsExpressionArrayInputSchemaTypeSchema,
 }).describe("Schema for an array input.").meta({ title: "functions.expression.ArrayInputSchema" });

@@ -5,7 +5,7 @@ import { FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema } from ".
 
 export const FunctionsInventionsStateAlphaVectorStateSchema = z.object({
   depth: z.number().int().min(0).max(18446744073709552000),
-  input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema.nullable().optional(),
+  input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema.nullable().meta({ omitempty: true }).optional(),
   max_branch_width: z.number().int().min(0).max(18446744073709552000),
   max_leaf_width: z.number().int().min(0).max(18446744073709552000),
   min_branch_width: z.number().int().min(0).max(18446744073709552000),

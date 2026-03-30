@@ -7,6 +7,6 @@ import { FunctionsExpressionExpressionSchema } from "../expression/expression";
 export const FunctionsAlphaScalarVectorCompletionTaskExpressionSchema = z.object({
   messages: FunctionsExpressionExpressionSchema,
   responses: z.array(AgentCompletionsMessageRichContentSchema),
-  skip: FunctionsExpressionExpressionSchema.nullable().optional(),
+  skip: FunctionsExpressionExpressionSchema.nullable().meta({ omitempty: true }).optional(),
 }).meta({ title: "functions.alpha_scalar.VectorCompletionTaskExpression" });
 export type FunctionsAlphaScalarVectorCompletionTaskExpression = z.infer<typeof FunctionsAlphaScalarVectorCompletionTaskExpressionSchema>;

@@ -5,7 +5,7 @@ import { ConfigViewerLocalConfigSchema } from "./viewerLocalConfig";
 import { ConfigViewerModeSchema } from "./viewerMode";
 
 export const ConfigViewerConfigSchema = z.object({
-  local: ConfigViewerLocalConfigSchema.nullable().optional(),
+  local: ConfigViewerLocalConfigSchema.nullable().meta({ omitempty: true }).optional(),
   mode: ConfigViewerModeSchema.default("local"),
 }).meta({ title: "config.ViewerConfig" });
 export type ConfigViewerConfig = z.infer<typeof ConfigViewerConfigSchema>;

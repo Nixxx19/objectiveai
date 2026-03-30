@@ -7,9 +7,9 @@ import { ConfigApiModeSchema } from "./apiMode";
 import { ConfigApiRemoteConfigSchema } from "./apiRemoteConfig";
 
 export const ConfigApiConfigSchema = z.object({
-  headers: ConfigApiHeadersConfigSchema.nullable().optional(),
-  local: ConfigApiLocalConfigSchema.nullable().optional(),
+  headers: ConfigApiHeadersConfigSchema.nullable().meta({ omitempty: true }).optional(),
+  local: ConfigApiLocalConfigSchema.nullable().meta({ omitempty: true }).optional(),
   mode: ConfigApiModeSchema.default("local"),
-  remote: ConfigApiRemoteConfigSchema.nullable().optional(),
+  remote: ConfigApiRemoteConfigSchema.nullable().meta({ omitempty: true }).optional(),
 }).meta({ title: "config.ApiConfig" });
 export type ConfigApiConfig = z.infer<typeof ConfigApiConfigSchema>;

@@ -11,16 +11,16 @@ import { RemotePathSchema } from "../../../../remotePath";
 
 export const FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema = z.object({
   created: z.number().int().min(0).max(18446744073709552000),
-  error: ErrorResponseErrorSchema.nullable().optional(),
+  error: ErrorResponseErrorSchema.nullable().meta({ omitempty: true }).optional(),
   function: RemotePathSchema.nullable().optional(),
   id: z.string(),
   object: FunctionsExecutionsResponseStreamingObjectSchema,
-  output: FunctionsExecutionsResponseOutputSchema.nullable().optional(),
+  output: FunctionsExecutionsResponseOutputSchema.nullable().meta({ omitempty: true }).optional(),
   profile: RemotePathSchema.nullable().optional(),
-  reasoning: FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema.nullable().optional(),
-  retry_token: z.string().nullable().optional(),
+  reasoning: FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema.nullable().meta({ omitempty: true }).optional(),
+  retry_token: z.string().nullable().meta({ omitempty: true }).optional(),
   tasks: z.array(FunctionsExecutionsResponseStreamingTaskChunkSchema),
-  tasks_errors: z.boolean().nullable().optional(),
-  usage: AgentCompletionsResponseUsageSchema.nullable().optional(),
+  tasks_errors: z.boolean().nullable().meta({ omitempty: true }).optional(),
+  usage: AgentCompletionsResponseUsageSchema.nullable().meta({ omitempty: true }).optional(),
 }).meta({ title: "functions.executions.response.streaming.FunctionExecutionChunk" });
 export type FunctionsExecutionsResponseStreamingFunctionExecutionChunk = z.infer<typeof FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema>;

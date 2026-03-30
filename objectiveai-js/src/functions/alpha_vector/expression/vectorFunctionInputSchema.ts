@@ -5,7 +5,7 @@ import { FunctionsExpressionInputSchemaSchema } from "../../expression/inputSche
 import { FunctionsExpressionObjectInputSchemaSchema } from "../../expression/objectInputSchema";
 
 export const FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema = z.object({
-  context: FunctionsExpressionObjectInputSchemaSchema.nullable().optional(),
+  context: FunctionsExpressionObjectInputSchemaSchema.nullable().meta({ omitempty: true }).optional(),
   items: FunctionsExpressionInputSchemaSchema,
 }).meta({ title: "functions.alpha_vector.expression.VectorFunctionInputSchema" });
 export type FunctionsAlphaVectorExpressionVectorFunctionInputSchema = z.infer<typeof FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema>;

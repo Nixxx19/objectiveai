@@ -7,6 +7,6 @@ import { RemotePathSchema } from "../../remotePath";
 
 export const FunctionsAlphaVectorVectorFunctionTaskExpressionSchema = RemotePathSchema.and(z.object({
   input: FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema,
-  skip: FunctionsExpressionExpressionSchema.nullable().optional(),
+  skip: FunctionsExpressionExpressionSchema.nullable().meta({ omitempty: true }).optional(),
 })).meta({ title: "functions.alpha_vector.VectorFunctionTaskExpression" });
 export type FunctionsAlphaVectorVectorFunctionTaskExpression = z.infer<typeof FunctionsAlphaVectorVectorFunctionTaskExpressionSchema>;

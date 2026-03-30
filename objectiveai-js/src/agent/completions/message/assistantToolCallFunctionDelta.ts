@@ -3,7 +3,7 @@
 import { z } from "zod";
 
 export const AgentCompletionsMessageAssistantToolCallFunctionDeltaSchema = z.object({
-  arguments: z.string().nullable().describe("The arguments being streamed (accumulated across deltas).").optional(),
-  name: z.string().nullable().describe("The function name (only present in the first delta).").optional(),
+  arguments: z.string().nullable().describe("The arguments being streamed (accumulated across deltas).").meta({ omitempty: true }).optional(),
+  name: z.string().nullable().describe("The function name (only present in the first delta).").meta({ omitempty: true }).optional(),
 }).describe("Function call details in a streaming tool call.").meta({ title: "agent.completions.message.AssistantToolCallFunctionDelta" });
 export type AgentCompletionsMessageAssistantToolCallFunctionDelta = z.infer<typeof AgentCompletionsMessageAssistantToolCallFunctionDeltaSchema>;

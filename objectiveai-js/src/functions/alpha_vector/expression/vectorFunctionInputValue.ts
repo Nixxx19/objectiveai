@@ -4,7 +4,7 @@ import { z } from "zod";
 import { FunctionsExpressionInputValueSchema } from "../../expression/inputValue";
 
 export const FunctionsAlphaVectorExpressionVectorFunctionInputValueSchema = z.object({
-  context: z.record(z.string(), FunctionsExpressionInputValueSchema).nullable().optional(),
+  context: z.record(z.string(), FunctionsExpressionInputValueSchema).nullable().meta({ omitempty: true }).optional(),
   items: z.array(FunctionsExpressionInputValueSchema),
 }).meta({ title: "functions.alpha_vector.expression.VectorFunctionInputValue" });
 export type FunctionsAlphaVectorExpressionVectorFunctionInputValue = z.infer<typeof FunctionsAlphaVectorExpressionVectorFunctionInputValueSchema>;

@@ -9,8 +9,8 @@ export const FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecur
   created: z.number().int().min(0).max(18446744073709552000),
   id: z.string(),
   inventions: z.array(FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema),
-  inventions_errors: z.boolean().nullable().optional(),
+  inventions_errors: z.boolean().nullable().meta({ omitempty: true }).optional(),
   object: FunctionsInventionsRecursiveResponseStreamingObjectSchema,
-  usage: AgentCompletionsResponseUsageSchema.nullable().optional(),
+  usage: AgentCompletionsResponseUsageSchema.nullable().meta({ omitempty: true }).optional(),
 }).meta({ title: "functions.inventions.recursive.response.streaming.FunctionInventionRecursiveChunk" });
 export type FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk = z.infer<typeof FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema>;

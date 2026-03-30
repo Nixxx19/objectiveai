@@ -11,8 +11,8 @@ export interface FunctionsExpressionObjectInputSchema {
   type: FunctionsExpressionObjectInputSchemaType;
 }
 export const FunctionsExpressionObjectInputSchemaSchema: z.ZodType<FunctionsExpressionObjectInputSchema> = z.object({
-  description: z.string().nullable().describe("Human-readable description of the object.").optional(),
+  description: z.string().nullable().describe("Human-readable description of the object.").meta({ omitempty: true }).optional(),
   properties: z.record(z.string(), z.lazy(() => FunctionsExpressionInputSchemaSchema)).describe("Schema for each property in the object."),
-  required: z.array(z.string()).nullable().describe("List of property names that must be present.").optional(),
+  required: z.array(z.string()).nullable().describe("List of property names that must be present.").meta({ omitempty: true }).optional(),
   type: FunctionsExpressionObjectInputSchemaTypeSchema,
 }).describe("Schema for an object input with named properties.").meta({ title: "functions.expression.ObjectInputSchema" });

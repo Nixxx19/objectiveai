@@ -7,7 +7,7 @@ import { FunctionsExpressionObjectInputSchemaSchema } from "../expression/object
 export const FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema = z.object({
   input: FunctionsExpressionExpressionSchema,
   input_schema: FunctionsExpressionObjectInputSchemaSchema,
-  skip: FunctionsExpressionExpressionSchema.nullable().optional(),
+  skip: FunctionsExpressionExpressionSchema.nullable().meta({ omitempty: true }).optional(),
   spec: z.string(),
 }).meta({ title: "functions.alpha_vector.PartialPlaceholderScalarFunctionTaskExpression" });
 export type FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpression = z.infer<typeof FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema>;

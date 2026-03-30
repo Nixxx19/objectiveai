@@ -5,10 +5,10 @@ import { z } from "zod";
 export const VectorCompletionsResponseVoteSchema = z.object({
   agent: z.string().describe("The agent that produced this vote (content-addressed ID)."),
   flat_swarm_index: z.number().int().min(0).max(18446744073709552000).describe("Flattened index accounting for agent counts in the swarm."),
-  from_cache: z.boolean().nullable().describe("If true, this vote was retrieved from cache rather than generated fresh.").optional(),
+  from_cache: z.boolean().nullable().describe("If true, this vote was retrieved from cache rather than generated fresh.").meta({ omitempty: true }).optional(),
   prompt_id: z.string().describe("Content hash of the request messages (for caching/deduplication)."),
   responses_ids: z.array(z.string()).describe("Content hashes of each response option in the request."),
-  retry: z.boolean().nullable().describe("If true, this vote was reused from a previous request via the `retry`\nparameter. All fields reflect the original request's values.").optional(),
+  retry: z.boolean().nullable().describe("If true, this vote was reused from a previous request via the `retry`\nparameter. All fields reflect the original request's values.").meta({ omitempty: true }).optional(),
   swarm_index: z.number().int().min(0).max(18446744073709552000).describe("Index of the agent configuration within the swarm."),
   vote: z.array(z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38)).describe("The vote distribution. Each index corresponds to a response from the\nrequest. Typically one element is 1.0 (selected) and the rest are 0.0."),
   weight: z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38).describe("The weight applied to this vote when computing final scores."),

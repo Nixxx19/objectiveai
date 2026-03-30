@@ -50,6 +50,7 @@ export const KEYWORD_ORDER = [
   "pattern",
   "format",
   "default",
+  "omitempty",
 ];
 
 const KEYWORD_RANK = new Map(KEYWORD_ORDER.map((kw, i) => [kw, i]));

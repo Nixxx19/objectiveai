@@ -5,10 +5,10 @@ import { AgentMockOutputModeSchema } from "./outputMode";
 import { AgentMockUpstreamSchema } from "./upstream";
 
 export const AgentMockAgentBaseSchema = z.object({
-  error: z.boolean().nullable().describe("If true, the mock client will return an error instead of a response.").optional(),
-  invention: z.boolean().nullable().describe("If true, this mock agent supports invention tool calling.\nIncompatible with output modes other than `instruction`.").optional(),
+  error: z.boolean().nullable().describe("If true, the mock client will return an error instead of a response.").meta({ omitempty: true }).optional(),
+  invention: z.boolean().nullable().describe("If true, this mock agent supports invention tool calling.\nIncompatible with output modes other than `instruction`.").meta({ omitempty: true }).optional(),
   output_mode: AgentMockOutputModeSchema.describe("The output mode for vector completions. Ignored for agent completions."),
-  top_logprobs: z.number().int().min(0).max(18446744073709552000).nullable().describe("Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.").optional(),
+  top_logprobs: z.number().int().min(0).max(18446744073709552000).nullable().describe("Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.").meta({ omitempty: true }).optional(),
   upstream: AgentMockUpstreamSchema.describe("The upstream provider marker."),
 }).describe("The base configuration for a Mock Agent (without computed ID).").meta({ title: "agent.mock.AgentBase" });
 export type AgentMockAgentBase = z.infer<typeof AgentMockAgentBaseSchema>;

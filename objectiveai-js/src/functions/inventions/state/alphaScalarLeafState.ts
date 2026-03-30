@@ -6,18 +6,18 @@ import { FunctionsExpressionObjectInputSchemaSchema } from "../../expression/obj
 
 export const FunctionsInventionsStateAlphaScalarLeafStateSchema = z.object({
   depth: z.number().int().min(0).max(18446744073709552000),
-  description: z.string().nullable().optional(),
-  essay: z.string().nullable().optional(),
-  essay_tasks: z.string().nullable().optional(),
-  input_schema: FunctionsExpressionObjectInputSchemaSchema.nullable().optional(),
+  description: z.string().nullable().meta({ omitempty: true }).optional(),
+  essay: z.string().nullable().meta({ omitempty: true }).optional(),
+  essay_tasks: z.string().nullable().meta({ omitempty: true }).optional(),
+  input_schema: FunctionsExpressionObjectInputSchemaSchema.nullable().meta({ omitempty: true }).optional(),
   max_branch_width: z.number().int().min(0).max(18446744073709552000),
   max_leaf_width: z.number().int().min(0).max(18446744073709552000),
   min_branch_width: z.number().int().min(0).max(18446744073709552000),
   min_leaf_width: z.number().int().min(0).max(18446744073709552000),
   name: z.string(),
-  readme: z.string().nullable().optional(),
+  readme: z.string().nullable().meta({ omitempty: true }).optional(),
   spec: z.string(),
-  tasks: z.array(FunctionsAlphaScalarLeafTaskExpressionSchema).nullable().optional(),
-  tasks_length: z.number().int().min(0).max(18446744073709552000).nullable().optional(),
+  tasks: z.array(FunctionsAlphaScalarLeafTaskExpressionSchema).nullable().meta({ omitempty: true }).optional(),
+  tasks_length: z.number().int().min(0).max(18446744073709552000).nullable().meta({ omitempty: true }).optional(),
 }).meta({ title: "functions.inventions.state.AlphaScalarLeafState" });
 export type FunctionsInventionsStateAlphaScalarLeafState = z.infer<typeof FunctionsInventionsStateAlphaScalarLeafStateSchema>;

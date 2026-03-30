@@ -9,15 +9,15 @@ import { FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema } from "../../f
 import { FunctionsInlineProfileOrRemoteCommitOptionalSchema } from "../../inlineProfileOrRemoteCommitOptional";
 
 export const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema = z.object({
-  from_cache: z.boolean().nullable().optional(),
+  from_cache: z.boolean().nullable().meta({ omitempty: true }).optional(),
   function: FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema.describe("The function to execute (inline definition or remote path)."),
   input: FunctionsExpressionInputValueSchema,
   profile: FunctionsInlineProfileOrRemoteCommitOptionalSchema.describe("The profile to use (inline definition or remote path)."),
-  provider: AgentCompletionsRequestProviderSchema.nullable().optional(),
-  reasoning: FunctionsExecutionsRequestReasoningSchema.nullable().optional(),
-  retry_token: z.string().nullable().optional(),
-  seed: z.number().int().min(-9223372036854776000).max(9223372036854776000).nullable().optional(),
-  strategy: FunctionsExecutionsRequestStrategySchema.nullable().optional(),
-  stream: z.boolean().nullable().optional(),
+  provider: AgentCompletionsRequestProviderSchema.nullable().meta({ omitempty: true }).optional(),
+  reasoning: FunctionsExecutionsRequestReasoningSchema.nullable().meta({ omitempty: true }).optional(),
+  retry_token: z.string().nullable().meta({ omitempty: true }).optional(),
+  seed: z.number().int().min(-9223372036854776000).max(9223372036854776000).nullable().meta({ omitempty: true }).optional(),
+  strategy: FunctionsExecutionsRequestStrategySchema.nullable().meta({ omitempty: true }).optional(),
+  stream: z.boolean().nullable().meta({ omitempty: true }).optional(),
 }).describe("Parameters for creating a function execution.").meta({ title: "functions.executions.request.FunctionExecutionCreateParams" });
 export type FunctionsExecutionsRequestFunctionExecutionCreateParams = z.infer<typeof FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema>;

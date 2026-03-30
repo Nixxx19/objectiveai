@@ -4,6 +4,6 @@ import { z } from "zod";
 import { FunctionsProfilesListProfilesSourceSchema } from "./listProfilesSource";
 
 export const FunctionsProfilesListProfilesRequestSchema = z.object({
-  source: FunctionsProfilesListProfilesSourceSchema.nullable().describe("Optional source filter for listing profiles.").optional(),
+  source: FunctionsProfilesListProfilesSourceSchema.nullable().describe("Optional source filter for listing profiles.").meta({ omitempty: true }).optional(),
 }).describe("Query parameters for the list profiles endpoint.").meta({ title: "functions.profiles.ListProfilesRequest" });
 export type FunctionsProfilesListProfilesRequest = z.infer<typeof FunctionsProfilesListProfilesRequestSchema>;

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { FunctionsExpressionBooleanInputSchemaTypeSchema } from "./booleanInputSchemaType";
 
 export const FunctionsExpressionBooleanInputSchemaSchema = z.object({
-  description: z.string().nullable().describe("Human-readable description of the boolean.").optional(),
+  description: z.string().nullable().describe("Human-readable description of the boolean.").meta({ omitempty: true }).optional(),
   type: FunctionsExpressionBooleanInputSchemaTypeSchema,
 }).describe("Schema for a boolean input.").meta({ title: "functions.expression.BooleanInputSchema" });
 export type FunctionsExpressionBooleanInputSchema = z.infer<typeof FunctionsExpressionBooleanInputSchemaSchema>;

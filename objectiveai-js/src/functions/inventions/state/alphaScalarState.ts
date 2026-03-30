@@ -5,7 +5,7 @@ import { FunctionsExpressionObjectInputSchemaSchema } from "../../expression/obj
 
 export const FunctionsInventionsStateAlphaScalarStateSchema = z.object({
   depth: z.number().int().min(0).max(18446744073709552000),
-  input_schema: FunctionsExpressionObjectInputSchemaSchema.nullable().optional(),
+  input_schema: FunctionsExpressionObjectInputSchemaSchema.nullable().meta({ omitempty: true }).optional(),
   max_branch_width: z.number().int().min(0).max(18446744073709552000),
   max_leaf_width: z.number().int().min(0).max(18446744073709552000),
   min_branch_width: z.number().int().min(0).max(18446744073709552000),

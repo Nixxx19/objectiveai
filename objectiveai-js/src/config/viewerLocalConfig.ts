@@ -3,7 +3,7 @@
 import { z } from "zod";
 
 export const ConfigViewerLocalConfigSchema = z.object({
-  secret: z.string().nullable().optional(),
-  signature: z.string().nullable().optional(),
+  secret: z.string().nullable().meta({ omitempty: true }).optional(),
+  signature: z.string().nullable().meta({ omitempty: true }).optional(),
 }).meta({ title: "config.ViewerLocalConfig" });
 export type ConfigViewerLocalConfig = z.infer<typeof ConfigViewerLocalConfigSchema>;

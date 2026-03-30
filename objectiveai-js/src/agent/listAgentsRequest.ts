@@ -4,6 +4,6 @@ import { z } from "zod";
 import { AgentListAgentsSourceSchema } from "./listAgentsSource";
 
 export const AgentListAgentsRequestSchema = z.object({
-  source: AgentListAgentsSourceSchema.nullable().describe("Optional source filter for listing agents.").optional(),
+  source: AgentListAgentsSourceSchema.nullable().describe("Optional source filter for listing agents.").meta({ omitempty: true }).optional(),
 }).describe("Query parameters for the list agents endpoint.").meta({ title: "agent.ListAgentsRequest" });
 export type AgentListAgentsRequest = z.infer<typeof AgentListAgentsRequestSchema>;

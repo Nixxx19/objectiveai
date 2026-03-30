@@ -6,18 +6,18 @@ import { FunctionsAlphaVectorLeafTaskExpressionSchema } from "../../alpha_vector
 
 export const FunctionsInventionsStateAlphaVectorLeafStateSchema = z.object({
   depth: z.number().int().min(0).max(18446744073709552000),
-  description: z.string().nullable().optional(),
-  essay: z.string().nullable().optional(),
-  essay_tasks: z.string().nullable().optional(),
-  input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema.nullable().optional(),
+  description: z.string().nullable().meta({ omitempty: true }).optional(),
+  essay: z.string().nullable().meta({ omitempty: true }).optional(),
+  essay_tasks: z.string().nullable().meta({ omitempty: true }).optional(),
+  input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema.nullable().meta({ omitempty: true }).optional(),
   max_branch_width: z.number().int().min(0).max(18446744073709552000),
   max_leaf_width: z.number().int().min(0).max(18446744073709552000),
   min_branch_width: z.number().int().min(0).max(18446744073709552000),
   min_leaf_width: z.number().int().min(0).max(18446744073709552000),
   name: z.string(),
-  readme: z.string().nullable().optional(),
+  readme: z.string().nullable().meta({ omitempty: true }).optional(),
   spec: z.string(),
-  tasks: z.array(FunctionsAlphaVectorLeafTaskExpressionSchema).nullable().optional(),
-  tasks_length: z.number().int().min(0).max(18446744073709552000).nullable().optional(),
+  tasks: z.array(FunctionsAlphaVectorLeafTaskExpressionSchema).nullable().meta({ omitempty: true }).optional(),
+  tasks_length: z.number().int().min(0).max(18446744073709552000).nullable().meta({ omitempty: true }).optional(),
 }).meta({ title: "functions.inventions.state.AlphaVectorLeafState" });
 export type FunctionsInventionsStateAlphaVectorLeafState = z.infer<typeof FunctionsInventionsStateAlphaVectorLeafStateSchema>;

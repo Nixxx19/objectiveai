@@ -5,7 +5,7 @@ import { ConfigFavoriteSchema } from "./favorite";
 import { ConfigFunctionsProfilesPairsConfigSchema } from "./functionsProfilesPairsConfig";
 
 export const ConfigFunctionsProfilesConfigSchema = z.object({
-  favorites: z.array(ConfigFavoriteSchema).nullable().optional(),
-  pairs: ConfigFunctionsProfilesPairsConfigSchema.nullable().optional(),
+  favorites: z.array(ConfigFavoriteSchema).nullable().meta({ omitempty: true }).optional(),
+  pairs: ConfigFunctionsProfilesPairsConfigSchema.nullable().meta({ omitempty: true }).optional(),
 }).meta({ title: "config.FunctionsProfilesConfig" });
 export type ConfigFunctionsProfilesConfig = z.infer<typeof ConfigFunctionsProfilesConfigSchema>;

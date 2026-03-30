@@ -3,16 +3,16 @@
 import { z } from "zod";
 
 export const ConfigApiHeadersConfigSchema = z.object({
-  http_referer: z.string().nullable().optional(),
-  user_agent: z.string().nullable().optional(),
-  x_commit_author_email: z.string().nullable().optional(),
-  x_commit_author_name: z.string().nullable().optional(),
-  x_github_authorization: z.string().nullable().optional(),
-  x_mcp_authorization: z.record(z.string(), z.string()).nullable().optional(),
-  x_objectiveai_authorization: z.string().nullable().optional(),
-  x_openrouter_authorization: z.string().nullable().optional(),
-  x_title: z.string().nullable().optional(),
-  x_viewer_address: z.string().nullable().optional(),
-  x_viewer_signature: z.string().nullable().optional(),
+  http_referer: z.string().nullable().meta({ omitempty: true }).optional(),
+  user_agent: z.string().nullable().meta({ omitempty: true }).optional(),
+  x_commit_author_email: z.string().nullable().meta({ omitempty: true }).optional(),
+  x_commit_author_name: z.string().nullable().meta({ omitempty: true }).optional(),
+  x_github_authorization: z.string().nullable().meta({ omitempty: true }).optional(),
+  x_mcp_authorization: z.record(z.string(), z.string()).nullable().meta({ omitempty: true }).optional(),
+  x_objectiveai_authorization: z.string().nullable().meta({ omitempty: true }).optional(),
+  x_openrouter_authorization: z.string().nullable().meta({ omitempty: true }).optional(),
+  x_title: z.string().nullable().meta({ omitempty: true }).optional(),
+  x_viewer_address: z.string().nullable().meta({ omitempty: true }).optional(),
+  x_viewer_signature: z.string().nullable().meta({ omitempty: true }).optional(),
 }).meta({ title: "config.ApiHeadersConfig" });
 export type ConfigApiHeadersConfig = z.infer<typeof ConfigApiHeadersConfigSchema>;

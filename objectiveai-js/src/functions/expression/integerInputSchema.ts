@@ -4,9 +4,9 @@ import { z } from "zod";
 import { FunctionsExpressionIntegerInputSchemaTypeSchema } from "./integerInputSchemaType";
 
 export const FunctionsExpressionIntegerInputSchemaSchema = z.object({
-  description: z.string().nullable().describe("Human-readable description of the integer.").optional(),
-  maximum: z.number().int().min(-9223372036854776000).max(9223372036854776000).nullable().describe("Maximum allowed value (inclusive).").optional(),
-  minimum: z.number().int().min(-9223372036854776000).max(9223372036854776000).nullable().describe("Minimum allowed value (inclusive).").optional(),
+  description: z.string().nullable().describe("Human-readable description of the integer.").meta({ omitempty: true }).optional(),
+  maximum: z.number().int().min(-9223372036854776000).max(9223372036854776000).nullable().describe("Maximum allowed value (inclusive).").meta({ omitempty: true }).optional(),
+  minimum: z.number().int().min(-9223372036854776000).max(9223372036854776000).nullable().describe("Minimum allowed value (inclusive).").meta({ omitempty: true }).optional(),
   type: FunctionsExpressionIntegerInputSchemaTypeSchema,
 }).describe("Schema for an integer input.").meta({ title: "functions.expression.IntegerInputSchema" });
 export type FunctionsExpressionIntegerInputSchema = z.infer<typeof FunctionsExpressionIntegerInputSchemaSchema>;

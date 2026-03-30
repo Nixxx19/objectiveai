@@ -11,13 +11,13 @@ import { RemotePathSchema } from "../../../../../remotePath";
 export const FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema = z.object({
   created: z.number().int().min(0).max(18446744073709552000),
   executions: z.array(FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema),
-  executions_errors: z.boolean().nullable().optional(),
-  fitting_stats: FunctionsProfilesComputationsResponseFittingStatsSchema.nullable().optional(),
+  executions_errors: z.boolean().nullable().meta({ omitempty: true }).optional(),
+  fitting_stats: FunctionsProfilesComputationsResponseFittingStatsSchema.nullable().meta({ omitempty: true }).optional(),
   function: RemotePathSchema.nullable().optional(),
   id: z.string(),
   object: FunctionsProfilesComputationsResponseStreamingObjectSchema,
-  profile: FunctionsInlineTasksProfileSchema.nullable().optional(),
-  retry_token: z.string().nullable().optional(),
-  usage: AgentCompletionsResponseUsageSchema.nullable().optional(),
+  profile: FunctionsInlineTasksProfileSchema.nullable().meta({ omitempty: true }).optional(),
+  retry_token: z.string().nullable().meta({ omitempty: true }).optional(),
+  usage: AgentCompletionsResponseUsageSchema.nullable().meta({ omitempty: true }).optional(),
 }).meta({ title: "functions.profiles.computations.response.streaming.FunctionProfileComputationChunk" });
 export type FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk = z.infer<typeof FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema>;

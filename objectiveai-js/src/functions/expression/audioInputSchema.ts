@@ -4,7 +4,7 @@ import { z } from "zod";
 import { FunctionsExpressionAudioInputSchemaTypeSchema } from "./audioInputSchemaType";
 
 export const FunctionsExpressionAudioInputSchemaSchema = z.object({
-  description: z.string().nullable().describe("Human-readable description of the expected audio.").optional(),
+  description: z.string().nullable().describe("Human-readable description of the expected audio.").meta({ omitempty: true }).optional(),
   type: FunctionsExpressionAudioInputSchemaTypeSchema,
 }).describe("Schema for an audio input.").meta({ title: "functions.expression.AudioInputSchema" });
 export type FunctionsExpressionAudioInputSchema = z.infer<typeof FunctionsExpressionAudioInputSchemaSchema>;

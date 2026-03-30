@@ -4,6 +4,6 @@ import { z } from "zod";
 import { AgentInlineAgentBaseSchema } from "./inlineAgentBase";
 
 export const AgentInlineAgentBaseWithFallbacksSchema = AgentInlineAgentBaseSchema.and(z.object({
-  fallbacks: z.array(AgentInlineAgentBaseSchema).nullable().describe("Fallback agents to try if the primary fails.").optional(),
+  fallbacks: z.array(AgentInlineAgentBaseSchema).nullable().describe("Fallback agents to try if the primary fails.").meta({ omitempty: true }).optional(),
 })).describe("An [`InlineAgentBase`] with optional fallbacks (no description).").meta({ title: "agent.InlineAgentBaseWithFallbacks" });
 export type AgentInlineAgentBaseWithFallbacks = z.infer<typeof AgentInlineAgentBaseWithFallbacksSchema>;

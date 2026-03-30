@@ -8,11 +8,11 @@ import { AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema } from ".
 
 export const AgentCompletionsRequestAgentCompletionCreateParamsSchema = z.object({
   agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema.describe("The agent to use (inline Agent or stored ID)."),
-  continuation: z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").optional(),
+  continuation: z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
   messages: z.array(AgentCompletionsMessageMessageSchema).describe("The conversation messages."),
-  provider: AgentCompletionsRequestProviderSchema.nullable().describe("Provider routing preferences.").optional(),
-  response_format: AgentCompletionsRequestResponseFormatParamSchema.nullable().describe("Output format constraints (text, JSON, or JSON schema).").optional(),
-  seed: z.number().int().min(-9223372036854776000).max(9223372036854776000).nullable().describe("Random seed for deterministic generation.").optional(),
-  stream: z.boolean().nullable().describe("Whether to stream the response.").optional(),
+  provider: AgentCompletionsRequestProviderSchema.nullable().describe("Provider routing preferences.").meta({ omitempty: true }).optional(),
+  response_format: AgentCompletionsRequestResponseFormatParamSchema.nullable().describe("Output format constraints (text, JSON, or JSON schema).").meta({ omitempty: true }).optional(),
+  seed: z.number().int().min(-9223372036854776000).max(9223372036854776000).nullable().describe("Random seed for deterministic generation.").meta({ omitempty: true }).optional(),
+  stream: z.boolean().nullable().describe("Whether to stream the response.").meta({ omitempty: true }).optional(),
 }).describe("Parameters for creating a agent completion.").meta({ title: "agent.completions.request.AgentCompletionCreateParams" });
 export type AgentCompletionsRequestAgentCompletionCreateParams = z.infer<typeof AgentCompletionsRequestAgentCompletionCreateParamsSchema>;

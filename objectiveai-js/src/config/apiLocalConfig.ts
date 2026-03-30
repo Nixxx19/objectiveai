@@ -3,6 +3,6 @@
 import { z } from "zod";
 
 export const ConfigApiLocalConfigSchema = z.object({
-  claude_agent_sdk: z.boolean().nullable().optional(),
+  claude_agent_sdk: z.boolean().nullable().meta({ omitempty: true }).optional(),
 }).meta({ title: "config.ApiLocalConfig" });
 export type ConfigApiLocalConfig = z.infer<typeof ConfigApiLocalConfigSchema>;

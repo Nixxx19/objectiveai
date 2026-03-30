@@ -4,6 +4,6 @@ import { z } from "zod";
 import { SwarmListSwarmsSourceSchema } from "./listSwarmsSource";
 
 export const SwarmListSwarmsRequestSchema = z.object({
-  source: SwarmListSwarmsSourceSchema.nullable().describe("Optional source filter for listing swarms.").optional(),
+  source: SwarmListSwarmsSourceSchema.nullable().describe("Optional source filter for listing swarms.").meta({ omitempty: true }).optional(),
 }).describe("Query parameters for the list swarms endpoint.").meta({ title: "swarm.ListSwarmsRequest" });
 export type SwarmListSwarmsRequest = z.infer<typeof SwarmListSwarmsRequestSchema>;

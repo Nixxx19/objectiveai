@@ -4,7 +4,7 @@ import { z } from "zod";
 import { FunctionsExpressionVideoInputSchemaTypeSchema } from "./videoInputSchemaType";
 
 export const FunctionsExpressionVideoInputSchemaSchema = z.object({
-  description: z.string().nullable().describe("Human-readable description of the expected video.").optional(),
+  description: z.string().nullable().describe("Human-readable description of the expected video.").meta({ omitempty: true }).optional(),
   type: FunctionsExpressionVideoInputSchemaTypeSchema,
 }).describe("Schema for a video input (URL or base64-encoded).").meta({ title: "functions.expression.VideoInputSchema" });
 export type FunctionsExpressionVideoInputSchema = z.infer<typeof FunctionsExpressionVideoInputSchemaSchema>;

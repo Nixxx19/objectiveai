@@ -10,7 +10,7 @@ import { VectorCompletionsResponseVoteSchema } from "../../../../vector/completi
 export const FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema = z.object({
   completions: z.array(VectorCompletionsResponseStreamingAgentCompletionChunkSchema).describe("Incremental agent completion chunks from each agent."),
   created: z.number().int().min(0).max(18446744073709552000).describe("Unix timestamp when the completion was created."),
-  error: ErrorResponseErrorSchema.nullable().optional(),
+  error: ErrorResponseErrorSchema.nullable().meta({ omitempty: true }).optional(),
   id: z.string().describe("Unique identifier for this vector completion."),
   index: z.number().int().min(0).max(18446744073709552000),
   object: VectorCompletionsResponseStreamingObjectSchema.describe("Object type identifier (`\"vector.completion.chunk\"`)."),
@@ -18,7 +18,7 @@ export const FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema
   swarm: z.string().describe("ID of the swarm used for this completion."),
   task_index: z.number().int().min(0).max(18446744073709552000),
   task_path: z.array(z.number().int().min(0).max(18446744073709552000)),
-  usage: AgentCompletionsResponseUsageSchema.nullable().describe("Aggregated usage statistics. Typically present only in the final chunk.").optional(),
+  usage: AgentCompletionsResponseUsageSchema.nullable().describe("Aggregated usage statistics. Typically present only in the final chunk.").meta({ omitempty: true }).optional(),
   votes: z.array(VectorCompletionsResponseVoteSchema).describe("Votes received so far. New votes are appended in subsequent chunks."),
   weights: z.array(z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38)).describe("Current weight distribution across responses. Updated as new votes arrive."),
 }).describe("A chunk in a streaming vector completion response.\n\nEach chunk contains incremental updates to the completion. Use the\n[`push`](Self::push) method to accumulate chunks into a complete response.").meta({ title: "functions.executions.response.streaming.VectorCompletionTaskChunk" });

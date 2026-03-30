@@ -10,5 +10,5 @@ export interface FunctionsInlineTasksProfile {
 }
 export const FunctionsInlineTasksProfileSchema: z.ZodType<FunctionsInlineTasksProfile> = z.object({
   tasks: z.array(z.lazy(() => FunctionsTaskProfileSchema)).describe("Configuration for each task in the corresponding Function."),
-  weights: WeightsSchema.nullable().describe("Optional weights for each Task in the corresponding Function.\nIf `None`, uniform weights are used.").optional(),
+  weights: WeightsSchema.nullable().describe("Optional weights for each Task in the corresponding Function.\nIf `None`, uniform weights are used.").meta({ omitempty: true }).optional(),
 }).describe("An inline tasks-based profile definition without metadata.").meta({ title: "functions.InlineTasksProfile" });

@@ -3,9 +3,9 @@
 import { z } from "zod";
 
 export const AgentCompletionsResponsePromptTokensDetailsSchema = z.object({
-  audio_tokens: z.number().int().min(0).max(18446744073709552000).nullable().describe("Audio input tokens.").optional(),
-  cache_write_tokens: z.number().int().min(0).max(18446744073709552000).nullable().describe("Tokens written to cache.").optional(),
-  cached_tokens: z.number().int().min(0).max(18446744073709552000).nullable().describe("Tokens served from cache.").optional(),
-  video_tokens: z.number().int().min(0).max(18446744073709552000).nullable().describe("Video input tokens.").optional(),
+  audio_tokens: z.number().int().min(0).max(18446744073709552000).nullable().describe("Audio input tokens.").meta({ omitempty: true }).optional(),
+  cache_write_tokens: z.number().int().min(0).max(18446744073709552000).nullable().describe("Tokens written to cache.").meta({ omitempty: true }).optional(),
+  cached_tokens: z.number().int().min(0).max(18446744073709552000).nullable().describe("Tokens served from cache.").meta({ omitempty: true }).optional(),
+  video_tokens: z.number().int().min(0).max(18446744073709552000).nullable().describe("Video input tokens.").meta({ omitempty: true }).optional(),
 }).describe("Detailed breakdown of prompt token usage.").meta({ title: "agent.completions.response.PromptTokensDetails" });
 export type AgentCompletionsResponsePromptTokensDetails = z.infer<typeof AgentCompletionsResponsePromptTokensDetailsSchema>;

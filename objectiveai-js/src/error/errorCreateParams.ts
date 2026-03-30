@@ -3,7 +3,7 @@
 import { z } from "zod";
 
 export const ErrorErrorCreateParamsSchema = z.object({
-  seed: z.number().int().min(-9223372036854776000).max(9223372036854776000).nullable().describe("Random seed for deterministic error generation.").optional(),
-  stream: z.boolean().nullable().describe("Whether to stream the response.").optional(),
+  seed: z.number().int().min(-9223372036854776000).max(9223372036854776000).nullable().describe("Random seed for deterministic error generation.").meta({ omitempty: true }).optional(),
+  stream: z.boolean().nullable().describe("Whether to stream the response.").meta({ omitempty: true }).optional(),
 }).describe("Request to trigger an error response for testing purposes.").meta({ title: "error.ErrorCreateParams" });
 export type ErrorErrorCreateParams = z.infer<typeof ErrorErrorCreateParamsSchema>;

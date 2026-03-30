@@ -303,7 +303,16 @@ function convertObject(
       if (inner._zod.def.type === "optional") {
         inner = inner._zod.def.innerType;
       }
-      properties[key] = convert(inner, allTitles, rootTitle, seen);
+      // Check for omitempty in meta before converting (meta is on the
+      // outermost wrapper, which may be the optional or the inner schema)
+      const propMeta = typeof propSchema.meta === "function" ? propSchema.meta() : undefined;
+      const innerMeta = typeof inner.meta === "function" ? inner.meta() : undefined;
+      const omitempty = propMeta?.omitempty || innerMeta?.omitempty;
+      const prop: Record<string, unknown> = convert(inner, allTitles, rootTitle, seen);
+      if (omitempty) {
+        prop.omitempty = true;
+      }
+      properties[key] = prop;
     }
     result.properties = properties;
   }

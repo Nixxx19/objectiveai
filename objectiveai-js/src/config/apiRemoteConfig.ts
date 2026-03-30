@@ -3,6 +3,6 @@
 import { z } from "zod";
 
 export const ConfigApiRemoteConfigSchema = z.object({
-  objectiveai_address: z.string().nullable().optional(),
+  objectiveai_address: z.string().nullable().meta({ omitempty: true }).optional(),
 }).meta({ title: "config.ApiRemoteConfig" });
 export type ConfigApiRemoteConfig = z.infer<typeof ConfigApiRemoteConfigSchema>;

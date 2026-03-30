@@ -8,16 +8,16 @@ import { AgentCompletionsMessageRichContentSchema } from "../completions/message
 import { AgentMcpServerSchema } from "../mcpServer";
 
 export const AgentClaudeAgentSdkAgentSchema = z.object({
-  effort: AgentClaudeAgentSdkEffortSchema.nullable().describe("The effort level for model output.").optional(),
+  effort: AgentClaudeAgentSdkEffortSchema.nullable().describe("The effort level for model output.").meta({ omitempty: true }).optional(),
   id: z.string().describe("The deterministic content-addressed ID (22-character base62 string)."),
-  mcp_servers: z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").optional(),
+  mcp_servers: z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").meta({ omitempty: true }).optional(),
   model: z.string().describe("The upstream language model identifier."),
   output_mode: AgentClaudeAgentSdkOutputModeSchema.describe("The output mode for vector completions. Ignored for agent completions."),
-  prefix_content: AgentCompletionsMessageRichContentSchema.nullable().describe("Rich content prepended to the user's prompt.").optional(),
-  suffix_content: AgentCompletionsMessageRichContentSchema.nullable().describe("Rich content appended after the user's prompt.").optional(),
-  synthetic_reasoning: z.boolean().nullable().describe("Enable synthetic reasoning for non-reasoning LLMs.\n\n**Vector completions only.** Ignored for agent completions.\n\nWhen enabled, forces the LLM to output a `_think` field before voting,\nsimulating chain-of-thought reasoning. Requires `output_mode` to be\n`ToolCall` (not `Instruction`).").optional(),
-  system_prompt: z.string().nullable().describe("System prompt for the agent.").optional(),
-  thinking: z.boolean().nullable().describe("Whether thinking/extended thinking is enabled.\n\nDefaults to `true`. Set to `false` to disable.").optional(),
+  prefix_content: AgentCompletionsMessageRichContentSchema.nullable().describe("Rich content prepended to the user's prompt.").meta({ omitempty: true }).optional(),
+  suffix_content: AgentCompletionsMessageRichContentSchema.nullable().describe("Rich content appended after the user's prompt.").meta({ omitempty: true }).optional(),
+  synthetic_reasoning: z.boolean().nullable().describe("Enable synthetic reasoning for non-reasoning LLMs.\n\n**Vector completions only.** Ignored for agent completions.\n\nWhen enabled, forces the LLM to output a `_think` field before voting,\nsimulating chain-of-thought reasoning. Requires `output_mode` to be\n`ToolCall` (not `Instruction`).").meta({ omitempty: true }).optional(),
+  system_prompt: z.string().nullable().describe("System prompt for the agent.").meta({ omitempty: true }).optional(),
+  thinking: z.boolean().nullable().describe("Whether thinking/extended thinking is enabled.\n\nDefaults to `true`. Set to `false` to disable.").meta({ omitempty: true }).optional(),
   upstream: AgentClaudeAgentSdkUpstreamSchema.describe("The upstream provider marker."),
 }).describe("A validated Claude Agent SDK Agent with its computed content-addressed ID.").meta({ title: "agent.claude_agent_sdk.Agent" });
 export type AgentClaudeAgentSdkAgent = z.infer<typeof AgentClaudeAgentSdkAgentSchema>;

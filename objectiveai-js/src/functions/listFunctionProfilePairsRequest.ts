@@ -4,6 +4,6 @@ import { z } from "zod";
 import { FunctionsListFunctionProfilePairsSourceSchema } from "./listFunctionProfilePairsSource";
 
 export const FunctionsListFunctionProfilePairsRequestSchema = z.object({
-  source: FunctionsListFunctionProfilePairsSourceSchema.nullable().describe("Optional source filter for listing function-profile pairs.").optional(),
+  source: FunctionsListFunctionProfilePairsSourceSchema.nullable().describe("Optional source filter for listing function-profile pairs.").meta({ omitempty: true }).optional(),
 }).describe("Query parameters for the list function-profile pairs endpoint.").meta({ title: "functions.ListFunctionProfilePairsRequest" });
 export type FunctionsListFunctionProfilePairsRequest = z.infer<typeof FunctionsListFunctionProfilePairsRequestSchema>;

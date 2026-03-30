@@ -4,6 +4,6 @@ import { z } from "zod";
 import { ConfigFavoriteSchema } from "./favorite";
 
 export const ConfigAgentsConfigSchema = z.object({
-  favorites: z.array(ConfigFavoriteSchema).nullable().optional(),
+  favorites: z.array(ConfigFavoriteSchema).nullable().meta({ omitempty: true }).optional(),
 }).meta({ title: "config.AgentsConfig" });
 export type ConfigAgentsConfig = z.infer<typeof ConfigAgentsConfigSchema>;
