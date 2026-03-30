@@ -3,6 +3,17 @@
   "description": "A streaming agent completion chunk from a single agent within a vector completion.\n\nThe `index` field is used to correlate chunks belonging to the same\nunderlying completion when accumulating via [`push`](Self::push).",
   "type": "object",
   "properties": {
+    "continuation": {
+      "description": "Continuation state for multi-turn conversations (only present in the final chunk).",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "created": {
       "type": "integer",
       "minimum": 0,

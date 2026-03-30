@@ -3,6 +3,17 @@
   "description": "A agent completion from a single agent within a vector completion.\n\nWraps the standard agent completion response with an index to identify\nwhich agent in the swarm produced it.",
   "type": "object",
   "properties": {
+    "continuation": {
+      "description": "Continuation state for multi-turn conversations.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "created": {
       "type": "integer",
       "minimum": 0,

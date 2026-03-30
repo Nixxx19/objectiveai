@@ -7,6 +7,17 @@
       "description": "The agent to use (inline Agent or stored ID).",
       "$ref": "agent.InlineAgentBaseWithFallbacksOrRemoteCommitOptional"
     },
+    "continuation": {
+      "description": "Continuation from a previous completion, as a base64-encoded string.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "messages": {
       "description": "The conversation messages.",
       "type": "array",

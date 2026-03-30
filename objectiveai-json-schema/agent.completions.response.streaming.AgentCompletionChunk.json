@@ -3,6 +3,17 @@
   "description": "A chunk of a streaming agent completion response.\n\nMultiple chunks are received via Server-Sent Events and can be\naccumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)\nusing the [`push`](Self::push) method.",
   "type": "object",
   "properties": {
+    "continuation": {
+      "description": "Continuation state for multi-turn conversations (only present in the final chunk).",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "created": {
       "type": "integer",
       "minimum": 0,

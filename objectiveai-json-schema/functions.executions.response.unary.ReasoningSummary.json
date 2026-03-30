@@ -3,6 +3,17 @@
   "description": "A complete agent completion response.",
   "type": "object",
   "properties": {
+    "continuation": {
+      "description": "Continuation state for multi-turn conversations.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "created": {
       "type": "integer",
       "minimum": 0,
