@@ -11,6 +11,9 @@ func (v *FunctionsExecutionsResponseStreamingReasoningSummaryChunk) Push(other *
 	// error: replace
 	v.Error = pushReplace(v.Error, other.Error)
 
+	// continuation: replace
+	v.Continuation = pushReplace(v.Continuation, other.Continuation)
+
 	// usage: delegate
 	if v.Usage != nil && other.Usage != nil {
 		v.Usage.Push(other.Usage)

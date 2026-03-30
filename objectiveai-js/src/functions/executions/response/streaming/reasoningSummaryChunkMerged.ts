@@ -27,6 +27,12 @@ export function functionsExecutionsResponseStreamingReasoningSummaryChunkMerged(
     error = b.error;
   }
 
+  let continuation = a.continuation;
+  if (b.continuation != null) {
+    if (b.continuation !== a.continuation) changed = true;
+    continuation = b.continuation;
+  }
+
   if (!changed) return [a, false];
   return [{
     id: a.id,
@@ -36,5 +42,6 @@ export function functionsExecutionsResponseStreamingReasoningSummaryChunkMerged(
     ...(usage != null ? { usage } : {}),
     upstream: a.upstream,
     ...(error != null ? { error } : {}),
+    ...(continuation != null ? { continuation } : {}),
   }, true];
 }
