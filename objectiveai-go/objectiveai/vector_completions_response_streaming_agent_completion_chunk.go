@@ -12,6 +12,8 @@ import (
 // The `index` field is used to correlate chunks belonging to the same
 // underlying completion when accumulating via [`push`](Self::push).
 type VectorCompletionsResponseStreamingAgentCompletionChunk struct {
+	// Continuation state for multi-turn conversations (only present in the final chunk).
+	Continuation *string `json:"continuation,omitempty"`
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
 	// Error details if this completion failed.
 	Error *ErrorResponseError `json:"error,omitempty"`

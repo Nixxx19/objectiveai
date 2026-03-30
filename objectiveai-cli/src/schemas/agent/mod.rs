@@ -56,6 +56,10 @@ pub enum Commands {
         #[command(subcommand)]
         command: GetCommand,
     },
+    Continuation {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
     GetAgentResponse {
         #[command(subcommand)]
         command: GetCommand,
@@ -137,7 +141,7 @@ pub enum Commands {
 impl Commands {
     pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
         match self {
-            Commands::List => Ok(crate::Output::Schema("[\"claude_agent_sdk\",\"completions\",\"mock\",\"openrouter\",\"Agent\",\"AgentBase\",\"AgentWithFallbacks\",\"AgentWithFallbacksWithCount\",\"GetAgentResponse\",\"InlineAgent\",\"InlineAgentBase\",\"InlineAgentBaseWithFallbacks\",\"InlineAgentBaseWithFallbacksOrRemote\",\"InlineAgentBaseWithFallbacksOrRemoteCommitOptional\",\"InlineAgentBaseWithFallbacksOrRemoteWithCount\",\"InlineAgentWithFallbacks\",\"ListAgentResponse\",\"ListAgentsRequest\",\"ListAgentsSource\",\"McpServer\",\"OutputMode\",\"RemoteAgent\",\"RemoteAgentBase\",\"RemoteAgentBaseWithFallbacks\",\"RemoteAgentWithFallbacks\",\"Upstream\",\"UsageAgentResponse\"]")),
+            Commands::List => Ok(crate::Output::Schema("[\"claude_agent_sdk\",\"completions\",\"mock\",\"openrouter\",\"Agent\",\"AgentBase\",\"AgentWithFallbacks\",\"AgentWithFallbacksWithCount\",\"Continuation\",\"GetAgentResponse\",\"InlineAgent\",\"InlineAgentBase\",\"InlineAgentBaseWithFallbacks\",\"InlineAgentBaseWithFallbacksOrRemote\",\"InlineAgentBaseWithFallbacksOrRemoteCommitOptional\",\"InlineAgentBaseWithFallbacksOrRemoteWithCount\",\"InlineAgentWithFallbacks\",\"ListAgentResponse\",\"ListAgentsRequest\",\"ListAgentsSource\",\"McpServer\",\"OutputMode\",\"RemoteAgent\",\"RemoteAgentBase\",\"RemoteAgentBaseWithFallbacks\",\"RemoteAgentWithFallbacks\",\"Upstream\",\"UsageAgentResponse\"]")),
             Commands::ClaudeAgentSdk { command } => command.handle(),
             Commands::Completions { command } => command.handle(),
             Commands::Mock { command } => command.handle(),
@@ -153,6 +157,9 @@ impl Commands {
             )),
             Commands::AgentWithFallbacksWithCount { .. } => Ok(crate::Output::Schema(
                 include_str!("../../../../objectiveai-json-schema/agent.AgentWithFallbacksWithCount.json"),
+            )),
+            Commands::Continuation { .. } => Ok(crate::Output::Schema(
+                include_str!("../../../../objectiveai-json-schema/agent.Continuation.json"),
             )),
             Commands::GetAgentResponse { .. } => Ok(crate::Output::Schema(
                 include_str!("../../../../objectiveai-json-schema/agent.GetAgentResponse.json"),

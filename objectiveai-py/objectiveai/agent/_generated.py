@@ -4,6 +4,7 @@ from .agent import Agent, AgentInline, AgentRemote  # noqa: F401
 from .agent_base import AgentBase, AgentBaseInline, AgentBaseRemote  # noqa: F401
 from .agent_with_fallbacks import AgentWithFallbacks, AgentWithFallbacksInline, AgentWithFallbacksRemote  # noqa: F401
 from .agent_with_fallbacks_with_count import AgentWithFallbacksWithCount, AgentWithFallbacksWithCountInlineClaudeAgentSdk, AgentWithFallbacksWithCountInlineMock, AgentWithFallbacksWithCountInlineOpenrouter, AgentWithFallbacksWithCountRemoteClaudeAgentSdk, AgentWithFallbacksWithCountRemoteMock, AgentWithFallbacksWithCountRemoteOpenrouter  # noqa: F401
+from .continuation import Continuation, ContinuationClaudeAgentSdk, ContinuationMock, ContinuationOpenrouter  # noqa: F401
 from .get_agent_response import GetAgentResponse, GetAgentResponseFilesystem, GetAgentResponseGithub, GetAgentResponseMock  # noqa: F401
 from .inline_agent import InlineAgent, InlineAgentClaudeAgentSdk, InlineAgentMock, InlineAgentOpenrouter  # noqa: F401
 from .inline_agent_base import InlineAgentBase, InlineAgentBaseClaudeAgentSdk, InlineAgentBaseMock, InlineAgentBaseOpenrouter  # noqa: F401

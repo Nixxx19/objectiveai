@@ -14,6 +14,7 @@ class AgentCompletionCreateParams(BaseModel):
     model_config = ConfigDict(title='agent.completions.request.AgentCompletionCreateParams')
 
     agent: InlineAgentBaseWithFallbacksOrRemoteCommitOptional = Field(..., description='The agent to use (inline Agent or stored ID).')
+    continuation: Optional[str] = Field(None, description='Continuation from a previous completion, as a base64-encoded string.')
     messages: list[Message] = Field(..., description='The conversation messages.')
     provider: Optional[Provider] = Field(None, description='Provider routing preferences.')
     response_format: Optional[ResponseFormatParam] = Field(None, description='Output format constraints (text, JSON, or JSON schema).')

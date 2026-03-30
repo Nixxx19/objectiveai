@@ -11,6 +11,8 @@ import (
 type AgentCompletionsRequestAgentCompletionCreateParams struct {
 	// The agent to use (inline Agent or stored ID).
 	Agent AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional `json:"agent"`
+	// Continuation from a previous completion, as a base64-encoded string.
+	Continuation *string `json:"continuation,omitempty"`
 	// The conversation messages.
 	Messages []AgentCompletionsMessageMessage `json:"messages"`
 	// Provider routing preferences.

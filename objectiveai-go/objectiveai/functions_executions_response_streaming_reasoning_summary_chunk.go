@@ -13,6 +13,8 @@ import (
 // accumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)
 // using the [`push`](Self::push) method.
 type FunctionsExecutionsResponseStreamingReasoningSummaryChunk struct {
+	// Continuation state for multi-turn conversations (only present in the final chunk).
+	Continuation *string `json:"continuation,omitempty"`
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
 	Error *ErrorResponseError `json:"error,omitempty"`
 	ID string `json:"id"`

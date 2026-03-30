@@ -17,6 +17,7 @@ The `index` field is used to correlate chunks belonging to the same
 underlying completion when accumulating via [`push`](Self::push)."""
     model_config = ConfigDict(title='vector.completions.response.streaming.AgentCompletionChunk')
 
+    continuation: Optional[str] = Field(None, description='Continuation state for multi-turn conversations (only present in the final chunk).')
     created: int = Field(..., ge=0, le=18446744073709551615)
     error: Optional[ResponseError] = Field(None, description='Error details if this completion failed.')
     id: str

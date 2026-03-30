@@ -23,6 +23,10 @@ pub enum Commands {
         #[command(subcommand)]
         command: GetCommand,
     },
+    Continuation {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
     OutputMode {
         #[command(subcommand)]
         command: GetCommand,
@@ -64,12 +68,15 @@ pub enum Commands {
 impl Commands {
     pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
         match self {
-            Commands::List => Ok(crate::Output::Schema("[\"Agent\",\"AgentBase\",\"OutputMode\",\"Provider\",\"ProviderQuantization\",\"Reasoning\",\"ReasoningEffort\",\"ReasoningSummaryVerbosity\",\"Stop\",\"Upstream\",\"Verbosity\"]")),
+            Commands::List => Ok(crate::Output::Schema("[\"Agent\",\"AgentBase\",\"Continuation\",\"OutputMode\",\"Provider\",\"ProviderQuantization\",\"Reasoning\",\"ReasoningEffort\",\"ReasoningSummaryVerbosity\",\"Stop\",\"Upstream\",\"Verbosity\"]")),
             Commands::Agent { .. } => Ok(crate::Output::Schema(
                 include_str!("../../../../../objectiveai-json-schema/agent.openrouter.Agent.json"),
             )),
             Commands::AgentBase { .. } => Ok(crate::Output::Schema(
                 include_str!("../../../../../objectiveai-json-schema/agent.openrouter.AgentBase.json"),
+            )),
+            Commands::Continuation { .. } => Ok(crate::Output::Schema(
+                include_str!("../../../../../objectiveai-json-schema/agent.openrouter.Continuation.json"),
             )),
             Commands::OutputMode { .. } => Ok(crate::Output::Schema(
                 include_str!("../../../../../objectiveai-json-schema/agent.openrouter.OutputMode.json"),

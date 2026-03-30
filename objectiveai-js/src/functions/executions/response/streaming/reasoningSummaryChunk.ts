@@ -8,6 +8,7 @@ import { AgentUpstreamSchema } from "../../../../agent/upstream";
 import { ErrorResponseErrorSchema } from "../../../../error/responseError";
 
 export const FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema = z.object({
+  continuation: z.string().nullable().describe("Continuation state for multi-turn conversations (only present in the final chunk).").optional(),
   created: z.number().int().min(0).max(18446744073709552000),
   error: ErrorResponseErrorSchema.nullable().optional(),
   id: z.string(),

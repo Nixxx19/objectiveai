@@ -14,6 +14,7 @@ class ReasoningSummary(BaseModel):
     """A complete agent completion response."""
     model_config = ConfigDict(title='functions.executions.response.unary.ReasoningSummary')
 
+    continuation: Optional[str] = Field(None, description='Continuation state for multi-turn conversations.')
     created: int = Field(..., ge=0, le=18446744073709551615)
     error: Optional[ResponseError] = None
     id: str

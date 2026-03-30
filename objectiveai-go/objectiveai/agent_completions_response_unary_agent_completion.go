@@ -9,6 +9,8 @@ import (
 
 // A complete agent completion response.
 type AgentCompletionsResponseUnaryAgentCompletion struct {
+	// Continuation state for multi-turn conversations.
+	Continuation *string `json:"continuation,omitempty"`
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
 	// Error details if this completion failed.
 	Error *ErrorResponseError `json:"error,omitempty"`

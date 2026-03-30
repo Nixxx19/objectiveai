@@ -17,6 +17,7 @@ Wraps the standard agent completion response with an index to identify
 which agent in the swarm produced it."""
     model_config = ConfigDict(title='vector.completions.response.unary.AgentCompletion')
 
+    continuation: Optional[str] = Field(None, description='Continuation state for multi-turn conversations.')
     created: int = Field(..., ge=0, le=18446744073709551615)
     error: Optional[ResponseError] = Field(None, description='Error details if this completion failed.')
     id: str

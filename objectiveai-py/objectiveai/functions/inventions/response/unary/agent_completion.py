@@ -14,6 +14,7 @@ class AgentCompletion(BaseModel):
     """A complete agent completion response."""
     model_config = ConfigDict(title='functions.inventions.response.unary.AgentCompletion')
 
+    continuation: Optional[str] = Field(None, description='Continuation state for multi-turn conversations.')
     created: int = Field(..., ge=0, le=18446744073709551615)
     error: Optional[ResponseError] = Field(None, description='Error details if this completion failed.')
     id: str

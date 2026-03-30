@@ -23,6 +23,10 @@ pub enum Commands {
         #[command(subcommand)]
         command: GetCommand,
     },
+    Continuation {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
     Effort {
         #[command(subcommand)]
         command: GetCommand,
@@ -40,12 +44,15 @@ pub enum Commands {
 impl Commands {
     pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
         match self {
-            Commands::List => Ok(crate::Output::Schema("[\"Agent\",\"AgentBase\",\"Effort\",\"OutputMode\",\"Upstream\"]")),
+            Commands::List => Ok(crate::Output::Schema("[\"Agent\",\"AgentBase\",\"Continuation\",\"Effort\",\"OutputMode\",\"Upstream\"]")),
             Commands::Agent { .. } => Ok(crate::Output::Schema(
                 include_str!("../../../../../objectiveai-json-schema/agent.claude_agent_sdk.Agent.json"),
             )),
             Commands::AgentBase { .. } => Ok(crate::Output::Schema(
                 include_str!("../../../../../objectiveai-json-schema/agent.claude_agent_sdk.AgentBase.json"),
+            )),
+            Commands::Continuation { .. } => Ok(crate::Output::Schema(
+                include_str!("../../../../../objectiveai-json-schema/agent.claude_agent_sdk.Continuation.json"),
             )),
             Commands::Effort { .. } => Ok(crate::Output::Schema(
                 include_str!("../../../../../objectiveai-json-schema/agent.claude_agent_sdk.Effort.json"),

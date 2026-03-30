@@ -18,6 +18,7 @@ accumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion
 using the [`push`](Self::push) method."""
     model_config = ConfigDict(title='functions.executions.response.streaming.ReasoningSummaryChunk')
 
+    continuation: Optional[str] = Field(None, description='Continuation state for multi-turn conversations (only present in the final chunk).')
     created: int = Field(..., ge=0, le=18446744073709551615)
     error: Optional[ResponseError] = None
     id: str
