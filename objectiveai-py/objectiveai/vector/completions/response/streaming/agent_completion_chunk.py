@@ -17,13 +17,13 @@ The `index` field is used to correlate chunks belonging to the same
 underlying completion when accumulating via [`push`](Self::push)."""
     model_config = ConfigDict(title='vector.completions.response.streaming.AgentCompletionChunk')
 
-    continuation: Optional[str] = Field(None, description='Continuation state for multi-turn conversations (only present in the final chunk).')
+    continuation: Optional[str] = Field(None, description='Continuation state for multi-turn conversations (only present in the final chunk).', json_schema_extra={'omitempty': True})
     created: int = Field(..., ge=0, le=18446744073709551615)
-    error: Optional[ResponseError] = Field(None, description='Error details if this completion failed.')
+    error: Optional[ResponseError] = Field(None, description='Error details if this completion failed.', json_schema_extra={'omitempty': True})
     id: str
     index: int = Field(..., description='Index used to correlate chunks from the same completion.', ge=0, le=18446744073709551615)
     messages: list[MessageChunk]
     object: Object = Field(..., description='The object type (always "agent.completion.chunk").')
     upstream: Upstream = Field(..., description='Upstream provider')
-    usage: Optional[Usage] = Field(None, description='Token usage (only present in the final chunk).')
+    usage: Optional[Usage] = Field(None, description='Token usage (only present in the final chunk).', json_schema_extra={'omitempty': True})
 

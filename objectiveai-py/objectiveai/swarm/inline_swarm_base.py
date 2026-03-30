@@ -15,5 +15,5 @@ and sorted when converting to an [`InlineSwarm`]."""
     model_config = ConfigDict(title='swarm.InlineSwarmBase')
 
     agents: list[InlineAgentBaseWithFallbacksOrRemoteWithCount] = Field(..., description='The LLMs in this swarm, with optional counts and fallbacks.')
-    weights: Optional[Weights] = Field(None, description='Optional weights for each agent. If `None`, uniform weights are used.')
+    weights: Optional[Weights] = Field(None, description='Optional weights for each agent. If `None`, uniform weights are used.', json_schema_extra={'omitempty': True})
 

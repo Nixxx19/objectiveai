@@ -10,7 +10,7 @@ class StringInputSchema(BaseModel):
     """Schema for a string input."""
     model_config = ConfigDict(title='functions.expression.StringInputSchema')
 
-    description: Optional[str] = Field(None, description='Human-readable description of the string.')
-    enum: Optional[list[str]] = Field(None, description='If provided, the string must be one of these values.')
+    description: Optional[str] = Field(None, description='Human-readable description of the string.', json_schema_extra={'omitempty': True})
+    enum: Optional[list[str]] = Field(None, description='If provided, the string must be one of these values.', json_schema_extra={'omitempty': True})
     type_: StringInputSchemaType = Field(..., alias='type')
 

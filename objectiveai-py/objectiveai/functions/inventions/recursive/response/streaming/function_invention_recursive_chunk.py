@@ -14,7 +14,7 @@ class FunctionInventionRecursiveChunk(BaseModel):
     created: int = Field(..., ge=0, le=18446744073709551615)
     id: str
     inventions: list[FunctionInventionChunk]
-    inventions_errors: Optional[bool] = None
+    inventions_errors: Optional[bool] = Field(None, json_schema_extra={'omitempty': True})
     object: Object
-    usage: Optional[Usage] = None
+    usage: Optional[Usage] = Field(None, json_schema_extra={'omitempty': True})
 

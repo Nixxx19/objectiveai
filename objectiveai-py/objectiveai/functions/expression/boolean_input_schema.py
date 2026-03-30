@@ -10,6 +10,6 @@ class BooleanInputSchema(BaseModel):
     """Schema for a boolean input."""
     model_config = ConfigDict(title='functions.expression.BooleanInputSchema')
 
-    description: Optional[str] = Field(None, description='Human-readable description of the boolean.')
+    description: Optional[str] = Field(None, description='Human-readable description of the boolean.', json_schema_extra={'omitempty': True})
     type_: BooleanInputSchemaType = Field(..., alias='type')
 

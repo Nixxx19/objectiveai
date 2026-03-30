@@ -13,11 +13,11 @@ class FunctionInventionRecursiveCreateParams(BaseModel):
     model_config = ConfigDict(title='functions.inventions.recursive.request.FunctionInventionRecursiveCreateParams')
 
     agent: InlineAgentBaseWithFallbacksOrRemoteCommitOptional
-    max_step_retries: Optional[Annotated[int, Field(ge=0, le=4294967295)]] = Field(None, description="Maximum number of retries per invention step.\nEach step is one agent completion (which itself may loop internally\nvia tool calls). If the step's validation still fails after the\nagent loop ends, the step is retried up to this many times.\nDefaults to 3 if not specified.")
-    overwrite: Optional[bool] = None
-    provider: Optional[Provider] = None
+    max_step_retries: Optional[Annotated[int, Field(ge=0, le=4294967295)]] = Field(None, description="Maximum number of retries per invention step.\nEach step is one agent completion (which itself may loop internally\nvia tool calls). If the step's validation still fails after the\nagent loop ends, the step is retried up to this many times.\nDefaults to 3 if not specified.", json_schema_extra={'omitempty': True})
+    overwrite: Optional[bool] = Field(None, json_schema_extra={'omitempty': True})
+    provider: Optional[Provider] = Field(None, json_schema_extra={'omitempty': True})
     remote: Remote
-    seed: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = None
+    seed: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = Field(None, json_schema_extra={'omitempty': True})
     state: ParamsStateOrRemoteCommitOptional
-    stream: Optional[bool] = None
+    stream: Optional[bool] = Field(None, json_schema_extra={'omitempty': True})
 

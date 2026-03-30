@@ -16,12 +16,12 @@ class FunctionProfileComputationChunk(BaseModel):
 
     created: int = Field(..., ge=0, le=18446744073709551615)
     executions: list[FunctionExecutionChunk]
-    executions_errors: Optional[bool] = None
-    fitting_stats: Optional[FittingStats] = None
+    executions_errors: Optional[bool] = Field(None, json_schema_extra={'omitempty': True})
+    fitting_stats: Optional[FittingStats] = Field(None, json_schema_extra={'omitempty': True})
     function: Optional[RemotePath] = None
     id: str
     object: Object
-    profile: Optional[InlineTasksProfile] = None
-    retry_token: Optional[str] = None
-    usage: Optional[Usage] = None
+    profile: Optional[InlineTasksProfile] = Field(None, json_schema_extra={'omitempty': True})
+    retry_token: Optional[str] = Field(None, json_schema_extra={'omitempty': True})
+    usage: Optional[Usage] = Field(None, json_schema_extra={'omitempty': True})
 

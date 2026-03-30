@@ -17,12 +17,12 @@ class FunctionInventionChunk(BaseModel):
 
     completions: list[AgentCompletionChunk]
     created: int = Field(..., ge=0, le=18446744073709551615)
-    error: Optional[ResponseError] = None
-    function: Optional[FullRemoteFunction] = None
+    error: Optional[ResponseError] = Field(None, json_schema_extra={'omitempty': True})
+    function: Optional[FullRemoteFunction] = Field(None, json_schema_extra={'omitempty': True})
     id: str
     index: int = Field(..., ge=0, le=18446744073709551615)
     object: Object
-    path: Optional[RemotePath] = None
-    state: Optional[State] = None
-    usage: Optional[Usage] = None
+    path: Optional[RemotePath] = Field(None, json_schema_extra={'omitempty': True})
+    state: Optional[State] = Field(None, json_schema_extra={'omitempty': True})
+    usage: Optional[Usage] = Field(None, json_schema_extra={'omitempty': True})
 

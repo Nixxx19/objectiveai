@@ -9,8 +9,8 @@ class PromptTokensDetails(BaseModel):
     """Detailed breakdown of prompt token usage."""
     model_config = ConfigDict(title='agent.completions.response.PromptTokensDetails')
 
-    audio_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Audio input tokens.')
-    cache_write_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Tokens written to cache.')
-    cached_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Tokens served from cache.')
-    video_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Video input tokens.')
+    audio_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Audio input tokens.', json_schema_extra={'omitempty': True})
+    cache_write_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Tokens written to cache.', json_schema_extra={'omitempty': True})
+    cached_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Tokens served from cache.', json_schema_extra={'omitempty': True})
+    video_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Video input tokens.', json_schema_extra={'omitempty': True})
 

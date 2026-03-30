@@ -10,9 +10,9 @@ class ObjectInputSchema(BaseModel):
     """Schema for an object input with named properties."""
     model_config = ConfigDict(title='functions.expression.ObjectInputSchema')
 
-    description: Optional[str] = Field(None, description='Human-readable description of the object.')
+    description: Optional[str] = Field(None, description='Human-readable description of the object.', json_schema_extra={'omitempty': True})
     properties: dict[str, InputSchema] = Field(..., description='Schema for each property in the object.')
-    required: Optional[list[str]] = Field(None, description='List of property names that must be present.')
+    required: Optional[list[str]] = Field(None, description='List of property names that must be present.', json_schema_extra={'omitempty': True})
     type_: ObjectInputSchemaType = Field(..., alias='type')
 
 

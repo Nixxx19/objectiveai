@@ -11,17 +11,17 @@ from objectiveai.agent.openrouter.agent_base import AgentBase as AgentOpenrouter
 
 
 class RemoteAgentBaseWithFallbacksOpenrouter(AgentOpenrouterAgentBase):
-    fallbacks: Optional[list[InlineAgentBase]] = Field(None, description='Fallback agents to try if the primary fails.')
+    fallbacks: Optional[list[InlineAgentBase]] = Field(None, description='Fallback agents to try if the primary fails.', json_schema_extra={'omitempty': True})
     description: str
 
 
 class RemoteAgentBaseWithFallbacksClaudeAgentSdk(AgentClaudeAgentSdkAgentBase):
-    fallbacks: Optional[list[InlineAgentBase]] = Field(None, description='Fallback agents to try if the primary fails.')
+    fallbacks: Optional[list[InlineAgentBase]] = Field(None, description='Fallback agents to try if the primary fails.', json_schema_extra={'omitempty': True})
     description: str
 
 
 class RemoteAgentBaseWithFallbacksMock(AgentMockAgentBase):
-    fallbacks: Optional[list[InlineAgentBase]] = Field(None, description='Fallback agents to try if the primary fails.')
+    fallbacks: Optional[list[InlineAgentBase]] = Field(None, description='Fallback agents to try if the primary fails.', json_schema_extra={'omitempty': True})
     description: str
 
 

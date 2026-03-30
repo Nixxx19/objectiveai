@@ -15,22 +15,22 @@ class FunctionExecutionTaskChunk(BaseModel):
     model_config = ConfigDict(title='functions.executions.response.streaming.FunctionExecutionTaskChunk')
 
     created: int = Field(..., ge=0, le=18446744073709551615)
-    error: Optional[ResponseError] = None
+    error: Optional[ResponseError] = Field(None, json_schema_extra={'omitempty': True})
     function: Optional[RemotePath] = None
     id: str
     index: int = Field(..., ge=0, le=18446744073709551615)
     object: Object
-    output: Optional[Output] = None
+    output: Optional[Output] = Field(None, json_schema_extra={'omitempty': True})
     profile: Optional[RemotePath] = None
-    reasoning: Optional[ReasoningSummaryChunk] = None
-    retry_token: Optional[str] = None
-    swiss_pool_index: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = None
-    swiss_round: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = None
+    reasoning: Optional[ReasoningSummaryChunk] = Field(None, json_schema_extra={'omitempty': True})
+    retry_token: Optional[str] = Field(None, json_schema_extra={'omitempty': True})
+    swiss_pool_index: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, json_schema_extra={'omitempty': True})
+    swiss_round: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, json_schema_extra={'omitempty': True})
     task_index: int = Field(..., ge=0, le=18446744073709551615)
     task_path: list[Annotated[int, Field(ge=0, le=18446744073709551615)]]
     tasks: list[TaskChunk]
-    tasks_errors: Optional[bool] = None
-    usage: Optional[Usage] = None
+    tasks_errors: Optional[bool] = Field(None, json_schema_extra={'omitempty': True})
+    usage: Optional[Usage] = Field(None, json_schema_extra={'omitempty': True})
 
 
 # Deferred imports to break circular dependencies

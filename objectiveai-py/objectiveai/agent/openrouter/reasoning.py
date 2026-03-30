@@ -18,8 +18,8 @@ This struct configures those capabilities.
 only supported by some models. Unsupported fields are silently ignored."""
     model_config = ConfigDict(title='agent.openrouter.Reasoning')
 
-    effort: Optional[ReasoningEffort] = Field(None, description='The reasoning effort level.\n\nOnly supported by some models.')
-    enabled: Optional[bool] = Field(None, description='Whether reasoning is enabled. Defaults to `true` if other fields are set.')
-    max_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Maximum tokens for the reasoning/thinking output.\n\nOnly supported by some models.')
-    summary_verbosity: Optional[ReasoningSummaryVerbosity] = Field(None, description='Verbosity of reasoning summaries in the response.\n\nOnly supported by some models.')
+    effort: Optional[ReasoningEffort] = Field(None, description='The reasoning effort level.\n\nOnly supported by some models.', json_schema_extra={'omitempty': True})
+    enabled: Optional[bool] = Field(None, description='Whether reasoning is enabled. Defaults to `true` if other fields are set.', json_schema_extra={'omitempty': True})
+    max_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Maximum tokens for the reasoning/thinking output.\n\nOnly supported by some models.', json_schema_extra={'omitempty': True})
+    summary_verbosity: Optional[ReasoningSummaryVerbosity] = Field(None, description='Verbosity of reasoning summaries in the response.\n\nOnly supported by some models.', json_schema_extra={'omitempty': True})
 

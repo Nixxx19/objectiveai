@@ -47,6 +47,7 @@ KEYWORD_ORDER: list[str] = [
     "pattern",
     "format",
     "default",
+    "omitempty",
 ]
 
 _KEYWORD_RANK: dict[str, int] = {kw: i for i, kw in enumerate(KEYWORD_ORDER)}

@@ -11,10 +11,10 @@ class Agent(BaseModel):
     """A validated Mock Agent with its computed content-addressed ID."""
     model_config = ConfigDict(title='agent.mock.Agent')
 
-    error: Optional[bool] = Field(None, description='If true, the mock client will return an error instead of a response.')
+    error: Optional[bool] = Field(None, description='If true, the mock client will return an error instead of a response.', json_schema_extra={'omitempty': True})
     id: str = Field(..., description='The deterministic content-addressed ID (22-character base62 string).')
-    invention: Optional[bool] = Field(None, description='If true, this mock agent supports invention tool calling.\nIncompatible with output modes other than `instruction`.')
+    invention: Optional[bool] = Field(None, description='If true, this mock agent supports invention tool calling.\nIncompatible with output modes other than `instruction`.', json_schema_extra={'omitempty': True})
     output_mode: OutputMode = Field(..., description='The output mode for vector completions. Ignored for agent completions.')
-    top_logprobs: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.')
+    top_logprobs: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.', json_schema_extra={'omitempty': True})
     upstream: Upstream = Field(..., description='The upstream provider marker.')
 

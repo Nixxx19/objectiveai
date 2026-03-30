@@ -60,7 +60,7 @@ Always produces a fixed output of 0.5."""
 
     input: PlaceholderScalarFunctionTaskExpressionInput = Field(..., description='Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
     input_schema: InputSchema = Field(..., description='JSON Schema defining the expected input structure.')
-    map: Optional[Expression] = Field(None, description='Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).')
+    map: Optional[Expression] = Field(None, description='Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).', json_schema_extra={'omitempty': True})
     output: Expression = Field(..., description='Expression to transform the fixed 0.5 output.\nReceives: `input`, `output` as `Scalar(0.5)`.')
-    skip: Optional[Expression] = Field(None, description='If this expression evaluates to true, skip the task. Receives: `input`.')
+    skip: Optional[Expression] = Field(None, description='If this expression evaluates to true, skip the task. Receives: `input`.', json_schema_extra={'omitempty': True})
 

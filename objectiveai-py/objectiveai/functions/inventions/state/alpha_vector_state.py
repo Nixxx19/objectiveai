@@ -10,7 +10,7 @@ class AlphaVectorState(BaseModel):
     model_config = ConfigDict(title='functions.inventions.state.AlphaVectorState')
 
     depth: int = Field(..., ge=0, le=18446744073709551615)
-    input_schema: Optional[VectorFunctionInputSchema] = None
+    input_schema: Optional[VectorFunctionInputSchema] = Field(None, json_schema_extra={'omitempty': True})
     max_branch_width: int = Field(..., ge=0, le=18446744073709551615)
     max_leaf_width: int = Field(..., ge=0, le=18446744073709551615)
     min_branch_width: int = Field(..., ge=0, le=18446744073709551615)

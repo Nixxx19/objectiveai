@@ -10,10 +10,10 @@ class ArrayInputSchema(BaseModel):
     """Schema for an array input."""
     model_config = ConfigDict(title='functions.expression.ArrayInputSchema')
 
-    description: Optional[str] = Field(None, description='Human-readable description of the array.')
+    description: Optional[str] = Field(None, description='Human-readable description of the array.', json_schema_extra={'omitempty': True})
     items: InputSchema = Field(..., description='Schema for each item in the array.')
-    max_items: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, alias='maxItems', description='Maximum number of items allowed.')
-    min_items: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, alias='minItems', description='Minimum number of items required.')
+    max_items: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, alias='maxItems', description='Maximum number of items allowed.', json_schema_extra={'omitempty': True})
+    min_items: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, alias='minItems', description='Minimum number of items required.', json_schema_extra={'omitempty': True})
     type_: ArrayInputSchemaType = Field(..., alias='type')
 
 

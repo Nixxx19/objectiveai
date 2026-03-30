@@ -10,5 +10,5 @@ class ListAgentsRequest(BaseModel):
     """Query parameters for the list agents endpoint."""
     model_config = ConfigDict(title='agent.ListAgentsRequest')
 
-    source: Optional[ListAgentsSource] = Field(None, description='Optional source filter for listing agents.')
+    source: Optional[ListAgentsSource] = Field(None, description='Optional source filter for listing agents.', json_schema_extra={'omitempty': True})
 

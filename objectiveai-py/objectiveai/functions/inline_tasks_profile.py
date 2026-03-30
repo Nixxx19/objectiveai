@@ -11,7 +11,7 @@ class InlineTasksProfile(BaseModel):
     model_config = ConfigDict(title='functions.InlineTasksProfile')
 
     tasks: list[TaskProfile] = Field(..., description='Configuration for each task in the corresponding Function.')
-    weights: Optional[Weights] = Field(None, description='Optional weights for each Task in the corresponding Function.\nIf `None`, uniform weights are used.')
+    weights: Optional[Weights] = Field(None, description='Optional weights for each Task in the corresponding Function.\nIf `None`, uniform weights are used.', json_schema_extra={'omitempty': True})
 
 
 # Deferred imports to break circular dependencies

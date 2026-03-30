@@ -62,8 +62,8 @@ Always produces an equalized vector of length `output_length`."""
     input_merge: Expression = Field(..., description='Expression merging sub-inputs back into one input.\nReceives: `input` (as an array).')
     input_schema: InputSchema = Field(..., description='JSON Schema defining the expected input structure.')
     input_split: Expression = Field(..., description='Expression transforming input into sub-inputs for swiss system.\nReceives: `input`.')
-    map: Optional[Expression] = Field(None, description='Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).')
+    map: Optional[Expression] = Field(None, description='Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).', json_schema_extra={'omitempty': True})
     output: Expression = Field(..., description='Expression to transform the equalized vector output.\nReceives: `input`, `output` as `Vector(equalized)`.')
     output_length: Expression = Field(..., description='Expression computing the expected output vector length.\nReceives: `input`.')
-    skip: Optional[Expression] = Field(None, description='If this expression evaluates to true, skip the task. Receives: `input`.')
+    skip: Optional[Expression] = Field(None, description='If this expression evaluates to true, skip the task. Receives: `input`.', json_schema_extra={'omitempty': True})
 

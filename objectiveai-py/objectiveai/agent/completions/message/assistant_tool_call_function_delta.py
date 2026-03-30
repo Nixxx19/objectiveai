@@ -9,6 +9,6 @@ class AssistantToolCallFunctionDelta(BaseModel):
     """Function call details in a streaming tool call."""
     model_config = ConfigDict(title='agent.completions.message.AssistantToolCallFunctionDelta')
 
-    arguments: Optional[str] = Field(None, description='The arguments being streamed (accumulated across deltas).')
-    name: Optional[str] = Field(None, description='The function name (only present in the first delta).')
+    arguments: Optional[str] = Field(None, description='The arguments being streamed (accumulated across deltas).', json_schema_extra={'omitempty': True})
+    name: Optional[str] = Field(None, description='The function name (only present in the first delta).', json_schema_extra={'omitempty': True})
 

@@ -11,5 +11,5 @@ class SystemMessage(BaseModel):
     model_config = ConfigDict(title='agent.completions.message.SystemMessage')
 
     content: SimpleContent = Field(..., description='The message content.')
-    name: Optional[str] = Field(None, description='Optional name for the message author.')
+    name: Optional[str] = Field(None, description='Optional name for the message author.', json_schema_extra={'omitempty': True})
 

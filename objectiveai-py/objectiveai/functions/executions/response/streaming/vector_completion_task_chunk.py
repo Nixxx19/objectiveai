@@ -19,7 +19,7 @@ Each chunk contains incremental updates to the completion. Use the
 
     completions: list[AgentCompletionChunk] = Field(..., description='Incremental agent completion chunks from each agent.')
     created: int = Field(..., description='Unix timestamp when the completion was created.', ge=0, le=18446744073709551615)
-    error: Optional[ResponseError] = None
+    error: Optional[ResponseError] = Field(None, json_schema_extra={'omitempty': True})
     id: str = Field(..., description='Unique identifier for this vector completion.')
     index: int = Field(..., ge=0, le=18446744073709551615)
     object: Object = Field(..., description='Object type identifier (`"vector.completion.chunk"`).')
@@ -27,7 +27,7 @@ Each chunk contains incremental updates to the completion. Use the
     swarm: str = Field(..., description='ID of the swarm used for this completion.')
     task_index: int = Field(..., ge=0, le=18446744073709551615)
     task_path: list[Annotated[int, Field(ge=0, le=18446744073709551615)]]
-    usage: Optional[Usage] = Field(None, description='Aggregated usage statistics. Typically present only in the final chunk.')
+    usage: Optional[Usage] = Field(None, description='Aggregated usage statistics. Typically present only in the final chunk.', json_schema_extra={'omitempty': True})
     votes: list[Vote] = Field(..., description='Votes received so far. New votes are appended in subsequent chunks.')
     weights: list[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]] = Field(..., description='Current weight distribution across responses. Updated as new votes arrive.')
 

@@ -571,7 +571,6 @@ def _convert_property(tp: Any, field_info: FieldInfo, root_title: str) -> dict:
             fi_constraints["pattern"] = fi_extra["pattern"]
         if "additionalProperties" in fi_extra:
             fi_constraints["additionalProperties"] = fi_extra["additionalProperties"]
-
     # Place constraints correctly:
     # - For nullable types: constraints should go inside the non-null anyOf variant
     # - For non-nullable types: constraints go directly on the property
@@ -594,6 +593,10 @@ def _convert_property(tp: Any, field_info: FieldInfo, root_title: str) -> dict:
             pass  # Suppress implicit default: null for nullable fields
         else:
             result["default"] = field_info.default
+
+    # omitempty is a property-level attribute, not a type constraint
+    if isinstance(fi_extra, dict) and fi_extra.get("omitempty") is True:
+        result["omitempty"] = True
 
     return result
 

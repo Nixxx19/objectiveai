@@ -10,5 +10,5 @@ class ListFunctionProfilePairsRequest(BaseModel):
     """Query parameters for the list function-profile pairs endpoint."""
     model_config = ConfigDict(title='functions.ListFunctionProfilePairsRequest')
 
-    source: Optional[ListFunctionProfilePairsSource] = Field(None, description='Optional source filter for listing function-profile pairs.')
+    source: Optional[ListFunctionProfilePairsSource] = Field(None, description='Optional source filter for listing function-profile pairs.', json_schema_extra={'omitempty': True})
 

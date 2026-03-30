@@ -14,7 +14,7 @@ class BranchTaskExpressionScalarFunctionGithub(BaseModel):
     remote: Literal['github']
     repository: str
     input: Expression
-    skip: Optional[Expression] = None
+    skip: Optional[Expression] = Field(None, json_schema_extra={'omitempty': True})
     type_: Literal['alpha.scalar.function'] = Field(..., alias='type')
 
 
@@ -24,7 +24,7 @@ class BranchTaskExpressionScalarFunctionFilesystem(BaseModel):
     remote: Literal['filesystem']
     repository: str
     input: Expression
-    skip: Optional[Expression] = None
+    skip: Optional[Expression] = Field(None, json_schema_extra={'omitempty': True})
     type_: Literal['alpha.scalar.function'] = Field(..., alias='type')
 
 
@@ -32,7 +32,7 @@ class BranchTaskExpressionScalarFunctionMock(BaseModel):
     name: str
     remote: Literal['mock']
     input: Expression
-    skip: Optional[Expression] = None
+    skip: Optional[Expression] = Field(None, json_schema_extra={'omitempty': True})
     type_: Literal['alpha.scalar.function'] = Field(..., alias='type')
 
 

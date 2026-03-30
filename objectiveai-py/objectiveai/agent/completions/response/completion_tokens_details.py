@@ -9,8 +9,8 @@ class CompletionTokensDetails(BaseModel):
     """Detailed breakdown of completion token usage."""
     model_config = ConfigDict(title='agent.completions.response.CompletionTokensDetails')
 
-    accepted_prediction_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Tokens from accepted predictions (speculative decoding).')
-    audio_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Audio output tokens.')
-    reasoning_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Tokens used for reasoning/thinking.')
-    rejected_prediction_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Tokens from rejected predictions (speculative decoding).')
+    accepted_prediction_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Tokens from accepted predictions (speculative decoding).', json_schema_extra={'omitempty': True})
+    audio_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Audio output tokens.', json_schema_extra={'omitempty': True})
+    reasoning_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Tokens used for reasoning/thinking.', json_schema_extra={'omitempty': True})
+    rejected_prediction_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Tokens from rejected predictions (speculative decoding).', json_schema_extra={'omitempty': True})
 

@@ -10,5 +10,5 @@ class ListSwarmsRequest(BaseModel):
     """Query parameters for the list swarms endpoint."""
     model_config = ConfigDict(title='swarm.ListSwarmsRequest')
 
-    source: Optional[ListSwarmsSource] = Field(None, description='Optional source filter for listing swarms.')
+    source: Optional[ListSwarmsSource] = Field(None, description='Optional source filter for listing swarms.', json_schema_extra={'omitempty': True})
 

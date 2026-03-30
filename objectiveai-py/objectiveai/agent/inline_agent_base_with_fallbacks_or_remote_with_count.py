@@ -11,17 +11,17 @@ from objectiveai.agent.openrouter.agent_base import AgentBase as AgentOpenrouter
 
 
 class InlineAgentBaseWithFallbacksOrRemoteWithCountAgentBaseOpenrouter(AgentOpenrouterAgentBase):
-    fallbacks: Optional[list[InlineAgentBase]] = Field(None, description='Fallback agents to try if the primary fails.')
+    fallbacks: Optional[list[InlineAgentBase]] = Field(None, description='Fallback agents to try if the primary fails.', json_schema_extra={'omitempty': True})
     count: int = Field(1, description='Number of instances of this agent in the swarm. Defaults to 1.', ge=0, le=18446744073709551615)
 
 
 class InlineAgentBaseWithFallbacksOrRemoteWithCountAgentBaseClaudeAgentSdk(AgentClaudeAgentSdkAgentBase):
-    fallbacks: Optional[list[InlineAgentBase]] = Field(None, description='Fallback agents to try if the primary fails.')
+    fallbacks: Optional[list[InlineAgentBase]] = Field(None, description='Fallback agents to try if the primary fails.', json_schema_extra={'omitempty': True})
     count: int = Field(1, description='Number of instances of this agent in the swarm. Defaults to 1.', ge=0, le=18446744073709551615)
 
 
 class InlineAgentBaseWithFallbacksOrRemoteWithCountAgentBaseMock(AgentMockAgentBase):
-    fallbacks: Optional[list[InlineAgentBase]] = Field(None, description='Fallback agents to try if the primary fails.')
+    fallbacks: Optional[list[InlineAgentBase]] = Field(None, description='Fallback agents to try if the primary fails.', json_schema_extra={'omitempty': True})
     count: int = Field(1, description='Number of instances of this agent in the swarm. Defaults to 1.', ge=0, le=18446744073709551615)
 
 

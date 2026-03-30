@@ -9,6 +9,6 @@ class ErrorCreateParams(BaseModel):
     """Request to trigger an error response for testing purposes."""
     model_config = ConfigDict(title='error.ErrorCreateParams')
 
-    seed: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = Field(None, description='Random seed for deterministic error generation.')
-    stream: Optional[bool] = Field(None, description='Whether to stream the response.')
+    seed: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = Field(None, description='Random seed for deterministic error generation.', json_schema_extra={'omitempty': True})
+    stream: Optional[bool] = Field(None, description='Whether to stream the response.', json_schema_extra={'omitempty': True})
 

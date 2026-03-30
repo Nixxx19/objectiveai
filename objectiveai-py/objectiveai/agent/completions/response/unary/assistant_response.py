@@ -22,12 +22,12 @@ class AssistantResponse(BaseModel):
     index: int = Field(..., ge=0, le=18446744073709551615)
     logprobs: Optional[Logprobs] = None
     model: str
-    provider: Optional[str] = None
-    reasoning: Optional[str] = None
+    provider: Optional[str] = Field(None, json_schema_extra={'omitempty': True})
+    reasoning: Optional[str] = Field(None, json_schema_extra={'omitempty': True})
     refusal: Optional[str] = None
     role: AssistantRole
-    service_tier: Optional[str] = None
-    system_fingerprint: Optional[str] = None
+    service_tier: Optional[str] = Field(None, json_schema_extra={'omitempty': True})
+    system_fingerprint: Optional[str] = Field(None, json_schema_extra={'omitempty': True})
     tool_calls: Optional[list[AssistantToolCall]] = None
     upstream_id: str
     usage: UpstreamUsage = Field(..., description='Upstream usage for this assistant response (set by upstream clients).')

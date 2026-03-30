@@ -10,6 +10,6 @@ class VideoInputSchema(BaseModel):
     """Schema for a video input (URL or base64-encoded)."""
     model_config = ConfigDict(title='functions.expression.VideoInputSchema')
 
-    description: Optional[str] = Field(None, description='Human-readable description of the expected video.')
+    description: Optional[str] = Field(None, description='Human-readable description of the expected video.', json_schema_extra={'omitempty': True})
     type_: VideoInputSchemaType = Field(..., alias='type')
 

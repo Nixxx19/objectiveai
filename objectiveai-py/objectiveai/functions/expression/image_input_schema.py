@@ -10,6 +10,6 @@ class ImageInputSchema(BaseModel):
     """Schema for an image input (URL or base64-encoded)."""
     model_config = ConfigDict(title='functions.expression.ImageInputSchema')
 
-    description: Optional[str] = Field(None, description='Human-readable description of the expected image.')
+    description: Optional[str] = Field(None, description='Human-readable description of the expected image.', json_schema_extra={'omitempty': True})
     type_: ImageInputSchemaType = Field(..., alias='type')
 

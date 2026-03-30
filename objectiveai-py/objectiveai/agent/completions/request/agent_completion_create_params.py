@@ -14,10 +14,10 @@ class AgentCompletionCreateParams(BaseModel):
     model_config = ConfigDict(title='agent.completions.request.AgentCompletionCreateParams')
 
     agent: InlineAgentBaseWithFallbacksOrRemoteCommitOptional = Field(..., description='The agent to use (inline Agent or stored ID).')
-    continuation: Optional[str] = Field(None, description='Continuation from a previous completion, as a base64-encoded string.')
+    continuation: Optional[str] = Field(None, description='Continuation from a previous completion, as a base64-encoded string.', json_schema_extra={'omitempty': True})
     messages: list[Message] = Field(..., description='The conversation messages.')
-    provider: Optional[Provider] = Field(None, description='Provider routing preferences.')
-    response_format: Optional[ResponseFormatParam] = Field(None, description='Output format constraints (text, JSON, or JSON schema).')
-    seed: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = Field(None, description='Random seed for deterministic generation.')
-    stream: Optional[bool] = Field(None, description='Whether to stream the response.')
+    provider: Optional[Provider] = Field(None, description='Provider routing preferences.', json_schema_extra={'omitempty': True})
+    response_format: Optional[ResponseFormatParam] = Field(None, description='Output format constraints (text, JSON, or JSON schema).', json_schema_extra={'omitempty': True})
+    seed: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = Field(None, description='Random seed for deterministic generation.', json_schema_extra={'omitempty': True})
+    stream: Optional[bool] = Field(None, description='Whether to stream the response.', json_schema_extra={'omitempty': True})
 

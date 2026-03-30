@@ -9,8 +9,8 @@ class File(BaseModel):
     """A file attachment for multimodal input."""
     model_config = ConfigDict(title='agent.completions.message.File')
 
-    file_data: Optional[str] = Field(None, description='Base64-encoded file data.')
-    file_id: Optional[str] = Field(None, description='The ID of a previously uploaded file.')
-    file_url: Optional[str] = Field(None, description='A URL to fetch the file from.')
-    filename: Optional[str] = Field(None, description='The filename for display purposes.')
+    file_data: Optional[str] = Field(None, description='Base64-encoded file data.', json_schema_extra={'omitempty': True})
+    file_id: Optional[str] = Field(None, description='The ID of a previously uploaded file.', json_schema_extra={'omitempty': True})
+    file_url: Optional[str] = Field(None, description='A URL to fetch the file from.', json_schema_extra={'omitempty': True})
+    filename: Optional[str] = Field(None, description='The filename for display purposes.', json_schema_extra={'omitempty': True})
 

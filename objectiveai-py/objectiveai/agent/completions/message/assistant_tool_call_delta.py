@@ -11,8 +11,8 @@ class AssistantToolCallDelta(BaseModel):
     """A tool call delta in a streaming response."""
     model_config = ConfigDict(title='agent.completions.message.AssistantToolCallDelta')
 
-    function: Optional[AssistantToolCallFunctionDelta] = Field(None, description='The function call details.')
-    id: Optional[str] = Field(None, description='The unique ID of this tool call.')
+    function: Optional[AssistantToolCallFunctionDelta] = Field(None, description='The function call details.', json_schema_extra={'omitempty': True})
+    id: Optional[str] = Field(None, description='The unique ID of this tool call.', json_schema_extra={'omitempty': True})
     index: int = Field(..., description='The index of this tool call.', ge=0, le=18446744073709551615)
-    type_: Optional[AssistantToolCallType] = Field(None, alias='type', description='The type of tool call (always "function").')
+    type_: Optional[AssistantToolCallType] = Field(None, alias='type', description='The type of tool call (always "function").', json_schema_extra={'omitempty': True})
 

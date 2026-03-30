@@ -10,5 +10,5 @@ class ListFunctionsRequest(BaseModel):
     """Query parameters for the list functions endpoint."""
     model_config = ConfigDict(title='functions.ListFunctionsRequest')
 
-    source: Optional[ListFunctionsSource] = Field(None, description='Optional source filter for listing functions.')
+    source: Optional[ListFunctionsSource] = Field(None, description='Optional source filter for listing functions.', json_schema_extra={'omitempty': True})
 

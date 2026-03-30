@@ -49,7 +49,7 @@ class ResponseFormatToolCall(BaseModel):
 
     description: str = Field(..., description='A description of the tool.')
     name: str = Field(..., description='The name of the tool.')
-    required: Optional[bool] = Field(None, description='Whether the tool MUST be called.')
+    required: Optional[bool] = Field(None, description='Whether the tool MUST be called.', json_schema_extra={'omitempty': True})
     schema: dict[str, JsonValue] = Field(..., description='The JSON Schema definition.', json_schema_extra={'additionalProperties': True})
     type_: Literal['tool_call'] = Field(..., alias='type')
 

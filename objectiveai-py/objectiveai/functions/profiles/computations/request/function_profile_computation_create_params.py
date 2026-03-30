@@ -14,13 +14,13 @@ class FunctionProfileComputationCreateParams(BaseModel):
     model_config = ConfigDict(title='functions.profiles.computations.request.FunctionProfileComputationCreateParams')
 
     dataset: list[DatasetItem]
-    from_cache: Optional[bool] = None
+    from_cache: Optional[bool] = Field(None, json_schema_extra={'omitempty': True})
     function: FullInlineFunctionOrRemoteCommitOptional = Field(..., description='The function to compute a profile for (inline definition or remote path).')
-    max_retries: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = None
+    max_retries: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, json_schema_extra={'omitempty': True})
     n: int = Field(..., ge=0, le=18446744073709551615)
-    provider: Optional[Provider] = None
-    retry_token: Optional[str] = None
-    seed: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = None
-    stream: Optional[bool] = None
+    provider: Optional[Provider] = Field(None, json_schema_extra={'omitempty': True})
+    retry_token: Optional[str] = Field(None, json_schema_extra={'omitempty': True})
+    seed: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = Field(None, json_schema_extra={'omitempty': True})
+    stream: Optional[bool] = Field(None, json_schema_extra={'omitempty': True})
     swarm: InlineSwarmBaseOrRemoteCommitOptional
 

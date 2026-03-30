@@ -20,19 +20,19 @@ using the [`push`](Self::push) method."""
     model_config = ConfigDict(title='agent.completions.response.streaming.AssistantResponseChunk')
 
     agent: str
-    content: Optional[RichContent] = None
+    content: Optional[RichContent] = Field(None, json_schema_extra={'omitempty': True})
     created: int = Field(..., ge=0, le=18446744073709551615)
     finish_reason: Optional[FinishReason] = None
     index: int = Field(..., ge=0, le=18446744073709551615)
-    logprobs: Optional[Logprobs] = None
+    logprobs: Optional[Logprobs] = Field(None, json_schema_extra={'omitempty': True})
     model: str
-    provider: Optional[str] = None
-    reasoning: Optional[str] = None
-    refusal: Optional[str] = None
+    provider: Optional[str] = Field(None, json_schema_extra={'omitempty': True})
+    reasoning: Optional[str] = Field(None, json_schema_extra={'omitempty': True})
+    refusal: Optional[str] = Field(None, json_schema_extra={'omitempty': True})
     role: AssistantRole
-    service_tier: Optional[str] = None
-    system_fingerprint: Optional[str] = None
-    tool_calls: Optional[list[AssistantToolCallDelta]] = None
+    service_tier: Optional[str] = Field(None, json_schema_extra={'omitempty': True})
+    system_fingerprint: Optional[str] = Field(None, json_schema_extra={'omitempty': True})
+    tool_calls: Optional[list[AssistantToolCallDelta]] = Field(None, json_schema_extra={'omitempty': True})
     upstream_id: str
-    usage: Optional[UpstreamUsage] = Field(None, description='Upstream usage for this assistant response (set by upstream clients).')
+    usage: Optional[UpstreamUsage] = Field(None, description='Upstream usage for this assistant response (set by upstream clients).', json_schema_extra={'omitempty': True})
 

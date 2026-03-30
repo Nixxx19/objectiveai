@@ -18,12 +18,12 @@ accumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion
 using the [`push`](Self::push) method."""
     model_config = ConfigDict(title='functions.executions.response.streaming.ReasoningSummaryChunk')
 
-    continuation: Optional[str] = Field(None, description='Continuation state for multi-turn conversations (only present in the final chunk).')
+    continuation: Optional[str] = Field(None, description='Continuation state for multi-turn conversations (only present in the final chunk).', json_schema_extra={'omitempty': True})
     created: int = Field(..., ge=0, le=18446744073709551615)
-    error: Optional[ResponseError] = None
+    error: Optional[ResponseError] = Field(None, json_schema_extra={'omitempty': True})
     id: str
     messages: list[MessageChunk]
     object: Object = Field(..., description='The object type (always "agent.completion.chunk").')
     upstream: Upstream = Field(..., description='Upstream provider')
-    usage: Optional[Usage] = Field(None, description='Token usage (only present in the final chunk).')
+    usage: Optional[Usage] = Field(None, description='Token usage (only present in the final chunk).', json_schema_extra={'omitempty': True})
 

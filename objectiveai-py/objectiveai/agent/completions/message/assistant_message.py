@@ -11,9 +11,9 @@ class AssistantMessage(BaseModel):
     """An assistant message (model's previous response)."""
     model_config = ConfigDict(title='agent.completions.message.AssistantMessage')
 
-    content: Optional[RichContent] = Field(None, description='The message content, if any.')
-    name: Optional[str] = Field(None, description='Optional name for the assistant.')
-    reasoning: Optional[str] = Field(None, description='Reasoning content from models that support chain-of-thought.')
-    refusal: Optional[str] = Field(None, description='Refusal message if the model declined to respond.')
-    tool_calls: Optional[list[AssistantToolCall]] = Field(None, description='Tool calls made by the assistant.')
+    content: Optional[RichContent] = Field(None, description='The message content, if any.', json_schema_extra={'omitempty': True})
+    name: Optional[str] = Field(None, description='Optional name for the assistant.', json_schema_extra={'omitempty': True})
+    reasoning: Optional[str] = Field(None, description='Reasoning content from models that support chain-of-thought.', json_schema_extra={'omitempty': True})
+    refusal: Optional[str] = Field(None, description='Refusal message if the model declined to respond.', json_schema_extra={'omitempty': True})
+    tool_calls: Optional[list[AssistantToolCall]] = Field(None, description='Tool calls made by the assistant.', json_schema_extra={'omitempty': True})
 

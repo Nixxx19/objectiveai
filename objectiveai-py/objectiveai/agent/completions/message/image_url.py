@@ -10,6 +10,6 @@ class ImageUrl(BaseModel):
     """An image URL for multimodal input."""
     model_config = ConfigDict(title='agent.completions.message.ImageUrl')
 
-    detail: Optional[ImageUrlDetail] = Field(None, description='The detail level for image processing.')
+    detail: Optional[ImageUrlDetail] = Field(None, description='The detail level for image processing.', json_schema_extra={'omitempty': True})
     url: str = Field(..., description='The URL of the image (can be a data URL or HTTP URL).')
 

@@ -10,8 +10,8 @@ class IntegerInputSchema(BaseModel):
     """Schema for an integer input."""
     model_config = ConfigDict(title='functions.expression.IntegerInputSchema')
 
-    description: Optional[str] = Field(None, description='Human-readable description of the integer.')
-    maximum: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = Field(None, description='Maximum allowed value (inclusive).')
-    minimum: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = Field(None, description='Minimum allowed value (inclusive).')
+    description: Optional[str] = Field(None, description='Human-readable description of the integer.', json_schema_extra={'omitempty': True})
+    maximum: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = Field(None, description='Maximum allowed value (inclusive).', json_schema_extra={'omitempty': True})
+    minimum: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = Field(None, description='Minimum allowed value (inclusive).', json_schema_extra={'omitempty': True})
     type_: IntegerInputSchemaType = Field(..., alias='type')
 

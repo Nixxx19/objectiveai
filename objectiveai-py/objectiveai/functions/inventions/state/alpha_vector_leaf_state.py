@@ -11,17 +11,17 @@ class AlphaVectorLeafState(BaseModel):
     model_config = ConfigDict(title='functions.inventions.state.AlphaVectorLeafState')
 
     depth: int = Field(..., ge=0, le=18446744073709551615)
-    description: Optional[str] = None
-    essay: Optional[str] = None
-    essay_tasks: Optional[str] = None
-    input_schema: Optional[VectorFunctionInputSchema] = None
+    description: Optional[str] = Field(None, json_schema_extra={'omitempty': True})
+    essay: Optional[str] = Field(None, json_schema_extra={'omitempty': True})
+    essay_tasks: Optional[str] = Field(None, json_schema_extra={'omitempty': True})
+    input_schema: Optional[VectorFunctionInputSchema] = Field(None, json_schema_extra={'omitempty': True})
     max_branch_width: int = Field(..., ge=0, le=18446744073709551615)
     max_leaf_width: int = Field(..., ge=0, le=18446744073709551615)
     min_branch_width: int = Field(..., ge=0, le=18446744073709551615)
     min_leaf_width: int = Field(..., ge=0, le=18446744073709551615)
     name: str
-    readme: Optional[str] = None
+    readme: Optional[str] = Field(None, json_schema_extra={'omitempty': True})
     spec: str
-    tasks: Optional[list[LeafTaskExpression]] = None
-    tasks_length: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = None
+    tasks: Optional[list[LeafTaskExpression]] = Field(None, json_schema_extra={'omitempty': True})
+    tasks_length: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, json_schema_extra={'omitempty': True})
 

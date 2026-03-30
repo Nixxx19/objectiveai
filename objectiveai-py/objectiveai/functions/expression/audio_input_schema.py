@@ -10,6 +10,6 @@ class AudioInputSchema(BaseModel):
     """Schema for an audio input."""
     model_config = ConfigDict(title='functions.expression.AudioInputSchema')
 
-    description: Optional[str] = Field(None, description='Human-readable description of the expected audio.')
+    description: Optional[str] = Field(None, description='Human-readable description of the expected audio.', json_schema_extra={'omitempty': True})
     type_: AudioInputSchemaType = Field(..., alias='type')
 

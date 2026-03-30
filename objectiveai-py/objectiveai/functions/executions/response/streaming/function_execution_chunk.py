@@ -16,15 +16,15 @@ class FunctionExecutionChunk(BaseModel):
     model_config = ConfigDict(title='functions.executions.response.streaming.FunctionExecutionChunk')
 
     created: int = Field(..., ge=0, le=18446744073709551615)
-    error: Optional[ResponseError] = None
+    error: Optional[ResponseError] = Field(None, json_schema_extra={'omitempty': True})
     function: Optional[RemotePath] = None
     id: str
     object: Object
-    output: Optional[Output] = None
+    output: Optional[Output] = Field(None, json_schema_extra={'omitempty': True})
     profile: Optional[RemotePath] = None
-    reasoning: Optional[ReasoningSummaryChunk] = None
-    retry_token: Optional[str] = None
+    reasoning: Optional[ReasoningSummaryChunk] = Field(None, json_schema_extra={'omitempty': True})
+    retry_token: Optional[str] = Field(None, json_schema_extra={'omitempty': True})
     tasks: list[TaskChunk]
-    tasks_errors: Optional[bool] = None
-    usage: Optional[Usage] = None
+    tasks_errors: Optional[bool] = Field(None, json_schema_extra={'omitempty': True})
+    usage: Optional[Usage] = Field(None, json_schema_extra={'omitempty': True})
 

@@ -19,6 +19,6 @@ class PlaceholderVectorFunctionTaskExpression(BaseModel):
     min_branch_width: int = Field(..., ge=0, le=18446744073709551615)
     min_leaf_width: int = Field(..., ge=0, le=18446744073709551615)
     name: str
-    skip: Optional[Expression] = None
+    skip: Optional[Expression] = Field(None, json_schema_extra={'omitempty': True})
     spec: str
 

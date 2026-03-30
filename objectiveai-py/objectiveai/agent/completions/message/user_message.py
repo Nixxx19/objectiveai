@@ -11,5 +11,5 @@ class UserMessage(BaseModel):
     model_config = ConfigDict(title='agent.completions.message.UserMessage')
 
     content: RichContent = Field(..., description='The message content (supports text, images, audio, video, files).')
-    name: Optional[str] = Field(None, description='Optional name for the user.')
+    name: Optional[str] = Field(None, description='Optional name for the user.', json_schema_extra={'omitempty': True})
 

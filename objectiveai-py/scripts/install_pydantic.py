@@ -681,6 +681,10 @@ def _extract_field_metadata(prop_schema: dict) -> dict:
     if desc:
         kwargs["description"] = desc
 
+    # omitempty is a property-level attribute, not a type constraint
+    if prop_schema.get("omitempty") is True:
+        kwargs.setdefault("json_schema_extra", {})["omitempty"] = True
+
     # For nullable properties, constraints are inside the non-null variant.
     # Those are handled by Annotated[] in the type, not by Field().
     if _is_nullable(prop_schema):

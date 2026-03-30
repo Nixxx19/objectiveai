@@ -15,14 +15,14 @@ class FunctionExecutionCreateParams(BaseModel):
     """Parameters for creating a function execution."""
     model_config = ConfigDict(title='functions.executions.request.FunctionExecutionCreateParams')
 
-    from_cache: Optional[bool] = None
+    from_cache: Optional[bool] = Field(None, json_schema_extra={'omitempty': True})
     function: FullInlineFunctionOrRemoteCommitOptional = Field(..., description='The function to execute (inline definition or remote path).')
     input: InputValue
     profile: InlineProfileOrRemoteCommitOptional = Field(..., description='The profile to use (inline definition or remote path).')
-    provider: Optional[Provider] = None
-    reasoning: Optional[Reasoning] = None
-    retry_token: Optional[str] = None
-    seed: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = None
-    strategy: Optional[Strategy] = None
-    stream: Optional[bool] = None
+    provider: Optional[Provider] = Field(None, json_schema_extra={'omitempty': True})
+    reasoning: Optional[Reasoning] = Field(None, json_schema_extra={'omitempty': True})
+    retry_token: Optional[str] = Field(None, json_schema_extra={'omitempty': True})
+    seed: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = Field(None, json_schema_extra={'omitempty': True})
+    strategy: Optional[Strategy] = Field(None, json_schema_extra={'omitempty': True})
+    stream: Optional[bool] = Field(None, json_schema_extra={'omitempty': True})
 
