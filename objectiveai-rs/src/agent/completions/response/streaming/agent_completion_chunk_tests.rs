@@ -11,6 +11,7 @@ stream_push_test!(
         usage: None,
         upstream: crate::agent::Upstream::Openrouter,
         error: None,
+        continuation: None,
     }],
     AgentCompletionChunk {
         id: "acc-1".into(),
@@ -20,6 +21,7 @@ stream_push_test!(
         usage: None,
         upstream: crate::agent::Upstream::Openrouter,
         error: None,
+        continuation: None,
     }
 );
 
@@ -53,6 +55,7 @@ stream_push_test!(
             usage: None,
             upstream: crate::agent::Upstream::Openrouter,
             error: None,
+            continuation: None,
         },
         AgentCompletionChunk {
             id: "acc-2".into(),
@@ -81,6 +84,7 @@ stream_push_test!(
             usage: None,
             upstream: crate::agent::Upstream::Openrouter,
             error: None,
+            continuation: None,
         },
     ],
     AgentCompletionChunk {
@@ -110,6 +114,7 @@ stream_push_test!(
         usage: None,
         upstream: crate::agent::Upstream::Openrouter,
         error: None,
+        continuation: None,
     }
 );
 
@@ -143,6 +148,7 @@ stream_push_test!(
             usage: None,
             upstream: crate::agent::Upstream::Openrouter,
             error: None,
+            continuation: None,
         },
         AgentCompletionChunk {
             id: "acc-3".into(),
@@ -171,6 +177,7 @@ stream_push_test!(
             usage: None,
             upstream: crate::agent::Upstream::Openrouter,
             error: None,
+            continuation: None,
         },
         AgentCompletionChunk {
             id: "acc-3".into(),
@@ -199,6 +206,7 @@ stream_push_test!(
             usage: None,
             upstream: crate::agent::Upstream::Openrouter,
             error: None,
+            continuation: None,
         },
     ],
     AgentCompletionChunk {
@@ -228,6 +236,7 @@ stream_push_test!(
         usage: None,
         upstream: crate::agent::Upstream::Openrouter,
         error: None,
+        continuation: None,
     }
 );
 
@@ -242,6 +251,7 @@ stream_push_test!(
             usage: None,
             upstream: crate::agent::Upstream::Openrouter,
             error: None,
+            continuation: None,
         },
         AgentCompletionChunk {
             id: "acc-4".into(),
@@ -260,6 +270,7 @@ stream_push_test!(
             }),
             upstream: crate::agent::Upstream::Openrouter,
             error: None,
+            continuation: None,
         },
     ],
     AgentCompletionChunk {
@@ -279,6 +290,7 @@ stream_push_test!(
         }),
         upstream: crate::agent::Upstream::Openrouter,
         error: None,
+        continuation: None,
     }
 );
 
@@ -296,6 +308,7 @@ stream_push_test!(
                 code: 500,
                 message: serde_json::json!("first"),
             }),
+            continuation: None,
         },
         AgentCompletionChunk {
             id: "acc-5".into(),
@@ -308,6 +321,7 @@ stream_push_test!(
                 code: 502,
                 message: serde_json::json!("second"),
             }),
+            continuation: None,
         },
     ],
     AgentCompletionChunk {
@@ -321,5 +335,6 @@ stream_push_test!(
             code: 502,
             message: serde_json::json!("second"),
         }),
+        continuation: None,
     }
 );

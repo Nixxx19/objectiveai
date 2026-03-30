@@ -18,5 +18,8 @@ func (v *AgentCompletionsResponseStreamingAgentCompletionChunk) Push(other *Agen
 	// error: replace
 	v.Error = pushReplace(v.Error, other.Error)
 
+	// continuation: replace
+	v.Continuation = pushReplace(v.Continuation, other.Continuation)
+
 	// id, created, object, upstream are immutable
 }

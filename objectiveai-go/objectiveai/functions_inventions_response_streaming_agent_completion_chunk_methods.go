@@ -18,5 +18,8 @@ func (v *FunctionsInventionsResponseStreamingAgentCompletionChunk) Push(other *F
 		v.Usage = other.Usage
 	}
 
+	// continuation: replace
+	v.Continuation = pushReplace(v.Continuation, other.Continuation)
+
 	// id, created, object, upstream, index are immutable
 }

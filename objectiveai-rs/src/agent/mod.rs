@@ -29,6 +29,7 @@
 mod agent;
 pub mod claude_agent_sdk;
 pub mod completions;
+mod continuation;
 mod mcp;
 pub mod mock;
 pub mod openrouter;
@@ -38,6 +39,7 @@ pub mod response;
 mod upstream;
 
 pub use agent::*;
+pub use continuation::*;
 pub use mcp::*;
 pub use output_mode::*;
 pub use upstream::*;

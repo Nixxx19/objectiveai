@@ -27,6 +27,12 @@ export function functionsInventionsResponseStreamingAgentCompletionChunkMerged(
     error = b.error;
   }
 
+  let continuation = a.continuation;
+  if (b.continuation != null) {
+    if (b.continuation !== a.continuation) changed = true;
+    continuation = b.continuation;
+  }
+
   if (!changed) return [a, false];
   return [{
     index: a.index,
@@ -37,6 +43,7 @@ export function functionsInventionsResponseStreamingAgentCompletionChunkMerged(
     ...(usage != null ? { usage } : {}),
     upstream: a.upstream,
     ...(error != null ? { error } : {}),
+    ...(continuation != null ? { continuation } : {}),
   }, true];
 }
 

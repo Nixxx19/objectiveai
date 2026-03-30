@@ -26,6 +26,9 @@ pub struct AgentCompletionChunk {
     /// Error details if this completion failed.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<crate::error::ResponseError>,
+    /// Continuation state for multi-turn conversations (only present in the final chunk).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub continuation: Option<String>,
 }
 
 impl AgentCompletionChunk {
@@ -35,7 +38,7 @@ impl AgentCompletionChunk {
     pub fn push(
         &mut self,
         AgentCompletionChunk {
-            messages, usage, error, ..
+            messages, usage, error, continuation, ..
         }: &AgentCompletionChunk,
     ) {
         self.push_messages(messages);
@@ -50,6 +53,9 @@ impl AgentCompletionChunk {
         }
         if let Some(error) = error {
             self.error = Some(error.clone());
+        }
+        if let Some(continuation) = continuation {
+            self.continuation = Some(continuation.clone());
         }
     }
 

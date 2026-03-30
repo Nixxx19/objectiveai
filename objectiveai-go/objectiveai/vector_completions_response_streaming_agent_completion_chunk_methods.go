@@ -18,5 +18,8 @@ func (v *VectorCompletionsResponseStreamingAgentCompletionChunk) Push(other *Vec
 	// error: replace
 	v.Error = pushReplace(v.Error, other.Error)
 
+	// continuation: replace
+	v.Continuation = pushReplace(v.Continuation, other.Continuation)
+
 	// id, created, object, upstream, index are immutable
 }

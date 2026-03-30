@@ -23,5 +23,7 @@ pub struct AgentCompletionCreateParams {
     /// Whether to stream the response.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stream: Option<bool>,
-
+    /// Continuation from a previous completion, as a base64-encoded string.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub continuation: Option<String>,
 }

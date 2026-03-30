@@ -18,6 +18,8 @@ pub struct AgentCompletion {
     pub upstream: crate::agent::Upstream,
     /// Error details if this completion failed.
     pub error: Option<crate::error::ResponseError>,
+    /// Continuation state for multi-turn conversations.
+    pub continuation: Option<String>,
 }
 
 impl AgentCompletion {
@@ -44,6 +46,7 @@ impl From<response::streaming::AgentCompletionChunk> for AgentCompletion {
             usage,
             upstream,
             error,
+            continuation,
         }: response::streaming::AgentCompletionChunk,
     ) -> Self {
         Self {
@@ -54,6 +57,7 @@ impl From<response::streaming::AgentCompletionChunk> for AgentCompletion {
             usage: usage.unwrap_or_default(),
             upstream,
             error,
+            continuation,
         }
     }
 }
