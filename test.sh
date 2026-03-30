@@ -40,6 +40,7 @@ for suite in \
   objectiveai-cli \
   objectiveai-js \
   objectiveai-py \
+  objectiveai-go \
 ; do
   bash "$REPO_ROOT/$suite/test.sh" &
   PIDS+=($!)
