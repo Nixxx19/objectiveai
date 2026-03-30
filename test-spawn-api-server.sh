@@ -20,9 +20,16 @@ get_free_port() {
 
 PORT=$(get_free_port)
 
-# Start the server in the background
-ADDRESS=127.0.0.1 PORT="$PORT" MOCK_DELAY_MS=0 \
-  cargo run --package objectiveai-api &
+# Build the server binary, then run from a copy so the original is not locked.
+# Windows locks running executables, which blocks cargo test from relinking.
+cargo build --package objectiveai-api --quiet >&2
+REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+BINARY="$REPO_ROOT/target/debug/objectiveai-api"
+if [ -f "$BINARY.exe" ]; then BINARY="$BINARY.exe"; fi
+TMPDIR="$(mktemp -d)"
+TMPBIN="$TMPDIR/$(basename "$BINARY")"
+cp "$BINARY" "$TMPBIN"
+ADDRESS=127.0.0.1 PORT="$PORT" MOCK_DELAY_MS=0 "$TMPBIN" &
 SERVER_PID=$!
 
 # Wait for the server to accept connections (up to 120s)
