@@ -23,9 +23,6 @@ func (v AgentCompletionsResponseStreamingMessageChunk) MarshalJSON() ([]byte, er
 }
 
 func (v *AgentCompletionsResponseStreamingMessageChunk) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentCompletionsResponseStreamingAssistantResponseChunk
 		if err := json.Unmarshal(data, &try); err == nil {

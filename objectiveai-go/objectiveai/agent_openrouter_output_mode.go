@@ -55,9 +55,6 @@ func (v AgentOpenrouterOutputMode) MarshalJSON() ([]byte, error) {
 }
 
 func (v *AgentOpenrouterOutputMode) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentOpenrouterOutputModeInstruction
 		if err := json.Unmarshal(data, &try); err == nil {

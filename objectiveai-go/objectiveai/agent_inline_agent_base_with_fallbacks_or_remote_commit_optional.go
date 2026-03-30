@@ -25,9 +25,6 @@ func (v AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional) MarshalJSON() (
 }
 
 func (v *AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentInlineAgentBaseWithFallbacks
 		if err := json.Unmarshal(data, &try); err == nil {

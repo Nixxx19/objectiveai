@@ -24,9 +24,6 @@ func (v SwarmSwarm) MarshalJSON() ([]byte, error) {
 }
 
 func (v *SwarmSwarm) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try SwarmRemoteSwarm
 		if err := json.Unmarshal(data, &try); err == nil {

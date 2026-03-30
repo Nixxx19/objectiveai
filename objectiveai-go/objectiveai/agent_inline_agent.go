@@ -30,9 +30,6 @@ func (v AgentInlineAgent) MarshalJSON() ([]byte, error) {
 }
 
 func (v *AgentInlineAgent) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentOpenrouterAgent
 		if err := json.Unmarshal(data, &try); err == nil {

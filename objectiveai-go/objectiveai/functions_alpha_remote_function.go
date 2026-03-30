@@ -23,9 +23,6 @@ func (v FunctionsAlphaRemoteFunction) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsAlphaRemoteFunction) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsAlphaScalarRemoteFunction
 		if err := json.Unmarshal(data, &try); err == nil {

@@ -11,11 +11,49 @@ type FunctionsAlphaVectorInlineFunctionBranch struct {
 	Tasks []FunctionsAlphaVectorBranchTaskExpression `json:"tasks"`
 	Type string `json:"type" validate:"oneof=alpha.vector.branch.function"`
 }
+
+func (v *FunctionsAlphaVectorInlineFunctionBranch) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"tasks", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsAlphaVectorInlineFunctionBranch: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsAlphaVectorInlineFunctionBranch
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsAlphaVectorInlineFunctionBranch(alias)
+	return nil
+}
 func (FunctionsAlphaVectorInlineFunctionBranch) SchemaVariantTitle() string { return "Branch" }
 
 type FunctionsAlphaVectorInlineFunctionLeaf struct {
 	Tasks []FunctionsAlphaVectorLeafTaskExpression `json:"tasks"`
 	Type string `json:"type" validate:"oneof=alpha.vector.leaf.function"`
+}
+
+func (v *FunctionsAlphaVectorInlineFunctionLeaf) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"tasks", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsAlphaVectorInlineFunctionLeaf: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsAlphaVectorInlineFunctionLeaf
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsAlphaVectorInlineFunctionLeaf(alias)
+	return nil
 }
 func (FunctionsAlphaVectorInlineFunctionLeaf) SchemaVariantTitle() string { return "Leaf" }
 
@@ -35,9 +73,6 @@ func (v FunctionsAlphaVectorInlineFunction) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsAlphaVectorInlineFunction) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsAlphaVectorInlineFunctionBranch
 		if err := json.Unmarshal(data, &try); err == nil {

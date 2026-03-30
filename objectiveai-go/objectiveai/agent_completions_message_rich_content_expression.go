@@ -51,9 +51,6 @@ func (v AgentCompletionsMessageRichContentExpressionPartsItem) MarshalJSON() ([]
 }
 
 func (v *AgentCompletionsMessageRichContentExpressionPartsItem) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -111,9 +108,6 @@ func (v AgentCompletionsMessageRichContentExpression) MarshalJSON() ([]byte, err
 }
 
 func (v *AgentCompletionsMessageRichContentExpression) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentCompletionsMessageRichContentExpressionText
 		if err := json.Unmarshal(data, &try); err == nil {

@@ -13,9 +13,9 @@ type FunctionsProfilesComputationsResponseUnaryFunctionExecution struct {
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
 	Dataset uint64 `json:"dataset" validate:"min=0,max=18446744073709551615"`
 	// Error details if the execution failed.
-	Error *ErrorResponseError `json:"error,omitempty"`
+	Error *ErrorResponseError `json:"error"`
 	// The function used (if remote).
-	Function *RemotePath `json:"function,omitempty"`
+	Function *RemotePath `json:"function"`
 	// Unique identifier for this execution.
 	ID string `json:"id"`
 	Index uint64 `json:"index" validate:"min=0,max=18446744073709551615"`
@@ -25,12 +25,12 @@ type FunctionsProfilesComputationsResponseUnaryFunctionExecution struct {
 	// The final output (scalar or vector score).
 	Output FunctionsExecutionsResponseOutput `json:"output"`
 	// The profile used (if remote).
-	Profile *RemotePath `json:"profile,omitempty"`
+	Profile *RemotePath `json:"profile"`
 	// Reasoning summary if reasoning was enabled.
-	Reasoning *FunctionsExecutionsResponseUnaryReasoningSummary `json:"reasoning,omitempty"`
+	Reasoning *FunctionsExecutionsResponseUnaryReasoningSummary `json:"reasoning"`
 	Retry uint64 `json:"retry" validate:"min=0,max=18446744073709551615"`
 	// Token for retrying this execution with cached votes.
-	RetryToken *string `json:"retry_token,omitempty"`
+	RetryToken *string `json:"retry_token"`
 	// Results from each task in the function.
 	Tasks []FunctionsExecutionsResponseUnaryTask `json:"tasks"`
 	// Whether any tasks encountered errors.

@@ -55,9 +55,6 @@ func (v AgentOpenrouterVerbosity) MarshalJSON() ([]byte, error) {
 }
 
 func (v *AgentOpenrouterVerbosity) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentOpenrouterVerbosityLow
 		if err := json.Unmarshal(data, &try); err == nil {

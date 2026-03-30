@@ -32,9 +32,6 @@ func (v FunctionsProfilesListProfilesSource) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsProfilesListProfilesSource) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {

@@ -16,7 +16,7 @@ type AgentCompletionsResponseStreamingAssistantResponseChunk struct {
 	Agent string `json:"agent"`
 	Content *AgentCompletionsMessageRichContent `json:"content,omitempty"`
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
-	FinishReason *AgentCompletionsResponseFinishReason `json:"finish_reason,omitempty"`
+	FinishReason *AgentCompletionsResponseFinishReason `json:"finish_reason"`
 	Index uint64 `json:"index" validate:"min=0,max=18446744073709551615"`
 	Logprobs *AgentCompletionsResponseLogprobs `json:"logprobs,omitempty"`
 	Model string `json:"model"`

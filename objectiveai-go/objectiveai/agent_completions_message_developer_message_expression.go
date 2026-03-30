@@ -49,9 +49,6 @@ func (v AgentCompletionsMessageDeveloperMessageExpressionContent) MarshalJSON() 
 }
 
 func (v *AgentCompletionsMessageDeveloperMessageExpressionContent) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -90,8 +87,6 @@ type AgentCompletionsMessageDeveloperMessageExpressionNameValue string
 
 func (AgentCompletionsMessageDeveloperMessageExpressionNameValue) SchemaVariantTitle() string { return "Value" }
 
-// Optional name expression.
-//
 // A value that can be either a literal or an expression.
 //
 // This allows Function definitions to mix static values with dynamic
@@ -118,7 +113,7 @@ type AgentCompletionsMessageDeveloperMessageExpressionName struct {
 	// An expression (JMESPath or Starlark) to evaluate.
 	Expression *FunctionsExpressionExpression 
 	// A literal value.
-	Value *AgentCompletionsMessageDeveloperMessageExpressionNameValue `nullable:"true"`
+	Value *AgentCompletionsMessageDeveloperMessageExpressionNameValue 
 }
 
 func (v AgentCompletionsMessageDeveloperMessageExpressionName) MarshalJSON() ([]byte, error) {
@@ -132,9 +127,6 @@ func (v AgentCompletionsMessageDeveloperMessageExpressionName) MarshalJSON() ([]
 }
 
 func (v *AgentCompletionsMessageDeveloperMessageExpressionName) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -197,30 +189,7 @@ type AgentCompletionsMessageDeveloperMessageExpression struct {
 	// ```
 	Content AgentCompletionsMessageDeveloperMessageExpressionContent `json:"content"`
 	// Optional name expression.
-	//
-	// A value that can be either a literal or an expression.
-	//
-	// This allows Function definitions to mix static values with dynamic
-	// expressions. During compilation, expressions are evaluated while
-	// literal values pass through unchanged.
-	//
-	// # Example
-	//
-	// Literal value:
-	// ```json
-	// "hello world"
-	// ```
-	//
-	// JMESPath expression:
-	// ```json
-	// {"$jmespath": "input.greeting"}
-	// ```
-	//
-	// Starlark expression:
-	// ```json
-	// {"$starlark": "input['greeting']"}
-	// ```
-	Name AgentCompletionsMessageDeveloperMessageExpressionName `json:"name"`
+	Name *AgentCompletionsMessageDeveloperMessageExpressionName `json:"name,omitempty"`
 }
 
 func (AgentCompletionsMessageDeveloperMessageExpression) SchemaTitle() string { return "agent.completions.message.DeveloperMessageExpression" }
@@ -233,7 +202,7 @@ func (v *AgentCompletionsMessageDeveloperMessageExpression) UnmarshalJSON(data [
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	for _, key := range []string{"content", "name"} {
+	for _, key := range []string{"content"} {
 		if _, ok := raw[key]; !ok {
 			return fmt.Errorf("AgentCompletionsMessageDeveloperMessageExpression: missing required field %q", key)
 		}

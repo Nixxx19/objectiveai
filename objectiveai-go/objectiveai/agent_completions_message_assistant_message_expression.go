@@ -7,12 +7,6 @@ import (
 	"fmt"
 )
 
-type AgentCompletionsMessageAssistantMessageExpressionContentValue AgentCompletionsMessageRichContentExpression
-
-func (AgentCompletionsMessageAssistantMessageExpressionContentValue) SchemaVariantTitle() string { return "Value" }
-
-// The content expression.
-//
 // A value that can be either a literal or an expression.
 //
 // This allows Function definitions to mix static values with dynamic
@@ -39,7 +33,7 @@ type AgentCompletionsMessageAssistantMessageExpressionContent struct {
 	// An expression (JMESPath or Starlark) to evaluate.
 	Expression *FunctionsExpressionExpression 
 	// A literal value.
-	Value *AgentCompletionsMessageAssistantMessageExpressionContentValue `nullable:"true"`
+	Value *AgentCompletionsMessageRichContentExpression 
 }
 
 func (v AgentCompletionsMessageAssistantMessageExpressionContent) MarshalJSON() ([]byte, error) {
@@ -53,9 +47,6 @@ func (v AgentCompletionsMessageAssistantMessageExpressionContent) MarshalJSON() 
 }
 
 func (v *AgentCompletionsMessageAssistantMessageExpressionContent) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -68,7 +59,7 @@ func (v *AgentCompletionsMessageAssistantMessageExpressionContent) UnmarshalJSON
 		}
 	}
 	{
-		var try AgentCompletionsMessageAssistantMessageExpressionContentValue
+		var try AgentCompletionsMessageRichContentExpression
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := AgentCompletionsMessageAssistantMessageExpressionContent{}
 			candidate.Value = &try
@@ -120,7 +111,7 @@ type AgentCompletionsMessageAssistantMessageExpressionName struct {
 	// An expression (JMESPath or Starlark) to evaluate.
 	Expression *FunctionsExpressionExpression 
 	// A literal value.
-	Value *AgentCompletionsMessageAssistantMessageExpressionNameValue `nullable:"true"`
+	Value *AgentCompletionsMessageAssistantMessageExpressionNameValue 
 }
 
 func (v AgentCompletionsMessageAssistantMessageExpressionName) MarshalJSON() ([]byte, error) {
@@ -134,9 +125,6 @@ func (v AgentCompletionsMessageAssistantMessageExpressionName) MarshalJSON() ([]
 }
 
 func (v *AgentCompletionsMessageAssistantMessageExpressionName) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -201,7 +189,7 @@ type AgentCompletionsMessageAssistantMessageExpressionReasoning struct {
 	// An expression (JMESPath or Starlark) to evaluate.
 	Expression *FunctionsExpressionExpression 
 	// A literal value.
-	Value *AgentCompletionsMessageAssistantMessageExpressionReasoningValue `nullable:"true"`
+	Value *AgentCompletionsMessageAssistantMessageExpressionReasoningValue 
 }
 
 func (v AgentCompletionsMessageAssistantMessageExpressionReasoning) MarshalJSON() ([]byte, error) {
@@ -215,9 +203,6 @@ func (v AgentCompletionsMessageAssistantMessageExpressionReasoning) MarshalJSON(
 }
 
 func (v *AgentCompletionsMessageAssistantMessageExpressionReasoning) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -282,7 +267,7 @@ type AgentCompletionsMessageAssistantMessageExpressionRefusal struct {
 	// An expression (JMESPath or Starlark) to evaluate.
 	Expression *FunctionsExpressionExpression 
 	// A literal value.
-	Value *AgentCompletionsMessageAssistantMessageExpressionRefusalValue `nullable:"true"`
+	Value *AgentCompletionsMessageAssistantMessageExpressionRefusalValue 
 }
 
 func (v AgentCompletionsMessageAssistantMessageExpressionRefusal) MarshalJSON() ([]byte, error) {
@@ -296,9 +281,6 @@ func (v AgentCompletionsMessageAssistantMessageExpressionRefusal) MarshalJSON() 
 }
 
 func (v *AgentCompletionsMessageAssistantMessageExpressionRefusal) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -373,9 +355,6 @@ func (v AgentCompletionsMessageAssistantMessageExpressionToolCallsValueItem) Mar
 }
 
 func (v *AgentCompletionsMessageAssistantMessageExpressionToolCallsValueItem) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -440,7 +419,7 @@ type AgentCompletionsMessageAssistantMessageExpressionToolCalls struct {
 	// An expression (JMESPath or Starlark) to evaluate.
 	Expression *FunctionsExpressionExpression 
 	// A literal value.
-	Value *AgentCompletionsMessageAssistantMessageExpressionToolCallsValue `nullable:"true"`
+	Value *AgentCompletionsMessageAssistantMessageExpressionToolCallsValue 
 }
 
 func (v AgentCompletionsMessageAssistantMessageExpressionToolCalls) MarshalJSON() ([]byte, error) {
@@ -454,9 +433,6 @@ func (v AgentCompletionsMessageAssistantMessageExpressionToolCalls) MarshalJSON(
 }
 
 func (v *AgentCompletionsMessageAssistantMessageExpressionToolCalls) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -494,144 +470,14 @@ func (v AgentCompletionsMessageAssistantMessageExpressionToolCalls) Validate() e
 // Expression variant of [`AssistantMessage`] for dynamic content.
 type AgentCompletionsMessageAssistantMessageExpression struct {
 	// The content expression.
-	//
-	// A value that can be either a literal or an expression.
-	//
-	// This allows Function definitions to mix static values with dynamic
-	// expressions. During compilation, expressions are evaluated while
-	// literal values pass through unchanged.
-	//
-	// # Example
-	//
-	// Literal value:
-	// ```json
-	// "hello world"
-	// ```
-	//
-	// JMESPath expression:
-	// ```json
-	// {"$jmespath": "input.greeting"}
-	// ```
-	//
-	// Starlark expression:
-	// ```json
-	// {"$starlark": "input['greeting']"}
-	// ```
-	Content AgentCompletionsMessageAssistantMessageExpressionContent `json:"content"`
-	// A value that can be either a literal or an expression.
-	//
-	// This allows Function definitions to mix static values with dynamic
-	// expressions. During compilation, expressions are evaluated while
-	// literal values pass through unchanged.
-	//
-	// # Example
-	//
-	// Literal value:
-	// ```json
-	// "hello world"
-	// ```
-	//
-	// JMESPath expression:
-	// ```json
-	// {"$jmespath": "input.greeting"}
-	// ```
-	//
-	// Starlark expression:
-	// ```json
-	// {"$starlark": "input['greeting']"}
-	// ```
-	Name AgentCompletionsMessageAssistantMessageExpressionName `json:"name"`
-	// A value that can be either a literal or an expression.
-	//
-	// This allows Function definitions to mix static values with dynamic
-	// expressions. During compilation, expressions are evaluated while
-	// literal values pass through unchanged.
-	//
-	// # Example
-	//
-	// Literal value:
-	// ```json
-	// "hello world"
-	// ```
-	//
-	// JMESPath expression:
-	// ```json
-	// {"$jmespath": "input.greeting"}
-	// ```
-	//
-	// Starlark expression:
-	// ```json
-	// {"$starlark": "input['greeting']"}
-	// ```
-	Reasoning AgentCompletionsMessageAssistantMessageExpressionReasoning `json:"reasoning"`
-	// A value that can be either a literal or an expression.
-	//
-	// This allows Function definitions to mix static values with dynamic
-	// expressions. During compilation, expressions are evaluated while
-	// literal values pass through unchanged.
-	//
-	// # Example
-	//
-	// Literal value:
-	// ```json
-	// "hello world"
-	// ```
-	//
-	// JMESPath expression:
-	// ```json
-	// {"$jmespath": "input.greeting"}
-	// ```
-	//
-	// Starlark expression:
-	// ```json
-	// {"$starlark": "input['greeting']"}
-	// ```
-	Refusal AgentCompletionsMessageAssistantMessageExpressionRefusal `json:"refusal"`
-	// A value that can be either a literal or an expression.
-	//
-	// This allows Function definitions to mix static values with dynamic
-	// expressions. During compilation, expressions are evaluated while
-	// literal values pass through unchanged.
-	//
-	// # Example
-	//
-	// Literal value:
-	// ```json
-	// "hello world"
-	// ```
-	//
-	// JMESPath expression:
-	// ```json
-	// {"$jmespath": "input.greeting"}
-	// ```
-	//
-	// Starlark expression:
-	// ```json
-	// {"$starlark": "input['greeting']"}
-	// ```
-	ToolCalls AgentCompletionsMessageAssistantMessageExpressionToolCalls `json:"tool_calls"`
+	Content *AgentCompletionsMessageAssistantMessageExpressionContent `json:"content,omitempty"`
+	Name *AgentCompletionsMessageAssistantMessageExpressionName `json:"name,omitempty"`
+	Reasoning *AgentCompletionsMessageAssistantMessageExpressionReasoning `json:"reasoning,omitempty"`
+	Refusal *AgentCompletionsMessageAssistantMessageExpressionRefusal `json:"refusal,omitempty"`
+	ToolCalls *AgentCompletionsMessageAssistantMessageExpressionToolCalls `json:"tool_calls,omitempty"`
 }
 
 func (AgentCompletionsMessageAssistantMessageExpression) SchemaTitle() string { return "agent.completions.message.AssistantMessageExpression" }
 func (v AgentCompletionsMessageAssistantMessageExpression) Validate() error {
 	return variantValidator.Struct(v)
-}
-
-func (v *AgentCompletionsMessageAssistantMessageExpression) UnmarshalJSON(data []byte) error {
-	var raw map[string]json.RawMessage
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return err
-	}
-	for _, key := range []string{"content", "name", "reasoning", "refusal", "tool_calls"} {
-		if _, ok := raw[key]; !ok {
-			return fmt.Errorf("AgentCompletionsMessageAssistantMessageExpression: missing required field %q", key)
-		}
-	}
-	type Alias AgentCompletionsMessageAssistantMessageExpression
-	var alias Alias
-	if err := json.Unmarshal(data, &alias); err != nil {
-		return err
-	}
-	*v = AgentCompletionsMessageAssistantMessageExpression(alias)
-	return nil
 }

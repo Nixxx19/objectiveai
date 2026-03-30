@@ -13,6 +13,25 @@ type FunctionsAlphaVectorRemoteFunctionBranch struct {
 	Tasks []FunctionsAlphaVectorBranchTaskExpression `json:"tasks"`
 	Type string `json:"type" validate:"oneof=alpha.vector.branch.function"`
 }
+
+func (v *FunctionsAlphaVectorRemoteFunctionBranch) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"description", "input_schema", "tasks", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsAlphaVectorRemoteFunctionBranch: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsAlphaVectorRemoteFunctionBranch
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsAlphaVectorRemoteFunctionBranch(alias)
+	return nil
+}
 func (FunctionsAlphaVectorRemoteFunctionBranch) SchemaVariantTitle() string { return "Branch" }
 
 type FunctionsAlphaVectorRemoteFunctionLeaf struct {
@@ -20,6 +39,25 @@ type FunctionsAlphaVectorRemoteFunctionLeaf struct {
 	InputSchema FunctionsAlphaVectorExpressionVectorFunctionInputSchema `json:"input_schema"`
 	Tasks []FunctionsAlphaVectorLeafTaskExpression `json:"tasks"`
 	Type string `json:"type" validate:"oneof=alpha.vector.leaf.function"`
+}
+
+func (v *FunctionsAlphaVectorRemoteFunctionLeaf) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"description", "input_schema", "tasks", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsAlphaVectorRemoteFunctionLeaf: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsAlphaVectorRemoteFunctionLeaf
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsAlphaVectorRemoteFunctionLeaf(alias)
+	return nil
 }
 func (FunctionsAlphaVectorRemoteFunctionLeaf) SchemaVariantTitle() string { return "Leaf" }
 
@@ -39,9 +77,6 @@ func (v FunctionsAlphaVectorRemoteFunction) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsAlphaVectorRemoteFunction) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsAlphaVectorRemoteFunctionBranch
 		if err := json.Unmarshal(data, &try); err == nil {

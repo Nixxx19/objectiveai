@@ -34,9 +34,6 @@ func (v AgentCompletionsRequestProviderDataCollection) MarshalJSON() ([]byte, er
 }
 
 func (v *AgentCompletionsRequestProviderDataCollection) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentCompletionsRequestProviderDataCollectionDeny
 		if err := json.Unmarshal(data, &try); err == nil {

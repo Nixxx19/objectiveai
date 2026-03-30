@@ -43,9 +43,6 @@ func (v AgentCompletionsRequestProviderSort) MarshalJSON() ([]byte, error) {
 }
 
 func (v *AgentCompletionsRequestProviderSort) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentCompletionsRequestProviderSortPrice
 		if err := json.Unmarshal(data, &try); err == nil {

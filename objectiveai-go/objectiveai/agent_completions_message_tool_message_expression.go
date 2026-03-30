@@ -49,9 +49,6 @@ func (v AgentCompletionsMessageToolMessageExpressionContent) MarshalJSON() ([]by
 }
 
 func (v *AgentCompletionsMessageToolMessageExpressionContent) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -132,9 +129,6 @@ func (v AgentCompletionsMessageToolMessageExpressionToolCallID) MarshalJSON() ([
 }
 
 func (v *AgentCompletionsMessageToolMessageExpressionToolCallID) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {

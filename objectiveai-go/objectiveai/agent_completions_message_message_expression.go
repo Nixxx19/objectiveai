@@ -205,9 +205,6 @@ func (v AgentCompletionsMessageMessageExpression) MarshalJSON() ([]byte, error) 
 }
 
 func (v *AgentCompletionsMessageMessageExpression) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentCompletionsMessageMessageExpressionDeveloper
 		if err := json.Unmarshal(data, &try); err == nil {

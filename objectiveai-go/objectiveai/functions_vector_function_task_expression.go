@@ -50,9 +50,6 @@ func (v FunctionsVectorFunctionTaskExpressionInput) MarshalJSON() ([]byte, error
 }
 
 func (v *FunctionsVectorFunctionTaskExpressionInput) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {

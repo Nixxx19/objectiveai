@@ -9,7 +9,7 @@ import (
 
 type ConfigViewerConfig struct {
 	Local *ConfigViewerLocalConfig `json:"local,omitempty"`
-	Mode ConfigViewerMode `json:"mode,omitempty" default:"local"`
+	Mode ConfigViewerMode `json:"mode" default:"local"`
 }
 
 func (ConfigViewerConfig) SchemaTitle() string { return "config.ViewerConfig" }

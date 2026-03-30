@@ -43,9 +43,6 @@ func (v Remote) MarshalJSON() ([]byte, error) {
 }
 
 func (v *Remote) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try RemoteGithub
 		if err := json.Unmarshal(data, &try); err == nil {

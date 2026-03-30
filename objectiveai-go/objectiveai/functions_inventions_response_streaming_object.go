@@ -23,9 +23,6 @@ func (v FunctionsInventionsResponseStreamingObject) MarshalJSON() ([]byte, error
 }
 
 func (v *FunctionsInventionsResponseStreamingObject) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {

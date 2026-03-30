@@ -37,9 +37,6 @@ func (v Weights) MarshalJSON() ([]byte, error) {
 }
 
 func (v *Weights) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try WeightsWeights
 		if err := json.Unmarshal(data, &try); err == nil {

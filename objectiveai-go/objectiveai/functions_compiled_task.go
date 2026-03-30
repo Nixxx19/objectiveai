@@ -34,9 +34,6 @@ func (v FunctionsCompiledTask) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsCompiledTask) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsTask
 		if err := json.Unmarshal(data, &try); err == nil {

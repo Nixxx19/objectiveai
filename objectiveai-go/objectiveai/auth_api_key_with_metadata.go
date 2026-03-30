@@ -19,11 +19,11 @@ type AuthApiKeyWithMetadata struct {
 	// The timestamp when the API key was created (RFC 3339 format).
 	Created time.Time `json:"created"`
 	// The user-provided description of the API key, or `None` if not provided.
-	Description *string `json:"description,omitempty"`
+	Description *string `json:"description"`
 	// The timestamp when the API key was disabled, or `None` if it is active.
-	Disabled *time.Time `json:"disabled,omitempty"`
+	Disabled *time.Time `json:"disabled"`
 	// The timestamp when the API key expires, or `None` if it does not expire.
-	Expires *time.Time `json:"expires,omitempty"`
+	Expires *time.Time `json:"expires"`
 	// The user-provided name of the API key.
 	Name string `json:"name"`
 }

@@ -54,9 +54,6 @@ func (v AgentClaudeAgentSdkEffort) MarshalJSON() ([]byte, error) {
 }
 
 func (v *AgentClaudeAgentSdkEffort) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentClaudeAgentSdkEffortLow
 		if err := json.Unmarshal(data, &try); err == nil {

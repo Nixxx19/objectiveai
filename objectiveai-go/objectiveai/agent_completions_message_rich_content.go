@@ -34,9 +34,6 @@ func (v AgentCompletionsMessageRichContent) MarshalJSON() ([]byte, error) {
 }
 
 func (v *AgentCompletionsMessageRichContent) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentCompletionsMessageRichContentText
 		if err := json.Unmarshal(data, &try); err == nil {

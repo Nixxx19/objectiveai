@@ -10,12 +10,12 @@ import (
 type FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk struct {
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
 	Error *ErrorResponseError `json:"error,omitempty"`
-	Function *RemotePath `json:"function,omitempty"`
+	Function *RemotePath `json:"function"`
 	ID string `json:"id"`
 	Index uint64 `json:"index" validate:"min=0,max=18446744073709551615"`
 	Object FunctionsExecutionsResponseStreamingObject `json:"object"`
 	Output *FunctionsExecutionsResponseOutput `json:"output,omitempty"`
-	Profile *RemotePath `json:"profile,omitempty"`
+	Profile *RemotePath `json:"profile"`
 	Reasoning *FunctionsExecutionsResponseStreamingReasoningSummaryChunk `json:"reasoning,omitempty"`
 	RetryToken *string `json:"retry_token,omitempty"`
 	SwissPoolIndex *uint64 `json:"swiss_pool_index,omitempty" validate:"omitempty,min=0,max=18446744073709551615"`

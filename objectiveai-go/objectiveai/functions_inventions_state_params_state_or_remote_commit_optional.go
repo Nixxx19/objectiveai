@@ -25,9 +25,6 @@ func (v FunctionsInventionsStateParamsStateOrRemoteCommitOptional) MarshalJSON()
 }
 
 func (v *FunctionsInventionsStateParamsStateOrRemoteCommitOptional) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsInventionsStateParamsState
 		if err := json.Unmarshal(data, &try); err == nil {

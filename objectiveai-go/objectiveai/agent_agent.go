@@ -24,9 +24,6 @@ func (v AgentAgent) MarshalJSON() ([]byte, error) {
 }
 
 func (v *AgentAgent) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentRemoteAgent
 		if err := json.Unmarshal(data, &try); err == nil {

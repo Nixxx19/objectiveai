@@ -11,17 +11,74 @@ type FunctionsProfilesComputationsRequestTargetScalar struct {
 	Type string `json:"type" validate:"oneof=scalar"`
 	Value float64 `json:"value" validate:"min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }
+
+func (v *FunctionsProfilesComputationsRequestTargetScalar) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"type", "value"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsProfilesComputationsRequestTargetScalar: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsProfilesComputationsRequestTargetScalar
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsProfilesComputationsRequestTargetScalar(alias)
+	return nil
+}
 func (FunctionsProfilesComputationsRequestTargetScalar) SchemaVariantTitle() string { return "Scalar" }
 
 type FunctionsProfilesComputationsRequestTargetVector struct {
 	Type string `json:"type" validate:"oneof=vector"`
 	Value []float64 `json:"value" validate:"dive,min=-3.4028234663852886e+38,max=3.4028234663852886e+38"`
 }
+
+func (v *FunctionsProfilesComputationsRequestTargetVector) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"type", "value"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsProfilesComputationsRequestTargetVector: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsProfilesComputationsRequestTargetVector
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsProfilesComputationsRequestTargetVector(alias)
+	return nil
+}
 func (FunctionsProfilesComputationsRequestTargetVector) SchemaVariantTitle() string { return "Vector" }
 
 type FunctionsProfilesComputationsRequestTargetVectorWinner struct {
 	Type string `json:"type" validate:"oneof=vector_winner"`
 	Value uint32 `json:"value" validate:"min=0,max=4294967295"`
+}
+
+func (v *FunctionsProfilesComputationsRequestTargetVectorWinner) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"type", "value"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsProfilesComputationsRequestTargetVectorWinner: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsProfilesComputationsRequestTargetVectorWinner
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsProfilesComputationsRequestTargetVectorWinner(alias)
+	return nil
 }
 func (FunctionsProfilesComputationsRequestTargetVectorWinner) SchemaVariantTitle() string { return "VectorWinner" }
 
@@ -45,9 +102,6 @@ func (v FunctionsProfilesComputationsRequestTarget) MarshalJSON() ([]byte, error
 }
 
 func (v *FunctionsProfilesComputationsRequestTarget) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsProfilesComputationsRequestTargetScalar
 		if err := json.Unmarshal(data, &try); err == nil {

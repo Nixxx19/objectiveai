@@ -20,6 +20,25 @@ type FunctionsRemoteFunctionScalar struct {
 	Tasks []FunctionsTaskExpression `json:"tasks"`
 	Type string `json:"type" validate:"oneof=scalar.function"`
 }
+
+func (v *FunctionsRemoteFunctionScalar) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"description", "input_schema", "tasks", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsRemoteFunctionScalar: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsRemoteFunctionScalar
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsRemoteFunctionScalar(alias)
+	return nil
+}
 func (FunctionsRemoteFunctionScalar) SchemaVariantTitle() string { return "Scalar" }
 
 // Produces a vector of scores that sums to 1.
@@ -47,6 +66,25 @@ type FunctionsRemoteFunctionVector struct {
 	Tasks []FunctionsTaskExpression `json:"tasks"`
 	Type string `json:"type" validate:"oneof=vector.function"`
 }
+
+func (v *FunctionsRemoteFunctionVector) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"description", "input_merge", "input_schema", "input_split", "output_length", "tasks", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsRemoteFunctionVector: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsRemoteFunctionVector
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsRemoteFunctionVector(alias)
+	return nil
+}
 func (FunctionsRemoteFunctionVector) SchemaVariantTitle() string { return "Vector" }
 
 // A remote function with full metadata.
@@ -72,9 +110,6 @@ func (v FunctionsRemoteFunction) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsRemoteFunction) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsRemoteFunctionScalar
 		if err := json.Unmarshal(data, &try); err == nil {

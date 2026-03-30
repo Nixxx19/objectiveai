@@ -72,9 +72,6 @@ func (v AgentOpenrouterReasoningEffort) MarshalJSON() ([]byte, error) {
 }
 
 func (v *AgentOpenrouterReasoningEffort) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentOpenrouterReasoningEffortNone
 		if err := json.Unmarshal(data, &try); err == nil {

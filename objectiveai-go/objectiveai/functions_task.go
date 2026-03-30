@@ -214,9 +214,6 @@ func (v FunctionsTask) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsTask) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsTaskScalarFunction
 		if err := json.Unmarshal(data, &try); err == nil {

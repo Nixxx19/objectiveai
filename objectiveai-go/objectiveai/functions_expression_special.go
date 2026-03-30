@@ -80,9 +80,6 @@ func (v FunctionsExpressionSpecial) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsExpressionSpecial) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionSpecialInput
 		if err := json.Unmarshal(data, &try); err == nil {

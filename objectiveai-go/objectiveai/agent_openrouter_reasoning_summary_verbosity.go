@@ -45,9 +45,6 @@ func (v AgentOpenrouterReasoningSummaryVerbosity) MarshalJSON() ([]byte, error) 
 }
 
 func (v *AgentOpenrouterReasoningSummaryVerbosity) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentOpenrouterReasoningSummaryVerbosityAuto
 		if err := json.Unmarshal(data, &try); err == nil {

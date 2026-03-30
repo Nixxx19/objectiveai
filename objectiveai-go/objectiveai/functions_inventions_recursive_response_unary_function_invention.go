@@ -10,12 +10,12 @@ import (
 type FunctionsInventionsRecursiveResponseUnaryFunctionInvention struct {
 	Completions []FunctionsInventionsResponseUnaryAgentCompletion `json:"completions"`
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
-	Error *ErrorResponseError `json:"error,omitempty"`
-	Function *FunctionsFullRemoteFunction `json:"function,omitempty"`
+	Error *ErrorResponseError `json:"error"`
+	Function *FunctionsFullRemoteFunction `json:"function"`
 	ID string `json:"id"`
 	Index uint64 `json:"index" validate:"min=0,max=18446744073709551615"`
 	Object FunctionsInventionsResponseUnaryObject `json:"object"`
-	Path *RemotePath `json:"path,omitempty"`
+	Path *RemotePath `json:"path"`
 	State FunctionsInventionsStateState `json:"state"`
 	Usage AgentCompletionsResponseUsage `json:"usage"`
 }

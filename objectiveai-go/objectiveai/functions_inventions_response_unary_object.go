@@ -23,9 +23,6 @@ func (v FunctionsInventionsResponseUnaryObject) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsInventionsResponseUnaryObject) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {

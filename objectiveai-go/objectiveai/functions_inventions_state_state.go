@@ -163,9 +163,6 @@ func (v FunctionsInventionsStateState) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsInventionsStateState) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsInventionsStateStateAlphaScalarBranch
 		if err := json.Unmarshal(data, &try); err == nil {

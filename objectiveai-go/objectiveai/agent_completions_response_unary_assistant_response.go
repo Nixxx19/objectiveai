@@ -10,19 +10,19 @@ import (
 // An assistant response in a unary agent completion.
 type AgentCompletionsResponseUnaryAssistantResponse struct {
 	Agent string `json:"agent"`
-	Content *AgentCompletionsMessageRichContent `json:"content,omitempty"`
+	Content *AgentCompletionsMessageRichContent `json:"content"`
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
 	FinishReason AgentCompletionsResponseFinishReason `json:"finish_reason"`
 	Index uint64 `json:"index" validate:"min=0,max=18446744073709551615"`
-	Logprobs *AgentCompletionsResponseLogprobs `json:"logprobs,omitempty"`
+	Logprobs *AgentCompletionsResponseLogprobs `json:"logprobs"`
 	Model string `json:"model"`
 	Provider *string `json:"provider,omitempty"`
 	Reasoning *string `json:"reasoning,omitempty"`
-	Refusal *string `json:"refusal,omitempty"`
+	Refusal *string `json:"refusal"`
 	Role AgentCompletionsResponseAssistantRole `json:"role"`
 	ServiceTier *string `json:"service_tier,omitempty"`
 	SystemFingerprint *string `json:"system_fingerprint,omitempty"`
-	ToolCalls *[]AgentCompletionsMessageAssistantToolCall `json:"tool_calls,omitempty"`
+	ToolCalls *[]AgentCompletionsMessageAssistantToolCall `json:"tool_calls"`
 	UpstreamID string `json:"upstream_id"`
 	// Upstream usage for this assistant response (set by upstream clients).
 	Usage AgentCompletionsResponseUpstreamUsage `json:"usage"`

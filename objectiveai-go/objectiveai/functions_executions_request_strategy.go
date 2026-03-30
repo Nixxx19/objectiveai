@@ -11,15 +11,53 @@ import (
 type FunctionsExecutionsRequestStrategyDefault struct {
 	Type string `json:"type" validate:"oneof=default"`
 }
+
+func (v *FunctionsExecutionsRequestStrategyDefault) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsExecutionsRequestStrategyDefault: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsExecutionsRequestStrategyDefault
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsExecutionsRequestStrategyDefault(alias)
+	return nil
+}
 func (FunctionsExecutionsRequestStrategyDefault) SchemaVariantTitle() string { return "Default" }
 
 // Vector
 type FunctionsExecutionsRequestStrategySwissSystem struct {
 	// How many vector responses for each execution
-	Pool *uint32 `json:"pool,omitempty" validate:"omitempty,min=0,max=4294967295"`
+	Pool *uint32 `json:"pool" validate:"omitempty,min=0,max=4294967295"`
 	// How many sequential rounds of comparison
-	Rounds *uint32 `json:"rounds,omitempty" validate:"omitempty,min=0,max=4294967295"`
+	Rounds *uint32 `json:"rounds" validate:"omitempty,min=0,max=4294967295"`
 	Type string `json:"type" validate:"oneof=swiss_system"`
+}
+
+func (v *FunctionsExecutionsRequestStrategySwissSystem) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsExecutionsRequestStrategySwissSystem: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsExecutionsRequestStrategySwissSystem
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsExecutionsRequestStrategySwissSystem(alias)
+	return nil
 }
 func (FunctionsExecutionsRequestStrategySwissSystem) SchemaVariantTitle() string { return "SwissSystem" }
 
@@ -41,9 +79,6 @@ func (v FunctionsExecutionsRequestStrategy) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsExecutionsRequestStrategy) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExecutionsRequestStrategyDefault
 		if err := json.Unmarshal(data, &try); err == nil {

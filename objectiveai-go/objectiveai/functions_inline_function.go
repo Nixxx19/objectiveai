@@ -16,6 +16,25 @@ type FunctionsInlineFunctionScalar struct {
 	Tasks []FunctionsTaskExpression `json:"tasks"`
 	Type string `json:"type" validate:"oneof=scalar.function"`
 }
+
+func (v *FunctionsInlineFunctionScalar) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"tasks", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsInlineFunctionScalar: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsInlineFunctionScalar
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsInlineFunctionScalar(alias)
+	return nil
+}
 func (FunctionsInlineFunctionScalar) SchemaVariantTitle() string { return "Scalar" }
 
 // Produces a vector of scores that sums to 1.
@@ -24,19 +43,38 @@ type FunctionsInlineFunctionVector struct {
 	// into a single Input object for the Function.
 	// Receives: `input` (as an array).
 	// Only required if the request uses a strategy that needs input splitting.
-	InputMerge *FunctionsExpressionExpression `json:"input_merge,omitempty"`
+	InputMerge *FunctionsExpressionExpression `json:"input_merge"`
 	// Expression transforming input into an input array of the output_length
 	// When the Function is executed with any input from the array,
 	// The output_length should be 1.
 	// Receives: `input`.
 	// Only required if the request uses a strategy that needs input splitting.
-	InputSplit *FunctionsExpressionExpression `json:"input_split,omitempty"`
+	InputSplit *FunctionsExpressionExpression `json:"input_split"`
 	// The list of tasks to execute. Tasks with a `map` expression are
 	// expanded into multiple instances. Each instance is compiled with
 	// `map` set to the current integer index.
 	// Receives: `input`, `map` (if mapped).
 	Tasks []FunctionsTaskExpression `json:"tasks"`
 	Type string `json:"type" validate:"oneof=vector.function"`
+}
+
+func (v *FunctionsInlineFunctionVector) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"tasks", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsInlineFunctionVector: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsInlineFunctionVector
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsInlineFunctionVector(alias)
+	return nil
 }
 func (FunctionsInlineFunctionVector) SchemaVariantTitle() string { return "Vector" }
 
@@ -63,9 +101,6 @@ func (v FunctionsInlineFunction) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsInlineFunction) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsInlineFunctionScalar
 		if err := json.Unmarshal(data, &try); err == nil {

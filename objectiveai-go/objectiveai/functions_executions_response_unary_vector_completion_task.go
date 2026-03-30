@@ -16,7 +16,7 @@ type FunctionsExecutionsResponseUnaryVectorCompletionTask struct {
 	Completions []VectorCompletionsResponseUnaryAgentCompletion `json:"completions"`
 	// Unix timestamp when the completion was created.
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
-	Error *ErrorResponseError `json:"error,omitempty"`
+	Error *ErrorResponseError `json:"error"`
 	// Unique identifier for this vector completion.
 	ID string `json:"id"`
 	Index uint64 `json:"index" validate:"min=0,max=18446744073709551615"`

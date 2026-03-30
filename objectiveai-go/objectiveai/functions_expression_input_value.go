@@ -78,9 +78,6 @@ func (v FunctionsExpressionInputValue) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsExpressionInputValue) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentCompletionsMessageRichContentPart
 		if err := json.Unmarshal(data, &try); err == nil {

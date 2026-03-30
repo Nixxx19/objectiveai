@@ -11,7 +11,7 @@ import (
 type AgentAgentWithFallbacksWithCount struct {
 	AgentAgentWithFallbacks
 	// Number of instances of this agent in the swarm. Defaults to 1.
-	Count uint64 `json:"count,omitempty" validate:"min=0,max=18446744073709551615" default:"1"`
+	Count uint64 `json:"count" validate:"min=0,max=18446744073709551615" default:"1"`
 }
 
 func (AgentAgentWithFallbacksWithCount) SchemaTitle() string { return "agent.AgentWithFallbacksWithCount" }

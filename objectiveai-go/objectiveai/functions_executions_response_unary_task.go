@@ -23,9 +23,6 @@ func (v FunctionsExecutionsResponseUnaryTask) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsExecutionsResponseUnaryTask) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExecutionsResponseUnaryFunctionExecutionTask
 		if err := json.Unmarshal(data, &try); err == nil {

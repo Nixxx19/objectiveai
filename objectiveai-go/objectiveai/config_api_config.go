@@ -10,7 +10,7 @@ import (
 type ConfigApiConfig struct {
 	Headers *ConfigApiHeadersConfig `json:"headers,omitempty"`
 	Local *ConfigApiLocalConfig `json:"local,omitempty"`
-	Mode ConfigApiMode `json:"mode,omitempty" default:"local"`
+	Mode ConfigApiMode `json:"mode" default:"local"`
 	Remote *ConfigApiRemoteConfig `json:"remote,omitempty"`
 }
 

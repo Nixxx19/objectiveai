@@ -12,7 +12,7 @@ type FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChu
 	Executions []FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk `json:"executions"`
 	ExecutionsErrors *bool `json:"executions_errors,omitempty"`
 	FittingStats *FunctionsProfilesComputationsResponseFittingStats `json:"fitting_stats,omitempty"`
-	Function *RemotePath `json:"function,omitempty"`
+	Function *RemotePath `json:"function"`
 	ID string `json:"id"`
 	Object FunctionsProfilesComputationsResponseStreamingObject `json:"object"`
 	Profile *FunctionsInlineTasksProfile `json:"profile,omitempty"`

@@ -37,9 +37,6 @@ func (v FunctionsTaskProfile) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsTaskProfile) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try RemotePath
 		if err := json.Unmarshal(data, &try); err == nil {

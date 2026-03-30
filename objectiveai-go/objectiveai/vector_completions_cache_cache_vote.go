@@ -3,7 +3,7 @@
 package objectiveai
 
 type VectorCompletionsCacheCacheVote struct {
-	Vote *VectorCompletionsResponseVote `json:"vote,omitempty"`
+	Vote *VectorCompletionsResponseVote `json:"vote"`
 }
 
 func (VectorCompletionsCacheCacheVote) SchemaTitle() string { return "vector.completions.cache.CacheVote" }

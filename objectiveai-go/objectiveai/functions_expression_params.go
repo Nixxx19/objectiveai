@@ -12,9 +12,9 @@ type FunctionsExpressionParams struct {
 	// The function's input data.
 	Input FunctionsExpressionInputValue `json:"input"`
 	// Current map index. Only populated for mapped task expressions.
-	Map *uint64 `json:"map,omitempty" validate:"omitempty,min=0,max=18446744073709551615"`
+	Map *uint64 `json:"map" validate:"omitempty,min=0,max=18446744073709551615"`
 	// Results from executed tasks. Only populated for task output expressions.
-	Output *FunctionsExpressionTaskOutput `json:"output,omitempty"`
+	Output *FunctionsExpressionTaskOutput `json:"output"`
 }
 
 func (FunctionsExpressionParams) SchemaTitle() string { return "functions.expression.Params" }

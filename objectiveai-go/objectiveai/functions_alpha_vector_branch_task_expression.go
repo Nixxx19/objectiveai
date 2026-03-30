@@ -163,9 +163,6 @@ func (v FunctionsAlphaVectorBranchTaskExpression) MarshalJSON() ([]byte, error) 
 }
 
 func (v *FunctionsAlphaVectorBranchTaskExpression) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsAlphaVectorBranchTaskExpressionScalarFunction
 		if err := json.Unmarshal(data, &try); err == nil {

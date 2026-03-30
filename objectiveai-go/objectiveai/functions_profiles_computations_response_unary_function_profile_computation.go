@@ -12,11 +12,11 @@ type FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation struct
 	Executions []FunctionsProfilesComputationsResponseUnaryFunctionExecution `json:"executions"`
 	ExecutionsErrors bool `json:"executions_errors"`
 	FittingStats FunctionsProfilesComputationsResponseFittingStats `json:"fitting_stats"`
-	Function *RemotePath `json:"function,omitempty"`
+	Function *RemotePath `json:"function"`
 	ID string `json:"id"`
 	Object FunctionsProfilesComputationsResponseUnaryObject `json:"object"`
 	Profile FunctionsInlineTasksProfile `json:"profile"`
-	RetryToken *string `json:"retry_token,omitempty"`
+	RetryToken *string `json:"retry_token"`
 	Usage AgentCompletionsResponseUsage `json:"usage"`
 }
 

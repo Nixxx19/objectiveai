@@ -11,13 +11,13 @@ type FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk struct
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
 	Dataset uint64 `json:"dataset" validate:"min=0,max=18446744073709551615"`
 	Error *ErrorResponseError `json:"error,omitempty"`
-	Function *RemotePath `json:"function,omitempty"`
+	Function *RemotePath `json:"function"`
 	ID string `json:"id"`
 	Index uint64 `json:"index" validate:"min=0,max=18446744073709551615"`
 	N uint64 `json:"n" validate:"min=0,max=18446744073709551615"`
 	Object FunctionsExecutionsResponseStreamingObject `json:"object"`
 	Output *FunctionsExecutionsResponseOutput `json:"output,omitempty"`
-	Profile *RemotePath `json:"profile,omitempty"`
+	Profile *RemotePath `json:"profile"`
 	Reasoning *FunctionsExecutionsResponseStreamingReasoningSummaryChunk `json:"reasoning,omitempty"`
 	Retry uint64 `json:"retry" validate:"min=0,max=18446744073709551615"`
 	RetryToken *string `json:"retry_token,omitempty"`

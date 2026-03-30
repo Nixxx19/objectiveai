@@ -302,8 +302,6 @@ func reconstructFieldSchema(
 		typeName = strings.TrimPrefix(typeName, "*")
 	}
 
-	isNullable := isPointer && isOmitempty
-
 	inner := buildFieldTypeSchema(typeName, types, titleMap)
 
 	if patternTag != "" {
@@ -314,12 +312,18 @@ func reconstructFieldSchema(
 	}
 	addValidateConstraints(inner, validateTag)
 
-	if isNullable {
-		return map[string]any{
+	var result map[string]any
+	if isPointer {
+		result = map[string]any{
 			"anyOf": []any{inner, map[string]any{"type": "null"}},
 		}
+	} else {
+		result = inner
 	}
-	return inner
+	if isOmitempty {
+		result["omitempty"] = true
+	}
+	return result
 }
 
 func buildFieldTypeSchema(
@@ -569,20 +573,13 @@ func reconstructVariant(
 	// Build the inner schema (without title/description)
 	inner := reconstructVariantInner(f, typeName, types, titleMap)
 
-	// Check if this variant is nullable (parent field has nullable:"true")
-	isNullable := getTagValue(f.tags, "nullable") == "true"
-
 	// Assemble the variant with title, description, and inner schema
 	variant := map[string]any{"title": variantTitle}
 	if f.doc != "" {
 		variant["description"] = f.doc
 	}
-	if isNullable {
-		variant["anyOf"] = []any{inner, map[string]any{"type": "null"}}
-	} else {
-		for k, v := range inner {
-			variant[k] = v
-		}
+	for k, v := range inner {
+		variant[k] = v
 	}
 	return variant
 }

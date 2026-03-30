@@ -23,9 +23,6 @@ func (v ConfigViewerMode) MarshalJSON() ([]byte, error) {
 }
 
 func (v *ConfigViewerMode) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {

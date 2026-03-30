@@ -37,9 +37,6 @@ func (v AgentOpenrouterStop) MarshalJSON() ([]byte, error) {
 }
 
 func (v *AgentOpenrouterStop) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentOpenrouterStopString
 		if err := json.Unmarshal(data, &try); err == nil {

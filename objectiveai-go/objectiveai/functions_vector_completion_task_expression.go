@@ -47,9 +47,6 @@ func (v FunctionsVectorCompletionTaskExpressionMessagesValueItem) MarshalJSON() 
 }
 
 func (v *FunctionsVectorCompletionTaskExpressionMessagesValueItem) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -131,9 +128,6 @@ func (v FunctionsVectorCompletionTaskExpressionMessages) MarshalJSON() ([]byte, 
 }
 
 func (v *FunctionsVectorCompletionTaskExpressionMessages) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -208,9 +202,6 @@ func (v FunctionsVectorCompletionTaskExpressionResponsesValueItem) MarshalJSON()
 }
 
 func (v *FunctionsVectorCompletionTaskExpressionResponsesValueItem) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -292,9 +283,6 @@ func (v FunctionsVectorCompletionTaskExpressionResponses) MarshalJSON() ([]byte,
 }
 
 func (v *FunctionsVectorCompletionTaskExpressionResponses) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {

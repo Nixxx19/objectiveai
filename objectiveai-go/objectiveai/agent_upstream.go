@@ -52,9 +52,6 @@ func (v AgentUpstream) MarshalJSON() ([]byte, error) {
 }
 
 func (v *AgentUpstream) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentUpstreamUnknown
 		if err := json.Unmarshal(data, &try); err == nil {

@@ -11,11 +11,49 @@ type FunctionsInventionsStateInputSchemaScalarFunctionInputSchema struct {
 	Schema FunctionsExpressionObjectInputSchema `json:"schema"`
 	Type string `json:"type" validate:"oneof=alpha.scalar.function"`
 }
+
+func (v *FunctionsInventionsStateInputSchemaScalarFunctionInputSchema) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"schema", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsInventionsStateInputSchemaScalarFunctionInputSchema: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsInventionsStateInputSchemaScalarFunctionInputSchema
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsInventionsStateInputSchemaScalarFunctionInputSchema(alias)
+	return nil
+}
 func (FunctionsInventionsStateInputSchemaScalarFunctionInputSchema) SchemaVariantTitle() string { return "ScalarFunctionInputSchema" }
 
 type FunctionsInventionsStateInputSchemaVectorFunctionInputSchema struct {
 	Schema FunctionsAlphaVectorExpressionVectorFunctionInputSchema `json:"schema"`
 	Type string `json:"type" validate:"oneof=alpha.vector.function"`
+}
+
+func (v *FunctionsInventionsStateInputSchemaVectorFunctionInputSchema) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"schema", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsInventionsStateInputSchemaVectorFunctionInputSchema: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsInventionsStateInputSchemaVectorFunctionInputSchema
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsInventionsStateInputSchemaVectorFunctionInputSchema(alias)
+	return nil
 }
 func (FunctionsInventionsStateInputSchemaVectorFunctionInputSchema) SchemaVariantTitle() string { return "VectorFunctionInputSchema" }
 
@@ -38,9 +76,6 @@ func (v FunctionsInventionsStateInputSchema) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsInventionsStateInputSchema) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsInventionsStateInputSchemaScalarFunctionInputSchema
 		if err := json.Unmarshal(data, &try); err == nil {

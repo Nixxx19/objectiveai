@@ -26,9 +26,6 @@ func (v FunctionsInlineProfile) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsInlineProfile) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsInlineTasksProfile
 		if err := json.Unmarshal(data, &try); err == nil {

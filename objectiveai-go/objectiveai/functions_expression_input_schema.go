@@ -74,9 +74,6 @@ func (v FunctionsExpressionInputSchema) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsExpressionInputSchema) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionAnyOfInputSchema
 		if err := json.Unmarshal(data, &try); err == nil {

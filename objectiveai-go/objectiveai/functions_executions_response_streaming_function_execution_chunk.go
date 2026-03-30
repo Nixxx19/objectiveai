@@ -10,11 +10,11 @@ import (
 type FunctionsExecutionsResponseStreamingFunctionExecutionChunk struct {
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
 	Error *ErrorResponseError `json:"error,omitempty"`
-	Function *RemotePath `json:"function,omitempty"`
+	Function *RemotePath `json:"function"`
 	ID string `json:"id"`
 	Object FunctionsExecutionsResponseStreamingObject `json:"object"`
 	Output *FunctionsExecutionsResponseOutput `json:"output,omitempty"`
-	Profile *RemotePath `json:"profile,omitempty"`
+	Profile *RemotePath `json:"profile"`
 	Reasoning *FunctionsExecutionsResponseStreamingReasoningSummaryChunk `json:"reasoning,omitempty"`
 	RetryToken *string `json:"retry_token,omitempty"`
 	Tasks []FunctionsExecutionsResponseStreamingTaskChunk `json:"tasks"`

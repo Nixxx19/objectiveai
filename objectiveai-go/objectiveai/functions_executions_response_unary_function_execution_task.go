@@ -12,9 +12,9 @@ type FunctionsExecutionsResponseUnaryFunctionExecutionTask struct {
 	// Unix timestamp when the execution was created.
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
 	// Error details if the execution failed.
-	Error *ErrorResponseError `json:"error,omitempty"`
+	Error *ErrorResponseError `json:"error"`
 	// The function used (if remote).
-	Function *RemotePath `json:"function,omitempty"`
+	Function *RemotePath `json:"function"`
 	// Unique identifier for this execution.
 	ID string `json:"id"`
 	Index uint64 `json:"index" validate:"min=0,max=18446744073709551615"`
@@ -23,11 +23,11 @@ type FunctionsExecutionsResponseUnaryFunctionExecutionTask struct {
 	// The final output (scalar or vector score).
 	Output FunctionsExecutionsResponseOutput `json:"output"`
 	// The profile used (if remote).
-	Profile *RemotePath `json:"profile,omitempty"`
+	Profile *RemotePath `json:"profile"`
 	// Reasoning summary if reasoning was enabled.
-	Reasoning *FunctionsExecutionsResponseUnaryReasoningSummary `json:"reasoning,omitempty"`
+	Reasoning *FunctionsExecutionsResponseUnaryReasoningSummary `json:"reasoning"`
 	// Token for retrying this execution with cached votes.
-	RetryToken *string `json:"retry_token,omitempty"`
+	RetryToken *string `json:"retry_token"`
 	SwissPoolIndex *uint64 `json:"swiss_pool_index,omitempty" validate:"omitempty,min=0,max=18446744073709551615"`
 	SwissRound *uint64 `json:"swiss_round,omitempty" validate:"omitempty,min=0,max=18446744073709551615"`
 	TaskIndex uint64 `json:"task_index" validate:"min=0,max=18446744073709551615"`

@@ -31,9 +31,6 @@ func (v FunctionsFunctionType) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsFunctionType) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsFunctionTypeScalar
 		if err := json.Unmarshal(data, &try); err == nil {

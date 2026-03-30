@@ -32,9 +32,6 @@ func (v AgentListAgentsSource) MarshalJSON() ([]byte, error) {
 }
 
 func (v *AgentListAgentsSource) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try string
 		if err := json.Unmarshal(data, &try); err == nil {

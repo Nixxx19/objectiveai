@@ -23,9 +23,6 @@ func (v FunctionsAlphaInlineFunction) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsAlphaInlineFunction) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsAlphaScalarInlineFunction
 		if err := json.Unmarshal(data, &try); err == nil {

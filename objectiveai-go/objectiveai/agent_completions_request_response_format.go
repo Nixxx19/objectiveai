@@ -11,11 +11,49 @@ import (
 type AgentCompletionsRequestResponseFormatText struct {
 	Type string `json:"type" validate:"oneof=text"`
 }
+
+func (v *AgentCompletionsRequestResponseFormatText) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsRequestResponseFormatText: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsRequestResponseFormatText
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsRequestResponseFormatText(alias)
+	return nil
+}
 func (AgentCompletionsRequestResponseFormatText) SchemaVariantTitle() string { return "Text" }
 
 // Response must be valid JSON.
 type AgentCompletionsRequestResponseFormatJsonObject struct {
 	Type string `json:"type" validate:"oneof=json_object"`
+}
+
+func (v *AgentCompletionsRequestResponseFormatJsonObject) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsRequestResponseFormatJsonObject: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsRequestResponseFormatJsonObject
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsRequestResponseFormatJsonObject(alias)
+	return nil
 }
 func (AgentCompletionsRequestResponseFormatJsonObject) SchemaVariantTitle() string { return "JsonObject" }
 
@@ -25,6 +63,25 @@ type AgentCompletionsRequestResponseFormatJsonSchema struct {
 	Schema map[string]JsonValue `json:"schema"`
 	Type string `json:"type" validate:"oneof=json_schema"`
 }
+
+func (v *AgentCompletionsRequestResponseFormatJsonSchema) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"schema", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsRequestResponseFormatJsonSchema: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsRequestResponseFormatJsonSchema
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsRequestResponseFormatJsonSchema(alias)
+	return nil
+}
 func (AgentCompletionsRequestResponseFormatJsonSchema) SchemaVariantTitle() string { return "JsonSchema" }
 
 // Response must conform to a grammar.
@@ -32,11 +89,49 @@ type AgentCompletionsRequestResponseFormatGrammar struct {
 	Grammar string `json:"grammar"`
 	Type string `json:"type" validate:"oneof=grammar"`
 }
+
+func (v *AgentCompletionsRequestResponseFormatGrammar) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"grammar", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsRequestResponseFormatGrammar: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsRequestResponseFormatGrammar
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsRequestResponseFormatGrammar(alias)
+	return nil
+}
 func (AgentCompletionsRequestResponseFormatGrammar) SchemaVariantTitle() string { return "Grammar" }
 
 // Response must be valid Python code.
 type AgentCompletionsRequestResponseFormatPython struct {
 	Type string `json:"type" validate:"oneof=python"`
+}
+
+func (v *AgentCompletionsRequestResponseFormatPython) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsRequestResponseFormatPython: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsRequestResponseFormatPython
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsRequestResponseFormatPython(alias)
+	return nil
 }
 func (AgentCompletionsRequestResponseFormatPython) SchemaVariantTitle() string { return "Python" }
 
@@ -51,6 +146,25 @@ type AgentCompletionsRequestResponseFormatToolCall struct {
 	// The JSON Schema definition.
 	Schema map[string]JsonValue `json:"schema"`
 	Type string `json:"type" validate:"oneof=tool_call"`
+}
+
+func (v *AgentCompletionsRequestResponseFormatToolCall) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"description", "name", "schema", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsRequestResponseFormatToolCall: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsRequestResponseFormatToolCall
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsRequestResponseFormatToolCall(alias)
+	return nil
 }
 func (AgentCompletionsRequestResponseFormatToolCall) SchemaVariantTitle() string { return "ToolCall" }
 
@@ -93,9 +207,6 @@ func (v AgentCompletionsRequestResponseFormat) MarshalJSON() ([]byte, error) {
 }
 
 func (v *AgentCompletionsRequestResponseFormat) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentCompletionsRequestResponseFormatText
 		if err := json.Unmarshal(data, &try); err == nil {

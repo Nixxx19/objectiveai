@@ -23,9 +23,6 @@ func (v FunctionsExecutionsResponseStreamingTaskChunk) MarshalJSON() ([]byte, er
 }
 
 func (v *FunctionsExecutionsResponseStreamingTaskChunk) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk
 		if err := json.Unmarshal(data, &try); err == nil {

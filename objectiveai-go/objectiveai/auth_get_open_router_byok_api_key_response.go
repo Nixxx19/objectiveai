@@ -5,7 +5,7 @@ package objectiveai
 // Response containing the user's OpenRouter BYOK API key.
 type AuthGetOpenRouterByokApiKeyResponse struct {
 	// The OpenRouter API key, or `None` if not configured.
-	APIKey *string `json:"api_key,omitempty"`
+	APIKey *string `json:"api_key"`
 }
 
 func (AuthGetOpenRouterByokApiKeyResponse) SchemaTitle() string { return "auth.GetOpenRouterByokApiKeyResponse" }

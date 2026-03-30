@@ -53,9 +53,6 @@ func (v AgentCompletionsMessageSimpleContentPartExpressionText) MarshalJSON() ([
 }
 
 func (v *AgentCompletionsMessageSimpleContentPartExpressionText) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {

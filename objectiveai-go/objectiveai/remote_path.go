@@ -13,6 +13,25 @@ type RemotePathGithub struct {
 	Remote string `json:"remote" validate:"oneof=github"`
 	Repository string `json:"repository"`
 }
+
+func (v *RemotePathGithub) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"commit", "owner", "remote", "repository"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("RemotePathGithub: missing required field %q", key)
+		}
+	}
+	type Alias RemotePathGithub
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = RemotePathGithub(alias)
+	return nil
+}
 func (RemotePathGithub) SchemaVariantTitle() string { return "Github" }
 
 type RemotePathFilesystem struct {
@@ -21,11 +40,49 @@ type RemotePathFilesystem struct {
 	Remote string `json:"remote" validate:"oneof=filesystem"`
 	Repository string `json:"repository"`
 }
+
+func (v *RemotePathFilesystem) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"commit", "owner", "remote", "repository"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("RemotePathFilesystem: missing required field %q", key)
+		}
+	}
+	type Alias RemotePathFilesystem
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = RemotePathFilesystem(alias)
+	return nil
+}
 func (RemotePathFilesystem) SchemaVariantTitle() string { return "Filesystem" }
 
 type RemotePathMock struct {
 	Name string `json:"name"`
 	Remote string `json:"remote" validate:"oneof=mock"`
+}
+
+func (v *RemotePathMock) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"name", "remote"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("RemotePathMock: missing required field %q", key)
+		}
+	}
+	type Alias RemotePathMock
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = RemotePathMock(alias)
+	return nil
 }
 func (RemotePathMock) SchemaVariantTitle() string { return "Mock" }
 
@@ -49,9 +106,6 @@ func (v RemotePath) MarshalJSON() ([]byte, error) {
 }
 
 func (v *RemotePath) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try RemotePathGithub
 		if err := json.Unmarshal(data, &try); err == nil {

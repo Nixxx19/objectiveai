@@ -30,9 +30,6 @@ func (v AgentCompletionsRequestResponseFormatParam) MarshalJSON() ([]byte, error
 }
 
 func (v *AgentCompletionsRequestResponseFormatParam) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentCompletionsRequestResponseFormat
 		if err := json.Unmarshal(data, &try); err == nil {

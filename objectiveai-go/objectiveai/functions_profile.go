@@ -29,9 +29,6 @@ func (v FunctionsProfile) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsProfile) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsRemoteProfile
 		if err := json.Unmarshal(data, &try); err == nil {

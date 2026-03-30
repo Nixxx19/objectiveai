@@ -89,9 +89,6 @@ func (v FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression) MarshalJSON(
 }
 
 func (v *FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionPlaceholderScalarFunction
 		if err := json.Unmarshal(data, &try); err == nil {

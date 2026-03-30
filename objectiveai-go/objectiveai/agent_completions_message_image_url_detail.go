@@ -43,9 +43,6 @@ func (v AgentCompletionsMessageImageUrlDetail) MarshalJSON() ([]byte, error) {
 }
 
 func (v *AgentCompletionsMessageImageUrlDetail) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentCompletionsMessageImageUrlDetailAuto
 		if err := json.Unmarshal(data, &try); err == nil {

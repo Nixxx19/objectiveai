@@ -13,10 +13,10 @@ import (
 // which agent in the swarm produced it.
 type VectorCompletionsResponseUnaryAgentCompletion struct {
 	// Continuation state for multi-turn conversations.
-	Continuation *string `json:"continuation,omitempty"`
+	Continuation *string `json:"continuation"`
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
 	// Error details if this completion failed.
-	Error *ErrorResponseError `json:"error,omitempty"`
+	Error *ErrorResponseError `json:"error"`
 	ID string `json:"id"`
 	// Index of this completion within the vector completion.
 	Index uint64 `json:"index" validate:"min=0,max=18446744073709551615"`

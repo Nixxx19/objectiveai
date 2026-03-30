@@ -47,9 +47,6 @@ func (v FunctionsExpressionInputValueExpressionObjectValue) MarshalJSON() ([]byt
 }
 
 func (v *FunctionsExpressionInputValueExpressionObjectValue) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -128,9 +125,6 @@ func (v FunctionsExpressionInputValueExpressionArrayItem) MarshalJSON() ([]byte,
 }
 
 func (v *FunctionsExpressionInputValueExpressionArrayItem) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -232,9 +226,6 @@ func (v FunctionsExpressionInputValueExpression) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsExpressionInputValueExpression) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentCompletionsMessageRichContentPart
 		if err := json.Unmarshal(data, &try); err == nil {

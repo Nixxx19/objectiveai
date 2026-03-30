@@ -508,9 +508,7 @@ func generateStruct(typeName string, schema Schema, selfTitle string, allTitles 
 		b.WriteString(goDocComment(fieldDesc, "\t"))
 
 		jsonTag := propName
-		if isNullable(propSchema) {
-			jsonTag += ",omitempty"
-		} else if _, hasDefault := propSchema["default"]; hasDefault {
+		if oe, _ := propSchema["omitempty"].(bool); oe {
 			jsonTag += ",omitempty"
 		}
 
@@ -540,7 +538,7 @@ func resolveFieldTypeWithInline(propSchema Schema, selfTitle string, allTitles m
 			// Generate an inline variant struct
 			inlineName := parentType + fieldName
 			inlineSchema := Schema{}
-			if desc, ok := propSchema["description"].(string); ok {
+			if desc, ok := cs["description"].(string); ok {
 				inlineSchema["description"] = desc
 			}
 			aux.WriteString(generateAnyOfStruct(inlineName, anyOf, selfTitle, inlineSchema, allTitles, false))
@@ -810,12 +808,9 @@ func generateAnyOfStruct(typeName string, anyOf []any, selfTitle string, schema 
 		variantIsPointer = append(variantIsPointer, strings.HasPrefix(fieldType, "*"))
 		variantValidateTags = append(variantValidateTags, buildValidateValue(m))
 
-		// Build variant field tags — add nullable, and prepend omitempty to validate
+		// Build variant field tags — prepend omitempty to validate
 		// (nil variant fields must pass validation)
 		var variantTags []string
-		if isNullable(m) {
-			variantTags = append(variantTags, `nullable:"true"`)
-		}
 		if constraintTags := buildStructTags("", m, selfTitle, allTitles); constraintTags != "" {
 			inner := strings.TrimPrefix(strings.TrimSuffix(constraintTags, "`"), "`")
 			// Prepend omitempty to validate tag so nil fields are skipped
@@ -920,7 +915,6 @@ func generateVariantMarshal(typeName string, variants []variantInfo, single bool
 		}
 		b.WriteString("\treturn v.Validate()\n")
 	} else {
-		b.WriteString("\tif string(data) == \"null\" {\n\t\treturn nil\n\t}\n")
 		for _, vi := range variants {
 			b.WriteString(fmt.Sprintf("\t{\n\t\tvar try %s\n", vi.baseType))
 			b.WriteString("\t\tif err := json.Unmarshal(data, &try); err == nil {\n")
@@ -968,10 +962,7 @@ func generateInlineVariantStruct(structName string, schema Schema, selfTitle str
 		fieldDesc, _ := ps["description"].(string)
 		b.WriteString(goDocComment(fieldDesc, "\t"))
 		jt := pn
-		if isNullable(ps) {
-			jt += ",omitempty"
-		}
-		if _, hd := ps["default"]; hd && !strings.Contains(jt, "omitempty") {
+		if oe, _ := ps["omitempty"].(bool); oe {
 			jt += ",omitempty"
 		}
 		tags := buildStructTags(jt, ps, selfTitle, allTitles)
@@ -1006,7 +997,7 @@ func generateInlineVariantStruct(structName string, schema Schema, selfTitle str
 			fn := goFieldName(pn)
 			ft := resolveFieldType(ps, selfTitle, allTitles)
 			jt := pn
-			if isNullable(ps) {
+			if oe, _ := ps["omitempty"].(bool); oe {
 				jt += ",omitempty"
 			}
 			b.WriteString(fmt.Sprintf("\t\t%s %s `json:%q`\n", fn, ft, jt))
@@ -1042,6 +1033,15 @@ func generateInlineVariantStruct(structName string, schema Schema, selfTitle str
 		}
 		b.WriteString("\treturn json.Marshal(merged)\n")
 		b.WriteString("}\n")
+	}
+
+	// Strict UnmarshalJSON for required field checking (only when no embedding,
+	// since embedding already generates its own custom UnmarshalJSON).
+	if _, hasRef := schema["$ref"].(string); !hasRef {
+		if unmarshal := generateStrictUnmarshal(structName, schema, selfTitle, allTitles); unmarshal != "" {
+			b.WriteString("\n")
+			b.WriteString(unmarshal)
+		}
 	}
 
 	return auxiliary.String() + b.String()

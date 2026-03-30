@@ -12,12 +12,50 @@ type AgentCompletionsMessageRichContentPartText struct {
 	Text string `json:"text"`
 	Type string `json:"type" validate:"oneof=text"`
 }
+
+func (v *AgentCompletionsMessageRichContentPartText) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"text", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsMessageRichContentPartText: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsMessageRichContentPartText
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsMessageRichContentPartText(alias)
+	return nil
+}
 func (AgentCompletionsMessageRichContentPartText) SchemaVariantTitle() string { return "Text" }
 
 // An image URL.
 type AgentCompletionsMessageRichContentPartImageUrl struct {
 	ImageURL AgentCompletionsMessageImageUrl `json:"image_url"`
 	Type string `json:"type" validate:"oneof=image_url"`
+}
+
+func (v *AgentCompletionsMessageRichContentPartImageUrl) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"image_url", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsMessageRichContentPartImageUrl: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsMessageRichContentPartImageUrl
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsMessageRichContentPartImageUrl(alias)
+	return nil
 }
 func (AgentCompletionsMessageRichContentPartImageUrl) SchemaVariantTitle() string { return "ImageUrl" }
 
@@ -26,12 +64,50 @@ type AgentCompletionsMessageRichContentPartInputAudio struct {
 	InputAudio AgentCompletionsMessageInputAudio `json:"input_audio"`
 	Type string `json:"type" validate:"oneof=input_audio"`
 }
+
+func (v *AgentCompletionsMessageRichContentPartInputAudio) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"input_audio", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsMessageRichContentPartInputAudio: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsMessageRichContentPartInputAudio
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsMessageRichContentPartInputAudio(alias)
+	return nil
+}
 func (AgentCompletionsMessageRichContentPartInputAudio) SchemaVariantTitle() string { return "InputAudio" }
 
 // Video input.
 type AgentCompletionsMessageRichContentPartInputVideo struct {
 	Type string `json:"type" validate:"oneof=input_video"`
 	VideoURL AgentCompletionsMessageVideoUrl `json:"video_url"`
+}
+
+func (v *AgentCompletionsMessageRichContentPartInputVideo) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"type", "video_url"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsMessageRichContentPartInputVideo: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsMessageRichContentPartInputVideo
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsMessageRichContentPartInputVideo(alias)
+	return nil
 }
 func (AgentCompletionsMessageRichContentPartInputVideo) SchemaVariantTitle() string { return "InputVideo" }
 
@@ -40,12 +116,50 @@ type AgentCompletionsMessageRichContentPartVideoUrl struct {
 	Type string `json:"type" validate:"oneof=video_url"`
 	VideoURL AgentCompletionsMessageVideoUrl `json:"video_url"`
 }
+
+func (v *AgentCompletionsMessageRichContentPartVideoUrl) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"type", "video_url"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsMessageRichContentPartVideoUrl: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsMessageRichContentPartVideoUrl
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsMessageRichContentPartVideoUrl(alias)
+	return nil
+}
 func (AgentCompletionsMessageRichContentPartVideoUrl) SchemaVariantTitle() string { return "VideoUrl" }
 
 // A file.
 type AgentCompletionsMessageRichContentPartFile struct {
 	File AgentCompletionsMessageFile `json:"file"`
 	Type string `json:"type" validate:"oneof=file"`
+}
+
+func (v *AgentCompletionsMessageRichContentPartFile) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"file", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsMessageRichContentPartFile: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsMessageRichContentPartFile
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsMessageRichContentPartFile(alias)
+	return nil
 }
 func (AgentCompletionsMessageRichContentPartFile) SchemaVariantTitle() string { return "File" }
 
@@ -88,9 +202,6 @@ func (v AgentCompletionsMessageRichContentPart) MarshalJSON() ([]byte, error) {
 }
 
 func (v *AgentCompletionsMessageRichContentPart) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentCompletionsMessageRichContentPartText
 		if err := json.Unmarshal(data, &try); err == nil {

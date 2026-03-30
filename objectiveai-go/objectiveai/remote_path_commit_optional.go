@@ -8,24 +8,81 @@ import (
 )
 
 type RemotePathCommitOptionalGithub struct {
-	Commit *string `json:"commit,omitempty"`
+	Commit *string `json:"commit"`
 	Owner string `json:"owner"`
 	Remote string `json:"remote" validate:"oneof=github"`
 	Repository string `json:"repository"`
 }
+
+func (v *RemotePathCommitOptionalGithub) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"owner", "remote", "repository"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("RemotePathCommitOptionalGithub: missing required field %q", key)
+		}
+	}
+	type Alias RemotePathCommitOptionalGithub
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = RemotePathCommitOptionalGithub(alias)
+	return nil
+}
 func (RemotePathCommitOptionalGithub) SchemaVariantTitle() string { return "Github" }
 
 type RemotePathCommitOptionalFilesystem struct {
-	Commit *string `json:"commit,omitempty"`
+	Commit *string `json:"commit"`
 	Owner string `json:"owner"`
 	Remote string `json:"remote" validate:"oneof=filesystem"`
 	Repository string `json:"repository"`
+}
+
+func (v *RemotePathCommitOptionalFilesystem) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"owner", "remote", "repository"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("RemotePathCommitOptionalFilesystem: missing required field %q", key)
+		}
+	}
+	type Alias RemotePathCommitOptionalFilesystem
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = RemotePathCommitOptionalFilesystem(alias)
+	return nil
 }
 func (RemotePathCommitOptionalFilesystem) SchemaVariantTitle() string { return "Filesystem" }
 
 type RemotePathCommitOptionalMock struct {
 	Name string `json:"name"`
 	Remote string `json:"remote" validate:"oneof=mock"`
+}
+
+func (v *RemotePathCommitOptionalMock) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"name", "remote"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("RemotePathCommitOptionalMock: missing required field %q", key)
+		}
+	}
+	type Alias RemotePathCommitOptionalMock
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = RemotePathCommitOptionalMock(alias)
+	return nil
 }
 func (RemotePathCommitOptionalMock) SchemaVariantTitle() string { return "Mock" }
 
@@ -49,9 +106,6 @@ func (v RemotePathCommitOptional) MarshalJSON() ([]byte, error) {
 }
 
 func (v *RemotePathCommitOptional) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try RemotePathCommitOptionalGithub
 		if err := json.Unmarshal(data, &try); err == nil {

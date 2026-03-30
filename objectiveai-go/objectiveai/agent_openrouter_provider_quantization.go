@@ -100,9 +100,6 @@ func (v AgentOpenrouterProviderQuantization) MarshalJSON() ([]byte, error) {
 }
 
 func (v *AgentOpenrouterProviderQuantization) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentOpenrouterProviderQuantizationInt4
 		if err := json.Unmarshal(data, &try); err == nil {

@@ -51,9 +51,6 @@ func (v AgentCompletionsMessageRichContentPartExpressionTextText) MarshalJSON() 
 }
 
 func (v *AgentCompletionsMessageRichContentPartExpressionTextText) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -114,6 +111,25 @@ type AgentCompletionsMessageRichContentPartExpressionText struct {
 	Text AgentCompletionsMessageRichContentPartExpressionTextText `json:"text"`
 	Type string `json:"type" validate:"oneof=text"`
 }
+
+func (v *AgentCompletionsMessageRichContentPartExpressionText) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"text", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsMessageRichContentPartExpressionText: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsMessageRichContentPartExpressionText
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsMessageRichContentPartExpressionText(alias)
+	return nil
+}
 func (AgentCompletionsMessageRichContentPartExpressionText) SchemaVariantTitle() string { return "Text" }
 
 // A value that can be either a literal or an expression.
@@ -156,9 +172,6 @@ func (v AgentCompletionsMessageRichContentPartExpressionImageUrlImageURL) Marsha
 }
 
 func (v *AgentCompletionsMessageRichContentPartExpressionImageUrlImageURL) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -219,6 +232,25 @@ type AgentCompletionsMessageRichContentPartExpressionImageUrl struct {
 	ImageURL AgentCompletionsMessageRichContentPartExpressionImageUrlImageURL `json:"image_url"`
 	Type string `json:"type" validate:"oneof=image_url"`
 }
+
+func (v *AgentCompletionsMessageRichContentPartExpressionImageUrl) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"image_url", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsMessageRichContentPartExpressionImageUrl: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsMessageRichContentPartExpressionImageUrl
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsMessageRichContentPartExpressionImageUrl(alias)
+	return nil
+}
 func (AgentCompletionsMessageRichContentPartExpressionImageUrl) SchemaVariantTitle() string { return "ImageUrl" }
 
 // A value that can be either a literal or an expression.
@@ -261,9 +293,6 @@ func (v AgentCompletionsMessageRichContentPartExpressionInputAudioInputAudio) Ma
 }
 
 func (v *AgentCompletionsMessageRichContentPartExpressionInputAudioInputAudio) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -324,6 +353,25 @@ type AgentCompletionsMessageRichContentPartExpressionInputAudio struct {
 	InputAudio AgentCompletionsMessageRichContentPartExpressionInputAudioInputAudio `json:"input_audio"`
 	Type string `json:"type" validate:"oneof=input_audio"`
 }
+
+func (v *AgentCompletionsMessageRichContentPartExpressionInputAudio) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"input_audio", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsMessageRichContentPartExpressionInputAudio: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsMessageRichContentPartExpressionInputAudio
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsMessageRichContentPartExpressionInputAudio(alias)
+	return nil
+}
 func (AgentCompletionsMessageRichContentPartExpressionInputAudio) SchemaVariantTitle() string { return "InputAudio" }
 
 // A value that can be either a literal or an expression.
@@ -366,9 +414,6 @@ func (v AgentCompletionsMessageRichContentPartExpressionInputVideoVideoURL) Mars
 }
 
 func (v *AgentCompletionsMessageRichContentPartExpressionInputVideoVideoURL) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -429,6 +474,25 @@ type AgentCompletionsMessageRichContentPartExpressionInputVideo struct {
 	// ```
 	VideoURL AgentCompletionsMessageRichContentPartExpressionInputVideoVideoURL `json:"video_url"`
 }
+
+func (v *AgentCompletionsMessageRichContentPartExpressionInputVideo) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"type", "video_url"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsMessageRichContentPartExpressionInputVideo: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsMessageRichContentPartExpressionInputVideo
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsMessageRichContentPartExpressionInputVideo(alias)
+	return nil
+}
 func (AgentCompletionsMessageRichContentPartExpressionInputVideo) SchemaVariantTitle() string { return "InputVideo" }
 
 // A value that can be either a literal or an expression.
@@ -471,9 +535,6 @@ func (v AgentCompletionsMessageRichContentPartExpressionVideoUrlVideoURL) Marsha
 }
 
 func (v *AgentCompletionsMessageRichContentPartExpressionVideoUrlVideoURL) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -534,6 +595,25 @@ type AgentCompletionsMessageRichContentPartExpressionVideoUrl struct {
 	// ```
 	VideoURL AgentCompletionsMessageRichContentPartExpressionVideoUrlVideoURL `json:"video_url"`
 }
+
+func (v *AgentCompletionsMessageRichContentPartExpressionVideoUrl) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"type", "video_url"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsMessageRichContentPartExpressionVideoUrl: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsMessageRichContentPartExpressionVideoUrl
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsMessageRichContentPartExpressionVideoUrl(alias)
+	return nil
+}
 func (AgentCompletionsMessageRichContentPartExpressionVideoUrl) SchemaVariantTitle() string { return "VideoUrl" }
 
 // A value that can be either a literal or an expression.
@@ -576,9 +656,6 @@ func (v AgentCompletionsMessageRichContentPartExpressionFileFile) MarshalJSON() 
 }
 
 func (v *AgentCompletionsMessageRichContentPartExpressionFileFile) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpression
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -639,6 +716,25 @@ type AgentCompletionsMessageRichContentPartExpressionFile struct {
 	File AgentCompletionsMessageRichContentPartExpressionFileFile `json:"file"`
 	Type string `json:"type" validate:"oneof=file"`
 }
+
+func (v *AgentCompletionsMessageRichContentPartExpressionFile) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"file", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("AgentCompletionsMessageRichContentPartExpressionFile: missing required field %q", key)
+		}
+	}
+	type Alias AgentCompletionsMessageRichContentPartExpressionFile
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = AgentCompletionsMessageRichContentPartExpressionFile(alias)
+	return nil
+}
 func (AgentCompletionsMessageRichContentPartExpressionFile) SchemaVariantTitle() string { return "File" }
 
 // Expression variant of [`RichContentPart`] for dynamic content.
@@ -674,9 +770,6 @@ func (v AgentCompletionsMessageRichContentPartExpression) MarshalJSON() ([]byte,
 }
 
 func (v *AgentCompletionsMessageRichContentPartExpression) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try AgentCompletionsMessageRichContentPartExpressionText
 		if err := json.Unmarshal(data, &try); err == nil {

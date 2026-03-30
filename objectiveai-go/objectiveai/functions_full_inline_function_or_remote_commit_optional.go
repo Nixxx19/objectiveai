@@ -25,9 +25,6 @@ func (v FunctionsFullInlineFunctionOrRemoteCommitOptional) MarshalJSON() ([]byte
 }
 
 func (v *FunctionsFullInlineFunctionOrRemoteCommitOptional) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsFullInlineFunction
 		if err := json.Unmarshal(data, &try); err == nil {

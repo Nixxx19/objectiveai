@@ -17,9 +17,9 @@ import (
 // * `description` - Optional description providing additional context.
 type AuthCreateApiKeyRequest struct {
 	// An optional description providing additional context about the key's purpose.
-	Description *string `json:"description,omitempty"`
+	Description *string `json:"description"`
 	// The expiration timestamp for the API key, or `None` for a non-expiring key.
-	Expires *time.Time `json:"expires,omitempty"`
+	Expires *time.Time `json:"expires"`
 	// A user-provided name to identify this API key.
 	Name string `json:"name"`
 }

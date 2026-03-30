@@ -13,6 +13,25 @@ type FunctionsExpressionExpressionJMESPath struct {
 }
 
 func (FunctionsExpressionExpressionJMESPath) AdditionalProperties() bool { return false }
+
+func (v *FunctionsExpressionExpressionJMESPath) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"$jmespath"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsExpressionExpressionJMESPath: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsExpressionExpressionJMESPath
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsExpressionExpressionJMESPath(alias)
+	return nil
+}
 func (FunctionsExpressionExpressionJMESPath) SchemaVariantTitle() string { return "JMESPath" }
 
 // A Starlark expression.
@@ -21,6 +40,25 @@ type FunctionsExpressionExpressionStarlark struct {
 }
 
 func (FunctionsExpressionExpressionStarlark) AdditionalProperties() bool { return false }
+
+func (v *FunctionsExpressionExpressionStarlark) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"$starlark"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsExpressionExpressionStarlark: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsExpressionExpressionStarlark
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsExpressionExpressionStarlark(alias)
+	return nil
+}
 func (FunctionsExpressionExpressionStarlark) SchemaVariantTitle() string { return "Starlark" }
 
 // A predefined special expression variant.
@@ -29,6 +67,25 @@ type FunctionsExpressionExpressionSpecial struct {
 }
 
 func (FunctionsExpressionExpressionSpecial) AdditionalProperties() bool { return false }
+
+func (v *FunctionsExpressionExpressionSpecial) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"$special"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("FunctionsExpressionExpressionSpecial: missing required field %q", key)
+		}
+	}
+	type Alias FunctionsExpressionExpressionSpecial
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = FunctionsExpressionExpressionSpecial(alias)
+	return nil
+}
 func (FunctionsExpressionExpressionSpecial) SchemaVariantTitle() string { return "Special" }
 
 // An expression that can be either JMESPath or Starlark.
@@ -69,9 +126,6 @@ func (v FunctionsExpressionExpression) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsExpressionExpression) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsExpressionExpressionJMESPath
 		if err := json.Unmarshal(data, &try); err == nil {

@@ -26,9 +26,6 @@ func (v FunctionsRemoteProfile) MarshalJSON() ([]byte, error) {
 }
 
 func (v *FunctionsRemoteProfile) UnmarshalJSON(data []byte) error {
-	if string(data) == "null" {
-		return nil
-	}
 	{
 		var try FunctionsRemoteTasksProfile
 		if err := json.Unmarshal(data, &try); err == nil {
