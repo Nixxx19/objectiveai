@@ -4,10 +4,13 @@ use serde::{Serialize, Deserialize};
 #[schemars(rename = "config.FunctionsConfig")]
 pub struct FunctionsConfig {
     #[serde(skip_serializing_if = "FunctionsInventionsConfig::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub inventions: Option<FunctionsInventionsConfig>,
     #[serde(skip_serializing_if = "FunctionsProfilesConfig::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub profiles: Option<FunctionsProfilesConfig>,
     #[serde(skip_serializing_if = "crate::util::vec_is_none_or_empty")]
+    #[schemars(extend("omitempty" = true))]
     pub favorites: Option<Vec<super::Favorite>>,
 }
 
@@ -102,8 +105,10 @@ impl FunctionsInventionsConfig {
 #[schemars(rename = "config.FunctionsProfilesConfig")]
 pub struct FunctionsProfilesConfig {
     #[serde(skip_serializing_if = "FunctionsProfilesPairsConfig::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub pairs: Option<FunctionsProfilesPairsConfig>,
     #[serde(skip_serializing_if = "crate::util::vec_is_none_or_empty")]
+    #[schemars(extend("omitempty" = true))]
     pub favorites: Option<Vec<super::Favorite>>,
 }
 
@@ -152,6 +157,7 @@ impl FunctionsProfilesConfig {
 #[schemars(rename = "config.FunctionsProfilesPairsConfig")]
 pub struct FunctionsProfilesPairsConfig {
     #[serde(skip_serializing_if = "crate::util::vec_is_none_or_empty")]
+    #[schemars(extend("omitempty" = true))]
     pub favorites: Option<Vec<super::PairFavorite>>,
 }
 

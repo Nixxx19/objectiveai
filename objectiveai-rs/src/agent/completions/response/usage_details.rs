@@ -11,18 +11,22 @@ use schemars::JsonSchema;
 pub struct CompletionTokensDetails {
     /// Tokens from accepted predictions (speculative decoding).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub accepted_prediction_tokens: Option<u64>,
     /// Audio output tokens.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub audio_tokens: Option<u64>,
     /// Tokens used for reasoning/thinking.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub reasoning_tokens: Option<u64>,
     /// Tokens from rejected predictions (speculative decoding).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub rejected_prediction_tokens: Option<u64>,
 }
@@ -60,18 +64,22 @@ impl CompletionTokensDetails {
 pub struct PromptTokensDetails {
     /// Audio input tokens.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub audio_tokens: Option<u64>,
     /// Tokens served from cache.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub cached_tokens: Option<u64>,
     /// Tokens written to cache.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub cache_write_tokens: Option<u64>,
     /// Video input tokens.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub video_tokens: Option<u64>,
 }

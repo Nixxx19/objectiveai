@@ -417,6 +417,7 @@ pub struct InlineAgentBaseWithFallbacks {
     pub inner: InlineAgentBase,
     /// Fallback agents to try if the primary fails.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub fallbacks: Option<Vec<InlineAgentBase>>,
 }
 
@@ -448,6 +449,7 @@ pub struct InlineAgentWithFallbacks {
     pub inner: InlineAgent,
     /// Fallback agents to try if the primary fails.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub fallbacks: Option<Vec<InlineAgent>>,
 }
 

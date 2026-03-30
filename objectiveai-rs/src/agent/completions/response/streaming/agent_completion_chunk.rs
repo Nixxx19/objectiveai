@@ -20,14 +20,17 @@ pub struct AgentCompletionChunk {
     pub object: super::Object,
     /// Token usage (only present in the final chunk).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub usage: Option<response::Usage>,
     /// Upstream provider
     pub upstream: crate::agent::Upstream,
     /// Error details if this completion failed.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub error: Option<crate::error::ResponseError>,
     /// Continuation state for multi-turn conversations (only present in the final chunk).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub continuation: Option<String>,
 }
 

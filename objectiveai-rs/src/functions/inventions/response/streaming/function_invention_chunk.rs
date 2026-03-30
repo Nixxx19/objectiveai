@@ -9,18 +9,23 @@ pub struct FunctionInventionChunk {
     pub completions: Vec<super::AgentCompletionChunk>,
     // yielded after steps with the current state
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub state: Option<functions::inventions::State>,
     // yielded at the end
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub path: Option<crate::RemotePath>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub function: Option<functions::FullRemoteFunction>,
     #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub created: u64,
     pub object: super::Object,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub usage: Option<agent::completions::response::Usage>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub error: Option<error::ResponseError>,
 }
 

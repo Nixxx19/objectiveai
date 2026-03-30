@@ -20,6 +20,7 @@ pub mod scalar_function_input_value_expression {
 #[schemars(rename = "functions.alpha_vector.expression.VectorFunctionInputValueExpression")]
 pub struct VectorFunctionInputValueExpression {
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub context: Option<functions::expression::Expression>,
     pub items: functions::expression::Expression,
 }
@@ -73,6 +74,7 @@ pub mod scalar_function_input_value {
 #[schemars(rename = "functions.alpha_vector.expression.VectorFunctionInputValue")]
 pub struct VectorFunctionInputValue {
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub context: Option<IndexMap<String, functions::expression::InputValue>>,
     pub items: Vec<functions::expression::InputValue>,
 }

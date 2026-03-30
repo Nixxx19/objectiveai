@@ -6,10 +6,13 @@ pub struct ApiConfig {
     #[serde(default)]
     pub mode: ApiMode,
     #[serde(skip_serializing_if = "ApiRemoteConfig::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub remote: Option<ApiRemoteConfig>,
     #[serde(skip_serializing_if = "ApiLocalConfig::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub local: Option<ApiLocalConfig>,
     #[serde(skip_serializing_if = "ApiHeadersConfig::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub headers: Option<ApiHeadersConfig>,
 }
 
@@ -60,6 +63,7 @@ pub enum ApiMode {
 #[schemars(rename = "config.ApiRemoteConfig")]
 pub struct ApiRemoteConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub objectiveai_address: Option<String>,
 }
 
@@ -89,6 +93,7 @@ impl ApiRemoteConfig {
 #[schemars(rename = "config.ApiLocalConfig")]
 pub struct ApiLocalConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub claude_agent_sdk: Option<bool>,
 }
 
@@ -118,26 +123,37 @@ impl ApiLocalConfig {
 #[schemars(rename = "config.ApiHeadersConfig")]
 pub struct ApiHeadersConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub x_objectiveai_authorization: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub x_openrouter_authorization: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub x_github_authorization: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub x_mcp_authorization: Option<indexmap::IndexMap<String, String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub x_viewer_signature: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub x_viewer_address: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub user_agent: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub http_referer: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub x_title: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub x_commit_author_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub x_commit_author_email: Option<String>,
 }
 

@@ -15,6 +15,7 @@ pub struct AssistantResponse {
     pub model: String,
     pub upstream_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub reasoning: Option<String>,
     pub tool_calls: Option<Vec<message::AssistantToolCall>>,
     pub content: Option<message::RichContent>,
@@ -22,10 +23,13 @@ pub struct AssistantResponse {
     pub finish_reason: response::FinishReason,
     pub logprobs: Option<response::Logprobs>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub service_tier: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub system_fingerprint: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub provider: Option<String>,
     /// Upstream usage for this assistant response (set by upstream clients).
     pub usage: response::UpstreamUsage,

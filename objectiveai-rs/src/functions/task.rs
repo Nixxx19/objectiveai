@@ -186,11 +186,13 @@ pub struct ScalarFunctionTaskExpression {
 
     /// If this expression evaluates to true, skip the task. Receives: `input`.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub skip: Option<super::expression::Expression>,
 
     /// Expression that evaluates to the number of mapped task instances.
     /// Each instance receives `map` as an integer index (0-based).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub map: Option<super::expression::Expression>,
 
     /// Expression for the input to pass to the function.
@@ -286,11 +288,13 @@ pub struct VectorFunctionTaskExpression {
 
     /// If this expression evaluates to true, skip the task. Receives: `input`.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub skip: Option<super::expression::Expression>,
 
     /// Expression that evaluates to the number of mapped task instances.
     /// Each instance receives `map` as an integer index (0-based).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub map: Option<super::expression::Expression>,
 
     /// Expression for the input to pass to the function.
@@ -382,11 +386,13 @@ impl VectorFunctionTask {
 pub struct VectorCompletionTaskExpression {
     /// If this expression evaluates to true, skip the task. Receives: `input`.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub skip: Option<super::expression::Expression>,
 
     /// Expression that evaluates to the number of mapped task instances.
     /// Each instance receives `map` as an integer index (0-based).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub map: Option<super::expression::Expression>,
 
     /// Expression for the conversation messages (the prompt).
@@ -516,11 +522,13 @@ pub struct PlaceholderScalarFunctionTaskExpression {
 
     /// If this expression evaluates to true, skip the task. Receives: `input`.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub skip: Option<super::expression::Expression>,
 
     /// Expression that evaluates to the number of mapped task instances.
     /// Each instance receives `map` as an integer index (0-based).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub map: Option<super::expression::Expression>,
 
     /// Expression for the input to pass to the placeholder function.
@@ -607,11 +615,13 @@ pub struct PlaceholderVectorFunctionTaskExpression {
 
     /// If this expression evaluates to true, skip the task. Receives: `input`.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub skip: Option<super::expression::Expression>,
 
     /// Expression that evaluates to the number of mapped task instances.
     /// Each instance receives `map` as an integer index (0-based).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub map: Option<super::expression::Expression>,
 
     /// Expression for the input to pass to the placeholder function.

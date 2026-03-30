@@ -13,22 +13,29 @@ pub struct FunctionExecutionCreateParams {
 
     // --- Caching and retry options ---
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub retry_token: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub from_cache: Option<bool>,
 
     // --- Reasoning configuration ---
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub reasoning: Option<super::Reasoning>,
 
     // --- Core configuration ---
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub strategy: Option<super::Strategy>,
     pub input: functions::expression::InputValue,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub provider: Option<agent::completions::request::Provider>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub seed: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub stream: Option<bool>,
 }

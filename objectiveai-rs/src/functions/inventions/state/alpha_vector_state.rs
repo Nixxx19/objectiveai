@@ -8,6 +8,7 @@ pub struct AlphaVectorState {
     #[serde(flatten)]
     pub params: super::Params,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub input_schema:
         Option<functions::alpha_vector::expression::VectorFunctionInputSchema>,
 }

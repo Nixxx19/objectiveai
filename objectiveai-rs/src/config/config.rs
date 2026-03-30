@@ -4,14 +4,19 @@ use serde::{Serialize, Deserialize};
 #[schemars(rename = "config.Config")]
 pub struct Config {
     #[serde(skip_serializing_if = "super::ApiConfig::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub api: Option<super::ApiConfig>,
     #[serde(skip_serializing_if = "super::AgentsConfig::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub agents: Option<super::AgentsConfig>,
     #[serde(skip_serializing_if = "super::SwarmsConfig::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub swarms: Option<super::SwarmsConfig>,
     #[serde(skip_serializing_if = "super::FunctionsConfig::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub functions: Option<super::FunctionsConfig>,
     #[serde(skip_serializing_if = "super::ViewerConfig::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub viewer: Option<super::ViewerConfig>,
 }
 

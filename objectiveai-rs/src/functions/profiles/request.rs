@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 pub struct ListProfilesRequest {
     /// Optional source filter for listing profiles.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub source: Option<ListProfilesSource>,
 }
 

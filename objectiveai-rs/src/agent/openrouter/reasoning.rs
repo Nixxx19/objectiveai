@@ -16,22 +16,26 @@ use schemars::JsonSchema;
 pub struct Reasoning {
     /// Whether reasoning is enabled. Defaults to `true` if other fields are set.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub enabled: Option<bool>,
     /// Maximum tokens for the reasoning/thinking output.
     ///
     /// Only supported by some models.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub max_tokens: Option<u64>,
     /// The reasoning effort level.
     ///
     /// Only supported by some models.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub effort: Option<ReasoningEffort>,
     /// Verbosity of reasoning summaries in the response.
     ///
     /// Only supported by some models.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub summary_verbosity: Option<ReasoningSummaryVerbosity>,
 }
 

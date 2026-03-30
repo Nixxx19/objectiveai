@@ -22,9 +22,11 @@ pub struct Usage {
     pub total_tokens: u64,
     /// Breakdown of completion tokens (reasoning, audio, etc.) if available.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub completion_tokens_details: Option<CompletionTokensDetails>,
     /// Breakdown of prompt tokens (cached, audio, etc.) if available.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub prompt_tokens_details: Option<PromptTokensDetails>,
     /// Cost charged by ObjectiveAI for this request.
     #[serde(deserialize_with = "crate::serde_util::decimal")]
@@ -33,6 +35,7 @@ pub struct Usage {
     pub cost: rust_decimal::Decimal,
     /// Breakdown of upstream and upstream_upstream costs if available.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub cost_details: Option<CostDetails>,
     /// Total cost including upstream provider charges. Only differs from `cost`
     /// when using BYOK (Bring Your Own Key).

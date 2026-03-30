@@ -137,6 +137,7 @@ pub struct ScalarFunctionTaskExpression {
     #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
     pub path: crate::RemotePath,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub skip: Option<functions::expression::Expression>,
     pub input: super::expression::ScalarFunctionInputValueExpression,
 }
@@ -169,6 +170,7 @@ pub struct VectorFunctionTaskExpression {
     #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
     pub path: crate::RemotePath,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub skip: Option<functions::expression::Expression>,
     pub input: super::expression::VectorFunctionInputValueExpression,
 }
@@ -198,6 +200,7 @@ pub struct PlaceholderScalarFunctionTaskExpression {
     pub params: functions::inventions::Params,
     pub input_schema: super::expression::ScalarFunctionInputSchema,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub skip: Option<functions::expression::Expression>,
     pub input: super::expression::ScalarFunctionInputValueExpression,
 }
@@ -243,6 +246,7 @@ pub struct PartialPlaceholderScalarFunctionTaskExpression {
     pub spec: String,
     pub input_schema: super::expression::ScalarFunctionInputSchema,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub skip: Option<functions::expression::Expression>,
     pub input: super::expression::ScalarFunctionInputValueExpression,
 }
@@ -281,6 +285,7 @@ pub struct PlaceholderVectorFunctionTaskExpression {
     pub params: functions::inventions::Params,
     pub input_schema: super::expression::VectorFunctionInputSchema,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub skip: Option<functions::expression::Expression>,
     pub input: super::expression::VectorFunctionInputValueExpression,
 }
@@ -327,6 +332,7 @@ pub struct PartialPlaceholderVectorFunctionTaskExpression {
     pub spec: String,
     pub input_schema: super::expression::VectorFunctionInputSchema,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub skip: Option<functions::expression::Expression>,
     pub input: super::expression::VectorFunctionInputValueExpression,
 }
@@ -362,6 +368,7 @@ impl PartialPlaceholderVectorFunctionTaskExpression {
 #[schemars(rename = "functions.alpha_vector.VectorCompletionTaskExpression")]
 pub struct VectorCompletionTaskExpression {
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub skip: Option<functions::expression::Expression>,
     pub messages: functions::expression::Expression,
     pub responses: functions::expression::Expression,

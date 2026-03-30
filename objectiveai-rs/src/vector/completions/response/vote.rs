@@ -56,10 +56,12 @@ pub struct Vote {
     /// If true, this vote was reused from a previous request via the `retry`
     /// parameter. All fields reflect the original request's values.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub retry: Option<bool>,
 
     /// If true, this vote was retrieved from cache rather than generated fresh.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub from_cache: Option<bool>,
 
     // --- Internal ---

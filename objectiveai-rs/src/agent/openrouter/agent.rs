@@ -23,89 +23,110 @@ pub struct AgentBase {
     ///
     /// **Vector completions only.** Ignored for agent completions.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub synthetic_reasoning: Option<bool>,
 
     /// Number of top log probabilities to return (2-20).
     ///
     /// **Vector completions only.** Ignored for agent completions.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub top_logprobs: Option<u64>,
 
     /// Messages prepended to the user's prompt.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub prefix_messages: Option<Vec<super::super::completions::message::Message>>,
 
     /// Messages inserted after the leading chain of system/developer messages.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub post_system_prefix_messages: Option<Vec<super::super::completions::message::Message>>,
 
     /// Messages appended after the user's prompt.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub suffix_messages: Option<Vec<super::super::completions::message::Message>>,
 
     /// MCP servers the agent can connect to.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub mcp_servers: Option<super::super::McpServers>,
 
     // --- OpenAI-compatible parameters ---
     /// Penalizes tokens based on their frequency in the output so far (-2.0 to 2.0).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_f64)]
     pub frequency_penalty: Option<f64>,
     /// Token ID to bias mapping (-100 to 100). Positive values increase likelihood.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_indexmap_string_i64)]
     pub logit_bias: Option<IndexMap<String, i64>>,
     /// Maximum tokens in the completion.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub max_completion_tokens: Option<u64>,
     /// Penalizes tokens based on their presence in the output so far (-2.0 to 2.0).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_f64)]
     pub presence_penalty: Option<f64>,
     /// Stop sequences that halt generation.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub stop: Option<super::Stop>,
     /// Sampling temperature (0.0 to 2.0). Higher = more random.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_f64)]
     pub temperature: Option<f64>,
     /// Nucleus sampling probability (0.0 to 1.0).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_f64)]
     pub top_p: Option<f64>,
 
     // --- OpenRouter-specific parameters ---
     /// Maximum tokens (OpenRouter variant of max_completion_tokens).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub max_tokens: Option<u64>,
     /// Minimum probability threshold for sampling (0.0 to 1.0).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_f64)]
     pub min_p: Option<f64>,
     /// Provider routing preferences.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub provider: Option<super::Provider>,
     /// Reasoning/thinking configuration for supported models.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub reasoning: Option<super::Reasoning>,
     /// Repetition penalty (0.0 to 2.0). Values > 1.0 penalize repetition.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_f64)]
     pub repetition_penalty: Option<f64>,
     /// Top-a sampling parameter (0.0 to 1.0).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_f64)]
     pub top_a: Option<f64>,
     /// Top-k sampling: only consider the k most likely tokens.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub top_k: Option<u64>,
     /// Output verbosity hint for supported models.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub verbosity: Option<super::Verbosity>,
 }
 

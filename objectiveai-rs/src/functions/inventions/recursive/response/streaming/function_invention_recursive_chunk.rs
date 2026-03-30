@@ -8,11 +8,13 @@ pub struct FunctionInventionRecursiveChunk {
     pub id: String,
     pub inventions: Vec<super::FunctionInventionChunk>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub inventions_errors: Option<bool>,
     #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub created: u64,
     pub object: super::Object,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub usage: Option<agent::completions::response::Usage>,
 }
 

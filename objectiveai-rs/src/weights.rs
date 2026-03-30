@@ -23,6 +23,7 @@ pub struct WeightsEntry {
     ///
     /// When omitted or false, the vote distribution is used as-is.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub invert: Option<bool>,
 }
 

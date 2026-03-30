@@ -16,18 +16,23 @@ use schemars::JsonSchema;
 pub struct AssistantMessage {
     /// The message content, if any.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub content: Option<RichContent>,
     /// Optional name for the assistant.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub name: Option<String>,
     /// Refusal message if the model declined to respond.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub refusal: Option<String>,
     /// Tool calls made by the assistant.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub tool_calls: Option<Vec<AssistantToolCall>>,
     /// Reasoning content from models that support chain-of-thought.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub reasoning: Option<String>,
 }
 
@@ -118,13 +123,17 @@ impl FromStarlarkValue for AssistantMessage {
 pub struct AssistantMessageExpression {
     /// The content expression.
     #[serde(default, skip_serializing_if = "functions::expression::WithExpression::is_none")]
+    #[schemars(with = "Option<functions::expression::WithExpression<RichContentExpression>>", extend("omitempty" = true))]
     pub content:
         functions::expression::WithExpression<Option<RichContentExpression>>,
     #[serde(default, skip_serializing_if = "functions::expression::WithExpression::is_none")]
+    #[schemars(with = "Option<functions::expression::WithExpression<String>>", extend("omitempty" = true))]
     pub name: functions::expression::WithExpression<Option<String>>,
     #[serde(default, skip_serializing_if = "functions::expression::WithExpression::is_none")]
+    #[schemars(with = "Option<functions::expression::WithExpression<String>>", extend("omitempty" = true))]
     pub refusal: functions::expression::WithExpression<Option<String>>,
     #[serde(default, skip_serializing_if = "functions::expression::WithExpression::is_none")]
+    #[schemars(with = "Option<functions::expression::WithExpression<Vec<functions::expression::WithExpression<AssistantToolCallExpression>>>>", extend("omitempty" = true))]
     pub tool_calls:
         functions::expression::WithExpression<
             Option<
@@ -136,6 +145,7 @@ pub struct AssistantMessageExpression {
             >,
         >,
     #[serde(default, skip_serializing_if = "functions::expression::WithExpression::is_none")]
+    #[schemars(with = "Option<functions::expression::WithExpression<String>>", extend("omitempty" = true))]
     pub reasoning:
         functions::expression::WithExpression<Option<String>>,
 }
@@ -483,12 +493,15 @@ pub struct AssistantToolCallDelta {
     pub index: u64,
     /// The type of tool call (always "function").
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub r#type: Option<AssistantToolCallType>,
     /// The unique ID of this tool call.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub id: Option<String>,
     /// The function call details.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub function: Option<AssistantToolCallFunctionDelta>,
 }
 
@@ -529,9 +542,11 @@ pub enum AssistantToolCallType {
 pub struct AssistantToolCallFunctionDelta {
     /// The function name (only present in the first delta).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub name: Option<String>,
     /// The arguments being streamed (accumulated across deltas).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub arguments: Option<String>,
 }
 

@@ -18,6 +18,7 @@ pub mod scalar_function_input_schema {
 #[schemars(rename = "functions.alpha_vector.expression.VectorFunctionInputSchema")]
 pub struct VectorFunctionInputSchema {
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub context: Option<functions::expression::ObjectInputSchema>,
     pub items: functions::expression::InputSchema,
 }

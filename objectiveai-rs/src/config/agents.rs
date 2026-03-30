@@ -4,6 +4,7 @@ use serde::{Serialize, Deserialize};
 #[schemars(rename = "config.AgentsConfig")]
 pub struct AgentsConfig {
     #[serde(skip_serializing_if = "crate::util::vec_is_none_or_empty")]
+    #[schemars(extend("omitempty" = true))]
     pub favorites: Option<Vec<super::Favorite>>,
 }
 

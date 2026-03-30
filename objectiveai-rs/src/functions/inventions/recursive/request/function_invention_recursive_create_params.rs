@@ -7,14 +7,18 @@ use schemars::JsonSchema;
 pub struct FunctionInventionRecursiveCreateParams {
     pub remote: crate::Remote,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub overwrite: Option<bool>,
     pub state: functions::inventions::ParamsStateOrRemoteCommitOptional,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub provider: Option<agent::completions::request::Provider>,
     pub agent: agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub seed: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub stream: Option<bool>,
     /// Maximum number of retries per invention step.
     /// Each step is one agent completion (which itself may loop internally
@@ -22,5 +26,6 @@ pub struct FunctionInventionRecursiveCreateParams {
     /// agent loop ends, the step is retried up to this many times.
     /// Defaults to 3 if not specified.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub max_step_retries: Option<u32>,
 }

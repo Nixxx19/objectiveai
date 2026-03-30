@@ -317,7 +317,6 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(crate::RemotePath),
         schemars::schema_for!(crate::functions::expression::OneOrMany<String>),
         schemars::schema_for!(crate::functions::expression::WithExpression<String>),
-        schemars::schema_for!(crate::functions::expression::WithExpression<Option<String>>),
         schemars::schema_for!(crate::functions::expression::WithExpression<crate::functions::expression::InputValueExpression>),
         schemars::schema_for!(crate::functions::expression::WithExpression<crate::agent::completions::message::MessageExpression>),
         schemars::schema_for!(crate::functions::expression::WithExpression<crate::agent::completions::message::AssistantToolCallExpression>),
@@ -330,8 +329,8 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(crate::functions::expression::WithExpression<crate::agent::completions::message::SimpleContentExpression>),
         schemars::schema_for!(crate::functions::expression::WithExpression<crate::agent::completions::message::SimpleContentPartExpression>),
         schemars::schema_for!(crate::functions::expression::WithExpression<crate::agent::completions::message::VideoUrl>),
-        schemars::schema_for!(crate::functions::expression::WithExpression<Option<crate::agent::completions::message::RichContentExpression>>),
-        schemars::schema_for!(crate::functions::expression::WithExpression<Option<Vec<crate::functions::expression::WithExpression<crate::agent::completions::message::AssistantToolCallExpression>>>>),
+        schemars::schema_for!(crate::functions::expression::WithExpression<crate::agent::completions::message::RichContentExpression>),
+        schemars::schema_for!(crate::functions::expression::WithExpression<Vec<crate::functions::expression::WithExpression<crate::agent::completions::message::AssistantToolCallExpression>>>),
         schemars::schema_for!(crate::functions::expression::WithExpression<Vec<crate::functions::expression::WithExpression<crate::agent::completions::message::MessageExpression>>>),
         schemars::schema_for!(crate::functions::expression::WithExpression<Vec<crate::functions::expression::WithExpression<crate::agent::completions::message::RichContentExpression>>>),
     ];

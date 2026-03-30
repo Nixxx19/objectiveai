@@ -25,32 +25,39 @@ pub struct AgentBase {
     /// simulating chain-of-thought reasoning. Requires `output_mode` to be
     /// `ToolCall` (not `Instruction`).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub synthetic_reasoning: Option<bool>,
 
     /// Whether thinking/extended thinking is enabled.
     ///
     /// Defaults to `true`. Set to `false` to disable.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub thinking: Option<bool>,
 
     /// The effort level for model output.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub effort: Option<super::Effort>,
 
     /// System prompt for the agent.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub system_prompt: Option<String>,
 
     /// Rich content prepended to the user's prompt.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub prefix_content: Option<super::super::completions::message::RichContent>,
 
     /// Rich content appended after the user's prompt.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub suffix_content: Option<super::super::completions::message::RichContent>,
 
     /// MCP servers the agent can connect to.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub mcp_servers: Option<super::super::McpServers>,
 }
 

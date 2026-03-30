@@ -15,9 +15,11 @@ pub struct VectorCompletionCreateParams {
     // --- Caching and retry options ---
     /// If present, reuses votes from a previous request with this ID.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub retry: Option<String>,
     /// If true, uses cached votes when available.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub from_cache: Option<bool>,
 
     // --- Core configuration ---
@@ -25,14 +27,17 @@ pub struct VectorCompletionCreateParams {
     pub messages: Vec<agent::completions::message::Message>,
     /// Provider routing preferences.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub provider: Option<agent::completions::request::Provider>,
     /// The Swarm of agents to use.
     pub swarm: crate::swarm::InlineSwarmBaseOrRemoteCommitOptional,
     /// Random seed for deterministic results.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub seed: Option<i64>,
     /// Whether to stream the response.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub stream: Option<bool>,
     /// The possible responses the LLMs can vote for.
     pub responses: Vec<agent::completions::message::RichContent>,

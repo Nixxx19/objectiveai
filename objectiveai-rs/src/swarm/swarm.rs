@@ -22,6 +22,7 @@ pub struct InlineSwarmBase {
     pub agents: Vec<agent::InlineAgentBaseWithFallbacksOrRemoteWithCount>,
     /// Optional weights for each agent. If `None`, uniform weights are used.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub weights: Option<Weights>,
 }
 

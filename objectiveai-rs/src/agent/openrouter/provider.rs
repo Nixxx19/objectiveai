@@ -17,22 +17,28 @@ pub struct Provider {
     /// Whether to allow fallback to other providers if preferred ones fail.
     /// Defaults to `true`.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub allow_fallbacks: Option<bool>,
     /// Whether to require that the provider supports all request parameters.
     /// Defaults to `false`.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub require_parameters: Option<bool>,
     /// Preferred provider order. Earlier providers are tried first.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub order: Option<Vec<String>>,
     /// Exclusive list of allowed providers. If set, only these providers are used.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub only: Option<Vec<String>>,
     /// Providers to exclude from routing.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub ignore: Option<Vec<String>>,
     /// Allowed model quantization levels.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub quantizations: Option<Vec<ProviderQuantization>>,
 }
 

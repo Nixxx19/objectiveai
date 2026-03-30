@@ -14,6 +14,7 @@ pub struct VectorCompletionTaskChunk {
     #[serde(flatten)]
     pub inner: vector::completions::response::streaming::VectorCompletionChunk,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub error: Option<error::ResponseError>,
 }
 

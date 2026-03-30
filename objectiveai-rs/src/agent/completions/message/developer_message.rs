@@ -18,6 +18,7 @@ pub struct DeveloperMessage {
     pub content: SimpleContent,
     /// Optional name for the message author.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub name: Option<String>,
 }
 
@@ -90,6 +91,7 @@ pub struct DeveloperMessageExpression {
     pub content: functions::expression::WithExpression<SimpleContentExpression>,
     /// Optional name expression.
     #[serde(default, skip_serializing_if = "functions::expression::WithExpression::is_none")]
+    #[schemars(with = "Option<functions::expression::WithExpression<String>>", extend("omitempty" = true))]
     pub name: functions::expression::WithExpression<Option<String>>,
 }
 

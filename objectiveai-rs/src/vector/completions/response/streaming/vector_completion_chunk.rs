@@ -36,6 +36,7 @@ pub struct VectorCompletionChunk {
     pub object: super::Object,
     /// Aggregated usage statistics. Typically present only in the final chunk.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub usage: Option<agent::completions::response::Usage>,
 }
 

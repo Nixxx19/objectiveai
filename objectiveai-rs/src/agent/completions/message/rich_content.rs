@@ -540,6 +540,7 @@ pub struct ImageUrl {
     pub url: String,
     /// The detail level for image processing.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub detail: Option<ImageUrlDetail>,
 }
 
@@ -801,15 +802,19 @@ impl FromStarlarkValue for VideoUrl {
 pub struct File {
     /// Base64-encoded file data.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub file_data: Option<String>,
     /// The ID of a previously uploaded file.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub file_id: Option<String>,
     /// The filename for display purposes.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub filename: Option<String>,
     /// A URL to fetch the file from.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub file_url: Option<String>,
 }
 

@@ -9,20 +9,27 @@ pub struct AlphaVectorBranchState {
     #[serde(flatten)]
     pub params: super::Params,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub essay: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub input_schema:
         Option<functions::alpha_vector::expression::VectorFunctionInputSchema>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub essay_tasks: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub tasks: Option<Vec<functions::alpha_vector::BranchTaskExpression>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub tasks_length: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub readme: Option<String>,
     #[serde(skip_serializing, default)]
     #[schemars(skip)]

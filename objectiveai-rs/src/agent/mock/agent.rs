@@ -18,16 +18,19 @@ pub struct AgentBase {
     ///
     /// **Vector completions only.** Ignored for agent completions.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub top_logprobs: Option<u64>,
 
     /// If true, the mock client will return an error instead of a response.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub error: Option<bool>,
 
     /// If true, this mock agent supports invention tool calling.
     /// Incompatible with output modes other than `instruction`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub invention: Option<bool>,
 }
 

@@ -39,6 +39,7 @@ pub enum ResponseFormat {
         schema: IndexMap<String, serde_json::Value>,
         /// Whether the tool MUST be called.
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[schemars(extend("omitempty" = true))]
         required: Option<bool>,
     },
 }

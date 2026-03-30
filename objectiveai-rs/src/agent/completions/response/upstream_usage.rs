@@ -22,9 +22,11 @@ pub struct UpstreamUsage {
     pub total_tokens: u64,
     /// Detailed breakdown of completion tokens.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub completion_tokens_details: Option<CompletionTokensDetails>,
     /// Detailed breakdown of prompt tokens.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub prompt_tokens_details: Option<PromptTokensDetails>,
     /// The cost charged by ObjectiveAI for this request.
     #[serde(deserialize_with = "crate::serde_util::decimal")]
@@ -33,6 +35,7 @@ pub struct UpstreamUsage {
     pub cost: rust_decimal::Decimal,
     /// Detailed cost breakdown.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub cost_details: Option<CostDetails>,
     /// Total cost including ObjectiveAI's charge plus all upstream charges.
     /// For BYOK requests, ObjectiveAI only charges the cost_multiplier difference,

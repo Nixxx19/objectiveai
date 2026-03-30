@@ -35,6 +35,7 @@ const ALLOWED_KEYWORDS: &[&str] = &[
     "pattern",
     "format",
     "default",
+    "omitempty",
 ];
 
 fn collect_keywords(value: &serde_json::Value, inside_properties: bool, found: &mut std::collections::BTreeSet<String>) {
@@ -471,6 +472,63 @@ fn multi_variant_anyof_never_nullable() {
             errors.join("\n")
         );
     }
+}
+
+fn check_no_nested_null_in_anyof(
+    value: &serde_json::Value,
+    inside_properties: bool,
+    errors: &mut Vec<String>,
+    path: &str,
+) {
+    match value {
+        serde_json::Value::Object(map) => {
+            if !inside_properties {
+                if let Some(serde_json::Value::Array(variants)) = map.get("anyOf") {
+                    for (i, variant) in variants.iter().enumerate() {
+                        // Check if this variant has its own anyOf containing null
+                        if let Some(serde_json::Value::Array(inner_variants)) =
+                            variant.get("anyOf")
+                        {
+                            if inner_variants.iter().any(|v| {
+                                v.get("type").and_then(|t| t.as_str()) == Some("null")
+                            }) {
+                                errors.push(format!(
+                                    "{path}.anyOf[{i}]: nested anyOf contains a null variant (null must be at the outer level)"
+                                ));
+                            }
+                        }
+                    }
+                }
+            }
+            for (k, v) in map {
+                let child_path = if path.is_empty() {
+                    k.clone()
+                } else {
+                    format!("{path}.{k}")
+                };
+                check_no_nested_null_in_anyof(v, k == "properties", errors, &child_path);
+            }
+        }
+        serde_json::Value::Array(arr) => {
+            for (i, v) in arr.iter().enumerate() {
+                check_no_nested_null_in_anyof(v, false, errors, &format!("{path}[{i}]"));
+            }
+        }
+        _ => {}
+    }
+}
+
+#[test]
+fn no_nested_null_in_anyof_variants() {
+    let mut errors = Vec::new();
+    for (name, schema) in load_schemas() {
+        check_no_nested_null_in_anyof(&schema, false, &mut errors, &name);
+    }
+    assert!(
+        errors.is_empty(),
+        "null variants must not be nested inside anyOf variants:\n{}",
+        errors.join("\n")
+    );
 }
 
 fn check_any_of_variants_have_title(

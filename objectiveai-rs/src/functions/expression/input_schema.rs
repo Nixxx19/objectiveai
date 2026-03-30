@@ -147,12 +147,14 @@ pub struct ObjectInputSchema {
     pub r#type: ObjectInputSchemaType,
     /// Human-readable description of the object.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub description: Option<String>,
     /// Schema for each property in the object.
     #[arbitrary(with = crate::arbitrary_util::arbitrary_indexmap)]
     pub properties: IndexMap<String, InputSchema>,
     /// List of property names that must be present.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub required: Option<Vec<String>>,
 }
 
@@ -195,13 +197,16 @@ pub struct ArrayInputSchema {
     pub r#type: ArrayInputSchemaType,
     /// Human-readable description of the array.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub description: Option<String>,
     /// Minimum number of items required.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub min_items: Option<u64>,
     /// Maximum number of items allowed.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub max_items: Option<u64>,
     /// Schema for each item in the array.
@@ -251,9 +256,11 @@ pub struct StringInputSchema {
     pub r#type: StringInputSchemaType,
     /// Human-readable description of the string.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub description: Option<String>,
     /// If provided, the string must be one of these values.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub r#enum: Option<Vec<String>>,
 }
 
@@ -289,13 +296,16 @@ pub struct IntegerInputSchema {
     pub r#type: IntegerInputSchemaType,
     /// Human-readable description of the integer.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub description: Option<String>,
     /// Minimum allowed value (inclusive).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_i64)]
     pub minimum: Option<i64>,
     /// Maximum allowed value (inclusive).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_i64)]
     pub maximum: Option<i64>,
 }
@@ -354,13 +364,16 @@ pub struct NumberInputSchema {
     pub r#type: NumberInputSchemaType,
     /// Human-readable description of the number.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub description: Option<String>,
     /// Minimum allowed value (inclusive).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_f64)]
     pub minimum: Option<f64>,
     /// Maximum allowed value (inclusive).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[arbitrary(with = crate::arbitrary_util::arbitrary_option_f64)]
     pub maximum: Option<f64>,
 }
@@ -417,6 +430,7 @@ pub struct BooleanInputSchema {
     pub r#type: BooleanInputSchemaType,
     /// Human-readable description of the boolean.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub description: Option<String>,
 }
 
@@ -446,6 +460,7 @@ pub struct ImageInputSchema {
     pub r#type: ImageInputSchemaType,
     /// Human-readable description of the expected image.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub description: Option<String>,
 }
 
@@ -479,6 +494,7 @@ pub struct AudioInputSchema {
     pub r#type: AudioInputSchemaType,
     /// Human-readable description of the expected audio.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub description: Option<String>,
 }
 
@@ -512,6 +528,7 @@ pub struct VideoInputSchema {
     pub r#type: VideoInputSchemaType,
     /// Human-readable description of the expected video.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub description: Option<String>,
 }
 
@@ -550,6 +567,7 @@ pub struct FileInputSchema {
     pub r#type: FileInputSchemaType,
     /// Human-readable description of the expected file.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub description: Option<String>,
 }
 
