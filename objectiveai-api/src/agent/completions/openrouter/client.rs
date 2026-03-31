@@ -365,4 +365,33 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::o
             }
         }
     }
+
+    fn response_continuation(
+        &self,
+        mcp_sessions: indexmap::IndexMap<String, String>,
+        request_continuation: Option<&objectiveai::agent::openrouter::Continuation>,
+        messages: &[objectiveai::agent::completions::message::Message],
+        continuation: Option<&[ContinuationItem<Self::State>]>,
+    ) -> objectiveai::agent::openrouter::Continuation {
+        use objectiveai::agent::completions::message::Message;
+        let rc_len = request_continuation.map_or(0, |rc| rc.messages.len());
+        let cont_len = continuation.map_or(0, |c| c.len());
+        let mut all_messages = Vec::with_capacity(rc_len + messages.len() + cont_len);
+        if let Some(rc) = request_continuation {
+            all_messages.extend_from_slice(&rc.messages);
+        }
+        all_messages.extend_from_slice(messages);
+        if let Some(cont) = continuation {
+            all_messages.extend(cont.iter().map(|item| match item {
+                ContinuationItem::State(assistant) => Message::Assistant(assistant.clone()),
+                ContinuationItem::ToolMessage(t) => Message::Tool(t.clone()),
+                ContinuationItem::UserMessage(u) => Message::User(u.clone()),
+            }));
+        }
+        objectiveai::agent::openrouter::Continuation {
+            upstream: objectiveai::agent::openrouter::Upstream::default(),
+            messages: all_messages,
+            mcp_sessions,
+        }
+    }
 }

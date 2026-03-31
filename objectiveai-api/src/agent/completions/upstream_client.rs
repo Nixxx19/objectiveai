@@ -69,6 +69,16 @@ pub trait UpstreamClient<AGENT, CONTINUATION> {
         >,
     > + Send
     + 'static;
+
+    /// Builds a response continuation from MCP sessions, request continuation,
+    /// messages, and internal continuation items.
+    fn response_continuation(
+        &self,
+        mcp_sessions: indexmap::IndexMap<String, String>,
+        request_continuation: Option<&CONTINUATION>,
+        messages: &[objectiveai::agent::completions::message::Message],
+        continuation: Option<&[super::ContinuationItem<Self::State>]>,
+    ) -> CONTINUATION;
 }
 
 pub struct UnimplementedUpstreamClient;
@@ -110,6 +120,16 @@ impl<AGENT, CONTINUATION> UpstreamClient<AGENT, CONTINUATION> for UnimplementedU
                 }
             )
         }
+    }
+
+    fn response_continuation(
+        &self,
+        _mcp_sessions: indexmap::IndexMap<String, String>,
+        _request_continuation: Option<&CONTINUATION>,
+        _messages: &[objectiveai::agent::completions::message::Message],
+        _continuation: Option<&[super::ContinuationItem<Self::State>]>,
+    ) -> CONTINUATION {
+        unimplemented!()
     }
 }
 

@@ -372,4 +372,31 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
             }
         }
     }
+
+    fn response_continuation(
+        &self,
+        mcp_sessions: indexmap::IndexMap<String, String>,
+        request_continuation: Option<&objectiveai::agent::claude_agent_sdk::Continuation>,
+        _messages: &[objectiveai::agent::completions::message::Message],
+        continuation: Option<&[ContinuationItem<Self::State>]>,
+    ) -> objectiveai::agent::claude_agent_sdk::Continuation {
+        // Extract session_id from last State in continuation, fall back to request continuation.
+        let session_id = continuation
+            .and_then(|items| {
+                items.iter().rev().find_map(|item| match item {
+                    ContinuationItem::State(state) => {
+                        if state.session_id.is_empty() { None } else { Some(state.session_id.clone()) }
+                    }
+                    _ => None,
+                })
+            })
+            .or_else(|| request_continuation.map(|rc| rc.session_id.clone()))
+            .unwrap_or_default();
+
+        objectiveai::agent::claude_agent_sdk::Continuation {
+            upstream: objectiveai::agent::claude_agent_sdk::Upstream::default(),
+            session_id,
+            mcp_sessions,
+        }
+    }
 }
