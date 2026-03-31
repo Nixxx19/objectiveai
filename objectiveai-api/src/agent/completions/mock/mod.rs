@@ -10,3 +10,5 @@ pub use state::*;
 
 #[cfg(test)]
 mod client_tests;
+#[cfg(test)]
+mod response_continuation_tests;
