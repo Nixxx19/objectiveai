@@ -7,7 +7,6 @@ use futures::Stream;
 use objectiveai::agent::completions::response::{Logprob, Logprobs};
 use rand::{Rng, SeedableRng};
 use super::super::{ContinuationItem, StreamItem, UpstreamClient, ResolvedTool};
-use super::State;
 
 /// Mock upstream client that generates random responses with configurable delay.
 #[derive(Debug, Clone)]
@@ -51,7 +50,7 @@ enum MockResponse {
 }
 
 impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation> for Client {
-    type State = State;
+    type State = objectiveai::agent::completions::message::AssistantMessage;
     type Stream = Pin<
         Box<dyn Stream<Item = StreamItem<Self::State>> + Send + 'static>,
     >;
@@ -64,17 +63,17 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
         agent: &objectiveai::agent::mock::Agent,
         request_continuation: Option<objectiveai::agent::mock::Continuation>,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
-        _messages: &[objectiveai::agent::completions::message::Message],
+        messages: &[objectiveai::agent::completions::message::Message],
         _mcp_connections: &[std::sync::Arc<crate::mcp::Connection>],
-        _invention_tools: Option<
+        invention_tools: Option<
             &[objectiveai::functions::inventions::InventionTool],
         >,
         tool_names: &[String],
         tool_map: &HashMap<String, ResolvedTool>,
-        _continuation: Option<&[ContinuationItem<Self::State>]>,
+        continuation: Option<&[ContinuationItem<Self::State>]>,
         byok: Option<&str>,
         _cost_multiplier: rust_decimal::Decimal,
-        _tools_enabled: bool,
+        tools_enabled: bool,
     ) -> impl Future<
         Output = Result<
             Self::Stream,
@@ -82,11 +81,11 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
         >,
     > + Send
     + 'static {
-        let tools_enabled = _tools_enabled;
+        let tools_enabled = tools_enabled;
         let invention = agent.base.invention == Some(true);
-        let has_invention_tools = _invention_tools.is_some_and(|t| !t.is_empty());
+        let has_invention_tools = invention_tools.is_some_and(|t| !t.is_empty());
         let invention_tools: Vec<objectiveai::functions::inventions::InventionTool> =
-            _invention_tools.map(|t| t.to_vec()).unwrap_or_default();
+            invention_tools.map(|t| t.to_vec()).unwrap_or_default();
         let id = id.to_string();
         let agent_id = agent.id.clone();
         let error = agent.base.error == Some(true);
@@ -95,9 +94,39 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
         let tool_names = tool_names.to_vec();
         let tool_map = tool_map.clone();
         let delay = self.delay;
-        let cont_len = _continuation.map_or(0u64, |c| c.len() as u64);
+        // Build the full message list: request_continuation -> messages -> continuation.
+        let rc_len = request_continuation.as_ref().map_or(0, |rc| rc.messages.len());
+        let cont_len = continuation.map_or(0, |c| c.len());
+        let mut all_messages: Vec<objectiveai::agent::completions::message::Message> =
+            Vec::with_capacity(rc_len + messages.len() + cont_len);
+        if let Some(ref rc) = request_continuation {
+            all_messages.extend_from_slice(&rc.messages);
+        }
+        all_messages.extend_from_slice(messages);
+        if let Some(cont) = continuation {
+            all_messages.extend(cont.iter().map(|item| match item {
+                ContinuationItem::State(assistant) => objectiveai::agent::completions::message::Message::Assistant(assistant.clone()),
+                ContinuationItem::ToolMessage(t) => objectiveai::agent::completions::message::Message::Tool(t.clone()),
+                ContinuationItem::UserMessage(u) => objectiveai::agent::completions::message::Message::User(u.clone()),
+            }));
+        }
+        // Compute assistant index from internal continuation (State + ToolMessage items),
+        // identical to openrouter logic.
+        let assistant_index = continuation
+            .map(|c| {
+                c.iter()
+                    .filter(|item| {
+                        matches!(
+                            item,
+                            ContinuationItem::State(_)
+                                | ContinuationItem::ToolMessage(_)
+                        )
+                    })
+                    .count() as u64
+            })
+            .unwrap_or(0);
         // Extract the prompt text for invention step discovery.
-        // First step: last user message in _messages.
+        // First step: last user message in messages.
         // Subsequent steps: last UserMessage on continuation.
         let prompt_text = if invention {
             use objectiveai::agent::completions::message::RichContent;
@@ -106,7 +135,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
                 RichContent::Parts(_) => String::new(),
             };
             // Check continuation first (later steps)
-            _continuation
+            continuation
                 .and_then(|items| {
                     items.iter().rev().find_map(|item| match item {
                         ContinuationItem::UserMessage(u) => Some(extract_text(&u.content)),
@@ -115,7 +144,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
                 })
                 // Fall back to messages (first step)
                 .or_else(|| {
-                    _messages.iter().rev().find_map(|m| match m {
+                    messages.iter().rev().find_map(|m| match m {
                         objectiveai::agent::completions::message::Message::User(u) => {
                             Some(extract_text(&u.content))
                         }
@@ -129,10 +158,9 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
         let seed = params.seed.map(|s| {
             use std::hash::Hasher;
             let mut hasher = twox_hash::XxHash3_64::with_seed(s as u64);
-            hasher.write(&cont_len.to_le_bytes());
-            // Hash messages (prompt_id-style) for differentiation across tasks
+            // Hash full prompt (request_continuation + messages + continuation)
             {
-                let mut prompt = _messages.to_vec();
+                let mut prompt = all_messages.clone();
                 objectiveai::agent::completions::message::prompt::prepare(&mut prompt);
                 let pid = objectiveai::agent::completions::message::prompt::id(&prompt);
                 hasher.write(pid.as_bytes());
@@ -143,10 +171,10 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
             }
             hasher.finish()
         });
-        let prior_tool_call_count: u32 = _continuation
+        let prior_tool_call_count: u32 = continuation
             .map(|items| {
                 items.iter().filter_map(|item| match item {
-                    ContinuationItem::State(s) => Some(s.tool_call_count() as u32),
+                    ContinuationItem::State(s) => Some(super::state::tool_call_count(s) as u32),
                     _ => None,
                 }).sum()
             })
@@ -154,7 +182,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
         // Validate that AppendTask / WriteInputSchema results from the
         // previous turn did not fail. Find the last State in the
         // continuation and check all ToolMessages that follow it.
-        let continuation_validation = _continuation.and_then(|items| {
+        let continuation_validation = continuation.and_then(|items| {
             let last_state_idx = items.iter().rposition(|item| {
                 matches!(item, ContinuationItem::State(_))
             })?;
@@ -162,7 +190,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
                 ContinuationItem::State(s) => s,
                 _ => unreachable!(),
             };
-            Some(state.validate_continuation(items[last_state_idx + 1..].iter()))
+            Some(super::state::validate_continuation(state, items[last_state_idx + 1..].iter()))
         });
         let is_byok = byok.is_some();
         let max_tool_calls = self.max_tool_calls;
@@ -248,7 +276,40 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
                 return Err(super::Error::MaxToolCallsExceeded(max_tool_calls));
             }
 
-            let state = State { tool_calls: current_tool_calls };
+            let state = {
+                use objectiveai::agent::completions::message::{
+                    AssistantMessage, AssistantToolCall, AssistantToolCallFunction, RichContent,
+                };
+                let reasoning = if reasoning_chunks.is_empty() {
+                    None
+                } else {
+                    Some(reasoning_chunks.join(""))
+                };
+                match &mock_response {
+                    MockResponse::Content { text, .. } => AssistantMessage {
+                        content: Some(RichContent::Text(text.clone())),
+                        name: None,
+                        refusal: None,
+                        tool_calls: None,
+                        reasoning,
+                    },
+                    MockResponse::ToolCalls(calls) => AssistantMessage {
+                        content: None,
+                        name: None,
+                        refusal: None,
+                        tool_calls: Some(calls.iter().map(|c| {
+                            AssistantToolCall::Function {
+                                id: c.call_id.clone(),
+                                function: AssistantToolCallFunction {
+                                    name: c.tool_name.clone(),
+                                    arguments: c.arguments.clone(),
+                                },
+                            }
+                        }).collect()),
+                        reasoning,
+                    },
+                }
+            };
 
             let stream = async_stream::stream! {
                 use objectiveai::agent::completions::message::{
@@ -269,7 +330,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
                         id: id.clone(),
                         created,
                         messages: vec![MessageChunk::Assistant(AssistantResponseChunk {
-                            index: cont_len,
+                            index: assistant_index,
                             created,
                             agent: agent_id.clone(),
                             model: "mock".into(),
@@ -299,7 +360,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
                                 id: id.clone(),
                                 created,
                                 messages: vec![MessageChunk::Assistant(AssistantResponseChunk {
-                                    index: cont_len,
+                                    index: assistant_index,
                                     created,
                                     agent: agent_id.clone(),
                                     model: "mock".into(),
@@ -346,7 +407,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
                                     id: id.clone(),
                                     created,
                                     messages: vec![MessageChunk::Assistant(AssistantResponseChunk {
-                                        index: cont_len,
+                                        index: assistant_index,
                                         created,
                                         agent: agent_id.clone(),
                                         model: "mock".into(),
