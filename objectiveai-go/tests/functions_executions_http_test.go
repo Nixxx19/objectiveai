@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/json"
 	"path/filepath"
 	"testing"
 
@@ -11,17 +12,18 @@ func TestFunctionsExecutionsHTTP(t *testing.T) {
 	c := getTestClient(t)
 	snapshotsDir := filepath.Join(assetsDir(), "functions", "executions", "client_tests")
 
-	mockRemote := func(name string) map[string]any {
-		return map[string]any{"remote": "mock", "name": name}
+	mockRemote := func(name string) json.RawMessage {
+		return json.RawMessage(`{"remote": "mock", "name": "` + name + `"}`)
 	}
 
+	// json.RawMessage preserves key order to match JS/Python request bodies.
 	cases := []httpTestCase{
 		{
 			Snapshot: "mock_1_scalar_leaf_binary_seed_42",
 			Body: map[string]any{
 				"function": mockRemote("binary-classifier"),
 				"profile":  mockRemote("solo-instruction"),
-				"input":    map[string]any{"text": "Hello world"},
+				"input":    json.RawMessage(`{"text": "Hello world"}`),
 				"seed":     42,
 			},
 		},
@@ -30,7 +32,7 @@ func TestFunctionsExecutionsHTTP(t *testing.T) {
 			Body: map[string]any{
 				"function": mockRemote("five-criteria-ranker"),
 				"profile":  mockRemote("schema-heavy-trio"),
-				"input":    map[string]any{"items": []any{"Option A", "Option B", "Option C"}},
+				"input":    json.RawMessage(`{"items": ["Option A", "Option B", "Option C"]}`),
 				"seed":     42,
 			},
 		},
@@ -39,7 +41,7 @@ func TestFunctionsExecutionsHTTP(t *testing.T) {
 			Body: map[string]any{
 				"function": mockRemote("nested-vector-super-branch"),
 				"profile":  mockRemote("nested-vector-inline-remote"),
-				"input":    map[string]any{"items": []any{"Alpha", "Beta", "Gamma"}},
+				"input":    json.RawMessage(`{"items": ["Alpha", "Beta", "Gamma"]}`),
 				"seed":     42,
 			},
 		},

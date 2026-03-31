@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/json"
 	"path/filepath"
 	"testing"
 
@@ -13,17 +14,20 @@ func TestFunctionsInventionsHTTP(t *testing.T) {
 
 	mockInventionAgent := map[string]any{"upstream": "mock", "output_mode": "instruction", "invention": true}
 
+	// json.RawMessage preserves key order to match JS/Python request bodies.
+	// Go's map[string]any alphabetizes keys, which changes the mock server's
+	// seeded random output.
 	cases := []httpTestCase{
 		{
 			Snapshot: "scalar_leaf_s42_0",
 			Body: map[string]any{
-				"state": map[string]any{
+				"state": json.RawMessage(`{
 					"type": "alpha.scalar.leaf.function",
 					"depth": 0, "min_branch_width": 3, "max_branch_width": 5,
 					"min_leaf_width": 3, "max_leaf_width": 5,
 					"name": "sl-default",
-					"spec": "Test function spec for mock invention.",
-				},
+					"spec": "Test function spec for mock invention."
+				}`),
 				"agent":            mockInventionAgent,
 				"seed":             42,
 				"stream":           true,
@@ -33,13 +37,13 @@ func TestFunctionsInventionsHTTP(t *testing.T) {
 		{
 			Snapshot: "vector_branch_s2025_0",
 			Body: map[string]any{
-				"state": map[string]any{
+				"state": json.RawMessage(`{
 					"type": "alpha.vector.branch.function",
 					"depth": 3, "min_branch_width": 2, "max_branch_width": 4,
 					"min_leaf_width": 2, "max_leaf_width": 4,
 					"name": "vb-deep",
-					"spec": "Test function spec for mock invention.",
-				},
+					"spec": "Test function spec for mock invention."
+				}`),
 				"agent":            mockInventionAgent,
 				"seed":             2025,
 				"stream":           true,
@@ -49,62 +53,51 @@ func TestFunctionsInventionsHTTP(t *testing.T) {
 		{
 			Snapshot: "scalar_leaf_schema_kitchen_0",
 			Body: map[string]any{
-				"state": map[string]any{
+				"state": json.RawMessage(`{
 					"type": "alpha.scalar.leaf.function",
 					"depth": 0, "min_branch_width": 3, "max_branch_width": 5,
 					"min_leaf_width": 3, "max_leaf_width": 5,
 					"name": "sl-kitchen",
 					"spec": "Test function spec for mock invention.",
-					"input_schema": map[string]any{
+					"input_schema": {
 						"type": "object",
-						"properties": map[string]any{
-							"name":      map[string]any{"type": "string"},
-							"age":       map[string]any{"type": "integer"},
-							"score":     map[string]any{"type": "number"},
-							"active":    map[string]any{"type": "boolean"},
-							"avatar":    map[string]any{"type": "image"},
-							"voicemail": map[string]any{"type": "audio"},
-							"demo":      map[string]any{"type": "video"},
-							"resume":    map[string]any{"type": "file"},
-							"aliases": map[string]any{
+						"properties": {
+							"name": {"type": "string"},
+							"age": {"type": "integer"},
+							"score": {"type": "number"},
+							"active": {"type": "boolean"},
+							"avatar": {"type": "image"},
+							"voicemail": {"type": "audio"},
+							"demo": {"type": "video"},
+							"resume": {"type": "file"},
+							"aliases": {
 								"type": "array",
-								"items": map[string]any{
-									"anyOf": []any{
-										map[string]any{"type": "string"},
-										map[string]any{"type": "integer"},
-									},
-								},
+								"items": {"anyOf": [{"type": "string"}, {"type": "integer"}]},
 								"minItems": 1,
-								"maxItems": 8,
+								"maxItems": 8
 							},
-							"extra": map[string]any{
-								"anyOf": []any{
-									map[string]any{"type": "string"},
-									map[string]any{
+							"extra": {
+								"anyOf": [
+									{"type": "string"},
+									{
 										"type": "array",
-										"items": map[string]any{
+										"items": {
 											"type": "object",
-											"properties": map[string]any{
-												"key": map[string]any{"type": "string"},
-												"val": map[string]any{
-													"anyOf": []any{
-														map[string]any{"type": "number"},
-														map[string]any{"type": "boolean"},
-														map[string]any{"type": "image"},
-													},
-												},
+											"properties": {
+												"key": {"type": "string"},
+												"val": {"anyOf": [{"type": "number"}, {"type": "boolean"}, {"type": "image"}]}
 											},
-											"required": []any{"key", "val"},
+											"required": ["key", "val"]
 										},
 										"minItems": 1,
-										"maxItems": 3,
-									},
-								},
-							},
+										"maxItems": 3
+									}
+								]
+							}
 						},
-						"required": []any{"name", "age", "score", "active", "avatar", "voicemail", "demo", "resume", "aliases", "extra"},
-					},
-				},
+						"required": ["name", "age", "score", "active", "avatar", "voicemail", "demo", "resume", "aliases", "extra"]
+					}
+				}`),
 				"agent":            mockInventionAgent,
 				"seed":             80004,
 				"stream":           true,

@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/json"
 	"path/filepath"
 	"testing"
 
@@ -13,49 +14,41 @@ func TestFunctionsInventionsRecursiveHTTP(t *testing.T) {
 
 	mockInventionAgent := map[string]any{"upstream": "mock", "output_mode": "instruction", "invention": true}
 
-	starlarkMessages := map[string]any{"$starlark": `[{"role": "user", "content": [{"type": "text", "text": str(input)}]}]`}
-	starlarkRankMessages := map[string]any{"$starlark": `[{"role": "user", "content": [{"type": "text", "text": "rank these"}]}]`}
-	starlarkRankResponses := map[string]any{"$starlark": `[[{"type": "text", "text": str(item)}] for item in input['items']]`}
-
-	yesNoResponses := []any{
-		[]any{map[string]any{"type": "text", "text": "yes"}},
-		[]any{map[string]any{"type": "text", "text": "no"}},
-	}
-
+	// json.RawMessage preserves key order to match JS/Python request bodies.
 	cases := []httpTestCase{
 		{
 			Snapshot: "valid_schema_valid_tasks_scalar_leaf",
 			Body: map[string]any{
 				"remote": "mock",
-				"state": map[string]any{
+				"state": json.RawMessage(`{
 					"type": "alpha.scalar.leaf.function",
 					"depth": 0, "min_branch_width": 1, "max_branch_width": 1,
 					"min_leaf_width": 2, "max_leaf_width": 4,
 					"name": "inv-good-sl",
 					"spec": "Test function spec for mock recursive invention.",
-					"input_schema": map[string]any{
+					"input_schema": {
 						"type": "object",
-						"properties": map[string]any{
-							"sentiment": map[string]any{"type": "string", "enum": []any{"positive", "negative"}},
+						"properties": {
+							"sentiment": {"type": "string", "enum": ["positive", "negative"]}
 						},
-						"required": []any{"sentiment"},
+						"required": ["sentiment"]
 					},
 					"essay_tasks": "Good tasks incoming.",
-					"tasks": []any{
-						map[string]any{
-							"type":      "vector.completion",
-							"messages":  starlarkMessages,
-							"responses": yesNoResponses,
+					"tasks": [
+						{
+							"type": "vector.completion",
+							"messages": {"$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"},
+							"responses": [[{"type": "text", "text": "yes"}], [{"type": "text", "text": "no"}]]
 						},
-						map[string]any{
-							"type":      "vector.completion",
-							"messages":  starlarkMessages,
-							"responses": yesNoResponses,
-						},
-					},
+						{
+							"type": "vector.completion",
+							"messages": {"$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"},
+							"responses": [[{"type": "text", "text": "yes"}], [{"type": "text", "text": "no"}]]
+						}
+					],
 					"tasks_length": 2,
-					"description":  "A valid scalar function.",
-				},
+					"description": "A valid scalar function."
+				}`),
 				"agent":            mockInventionAgent,
 				"seed":             5300,
 				"stream":           true,
@@ -66,30 +59,30 @@ func TestFunctionsInventionsRecursiveHTTP(t *testing.T) {
 			Snapshot: "valid_vector_schema_valid_tasks",
 			Body: map[string]any{
 				"remote": "mock",
-				"state": map[string]any{
+				"state": json.RawMessage(`{
 					"type": "alpha.vector.leaf.function",
 					"depth": 0, "min_branch_width": 1, "max_branch_width": 1,
 					"min_leaf_width": 2, "max_leaf_width": 4,
-					"name":  "inv-good-vl",
-					"spec":  "Test function spec for mock recursive invention.",
+					"name": "inv-good-vl",
+					"spec": "Test function spec for mock recursive invention.",
 					"essay": "Ranking things.",
-					"input_schema": map[string]any{
-						"items": map[string]any{"type": "string", "enum": []any{"apple", "banana"}},
+					"input_schema": {
+						"items": {"type": "string", "enum": ["apple", "banana"]}
 					},
-					"tasks": []any{
-						map[string]any{
-							"type":      "vector.completion",
-							"messages":  starlarkRankMessages,
-							"responses": starlarkRankResponses,
+					"tasks": [
+						{
+							"type": "vector.completion",
+							"messages": {"$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"rank these\"}]}]"},
+							"responses": {"$starlark": "[[{\"type\": \"text\", \"text\": str(item)}] for item in input['items']]"}
 						},
-						map[string]any{
-							"type":      "vector.completion",
-							"messages":  starlarkRankMessages,
-							"responses": starlarkRankResponses,
-						},
-					},
-					"tasks_length": 2,
-				},
+						{
+							"type": "vector.completion",
+							"messages": {"$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"rank these\"}]}]"},
+							"responses": {"$starlark": "[[{\"type\": \"text\", \"text\": str(item)}] for item in input['items']]"}
+						}
+					],
+					"tasks_length": 2
+				}`),
 				"agent":            mockInventionAgent,
 				"seed":             5400,
 				"stream":           true,
@@ -100,21 +93,21 @@ func TestFunctionsInventionsRecursiveHTTP(t *testing.T) {
 			Snapshot: "valid_schema_no_tasks_with_essay",
 			Body: map[string]any{
 				"remote": "mock",
-				"state": map[string]any{
+				"state": json.RawMessage(`{
 					"type": "alpha.scalar.leaf.function",
 					"depth": 0, "min_branch_width": 1, "max_branch_width": 1,
 					"min_leaf_width": 2, "max_leaf_width": 4,
-					"name":  "inv-schema-only",
-					"spec":  "Test function spec for mock recursive invention.",
+					"name": "inv-schema-only",
+					"spec": "Test function spec for mock recursive invention.",
 					"essay": "A great essay about things.",
-					"input_schema": map[string]any{
+					"input_schema": {
 						"type": "object",
-						"properties": map[string]any{
-							"sentiment": map[string]any{"type": "string", "enum": []any{"positive", "negative"}},
+						"properties": {
+							"sentiment": {"type": "string", "enum": ["positive", "negative"]}
 						},
-						"required": []any{"sentiment"},
-					},
-				},
+						"required": ["sentiment"]
+					}
+				}`),
 				"agent":            mockInventionAgent,
 				"seed":             5900,
 				"stream":           true,

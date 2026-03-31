@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/json"
 	"path/filepath"
 	"testing"
 
@@ -11,23 +12,24 @@ func TestAgentCompletionsHTTP(t *testing.T) {
 	c := getTestClient(t)
 	snapshotsDir := filepath.Join(assetsDir(), "agent", "completions", "client_tests")
 
+	// json.RawMessage preserves key order to match JS/Python request bodies.
 	cases := []httpTestCase{
 		{
 			Snapshot: "test_basic_mock_agent_seed_42",
 			Body: map[string]any{
 				"messages": []any{},
-				"agent":    map[string]any{"upstream": "mock", "output_mode": "instruction"},
+				"agent":    json.RawMessage(`{"upstream": "mock", "output_mode": "instruction"}`),
 				"seed":     42,
 			},
 		},
 		{
 			Snapshot: "test_with_developer_and_user_messages",
 			Body: map[string]any{
-				"messages": []any{
-					map[string]any{"role": "developer", "content": "You are a helpful assistant."},
-					map[string]any{"role": "user", "content": "What is 2+2?"},
-				},
-				"agent": map[string]any{"upstream": "mock", "output_mode": "instruction"},
+				"messages": json.RawMessage(`[
+					{"role": "developer", "content": "You are a helpful assistant."},
+					{"role": "user", "content": "What is 2+2?"}
+				]`),
+				"agent": json.RawMessage(`{"upstream": "mock", "output_mode": "instruction"}`),
 				"seed":  99,
 			},
 		},
@@ -35,8 +37,8 @@ func TestAgentCompletionsHTTP(t *testing.T) {
 			Snapshot: "test_json_object_response_format",
 			Body: map[string]any{
 				"messages":        []any{},
-				"agent":           map[string]any{"upstream": "mock", "output_mode": "instruction"},
-				"response_format": map[string]any{"type": "json_object"},
+				"agent":           json.RawMessage(`{"upstream": "mock", "output_mode": "instruction"}`),
+				"response_format": json.RawMessage(`{"type": "json_object"}`),
 				"seed":            42,
 			},
 		},
