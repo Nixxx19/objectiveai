@@ -61,7 +61,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
         id: &str,
         created: u64,
         agent: &objectiveai::agent::mock::Agent,
-        request_continuation: Option<objectiveai::agent::mock::Continuation>,
+        request_continuation: Option<&objectiveai::agent::mock::Continuation>,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         messages: &[objectiveai::agent::completions::message::Message],
         _mcp_connections: &[std::sync::Arc<crate::mcp::Connection>],
@@ -95,11 +95,11 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
         let tool_map = tool_map.clone();
         let delay = self.delay;
         // Build the full message list: request_continuation -> messages -> continuation.
-        let rc_len = request_continuation.as_ref().map_or(0, |rc| rc.messages.len());
+        let rc_len = request_continuation.map_or(0, |rc| rc.messages.len());
         let cont_len = continuation.map_or(0, |c| c.len());
         let mut all_messages: Vec<objectiveai::agent::completions::message::Message> =
             Vec::with_capacity(rc_len + messages.len() + cont_len);
-        if let Some(ref rc) = request_continuation {
+        if let Some(rc) = request_continuation {
             all_messages.extend_from_slice(&rc.messages);
         }
         all_messages.extend_from_slice(messages);

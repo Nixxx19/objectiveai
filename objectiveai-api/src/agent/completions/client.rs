@@ -483,7 +483,7 @@ where
                         objectiveai::agent::InlineAgent::Openrouter(or_agent) => {
                             let c = mcp_connections.clone();
                             let rc = match &request_continuation {
-                                Some(objectiveai::agent::Continuation::Openrouter(c)) => Some(c.clone()),
+                                Some(objectiveai::agent::Continuation::Openrouter(c)) => Some(c),
                                 _ => None,
                             };
                             match self.run_agent_loop(
@@ -506,7 +506,7 @@ where
                         objectiveai::agent::InlineAgent::ClaudeAgentSdk(cas_agent) => {
                             let c = mcp_connections.clone();
                             let rc = match &request_continuation {
-                                Some(objectiveai::agent::Continuation::ClaudeAgentSdk(c)) => Some(c.clone()),
+                                Some(objectiveai::agent::Continuation::ClaudeAgentSdk(c)) => Some(c),
                                 _ => None,
                             };
                             match self.run_agent_loop(
@@ -529,7 +529,7 @@ where
                         objectiveai::agent::InlineAgent::Mock(mock_agent) => {
                             let c = mcp_connections.clone();
                             let rc = match &request_continuation {
-                                Some(objectiveai::agent::Continuation::Mock(c)) => Some(c.clone()),
+                                Some(objectiveai::agent::Continuation::Mock(c)) => Some(c),
                                 _ => None,
                             };
                             match self.run_agent_loop(
@@ -586,7 +586,7 @@ where
         &self,
         upstream: Arc<U>,
         agent: &A,
-        request_continuation: Option<RC>,
+        request_continuation: Option<&RC>,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         mcp_connections: &[Arc<crate::mcp::Connection>],
         invention_tools: Option<&[objectiveai::functions::inventions::InventionTool]>,
@@ -609,7 +609,7 @@ where
     where
         U: super::UpstreamClient<A, RC> + Send + Sync + 'static,
         A: Send + Sync + Clone + 'static,
-        RC: Send + Clone + 'static,
+        RC: Send + Sync + Clone + 'static,
         CONT: Send + 'static,
     {
         // --- Merge messages, prepare, and apply transform. ---
@@ -659,6 +659,7 @@ where
         let tool_map = tool_map.clone();
         let id = id.to_string();
         let byok = byok.map(|s| s.to_string());
+        let request_continuation = request_continuation.cloned();
 
         Ok(Box::pin(async_stream::stream! {
             use objectiveai::agent::completions::message::{RichContent, ToolMessage};
@@ -824,7 +825,7 @@ where
                         &id,
                         created,
                         &agent,
-                        request_continuation.clone(),
+                        request_continuation.as_ref(),
                         &params,
                         &messages,
                         &mcp_connections,

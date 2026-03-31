@@ -34,7 +34,7 @@ pub trait UpstreamClient<AGENT, CONTINUATION> {
         // the agent that the upstream client uses
         agent: &AGENT,
         // optional continuation from the public API request
-        request_continuation: Option<CONTINUATION>,
+        request_continuation: Option<&CONTINUATION>,
         // the original request params for the agent completion
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         // contains the full prompt, including from the params and from the agent
@@ -82,7 +82,7 @@ impl<AGENT, CONTINUATION> UpstreamClient<AGENT, CONTINUATION> for UnimplementedU
         _id: &str,
         _created: u64,
         _agent: &AGENT,
-        _request_continuation: Option<CONTINUATION>,
+        _request_continuation: Option<&CONTINUATION>,
         _params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         _messages: &[objectiveai::agent::completions::message::Message],
         _mcp_connections: &[Arc<crate::mcp::Connection>],

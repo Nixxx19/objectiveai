@@ -234,7 +234,7 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::o
         id: &str,
         created: u64,
         agent: &objectiveai::agent::openrouter::Agent,
-        request_continuation: Option<objectiveai::agent::openrouter::Continuation>,
+        request_continuation: Option<&objectiveai::agent::openrouter::Continuation>,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         messages: &[objectiveai::agent::completions::message::Message],
         _mcp_connections: &[Arc<crate::mcp::Connection>],
@@ -262,6 +262,7 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::o
         let tool_names = tool_names.to_vec();
         let tool_map = tool_map.clone();
         let continuation = continuation.map(|c| c.to_vec());
+        let request_continuation = request_continuation.cloned();
         let client = self.clone();
         let is_byok = byok.is_some();
         let byok = byok.map(String::from);

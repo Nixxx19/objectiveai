@@ -90,7 +90,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
         id: &str,
         created: u64,
         agent: &objectiveai::agent::claude_agent_sdk::Agent,
-        request_continuation: Option<objectiveai::agent::claude_agent_sdk::Continuation>,
+        request_continuation: Option<&objectiveai::agent::claude_agent_sdk::Continuation>,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         messages: &[objectiveai::agent::completions::message::Message],
         mcp_connections: &[Arc<crate::mcp::Connection>],
@@ -121,6 +121,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
         let mcp_connections = mcp_connections.to_vec();
         let invention_tools = invention_tools.map(|t| t.to_vec());
         let continuation = continuation.map(|c| c.to_vec());
+        let request_continuation = request_continuation.cloned();
         let client = self.clone();
 
         async move {
