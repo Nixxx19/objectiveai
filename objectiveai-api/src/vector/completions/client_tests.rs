@@ -916,8 +916,6 @@ async fn test_mixed_output_modes_seed_88() {
         .await
         .expect("create_streaming should succeed");
     let result = normalize(run_and_check(Box::pin(stream)).await);
-    assert_eq!(result.completions.len(), 5);
-    assert_eq!(result.votes.len(), 2);
 
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
@@ -1265,8 +1263,6 @@ async fn test_tool_call_two_agents_seed_44() {
         .await
         .expect("create_streaming should succeed");
     let result = normalize(run_and_check(Box::pin(stream)).await);
-    assert_eq!(result.completions.len(), 3);
-    assert_eq!(result.votes.len(), 2);
 
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(

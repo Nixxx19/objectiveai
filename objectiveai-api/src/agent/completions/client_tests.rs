@@ -1303,7 +1303,11 @@ async fn test_with_mock_continuation() {
 
     let continuation = crate::agent::completions::Continuation::Mock {
         items: vec![
-            crate::agent::completions::ContinuationItem::State(crate::agent::completions::mock::State::default()),
+            crate::agent::completions::ContinuationItem::State(
+                objectiveai::agent::completions::message::AssistantMessage {
+                    content: None, name: None, refusal: None, tool_calls: None, reasoning: None,
+                },
+            ),
         ],
         mcp_connections: Arc::new(vec![]),
     };
@@ -1655,7 +1659,23 @@ async fn test_logprobs_with_continuation() {
     let continuation = crate::agent::completions::Continuation::Mock {
         items: vec![
             crate::agent::completions::ContinuationItem::State(
-                crate::agent::completions::mock::State { tool_calls: vec![("a".into(), "1".into()), ("b".into(), "2".into()), ("c".into(), "3".into())] },
+                objectiveai::agent::completions::message::AssistantMessage {
+                    content: None, name: None, refusal: None, reasoning: None,
+                    tool_calls: Some(vec![
+                        objectiveai::agent::completions::message::AssistantToolCall::Function {
+                            id: "1".into(),
+                            function: objectiveai::agent::completions::message::AssistantToolCallFunction { name: "a".into(), arguments: String::new() },
+                        },
+                        objectiveai::agent::completions::message::AssistantToolCall::Function {
+                            id: "2".into(),
+                            function: objectiveai::agent::completions::message::AssistantToolCallFunction { name: "b".into(), arguments: String::new() },
+                        },
+                        objectiveai::agent::completions::message::AssistantToolCall::Function {
+                            id: "3".into(),
+                            function: objectiveai::agent::completions::message::AssistantToolCallFunction { name: "c".into(), arguments: String::new() },
+                        },
+                    ]),
+                },
             ),
         ],
         mcp_connections: Arc::new(vec![]),
