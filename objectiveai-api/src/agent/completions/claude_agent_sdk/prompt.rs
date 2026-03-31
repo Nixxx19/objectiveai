@@ -55,6 +55,7 @@ impl Prompt {
     pub fn new(
         messages: &[Message],
         continuation: Option<&[ContinuationItem<super::State>]>,
+        request_continuation: Option<&objectiveai::agent::claude_agent_sdk::Continuation>,
     ) -> Result<Self, super::Error> {
         let mut system_parts: Vec<String> = Vec::new();
         let mut user_msg: Option<&objectiveai::agent::completions::message::UserMessage> = None;
@@ -176,6 +177,15 @@ impl Prompt {
             session_id
         } else {
             String::new()
+        };
+
+        // Fall back to request continuation session_id if no internal session found.
+        let session_id = if session_id.is_empty() {
+            request_continuation
+                .map(|rc| rc.session_id.clone())
+                .unwrap_or_default()
+        } else {
+            session_id
         };
 
         let message = SDKUserMessage {

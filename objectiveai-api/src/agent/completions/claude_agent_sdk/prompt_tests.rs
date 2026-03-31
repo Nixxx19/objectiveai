@@ -53,7 +53,7 @@ fn test_system_only() {
     ];
 
     assert_eq!(
-        Prompt::new(&messages, None).unwrap(),
+        Prompt::new(&messages, None, None).unwrap(),
         expected(Some("Hello\n\nWorld"), "", blocks(vec![])),
     );
 }
@@ -66,7 +66,7 @@ fn test_developer_only() {
     })];
 
     assert_eq!(
-        Prompt::new(&messages, None).unwrap(),
+        Prompt::new(&messages, None, None).unwrap(),
         expected(Some("Be helpful"), "", blocks(vec![])),
     );
 }
@@ -85,7 +85,7 @@ fn test_system_and_user_text() {
     ];
 
     assert_eq!(
-        Prompt::new(&messages, None).unwrap(),
+        Prompt::new(&messages, None, None).unwrap(),
         expected(
             Some("You are helpful"),
             "",
@@ -116,7 +116,7 @@ fn test_multiple_system_developer_user() {
     ];
 
     assert_eq!(
-        Prompt::new(&messages, None).unwrap(),
+        Prompt::new(&messages, None, None).unwrap(),
         expected(
             Some("Rule 1\n\nRule 2\n\nDev instruction"),
             "",
@@ -143,7 +143,7 @@ fn test_user_with_image_url() {
     })];
 
     assert_eq!(
-        Prompt::new(&messages, None).unwrap(),
+        Prompt::new(&messages, None, None).unwrap(),
         expected(
             None,
             "",
@@ -175,7 +175,7 @@ fn test_user_with_base64_image() {
     })];
 
     assert_eq!(
-        Prompt::new(&messages, None).unwrap(),
+        Prompt::new(&messages, None, None).unwrap(),
         expected(
             None,
             "",
@@ -207,7 +207,7 @@ fn test_user_with_file_url() {
     })];
 
     assert_eq!(
-        Prompt::new(&messages, None).unwrap(),
+        Prompt::new(&messages, None, None).unwrap(),
         expected(
             None,
             "",
@@ -246,7 +246,7 @@ fn test_user_with_base64_pdf() {
     })];
 
     assert_eq!(
-        Prompt::new(&messages, None).unwrap(),
+        Prompt::new(&messages, None, None).unwrap(),
         expected(
             None,
             "",
@@ -277,7 +277,7 @@ fn test_user_with_name() {
     })];
 
     assert_eq!(
-        Prompt::new(&messages, None).unwrap(),
+        Prompt::new(&messages, None, None).unwrap(),
         expected(
             None,
             "",
@@ -311,7 +311,7 @@ fn test_continuation_with_state_and_user() {
     ];
 
     assert_eq!(
-        Prompt::new(&messages, Some(&continuation)).unwrap(),
+        Prompt::new(&messages, Some(&continuation), None).unwrap(),
         expected(
             Some("Context"),
             "sess-abc",
@@ -338,7 +338,7 @@ fn test_user_with_plain_text_file() {
     })];
 
     assert_eq!(
-        Prompt::new(&messages, None).unwrap(),
+        Prompt::new(&messages, None, None).unwrap(),
         expected(
             None,
             "",
@@ -363,7 +363,7 @@ fn test_empty_messages() {
     let messages: Vec<Message> = vec![];
 
     assert_eq!(
-        Prompt::new(&messages, None).unwrap(),
+        Prompt::new(&messages, None, None).unwrap(),
         expected(None, "", blocks(vec![])),
     );
 }
@@ -383,7 +383,7 @@ fn test_error_assistant_message() {
     })];
 
     assert_eq!(
-        Prompt::new(&messages, None).unwrap_err(),
+        Prompt::new(&messages, None, None).unwrap_err(),
         super::Error::InvalidMessages("assistant messages are not allowed".to_string()),
     );
 }
@@ -396,7 +396,7 @@ fn test_error_tool_message() {
     })];
 
     assert_eq!(
-        Prompt::new(&messages, None).unwrap_err(),
+        Prompt::new(&messages, None, None).unwrap_err(),
         super::Error::InvalidMessages("tool messages are not allowed".to_string()),
     );
 }
@@ -415,7 +415,7 @@ fn test_error_system_after_user() {
     ];
 
     assert_eq!(
-        Prompt::new(&messages, None).unwrap_err(),
+        Prompt::new(&messages, None, None).unwrap_err(),
         super::Error::InvalidMessages(
             "system/developer messages must precede the user message".to_string()
         ),
@@ -436,7 +436,7 @@ fn test_error_two_user_messages() {
     ];
 
     assert_eq!(
-        Prompt::new(&messages, None).unwrap_err(),
+        Prompt::new(&messages, None, None).unwrap_err(),
         super::Error::InvalidMessages("only one user message is allowed".to_string()),
     );
 }
@@ -460,7 +460,7 @@ fn test_error_tool_after_state_in_continuation() {
     ];
 
     assert_eq!(
-        Prompt::new(&messages, Some(&continuation)).unwrap_err(),
+        Prompt::new(&messages, Some(&continuation), None).unwrap_err(),
         super::Error::InvalidContinuation(
             "tool messages must precede a state item".to_string()
         ),
@@ -486,7 +486,7 @@ fn test_error_continuation_name_mismatch() {
     ];
 
     assert_eq!(
-        Prompt::new(&messages, Some(&continuation)).unwrap_err(),
+        Prompt::new(&messages, Some(&continuation), None).unwrap_err(),
         super::Error::InvalidMessages(
             "continuation user message name 'Bob' does not match expected 'Alice'".to_string()
         ),
@@ -506,7 +506,7 @@ fn test_error_audio_content() {
     })];
 
     assert_eq!(
-        Prompt::new(&messages, None).unwrap_err(),
+        Prompt::new(&messages, None, None).unwrap_err(),
         super::Error::InvalidMessages(
             "unsupported content type: audio (mp3 format, 10 base64 chars)".to_string()
         ),
@@ -525,7 +525,61 @@ fn test_error_video_content() {
     })];
 
     assert_eq!(
-        Prompt::new(&messages, None).unwrap_err(),
+        Prompt::new(&messages, None, None).unwrap_err(),
         super::Error::InvalidMessages("unsupported content type: video".to_string()),
+    );
+}
+
+#[test]
+fn test_request_continuation_session_id_fallback() {
+    let messages = vec![Message::User(UserMessage {
+        content: RichContent::Text("Hello".to_string()),
+        name: None,
+    })];
+
+    let rc = objectiveai::agent::claude_agent_sdk::Continuation {
+        upstream: objectiveai::agent::claude_agent_sdk::Upstream::default(),
+        session_id: "req-sess-123".to_string(),
+        mcp_sessions: indexmap::IndexMap::new(),
+    };
+
+    // No internal continuation — should fall back to request continuation session_id.
+    assert_eq!(
+        Prompt::new(&messages, None, Some(&rc)).unwrap(),
+        expected(None, "req-sess-123", blocks(vec![text_block("Hello")])),
+    );
+}
+
+#[test]
+fn test_internal_session_id_takes_precedence_over_request() {
+    let messages = vec![Message::User(UserMessage {
+        content: RichContent::Text("Hello".to_string()),
+        name: None,
+    })];
+
+    let continuation = vec![
+        ContinuationItem::State(super::State {
+            message_count: 1,
+            session_id: "internal-sess".to_string(),
+        }),
+        ContinuationItem::UserMessage(UserMessage {
+            content: RichContent::Text("Follow up".to_string()),
+            name: None,
+        }),
+    ];
+
+    let rc = objectiveai::agent::claude_agent_sdk::Continuation {
+        upstream: objectiveai::agent::claude_agent_sdk::Upstream::default(),
+        session_id: "req-sess-456".to_string(),
+        mcp_sessions: indexmap::IndexMap::new(),
+    };
+
+    // Internal continuation has session_id — should use it, not request continuation's.
+    assert_eq!(
+        Prompt::new(&messages, Some(&continuation), Some(&rc)).unwrap(),
+        expected(None, "internal-sess", blocks(vec![
+            text_block("Hello"),
+            text_block("Follow up"),
+        ])),
     );
 }

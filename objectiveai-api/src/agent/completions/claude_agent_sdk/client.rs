@@ -139,7 +139,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
             validate_response_format(&agent.id, &params.response_format)?;
 
             // Build prompt from messages + continuation (handles continuation validation).
-            let prompt = Prompt::new(&messages, continuation.as_deref())?;
+            let prompt = Prompt::new(&messages, continuation.as_deref(), request_continuation.as_ref())?;
 
             // Spawn invention server if invention tools are provided.
             let invention_server = if let Some(ref tools) = invention_tools {

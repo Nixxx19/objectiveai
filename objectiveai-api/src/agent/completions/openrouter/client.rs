@@ -286,6 +286,7 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::o
                     &params,
                     &messages,
                     continuation.as_deref(),
+                    request_continuation.as_ref(),
                     &tool_names,
                     &tool_map,
                     tools_enabled,

@@ -26,7 +26,7 @@ fn build_params(
         resolved_rf.as_ref(),
     );
     ChatCompletionCreateParams::new(
-        agent, params, messages, continuation,
+        agent, params, messages, continuation, None,
         &tool_names, &tool_map, true,
     )
 }
@@ -55,7 +55,7 @@ fn build_params_with_tools_enabled(
         resolved_rf.as_ref(),
     );
     ChatCompletionCreateParams::new(
-        agent, params, messages, continuation,
+        agent, params, messages, continuation, None,
         &tool_names, &tool_map, tools_enabled,
     )
 }
@@ -3694,4 +3694,75 @@ fn test_tools_disabled_no_tools_no_tool_choice() {
     // No tools means no tool_choice at all.
     assert_eq!(result.tool_choice, None);
     assert!(result.tools.is_none());
+}
+
+#[test]
+fn test_request_continuation_messages_come_first() {
+    use objectiveai::agent::completions::message::*;
+
+    let agent = objectiveai::agent::openrouter::Agent::try_from(
+        objectiveai::agent::openrouter::AgentBase {
+            model: "test-model".into(),
+            ..Default::default()
+        },
+    )
+    .unwrap();
+
+    let messages = vec![Message::User(UserMessage {
+        content: RichContent::Text("Current turn".into()),
+        name: None,
+    })];
+
+    let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
+        messages: messages.clone(),
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+            objectiveai::agent::InlineAgentBaseWithFallbacks {
+                inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
+        provider: None,
+        response_format: None,
+        seed: None,
+        stream: None,
+        continuation: None,
+    };
+
+    let request_continuation = objectiveai::agent::openrouter::Continuation {
+        upstream: objectiveai::agent::openrouter::Upstream::default(),
+        messages: vec![
+            Message::User(UserMessage {
+                content: RichContent::Text("Previous turn".into()),
+                name: None,
+            }),
+            Message::Assistant(AssistantMessage {
+                content: Some(RichContent::Text("Previous response".into())),
+                name: None,
+                refusal: None,
+                tool_calls: None,
+                reasoning: None,
+            }),
+        ],
+        mcp_sessions: indexmap::IndexMap::new(),
+    };
+
+    let result = ChatCompletionCreateParams::new(
+        &agent, &params, &messages, None, Some(&request_continuation),
+        &[], &std::collections::HashMap::new(), true,
+    );
+
+    // Request continuation messages come first, then argument messages.
+    assert_eq!(result.messages.len(), 3);
+    // First: previous user message from continuation
+    assert!(
+        serde_json::to_string(&result.messages[0]).unwrap().contains("Previous turn"),
+    );
+    // Second: previous assistant response from continuation
+    assert!(
+        serde_json::to_string(&result.messages[1]).unwrap().contains("Previous response"),
+    );
+    // Third: current turn user message
+    assert!(
+        serde_json::to_string(&result.messages[2]).unwrap().contains("Current turn"),
+    );
 }

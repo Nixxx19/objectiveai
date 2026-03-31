@@ -101,6 +101,7 @@ impl ChatCompletionCreateParams {
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         messages: &[objectiveai::agent::completions::message::Message],
         continuation: Option<&[crate::agent::completions::ContinuationItem<objectiveai::agent::completions::message::AssistantMessage>]>,
+        request_continuation: Option<&objectiveai::agent::openrouter::Continuation>,
         tool_names: &[String],
         tool_map: &HashMap<String, crate::agent::completions::tool::ResolvedTool>,
         tools_enabled: bool,
@@ -108,10 +109,14 @@ impl ChatCompletionCreateParams {
         use crate::agent::completions::ContinuationItem;
         use objectiveai::agent::completions::message::Message;
 
-        // --- Step 0: Build messages array (messages + continuation) ---
+        // --- Step 0: Build messages array (request_continuation + messages + continuation) ---
         let continuation = continuation.unwrap_or_default();
+        let rc_len = request_continuation.map_or(0, |rc| rc.messages.len());
         let mut all_messages =
-            Vec::with_capacity(messages.len() + continuation.len());
+            Vec::with_capacity(rc_len + messages.len() + continuation.len());
+        if let Some(rc) = request_continuation {
+            all_messages.extend_from_slice(&rc.messages);
+        }
         all_messages.extend_from_slice(messages);
         all_messages.extend(continuation.iter().map(|item| match item {
             ContinuationItem::State(assistant) => {
