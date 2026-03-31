@@ -250,10 +250,10 @@ func goTypeSingle(t string, schema Schema, selfTitle string, allTitles map[strin
 	case "object":
 		if ap, ok := schema["additionalProperties"]; ok {
 			if apMap, ok := ap.(map[string]any); ok {
-				return "map[string]" + goType(apMap, selfTitle, allTitles)
+				return "OrderedMap[string, " + goType(apMap, selfTitle, allTitles) + "]"
 			}
 			if ap == true {
-				return "map[string]JsonValue"
+				return "OrderedMap[string,JsonValue]"
 			}
 		}
 		if _, ok := schema["properties"]; !ok {
@@ -589,7 +589,7 @@ func resolveFieldTypeWithInline(propSchema Schema, selfTitle string, allTitles m
 						valSchema["description"] = desc
 					}
 					aux.WriteString(generateAnyOfStruct(valName, apAnyOf, selfTitle, valSchema, allTitles, false))
-					goT := "map[string]" + valName
+					goT := "OrderedMap[string, " + valName + "]"
 					if nullable {
 						return "*" + goT
 					}
@@ -778,11 +778,13 @@ func generateAnyOfStruct(typeName string, anyOf []any, selfTitle string, schema 
 			goT = strings.TrimPrefix(goT, "*")
 			auxiliary.WriteString(fmt.Sprintf("type %s %s\n\n", vStructName, goT))
 			auxiliary.WriteString(fmt.Sprintf("func (%s) SchemaVariantTitle() string { return %q }\n\n", vStructName, variantTitle))
-			// JsonValue type definitions need marshal/unmarshal forwarding
-			// (Go type definitions don't inherit methods from the underlying type)
+			// Go type definitions don't inherit methods from the underlying type,
+			// so we forward marshal/unmarshal for special types.
 			if goT == "JsonValue" {
 				auxiliary.WriteString(fmt.Sprintf("func (v %s) MarshalJSON() ([]byte, error) { return json.Marshal(JsonValue(v)) }\n", vStructName))
 				auxiliary.WriteString(fmt.Sprintf("func (v *%s) UnmarshalJSON(data []byte) error { return json.Unmarshal(data, (*JsonValue)(v)) }\n\n", vStructName))
+			} else if vt := orderedMapValueType(goT); vt != "" {
+				auxiliary.WriteString(generateOrderedMapMethods(vStructName, vt))
 			}
 			if singleVariant {
 				fieldType = vStructName
@@ -1143,6 +1145,42 @@ func generateStrictUnmarshal(typeName string, schema Schema, selfTitle string, a
 	return b.String()
 }
 
+// generateOrderedMapMethods generates a constructor and JSON marshal/unmarshal
+// forwarding for a named type defined as OrderedMap[string, V].
+// Go type definitions don't inherit methods, so we forward manually.
+func generateOrderedMapMethods(typeName string, valueType string) string {
+	var b strings.Builder
+	omType := fmt.Sprintf("OrderedMap[string, %s]", valueType)
+	pairType := fmt.Sprintf("orderedmap.Pair[string, %s]", valueType)
+
+	// Constructor
+	b.WriteString(fmt.Sprintf("func New%s(pairs ...%s) %s {\n", typeName, pairType, typeName))
+	b.WriteString(fmt.Sprintf("\treturn %s(NewOrderedMap[string, %s](pairs...))\n", typeName, valueType))
+	b.WriteString("}\n\n")
+
+	// MarshalJSON
+	b.WriteString(fmt.Sprintf("func (v %s) MarshalJSON() ([]byte, error) {\n", typeName))
+	b.WriteString(fmt.Sprintf("\treturn %s(v).MarshalJSON()\n", omType))
+	b.WriteString("}\n\n")
+
+	// UnmarshalJSON
+	b.WriteString(fmt.Sprintf("func (v *%s) UnmarshalJSON(data []byte) error {\n", typeName))
+	b.WriteString(fmt.Sprintf("\treturn (*%s)(v).UnmarshalJSON(data)\n", omType))
+	b.WriteString("}\n\n")
+
+	return b.String()
+}
+
+// orderedMapValueType extracts the value type V from "OrderedMap[string,V]".
+// Returns "" if the type is not an ordered map.
+func orderedMapValueType(goT string) string {
+	const prefix = "OrderedMap[string,"
+	if strings.HasPrefix(goT, prefix) && strings.HasSuffix(goT, "]") {
+		return goT[len(prefix) : len(goT)-1]
+	}
+	return ""
+}
+
 // generateEmbedMarshal generates MarshalJSON for structs that embed a type
 // with its own MarshalJSON. Merges the embedded type's JSON with local fields.
 func generateEmbedMarshal(typeName string, embedType string, properties map[string]any, selfTitle string, allTitles map[string]bool) string {
@@ -1256,6 +1294,9 @@ func generateTypeCode(title string, schema Schema, allTitles map[string]bool) st
 	b.WriteString(goDocComment(desc, ""))
 	b.WriteString(fmt.Sprintf("type %s %s\n\n", typeName, goT))
 	b.WriteString(fmt.Sprintf("func (%s) SchemaTitle() string { return %q }\n", typeName, title))
+	if vt := orderedMapValueType(goT); vt != "" {
+		b.WriteString(generateOrderedMapMethods(typeName, vt))
+	}
 	return b.String()
 }
 
@@ -1276,11 +1317,11 @@ func determinePrimitiveGoType(schema Schema, title string, allTitles map[string]
 	case "object":
 		if ap, ok := schema["additionalProperties"]; ok {
 			if apMap, ok := ap.(map[string]any); ok {
-				return "map[string]" + goType(apMap, title, allTitles)
+				return "OrderedMap[string, " + goType(apMap, title, allTitles) + "]"
 			}
-			return "map[string]JsonValue"
+			return "OrderedMap[string,JsonValue]"
 		}
-		return "map[string]JsonValue"
+		return "OrderedMap[string,JsonValue]"
 	case "string":
 		return "string"
 	case "integer":
@@ -1385,11 +1426,12 @@ func main() {
 		needsFmt := strings.Contains(fullCode, "fmt.Errorf")
 		needsTime := strings.Contains(fullCode, "time.Time")
 		needsUUID := strings.Contains(fullCode, "uuid.UUID")
+		needsOrderedMap := strings.Contains(fullCode, "orderedmap.")
 
 		var file strings.Builder
 		file.WriteString(generatedHeader)
 		file.WriteString("package objectiveai\n")
-		if needsJSON || needsFmt || needsTime || needsUUID {
+		if needsJSON || needsFmt || needsTime || needsUUID || needsOrderedMap {
 			file.WriteString("\nimport (\n")
 			if needsJSON {
 				file.WriteString("\t\"encoding/json\"\n")
@@ -1402,6 +1444,9 @@ func main() {
 			}
 			if needsUUID {
 				file.WriteString("\t\"github.com/google/uuid\"\n")
+			}
+			if needsOrderedMap {
+				file.WriteString("\torderedmap \"github.com/wk8/go-ordered-map/v2\"\n")
 			}
 			file.WriteString(")\n")
 		}

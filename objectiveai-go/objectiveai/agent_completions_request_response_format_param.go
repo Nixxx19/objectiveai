@@ -5,11 +5,24 @@ package objectiveai
 import (
 	"encoding/json"
 	"fmt"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
-type AgentCompletionsRequestResponseFormatParamPerAgent map[string]AgentCompletionsRequestResponseFormat
+type AgentCompletionsRequestResponseFormatParamPerAgent OrderedMap[string, AgentCompletionsRequestResponseFormat]
 
 func (AgentCompletionsRequestResponseFormatParamPerAgent) SchemaVariantTitle() string { return "PerAgent" }
+
+func NewAgentCompletionsRequestResponseFormatParamPerAgent(pairs ...orderedmap.Pair[string,  AgentCompletionsRequestResponseFormat]) AgentCompletionsRequestResponseFormatParamPerAgent {
+	return AgentCompletionsRequestResponseFormatParamPerAgent(NewOrderedMap[string,  AgentCompletionsRequestResponseFormat](pairs...))
+}
+
+func (v AgentCompletionsRequestResponseFormatParamPerAgent) MarshalJSON() ([]byte, error) {
+	return OrderedMap[string,  AgentCompletionsRequestResponseFormat](v).MarshalJSON()
+}
+
+func (v *AgentCompletionsRequestResponseFormatParamPerAgent) UnmarshalJSON(data []byte) error {
+	return (*OrderedMap[string,  AgentCompletionsRequestResponseFormat])(v).UnmarshalJSON(data)
+}
 
 // Either a single response format or a per-agent map.
 type AgentCompletionsRequestResponseFormatParam struct {

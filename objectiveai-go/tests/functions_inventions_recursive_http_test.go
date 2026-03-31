@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"encoding/json"
+	"context"
 	"path/filepath"
 	"testing"
 
@@ -12,124 +12,140 @@ func TestFunctionsInventionsRecursiveHTTP(t *testing.T) {
 	c := getTestClient(t)
 	snapshotsDir := filepath.Join(assetsDir(), "functions", "inventions", "recursive_client_tests")
 
-	mockInventionAgent := map[string]any{"upstream": "mock", "output_mode": "instruction", "invention": true}
+	type tc struct {
+		snapshot string
+		params   FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams
+	}
 
-	// json.RawMessage preserves key order to match JS/Python request bodies.
-	cases := []httpTestCase{
+	sentimentSchema := &FunctionsExpressionObjectInputSchema{
+		Type: FunctionsExpressionObjectInputSchemaType{Object: "object"},
+		Properties: schemaPairs(
+			SP{Key: "sentiment", Value: FunctionsExpressionInputSchema{String: &FunctionsExpressionStringInputSchema{Type: FunctionsExpressionStringInputSchemaType{String: "string"}, Enum: &[]string{"positive", "negative"}}}},
+		),
+		Required: &[]string{"sentiment"},
+	}
+
+	cases := []tc{
 		{
-			Snapshot: "valid_schema_valid_tasks_scalar_leaf",
-			Body: map[string]any{
-				"remote": "mock",
-				"state": json.RawMessage(`{
-					"type": "alpha.scalar.leaf.function",
-					"depth": 0, "min_branch_width": 1, "max_branch_width": 1,
-					"min_leaf_width": 2, "max_leaf_width": 4,
-					"name": "inv-good-sl",
-					"spec": "Test function spec for mock recursive invention.",
-					"input_schema": {
-						"type": "object",
-						"properties": {
-							"sentiment": {"type": "string", "enum": ["positive", "negative"]}
+			snapshot: "valid_schema_valid_tasks_scalar_leaf",
+			params: FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams{
+				Remote: Remote{Mock: ptr(RemoteMock("mock"))},
+				Agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional{AgentBase: &AgentInlineAgentBaseWithFallbacks{AgentInlineAgentBase: AgentInlineAgentBase{Mock: &AgentMockAgentBase{
+					Upstream:   AgentMockUpstream{Mock: "mock"},
+					OutputMode: AgentMockOutputMode{Instruction: ptr(AgentMockOutputModeInstruction("instruction"))},
+					Invention:  ptr(true),
+				}}}},
+				State: FunctionsInventionsStateParamsStateOrRemoteCommitOptional{ParamsState: &FunctionsInventionsStateParamsState{
+					AlphaScalarLeaf: &FunctionsInventionsStateParamsStateAlphaScalarLeaf{
+						FunctionsInventionsStateAlphaScalarLeafState: FunctionsInventionsStateAlphaScalarLeafState{
+							Depth: 0, MinBranchWidth: 1, MaxBranchWidth: 1, MinLeafWidth: 2, MaxLeafWidth: 4,
+							Name: "inv-good-sl", Spec: "Test function spec for mock recursive invention.",
+							InputSchema: sentimentSchema,
+							EssayTasks:  ptr("Good tasks incoming."),
+							Tasks: &[]FunctionsAlphaScalarLeafTaskExpression{
+								{FunctionsAlphaScalarVectorCompletionTaskExpression: FunctionsAlphaScalarVectorCompletionTaskExpression{
+									Messages:  FunctionsExpressionExpression{Starlark: &FunctionsExpressionExpressionStarlark{Starlark: `[{"role": "user", "content": [{"type": "text", "text": str(input)}]}]`}},
+									Responses: []AgentCompletionsMessageRichContent{{Parts: ptr(AgentCompletionsMessageRichContentParts{{Text: &AgentCompletionsMessageRichContentPartText{Type: "text", Text: "yes"}}})}, {Parts: ptr(AgentCompletionsMessageRichContentParts{{Text: &AgentCompletionsMessageRichContentPartText{Type: "text", Text: "no"}}})}},
+								}, Type: "vector.completion"},
+								{FunctionsAlphaScalarVectorCompletionTaskExpression: FunctionsAlphaScalarVectorCompletionTaskExpression{
+									Messages:  FunctionsExpressionExpression{Starlark: &FunctionsExpressionExpressionStarlark{Starlark: `[{"role": "user", "content": [{"type": "text", "text": str(input)}]}]`}},
+									Responses: []AgentCompletionsMessageRichContent{{Parts: ptr(AgentCompletionsMessageRichContentParts{{Text: &AgentCompletionsMessageRichContentPartText{Type: "text", Text: "yes"}}})}, {Parts: ptr(AgentCompletionsMessageRichContentParts{{Text: &AgentCompletionsMessageRichContentPartText{Type: "text", Text: "no"}}})}},
+								}, Type: "vector.completion"},
+							},
+							TasksLength: ptr[uint64](2),
+							Description: ptr("A valid scalar function."),
 						},
-						"required": ["sentiment"]
+						Type: "alpha.scalar.leaf.function",
 					},
-					"essay_tasks": "Good tasks incoming.",
-					"tasks": [
-						{
-							"type": "vector.completion",
-							"messages": {"$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"},
-							"responses": [[{"type": "text", "text": "yes"}], [{"type": "text", "text": "no"}]]
-						},
-						{
-							"type": "vector.completion",
-							"messages": {"$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"},
-							"responses": [[{"type": "text", "text": "yes"}], [{"type": "text", "text": "no"}]]
-						}
-					],
-					"tasks_length": 2,
-					"description": "A valid scalar function."
-				}`),
-				"agent":            mockInventionAgent,
-				"seed":             5300,
-				"stream":           true,
-				"max_step_retries": 1,
+				}},
+				Seed:           ptr[int64](5300),
+				MaxStepRetries: ptr[uint32](1),
 			},
 		},
 		{
-			Snapshot: "valid_vector_schema_valid_tasks",
-			Body: map[string]any{
-				"remote": "mock",
-				"state": json.RawMessage(`{
-					"type": "alpha.vector.leaf.function",
-					"depth": 0, "min_branch_width": 1, "max_branch_width": 1,
-					"min_leaf_width": 2, "max_leaf_width": 4,
-					"name": "inv-good-vl",
-					"spec": "Test function spec for mock recursive invention.",
-					"essay": "Ranking things.",
-					"input_schema": {
-						"items": {"type": "string", "enum": ["apple", "banana"]}
-					},
-					"tasks": [
-						{
-							"type": "vector.completion",
-							"messages": {"$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"rank these\"}]}]"},
-							"responses": {"$starlark": "[[{\"type\": \"text\", \"text\": str(item)}] for item in input['items']]"}
+			snapshot: "valid_vector_schema_valid_tasks",
+			params: FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams{
+				Remote: Remote{Mock: ptr(RemoteMock("mock"))},
+				Agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional{AgentBase: &AgentInlineAgentBaseWithFallbacks{AgentInlineAgentBase: AgentInlineAgentBase{Mock: &AgentMockAgentBase{
+					Upstream:   AgentMockUpstream{Mock: "mock"},
+					OutputMode: AgentMockOutputMode{Instruction: ptr(AgentMockOutputModeInstruction("instruction"))},
+					Invention:  ptr(true),
+				}}}},
+				State: FunctionsInventionsStateParamsStateOrRemoteCommitOptional{ParamsState: &FunctionsInventionsStateParamsState{
+					AlphaVectorLeaf: &FunctionsInventionsStateParamsStateAlphaVectorLeaf{
+						FunctionsInventionsStateAlphaVectorLeafState: FunctionsInventionsStateAlphaVectorLeafState{
+							Depth: 0, MinBranchWidth: 1, MaxBranchWidth: 1, MinLeafWidth: 2, MaxLeafWidth: 4,
+							Name: "inv-good-vl", Spec: "Test function spec for mock recursive invention.",
+							Essay: ptr("Ranking things."),
+							InputSchema: &FunctionsAlphaVectorExpressionVectorFunctionInputSchema{
+								Items: FunctionsExpressionInputSchema{String: &FunctionsExpressionStringInputSchema{Type: FunctionsExpressionStringInputSchemaType{String: "string"}, Enum: &[]string{"apple", "banana"}}},
+							},
+							Tasks: &[]FunctionsAlphaVectorLeafTaskExpression{
+								{FunctionsAlphaVectorVectorCompletionTaskExpression: FunctionsAlphaVectorVectorCompletionTaskExpression{
+									Messages:  FunctionsExpressionExpression{Starlark: &FunctionsExpressionExpressionStarlark{Starlark: `[{"role": "user", "content": [{"type": "text", "text": "rank these"}]}]`}},
+									Responses: FunctionsExpressionExpression{Starlark: &FunctionsExpressionExpressionStarlark{Starlark: `[[{"type": "text", "text": str(item)}] for item in input['items']]`}},
+								}, Type: "vector.completion"},
+								{FunctionsAlphaVectorVectorCompletionTaskExpression: FunctionsAlphaVectorVectorCompletionTaskExpression{
+									Messages:  FunctionsExpressionExpression{Starlark: &FunctionsExpressionExpressionStarlark{Starlark: `[{"role": "user", "content": [{"type": "text", "text": "rank these"}]}]`}},
+									Responses: FunctionsExpressionExpression{Starlark: &FunctionsExpressionExpressionStarlark{Starlark: `[[{"type": "text", "text": str(item)}] for item in input['items']]`}},
+								}, Type: "vector.completion"},
+							},
+							TasksLength: ptr[uint64](2),
 						},
-						{
-							"type": "vector.completion",
-							"messages": {"$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"rank these\"}]}]"},
-							"responses": {"$starlark": "[[{\"type\": \"text\", \"text\": str(item)}] for item in input['items']]"}
-						}
-					],
-					"tasks_length": 2
-				}`),
-				"agent":            mockInventionAgent,
-				"seed":             5400,
-				"stream":           true,
-				"max_step_retries": 1,
+						Type: "alpha.vector.leaf.function",
+					},
+				}},
+				Seed:           ptr[int64](5400),
+				MaxStepRetries: ptr[uint32](1),
 			},
 		},
 		{
-			Snapshot: "valid_schema_no_tasks_with_essay",
-			Body: map[string]any{
-				"remote": "mock",
-				"state": json.RawMessage(`{
-					"type": "alpha.scalar.leaf.function",
-					"depth": 0, "min_branch_width": 1, "max_branch_width": 1,
-					"min_leaf_width": 2, "max_leaf_width": 4,
-					"name": "inv-schema-only",
-					"spec": "Test function spec for mock recursive invention.",
-					"essay": "A great essay about things.",
-					"input_schema": {
-						"type": "object",
-						"properties": {
-							"sentiment": {"type": "string", "enum": ["positive", "negative"]}
+			snapshot: "valid_schema_no_tasks_with_essay",
+			params: FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams{
+				Remote: Remote{Mock: ptr(RemoteMock("mock"))},
+				Agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional{AgentBase: &AgentInlineAgentBaseWithFallbacks{AgentInlineAgentBase: AgentInlineAgentBase{Mock: &AgentMockAgentBase{
+					Upstream:   AgentMockUpstream{Mock: "mock"},
+					OutputMode: AgentMockOutputMode{Instruction: ptr(AgentMockOutputModeInstruction("instruction"))},
+					Invention:  ptr(true),
+				}}}},
+				State: FunctionsInventionsStateParamsStateOrRemoteCommitOptional{ParamsState: &FunctionsInventionsStateParamsState{
+					AlphaScalarLeaf: &FunctionsInventionsStateParamsStateAlphaScalarLeaf{
+						FunctionsInventionsStateAlphaScalarLeafState: FunctionsInventionsStateAlphaScalarLeafState{
+							Depth: 0, MinBranchWidth: 1, MaxBranchWidth: 1, MinLeafWidth: 2, MaxLeafWidth: 4,
+							Name: "inv-schema-only", Spec: "Test function spec for mock recursive invention.",
+							Essay:       ptr("A great essay about things."),
+							InputSchema: sentimentSchema,
 						},
-						"required": ["sentiment"]
-					}
-				}`),
-				"agent":            mockInventionAgent,
-				"seed":             5900,
-				"stream":           true,
-				"max_step_retries": 1,
+						Type: "alpha.scalar.leaf.function",
+					},
+				}},
+				Seed:           ptr[int64](5900),
+				MaxStepRetries: ptr[uint32](1),
 			},
 		},
 	}
 
 	for _, tc := range cases {
-		t.Run(tc.Snapshot+"/unary", func(t *testing.T) {
-			expected := loadSnapshot(t, snapshotsDir, tc.Snapshot)
-			result := runUnary[FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive](t, c, "/functions/inventions/recursive", tc.Body)
+		t.Run(tc.snapshot+"/unary", func(t *testing.T) {
+			expected := loadSnapshot(t, snapshotsDir, tc.snapshot)
+			result, err := FunctionsInventionsRecursiveCreateFunctionInventionRecursiveUnary(context.Background(), c, tc.params)
+			if err != nil {
+				t.Fatalf("unary: %v", err)
+			}
 			normalized, err := NormalizeFunctionInventionRecursiveForTests(*result)
 			if err != nil {
 				t.Fatalf("normalize: %v", err)
 			}
-			assertRoundedMapEqual(t, tc.Snapshot, toMapJSON(t, normalized), expected)
+			assertRoundedMapEqual(t, tc.snapshot, toMapJSON(t, normalized), expected)
 		})
 
-		t.Run(tc.Snapshot+"/streaming", func(t *testing.T) {
-			expected := loadSnapshot(t, snapshotsDir, tc.Snapshot)
-			result := runStreaming(t, c, "/functions/inventions/recursive", tc.Body,
+		t.Run(tc.snapshot+"/streaming", func(t *testing.T) {
+			expected := loadSnapshot(t, snapshotsDir, tc.snapshot)
+			stream, err := FunctionsInventionsRecursiveCreateFunctionInventionRecursiveStreaming(context.Background(), c, tc.params)
+			if err != nil {
+				t.Fatalf("streaming: %v", err)
+			}
+			result := accumulateStream(t, stream,
 				func(acc, chunk *FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk) {
 					acc.Push(chunk)
 				},
@@ -139,7 +155,7 @@ func TestFunctionsInventionsRecursiveHTTP(t *testing.T) {
 			if err != nil {
 				t.Fatalf("normalize: %v", err)
 			}
-			assertRoundedMapEqual(t, tc.Snapshot, toMapJSON(t, normalized), expected)
+			assertRoundedMapEqual(t, tc.snapshot, toMapJSON(t, normalized), expected)
 		})
 	}
 }

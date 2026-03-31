@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -101,51 +100,14 @@ func assertRoundedMapEqual(t *testing.T, label string, got, want map[string]any)
 	}
 }
 
-// httpTestCase defines a single HTTP integration test case.
-type httpTestCase struct {
-	Snapshot string
-	Body     map[string]any
-	Endpoint string // optional per-case override
-}
-
-func withStream(body map[string]any, stream bool) map[string]any {
-	merged := make(map[string]any, len(body)+1)
-	for k, v := range body {
-		merged[k] = v
-	}
-	merged["stream"] = stream
-	return merged
-}
-
-// runUnary posts to endpoint with stream=false and deserializes directly into T.
-// Matches Python/JS: one deserialization from the API response, no extra round-trips.
-func runUnary[T any](t *testing.T, c *Client, endpoint string, body map[string]any) *T {
-	t.Helper()
-	result, err := PostUnary[T](context.Background(), c, endpoint, withStream(body, false))
-	if err != nil {
-		t.Fatalf("unary POST %s: %v", endpoint, err)
-	}
-	return result
-}
-
-// runStreaming posts to endpoint with stream=true, accumulates chunks via push,
-// and converts to unary. Returns the typed unary result directly.
-// Matches Python/JS: chunks are deserialized into typed objects, pushed to
-// accumulate, then converted to unary — no extra JSON round-trips.
-func runStreaming[Chunk any, Unary any](
+// accumulateStream reads all chunks from a stream, accumulating via push.
+func accumulateStream[Chunk any, Unary any](
 	t *testing.T,
-	c *Client,
-	endpoint string,
-	body map[string]any,
+	stream *Stream[Chunk],
 	push func(*Chunk, *Chunk),
 	chunkToUnary func(Chunk) (*Unary, error),
 ) *Unary {
 	t.Helper()
-
-	stream, err := PostStreaming[Chunk](context.Background(), c, endpoint, withStream(body, true))
-	if err != nil {
-		t.Fatalf("streaming POST %s: %v", endpoint, err)
-	}
 	defer stream.Close()
 
 	var acc *Chunk

@@ -5,6 +5,7 @@ package objectiveai
 import (
 	"encoding/json"
 	"fmt"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 // A value that can be either a literal or an expression.
@@ -81,9 +82,21 @@ func (v FunctionsExpressionInputValueExpressionObjectValue) Validate() error {
 	}
 	return variantValidator.Struct(v)
 }
-type FunctionsExpressionInputValueExpressionObject map[string]FunctionsExpressionInputValueExpressionObjectValue
+type FunctionsExpressionInputValueExpressionObject OrderedMap[string, FunctionsExpressionInputValueExpressionObjectValue]
 
 func (FunctionsExpressionInputValueExpressionObject) SchemaVariantTitle() string { return "Object" }
+
+func NewFunctionsExpressionInputValueExpressionObject(pairs ...orderedmap.Pair[string,  FunctionsExpressionInputValueExpressionObjectValue]) FunctionsExpressionInputValueExpressionObject {
+	return FunctionsExpressionInputValueExpressionObject(NewOrderedMap[string,  FunctionsExpressionInputValueExpressionObjectValue](pairs...))
+}
+
+func (v FunctionsExpressionInputValueExpressionObject) MarshalJSON() ([]byte, error) {
+	return OrderedMap[string,  FunctionsExpressionInputValueExpressionObjectValue](v).MarshalJSON()
+}
+
+func (v *FunctionsExpressionInputValueExpressionObject) UnmarshalJSON(data []byte) error {
+	return (*OrderedMap[string,  FunctionsExpressionInputValueExpressionObjectValue])(v).UnmarshalJSON(data)
+}
 
 // A value that can be either a literal or an expression.
 //

@@ -8,7 +8,7 @@ import (
 )
 
 type AgentClaudeAgentSdkContinuation struct {
-	MCPSessions map[string]string `json:"mcp_sessions"`
+	MCPSessions OrderedMap[string, string] `json:"mcp_sessions"`
 	SessionID string `json:"session_id"`
 	Upstream AgentClaudeAgentSdkUpstream `json:"upstream"`
 }

@@ -158,6 +158,16 @@ func typeExprString(expr ast.Expr) string {
 		return "map[" + typeExprString(e.Key) + "]" + typeExprString(e.Value)
 	case *ast.SelectorExpr:
 		return typeExprString(e.X) + "." + e.Sel.Name
+	case *ast.IndexExpr:
+		// Generic with one type arg: Foo[T]
+		return typeExprString(e.X) + "[" + typeExprString(e.Index) + "]"
+	case *ast.IndexListExpr:
+		// Generic with multiple type args: Foo[K, V]
+		parts := make([]string, len(e.Indices))
+		for i, idx := range e.Indices {
+			parts[i] = typeExprString(idx)
+		}
+		return typeExprString(e.X) + "[" + strings.Join(parts, ", ") + "]"
 	case *ast.InterfaceType:
 		return "any"
 	default:
@@ -382,8 +392,8 @@ func buildFieldTypeSchema(
 		return map[string]any{"type": "array", "items": items}
 	}
 
-	if strings.HasPrefix(typeName, "map[string]") {
-		valType := strings.TrimPrefix(typeName, "map[string]")
+	if strings.HasPrefix(typeName, "OrderedMap[string, ") {
+		valType := typeName[len("OrderedMap[string, ") : len(typeName)-1]
 		if valType == "JsonValue" {
 			return map[string]any{"type": "object", "additionalProperties": true}
 		}

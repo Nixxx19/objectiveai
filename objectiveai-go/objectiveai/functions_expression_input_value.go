@@ -5,11 +5,24 @@ package objectiveai
 import (
 	"encoding/json"
 	"fmt"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
-type FunctionsExpressionInputValueObject map[string]FunctionsExpressionInputValue
+type FunctionsExpressionInputValueObject OrderedMap[string, FunctionsExpressionInputValue]
 
 func (FunctionsExpressionInputValueObject) SchemaVariantTitle() string { return "Object" }
+
+func NewFunctionsExpressionInputValueObject(pairs ...orderedmap.Pair[string,  FunctionsExpressionInputValue]) FunctionsExpressionInputValueObject {
+	return FunctionsExpressionInputValueObject(NewOrderedMap[string,  FunctionsExpressionInputValue](pairs...))
+}
+
+func (v FunctionsExpressionInputValueObject) MarshalJSON() ([]byte, error) {
+	return OrderedMap[string,  FunctionsExpressionInputValue](v).MarshalJSON()
+}
+
+func (v *FunctionsExpressionInputValueObject) UnmarshalJSON(data []byte) error {
+	return (*OrderedMap[string,  FunctionsExpressionInputValue])(v).UnmarshalJSON(data)
+}
 
 type FunctionsExpressionInputValueArray []FunctionsExpressionInputValue
 

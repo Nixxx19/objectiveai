@@ -8,7 +8,7 @@ type ConfigApiHeadersConfig struct {
 	XCommitAuthorEmail *string `json:"x_commit_author_email,omitempty"`
 	XCommitAuthorName *string `json:"x_commit_author_name,omitempty"`
 	XGithubAuthorization *string `json:"x_github_authorization,omitempty"`
-	XMCPAuthorization *map[string]string `json:"x_mcp_authorization,omitempty"`
+	XMCPAuthorization *OrderedMap[string, string] `json:"x_mcp_authorization,omitempty"`
 	XObjectiveaiAuthorization *string `json:"x_objectiveai_authorization,omitempty"`
 	XOpenrouterAuthorization *string `json:"x_openrouter_authorization,omitempty"`
 	XTitle *string `json:"x_title,omitempty"`

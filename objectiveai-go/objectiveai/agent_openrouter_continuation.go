@@ -8,7 +8,7 @@ import (
 )
 
 type AgentOpenrouterContinuation struct {
-	MCPSessions map[string]string `json:"mcp_sessions"`
+	MCPSessions OrderedMap[string, string] `json:"mcp_sessions"`
 	Messages []AgentCompletionsMessageMessage `json:"messages"`
 	Upstream AgentOpenrouterUpstream `json:"upstream"`
 }

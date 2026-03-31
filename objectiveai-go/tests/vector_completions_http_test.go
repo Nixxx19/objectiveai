@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
 	"path/filepath"
 	"testing"
@@ -13,73 +13,123 @@ func TestVectorCompletionsHTTP(t *testing.T) {
 	c := getTestClient(t)
 	snapshotsDir := filepath.Join(assetsDir(), "vector", "completions", "client_tests")
 
-	responses25 := make([]any, 25)
+	responses25 := make([]AgentCompletionsMessageRichContent, 25)
 	for i := range responses25 {
-		responses25[i] = fmt.Sprintf("Response %d", i)
+		responses25[i] = AgentCompletionsMessageRichContent{Text: ptr(AgentCompletionsMessageRichContentText(fmt.Sprintf("Response %d", i)))}
 	}
 
-	// json.RawMessage preserves key order to match JS/Python request bodies.
-	cases := []httpTestCase{
+	type tc struct {
+		snapshot string
+		params   VectorCompletionsRequestVectorCompletionCreateParams
+	}
+
+	cases := []tc{
 		{
-			Snapshot: "single_agent_2_responses_instruction_seed_42",
-			Body: map[string]any{
-				"messages":  json.RawMessage(`[{"role": "user", "content": "Which is better?"}]`),
-				"swarm":     json.RawMessage(`{"agents": [{"upstream": "mock", "output_mode": "instruction"}]}`),
-				"responses": []any{"Response A", "Response B"},
-				"seed":      42,
+			snapshot: "single_agent_2_responses_instruction_seed_42",
+			params: VectorCompletionsRequestVectorCompletionCreateParams{
+				Messages: []AgentCompletionsMessageMessage{
+					{User: &AgentCompletionsMessageMessageUser{
+						AgentCompletionsMessageUserMessage: AgentCompletionsMessageUserMessage{Content: AgentCompletionsMessageRichContent{Text: ptr(AgentCompletionsMessageRichContentText("Which is better?"))}},
+						Role: "user",
+					}},
+				},
+				Swarm: SwarmInlineSwarmBaseOrRemoteCommitOptional{SwarmBase: &SwarmInlineSwarmBase{Agents: []AgentInlineAgentBaseWithFallbacksOrRemoteWithCount{
+					{AgentInlineAgentBaseWithFallbacksOrRemote: AgentInlineAgentBaseWithFallbacksOrRemote{AgentBase: &AgentInlineAgentBaseWithFallbacks{AgentInlineAgentBase: AgentInlineAgentBase{Mock: &AgentMockAgentBase{
+						Upstream:   AgentMockUpstream{Mock: "mock"},
+						OutputMode: AgentMockOutputMode{Instruction: ptr(AgentMockOutputModeInstruction("instruction"))},
+					}}}}, Count: 1},
+				}}},
+				Responses: []AgentCompletionsMessageRichContent{
+					{Text: ptr(AgentCompletionsMessageRichContentText("Response A"))},
+					{Text: ptr(AgentCompletionsMessageRichContentText("Response B"))},
+				},
+				Seed: ptr[int64](42),
 			},
 		},
 		{
-			Snapshot: "many_responses_deep_prefix_tree_seed_42",
-			Body: map[string]any{
-				"messages":  json.RawMessage(`[{"role": "user", "content": "Pick the best"}]`),
-				"swarm":     json.RawMessage(`{"agents": [{"upstream": "mock", "output_mode": "instruction"}]}`),
-				"responses": responses25,
-				"seed":      42,
+			snapshot: "many_responses_deep_prefix_tree_seed_42",
+			params: VectorCompletionsRequestVectorCompletionCreateParams{
+				Messages: []AgentCompletionsMessageMessage{
+					{User: &AgentCompletionsMessageMessageUser{
+						AgentCompletionsMessageUserMessage: AgentCompletionsMessageUserMessage{Content: AgentCompletionsMessageRichContent{Text: ptr(AgentCompletionsMessageRichContentText("Pick the best"))}},
+						Role: "user",
+					}},
+				},
+				Swarm: SwarmInlineSwarmBaseOrRemoteCommitOptional{SwarmBase: &SwarmInlineSwarmBase{Agents: []AgentInlineAgentBaseWithFallbacksOrRemoteWithCount{
+					{AgentInlineAgentBaseWithFallbacksOrRemote: AgentInlineAgentBaseWithFallbacksOrRemote{AgentBase: &AgentInlineAgentBaseWithFallbacks{AgentInlineAgentBase: AgentInlineAgentBase{Mock: &AgentMockAgentBase{
+						Upstream:   AgentMockUpstream{Mock: "mock"},
+						OutputMode: AgentMockOutputMode{Instruction: ptr(AgentMockOutputModeInstruction("instruction"))},
+					}}}}, Count: 1},
+				}}},
+				Responses: responses25,
+				Seed:      ptr[int64](42),
 			},
 		},
 		{
-			Snapshot: "mixed_output_modes_seed_88",
-			Body: map[string]any{
-				"messages": json.RawMessage(`[{"role": "user", "content": "Compare these vacation destinations"}]`),
-				"swarm": json.RawMessage(`{
-					"agents": [
-						{"upstream": "mock", "output_mode": "instruction"},
-						{"upstream": "mock", "output_mode": "json_schema"},
-						{"upstream": "mock", "output_mode": "tool_call"}
-					],
-					"weights": [0.4, 0.3, 0.3]
-				}`),
-				"responses": []any{"Kyoto, Japan", "Reykjavik, Iceland", "Patagonia, Argentina"},
-				"seed":      88,
+			snapshot: "mixed_output_modes_seed_88",
+			params: VectorCompletionsRequestVectorCompletionCreateParams{
+				Messages: []AgentCompletionsMessageMessage{
+					{User: &AgentCompletionsMessageMessageUser{
+						AgentCompletionsMessageUserMessage: AgentCompletionsMessageUserMessage{Content: AgentCompletionsMessageRichContent{Text: ptr(AgentCompletionsMessageRichContentText("Compare these vacation destinations"))}},
+						Role: "user",
+					}},
+				},
+				Swarm: SwarmInlineSwarmBaseOrRemoteCommitOptional{SwarmBase: &SwarmInlineSwarmBase{
+					Agents: []AgentInlineAgentBaseWithFallbacksOrRemoteWithCount{
+						{AgentInlineAgentBaseWithFallbacksOrRemote: AgentInlineAgentBaseWithFallbacksOrRemote{AgentBase: &AgentInlineAgentBaseWithFallbacks{AgentInlineAgentBase: AgentInlineAgentBase{Mock: &AgentMockAgentBase{
+							Upstream:   AgentMockUpstream{Mock: "mock"},
+							OutputMode: AgentMockOutputMode{Instruction: ptr(AgentMockOutputModeInstruction("instruction"))},
+						}}}}, Count: 1},
+						{AgentInlineAgentBaseWithFallbacksOrRemote: AgentInlineAgentBaseWithFallbacksOrRemote{AgentBase: &AgentInlineAgentBaseWithFallbacks{AgentInlineAgentBase: AgentInlineAgentBase{Mock: &AgentMockAgentBase{
+							Upstream:   AgentMockUpstream{Mock: "mock"},
+							OutputMode: AgentMockOutputMode{JsonSchema: ptr(AgentMockOutputModeJsonSchema("json_schema"))},
+						}}}}, Count: 1},
+						{AgentInlineAgentBaseWithFallbacksOrRemote: AgentInlineAgentBaseWithFallbacksOrRemote{AgentBase: &AgentInlineAgentBaseWithFallbacks{AgentInlineAgentBase: AgentInlineAgentBase{Mock: &AgentMockAgentBase{
+							Upstream:   AgentMockUpstream{Mock: "mock"},
+							OutputMode: AgentMockOutputMode{ToolCall: ptr(AgentMockOutputModeToolCall("tool_call"))},
+						}}}}, Count: 1},
+					},
+					Weights: &Weights{Weights: ptr(WeightsWeights([]float64{0.4, 0.3, 0.3}))},
+				}},
+				Responses: []AgentCompletionsMessageRichContent{
+					{Text: ptr(AgentCompletionsMessageRichContentText("Kyoto, Japan"))},
+					{Text: ptr(AgentCompletionsMessageRichContentText("Reykjavik, Iceland"))},
+					{Text: ptr(AgentCompletionsMessageRichContentText("Patagonia, Argentina"))},
+				},
+				Seed: ptr[int64](88),
 			},
 		},
 	}
 
 	for _, tc := range cases {
-		t.Run(tc.Snapshot+"/unary", func(t *testing.T) {
-			expected := loadSnapshot(t, snapshotsDir, tc.Snapshot)
-			result := runUnary[VectorCompletionsResponseUnaryVectorCompletion](t, c, "/vector/completions", tc.Body)
+		t.Run(tc.snapshot+"/unary", func(t *testing.T) {
+			expected := loadSnapshot(t, snapshotsDir, tc.snapshot)
+			result, err := VectorCompletionsCreateVectorCompletionUnary(context.Background(), c, tc.params)
+			if err != nil {
+				t.Fatalf("unary: %v", err)
+			}
 			normalized, err := NormalizeVectorCompletionForTests(*result)
 			if err != nil {
 				t.Fatalf("normalize: %v", err)
 			}
-			assertRoundedMapEqual(t, tc.Snapshot, toMapJSON(t, normalized), expected)
+			assertRoundedMapEqual(t, tc.snapshot, toMapJSON(t, normalized), expected)
 		})
 
-		t.Run(tc.Snapshot+"/streaming", func(t *testing.T) {
-			expected := loadSnapshot(t, snapshotsDir, tc.Snapshot)
-			result := runStreaming(t, c, "/vector/completions", tc.Body,
-				func(acc, chunk *VectorCompletionsResponseStreamingVectorCompletionChunk) {
-					acc.Push(chunk)
-				},
+		t.Run(tc.snapshot+"/streaming", func(t *testing.T) {
+			expected := loadSnapshot(t, snapshotsDir, tc.snapshot)
+			stream, err := VectorCompletionsCreateVectorCompletionStreaming(context.Background(), c, tc.params)
+			if err != nil {
+				t.Fatalf("streaming: %v", err)
+			}
+			result := accumulateStream(t, stream,
+				func(acc, chunk *VectorCompletionsResponseStreamingVectorCompletionChunk) { acc.Push(chunk) },
 				VectorCompletionChunkToUnary,
 			)
 			normalized, err := NormalizeVectorCompletionForTests(*result)
 			if err != nil {
 				t.Fatalf("normalize: %v", err)
 			}
-			assertRoundedMapEqual(t, tc.Snapshot, toMapJSON(t, normalized), expected)
+			assertRoundedMapEqual(t, tc.snapshot, toMapJSON(t, normalized), expected)
 		})
 	}
 }

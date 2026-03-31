@@ -12,7 +12,7 @@ type FunctionsExpressionObjectInputSchema struct {
 	// Human-readable description of the object.
 	Description *string `json:"description,omitempty"`
 	// Schema for each property in the object.
-	Properties map[string]FunctionsExpressionInputSchema `json:"properties"`
+	Properties OrderedMap[string, FunctionsExpressionInputSchema] `json:"properties"`
 	// List of property names that must be present.
 	Required *[]string `json:"required,omitempty"`
 	Type FunctionsExpressionObjectInputSchemaType `json:"type"`

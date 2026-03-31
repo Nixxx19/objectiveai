@@ -8,7 +8,7 @@ import (
 )
 
 type FunctionsAlphaVectorExpressionVectorFunctionInputValue struct {
-	Context *map[string]FunctionsExpressionInputValue `json:"context,omitempty"`
+	Context *OrderedMap[string, FunctionsExpressionInputValue] `json:"context,omitempty"`
 	Items []FunctionsExpressionInputValue `json:"items"`
 }
 
