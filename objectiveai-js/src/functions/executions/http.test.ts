@@ -1,5 +1,6 @@
 import * as path from "path";
 import { httpTestSuite } from "../../httpTestUtil";
+import { functionsExecutionsCreateFunctionExecution } from "./http";
 import { functionsExecutionsResponseStreamingFunctionExecutionChunkMerged } from "./response/streaming/functionExecutionChunkMerged";
 import {
   wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkToUnary,
@@ -8,16 +9,9 @@ import {
 import type { FunctionsExecutionsResponseStreamingFunctionExecutionChunk } from "./response/streaming/functionExecutionChunk";
 import type { FunctionsExecutionsResponseUnaryFunctionExecution } from "./response/unary/functionExecution";
 
-function executionBody(name: string): { function: object; profile: object } {
-  return {
-    function: { remote: "mock", name },
-    profile: { remote: "mock", name },
-  };
-}
-
 httpTestSuite<FunctionsExecutionsResponseStreamingFunctionExecutionChunk, FunctionsExecutionsResponseUnaryFunctionExecution>({
   name: "functions executions http",
-  endpoint: "/functions/executions",
+  fn: functionsExecutionsCreateFunctionExecution,
   snapshotsDir: path.resolve(__dirname, "../../../../objectiveai-api/assets/functions/executions/client_tests"),
   merge: functionsExecutionsResponseStreamingFunctionExecutionChunkMerged,
   chunkToUnary: wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkToUnary,

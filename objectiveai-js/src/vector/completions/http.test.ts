@@ -1,5 +1,6 @@
 import * as path from "path";
 import { httpTestSuite } from "../../httpTestUtil";
+import { vectorCompletionsCreateVectorCompletion } from "./http";
 import { vectorCompletionsResponseStreamingVectorCompletionChunkMerged } from "./response/streaming/vectorCompletionChunkMerged";
 import {
   wasmVectorCompletionsResponseStreamingVectorCompletionChunkToUnary,
@@ -12,7 +13,7 @@ const mockAgent = { upstream: "mock", output_mode: "instruction" };
 
 httpTestSuite<VectorCompletionsResponseStreamingVectorCompletionChunk, VectorCompletionsResponseUnaryVectorCompletion>({
   name: "vector completions http",
-  endpoint: "/vector/completions",
+  fn: vectorCompletionsCreateVectorCompletion,
   snapshotsDir: path.resolve(__dirname, "../../../../objectiveai-api/assets/vector/completions/client_tests"),
   merge: vectorCompletionsResponseStreamingVectorCompletionChunkMerged,
   chunkToUnary: wasmVectorCompletionsResponseStreamingVectorCompletionChunkToUnary,

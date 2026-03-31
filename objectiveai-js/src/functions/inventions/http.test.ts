@@ -1,5 +1,6 @@
 import * as path from "path";
 import { httpTestSuite } from "../../httpTestUtil";
+import { functionsInventionsCreateFunctionInvention } from "./http";
 import { functionsInventionsResponseStreamingFunctionInventionChunkMerged } from "./response/streaming/functionInventionChunkMerged";
 import {
   wasmFunctionsInventionsResponseStreamingFunctionInventionChunkToUnary,
@@ -12,7 +13,7 @@ const mockInventionAgent = { upstream: "mock", output_mode: "instruction", inven
 
 httpTestSuite<FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseUnaryFunctionInvention>({
   name: "functions inventions http",
-  endpoint: "/functions/inventions",
+  fn: functionsInventionsCreateFunctionInvention,
   snapshotsDir: path.resolve(__dirname, "../../../../objectiveai-api/assets/functions/inventions/client_tests"),
   merge: functionsInventionsResponseStreamingFunctionInventionChunkMerged,
   chunkToUnary: wasmFunctionsInventionsResponseStreamingFunctionInventionChunkToUnary,

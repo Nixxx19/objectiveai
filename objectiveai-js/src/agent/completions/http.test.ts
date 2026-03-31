@@ -1,5 +1,6 @@
 import * as path from "path";
 import { httpTestSuite } from "../../httpTestUtil";
+import { agentCompletionsCreateAgentCompletion } from "./http";
 import { agentCompletionsResponseStreamingAgentCompletionChunkMerged } from "./response/streaming/agentCompletionChunkMerged";
 import {
   wasmAgentCompletionsResponseStreamingAgentCompletionChunkToUnary,
@@ -10,7 +11,7 @@ import type { AgentCompletionsResponseUnaryAgentCompletion } from "./response/un
 
 httpTestSuite<AgentCompletionsResponseStreamingAgentCompletionChunk, AgentCompletionsResponseUnaryAgentCompletion>({
   name: "agent completions http",
-  endpoint: "/agent/completions",
+  fn: agentCompletionsCreateAgentCompletion,
   snapshotsDir: path.resolve(__dirname, "../../../../objectiveai-api/assets/agent/completions/client_tests"),
   merge: agentCompletionsResponseStreamingAgentCompletionChunkMerged,
   chunkToUnary: wasmAgentCompletionsResponseStreamingAgentCompletionChunkToUnary,

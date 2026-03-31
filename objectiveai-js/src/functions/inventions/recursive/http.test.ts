@@ -1,5 +1,6 @@
 import * as path from "path";
 import { httpTestSuite } from "../../../httpTestUtil";
+import { functionsInventionsRecursiveCreateFunctionInventionRecursive } from "./http";
 import { functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged } from "./response/streaming/functionInventionRecursiveChunkMerged";
 import {
   wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkToUnary,
@@ -12,7 +13,7 @@ const mockInventionAgent = { upstream: "mock", output_mode: "instruction", inven
 
 httpTestSuite<FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive>({
   name: "functions inventions recursive http",
-  endpoint: "/functions/inventions/recursive",
+  fn: functionsInventionsRecursiveCreateFunctionInventionRecursive,
   snapshotsDir: path.resolve(__dirname, "../../../../../objectiveai-api/assets/functions/inventions/recursive_client_tests"),
   merge: functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged,
   chunkToUnary: wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkToUnary,
