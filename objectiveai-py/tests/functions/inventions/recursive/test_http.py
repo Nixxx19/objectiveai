@@ -2,6 +2,7 @@
 
 import objectiveai_pyo3
 
+from objectiveai.functions.inventions.recursive.http import create_function_invention_recursive
 from objectiveai.functions.inventions.recursive.response.streaming import FunctionInventionRecursiveChunk
 from tests.http_test_util import HttpTestCase, http_test_suite, ASSETS_DIR
 
@@ -9,7 +10,7 @@ MOCK_INVENTION_AGENT = {"upstream": "mock", "output_mode": "instruction", "inven
 
 globals().update(http_test_suite(
     name="recursive function inventions http",
-    endpoint="/functions/inventions/recursive",
+    fn=create_function_invention_recursive,
     snapshots_dir=ASSETS_DIR / "functions" / "inventions" / "recursive_client_tests",
     chunk_cls=FunctionInventionRecursiveChunk,
     chunk_to_unary=objectiveai_pyo3.function_invention_recursive_chunk_to_unary,

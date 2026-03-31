@@ -2,12 +2,13 @@
 
 import objectiveai_pyo3
 
+from objectiveai.agent.completions.http import create_agent_completion
 from objectiveai.agent.completions.response.streaming import AgentCompletionChunk
 from tests.http_test_util import HttpTestCase, http_test_suite, ASSETS_DIR
 
 globals().update(http_test_suite(
     name="agent completions http",
-    endpoint="/agent/completions",
+    fn=create_agent_completion,
     snapshots_dir=ASSETS_DIR / "agent" / "completions" / "client_tests",
     chunk_cls=AgentCompletionChunk,
     chunk_to_unary=objectiveai_pyo3.agent_completion_chunk_to_unary,

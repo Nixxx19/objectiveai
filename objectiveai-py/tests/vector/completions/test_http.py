@@ -2,6 +2,7 @@
 
 import objectiveai_pyo3
 
+from objectiveai.vector.completions.http import create_vector_completion
 from objectiveai.vector.completions.response.streaming import VectorCompletionChunk
 from tests.http_test_util import HttpTestCase, http_test_suite, ASSETS_DIR
 
@@ -9,7 +10,7 @@ MOCK_AGENT = {"upstream": "mock", "output_mode": "instruction"}
 
 globals().update(http_test_suite(
     name="vector completions http",
-    endpoint="/vector/completions",
+    fn=create_vector_completion,
     snapshots_dir=ASSETS_DIR / "vector" / "completions" / "client_tests",
     chunk_cls=VectorCompletionChunk,
     chunk_to_unary=objectiveai_pyo3.vector_completion_chunk_to_unary,

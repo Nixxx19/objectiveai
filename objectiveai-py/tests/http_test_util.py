@@ -20,6 +20,20 @@ ASSETS_DIR = Path(__file__).resolve().parent.parent.parent / "objectiveai-api" /
 _port = os.environ.get("OBJECTIVEAI_TEST_PORT")
 
 
+class _AttrDict(dict):
+    """Dict subclass that exposes keys as attributes.
+
+    HTTP functions use ``getattr(params, "stream", None)`` to route,
+    while ``json.dumps`` needs a dict.  This satisfies both.
+    """
+
+    def __getattr__(self, name: str) -> Any:
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError(name)
+
+
 def get_test_client():
     """Create a test client connected to the local test server."""
     if not _port:
@@ -33,31 +47,6 @@ def load_snapshot(snapshots_dir: Path, name: str) -> dict:
     return json.loads((snapshots_dir / f"{name}.json").read_text(encoding="utf-8"))
 
 
-async def run_unary(client, endpoint: str, body: dict) -> dict:
-    """POST to endpoint with stream=false and return parsed response."""
-    return await client.post_unary(endpoint, {**body, "stream": False})
-
-
-async def run_streaming(
-    client,
-    endpoint: str,
-    body: dict,
-    chunk_cls: Type,
-    chunk_to_unary: Callable[[dict], dict],
-) -> dict:
-    """POST to endpoint with stream=true, push chunks via Pydantic, convert to unary."""
-    stream = await client.post_streaming(endpoint, {**body, "stream": True})
-    acc = None
-    async for raw_chunk in stream:
-        chunk = chunk_cls.model_validate(raw_chunk)
-        if acc is None:
-            acc = chunk
-        else:
-            acc.push(chunk)
-    assert acc is not None, "Stream yielded no chunks"
-    return chunk_to_unary(acc.model_dump(mode="python", by_alias=True, exclude_unset=True))
-
-
 class HttpTestCase:
     """A single HTTP test case."""
 
@@ -65,17 +54,15 @@ class HttpTestCase:
         self,
         snapshot: str,
         body: dict,
-        endpoint: str | None = None,
     ):
         self.snapshot = snapshot
         self.body = body
-        self.endpoint = endpoint
 
 
 def http_test_suite(
     *,
     name: str,
-    endpoint: str,
+    fn: Callable,
     snapshots_dir: Path,
     chunk_cls: Type,
     chunk_to_unary: Callable[[dict], dict],
@@ -85,11 +72,26 @@ def http_test_suite(
     """Generate a parametrized HTTP test suite (unary + streaming).
 
     Mirrors httpTestSuite() from objectiveai-js/src/httpTestUtil.ts.
-    Streaming tests use the Pydantic chunk_cls.push() method (the native
-    Python SDK implementation), matching how JS tests use the TS merge.
+    ``fn`` is the exported HTTP function from the corresponding http.py
+    module (e.g. ``create_agent_completion``).
     Returns a dict of test functions that pytest will collect from the
     caller's module globals.
     """
+
+    async def _post_unary(client, body: dict) -> dict:
+        return await fn(client, _AttrDict({**body, "stream": False}))
+
+    async def _post_streaming(client, body: dict) -> dict:
+        stream = await fn(client, _AttrDict({**body, "stream": True}))
+        acc = None
+        async for raw_chunk in stream:
+            chunk = chunk_cls.model_validate(raw_chunk)
+            if acc is None:
+                acc = chunk
+            else:
+                acc.push(chunk)
+        assert acc is not None, "Stream yielded no chunks"
+        return chunk_to_unary(acc.model_dump(mode="python", by_alias=True, exclude_unset=True))
 
     @pytest.fixture
     def client():
@@ -99,16 +101,14 @@ def http_test_suite(
     @pytest.mark.parametrize("case", cases, ids=[c.snapshot for c in cases])
     async def test_unary(client, case):
         expected = rounded(load_snapshot(snapshots_dir, case.snapshot))
-        result = rounded(normalize(await run_unary(client, case.endpoint or endpoint, case.body)))
+        result = rounded(normalize(await _post_unary(client, case.body)))
         assert result == expected
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("case", cases, ids=[c.snapshot for c in cases])
     async def test_streaming(client, case):
         expected = rounded(load_snapshot(snapshots_dir, case.snapshot))
-        result = rounded(normalize(
-            await run_streaming(client, case.endpoint or endpoint, case.body, chunk_cls, chunk_to_unary)
-        ))
+        result = rounded(normalize(await _post_streaming(client, case.body)))
         assert result == expected
 
     return {"client": client, "test_unary": test_unary, "test_streaming": test_streaming}
