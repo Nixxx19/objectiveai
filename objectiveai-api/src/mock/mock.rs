@@ -26,12 +26,13 @@ fn get_agent_json(name: &str) -> Option<&'static str> {
         "tool-call" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/agents/tool-call.json"))),
         "instruction-logprobs" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/agents/instruction-logprobs.json"))),
         "invention" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/agents/invention.json"))),
+        "error-probability-50" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/agents/error-probability-50.json"))),
         _ => None,
     }
 }
 
 /// All mock Agent names.
-const AGENT_REPOSITORIES: &[&str] = &["schema-logprobs", "instruction", "tool-call", "instruction-logprobs", "invention"];
+const AGENT_REPOSITORIES: &[&str] = &["schema-logprobs", "instruction", "tool-call", "instruction-logprobs", "invention", "error-probability-50"];
 
 /// Lists all mock Agents.
 pub fn list_agents() -> objectiveai::agent::response::ListAgentResponse {

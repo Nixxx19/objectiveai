@@ -118,7 +118,7 @@ fn make_client() -> super::Client<
     crate::agent::completions::mock::Client,
     StubRetrieveClient,
     StubRetrieveClient,
-    StubRetrieveClient,
+    crate::retrieval::retrieve::mock::MockClient,
     StubUsageHandler,
 > {
     super::Client::new(
@@ -140,7 +140,7 @@ fn make_client() -> super::Client<
         Arc::new(crate::retrieval::retrieve::Router::new(
             Arc::new(StubRetrieveClient),
             Arc::new(StubRetrieveClient),
-            Arc::new(StubRetrieveClient),
+            Arc::new(crate::retrieval::retrieve::mock::MockClient),
         )),
         Arc::new(StubUsageHandler),
         Arc::new(UnimplementedUpstreamClient),
@@ -1797,5 +1797,204 @@ async fn test_logprobs_per_agent_json_object() {
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_logprobs_per_agent_json_object.json"),
         include_str!("../../../assets/agent/completions/client_tests/test_logprobs_per_agent_json_object.json"),
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Error probability tests (remote mock agent, invention tools, mid-stream error)
+// ---------------------------------------------------------------------------
+
+fn error_prob_50_remote() -> objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional {
+    objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::Remote(
+        objectiveai::RemotePathCommitOptional::Mock {
+            name: "error-probability-50".into(),
+        },
+    )
+}
+
+#[tokio::test]
+async fn test_error_probability_remote_seed_2() {
+    let client = make_client();
+    let params = Arc::new(AgentCompletionCreateParams {
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Analyze this dataset and summarize findings".into()),
+            name: None,
+        })],
+        agent: error_prob_50_remote(),
+        provider: None,
+        response_format: None,
+        seed: Some(2),
+        stream: None,
+        continuation: None,
+    });
+    let tools = vec![
+        objectiveai::functions::inventions::InventionTool {
+            name: "query_database",
+            description: "Run a SQL query against the database",
+            parameters: indexmap::indexmap! {
+                "type".into() => serde_json::json!("object"),
+                "properties".into() => serde_json::json!({
+                    "sql": {"type": "string"},
+                    "database": {"type": "string"},
+                }),
+            },
+            call: Arc::new(|_| Box::pin(async { Ok("rows: [{id: 1, value: 42}]".into()) })),
+        },
+        objectiveai::functions::inventions::InventionTool {
+            name: "plot_chart",
+            description: "Generate a chart from data",
+            parameters: indexmap::indexmap! {
+                "type".into() => serde_json::json!("object"),
+                "properties".into() => serde_json::json!({
+                    "data": {"type": "string"},
+                    "chart_type": {"type": "string"},
+                }),
+            },
+            call: Arc::new(|_| Box::pin(async { Ok("chart://bar_chart_001.png".into()) })),
+        },
+    ];
+    let stream = client
+        .create_streaming(make_ctx(), params, None, Some(tools), None, None)
+        .await
+        .expect("create_streaming should succeed");
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_error_probability_remote_seed_2.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_error_probability_remote_seed_2.json"),
+    );
+}
+
+#[tokio::test]
+async fn test_error_probability_remote_seed_10() {
+    let client = make_client();
+    let params = Arc::new(AgentCompletionCreateParams {
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Write a web scraper for news articles".into()),
+            name: None,
+        })],
+        agent: error_prob_50_remote(),
+        provider: None,
+        response_format: None,
+        seed: Some(10),
+        stream: None,
+        continuation: None,
+    });
+    let tools = vec![
+        objectiveai::functions::inventions::InventionTool {
+            name: "fetch_url",
+            description: "Fetch the contents of a URL",
+            parameters: indexmap::indexmap! {
+                "type".into() => serde_json::json!("object"),
+                "properties".into() => serde_json::json!({
+                    "url": {"type": "string"},
+                }),
+            },
+            call: Arc::new(|_| Box::pin(async { Ok("<html>news article</html>".into()) })),
+        },
+        objectiveai::functions::inventions::InventionTool {
+            name: "save_file",
+            description: "Save content to a file",
+            parameters: indexmap::indexmap! {
+                "type".into() => serde_json::json!("object"),
+                "properties".into() => serde_json::json!({
+                    "path": {"type": "string"},
+                    "content": {"type": "string"},
+                }),
+            },
+            call: Arc::new(|_| Box::pin(async { Ok("saved".into()) })),
+        },
+        objectiveai::functions::inventions::InventionTool {
+            name: "parse_html",
+            description: "Extract structured data from HTML",
+            parameters: indexmap::indexmap! {
+                "type".into() => serde_json::json!("object"),
+                "properties".into() => serde_json::json!({
+                    "html": {"type": "string"},
+                    "selector": {"type": "string"},
+                }),
+            },
+            call: Arc::new(|_| Box::pin(async { Ok("title: Breaking News".into()) })),
+        },
+    ];
+    let stream = client
+        .create_streaming(make_ctx(), params, None, Some(tools), None, None)
+        .await
+        .expect("create_streaming should succeed");
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_error_probability_remote_seed_10.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_error_probability_remote_seed_10.json"),
+    );
+}
+
+#[tokio::test]
+async fn test_error_probability_remote_seed_15() {
+    let client = make_client();
+    let params = Arc::new(AgentCompletionCreateParams {
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Deploy the application to production".into()),
+            name: None,
+        })],
+        agent: error_prob_50_remote(),
+        provider: None,
+        response_format: None,
+        seed: Some(15),
+        stream: None,
+        continuation: Some(objectiveai::agent::Continuation::Mock(
+            objectiveai::agent::mock::Continuation {
+                upstream: objectiveai::agent::mock::Upstream::Mock,
+                messages: vec![
+                    Message::User(UserMessage {
+                        content: RichContent::Text("Build the project first".into()),
+                        name: None,
+                    }),
+                    Message::Assistant(objectiveai::agent::completions::message::AssistantMessage {
+                        content: Some(RichContent::Text("Build succeeded.".into())),
+                        name: None, refusal: None, tool_calls: None, reasoning: None,
+                    }),
+                ],
+                mcp_sessions: indexmap::IndexMap::new(),
+            },
+        ).to_string()),
+    });
+    let tools = vec![
+        objectiveai::functions::inventions::InventionTool {
+            name: "run_tests",
+            description: "Run the test suite",
+            parameters: indexmap::indexmap! {
+                "type".into() => serde_json::json!("object"),
+                "properties".into() => serde_json::json!({
+                    "suite": {"type": "string"},
+                }),
+            },
+            call: Arc::new(|_| Box::pin(async { Ok("all 42 tests passed".into()) })),
+        },
+        objectiveai::functions::inventions::InventionTool {
+            name: "deploy",
+            description: "Deploy to a target environment",
+            parameters: indexmap::indexmap! {
+                "type".into() => serde_json::json!("object"),
+                "properties".into() => serde_json::json!({
+                    "environment": {"type": "string"},
+                    "version": {"type": "string"},
+                }),
+            },
+            call: Arc::new(|_| Box::pin(async { Ok("deployed v2.1.0 to production".into()) })),
+        },
+    ];
+    let stream = client
+        .create_streaming(make_ctx(), params, None, Some(tools), None, None)
+        .await
+        .expect("create_streaming should succeed");
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_error_probability_remote_seed_15.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_error_probability_remote_seed_15.json"),
     );
 }

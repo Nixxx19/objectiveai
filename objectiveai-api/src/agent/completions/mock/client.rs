@@ -241,9 +241,9 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
             };
 
             // --- Probabilistic error: roll against error_probability ---
-            let probabilistic_error = error_probability.is_some_and(|p| {
-                rng.random_range(0u8..100) < p
-            });
+            if error_probability.is_some_and(|p| rng.random_range(0u8..100) < p) {
+                return Err(super::Error::ExpectedError);
+            }
 
             // --- Reasoning: roll 0-5 chunks ---
             let n_reasoning = rng.random_range(0u32..=5);
@@ -455,23 +455,6 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
                             }
                         }
                     }
-                }
-
-                // --- Yield error chunk if probabilistic error fired ---
-                if probabilistic_error {
-                    yield StreamItem::Chunk(AgentCompletionChunk {
-                        id: id.clone(),
-                        created,
-                        messages: vec![],
-                        object: Default::default(),
-                        usage: None,
-                        upstream: objectiveai::agent::Upstream::Mock,
-                        error: Some(objectiveai::error::ResponseError {
-                            code: 500,
-                            message: serde_json::json!("mock probabilistic error"),
-                        }),
-                        continuation: None,
-                    });
                 }
 
                 // --- Yield final state ---
