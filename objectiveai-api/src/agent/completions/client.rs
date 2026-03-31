@@ -609,7 +609,7 @@ where
     where
         U: super::UpstreamClient<A, RC> + Send + Sync + 'static,
         A: Send + Sync + Clone + 'static,
-        RC: Send + Sync + Clone + 'static,
+        RC: Send + Sync + Clone + Into<objectiveai::agent::Continuation> + 'static,
         CONT: Send + 'static,
     {
         // --- Merge messages, prepare, and apply transform. ---
@@ -855,7 +855,22 @@ where
                 }
             }
 
-            // Single site for usage (and error if a continuation call failed).
+            // Build MCP sessions map from active connections.
+            let mcp_sessions: indexmap::IndexMap<String, String> = mcp_connections.iter()
+                .map(|c| (c.url.clone(), c.session_id.clone()))
+                .collect();
+
+            // Build response continuation token.
+            let response_cont = upstream.response_continuation(
+                mcp_sessions,
+                request_continuation.as_ref(),
+                &messages,
+                Some(&continuation_items),
+            );
+            let continuation_token: objectiveai::agent::Continuation = response_cont.into();
+            let continuation_token = continuation_token.to_string();
+
+            // Single site for usage, continuation, and error (if a continuation call failed).
             yield super::StreamItem::Chunk(
                 objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
                     id: id.clone(),
@@ -863,6 +878,7 @@ where
                     upstream: upstream_kind,
                     usage: Some(usage),
                     error: final_error,
+                    continuation: Some(continuation_token),
                     ..Default::default()
                 },
             );

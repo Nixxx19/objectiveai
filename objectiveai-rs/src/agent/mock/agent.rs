@@ -32,6 +32,12 @@ pub struct AgentBase {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
     pub invention: Option<bool>,
+
+    /// Probability (0-100) that the mock returns an error mid-stream.
+    /// Requires `error` to be `Some(true)`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub error_probability: Option<u8>,
 }
 
 impl AgentBase {
@@ -41,6 +47,10 @@ impl AgentBase {
             Some(0) | Some(1) => None,
             other => other,
         };
+        if self.error == Some(true) && self.error_probability == Some(0) {
+            self.error = None;
+            self.error_probability = None;
+        }
         if self.error == Some(false) {
             self.error = None;
         }
@@ -63,6 +73,14 @@ impl AgentBase {
                 "`invention` is only compatible with `instruction` output mode"
                     .to_string(),
             );
+        }
+        if let Some(p) = self.error_probability {
+            if p > 100 {
+                return Err("`error_probability` must be at most 100".to_string());
+            }
+            if self.error != Some(true) {
+                return Err("`error_probability` requires `error` to be true".to_string());
+            }
         }
         Ok(())
     }

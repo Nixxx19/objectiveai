@@ -89,6 +89,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
         let id = id.to_string();
         let agent_id = agent.id.clone();
         let error = agent.base.error == Some(true);
+        let error_probability = agent.base.error_probability;
         let top_logprobs = agent.base.top_logprobs;
         let response_format = resolve_response_format(&agent.id, params);
         let tool_names = tool_names.to_vec();
@@ -198,7 +199,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
         async move {
             use objectiveai::agent::completions::request::ResponseFormat;
 
-            if error {
+            if error && error_probability.is_none() {
                 return Err(super::Error::ExpectedError);
             }
 
@@ -238,6 +239,11 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
                 Some(s) => rand::rngs::StdRng::seed_from_u64(s),
                 None => rand::rngs::StdRng::from_os_rng(),
             };
+
+            // --- Probabilistic error: roll against error_probability ---
+            let probabilistic_error = error_probability.is_some_and(|p| {
+                rng.random_range(0u8..100) < p
+            });
 
             // --- Reasoning: roll 0-5 chunks ---
             let n_reasoning = rng.random_range(0u32..=5);
@@ -449,6 +455,23 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
                             }
                         }
                     }
+                }
+
+                // --- Yield error chunk if probabilistic error fired ---
+                if probabilistic_error {
+                    yield StreamItem::Chunk(AgentCompletionChunk {
+                        id: id.clone(),
+                        created,
+                        messages: vec![],
+                        object: Default::default(),
+                        usage: None,
+                        upstream: objectiveai::agent::Upstream::Mock,
+                        error: Some(objectiveai::error::ResponseError {
+                            code: 500,
+                            message: serde_json::json!("mock probabilistic error"),
+                        }),
+                        continuation: None,
+                    });
                 }
 
                 // --- Yield final state ---

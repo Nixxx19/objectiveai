@@ -206,15 +206,18 @@ async fn run_and_check<S: 'static>(
             check_created_and_upstream(&expected_created, &expected_upstream, i, chunk);
             assert!(chunk.messages.len() <= 1, "chunk {i} has {} messages, expected at most 1", chunk.messages.len());
             assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
+            assert!(chunk.continuation.is_none(), "chunk {i} (non-final) has continuation, expected None");
         },
         |i, chunk| {
             check_created_and_upstream(&expected_created, &expected_upstream, i, chunk);
             assert!(chunk.messages.len() <= 1, "chunk {i} has {} messages, expected at most 1", chunk.messages.len());
             assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
+            assert!(chunk.continuation.is_none(), "chunk {i} (non-final) has continuation, expected None");
         },
         |i, chunk| {
             check_created_and_upstream(&expected_created, &expected_upstream, i, chunk);
             assert!(chunk.usage.is_some(), "final chunk {i} has no usage, expected Some");
+            assert!(chunk.continuation.is_some(), "final chunk {i} has no continuation, expected Some");
         },
     ).await;
     AgentCompletion::from(agg)
