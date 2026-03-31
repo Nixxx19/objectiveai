@@ -35,6 +35,10 @@ var (
 	rootDir   string
 	schemaDir string
 	srcDir    string
+
+	// orderedMapValueTypes collects all unique V types used in OrderedMap[string, V]
+	// across generated code, for validator registration.
+	orderedMapValueTypes = map[string]bool{}
 )
 
 func init() {
@@ -1174,7 +1178,7 @@ func generateOrderedMapMethods(typeName string, valueType string) string {
 // orderedMapValueType extracts the value type V from "OrderedMap[string,V]".
 // Returns "" if the type is not an ordered map.
 func orderedMapValueType(goT string) string {
-	const prefix = "OrderedMap[string,"
+	const prefix = "OrderedMap[string, "
 	if strings.HasPrefix(goT, prefix) && strings.HasSuffix(goT, "]") {
 		return goT[len(prefix) : len(goT)-1]
 	}
@@ -1455,6 +1459,39 @@ func main() {
 
 		outPath := filepath.Join(srcDir, fp+".go")
 		if err := os.WriteFile(outPath, []byte(file.String()), 0o644); err != nil {
+			fmt.Fprintf(os.Stderr, "Error writing %s: %v\n", outPath, err)
+			os.Exit(1)
+		}
+	}
+
+	// Emit validator registration for all OrderedMap instantiations.
+	// Scan all generated code for OrderedMap[string, V] patterns.
+	omRegex := regexp.MustCompile(`OrderedMap\[string,\s*([^\]]+?)\s*\]`)
+	omTypes := map[string]bool{}
+	for _, fp := range filePaths {
+		data, _ := os.ReadFile(filepath.Join(srcDir, fp+".go"))
+		for _, match := range omRegex.FindAllStringSubmatch(string(data), -1) {
+			omTypes[match[1]] = true
+		}
+	}
+	if len(omTypes) > 0 {
+		var reg strings.Builder
+		reg.WriteString(generatedHeader)
+		reg.WriteString("package objectiveai\n\n")
+		reg.WriteString("func init() {\n")
+		reg.WriteString("\tRegisterOrderedMapTypes(variantValidator,\n")
+		sortedOM := make([]string, 0, len(omTypes))
+		for vt := range omTypes {
+			sortedOM = append(sortedOM, vt)
+		}
+		sort.Strings(sortedOM)
+		for _, vt := range sortedOM {
+			reg.WriteString(fmt.Sprintf("\t\tOrderedMap[string, %s]{},\n", vt))
+		}
+		reg.WriteString("\t)\n")
+		reg.WriteString("}\n")
+		outPath := filepath.Join(srcDir, "orderedmap_registered.go")
+		if err := os.WriteFile(outPath, []byte(reg.String()), 0o644); err != nil {
 			fmt.Fprintf(os.Stderr, "Error writing %s: %v\n", outPath, err)
 			os.Exit(1)
 		}

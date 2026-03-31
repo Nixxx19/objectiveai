@@ -1,8 +1,39 @@
 package objectiveai
 
 import (
+	"reflect"
+
+	"github.com/go-playground/validator/v10"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
+
+// ToMapAny converts the OrderedMap to a map[any]any for validator dive support.
+// This avoids reflection on unexported fields of the underlying ordered map.
+func (om OrderedMap[K, V]) ToMapAny() map[any]any {
+	if om.inner == nil {
+		return nil
+	}
+	result := make(map[any]any, om.inner.Len())
+	for pair := om.inner.Oldest(); pair != nil; pair = pair.Next() {
+		result[pair.Key] = pair.Value
+	}
+	return result
+}
+
+// orderedMapToMap converts any OrderedMap[K, V] to map[any]any via the ToMapAny method.
+func orderedMapToMap(field reflect.Value) interface{} {
+	m := field.MethodByName("ToMapAny")
+	if !m.IsValid() {
+		return nil
+	}
+	return m.Call(nil)[0].Interface()
+}
+
+// RegisterOrderedMapTypes registers OrderedMap instantiations with the validator
+// so that "dive" tags work. Call once per concrete OrderedMap[K, V] type.
+func RegisterOrderedMapTypes(v *validator.Validate, types ...interface{}) {
+	v.RegisterCustomTypeFunc(orderedMapToMap, types...)
+}
 
 // OrderedMap is a JSON-order-preserving map. It wraps orderedmap.OrderedMap
 // in a value-type struct so that:

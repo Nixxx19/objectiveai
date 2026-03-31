@@ -8,6 +8,11 @@ import "github.com/go-playground/validator/v10"
 
 // variantValidator is used by UnmarshalJSON on variant structs to validate
 // that a deserialized value matches the variant's constraints (e.g., oneof).
+//
+// NOTE: The "dive" validate tag does not work with OrderedMap fields because
+// go-playground/validator only dives into native maps/slices. OrderedMap values
+// are validated server-side instead. RegisterCustomTypeFunc cannot be used
+// because each generic instantiation is a different reflect.Type.
 var variantValidator = validator.New()
 
 // Described is implemented by every generated type.

@@ -86,16 +86,16 @@ type FunctionsExpressionInputValueExpressionObject OrderedMap[string, FunctionsE
 
 func (FunctionsExpressionInputValueExpressionObject) SchemaVariantTitle() string { return "Object" }
 
-func NewFunctionsExpressionInputValueExpressionObject(pairs ...orderedmap.Pair[string,  FunctionsExpressionInputValueExpressionObjectValue]) FunctionsExpressionInputValueExpressionObject {
-	return FunctionsExpressionInputValueExpressionObject(NewOrderedMap[string,  FunctionsExpressionInputValueExpressionObjectValue](pairs...))
+func NewFunctionsExpressionInputValueExpressionObject(pairs ...orderedmap.Pair[string, FunctionsExpressionInputValueExpressionObjectValue]) FunctionsExpressionInputValueExpressionObject {
+	return FunctionsExpressionInputValueExpressionObject(NewOrderedMap[string, FunctionsExpressionInputValueExpressionObjectValue](pairs...))
 }
 
 func (v FunctionsExpressionInputValueExpressionObject) MarshalJSON() ([]byte, error) {
-	return OrderedMap[string,  FunctionsExpressionInputValueExpressionObjectValue](v).MarshalJSON()
+	return OrderedMap[string, FunctionsExpressionInputValueExpressionObjectValue](v).MarshalJSON()
 }
 
 func (v *FunctionsExpressionInputValueExpressionObject) UnmarshalJSON(data []byte) error {
-	return (*OrderedMap[string,  FunctionsExpressionInputValueExpressionObjectValue])(v).UnmarshalJSON(data)
+	return (*OrderedMap[string, FunctionsExpressionInputValueExpressionObjectValue])(v).UnmarshalJSON(data)
 }
 
 // A value that can be either a literal or an expression.

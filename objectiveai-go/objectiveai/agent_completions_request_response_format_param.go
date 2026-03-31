@@ -12,16 +12,16 @@ type AgentCompletionsRequestResponseFormatParamPerAgent OrderedMap[string, Agent
 
 func (AgentCompletionsRequestResponseFormatParamPerAgent) SchemaVariantTitle() string { return "PerAgent" }
 
-func NewAgentCompletionsRequestResponseFormatParamPerAgent(pairs ...orderedmap.Pair[string,  AgentCompletionsRequestResponseFormat]) AgentCompletionsRequestResponseFormatParamPerAgent {
-	return AgentCompletionsRequestResponseFormatParamPerAgent(NewOrderedMap[string,  AgentCompletionsRequestResponseFormat](pairs...))
+func NewAgentCompletionsRequestResponseFormatParamPerAgent(pairs ...orderedmap.Pair[string, AgentCompletionsRequestResponseFormat]) AgentCompletionsRequestResponseFormatParamPerAgent {
+	return AgentCompletionsRequestResponseFormatParamPerAgent(NewOrderedMap[string, AgentCompletionsRequestResponseFormat](pairs...))
 }
 
 func (v AgentCompletionsRequestResponseFormatParamPerAgent) MarshalJSON() ([]byte, error) {
-	return OrderedMap[string,  AgentCompletionsRequestResponseFormat](v).MarshalJSON()
+	return OrderedMap[string, AgentCompletionsRequestResponseFormat](v).MarshalJSON()
 }
 
 func (v *AgentCompletionsRequestResponseFormatParamPerAgent) UnmarshalJSON(data []byte) error {
-	return (*OrderedMap[string,  AgentCompletionsRequestResponseFormat])(v).UnmarshalJSON(data)
+	return (*OrderedMap[string, AgentCompletionsRequestResponseFormat])(v).UnmarshalJSON(data)
 }
 
 // Either a single response format or a per-agent map.

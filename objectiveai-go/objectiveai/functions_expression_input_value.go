@@ -12,16 +12,16 @@ type FunctionsExpressionInputValueObject OrderedMap[string, FunctionsExpressionI
 
 func (FunctionsExpressionInputValueObject) SchemaVariantTitle() string { return "Object" }
 
-func NewFunctionsExpressionInputValueObject(pairs ...orderedmap.Pair[string,  FunctionsExpressionInputValue]) FunctionsExpressionInputValueObject {
-	return FunctionsExpressionInputValueObject(NewOrderedMap[string,  FunctionsExpressionInputValue](pairs...))
+func NewFunctionsExpressionInputValueObject(pairs ...orderedmap.Pair[string, FunctionsExpressionInputValue]) FunctionsExpressionInputValueObject {
+	return FunctionsExpressionInputValueObject(NewOrderedMap[string, FunctionsExpressionInputValue](pairs...))
 }
 
 func (v FunctionsExpressionInputValueObject) MarshalJSON() ([]byte, error) {
-	return OrderedMap[string,  FunctionsExpressionInputValue](v).MarshalJSON()
+	return OrderedMap[string, FunctionsExpressionInputValue](v).MarshalJSON()
 }
 
 func (v *FunctionsExpressionInputValueObject) UnmarshalJSON(data []byte) error {
-	return (*OrderedMap[string,  FunctionsExpressionInputValue])(v).UnmarshalJSON(data)
+	return (*OrderedMap[string, FunctionsExpressionInputValue])(v).UnmarshalJSON(data)
 }
 
 type FunctionsExpressionInputValueArray []FunctionsExpressionInputValue
