@@ -82,6 +82,8 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM,
     pub claude_agent_sdk: Arc<CLAUDEAGENTSDK>,
     /// Upstream client for Mock agents.
     pub mock: Arc<MOCK>,
+    /// Viewer client for streaming telemetry.
+    pub viewer_client: Arc<crate::viewer::Client<CTXEXT>>,
 
     /// Current backoff interval for retry logic.
     pub backoff_current_interval: Duration,
@@ -111,6 +113,7 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> Client
         openrouter: Arc<OPENROUTER>,
         claude_agent_sdk: Arc<CLAUDEAGENTSDK>,
         mock: Arc<MOCK>,
+        viewer_client: Arc<crate::viewer::Client<CTXEXT>>,
         backoff_current_interval: Duration,
         backoff_initial_interval: Duration,
         backoff_randomization_factor: f64,
@@ -128,6 +131,7 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> Client
             openrouter,
             claude_agent_sdk,
             mock,
+            viewer_client,
             backoff_current_interval,
             backoff_initial_interval,
             backoff_randomization_factor,
@@ -153,6 +157,7 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> Clone
             openrouter: self.openrouter.clone(),
             claude_agent_sdk: self.claude_agent_sdk.clone(),
             mock: self.mock.clone(),
+            viewer_client: self.viewer_client.clone(),
             backoff_current_interval: self.backoff_current_interval,
             backoff_initial_interval: self.backoff_initial_interval,
             backoff_randomization_factor: self.backoff_randomization_factor,
@@ -194,6 +199,7 @@ where
         invention_tools: Option<Vec<objectiveai::functions::inventions::InventionTool>>,
         invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         transform_messages: Option<Arc<TransformMessages>>,
+        viewer: bool,
     ) -> Result<
         objectiveai::agent::completions::response::unary::AgentCompletion,
         super::Error,
@@ -202,7 +208,7 @@ where
             objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
         > = None;
         let mut stream = self
-            .create_streaming_handle_usage(ctx, params, continuation, invention_tools, invention_done, transform_messages)
+            .create_streaming_handle_usage(ctx, params, continuation, invention_tools, invention_done, transform_messages, viewer)
             .await?;
         while let Some(item) = stream.next().await {
             match item {
@@ -231,6 +237,7 @@ where
         invention_tools: Option<Vec<objectiveai::functions::inventions::InventionTool>>,
         invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         transform_messages: Option<Arc<TransformMessages>>,
+        viewer: bool,
     ) -> Result<
         impl futures::Stream<
             Item = super::StreamItem<
@@ -248,7 +255,7 @@ where
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
         let _ = tokio::spawn(async move {
             let stream = match self
-                .create_streaming(ctx.clone(), params.clone(), continuation, invention_tools, invention_done, transform_messages)
+                .create_streaming(ctx.clone(), params.clone(), continuation, invention_tools, invention_done, transform_messages, viewer)
                 .await
             {
                 Ok(stream) => stream,
@@ -309,6 +316,7 @@ where
         invention_tools: Option<Vec<objectiveai::functions::inventions::InventionTool>>,
         invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         transform_messages: Option<Arc<TransformMessages>>,
+        viewer: bool,
     ) -> Result<
         impl futures::Stream<
             Item = super::StreamItem<
@@ -336,6 +344,21 @@ where
             .unwrap()
             .as_secs();
         let id = response_id(created);
+
+        // Send viewer begin.
+        if viewer {
+            self.viewer_client.send_agent_completion_begin(
+                ctx.clone(), id.clone(), params.clone(),
+            );
+        }
+        let send_viewer_err = |e: super::Error| -> super::Error {
+            if viewer {
+                self.viewer_client.send_agent_completion_error(
+                    ctx.clone(), id.clone(), &e,
+                );
+            }
+            e
+        };
 
         // 1. Panic if internal and request continuation upstream types conflict.
         if let (Some(ic), Some(rc)) = (&continuation, &request_continuation) {
@@ -499,7 +522,16 @@ where
                                 invention_done.clone(),
                                 agent_transform,
                             ).await {
-                                Ok(stream) => return Ok(stream),
+                                Ok(stream) => {
+                                    if !viewer { return Ok(stream); }
+                                    let vc = self.viewer_client.clone();
+                                    let vctx = ctx.clone();
+                                    return Ok(Box::pin(futures::StreamExt::inspect(stream, move |item| {
+                                        if let super::StreamItem::Chunk(chunk) = item {
+                                            vc.send_agent_completion_continue(vctx.clone(), chunk.clone());
+                                        }
+                                    })));
+                                }
                                 Err(e) => e,
                             }
                         }
@@ -522,7 +554,16 @@ where
                                 invention_done.clone(),
                                 agent_transform,
                             ).await {
-                                Ok(stream) => return Ok(stream),
+                                Ok(stream) => {
+                                    if !viewer { return Ok(stream); }
+                                    let vc = self.viewer_client.clone();
+                                    let vctx = ctx.clone();
+                                    return Ok(Box::pin(futures::StreamExt::inspect(stream, move |item| {
+                                        if let super::StreamItem::Chunk(chunk) = item {
+                                            vc.send_agent_completion_continue(vctx.clone(), chunk.clone());
+                                        }
+                                    })));
+                                }
                                 Err(e) => e,
                             }
                         }
@@ -545,7 +586,16 @@ where
                                 invention_done.clone(),
                                 agent_transform,
                             ).await {
-                                Ok(stream) => return Ok(stream),
+                                Ok(stream) => {
+                                    if !viewer { return Ok(stream); }
+                                    let vc = self.viewer_client.clone();
+                                    let vctx = ctx.clone();
+                                    return Ok(Box::pin(futures::StreamExt::inspect(stream, move |item| {
+                                        if let super::StreamItem::Chunk(chunk) = item {
+                                            vc.send_agent_completion_continue(vctx.clone(), chunk.clone());
+                                        }
+                                    })));
+                                }
                                 Err(e) => e,
                             }
                         }
@@ -556,17 +606,17 @@ where
 
             // All agents failed this round — apply backoff or give up.
             if errors.is_empty() {
-                return Err(super::Error::NoAgentsResolved);
+                return Err(send_viewer_err(super::Error::NoAgentsResolved));
             }
             use backoff::backoff::Backoff;
             match backoff.next_backoff() {
                 Some(d) => tokio::time::sleep(d).await,
                 None => {
-                    return Err(if errors.len() == 1 {
+                    return Err(send_viewer_err(if errors.len() == 1 {
                         errors.into_iter().next().unwrap()
                     } else {
                         super::Error::MultipleErrors(errors)
-                    });
+                    }));
                 }
             }
         }

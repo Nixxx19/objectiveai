@@ -48,6 +48,9 @@ impl<CTXEXT: ctx::ContextExt + Send + Sync + 'static> Client<CTXEXT> {
                 };
 
                 let url = match &request {
+                    super::request::Request::AgentCompletion(_) => {
+                        format!("{}/agent/completions", address)
+                    }
                     super::request::Request::FunctionExecution(_) => {
                         format!("{}/functions/executions", address)
                     }
@@ -150,6 +153,44 @@ impl<CTXEXT: ctx::ContextExt + Send + Sync + 'static> Client<CTXEXT> {
 
             let _ = tx.send((ViewerData { address, signature }, request));
         });
+    }
+
+    pub fn send_agent_completion_begin(
+        &self,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
+        id: String,
+        request: Arc<objectiveai::agent::completions::request::AgentCompletionCreateParams>,
+    ) {
+        self.send_with_ctx(ctx, super::request::Request::AgentCompletion(
+            super::request::AgentCompletionRequest::Begin(super::request::AgentCompletionCreateParams {
+                id,
+                inner: request,
+            }),
+        ));
+    }
+
+    pub fn send_agent_completion_continue(
+        &self,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
+        chunk: objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
+    ) {
+        self.send_with_ctx(ctx, super::request::Request::AgentCompletion(
+            super::request::AgentCompletionRequest::Continue(chunk),
+        ));
+    }
+
+    pub fn send_agent_completion_error(
+        &self,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
+        id: String,
+        error: &crate::agent::completions::Error,
+    ) {
+        self.send_with_ctx(ctx, super::request::Request::AgentCompletion(
+            super::request::AgentCompletionRequest::Error(super::request::ResponseError {
+                id,
+                inner: objectiveai::error::ResponseError::from(error),
+            }),
+        ));
     }
 
     pub fn send_function_execution_begin(

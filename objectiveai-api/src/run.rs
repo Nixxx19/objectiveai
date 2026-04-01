@@ -567,6 +567,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
             delay: std::time::Duration::from_millis(mock_delay_ms),
             max_tool_calls: mock_max_tool_calls,
         }),
+        viewer_client.clone(),
         std::time::Duration::from_millis(
             agent_completions_backoff_current_interval,
         ),
@@ -1177,6 +1178,7 @@ async fn create_agent_completion(
                 None,
                 None,
                 None,
+                true,
             )
             .await
         {
@@ -1209,6 +1211,7 @@ async fn create_agent_completion(
                 None,
                 None,
                 None,
+                true,
             )
             .await
         {

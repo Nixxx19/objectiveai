@@ -182,6 +182,11 @@ fn make_client() -> Arc<TestClient> {
             delay: Duration::ZERO,
             max_tool_calls: 1000,
         }),
+        Arc::new(crate::viewer::Client::new(
+            reqwest::Client::new(), None, None,
+            std::time::Duration::ZERO, std::time::Duration::ZERO, 0.0, 1.0,
+            std::time::Duration::ZERO, std::time::Duration::ZERO,
+        )),
         Duration::ZERO,
         Duration::ZERO,
         0.0,

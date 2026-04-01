@@ -9,6 +9,21 @@ pub struct ResponseError {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AgentCompletionCreateParams {
+    pub id: String,
+    #[serde(flatten)]
+    pub inner: Arc<objectiveai::agent::completions::request::AgentCompletionCreateParams>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum AgentCompletionRequest {
+    Begin(AgentCompletionCreateParams),
+    Continue(objectiveai::agent::completions::response::streaming::AgentCompletionChunk),
+    Error(ResponseError),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FunctionExecutionCreateParams {
     pub id: String,
     #[serde(flatten)]
@@ -41,6 +56,7 @@ pub enum FunctionInventionRecursiveRequest {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Request {
+    AgentCompletion(AgentCompletionRequest),
     FunctionExecution(FunctionExecutionRequest),
     FunctionInventionRecursive(FunctionInventionRecursiveRequest),
 }

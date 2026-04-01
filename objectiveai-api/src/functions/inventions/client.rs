@@ -1139,6 +1139,7 @@ where
                 Some(tools.clone()),
                 Some(invention_done),
                 None,
+                false,
             )
             .await;
 
@@ -1231,6 +1232,7 @@ where
                     Some(tools.clone()),
                     Some(invention_done),
                     None,
+                    false,
                 )
                 .await;
 
