@@ -117,6 +117,8 @@ pub enum Commands {
         params: InventionParams,
         #[command(flatten)]
         agent: AgentArgs,
+        #[command(flatten)]
+        continuation: crate::continuation::ContinuationArgs,
         /// Seed for deterministic mock responses
         #[arg(long)]
         seed: Option<i64>,
@@ -127,6 +129,8 @@ pub enum Commands {
         params: InventionParams,
         #[command(flatten)]
         agent: AgentArgs,
+        #[command(flatten)]
+        continuation: crate::continuation::ContinuationArgs,
         /// Seed for deterministic mock responses
         #[arg(long)]
         seed: Option<i64>,
@@ -156,6 +160,8 @@ pub enum Commands {
         state_commit: Option<String>,
         #[command(flatten)]
         agent: AgentArgs,
+        #[command(flatten)]
+        continuation: crate::continuation::ContinuationArgs,
         /// Seed for deterministic mock responses
         #[arg(long)]
         seed: Option<i64>,
@@ -164,34 +170,35 @@ pub enum Commands {
 
 impl Commands {
     pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
-        let (agent_args, seed, state) = match self {
-            Commands::AlphaScalar { params, agent, seed } => {
+        let (agent_args, continuation_args, seed, state) = match self {
+            Commands::AlphaScalar { params, agent, continuation, seed } => {
                 let p = params.into_params();
                 let state = objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(
                     objectiveai::functions::inventions::ParamsState::AlphaScalar(
                         objectiveai::functions::inventions::state::AlphaScalarState { params: p, input_schema: None },
                     ),
                 );
-                (agent, seed, state)
+                (agent, continuation, seed, state)
             }
-            Commands::AlphaVector { params, agent, seed } => {
+            Commands::AlphaVector { params, agent, continuation, seed } => {
                 let p = params.into_params();
                 let state = objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(
                     objectiveai::functions::inventions::ParamsState::AlphaVector(
                         objectiveai::functions::inventions::state::AlphaVectorState { params: p, input_schema: None },
                     ),
                 );
-                (agent, seed, state)
+                (agent, continuation, seed, state)
             }
-            Commands::Remote { state_remote, state_owner, state_repository, state_name, state_commit, agent, seed } => {
+            Commands::Remote { state_remote, state_owner, state_repository, state_name, state_commit, agent, continuation, seed } => {
                 let remote_path = state_remote.into_path(state_owner, state_repository, state_name, state_commit)
                     .ok_or(crate::error::Error::MissingArgs("--state-owner and --state-repository are required for github/filesystem, --state-name for mock"))?;
                 let state = objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Remote(remote_path);
-                (agent, seed, state)
+                (agent, continuation, seed, state)
             }
         };
 
         let agent_path = agent_args.resolve()?;
+        let continuation = continuation_args.resolve()?;
 
         // Read remote from config
         let (_, mut config) = crate::config::read()?;
@@ -206,7 +213,7 @@ impl Commands {
             seed,
             stream: Some(true),
             max_step_retries: None,
-            continuation: None,
+            continuation,
         };
 
         crate::api::run(|http_client| async move {

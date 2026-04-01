@@ -1,4 +1,5 @@
 mod config;
+mod continuation;
 mod error;
 mod remote;
 mod get;

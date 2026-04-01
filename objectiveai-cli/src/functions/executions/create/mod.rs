@@ -211,6 +211,8 @@ pub enum Commands {
         profile: ProfileArgs,
         #[command(flatten)]
         input: InputSource,
+        #[command(flatten)]
+        continuation: crate::continuation::ContinuationArgs,
         /// Retry token from a previous execution
         #[arg(long)]
         retry_token: Option<String>,
@@ -226,6 +228,8 @@ pub enum Commands {
         profile: ProfileArgs,
         #[command(flatten)]
         input: InputSource,
+        #[command(flatten)]
+        continuation: crate::continuation::ContinuationArgs,
         /// Retry token from a previous execution
         #[arg(long)]
         retry_token: Option<String>,
@@ -243,21 +247,22 @@ pub enum Commands {
 
 impl Commands {
     pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
-        let (function_path, profile_path, input_source, retry_token, seed, strategy) = match self {
-            Commands::Standard { function, profile, input, retry_token, seed } => {
+        let (function_path, profile_path, input_source, continuation_args, retry_token, seed, strategy) = match self {
+            Commands::Standard { function, profile, input, continuation, retry_token, seed } => {
                 let fp = function.resolve()?;
                 let pp = profile.resolve()?;
-                (fp, pp, input, retry_token, seed, objectiveai::functions::executions::request::Strategy::Default)
+                (fp, pp, input, continuation, retry_token, seed, objectiveai::functions::executions::request::Strategy::Default)
             }
-            Commands::SwissSystem { function, profile, input, retry_token, seed, pool, rounds } => {
+            Commands::SwissSystem { function, profile, input, continuation, retry_token, seed, pool, rounds } => {
                 let fp = function.resolve()?;
                 let pp = profile.resolve()?;
                 let strategy = objectiveai::functions::executions::request::Strategy::SwissSystem { pool, rounds };
-                (fp, pp, input, retry_token, seed, strategy)
+                (fp, pp, input, continuation, retry_token, seed, strategy)
             }
         };
 
         let input_value = input_source.resolve()?;
+        let continuation = continuation_args.resolve()?;
 
         let params = objectiveai::functions::executions::request::FunctionExecutionCreateParams {
             function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(function_path),
@@ -270,7 +275,7 @@ impl Commands {
             provider: None,
             seed,
             stream: Some(true),
-            continuation: None,
+            continuation,
         };
 
         crate::api::run(|http_client| async move {
