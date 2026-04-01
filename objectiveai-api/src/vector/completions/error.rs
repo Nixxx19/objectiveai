@@ -27,6 +27,9 @@ pub enum Error {
     /// Vector completions require at least two response options.
     #[error("expected two or more request vector responses, got {0}")]
     ExpectedTwoOrMoreRequestVectorResponses(usize),
+    /// Cannot use both from_cache and continuation at the same time.
+    #[error("from_cache and continuation are mutually exclusive")]
+    CacheAndContinuationConflict,
 }
 
 impl objectiveai::error::StatusError for Error {
@@ -40,6 +43,7 @@ impl objectiveai::error::StatusError for Error {
             Error::SwarmNotFound => 404,
             Error::InvalidSwarm(_) => 400,
             Error::ExpectedTwoOrMoreRequestVectorResponses(_) => 400,
+            Error::CacheAndContinuationConflict => 400,
         }
     }
 
@@ -78,6 +82,10 @@ impl objectiveai::error::StatusError for Error {
                 Error::ExpectedTwoOrMoreRequestVectorResponses(n) => serde_json::json!({
                     "kind": "expected_two_or_more_request_vector_responses",
                     "error": format!("expected two or more request vector responses, got {}", n),
+                }),
+                Error::CacheAndContinuationConflict => serde_json::json!({
+                    "kind": "cache_and_continuation_conflict",
+                    "error": "from_cache and continuation are mutually exclusive",
                 }),
             }
         }))

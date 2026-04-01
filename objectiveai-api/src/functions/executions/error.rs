@@ -72,6 +72,9 @@ pub enum Error {
     /// A circular dependency was detected between functions.
     #[error("circular dependency detected: {0:?}")]
     CircularDependency(objectiveai::RemotePath),
+    /// Cannot use both from_cache and continuation at the same time.
+    #[error("from_cache and continuation are mutually exclusive")]
+    CacheAndContinuationConflict,
 }
 
 /// Error from evaluating a task's output expression.
@@ -107,6 +110,7 @@ impl objectiveai::error::StatusError for Error {
             Error::NoValidTaskOutputs => 400,
             Error::TaskOutputExpressionErrors(_) => 400,
             Error::CircularDependency(_) => 400,
+            Error::CacheAndContinuationConflict => 400,
         }
     }
 
@@ -200,6 +204,10 @@ impl objectiveai::error::StatusError for Error {
                 Error::CircularDependency(path) => serde_json::json!({
                     "kind": "circular_dependency",
                     "error": format!("circular dependency detected: {}", path.url()),
+                }),
+                Error::CacheAndContinuationConflict => serde_json::json!({
+                    "kind": "cache_and_continuation_conflict",
+                    "error": "from_cache and continuation are mutually exclusive",
                 }),
             }
         }))

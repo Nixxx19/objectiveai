@@ -210,6 +210,11 @@ where
         + 'static,
         super::Error,
     >{
+        // Reject conflicting from_cache + continuation.
+        if request.from_cache.is_some_and(|b| b) && request.continuation.is_some() {
+            return Err(super::Error::CacheAndContinuationConflict);
+        }
+
         // timestamp and identify the completion
         let created = time::SystemTime::now()
             .duration_since(time::UNIX_EPOCH)
