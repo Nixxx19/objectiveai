@@ -9,6 +9,7 @@ use subtle::ConstantTimeEq;
 use std::sync::Arc;
 use tauri::Emitter;
 use tokio::sync::mpsc;
+use crate::agent;
 use crate::functions;
 
 #[derive(Envconfig)]
@@ -78,6 +79,16 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
     let secret = config.secret.map(Arc::new);
 
     let app = axum::Router::new()
+        .route(
+            "/agent/completions",
+            axum::routing::post({
+                let tx = tx.clone();
+                move |Json(request): Json<agent::completions::request::Request>| async move {
+                    tx.send(Event::AgentCompletions(request)).ok();
+                    StatusCode::OK
+                }
+            }),
+        )
         .route(
             "/functions/executions",
             axum::routing::post({
@@ -199,6 +210,7 @@ fn verify_signature(secret: &str, _body: &[u8], signature_header: &str) -> bool 
 #[derive(Clone, Serialize)]
 #[serde(untagged)]
 pub enum Event {
+    AgentCompletions(agent::completions::request::Request),
     FunctionsExecutions(functions::executions::request::Request),
     FunctionsInventionsRecursive(functions::inventions::recursive::request::Request),
 }
@@ -206,6 +218,7 @@ pub enum Event {
 impl Event {
     fn name(&self) -> &'static str {
         match self {
+            Event::AgentCompletions(_) => "agent-completions",
             Event::FunctionsExecutions(_) => "functions-executions",
             Event::FunctionsInventionsRecursive(_) => "functions-inventions-recursive",
         }

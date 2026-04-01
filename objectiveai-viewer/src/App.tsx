@@ -2,20 +2,29 @@ import { useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { z } from "zod";
 import {
+  AgentCompletionsRequestAgentCompletionCreateParamsSchema,
+  AgentCompletionsResponseStreamingAgentCompletionChunkSchema,
   FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema,
   FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema,
   FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema,
   FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema,
   ErrorResponseErrorSchema,
+  agentCompletionsResponseStreamingAgentCompletionChunkMerged,
   functionsExecutionsResponseStreamingFunctionExecutionChunkMerged,
   functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged,
 } from "objectiveai";
 import type {
+  AgentCompletionsResponseStreamingAgentCompletionChunk,
   FunctionsExecutionsResponseStreamingFunctionExecutionChunk,
   FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk,
 } from "objectiveai";
 
 // Extended schemas with required id
+const AgentCompletionCreateParamsSchema = AgentCompletionsRequestAgentCompletionCreateParamsSchema.extend({
+  id: z.string(),
+});
+type AgentCompletionCreateParams = z.infer<typeof AgentCompletionCreateParamsSchema>;
+
 const FunctionExecutionCreateParamsSchema = FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema.extend({
   id: z.string(),
 });
@@ -32,6 +41,11 @@ const ResponseErrorSchema = ErrorResponseErrorSchema.extend({
 type ResponseError = z.infer<typeof ResponseErrorSchema>;
 
 // Classified incoming event
+type AgentCompletionEvent =
+  | { type: "begin"; data: AgentCompletionCreateParams }
+  | { type: "chunk"; data: AgentCompletionsResponseStreamingAgentCompletionChunk }
+  | { type: "error"; data: ResponseError };
+
 type FunctionExecutionEvent =
   | { type: "begin"; data: FunctionExecutionCreateParams }
   | { type: "chunk"; data: FunctionsExecutionsResponseStreamingFunctionExecutionChunk }
@@ -43,6 +57,14 @@ type FunctionInventionRecursiveEvent =
   | { type: "error"; data: ResponseError };
 
 // Entry in the list
+interface AgentCompletionEntry {
+  kind: "agent-completion";
+  id: string;
+  request: AgentCompletionCreateParams;
+  chunk: AgentCompletionsResponseStreamingAgentCompletionChunk | null;
+  error: ResponseError | null;
+}
+
 interface FunctionExecutionEntry {
   kind: "execution";
   id: string;
@@ -59,7 +81,17 @@ interface FunctionInventionRecursiveEntry {
   error: ResponseError | null;
 }
 
-type Entry = FunctionExecutionEntry | FunctionInventionRecursiveEntry;
+type Entry = AgentCompletionEntry | FunctionExecutionEntry | FunctionInventionRecursiveEntry;
+
+function classifyAgentCompletion(payload: unknown): AgentCompletionEvent | null {
+  const beginParse = AgentCompletionCreateParamsSchema.safeParse(payload);
+  if (beginParse.success) return { type: "begin", data: beginParse.data };
+  const errorParse = ResponseErrorSchema.safeParse(payload);
+  if (errorParse.success) return { type: "error", data: errorParse.data };
+  const chunkParse = AgentCompletionsResponseStreamingAgentCompletionChunkSchema.safeParse(payload);
+  if (chunkParse.success) return { type: "chunk", data: chunkParse.data };
+  return null;
+}
 
 function classifyFunctionExecution(payload: unknown): FunctionExecutionEvent | null {
   const beginParse = FunctionExecutionCreateParamsSchema.safeParse(payload);
@@ -95,6 +127,42 @@ function App() {
   const [entries, setEntries] = useState<Entry[]>([]);
 
   useEffect(() => {
+    const unlistenAgentCompletion = listen<unknown>("agent-completions", (event) => {
+      const classified = classifyAgentCompletion(event.payload);
+      if (!classified) return;
+
+      setEntries((prev) => {
+        switch (classified.type) {
+          case "begin":
+            return [...prev, {
+              kind: "agent-completion" as const,
+              id: classified.data.id,
+              request: classified.data,
+              chunk: null,
+              error: null,
+            }];
+          case "error": {
+            const id = classified.data.id;
+            if (!prev.some((e) => e.id === id)) return prev;
+            return prev.map((e) =>
+              e.id === id ? { ...e, error: classified.data } : e
+            );
+          }
+          case "chunk": {
+            const id = classified.data.id;
+            if (!prev.some((e) => e.id === id && e.kind === "agent-completion")) return prev;
+            return prev.map((e) => {
+              if (e.id !== id || e.kind !== "agent-completion") return e;
+              const [merged] = e.chunk
+                ? agentCompletionsResponseStreamingAgentCompletionChunkMerged(e.chunk, classified.data)
+                : [classified.data, true];
+              return { ...e, chunk: merged };
+            });
+          }
+        }
+      });
+    });
+
     const unlistenExecution = listen<unknown>("functions-executions", (event) => {
       const classified = classifyFunctionExecution(event.payload);
       if (!classified) return;
@@ -168,6 +236,7 @@ function App() {
     });
 
     return () => {
+      unlistenAgentCompletion.then((fn) => fn());
       unlistenExecution.then((fn) => fn());
       unlistenInvention.then((fn) => fn());
     };
