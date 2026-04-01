@@ -1046,7 +1046,7 @@ fn build_agent_params(
         response_format: None,
         seed: request.seed,
         stream: Some(true),
-        continuation: None,
+        continuation: request.continuation.clone(),
     }
 }
 

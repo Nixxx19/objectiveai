@@ -17,6 +17,7 @@ swarm), force each to vote for one of the predefined responses, and
 combine votes using the provided profile weights to produce final scores."""
     model_config = ConfigDict(title='vector.completions.request.VectorCompletionCreateParams')
 
+    continuation: Optional[str] = Field(None, description='Continuation from a previous completion, as a base64-encoded string.', json_schema_extra={'omitempty': True})
     from_cache: Optional[bool] = Field(None, description='If true, uses cached votes when available.', json_schema_extra={'omitempty': True})
     messages: list[Message] = Field(..., description='The conversation messages (the prompt).')
     provider: Optional[Provider] = Field(None, description='Provider routing preferences.', json_schema_extra={'omitempty': True})

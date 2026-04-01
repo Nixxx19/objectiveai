@@ -2211,6 +2211,7 @@ declare const AgentCompletionsRequestAgentCompletionCreateParamsSchema: z.ZodObj
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -2758,6 +2759,7 @@ declare const AgentCompletionsRequestAgentCompletionCreateParamsSchema: z.ZodObj
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -4779,6 +4781,7 @@ declare const AgentCompletionsRequestAgentCompletionCreateParamsStreamingSchema:
         upstream: z$1.ZodLiteral<"claude_agent_sdk">;
     }, z$1.core.$strip>, z$1.ZodObject<{
         error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+        error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
         invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
         output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
         top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
@@ -5326,6 +5329,7 @@ declare const AgentCompletionsRequestAgentCompletionCreateParamsStreamingSchema:
             upstream: z$1.ZodLiteral<"claude_agent_sdk">;
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+            error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
             invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
             top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
@@ -6087,6 +6091,7 @@ declare const AgentCompletionsRequestAgentCompletionCreateParamsUnarySchema: z$1
         upstream: z$1.ZodLiteral<"claude_agent_sdk">;
     }, z$1.core.$strip>, z$1.ZodObject<{
         error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+        error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
         invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
         output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
         top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
@@ -6634,6 +6639,7 @@ declare const AgentCompletionsRequestAgentCompletionCreateParamsUnarySchema: z$1
             upstream: z$1.ZodLiteral<"claude_agent_sdk">;
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+            error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
             invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
             top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
@@ -6857,6 +6863,7 @@ declare function agentCompletionsCreateAgentCompletion(client: ObjectiveAI, body
 
 declare const AgentMockAgentSchema: z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -6867,6 +6874,7 @@ type AgentMockAgent = z.infer<typeof AgentMockAgentSchema>;
 
 declare const AgentMockAgentBaseSchema: z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -8684,6 +8692,7 @@ declare const AgentAgentSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodUnio
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -9235,6 +9244,7 @@ declare const AgentAgentSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodUnio
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -9785,6 +9795,7 @@ declare const AgentAgentBaseSchema: z.ZodUnion<readonly [z.ZodIntersection<z.Zod
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -10333,6 +10344,7 @@ declare const AgentAgentBaseSchema: z.ZodUnion<readonly [z.ZodIntersection<z.Zod
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -10884,6 +10896,7 @@ declare const AgentAgentWithFallbacksSchema: z.ZodUnion<readonly [z.ZodIntersect
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -11434,6 +11447,7 @@ declare const AgentAgentWithFallbacksSchema: z.ZodUnion<readonly [z.ZodIntersect
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -11986,6 +12000,7 @@ declare const AgentAgentWithFallbacksSchema: z.ZodUnion<readonly [z.ZodIntersect
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -12536,6 +12551,7 @@ declare const AgentAgentWithFallbacksSchema: z.ZodUnion<readonly [z.ZodIntersect
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -13089,6 +13105,7 @@ declare const AgentAgentWithFallbacksWithCountSchema: z.ZodIntersection<z.ZodUni
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -13639,6 +13656,7 @@ declare const AgentAgentWithFallbacksWithCountSchema: z.ZodIntersection<z.ZodUni
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -14191,6 +14209,7 @@ declare const AgentAgentWithFallbacksWithCountSchema: z.ZodIntersection<z.ZodUni
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -14741,6 +14760,7 @@ declare const AgentAgentWithFallbacksWithCountSchema: z.ZodIntersection<z.ZodUni
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -15607,6 +15627,7 @@ declare const AgentInlineAgentSchema: z.ZodUnion<readonly [z.ZodObject<{
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -16157,6 +16178,7 @@ declare const AgentInlineAgentBaseSchema: z.ZodUnion<readonly [z.ZodObject<{
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -16706,6 +16728,7 @@ declare const AgentInlineAgentBaseWithFallbacksSchema: z.ZodIntersection<z.ZodUn
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -17253,6 +17276,7 @@ declare const AgentInlineAgentBaseWithFallbacksSchema: z.ZodIntersection<z.ZodUn
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -17803,6 +17827,7 @@ declare const AgentInlineAgentBaseWithFallbacksOrRemoteSchema: z.ZodUnion<readon
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -18350,6 +18375,7 @@ declare const AgentInlineAgentBaseWithFallbacksOrRemoteSchema: z.ZodUnion<readon
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -18913,6 +18939,7 @@ declare const AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema: z.Z
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -19460,6 +19487,7 @@ declare const AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema: z.Z
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -20023,6 +20051,7 @@ declare const AgentInlineAgentBaseWithFallbacksOrRemoteWithCountSchema: z.ZodInt
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -20570,6 +20599,7 @@ declare const AgentInlineAgentBaseWithFallbacksOrRemoteWithCountSchema: z.ZodInt
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -21137,6 +21167,7 @@ declare const AgentInlineAgentWithFallbacksSchema: z.ZodIntersection<z.ZodUnion<
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -21687,6 +21718,7 @@ declare const AgentInlineAgentWithFallbacksSchema: z.ZodIntersection<z.ZodUnion<
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -22285,6 +22317,7 @@ declare const AgentRemoteAgentSchema: z.ZodIntersection<z.ZodUnion<readonly [z.Z
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -22837,6 +22870,7 @@ declare const AgentRemoteAgentBaseSchema: z.ZodIntersection<z.ZodUnion<readonly 
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -23388,6 +23422,7 @@ declare const AgentRemoteAgentBaseWithFallbacksSchema: z.ZodIntersection<z.ZodIn
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -23935,6 +23970,7 @@ declare const AgentRemoteAgentBaseWithFallbacksSchema: z.ZodIntersection<z.ZodIn
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -24489,6 +24525,7 @@ declare const AgentRemoteAgentWithFallbacksSchema: z.ZodIntersection<z.ZodInters
     upstream: z.ZodLiteral<"claude_agent_sdk">;
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
     invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -25039,6 +25076,7 @@ declare const AgentRemoteAgentWithFallbacksSchema: z.ZodIntersection<z.ZodInters
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -27116,6 +27154,7 @@ declare function wasmFunctionsCheckCheckScalarFields(fields: FunctionsCheckScala
 declare function wasmFunctionsCheckCheckVectorFields(fields: FunctionsCheckVectorFieldsValidation): void;
 
 declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.ZodObject<{
+    continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     from_cache: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     function: z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
         tasks: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodIntersection<z.ZodUnion<readonly [z.ZodObject<{
@@ -29390,6 +29429,7 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -29937,6 +29977,7 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
                 upstream: z.ZodLiteral<"claude_agent_sdk">;
             }, z.core.$strip>, z.ZodObject<{
                 error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+                error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
                 invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
                 output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
                 top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -30513,6 +30554,7 @@ declare const FunctionsExecutionsRequestReasoningSchema: z.ZodObject<{
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -31060,6 +31102,7 @@ declare const FunctionsExecutionsRequestReasoningSchema: z.ZodObject<{
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -33095,6 +33138,7 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -33642,6 +33686,7 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -33661,6 +33706,7 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
         name: z.ZodString;
         remote: z.ZodLiteral<"mock">;
     }, z.core.$strip>]>]>;
+    continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     max_step_retries: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     overwrite: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     provider: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -43791,6 +43837,7 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
         upstream: z$1.ZodLiteral<"claude_agent_sdk">;
     }, z$1.core.$strip>, z$1.ZodObject<{
         error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+        error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
         invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
         output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
         top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
@@ -44338,6 +44385,7 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
             upstream: z$1.ZodLiteral<"claude_agent_sdk">;
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+            error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
             invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
             top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
@@ -44357,6 +44405,7 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
         name: z$1.ZodString;
         remote: z$1.ZodLiteral<"mock">;
     }, z$1.core.$strip>]>]>;
+    continuation: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
     max_step_retries: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
     overwrite: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
     provider: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodObject<{
@@ -45297,6 +45346,7 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
         upstream: z$1.ZodLiteral<"claude_agent_sdk">;
     }, z$1.core.$strip>, z$1.ZodObject<{
         error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+        error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
         invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
         output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
         top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
@@ -45844,6 +45894,7 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
             upstream: z$1.ZodLiteral<"claude_agent_sdk">;
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+            error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
             invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
             top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
@@ -45863,6 +45914,7 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
         name: z$1.ZodString;
         remote: z$1.ZodLiteral<"mock">;
     }, z$1.core.$strip>]>]>;
+    continuation: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
     max_step_retries: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
     overwrite: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
     provider: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodObject<{
@@ -46806,6 +46858,7 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsSchema: z.Z
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -47353,6 +47406,7 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsSchema: z.Z
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -47372,6 +47426,7 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsSchema: z.Z
         name: z.ZodString;
         remote: z.ZodLiteral<"mock">;
     }, z.core.$strip>]>]>;
+    continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     max_step_retries: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     overwrite: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     provider: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -54733,6 +54788,7 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSc
         upstream: z$1.ZodLiteral<"claude_agent_sdk">;
     }, z$1.core.$strip>, z$1.ZodObject<{
         error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+        error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
         invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
         output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
         top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
@@ -55280,6 +55336,7 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSc
             upstream: z$1.ZodLiteral<"claude_agent_sdk">;
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+            error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
             invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
             top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
@@ -55299,6 +55356,7 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSc
         name: z$1.ZodString;
         remote: z$1.ZodLiteral<"mock">;
     }, z$1.core.$strip>]>]>;
+    continuation: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
     max_step_retries: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
     overwrite: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
     provider: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodObject<{
@@ -56239,6 +56297,7 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema
         upstream: z$1.ZodLiteral<"claude_agent_sdk">;
     }, z$1.core.$strip>, z$1.ZodObject<{
         error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+        error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
         invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
         output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
         top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
@@ -56786,6 +56845,7 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema
             upstream: z$1.ZodLiteral<"claude_agent_sdk">;
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+            error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
             invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
             top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
@@ -56805,6 +56865,7 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema
         name: z$1.ZodString;
         remote: z$1.ZodLiteral<"mock">;
     }, z$1.core.$strip>]>]>;
+    continuation: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
     max_step_retries: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
     overwrite: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
     provider: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodObject<{
@@ -59498,6 +59559,7 @@ declare const FunctionsProfilesComputationsRequestFunctionProfileComputationCrea
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -60045,6 +60107,7 @@ declare const FunctionsProfilesComputationsRequestFunctionProfileComputationCrea
                 upstream: z.ZodLiteral<"claude_agent_sdk">;
             }, z.core.$strip>, z.ZodObject<{
                 error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+                error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
                 invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
                 output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
                 top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -60893,6 +60956,7 @@ declare const SwarmInlineSwarmBaseSchema: z.ZodObject<{
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -61440,6 +61504,7 @@ declare const SwarmInlineSwarmBaseSchema: z.ZodObject<{
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -77207,6 +77272,7 @@ declare const FunctionsProfileSchema: z.ZodUnion<readonly [z.ZodUnion<readonly [
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -77754,6 +77820,7 @@ declare const FunctionsProfileSchema: z.ZodUnion<readonly [z.ZodUnion<readonly [
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -79755,6 +79822,7 @@ declare const FunctionsRemoteProfileSchema: z.ZodUnion<readonly [z.ZodIntersecti
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -80302,6 +80370,7 @@ declare const FunctionsRemoteProfileSchema: z.ZodUnion<readonly [z.ZodIntersecti
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -82760,6 +82829,7 @@ declare const SwarmInlineSwarmSchema: z.ZodObject<{
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -83310,6 +83380,7 @@ declare const SwarmInlineSwarmSchema: z.ZodObject<{
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -83862,6 +83933,7 @@ declare const SwarmInlineSwarmSchema: z.ZodObject<{
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -84412,6 +84484,7 @@ declare const SwarmInlineSwarmSchema: z.ZodObject<{
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -84972,6 +85045,7 @@ declare const SwarmInlineSwarmBaseOrRemoteSchema: z.ZodUnion<readonly [z.ZodObje
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -85519,6 +85593,7 @@ declare const SwarmInlineSwarmBaseOrRemoteSchema: z.ZodUnion<readonly [z.ZodObje
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -86103,6 +86178,7 @@ declare const SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema: z.ZodUnion<reado
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -86650,6 +86726,7 @@ declare const SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema: z.ZodUnion<reado
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -87272,6 +87349,7 @@ declare const SwarmRemoteSwarmSchema: z.ZodIntersection<z.ZodObject<{
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -87822,6 +87900,7 @@ declare const SwarmRemoteSwarmSchema: z.ZodIntersection<z.ZodObject<{
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -88374,6 +88453,7 @@ declare const SwarmRemoteSwarmSchema: z.ZodIntersection<z.ZodObject<{
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -88924,6 +89004,7 @@ declare const SwarmRemoteSwarmSchema: z.ZodIntersection<z.ZodObject<{
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -89486,6 +89567,7 @@ declare const SwarmRemoteSwarmBaseSchema: z.ZodIntersection<z.ZodObject<{
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -90033,6 +90115,7 @@ declare const SwarmRemoteSwarmBaseSchema: z.ZodIntersection<z.ZodObject<{
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -90608,6 +90691,7 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -91158,6 +91242,7 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -91710,6 +91795,7 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -92260,6 +92346,7 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -92821,6 +92908,7 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -93371,6 +93459,7 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -93923,6 +94012,7 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -94473,6 +94563,7 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
@@ -95033,6 +95124,7 @@ declare const SwarmSwarmBaseSchema: z.ZodUnion<readonly [z.ZodIntersection<z.Zod
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -95580,6 +95672,7 @@ declare const SwarmSwarmBaseSchema: z.ZodUnion<readonly [z.ZodIntersection<z.Zod
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -96150,6 +96243,7 @@ declare const SwarmSwarmBaseSchema: z.ZodUnion<readonly [z.ZodIntersection<z.Zod
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -96697,6 +96791,7 @@ declare const SwarmSwarmBaseSchema: z.ZodUnion<readonly [z.ZodIntersection<z.Zod
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -97297,6 +97392,7 @@ declare const VectorCompletionsCacheCacheVoteRequestSchema: z.ZodObject<{
         upstream: z.ZodLiteral<"claude_agent_sdk">;
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -97844,6 +97940,7 @@ declare const VectorCompletionsCacheCacheVoteRequestSchema: z.ZodObject<{
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -98065,6 +98162,7 @@ declare function vectorCompletionsCacheGetCompletionVotes(client: ObjectiveAI, i
 declare function vectorCompletionsCacheGetCacheVote(client: ObjectiveAI, body: VectorCompletionsCacheCacheVoteRequest, options?: RequestOptions): Promise<VectorCompletionsCacheCacheVote>;
 
 declare const VectorCompletionsRequestVectorCompletionCreateParamsSchema: z.ZodObject<{
+    continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     from_cache: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     messages: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
         content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
@@ -98803,6 +98901,7 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsSchema: z.ZodO
             upstream: z.ZodLiteral<"claude_agent_sdk">;
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -99350,6 +99449,7 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsSchema: z.ZodO
                 upstream: z.ZodLiteral<"claude_agent_sdk">;
             }, z.core.$strip>, z.ZodObject<{
                 error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+                error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
                 invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
                 output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
                 top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -100259,6 +100359,7 @@ declare const VectorCompletionsVectorResponsesSchema: z.ZodArray<z.ZodUnion<read
 type VectorCompletionsVectorResponses = z.infer<typeof VectorCompletionsVectorResponsesSchema>;
 
 declare const VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchema: z$1.ZodObject<{
+    continuation: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
     from_cache: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
     messages: z$1.ZodArray<z$1.ZodUnion<readonly [z$1.ZodIntersection<z$1.ZodObject<{
         content: z$1.ZodUnion<readonly [z$1.ZodString, z$1.ZodArray<z$1.ZodObject<{
@@ -100996,6 +101097,7 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchem
             upstream: z$1.ZodLiteral<"claude_agent_sdk">;
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+            error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
             invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
             top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
@@ -101543,6 +101645,7 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchem
                 upstream: z$1.ZodLiteral<"claude_agent_sdk">;
             }, z$1.core.$strip>, z$1.ZodObject<{
                 error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+                error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
                 invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
                 output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
                 top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
@@ -101586,6 +101689,7 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchem
 }, z$1.core.$strip>;
 type VectorCompletionsRequestVectorCompletionCreateParamsStreaming = z$1.infer<typeof VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchema>;
 declare const VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema: z$1.ZodObject<{
+    continuation: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
     from_cache: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
     messages: z$1.ZodArray<z$1.ZodUnion<readonly [z$1.ZodIntersection<z$1.ZodObject<{
         content: z$1.ZodUnion<readonly [z$1.ZodString, z$1.ZodArray<z$1.ZodObject<{
@@ -102323,6 +102427,7 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema: z
             upstream: z$1.ZodLiteral<"claude_agent_sdk">;
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+            error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
             invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
             top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
@@ -102870,6 +102975,7 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema: z
                 upstream: z$1.ZodLiteral<"claude_agent_sdk">;
             }, z$1.core.$strip>, z$1.ZodObject<{
                 error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+                error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
                 invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
                 output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
                 top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;

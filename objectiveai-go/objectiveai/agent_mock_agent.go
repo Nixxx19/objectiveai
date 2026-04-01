@@ -11,6 +11,9 @@ import (
 type AgentMockAgent struct {
 	// If true, the mock client will return an error instead of a response.
 	Error *bool `json:"error,omitempty"`
+	// Probability (0-100) that the mock returns an error mid-stream.
+	// Requires `error` to be `Some(true)`.
+	ErrorProbability *uint32 `json:"error_probability,omitempty" validate:"omitempty,min=0,max=255"`
 	// The deterministic content-addressed ID (22-character base62 string).
 	ID string `json:"id"`
 	// If true, this mock agent supports invention tool calling.

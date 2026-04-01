@@ -9,6 +9,7 @@ import { FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema } from "../../f
 import { FunctionsInlineProfileOrRemoteCommitOptionalSchema } from "../../inlineProfileOrRemoteCommitOptional";
 
 export const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema = z.object({
+  continuation: z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
   from_cache: z.boolean().nullable().meta({ omitempty: true }).optional(),
   function: FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema.describe("The function to execute (inline definition or remote path)."),
   input: FunctionsExpressionInputValueSchema,

@@ -2440,6 +2440,7 @@ where
                         seed: request_base.seed,
                         stream: request_base.stream,
                         responses: ftp.responses,
+                        continuation: request_base.continuation.clone(),
                     },
                 ),
             )
@@ -2649,7 +2650,7 @@ where
                         response_format: None,
                         seed: request.seed,
                         stream: Some(true),
-                        continuation: None,
+                        continuation: request.continuation.clone(),
                     },
                 ),
                 None,

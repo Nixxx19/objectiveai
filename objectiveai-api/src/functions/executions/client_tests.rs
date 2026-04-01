@@ -283,6 +283,7 @@ fn make_request(
         provider: None,
         seed: Some(seed),
         stream: None,
+        continuation: None,
     })
 }
 
@@ -1130,6 +1131,7 @@ async fn test_inline_scalar_placeholder_seed_42() {
         provider: None,
         seed: Some(42),
         stream: None,
+        continuation: None,
     });
     let result = normalize(run_execution(&client, request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
@@ -1165,6 +1167,7 @@ async fn test_mock_25_scalar_placeholder_remote_swarm_seed_42() {
         provider: None,
         seed: Some(42),
         stream: None,
+        continuation: None,
     });
     let result = normalize(run_execution(&client, request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
@@ -1200,6 +1203,7 @@ async fn test_mock_4_vector_swiss_default_20_items_seed_7() {
         provider: None,
         seed: Some(7),
         stream: None,
+        continuation: None,
     });
     let result = normalize(run_execution(&client, request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
@@ -1234,6 +1238,7 @@ async fn test_mock_5_vector_swiss_pool5_rounds3_20_items_seed_7() {
         provider: None,
         seed: Some(7),
         stream: None,
+        continuation: None,
     });
     let result = normalize(run_execution(&client, request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
@@ -1265,6 +1270,7 @@ async fn test_mock_7_vector_swiss_pool4_rounds3_20_items_seed_7() {
         provider: None,
         seed: Some(7),
         stream: None,
+        continuation: None,
     });
     let result = normalize(run_execution(&client, request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
@@ -1429,6 +1435,7 @@ fn make_request_with_overrides(
         provider: None,
         seed: Some(42),
         stream: None,
+        continuation: None,
     };
     overrides(&mut params);
     Arc::new(params)

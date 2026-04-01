@@ -15,6 +15,20 @@
       ],
       "omitempty": true
     },
+    "error_probability": {
+      "description": "Probability (0-100) that the mock returns an error mid-stream.\nRequires `error` to be `Some(true)`.",
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
     "invention": {
       "description": "If true, this mock agent supports invention tool calling.\nIncompatible with output modes other than `instruction`.",
       "anyOf": [

@@ -143,7 +143,7 @@ type TestClient = super::Client<
     crate::agent::completions::mock::Client,
     StubRetrieveClient,
     StubRetrieveClient,
-    StubRetrieveClient,
+    crate::retrieval::retrieve::mock::MockClient,
     StubAgentUsageHandler,
     StubInventionUsageHandler,
     crate::retrieval::retrieve::mock::MockClient,
@@ -156,7 +156,7 @@ fn make_client() -> Arc<TestClient> {
     let retrieve_router = Arc::new(crate::retrieval::retrieve::Router::new(
         Arc::new(StubRetrieveClient),
         Arc::new(StubRetrieveClient),
-        Arc::new(StubRetrieveClient),
+        Arc::new(crate::retrieval::retrieve::mock::MockClient),
     ));
     let agent_client = Arc::new(crate::agent::completions::Client::new(
         Arc::new(crate::mcp::Client::new(
@@ -259,6 +259,7 @@ fn make_request(state: ParamsState, seed: i64) -> Arc<FunctionInventionRecursive
         seed: Some(seed),
         stream: Some(true),
         max_step_retries: Some(1),
+        continuation: None,
     })
 }
 

@@ -9,6 +9,8 @@ import (
 
 type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams struct {
 	Agent AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional `json:"agent"`
+	// Continuation from a previous completion, as a base64-encoded string.
+	Continuation *string `json:"continuation,omitempty"`
 	// Maximum number of retries per invention step.
 	// Each step is one agent completion (which itself may loop internally
 	// via tool calls). If the step's validation still fails after the

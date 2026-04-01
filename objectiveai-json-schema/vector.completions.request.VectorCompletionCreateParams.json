@@ -3,6 +3,18 @@
   "description": "Parameters for creating a vector completion.\n\nVector completions run multiple agent completions (one per LLM in the\nswarm), force each to vote for one of the predefined responses, and\ncombine votes using the provided profile weights to produce final scores.",
   "type": "object",
   "properties": {
+    "continuation": {
+      "description": "Continuation from a previous completion, as a base64-encoded string.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
     "from_cache": {
       "description": "If true, uses cached votes when available.",
       "anyOf": [

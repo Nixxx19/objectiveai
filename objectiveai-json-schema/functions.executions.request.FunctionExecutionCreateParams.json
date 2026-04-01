@@ -3,6 +3,18 @@
   "description": "Parameters for creating a function execution.",
   "type": "object",
   "properties": {
+    "continuation": {
+      "description": "Continuation from a previous completion, as a base64-encoded string.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
     "from_cache": {
       "anyOf": [
         {

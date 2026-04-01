@@ -6,6 +6,7 @@ import { AgentMockUpstreamSchema } from "./upstream";
 
 export const AgentMockAgentBaseSchema = z.object({
   error: z.boolean().nullable().describe("If true, the mock client will return an error instead of a response.").meta({ omitempty: true }).optional(),
+  error_probability: z.number().int().min(0).max(255).nullable().describe("Probability (0-100) that the mock returns an error mid-stream.\nRequires `error` to be `Some(true)`.").meta({ omitempty: true }).optional(),
   invention: z.boolean().nullable().describe("If true, this mock agent supports invention tool calling.\nIncompatible with output modes other than `instruction`.").meta({ omitempty: true }).optional(),
   output_mode: AgentMockOutputModeSchema.describe("The output mode for vector completions. Ignored for agent completions."),
   top_logprobs: z.number().int().min(0).max(18446744073709552000).nullable().describe("Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.").meta({ omitempty: true }).optional(),

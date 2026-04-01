@@ -12,6 +12,7 @@ class Agent(BaseModel):
     model_config = ConfigDict(title='agent.mock.Agent')
 
     error: Optional[bool] = Field(None, description='If true, the mock client will return an error instead of a response.', json_schema_extra={'omitempty': True})
+    error_probability: Optional[Annotated[int, Field(ge=0, le=255)]] = Field(None, description='Probability (0-100) that the mock returns an error mid-stream.\nRequires `error` to be `Some(true)`.', json_schema_extra={'omitempty': True})
     id: str = Field(..., description='The deterministic content-addressed ID (22-character base62 string).')
     invention: Optional[bool] = Field(None, description='If true, this mock agent supports invention tool calling.\nIncompatible with output modes other than `instruction`.', json_schema_extra={'omitempty': True})
     output_mode: OutputMode = Field(..., description='The output mode for vector completions. Ignored for agent completions.')

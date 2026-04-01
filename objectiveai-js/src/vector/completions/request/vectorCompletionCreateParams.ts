@@ -7,6 +7,7 @@ import { AgentCompletionsRequestProviderSchema } from "../../../agent/completion
 import { SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema } from "../../../swarm/inlineSwarmBaseOrRemoteCommitOptional";
 
 export const VectorCompletionsRequestVectorCompletionCreateParamsSchema = z.object({
+  continuation: z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
   from_cache: z.boolean().nullable().describe("If true, uses cached votes when available.").meta({ omitempty: true }).optional(),
   messages: z.array(AgentCompletionsMessageMessageSchema).describe("The conversation messages (the prompt)."),
   provider: AgentCompletionsRequestProviderSchema.nullable().describe("Provider routing preferences.").meta({ omitempty: true }).optional(),

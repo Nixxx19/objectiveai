@@ -41,5 +41,8 @@ pub struct VectorCompletionCreateParams {
     pub stream: Option<bool>,
     /// The possible responses the LLMs can vote for.
     pub responses: Vec<agent::completions::message::RichContent>,
-
+    /// Continuation from a previous completion, as a base64-encoded string.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub continuation: Option<String>,
 }

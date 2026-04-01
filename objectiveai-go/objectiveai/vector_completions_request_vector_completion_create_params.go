@@ -13,6 +13,8 @@ import (
 // swarm), force each to vote for one of the predefined responses, and
 // combine votes using the provided profile weights to produce final scores.
 type VectorCompletionsRequestVectorCompletionCreateParams struct {
+	// Continuation from a previous completion, as a base64-encoded string.
+	Continuation *string `json:"continuation,omitempty"`
 	// If true, uses cached votes when available.
 	FromCache *bool `json:"from_cache,omitempty"`
 	// The conversation messages (the prompt).

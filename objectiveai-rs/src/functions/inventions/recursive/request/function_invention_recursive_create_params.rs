@@ -28,4 +28,8 @@ pub struct FunctionInventionRecursiveCreateParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
     pub max_step_retries: Option<u32>,
+    /// Continuation from a previous completion, as a base64-encoded string.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub continuation: Option<String>,
 }

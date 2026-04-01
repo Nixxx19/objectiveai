@@ -341,6 +341,7 @@ where
                 seed: request.seed,
                 stream: request.stream,
                 max_step_retries: request.max_step_retries,
+                continuation: request.continuation.clone(),
             },
         );
 
@@ -452,6 +453,7 @@ where
                     seed: request.seed,
                     stream: request.stream,
                     max_step_retries: request.max_step_retries,
+                    continuation: request.continuation.clone(),
                 },
             );
 

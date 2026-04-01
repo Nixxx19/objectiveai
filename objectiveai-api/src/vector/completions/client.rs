@@ -700,7 +700,7 @@ where
             response_format: response_format.clone(),
             seed: request.seed.map(|s| per_agent_seed(s, &primary_id, flat_swarm_index, &prompt_id, &responses_ids)),
             stream: Some(false),
-            continuation: None,
+            continuation: request.continuation.clone(),
         });
 
         // Call the agent completions client, yielding each chunk immediately

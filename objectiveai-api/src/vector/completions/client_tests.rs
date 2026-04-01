@@ -143,17 +143,17 @@ impl super::usage_handler::UsageHandler<ctx::DefaultContextExt>
 // Shared helpers for constructing clients
 // ---------------------------------------------------------------------------
 
-fn make_retrieve_router() -> Arc<crate::retrieval::retrieve::Router<StubRetrieveClient, StubRetrieveClient, StubRetrieveClient, ctx::DefaultContextExt>> {
+fn make_retrieve_router() -> Arc<crate::retrieval::retrieve::Router<StubRetrieveClient, StubRetrieveClient, crate::retrieval::retrieve::mock::MockClient, ctx::DefaultContextExt>> {
     Arc::new(crate::retrieval::retrieve::Router::new(
         Arc::new(StubRetrieveClient),
         Arc::new(StubRetrieveClient),
-        Arc::new(StubRetrieveClient),
+        Arc::new(crate::retrieval::retrieve::mock::MockClient),
     ))
 }
 
 fn make_agent_client(
-    retrieve_router: &Arc<crate::retrieval::retrieve::Router<StubRetrieveClient, StubRetrieveClient, StubRetrieveClient, ctx::DefaultContextExt>>,
-) -> Arc<crate::agent::completions::Client<ctx::DefaultContextExt, UnimplementedUpstreamClient, UnimplementedUpstreamClient, crate::agent::completions::mock::Client, StubRetrieveClient, StubRetrieveClient, StubRetrieveClient, StubAgentUsageHandler>> {
+    retrieve_router: &Arc<crate::retrieval::retrieve::Router<StubRetrieveClient, StubRetrieveClient, crate::retrieval::retrieve::mock::MockClient, ctx::DefaultContextExt>>,
+) -> Arc<crate::agent::completions::Client<ctx::DefaultContextExt, UnimplementedUpstreamClient, UnimplementedUpstreamClient, crate::agent::completions::mock::Client, StubRetrieveClient, StubRetrieveClient, crate::retrieval::retrieve::mock::MockClient, StubAgentUsageHandler>> {
     Arc::new(crate::agent::completions::Client::new(
         Arc::new(crate::mcp::Client::new(
             reqwest::Client::new(),
@@ -196,7 +196,7 @@ type TestVectorClient = super::Client<
     crate::agent::completions::mock::Client,
     StubRetrieveClient,
     StubRetrieveClient,
-    StubRetrieveClient,
+    crate::retrieval::retrieve::mock::MockClient,
     StubAgentUsageHandler,
     StubCompletionVotesFetcher,
     StubCacheVoteFetcher,
@@ -321,6 +321,7 @@ async fn test_single_agent_2_responses_instruction_seed_42() {
             RichContent::Text("Response A".to_string()),
             RichContent::Text("Response B".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -369,6 +370,7 @@ async fn test_single_agent_3_responses_instruction_seed_42() {
             RichContent::Text("Beta".to_string()),
             RichContent::Text("Gamma".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -416,6 +418,7 @@ async fn test_two_agents_equal_weights_seed_42() {
             RichContent::Text("Option 1".to_string()),
             RichContent::Text("Option 2".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -467,6 +470,7 @@ async fn test_two_agents_unequal_weights_seed_42() {
             RichContent::Text("Option 1".to_string()),
             RichContent::Text("Option 2".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -516,6 +520,7 @@ async fn test_three_agents_4_responses_seed_99() {
             RichContent::Text("Blue".to_string()),
             RichContent::Text("Yellow".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -566,6 +571,7 @@ async fn test_invert_vote_seed_42() {
             RichContent::Text("Bad option".to_string()),
             RichContent::Text("Worse option".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -614,6 +620,7 @@ async fn test_deterministic_same_seed() {
                 RichContent::Text("B".to_string()),
                 RichContent::Text("C".to_string()),
             ],
+            continuation: None,
             })
     };
 
@@ -663,6 +670,7 @@ async fn test_different_seeds_differ() {
                 RichContent::Text("A".to_string()),
                 RichContent::Text("B".to_string()),
             ],
+            continuation: None,
             })
     };
 
@@ -711,6 +719,7 @@ async fn test_many_responses_deep_prefix_tree_seed_42() {
         seed: Some(42),
         stream: None,
         responses,
+        continuation: None,
     });
 
     let stream = client
@@ -759,6 +768,7 @@ async fn test_json_schema_single_agent_seed_77() {
             RichContent::Text("Essay about artificial intelligence".to_string()),
             RichContent::Text("Essay about space exploration".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -806,6 +816,7 @@ async fn test_tool_call_single_agent_seed_55() {
             RichContent::Text("Minimalist wordmark".to_string()),
             RichContent::Text("Abstract geometric icon".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -853,6 +864,7 @@ async fn test_error_agent_skipped_seed_42() {
             RichContent::Text("Proposal A".to_string()),
             RichContent::Text("Proposal B".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -907,6 +919,7 @@ async fn test_mixed_output_modes_seed_88() {
             RichContent::Text("Reykjavik, Iceland".to_string()),
             RichContent::Text("Patagonia, Argentina".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -977,6 +990,7 @@ async fn test_image_responses_instruction_seed_33() {
                 RichContentPart::Text { text: "Watercolor garden scene".to_string() },
             ]),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -1063,6 +1077,7 @@ async fn test_video_and_file_responses_seed_66() {
                 },
             ]),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -1126,6 +1141,7 @@ async fn test_three_different_agents_seed_11() {
             RichContent::Text("Wagyu beef carpaccio".to_string()),
             RichContent::Text("Lobster thermidor".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -1179,6 +1195,7 @@ async fn test_json_schema_many_responses_seed_22() {
             RichContent::Text("Prolog".to_string()),
             RichContent::Text("Smalltalk".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -1254,6 +1271,7 @@ async fn test_tool_call_two_agents_seed_44() {
                 RichContentPart::Text { text: "Skeuomorphic with gradients".to_string() },
             ]),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -1336,6 +1354,7 @@ async fn test_error_and_healthy_agents_seed_99() {
             ]),
             RichContent::Text("Brutalist concrete monolith".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -1383,6 +1402,7 @@ async fn test_only_final_chunk_has_usage() {
             RichContent::Text("A".to_string()),
             RichContent::Text("B".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -1427,6 +1447,7 @@ async fn test_error_zero_responses() {
         seed: Some(42),
         stream: None,
         responses: vec![],
+        continuation: None,
     });
 
     let err = client
@@ -1469,6 +1490,7 @@ async fn test_error_one_response() {
         responses: vec![
             RichContent::Text("Only option".to_string()),
         ],
+        continuation: None,
     });
 
     let err = client
@@ -1516,6 +1538,7 @@ async fn test_error_invalid_swarm_all_count_zero() {
             RichContent::Text("A".to_string()),
             RichContent::Text("B".to_string()),
         ],
+        continuation: None,
     });
 
     let err = client
@@ -1557,6 +1580,7 @@ async fn test_error_invalid_swarm_empty_agents() {
             RichContent::Text("X".to_string()),
             RichContent::Text("Y".to_string()),
         ],
+        continuation: None,
     });
 
     let err = client
@@ -1603,6 +1627,7 @@ async fn test_error_invalid_swarm_profile_length_mismatch() {
             RichContent::Text("A".to_string()),
             RichContent::Text("B".to_string()),
         ],
+        continuation: None,
     });
 
     let err = client
@@ -1657,6 +1682,7 @@ async fn test_error_invalid_swarm_conflicting_invert() {
             RichContent::Text("A".to_string()),
             RichContent::Text("B".to_string()),
         ],
+        continuation: None,
     });
 
     let err = client
@@ -1700,6 +1726,7 @@ async fn test_error_invalid_profile_all_zero_weights() {
             RichContent::Text("A".to_string()),
             RichContent::Text("B".to_string()),
         ],
+        continuation: None,
     });
 
     let err = client
@@ -1752,6 +1779,7 @@ async fn test_logprobs_json_schema_2_agents_seed_42() {
             RichContent::Text("Option B".to_string()),
             RichContent::Text("Option C".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -1806,6 +1834,7 @@ async fn test_logprobs_json_schema_3_agents_unequal_seed_77() {
             RichContent::Text("Candidate Gamma".to_string()),
             RichContent::Text("Candidate Delta".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -1852,6 +1881,7 @@ async fn test_logprobs_tool_call_single_agent_seed_55() {
             RichContent::Text("Hammer".to_string()),
             RichContent::Text("Screwdriver".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -1908,6 +1938,7 @@ async fn test_logprobs_error_with_fallback_seed_99() {
             RichContent::Text("Plan B".to_string()),
             RichContent::Text("Plan C".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -1963,6 +1994,7 @@ async fn test_logprobs_all_errors_seed_42() {
             RichContent::Text("X".to_string()),
             RichContent::Text("Y".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -2010,6 +2042,7 @@ async fn test_logprobs_instruction_seed_33() {
             RichContent::Text("Cats".to_string()),
             RichContent::Text("Dogs".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client
@@ -2075,6 +2108,7 @@ async fn test_logprobs_mixed_modes_with_fallback_seed_88() {
             RichContent::Text("Design Ornate".to_string()),
             RichContent::Text("Design Hybrid".to_string()),
         ],
+        continuation: None,
     });
 
     let stream = client

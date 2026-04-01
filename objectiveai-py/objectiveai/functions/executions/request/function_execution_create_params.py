@@ -15,6 +15,7 @@ class FunctionExecutionCreateParams(BaseModel):
     """Parameters for creating a function execution."""
     model_config = ConfigDict(title='functions.executions.request.FunctionExecutionCreateParams')
 
+    continuation: Optional[str] = Field(None, description='Continuation from a previous completion, as a base64-encoded string.', json_schema_extra={'omitempty': True})
     from_cache: Optional[bool] = Field(None, json_schema_extra={'omitempty': True})
     function: FullInlineFunctionOrRemoteCommitOptional = Field(..., description='The function to execute (inline definition or remote path).')
     input: InputValue

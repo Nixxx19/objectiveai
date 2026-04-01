@@ -270,6 +270,7 @@ impl Commands {
             provider: None,
             seed,
             stream: Some(true),
+            continuation: None,
         };
 
         crate::api::run(|http_client| async move {

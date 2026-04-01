@@ -9,6 +9,8 @@ import (
 
 // Parameters for creating a function execution.
 type FunctionsExecutionsRequestFunctionExecutionCreateParams struct {
+	// Continuation from a previous completion, as a base64-encoded string.
+	Continuation *string `json:"continuation,omitempty"`
 	FromCache *bool `json:"from_cache,omitempty"`
 	// The function to execute (inline definition or remote path).
 	Function FunctionsFullInlineFunctionOrRemoteCommitOptional `json:"function"`

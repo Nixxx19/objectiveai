@@ -11,6 +11,9 @@ import (
 type AgentMockAgentBase struct {
 	// If true, the mock client will return an error instead of a response.
 	Error *bool `json:"error,omitempty"`
+	// Probability (0-100) that the mock returns an error mid-stream.
+	// Requires `error` to be `Some(true)`.
+	ErrorProbability *uint32 `json:"error_probability,omitempty" validate:"omitempty,min=0,max=255"`
 	// If true, this mock agent supports invention tool calling.
 	// Incompatible with output modes other than `instruction`.
 	Invention *bool `json:"invention,omitempty"`
