@@ -1,3 +1,4 @@
+pub mod completions;
 pub mod config;
 pub mod favorites;
 
@@ -14,6 +15,11 @@ pub enum Commands {
     List {
         #[command(subcommand)]
         source: crate::list::Source,
+    },
+    /// Agent completions
+    Completions {
+        #[command(subcommand)]
+        command: completions::Commands,
     },
     /// Agents configuration
     Config {
@@ -66,6 +72,7 @@ impl Commands {
                     ).await,
                 }
             }
+            Commands::Completions { command } => command.handle().await,
             Commands::Config { command } => command.handle(),
             Commands::Favorites { command } => command.handle(),
         }
