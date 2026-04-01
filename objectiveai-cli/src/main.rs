@@ -6,6 +6,7 @@ mod get;
 mod list;
 mod favorite;
 mod python;
+mod response_format;
 mod api;
 mod agents;
 mod swarms;

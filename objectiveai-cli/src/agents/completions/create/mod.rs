@@ -92,6 +92,8 @@ pub enum Commands {
         agent: AgentArgs,
         #[command(flatten)]
         continuation: crate::continuation::ContinuationArgs,
+        #[command(flatten)]
+        response_format: crate::response_format::ResponseFormatArgs,
         /// Seed for deterministic mock responses
         #[arg(long)]
         seed: Option<i64>,
@@ -100,21 +102,23 @@ pub enum Commands {
 
 impl Commands {
     pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
-        let (message_source, agent_args, continuation_args, seed) = match self {
-            Commands::Standard { messages, agent, continuation, seed } => {
-                (messages, agent, continuation, seed)
+        let (message_source, agent_args, continuation_args, response_format_args, seed) = match self {
+            Commands::Standard { messages, agent, continuation, response_format, seed } => {
+                (messages, agent, continuation, response_format, seed)
             }
         };
 
         let messages = message_source.resolve()?;
         let agent = agent_args.resolve()?;
         let continuation = continuation_args.resolve()?;
+        let response_format = response_format_args.resolve()?
+            .map(objectiveai::agent::completions::request::ResponseFormatParam::Single);
 
         let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
             messages,
             provider: None,
             agent,
-            response_format: None,
+            response_format,
             seed,
             stream: Some(true),
             continuation,
