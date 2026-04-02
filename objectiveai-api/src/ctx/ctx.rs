@@ -58,6 +58,8 @@ pub struct Context<CTXEXT, PC> {
     commit_author_name_cached: Arc<OnceCell<Option<Arc<String>>>>,
     /// Cached resolved commit author email (self + ext).
     commit_author_email_cached: Arc<OnceCell<Option<Arc<String>>>>,
+    /// Cancellation signal — set to true when the client disconnects.
+    cancelled: Arc<std::sync::atomic::AtomicBool>,
     /// Cache for agent fetches, keyed by RemotePath.
     agent_cache: Arc<
         DashMap<
@@ -152,6 +154,7 @@ impl<CTXEXT, PC> Clone for Context<CTXEXT, PC> {
             viewer_address_cached: self.viewer_address_cached.clone(),
             commit_author_name_cached: self.commit_author_name_cached.clone(),
             commit_author_email_cached: self.commit_author_email_cached.clone(),
+            cancelled: self.cancelled.clone(),
             swarm_cache: self.swarm_cache.clone(),
             agent_cache: self.agent_cache.clone(),
             function_cache: self.function_cache.clone(),
@@ -162,6 +165,16 @@ impl<CTXEXT, PC> Clone for Context<CTXEXT, PC> {
 }
 
 impl<CTXEXT, PC> Context<CTXEXT, PC> {
+    /// Returns whether this context has been cancelled.
+    pub fn is_cancelled(&self) -> bool {
+        self.cancelled.load(std::sync::atomic::Ordering::Relaxed)
+    }
+
+    /// Marks this context as cancelled.
+    pub fn cancel(&self) {
+        self.cancelled.store(true, std::sync::atomic::Ordering::Relaxed);
+    }
+
     /// Creates a new context by extracting authorization headers from the request.
     ///
     /// For each header, checks the `X-` prefixed variant first, then falls back
@@ -249,6 +262,7 @@ impl<CTXEXT, PC> Context<CTXEXT, PC> {
             viewer_address_cached: Arc::new(OnceCell::new()),
             commit_author_name_cached: Arc::new(OnceCell::new()),
             commit_author_email_cached: Arc::new(OnceCell::new()),
+            cancelled: Arc::new(std::sync::atomic::AtomicBool::new(false)),
             swarm_cache: Arc::new(DashMap::new()),
             agent_cache: Arc::new(DashMap::new()),
             function_cache: Arc::new(DashMap::new()),

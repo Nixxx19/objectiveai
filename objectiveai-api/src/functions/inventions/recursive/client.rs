@@ -93,14 +93,13 @@ where
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams>,
-        cancelled: Option<Arc<std::sync::atomic::AtomicBool>>,
     ) -> Result<
         objectiveai::functions::inventions::recursive::response::unary::FunctionInventionRecursive,
         super::Error,
     > {
         let mut aggregate: Option<RecursiveChunk> = None;
         let mut stream =
-            self.create_streaming_handle_usage(ctx, request, cancelled).await?;
+            self.create_streaming_handle_usage(ctx, request).await?;
         while let Some(chunk) = stream.next().await {
             match &mut aggregate {
                 Some(aggregate) => aggregate.push(&chunk),
@@ -114,19 +113,17 @@ where
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams>,
-        cancelled: Option<Arc<std::sync::atomic::AtomicBool>>,
     ) -> Result<
         impl Stream<Item = RecursiveChunk> + Send + Unpin + 'static,
         super::Error,
     > {
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
-        let cancelled = cancelled.unwrap_or_else(|| Arc::new(std::sync::atomic::AtomicBool::new(false)));
         let self_clone = self.clone();
         tokio::spawn(async move {
             let mut aggregate: Option<RecursiveChunk> = None;
             let stream = match self_clone
                 .clone()
-                .create_streaming(ctx.clone(), request.clone(), cancelled.clone())
+                .create_streaming(ctx.clone(), request.clone())
                 .await
             {
                 Ok(stream) => stream,
@@ -142,7 +139,7 @@ where
                     None => aggregate = Some(chunk.clone()),
                 }
                 if tx.send(Ok(chunk)).is_err() {
-                    cancelled.store(true, std::sync::atomic::Ordering::Relaxed);
+                    ctx.cancel();
                 }
             }
             drop(stream);
@@ -174,7 +171,6 @@ where
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams>,
-        cancelled: Arc<std::sync::atomic::AtomicBool>,
     ) -> Result<
         impl Stream<Item = RecursiveChunk> + Send + 'static,
         super::Error,
@@ -226,7 +222,6 @@ where
             object,
             choice_indexer,
             0, // native index for root
-            cancelled,
         );
 
         // Wrap the inner stream to:
@@ -310,7 +305,6 @@ fn run_recursive<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, 
     object: RecursiveObject,
     choice_indexer: Arc<ChoiceIndexer>,
     native_index: usize,
-    cancelled: Arc<std::sync::atomic::AtomicBool>,
 ) -> Pin<Box<dyn Stream<Item = RecursiveChunk> + Send>>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
@@ -356,7 +350,7 @@ where
         // Run the single-level invention.
         let stream = match invention_client
             .clone()
-            .create_streaming(ctx.clone(), invention_request, cancelled.clone())
+            .create_streaming_handle_usage(ctx.clone(), invention_request)
             .await
         {
             Ok(stream) => stream,
@@ -475,7 +469,6 @@ where
                 object,
                 choice_indexer.clone(),
                 child_native,
-                cancelled.clone(),
             ));
         }
 

@@ -1,7 +1,6 @@
 //! Tests for recursive function invention client.
 
 use std::sync::Arc;
-use std::sync::atomic::AtomicBool;
 use std::time::Duration;
 
 use rust_decimal::Decimal;
@@ -299,7 +298,7 @@ async fn run_recursive_invention(
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
     let stream = client
         .clone()
-        .create_streaming(ctx, request, Arc::new(AtomicBool::new(false)))
+        .create_streaming(ctx, request)
         .await
         .expect("create_streaming should succeed");
     let expected_created = std::cell::Cell::new(None);
@@ -641,7 +640,7 @@ async fn run_recursive_invention_err(
     request: Arc<FunctionInventionRecursiveCreateParams>,
 ) -> String {
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
-    match client.clone().create_streaming(ctx, request, Arc::new(AtomicBool::new(false))).await {
+    match client.clone().create_streaming(ctx, request).await {
         Err(err) => err.to_string(),
         Ok(_) => panic!("create_streaming should return Err for invalid state"),
     }
