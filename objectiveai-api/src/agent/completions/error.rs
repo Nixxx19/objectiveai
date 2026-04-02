@@ -47,6 +47,9 @@ pub enum Error {
 
     #[error("empty stream")]
     EmptyStream,
+
+    #[error("stream cancelled")]
+    StreamCancelled,
 }
 
 impl objectiveai::error::StatusError for Error {
@@ -69,6 +72,7 @@ impl objectiveai::error::StatusError for Error {
             }
             Self::Timeout => 504,
             Self::EmptyStream => 502,
+            Self::StreamCancelled => 499,
         }
     }
 

@@ -462,6 +462,7 @@ where
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
+        cancelled: Option<Arc<std::sync::atomic::AtomicBool>>,
     ) -> Result<
         objectiveai::functions::executions::response::unary::FunctionExecution,
         super::Error,
@@ -470,7 +471,7 @@ where
             objectiveai::functions::executions::response::streaming::FunctionExecutionChunk,
         > = None;
         let mut stream =
-            self.create_streaming_handle_usage(ctx, request).await?;
+            self.create_streaming_handle_usage(ctx, request, cancelled).await?;
         while let Some(chunk) = stream.next().await {
             match &mut aggregate {
                 Some(aggregate) => aggregate.push(&chunk),
@@ -487,6 +488,7 @@ where
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
+        cancelled: Option<Arc<std::sync::atomic::AtomicBool>>,
     ) -> Result<
         impl Stream<Item = objectiveai::functions::executions::response::streaming::FunctionExecutionChunk>
         + Send
@@ -495,13 +497,14 @@ where
         super::Error,
     >{
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+        let cancelled = cancelled.unwrap_or_else(|| Arc::new(std::sync::atomic::AtomicBool::new(false)));
         tokio::spawn(async move {
             let mut aggregate: Option<
                 objectiveai::functions::executions::response::streaming::FunctionExecutionChunk,
             > = None;
             let stream = match self
                 .clone()
-                .create_streaming(ctx.clone(), request.clone())
+                .create_streaming(ctx.clone(), request.clone(), cancelled.clone())
                 .await
             {
                 Ok(stream) => stream,
@@ -516,7 +519,9 @@ where
                     Some(aggregate) => aggregate.push(&chunk),
                     None => aggregate = Some(chunk.clone()),
                 }
-                let _ = tx.send(Ok(chunk));
+                if tx.send(Ok(chunk)).is_err() {
+                    cancelled.store(true, std::sync::atomic::Ordering::Relaxed);
+                }
             }
             drop(stream);
             drop(tx);
@@ -603,6 +608,7 @@ where
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
+        cancelled: Arc<std::sync::atomic::AtomicBool>,
     ) -> Result<
         impl Stream<Item = objectiveai::functions::executions::response::streaming::FunctionExecutionChunk>
         + Send
@@ -1068,6 +1074,7 @@ where
                                 choice_indexer.clone(),
                                 Some(current_round as u64),
                                 Some(i as u64),
+                                cancelled.clone(),
                             ).boxed(),
                         ));
                         retry_token_indices.push(retry_token_index);
@@ -1432,6 +1439,7 @@ where
                         description,
                         objectiveai::functions::expression::TaskOutputOwned::Vector(final_output.clone()),
                         confidence_responses,
+                        cancelled.clone(),
                     ).await;
 
                     // yield reasoning chunks
@@ -1501,6 +1509,7 @@ where
                     choice_indexer,
                     None,
                     None,
+                    cancelled.clone(),
                 );
 
             Ok(futures::future::Either::Right(async_stream::stream! {
@@ -1653,6 +1662,7 @@ where
                         description,
                         final_chunk.output.clone().expect("missing output").output,
                         confidence_responses,
+                        cancelled.clone(),
                     ).await;
 
                     // yield chunks
@@ -1708,6 +1718,7 @@ where
         choice_indexer: Arc<ChoiceIndexer>,
         swiss_round: Option<u64>,
         swiss_pool_index: Option<u64>,
+        cancelled: Arc<std::sync::atomic::AtomicBool>,
     ) -> futures::stream::BoxStream<'static, FtpStreamChunk> {
         match ftp {
             functions::FlatTaskProfile::Function(function_ftp) => self
@@ -1723,6 +1734,7 @@ where
                     choice_indexer,
                     swiss_round,
                     swiss_pool_index,
+                    cancelled,
                 )
                 .boxed(),
             functions::FlatTaskProfile::MapFunction(map_function_ftp) => self
@@ -1737,6 +1749,7 @@ where
                     choice_indexer,
                     swiss_round,
                     swiss_pool_index,
+                    cancelled,
                 )
                 .boxed(),
             functions::FlatTaskProfile::VectorCompletion(vector_ftp) => {
@@ -1748,6 +1761,7 @@ where
                         vector_ftp,
                         task_index,
                         choice_indexer,
+                        cancelled,
                     ),
                 )
                 .flatten()
@@ -1762,6 +1776,7 @@ where
                         map_vector_ftp,
                         task_index,
                         choice_indexer,
+                        cancelled,
                     ),
                 )
                 .flatten()
@@ -1869,6 +1884,7 @@ where
         choice_indexer: Arc<ChoiceIndexer>,
         swiss_round: Option<u64>,
         swiss_pool_index: Option<u64>,
+        cancelled: Arc<std::sync::atomic::AtomicBool>,
     ) -> impl Stream<Item = FtpStreamChunk> + Send + 'static {
         // initialize output and task indices
         let ftp_inner_len = ftp.len();
@@ -1910,6 +1926,7 @@ where
                     choice_indexer.clone(),
                     swiss_round,
                     swiss_pool_index,
+                    cancelled.clone(),
                 )
             }),
         )
@@ -2000,6 +2017,7 @@ where
         choice_indexer: Arc<ChoiceIndexer>,
         swiss_round: Option<u64>,
         swiss_pool_index: Option<u64>,
+        cancelled: Arc<std::sync::atomic::AtomicBool>,
     ) -> impl Stream<Item = FtpStreamChunk> + Send + 'static {
         // identify the completion and get response type
         let response_id = response_id.unwrap_or_else(|| self::response_id(created));
@@ -2119,6 +2137,7 @@ where
                                     child_choice_indexer.clone(),
                                     swiss_round,
                                     swiss_pool_index,
+                                    cancelled.clone(),
                                 ))
                             } else {
                                 None
@@ -2337,6 +2356,7 @@ where
         ftp: functions::MapVectorCompletionFlatTaskProfile,
         task_index: u64,
         choice_indexer: Arc<ChoiceIndexer>,
+        cancelled: Arc<std::sync::atomic::AtomicBool>,
     ) -> impl Stream<Item = FtpStreamChunk> + Send + 'static {
         // initialize output (each sub-task produces a scores vector)
         let ftp_inner_len = ftp.vector_completions.len();
@@ -2366,6 +2386,7 @@ where
                             ftp,
                             task_index + i as u64,
                             choice_indexer.clone(),
+                            cancelled.clone(),
                         ),
                     )
                     .flatten()
@@ -2422,6 +2443,7 @@ where
         ftp: functions::VectorCompletionFlatTaskProfile,
         task_index: u64,
         choice_indexer: Arc<ChoiceIndexer>,
+        cancelled: Arc<std::sync::atomic::AtomicBool>,
     ) -> impl Stream<Item = FtpStreamChunk> + Send + 'static {
         let request_base = &*request;
         let retry_token = root_retry_token
@@ -2448,6 +2470,7 @@ where
                         continuation: request_base.continuation.clone(),
                     },
                 ),
+                Some(cancelled.clone()),
             )
             .await
         {
@@ -2544,6 +2567,7 @@ where
         description: Option<String>,
         output: objectiveai::functions::expression::TaskOutputOwned,
         confidence_responses: Vec<ConfidenceResponse>,
+        cancelled: Arc<std::sync::atomic::AtomicBool>,
     ) -> impl Stream<Item = objectiveai::functions::executions::response::streaming::ReasoningSummaryChunk>
     + Send
     + 'static{
@@ -2663,6 +2687,7 @@ where
                 None,
                 None,
                 false,
+                Some(cancelled.clone()),
             )
             .await
         {

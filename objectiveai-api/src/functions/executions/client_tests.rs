@@ -1,6 +1,7 @@
 //! Tests for function execution client.
 
 use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 use std::time::Duration;
 
 use rust_decimal::Decimal;
@@ -315,7 +316,7 @@ async fn run_execution(client: &Arc<TestClient>, request: Arc<FunctionExecutionC
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
     let stream = client
         .clone()
-        .create_streaming(ctx, request)
+        .create_streaming(ctx, request, Arc::new(AtomicBool::new(false)))
         .await
         .expect("create_streaming should succeed");
     let expected_created = std::cell::Cell::new(None);
@@ -1449,7 +1450,7 @@ fn make_request_with_overrides(
 /// Helper: expect create_streaming to return Err with a specific status code.
 async fn expect_err(client: &Arc<TestClient>, request: Arc<FunctionExecutionCreateParams>, expected_status: u16) -> super::Error {
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
-    match client.clone().create_streaming(ctx, request).await {
+    match client.clone().create_streaming(ctx, request, Arc::new(AtomicBool::new(false))).await {
         Ok(_) => panic!("expected create_streaming to fail, but it succeeded"),
         Err(err) => {
             assert_eq!(err.status(), expected_status, "error: {err}");

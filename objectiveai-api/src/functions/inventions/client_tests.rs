@@ -1,6 +1,7 @@
 //! Tests for function invention client.
 
 use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 use std::time::Duration;
 
 use rust_decimal::Decimal;
@@ -255,7 +256,7 @@ async fn run_invention(
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
     let stream = client
         .clone()
-        .create_streaming(ctx, request)
+        .create_streaming(ctx, request, Arc::new(AtomicBool::new(false)))
         .await
         .expect("create_streaming should succeed");
     let expected_created = std::cell::Cell::new(None);
@@ -1122,7 +1123,7 @@ async fn test_zero_leaf_width_rejected() {
         }),
         1,
     );
-    let result = client.create_streaming(ctx, request).await;
+    let result = client.create_streaming(ctx, request, Arc::new(AtomicBool::new(false))).await;
     assert!(result.is_err(), "zero leaf width should be rejected");
 }
 
@@ -1138,7 +1139,7 @@ async fn test_zero_branch_width_rejected() {
         }),
         2,
     );
-    let result = client.create_streaming(ctx, request).await;
+    let result = client.create_streaming(ctx, request, Arc::new(AtomicBool::new(false))).await;
     assert!(result.is_err(), "zero branch width should be rejected");
 }
 
@@ -1154,7 +1155,7 @@ async fn test_min_greater_than_max_rejected() {
         }),
         3,
     );
-    let result = client.create_streaming(ctx, request).await;
+    let result = client.create_streaming(ctx, request, Arc::new(AtomicBool::new(false))).await;
     assert!(result.is_err(), "min > max should be rejected");
 }
 
@@ -1198,7 +1199,7 @@ async fn test_name_over_100_bytes_rejected() {
         }),
         1,
     );
-    let result = client.create_streaming(ctx, request).await;
+    let result = client.create_streaming(ctx, request, Arc::new(AtomicBool::new(false))).await;
     assert!(result.is_err(), "name over 100 bytes should be rejected");
 }
 
@@ -1216,7 +1217,7 @@ async fn test_name_without_path_over_77_bytes_rejected() {
         }),
         1,
     );
-    let result = client.create_streaming(ctx, request).await;
+    let result = client.create_streaming(ctx, request, Arc::new(AtomicBool::new(false))).await;
     assert!(result.is_err(), "name without path segment over 77 bytes should be rejected");
 }
 
@@ -1233,7 +1234,7 @@ async fn test_name_without_path_at_77_bytes_accepted() {
         }),
         1,
     );
-    let result = client.create_streaming(ctx, request).await;
+    let result = client.create_streaming(ctx, request, Arc::new(AtomicBool::new(false))).await;
     assert!(result.is_ok(), "name at exactly 77 bytes without path should be accepted");
 }
 
@@ -1251,7 +1252,7 @@ async fn test_name_with_valid_path_over_77_bytes_accepted() {
         }),
         1,
     );
-    let result = client.create_streaming(ctx, request).await;
+    let result = client.create_streaming(ctx, request, Arc::new(AtomicBool::new(false))).await;
     assert!(result.is_ok(), "name with valid path segment over 77 bytes should be accepted");
 }
 
@@ -1270,7 +1271,7 @@ async fn test_name_78_bytes_ending_in_dash_rejected() {
         }),
         1,
     );
-    let result = client.create_streaming(ctx, request).await;
+    let result = client.create_streaming(ctx, request, Arc::new(AtomicBool::new(false))).await;
     assert!(result.is_err(), "78-byte name ending in '-' should be rejected");
 }
 
@@ -1289,7 +1290,7 @@ async fn test_name_100_bytes_ending_in_dash_rejected() {
         }),
         1,
     );
-    let result = client.create_streaming(ctx, request).await;
+    let result = client.create_streaming(ctx, request, Arc::new(AtomicBool::new(false))).await;
     assert!(result.is_err(), "100-byte name ending in '-' should be rejected");
 }
 

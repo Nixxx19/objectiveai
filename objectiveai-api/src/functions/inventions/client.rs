@@ -152,13 +152,14 @@ where
         request: Arc<
             objectiveai::functions::inventions::request::FunctionInventionCreateParams,
         >,
+        cancelled: Option<Arc<std::sync::atomic::AtomicBool>>,
     ) -> Result<
         objectiveai::functions::inventions::response::unary::FunctionInvention,
         super::Error,
     > {
         let mut aggregate: Option<FunctionInventionChunk> = None;
         let mut stream =
-            self.create_streaming_handle_usage(ctx, request).await?;
+            self.create_streaming_handle_usage(ctx, request, cancelled).await?;
         while let Some(chunk) = stream.next().await {
             match &mut aggregate {
                 Some(aggregate) => aggregate.push(&chunk),
@@ -174,16 +175,18 @@ where
         request: Arc<
             objectiveai::functions::inventions::request::FunctionInventionCreateParams,
         >,
+        cancelled: Option<Arc<std::sync::atomic::AtomicBool>>,
     ) -> Result<
         impl Stream<Item = FunctionInventionChunk> + Send + Unpin + 'static,
         super::Error,
     > {
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+        let cancelled = cancelled.unwrap_or_else(|| Arc::new(std::sync::atomic::AtomicBool::new(false)));
         tokio::spawn(async move {
             let mut aggregate: Option<FunctionInventionChunk> = None;
             let stream = match self
                 .clone()
-                .create_streaming(ctx.clone(), request.clone())
+                .create_streaming(ctx.clone(), request.clone(), cancelled.clone())
                 .await
             {
                 Ok(stream) => stream,
@@ -198,7 +201,9 @@ where
                     Some(aggregate) => aggregate.push(&chunk),
                     None => aggregate = Some(chunk.clone()),
                 }
-                let _ = tx.send(Ok(chunk));
+                if tx.send(Ok(chunk)).is_err() {
+                    cancelled.store(true, std::sync::atomic::Ordering::Relaxed);
+                }
             }
             drop(stream);
             drop(tx);
@@ -229,6 +234,7 @@ where
         request: Arc<
             objectiveai::functions::inventions::request::FunctionInventionCreateParams,
         >,
+        cancelled: Arc<std::sync::atomic::AtomicBool>,
     ) -> Result<
         impl Stream<Item = FunctionInventionChunk> + Send + 'static,
         super::Error,
@@ -324,16 +330,16 @@ where
         let stream: Pin<Box<dyn Stream<Item = FunctionInventionChunk> + Send>> =
             match state {
                 State::AlphaScalarBranch(s) => {
-                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist, cancelled)
                 }
                 State::AlphaScalarLeaf(s) => {
-                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist, cancelled)
                 }
                 State::AlphaVectorBranch(s) => {
-                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist, cancelled)
                 }
                 State::AlphaVectorLeaf(s) => {
-                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist, cancelled)
                 }
             };
 
@@ -432,6 +438,7 @@ fn run_all_steps<T, CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETR
     id: String,
     created: u64,
     persist: bool,
+    cancelled: Arc<std::sync::atomic::AtomicBool>,
 ) -> Pin<Box<dyn Stream<Item = FunctionInventionChunk> + Send>>
 where
     T: InventionState,
@@ -520,6 +527,7 @@ where
             essay_prompt, T::essay_tools(&state),
             essay_validate,
             id.clone(), created, object, continuation.take(), completion_index,
+            cancelled.clone(),
         );
         while let Some(output) = step.next().await {
             match output {
@@ -569,6 +577,7 @@ where
             input_schema_prompt, T::input_schema_tools(&state),
             input_schema_validate,
             id.clone(), created, object, continuation.take(), completion_index,
+            cancelled.clone(),
         );
         while let Some(output) = step.next().await {
             match output {
@@ -612,6 +621,7 @@ where
             essay_tasks_prompt, T::essay_tasks_tools(&state),
             essay_tasks_validate,
             id.clone(), created, object, continuation.take(), completion_index,
+            cancelled.clone(),
         );
         while let Some(output) = step.next().await {
             match output {
@@ -812,6 +822,7 @@ where
             tasks_prompt, T::tasks_tools(&state),
             tasks_validate,
             id.clone(), created, object, continuation.take(), completion_index,
+            cancelled.clone(),
         );
         while let Some(output) = step.next().await {
             match output {
@@ -852,6 +863,7 @@ where
             description_prompt, T::description_tools(&state),
             description_validate,
             id.clone(), created, object, continuation.take(), completion_index,
+            cancelled.clone(),
         );
         while let Some(output) = step.next().await {
             match output {
@@ -1076,6 +1088,7 @@ fn run_step<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG>
     object: Object,
     initial_continuation: Option<Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK>>,
     initial_completion_index: u64,
+    cancelled: Arc<std::sync::atomic::AtomicBool>,
 ) -> Pin<
     Box<
         dyn Stream<Item = StepOutput<OPENROUTER, CLAUDEAGENTSDK, MOCK>>
@@ -1140,6 +1153,7 @@ where
                 Some(invention_done),
                 None,
                 false,
+                cancelled.clone(),
             )
             .await;
 
@@ -1233,6 +1247,7 @@ where
                     Some(invention_done),
                     None,
                     false,
+                    cancelled.clone(),
                 )
                 .await;
 

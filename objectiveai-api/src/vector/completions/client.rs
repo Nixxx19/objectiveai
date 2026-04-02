@@ -98,6 +98,7 @@ where
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::vector::completions::request::VectorCompletionCreateParams>,
+        cancelled: Option<Arc<std::sync::atomic::AtomicBool>>,
     ) -> Result<
         objectiveai::vector::completions::response::unary::VectorCompletion,
         super::Error,
@@ -106,7 +107,7 @@ where
             objectiveai::vector::completions::response::streaming::VectorCompletionChunk,
         > = None;
         let mut stream =
-            self.create_streaming_handle_usage(ctx, request).await?;
+            self.create_streaming_handle_usage(ctx, request, cancelled).await?;
         while let Some(chunk) = stream.next().await {
             match &mut aggregate {
                 Some(aggregate) => aggregate.push(&chunk),
@@ -125,6 +126,7 @@ where
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::vector::completions::request::VectorCompletionCreateParams>,
+        cancelled: Option<Arc<std::sync::atomic::AtomicBool>>,
     ) -> Result<
         impl Stream<Item = objectiveai::vector::completions::response::streaming::VectorCompletionChunk>
         + Send
@@ -133,13 +135,14 @@ where
         super::Error,
     >{
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+        let cancelled = cancelled.unwrap_or_else(|| Arc::new(std::sync::atomic::AtomicBool::new(false)));
         tokio::spawn(async move {
             let mut aggregate: Option<
                 objectiveai::vector::completions::response::streaming::VectorCompletionChunk,
             > = None;
             let stream = match self
                 .clone()
-                .create_streaming(ctx.clone(), request.clone())
+                .create_streaming(ctx.clone(), request.clone(), cancelled.clone())
                 .await
             {
                 Ok(stream) => stream,
@@ -154,7 +157,9 @@ where
                     Some(aggregate) => aggregate.push(&chunk),
                     None => aggregate = Some(chunk.clone()),
                 }
-                let _ = tx.send(Ok(chunk));
+                if tx.send(Ok(chunk)).is_err() {
+                    cancelled.store(true, std::sync::atomic::Ordering::Relaxed);
+                }
             }
             drop(stream);
             drop(tx);
@@ -204,6 +209,7 @@ where
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::vector::completions::request::VectorCompletionCreateParams>,
+        cancelled: Arc<std::sync::atomic::AtomicBool>,
     ) -> Result<
         impl Stream<Item = objectiveai::vector::completions::response::streaming::VectorCompletionChunk>
         + Send
@@ -456,6 +462,7 @@ where
                         request.clone(),
                         prompt_id.clone(),
                         responses_ids.clone(),
+                        cancelled.clone(),
                     ))
                     .flatten()
                     .boxed()
@@ -583,6 +590,7 @@ where
         request: Arc<objectiveai::vector::completions::request::VectorCompletionCreateParams>,
         prompt_id: String,
         responses_ids: Vec<String>,
+        cancelled: Arc<std::sync::atomic::AtomicBool>,
     ) -> impl Stream<Item = objectiveai::vector::completions::response::streaming::VectorCompletionChunk> + Send + 'static
     {
         use objectiveai::agent::completions::message::{
@@ -746,6 +754,7 @@ where
                     None,
                     Some(transform_messages.clone()),
                     false,
+                    Some(cancelled.clone()),
                 ).await?;
                 let aggregate: Option<
                     objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
@@ -877,6 +886,7 @@ where
                                 None,
                                 Some(transform_messages.clone()),
                                 false,
+                                Some(cancelled.clone()),
                             ).await {
                                 Ok(mut retry_stream) => {
                                     let mut retry_agg: Option<
@@ -1004,6 +1014,7 @@ where
                                 None,
                                 Some(transform_messages.clone()),
                                 false,
+                                Some(cancelled.clone()),
                             ).await {
                                 Ok(mut retry_stream) => {
                                     let mut retry_agg: Option<

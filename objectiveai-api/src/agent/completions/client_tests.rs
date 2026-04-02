@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 use std::time::Duration;
 
 use objectiveai::agent::completions::message::{
@@ -264,7 +265,7 @@ async fn test_basic_mock_agent_seed_42() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("create_streaming should succeed");
 
@@ -297,7 +298,7 @@ async fn test_basic_mock_agent_seed_123() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("create_streaming should succeed");
 
@@ -330,14 +331,14 @@ async fn test_deterministic_with_same_seed() {
 
     let client_a = make_client();
     let stream_a = client_a
-        .create_streaming(make_ctx(), params.clone(), None, None, None, None, false)
+        .create_streaming(make_ctx(), params.clone(), None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .unwrap();
     let completion_a = normalize(run_and_check(Box::pin(stream_a)).await);
 
     let client_b = make_client();
     let stream_b = client_b
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .unwrap();
     let completion_b = normalize(run_and_check(Box::pin(stream_b)).await);
@@ -385,14 +386,14 @@ async fn test_different_seeds_differ() {
 
     let client_a = make_client();
     let stream_a = client_a
-        .create_streaming(make_ctx(), params_a, None, None, None, None, false)
+        .create_streaming(make_ctx(), params_a, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .unwrap();
     let completion_a = normalize(run_and_check(Box::pin(stream_a)).await);
 
     let client_b = make_client();
     let stream_b = client_b
-        .create_streaming(make_ctx(), params_b, None, None, None, None, false)
+        .create_streaming(make_ctx(), params_b, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .unwrap();
     let completion_b = normalize(run_and_check(Box::pin(stream_b)).await);
@@ -437,7 +438,7 @@ async fn test_mock_agent_with_error() {
     });
 
     let result = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await;
     assert!(result.is_err(), "error agent should fail");
 }
@@ -465,7 +466,7 @@ async fn test_with_single_user_message() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("should succeed with user message");
 
@@ -507,7 +508,7 @@ async fn test_with_developer_and_user_messages() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("should succeed with developer+user messages");
 
@@ -540,7 +541,7 @@ async fn test_json_object_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("JsonObject should succeed");
 
@@ -581,7 +582,7 @@ async fn test_json_schema_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("JsonSchema should succeed");
 
@@ -614,7 +615,7 @@ async fn test_text_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("Text should succeed");
 
@@ -649,7 +650,7 @@ async fn test_grammar_response_format_rejected() {
     });
 
     let result = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await;
     assert!(result.is_err(), "Grammar should be rejected");
 }
@@ -674,7 +675,7 @@ async fn test_python_response_format_rejected() {
     });
 
     let result = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await;
     assert!(result.is_err(), "Python should be rejected");
 }
@@ -709,7 +710,7 @@ async fn test_required_tool_call_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("required ToolCall should succeed");
 
@@ -753,7 +754,7 @@ async fn test_optional_tool_call_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("optional ToolCall should succeed");
 
@@ -813,7 +814,7 @@ async fn test_with_invention_tools() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, Some(vec![inv1, inv2]), None, None, false)
+        .create_streaming(make_ctx(), params, None, Some(vec![inv1, inv2]), None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("should succeed with invention tools");
 
@@ -869,7 +870,7 @@ async fn test_invention_tools_with_tool_call_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, Some(vec![inv]), None, None, false)
+        .create_streaming(make_ctx(), params, None, Some(vec![inv]), None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("should succeed with invention tools and response format");
 
@@ -915,7 +916,7 @@ async fn test_invention_tool_returns_error() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, Some(vec![inv]), None, None, false)
+        .create_streaming(make_ctx(), params, None, Some(vec![inv]), None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("should succeed even with failing invention tool");
 
@@ -957,7 +958,7 @@ async fn test_multiple_user_messages() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("should succeed with multiple user messages");
 
@@ -993,7 +994,7 @@ async fn test_mock_agent_error_false_succeeds() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("error=false should succeed");
 
@@ -1026,7 +1027,7 @@ async fn test_final_item_is_mock_continuation() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .unwrap();
 
@@ -1068,7 +1069,7 @@ async fn test_per_agent_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("PerAgent response format should succeed");
 
@@ -1107,7 +1108,7 @@ async fn test_per_agent_response_format_unknown_id() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("PerAgent with unknown ID should succeed (no format applied)");
 
@@ -1162,7 +1163,7 @@ async fn test_json_schema_nested_object() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("nested JsonSchema should succeed");
 
@@ -1200,7 +1201,7 @@ async fn test_fallback_agent_on_error() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("fallback agent should succeed when primary errors");
 
@@ -1241,7 +1242,7 @@ async fn test_all_agents_error() {
     });
 
     let result = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await;
     assert!(result.is_err(), "all agents erroring should fail");
 }
@@ -1275,7 +1276,7 @@ async fn test_multiple_fallback_agents() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("third agent should succeed");
 
@@ -1321,7 +1322,7 @@ async fn test_with_mock_continuation() {
     };
 
     let stream = client
-        .create_streaming(make_ctx(), params, Some(continuation), None, None, None, false)
+        .create_streaming(make_ctx(), params, Some(continuation), None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("should succeed with continuation");
 
@@ -1354,7 +1355,7 @@ async fn test_stream_yields_chunks_before_state() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .unwrap();
 
@@ -1387,7 +1388,7 @@ async fn test_large_seed_value() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("large seed should succeed");
 
@@ -1420,7 +1421,7 @@ async fn test_seed_zero() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("seed 0 should succeed");
 
@@ -1495,7 +1496,7 @@ async fn test_logprobs_basic_seed_42() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("logprobs basic should succeed");
 
@@ -1549,7 +1550,7 @@ async fn test_logprobs_json_schema_nested() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("logprobs json_schema nested should succeed");
 
@@ -1612,7 +1613,7 @@ async fn test_logprobs_with_invention_tools() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, Some(vec![inv]), None, None, false)
+        .create_streaming(make_ctx(), params, None, Some(vec![inv]), None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("logprobs with invention tools should succeed");
 
@@ -1690,7 +1691,7 @@ async fn test_logprobs_with_continuation() {
     };
 
     let stream = client
-        .create_streaming(make_ctx(), params, Some(continuation), None, None, None, false)
+        .create_streaming(make_ctx(), params, Some(continuation), None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("logprobs with continuation should succeed");
 
@@ -1733,7 +1734,7 @@ async fn test_logprobs_fallback_agent() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("fallback with logprobs should succeed");
 
@@ -1780,7 +1781,7 @@ async fn test_logprobs_per_agent_json_object() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false)
+        .create_streaming(make_ctx(), params, None, None, None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("logprobs per-agent json_object should succeed");
 
@@ -1859,7 +1860,7 @@ async fn test_error_probability_remote_seed_2() {
         },
     ];
     let stream = client
-        .create_streaming(make_ctx(), params, None, Some(tools), None, None, false)
+        .create_streaming(make_ctx(), params, None, Some(tools), None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("create_streaming should succeed");
     let completion = normalize(run_and_check(Box::pin(stream)).await);
@@ -1924,7 +1925,7 @@ async fn test_error_probability_remote_seed_10() {
         },
     ];
     let stream = client
-        .create_streaming(make_ctx(), params, None, Some(tools), None, None, false)
+        .create_streaming(make_ctx(), params, None, Some(tools), None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("create_streaming should succeed");
     let completion = normalize(run_and_check(Box::pin(stream)).await);
@@ -1992,7 +1993,7 @@ async fn test_error_probability_remote_seed_15() {
         },
     ];
     let stream = client
-        .create_streaming(make_ctx(), params, None, Some(tools), None, None, false)
+        .create_streaming(make_ctx(), params, None, Some(tools), None, None, false, Arc::new(AtomicBool::new(false)))
         .await
         .expect("create_streaming should succeed");
     let completion = normalize(run_and_check(Box::pin(stream)).await);

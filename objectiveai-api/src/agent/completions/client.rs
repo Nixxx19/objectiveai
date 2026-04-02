@@ -200,6 +200,7 @@ where
         invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         transform_messages: Option<Arc<TransformMessages>>,
         viewer: bool,
+        cancelled: Option<Arc<std::sync::atomic::AtomicBool>>,
     ) -> Result<
         objectiveai::agent::completions::response::unary::AgentCompletion,
         super::Error,
@@ -208,7 +209,7 @@ where
             objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
         > = None;
         let mut stream = self
-            .create_streaming_handle_usage(ctx, params, continuation, invention_tools, invention_done, transform_messages, viewer)
+            .create_streaming_handle_usage(ctx, params, continuation, invention_tools, invention_done, transform_messages, viewer, cancelled)
             .await?;
         while let Some(item) = stream.next().await {
             match item {
@@ -238,6 +239,7 @@ where
         invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         transform_messages: Option<Arc<TransformMessages>>,
         viewer: bool,
+        cancelled: Option<Arc<std::sync::atomic::AtomicBool>>,
     ) -> Result<
         impl futures::Stream<
             Item = super::StreamItem<
@@ -253,9 +255,10 @@ where
         super::Error,
     > {
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+        let cancelled = cancelled.unwrap_or_else(|| Arc::new(std::sync::atomic::AtomicBool::new(false)));
         let _ = tokio::spawn(async move {
             let stream = match self
-                .create_streaming(ctx.clone(), params.clone(), continuation, invention_tools, invention_done, transform_messages, viewer)
+                .create_streaming(ctx.clone(), params.clone(), continuation, invention_tools, invention_done, transform_messages, viewer, cancelled.clone())
                 .await
             {
                 Ok(stream) => stream,
@@ -278,7 +281,9 @@ where
                     }
                     super::StreamItem::State(_) => {}
                 }
-                let _ = tx.send(Ok(item));
+                if tx.send(Ok(item)).is_err() {
+                    cancelled.store(true, std::sync::atomic::Ordering::Relaxed);
+                }
             }
             drop(stream);
             drop(tx);
@@ -317,6 +322,7 @@ where
         invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         transform_messages: Option<Arc<TransformMessages>>,
         viewer: bool,
+        cancelled: Arc<std::sync::atomic::AtomicBool>,
     ) -> Result<
         impl futures::Stream<
             Item = super::StreamItem<
@@ -521,6 +527,7 @@ where
                                 objectiveai::agent::InlineAgentRef::Openrouter(&or_agent.base),
                                 invention_done.clone(),
                                 agent_transform,
+                                cancelled.clone(),
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -553,6 +560,7 @@ where
                                 objectiveai::agent::InlineAgentRef::ClaudeAgentSdk(&cas_agent.base),
                                 invention_done.clone(),
                                 agent_transform,
+                                cancelled.clone(),
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -585,6 +593,7 @@ where
                                 objectiveai::agent::InlineAgentRef::Mock(&mock_agent.base),
                                 invention_done.clone(),
                                 agent_transform,
+                                cancelled.clone(),
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -652,6 +661,7 @@ where
         agent_base: objectiveai::agent::InlineAgentRef<'_>,
         invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         transform_messages: Option<&(dyn Fn(Vec<objectiveai::agent::completions::message::Message>) -> Vec<objectiveai::agent::completions::message::Message> + Send + Sync)>,
+        cancelled: Arc<std::sync::atomic::AtomicBool>,
     ) -> Result<
         Pin<Box<dyn futures::Stream<Item = super::StreamItem<CONT>> + Send>>,
         super::Error,
@@ -779,7 +789,7 @@ where
                     yield super::StreamItem::Chunk(last);
                 }
 
-                if had_error {
+                if had_error || cancelled.load(std::sync::atomic::Ordering::Relaxed) {
                     break;
                 }
 
@@ -919,6 +929,13 @@ where
             );
             let continuation_token: objectiveai::agent::Continuation = response_cont.into();
             let continuation_token = continuation_token.to_string();
+
+            // Set cancellation error if the stream was cancelled.
+            if cancelled.load(std::sync::atomic::Ordering::Relaxed) && final_error.is_none() {
+                final_error = Some(objectiveai::error::ResponseError::from(
+                    &super::Error::StreamCancelled,
+                ));
+            }
 
             // Single site for usage, continuation, and error (if a continuation call failed).
             yield super::StreamItem::Chunk(

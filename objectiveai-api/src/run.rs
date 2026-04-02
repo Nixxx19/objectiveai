@@ -1179,6 +1179,7 @@ async fn create_agent_completion(
                 None,
                 None,
                 true,
+                None,
             )
             .await
         {
@@ -1212,6 +1213,7 @@ async fn create_agent_completion(
                 None,
                 None,
                 true,
+                None,
             )
             .await
         {
@@ -1284,7 +1286,7 @@ async fn create_vector_completion(
     let ctx = context(&headers, persistent_cache, suppress_output);
     if body.stream.unwrap_or(false) {
         match client
-            .create_streaming_handle_usage(ctx, Arc::new(body))
+            .create_streaming_handle_usage(ctx, Arc::new(body), None)
             .await
         {
             Ok(stream) => Sse::new(
@@ -1303,7 +1305,7 @@ async fn create_vector_completion(
             Err(e) => ResponseError::from(&e).into_response(),
         }
     } else {
-        match client.create_unary_handle_usage(ctx, Arc::new(body)).await {
+        match client.create_unary_handle_usage(ctx, Arc::new(body), None).await {
             Ok(r) => Json(r).into_response(),
             Err(e) => ResponseError::from(&e).into_response(),
         }
@@ -1412,7 +1414,7 @@ async fn execute_function(
     let ctx = context(&headers, persistent_cache, suppress_output);
     if request.stream.unwrap_or(false) {
         match client
-            .create_streaming_handle_usage(ctx, Arc::new(request))
+            .create_streaming_handle_usage(ctx, Arc::new(request), None)
             .await
         {
             Ok(stream) => Sse::new(
@@ -1432,7 +1434,7 @@ async fn execute_function(
         }
     } else {
         match client
-            .create_unary_handle_usage(ctx, Arc::new(request))
+            .create_unary_handle_usage(ctx, Arc::new(request), None)
             .await
         {
             Ok(r) => Json(r).into_response(),
@@ -1927,7 +1929,7 @@ async fn create_function_invention(
     let ctx = context(&headers, persistent_cache, suppress_output);
     if body.stream.unwrap_or(false) {
         match client
-            .create_streaming_handle_usage(ctx, Arc::new(body))
+            .create_streaming_handle_usage(ctx, Arc::new(body), None)
             .await
         {
             Ok(stream) => Sse::new(
@@ -1947,7 +1949,7 @@ async fn create_function_invention(
         }
     } else {
         match client
-            .create_unary_handle_usage(ctx, Arc::new(body))
+            .create_unary_handle_usage(ctx, Arc::new(body), None)
             .await
         {
             Ok(r) => Json(r).into_response(),
@@ -2026,7 +2028,7 @@ async fn create_function_invention_recursive(
     let ctx = context(&headers, persistent_cache, suppress_output);
     if body.stream.unwrap_or(false) {
         match client
-            .create_streaming_handle_usage(ctx, Arc::new(body))
+            .create_streaming_handle_usage(ctx, Arc::new(body), None)
             .await
         {
             Ok(stream) => Sse::new(
@@ -2046,7 +2048,7 @@ async fn create_function_invention_recursive(
         }
     } else {
         match client
-            .create_unary_handle_usage(ctx, Arc::new(body))
+            .create_unary_handle_usage(ctx, Arc::new(body), None)
             .await
         {
             Ok(r) => Json(r).into_response(),
