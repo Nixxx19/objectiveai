@@ -192,9 +192,9 @@ export default function FunctionsPage() {
         {/* Header */}
         <div className="pageHeader">
           <div>
-            <h1 className="heading2" style={{ marginBottom: '8px' }}>Functions</h1>
-            <p style={{ fontSize: isMobile ? '15px' : '17px', color: 'var(--text-muted)' }}>
-              Browse AI functions for scoring, ranking, and evaluation
+            <h1 className="heading2" style={{ marginBottom: '8px', color: 'var(--text-heading)' }}>Functions</h1>
+            <p style={{ fontSize: isMobile ? '15px' : '17px', color: 'var(--text-dim)' }}>
+              Browse scoring and ranking pipelines built on ObjectiveAI
             </p>
           </div>
         </div>
@@ -334,7 +334,7 @@ export default function FunctionsPage() {
                     flexDirection: 'column',
                     gap: '8px',
                   }}>
-                    <div style={{ width: '60px', height: '20px', background: 'var(--border)', borderRadius: '10px', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                    <div style={{ width: '60px', height: '20px', background: 'var(--border)', borderRadius: '4px', animation: 'pulse 1.5s ease-in-out infinite' }} />
                     <div style={{ width: '80%', height: '18px', background: 'var(--border)', borderRadius: '4px', animation: 'pulse 1.5s ease-in-out infinite' }} />
                     <div style={{ width: '100%', height: '32px', background: 'var(--border)', borderRadius: '4px', animation: 'pulse 1.5s ease-in-out infinite' }} />
                   </div>
@@ -379,7 +379,7 @@ export default function FunctionsPage() {
                     <p className="card-description" style={{
                       fontSize: '13px',
                       lineHeight: 1.5,
-                      color: 'var(--text-muted)',
+                      color: 'var(--text-dim)',
                       flex: 1,
                       marginBottom: '12px',
                     }}>
@@ -396,7 +396,7 @@ export default function FunctionsPage() {
                           fontSize: '11px',
                           padding: '3px 8px',
                           background: 'var(--border)',
-                          borderRadius: '10px',
+                          borderRadius: '4px',
                           color: 'var(--text-muted)',
                         }}>
                           {tag}
@@ -474,7 +474,7 @@ export default function FunctionsPage() {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                background: 'rgba(27, 27, 27, 0.7)',
+                background: 'rgba(13, 11, 9, 0.7)',
                 zIndex: 200,
               }}
               onClick={() => setFiltersOpen(false)}
@@ -491,8 +491,8 @@ export default function FunctionsPage() {
                 background: 'var(--card-bg)',
                 zIndex: 201,
                 padding: '24px',
-                borderTopLeftRadius: '20px',
-                borderTopRightRadius: '20px',
+                borderTopLeftRadius: '8px',
+                borderTopRightRadius: '8px',
                 boxShadow: '0 -4px 20px var(--shadow)',
                 maxHeight: '70vh',
                 overflowY: 'auto',
@@ -582,16 +582,16 @@ export default function FunctionsPage() {
             background: 'var(--nav-surface)',
           }}
         >
-          <h3 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '12px' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '12px', color: 'var(--text-heading)' }}>
             What are Functions?
           </h3>
-          <p style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '12px' }}>
+          <p style={{ fontSize: '14px', color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: '12px' }}>
             Functions are composable scoring pipelines. Data in, score(s) out. Each function
             executes a list of tasks, where each task is either a Vector Completion or another Function.
           </p>
-          <p style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-            Functions are hosted on GitHub as <code style={{ background: 'var(--card-bg)', padding: '2px 6px', borderRadius: '4px' }}>function.json</code> at
-            the repository root. Reference by <code style={{ background: 'var(--card-bg)', padding: '2px 6px', borderRadius: '4px' }}>owner/repo</code> with optional commit SHA for immutability.
+          <p style={{ fontSize: '14px', color: 'var(--text-dim)', lineHeight: 1.6 }}>
+            Functions are hosted on GitHub as <code style={{ background: 'var(--bg-code)', padding: '2px 6px', borderRadius: '4px' }}>function.json</code> at
+            the repository root. Reference by <code style={{ background: 'var(--bg-code)', padding: '2px 6px', borderRadius: '4px' }}>owner/repo</code> with optional commit SHA for immutability.
           </p>
         </div>
       </div>

@@ -27,7 +27,7 @@ const FOUNDERS: TeamMember[] = [
     id: "ceo",
     name: "Ronald Riggles",
     title: "CEO & Co-Founder",
-    bio: "AI ranking and scoring. Ronald has created a system that uses Ensembles of LLMs, who vote, to ensure confidence in objective, AI measurements. ObjectiveAI has evolved into a preferences engine. Objectively quantify subjective preferences to simulate how you actually think. No fine-tuning\u2014just learned weights over fixed models AND function tasks. Give it your feedback data and it computes a profile that reveals priorities you didn\u2019t know you had. He is building the infrastructure to scale this system into the most efficient, and autonomous, iteration of itself.",
+    bio: "AI ranking and scoring. Ronald has created a system that uses swarms of LLM agents, who vote, to ensure confidence in objective, AI measurements. ObjectiveAI has evolved into a preferences engine. Objectively quantify subjective preferences to simulate how you actually think. No fine-tuning\u2014just learned weights over fixed models AND function tasks. Give it your feedback data and it computes a profile that reveals priorities you didn\u2019t know you had. He is building the infrastructure to scale this system into the most efficient, and autonomous, iteration of itself.",
     focusAreas: ["Software Engineer", "Objectivity", "Efficiency"],
     contactEmail: "", // Removed for now
     photoUrl: "/photos/ronald.jpg",
@@ -38,9 +38,9 @@ const FOUNDERS: TeamMember[] = [
     },
   },
   {
-    id: "coo",
+    id: "cpo",
     name: "Maya Gore",
-    title: "COO & Co-Founder",
+    title: "CPO & Co-Founder",
     bio: "Maya Gore is an undergraduate senior in graphic design who views artificial intelligence not as a threat, but as something to shape with intent and nurture through practice. Her work with ObjectiveAI began with a logo. From that first .svg, through meetings, iteration, and collaboration, she became fully integrated as a Co-Founder. Most recently, she worked alongside Claude Code to implement the UI MVP. Now, she\u2019s focused on refining and perfecting the visual experience of ObjectiveAI.",
     focusAreas: ["User Interface", "Branding", "Clarity"],
     contactEmail: "", // Removed for now
@@ -164,7 +164,7 @@ function PersonCard({ person, isMobile }: { person: TeamMember; isMobile: boolea
                   fontWeight: 500,
                   background: 'var(--nav-surface)',
                   border: '1px solid var(--border)',
-                  borderRadius: '20px',
+                  borderRadius: '4px',
                   color: 'var(--text-muted)',
                 }}
               >
@@ -263,7 +263,7 @@ function SocialIconLink({ href, label, icon }: { href: string; label: string; ic
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = 'var(--accent)';
-        e.currentTarget.style.background = 'rgba(107, 92, 255, 0.05)';
+        e.currentTarget.style.background = 'rgba(237, 237, 242, 0.05)';
         e.currentTarget.style.color = 'var(--accent)';
       }}
       onMouseLeave={(e) => {

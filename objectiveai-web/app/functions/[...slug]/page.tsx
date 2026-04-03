@@ -490,7 +490,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                   gap: isMobile ? "10px" : "14px",
                   padding: isMobile ? "10px 12px" : "14px 18px",
                   background: isTop ? "rgba(34, 197, 94, 0.08)" : "var(--page-bg)",
-                  borderRadius: isMobile ? "10px" : "14px",
+                  borderRadius: "6px",
                   border: isTop ? "1px solid rgba(34, 197, 94, 0.2)" : "1px solid transparent",
                 }}>
                   <span style={{
@@ -603,7 +603,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
             maxWidth: isMobile ? undefined : "600px",
             zIndex: 10,
             background: "var(--card-bg)",
-            borderRadius: "12px",
+            borderRadius: "6px",
             border: "1px solid var(--border)",
             backdropFilter: "blur(16px)",
             boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
@@ -646,7 +646,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                     fontSize: "11px",
                     padding: "2px 8px",
                     background: "var(--border)",
-                    borderRadius: "10px",
+                    borderRadius: "4px",
                     color: "var(--text-muted)",
                   }}>
                     {functionDetails.owner}/{functionDetails.repository}
@@ -947,7 +947,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                   <div style={{
                     padding: isMobile ? "12px" : "16px",
                     background: "var(--page-bg)",
-                    borderRadius: isMobile ? "10px" : "12px",
+                    borderRadius: "6px",
                     border: "1px solid var(--border)",
                   }}>
                     <p style={{
@@ -973,7 +973,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                   <div style={{
                     padding: isMobile ? "10px 12px" : "12px 16px",
                     background: "var(--page-bg)",
-                    borderRadius: isMobile ? "10px" : "12px",
+                    borderRadius: "6px",
                     fontSize: isMobile ? "12px" : "13px",
                     color: "var(--text-muted)",
                     display: "flex",

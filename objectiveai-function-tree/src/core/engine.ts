@@ -4,10 +4,11 @@ import type {
   FunctionTreeConfig,
   InputFunctionExecution,
   InputFunctionDefinition,
+  InputProfile,
   VectorCompletionNodeData,
 } from "../types";
 import { DEFAULT_CONFIG } from "../types";
-import { buildTree } from "./tree-data";
+import { buildTree, applyProfileWeights } from "./tree-data";
 import { buildStructuralTree } from "./structural-tree-data";
 import { layoutTree, treeBounds } from "./layout";
 import { Viewport } from "./viewport";
@@ -90,11 +91,17 @@ export class FunctionTreeEngine {
   setData(
     data: InputFunctionExecution | null,
     modelNames?: Record<string, string>,
-    responseLabels?: Record<string, string[]>
+    responseLabels?: Record<string, string[]>,
+    profile?: InputProfile | null
   ): void {
     if (this.destroyed) return;
 
     const newTree = buildTree(data, modelNames, responseLabels);
+
+    // Apply profile weights to edges (normalizes LLM weights + adds task weights)
+    if (newTree) {
+      applyProfileWeights(newTree, profile);
+    }
 
     if (!newTree) {
       this.treeData = null;

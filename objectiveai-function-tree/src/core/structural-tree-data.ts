@@ -100,6 +100,7 @@ export function buildStructuralTree(
     width: SIZES.function.width,
     height: SIZES.function.height,
     state: "pending",
+    edgeWeight: null,
     data: {
       kind: "function",
       functionId: label ?? null,
@@ -189,6 +190,7 @@ function processStructuralVCTask(
     // Taller when prompt preview is present
     height: hasPrompt ? 85 : SIZES["vector-completion"].height,
     state: "pending",
+    edgeWeight: null,
     data: {
       kind: "vector-completion",
       taskIndex: index,
@@ -245,6 +247,7 @@ function processStructuralFunctionTask(
     width: SIZES.function.width,
     height: SIZES.function.height,
     state: "pending",
+    edgeWeight: null,
     data: {
       kind: "function",
       functionId: ownerRepo,
@@ -330,6 +333,7 @@ function processStructuralPlaceholderTask(
     width: SIZES["vector-completion"].width,
     height: SIZES["vector-completion"].height,
     state: "pending",
+    edgeWeight: null,
     data: {
       kind: "vector-completion",
       taskIndex: index,

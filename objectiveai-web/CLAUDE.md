@@ -6,9 +6,9 @@ Next.js / React App Router. Maya's primary workspace.
 
 ## Visual Direction
 
-Dark, authoritative, brutalist-influenced. Infrastructure aesthetic, not consumer. "Supreme Court energy but not scary." Black and white as a statement of seriousness. Grain as a medium, not a filter.
+Dark, authoritative, brutalist-influenced. Infrastructure aesthetic, not consumer. "Supreme Court energy but not scary." Warm carbon + dusty copper palette — serious but not cold. Grain as a medium, not a filter.
 
-**The landing page is the reference implementation.** When building or updating any page, match the landing page's palette, typography feel, and spacing — not the older site-wide CSS variables.
+**The landing page is the reference implementation.** When building or updating any page, match the landing page's palette, typography feel, and spacing — not the older site-wide CSS variables. Landing page uses agent/swarm terminology throughout.
 
 ---
 
@@ -20,16 +20,16 @@ The landing page scopes its own vars on `.landing` in `globals.css`. These repre
 
 | Variable | Value | Usage |
 |----------|-------|-------|
-| `--l-bg` | `#0a0a0a` | Page background — near-black |
-| `--l-bg-raised` | `#111111` | Cards, raised surfaces |
-| `--l-bg-code` | `#0d1117` | Terminal blocks, code backgrounds |
-| `--l-border` | `#1e1e1e` | Subtle dividers |
-| `--l-border-bright` | `#2a2a2a` | More visible borders |
-| `--l-text` | `#e0e0e0` | Primary body text |
-| `--l-text-dim` | `#6b6b6b` | Secondary text, descriptions |
-| `--l-text-muted` | `#4a4a4a` | Labels, captions, lowest emphasis |
-| `--l-green` | `#3fb950` | Status indicators, accent (GitHub green) |
-| Headings / emphasis | `#ffffff` | Pure white for h1, h2, strong, commands |
+| `--l-bg` | `#0d0b09` | Page background — warm carbon |
+| `--l-bg-raised` | `#151310` | Cards, raised surfaces |
+| `--l-bg-code` | `#110f0c` | Terminal blocks, code backgrounds |
+| `--l-border` | `#221f1a` | Subtle dividers |
+| `--l-border-bright` | `#2e2a25` | More visible borders |
+| `--l-text` | `#e8e2da` | Primary body text |
+| `--l-text-dim` | `#958c82` | Secondary text, descriptions |
+| `--l-text-muted` | `#5a534a` | Labels, captions, lowest emphasis |
+| `--l-text-heading` | `#f7f2eb` | Headings, emphasis, strong |
+| `--l-accent` | `#c0a090` | Accent — dusty copper (status, links, highlights) |
 
 ### Site-Wide CSS Variables (legacy, still used by browse/detail pages)
 
@@ -56,16 +56,17 @@ As pages get touched, migrate them toward the landing palette. Don't do a bulk s
 ### Retired — Do Not Use in New Work
 
 - Purple (`#6B5CFF`) — was v1 accent. Still in `design-tokens.css`. Do not propagate.
+- Green (`#3fb950`) — was landing page accent (GitHub green). Replaced by copper `#c0a090`.
 - `design-tokens.css` light theme vars — overridden by `globals.css`, ignore them.
 
 ### Typography
 
-| Context | What we use now | Direction |
-|---------|----------------|-----------|
-| Body | `system-ui` (set in `globals.css` body) | DM Sans |
-| Monospace | `--font-geist-mono` (loaded in `layout.tsx`) | JetBrains Mono |
+| Context | Font | CSS Variable |
+|---------|------|-------------|
+| Body | Space Grotesk | `--font-space-grotesk` |
+| Monospace | JetBrains Mono | `--font-jetbrains-mono` |
 
-The landing page already uses `JetBrains Mono` in the PromptBlock and bottom CTA, with Geist Mono as fallback. Migrate component-by-component as pages are touched — don't bulk swap.
+Both fonts loaded via `next/font/google` in `layout.tsx`. Migrate remaining pages component-by-component as they're touched — don't bulk swap.
 
 ### Spacing & Shape
 
@@ -109,7 +110,7 @@ The landing page is an exception — it uses its own `max-width: 780px` on `.lan
 ### Structure
 ```
 Nav
-→ Hero: badge + descriptor + headline + subtitle + CTA buttons + proof point + terminal + email form
+→ Hero: badge ("API + CLI live") + descriptor ("Your agent's advisory board.") + headline ("Your agent doesn't have to decide alone.") + subtitle + CTA buttons + proof point + terminal + email form
 → The Problem: logprobs insight block with comparison + score bars
 → How It Works: three numbered steps
 → Use Cases: 2x2 grid
@@ -119,7 +120,7 @@ Nav
 
 ### Key Components
 - **PromptBlock** (`components/PromptBlock.tsx`) — Terminal-style CLI install with copy button. Default and compact variants.
-- **Terminal block** — Custom `.landing-terminal` with dot bar, controlled by `CLI_LIVE` flag.
+- **Terminal block** — Custom `.landing-terminal` with dot bar. Badge says "API + CLI live."
 - **Email form** — Buttondown integration for CLI launch notifications.
 
 ### What It Does NOT Have
@@ -130,8 +131,8 @@ Nav
 
 ### Animation
 - Scroll-driven fade-ins via IntersectionObserver (no libraries)
-- Copy button: `scale(1.05)` + green border flash, CSS transition only
-- Status badge: subtle green pulse animation
+- Copy button: `scale(1.05)` + copper border flash, CSS transition only
+- Status badge: subtle copper pulse animation
 - No bouncing, parallax, or particle effects
 
 ### Mobile
@@ -187,7 +188,7 @@ All browse pages follow the same pattern:
 
 ## Planning Assets
 
-Check `objectiveai-web/planning/` before design decisions — moodboard, color system, wireframes, logo assets, design guidelines, and CTA strategy docs.
+Check `objectiveai-web/planning/` before design decisions — moodboard, color system, wireframes, logo assets, design guidelines, and CTA strategy docs. `planning/design-system.md` is the canonical design system reference.
 
 ---
 
@@ -198,3 +199,5 @@ Functions → Browse, Profiles
 Ensembles → Browse, LLMs
 Information → Team, Docs, Legal
 ```
+
+Note: Docs sidebar still shows old terminology (maps to current API endpoints). Will update when Ronald renames endpoints.

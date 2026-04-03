@@ -1,22 +1,10 @@
 // ---------------------------------------------------------------------------
-// @objectiveai/function-tree — Public API
+// @objectiveai/function-tree/core — Framework-agnostic public API
+//
+// Types, data builders, and layout utilities without React dependency.
+// Import from "@objectiveai/function-tree/core" when you need shared types
+// or tree data structures without pulling in the React component.
 // ---------------------------------------------------------------------------
-
-// React component
-export { FunctionTree } from "./react/FunctionTree";
-
-// Core engine (for framework-agnostic usage)
-export { FunctionTreeEngine } from "./core/engine";
-
-// Data transformation
-export { buildTree, applyProfileWeights } from "./core/tree-data";
-export { buildStructuralTree, extractPromptPreview } from "./core/structural-tree-data";
-
-// Layout
-export { layoutTree, treeBounds } from "./core/layout";
-
-// Viewport
-export { Viewport } from "./core/viewport";
 
 // Types
 export type {
@@ -30,7 +18,6 @@ export type {
   VectorCompletionNodeData,
   EnsembleLlmNodeData,
   FunctionTreeConfig,
-  FunctionTreeProps,
   InputFunctionExecution,
   InputFunctionDefinition,
   InputTaskDefinition,
@@ -45,3 +32,10 @@ export type {
 } from "./types";
 
 export { DEFAULT_CONFIG, NODE_SIZES, SCORE_COLORS, scoreColor } from "./types";
+
+// Data transformation
+export { buildTree, applyProfileWeights } from "./core/tree-data";
+export { buildStructuralTree, extractPromptPreview } from "./core/structural-tree-data";
+
+// Layout
+export { layoutTree, treeBounds } from "./core/layout";

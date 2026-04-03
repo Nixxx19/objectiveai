@@ -14,8 +14,8 @@ export default function Loading() {
           <div className="skeleton" style={{ width: '260px', maxWidth: '100%', height: '28px', borderRadius: '6px', marginBottom: '10px' }} />
           <div className="skeleton" style={{ width: '280px', maxWidth: '100%', height: '16px', borderRadius: '4px', marginBottom: '12px' }} />
           <div style={{ display: 'flex', gap: '8px' }}>
-            <div className="skeleton" style={{ width: '70px', height: '24px', borderRadius: '12px' }} />
-            <div className="skeleton" style={{ width: '100px', height: '24px', borderRadius: '12px' }} />
+            <div className="skeleton" style={{ width: '70px', height: '24px', borderRadius: '4px' }} />
+            <div className="skeleton" style={{ width: '100px', height: '24px', borderRadius: '4px' }} />
           </div>
         </div>
 
@@ -23,12 +23,12 @@ export default function Loading() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '24px' }}>
           {/* Left: Input form placeholder */}
           <div>
-            <div className="skeleton" style={{ width: '100%', height: '200px', borderRadius: '12px' }} />
+            <div className="skeleton" style={{ width: '100%', height: '200px', borderRadius: '6px' }} />
           </div>
           {/* Right: Results placeholder */}
           <div>
             <div className="skeleton" style={{ width: '100%', height: '44px', borderRadius: '8px', marginBottom: '12px' }} />
-            <div className="skeleton" style={{ width: '100%', height: '44px', borderRadius: '22px' }} />
+            <div className="skeleton" style={{ width: '100%', height: '44px', borderRadius: '6px' }} />
           </div>
         </div>
       </div>

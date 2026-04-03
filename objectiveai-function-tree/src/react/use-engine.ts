@@ -4,6 +4,7 @@ import type {
   FunctionTreeConfig,
   InputFunctionExecution,
   InputFunctionDefinition,
+  InputProfile,
   TreeNode,
 } from "../types";
 
@@ -12,6 +13,7 @@ interface UseEngineOptions {
   definition?: InputFunctionDefinition | null;
   definitionLabel?: string;
   resolvedSubFunctions?: Map<string, InputFunctionDefinition>;
+  profile?: InputProfile | null;
   modelNames?: Record<string, string>;
   responseLabels?: Record<string, string[]>;
   config?: Partial<FunctionTreeConfig>;
@@ -93,8 +95,8 @@ export function useEngine(options: UseEngineOptions): UseEngineResult {
   useEffect(() => {
     const engine = engineRef.current;
     if (!engine) return;
-    engine.setData(options.data, options.modelNames, options.responseLabels);
-  }, [options.data, options.modelNames, options.responseLabels]);
+    engine.setData(options.data, options.modelNames, options.responseLabels, options.profile);
+  }, [options.data, options.modelNames, options.responseLabels, options.profile]);
 
   // Sync config
   useEffect(() => {

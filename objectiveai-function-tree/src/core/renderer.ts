@@ -141,11 +141,14 @@ export class TreeRenderer {
   ): void {
     const ctx = this.ctx;
     ctx.strokeStyle = theme.edgeColor;
-    ctx.lineWidth = theme.edgeWidth;
     ctx.lineCap = "square";
     ctx.lineJoin = "miter";
 
-    ctx.beginPath();
+    // Collect edges, grouping by line width for efficient batching.
+    // Edges without weight data use the default width; weighted edges
+    // are drawn individually since each may have a unique thickness.
+    const defaultEdges: Array<[number, number, number, number]> = [];
+    const weightedEdges: Array<[number, number, number, number, number]> = [];
 
     for (const node of nodes.values()) {
       if (node.children.length === 0) continue;
@@ -167,16 +170,53 @@ export class TreeRenderer {
           continue;
         }
 
-        // Elbow connector: vertical down → horizontal jog → vertical down
+        if (child.edgeWeight !== null) {
+          // Map normalized weight [0, 1] to line width [1, 2]
+          const w = 1 + child.edgeWeight;
+          weightedEdges.push([px, py, cx, cy, w]);
+        } else {
+          defaultEdges.push([px, py, cx, cy]);
+        }
+      }
+    }
+
+    // Batch-draw all default-width edges in one path
+    if (defaultEdges.length > 0) {
+      ctx.lineWidth = theme.edgeWidth;
+      ctx.beginPath();
+      for (const [px, py, cx, cy] of defaultEdges) {
         const midY = py + (cy - py) / 2;
         ctx.moveTo(px, py);
         ctx.lineTo(px, midY);
         ctx.lineTo(cx, midY);
         ctx.lineTo(cx, cy);
       }
+      ctx.stroke();
     }
 
-    ctx.stroke();
+    // Draw weighted edges — group by quantized width to reduce draw calls
+    if (weightedEdges.length > 0) {
+      // Sort by width so we can batch consecutive edges with the same width
+      weightedEdges.sort((a, b) => a[4] - b[4]);
+      let currentWidth = -1;
+
+      for (const [px, py, cx, cy, w] of weightedEdges) {
+        // Quantize to 0.25px increments to enable batching
+        const qw = Math.round(w * 4) / 4;
+        if (qw !== currentWidth) {
+          if (currentWidth !== -1) ctx.stroke();
+          currentWidth = qw;
+          ctx.lineWidth = qw;
+          ctx.beginPath();
+        }
+        const midY = py + (cy - py) / 2;
+        ctx.moveTo(px, py);
+        ctx.lineTo(px, midY);
+        ctx.lineTo(cx, midY);
+        ctx.lineTo(cx, cy);
+      }
+      ctx.stroke();
+    }
   }
 
   private edgeVisible(

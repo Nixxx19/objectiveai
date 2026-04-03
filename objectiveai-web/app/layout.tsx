@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import AppShell from "@/components/AppShell";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -15,27 +16,39 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+});
+
 export const metadata: Metadata = {
   title: {
     default: "ObjectiveAI",
     template: "%s | ObjectiveAI",
   },
   description:
-    "Score everything. Rank everything. Simulate anyone. A REST API platform for scoring, ranking, and simulating preferences using ensembles of LLMs.",
+    "Your agent's advisory board. Swarms of AI agents vote with weighted probabilities to produce confidence-scored outputs. One API call, collective judgment.",
   metadataBase: new URL("https://objective-ai.io"),
   openGraph: {
     type: "website",
     siteName: "ObjectiveAI",
     title: "ObjectiveAI",
     description:
-      "Score everything. Rank everything. Simulate anyone. A REST API platform for scoring, ranking, and simulating preferences using ensembles of LLMs.",
+      "Your agent's advisory board. Swarms of AI agents vote with weighted probabilities to produce confidence-scored outputs. One API call, collective judgment.",
     url: "https://objective-ai.io",
   },
   twitter: {
     card: "summary",
     title: "ObjectiveAI",
     description:
-      "Score everything. Rank everything. Simulate anyone. A REST API platform using ensembles of LLMs.",
+      "Your agent's advisory board. Swarms of AI agents vote to produce confidence-scored outputs.",
   },
   robots: {
     index: true,
@@ -56,7 +69,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
         <SonarlyTracker />
         <AuthProvider>
           <AppShell>{children}</AppShell>

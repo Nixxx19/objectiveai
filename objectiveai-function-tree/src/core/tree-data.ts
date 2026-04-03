@@ -6,6 +6,7 @@ import type {
   InputTask,
   InputVectorCompletionTask,
   InputFunctionExecutionTask,
+  InputProfile,
   EnsembleLlmNodeData,
 } from "../types";
 import { NODE_SIZES as SIZES } from "../types";
@@ -84,6 +85,7 @@ export function buildTree(
     // Root node is taller when it has output to display the score prominently
     height: execution.output !== undefined ? 96 : SIZES.function.height,
     state: functionState(execution),
+    edgeWeight: null,
     data: {
       kind: "function",
       functionId: execution.function ?? null,
@@ -164,6 +166,7 @@ function processFunctionTask(
     width: SIZES.function.width,
     height: SIZES.function.height,
     state: functionState(task),
+    edgeWeight: null,
     data: {
       kind: "function",
       functionId: task.function ?? null,
@@ -220,6 +223,7 @@ function processVectorCompletionTask(
     width: SIZES["vector-completion"].width,
     height: SIZES["vector-completion"].height,
     state: taskState(task),
+    edgeWeight: null,
     data: {
       kind: "vector-completion",
       taskIndex: task.task_index ?? idx,
@@ -241,6 +245,9 @@ function processVectorCompletionTask(
 
   // Create ensemble LLM child nodes from votes
   if (task.votes && task.votes.length > 0) {
+    // Find max weight among votes for normalization
+    const maxWeight = Math.max(...task.votes.map((v) => v.weight));
+
     for (let v = 0; v < task.votes.length; v++) {
       const vote = task.votes[v];
       const llmId = nodeId("llm", [...path, v]);
@@ -263,6 +270,7 @@ function processVectorCompletionTask(
         width: SIZES["ensemble-llm"].width,
         height: SIZES["ensemble-llm"].height,
         state: "complete",
+        edgeWeight: maxWeight > 0 ? vote.weight / maxWeight : null,
         data: {
           kind: "ensemble-llm",
           model: modelName,
@@ -277,5 +285,69 @@ function processVectorCompletionTask(
       nodes.set(llmId, llmNode);
       node.children.push(llmId);
     }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Apply Profile Weights
+// ---------------------------------------------------------------------------
+
+/**
+ * Apply profile weights to tree node edges. Mutates nodes in place.
+ *
+ * Profile structure:
+ * - `profile.profile[]` — per-task weights for the root function's children
+ * - `profile.tasks[i].profile[]` — per-LLM weights within each task's ensemble
+ *
+ * Edge weights are normalized to [0, 1] relative to the maximum weight
+ * among siblings so the renderer can map to the 1-2px thickness range.
+ */
+export function applyProfileWeights(
+  treeData: TreeData,
+  profile: InputProfile | null | undefined,
+): void {
+  if (!profile) return;
+
+  const { nodes, rootId } = treeData;
+  const root = nodes.get(rootId);
+  if (!root) return;
+
+  // Apply per-task weights to direct children of root
+  const taskWeights = profile.profile;
+  if (taskWeights && taskWeights.length > 0) {
+    applyWeightsToChildren(nodes, root, taskWeights);
+  }
+
+  // Apply per-LLM weights from profile.tasks[i].profile
+  // to ensemble-llm children of each vector-completion node
+  if (profile.tasks) {
+    for (let i = 0; i < root.children.length && i < profile.tasks.length; i++) {
+      const childId = root.children[i];
+      const child = nodes.get(childId);
+      if (!child) continue;
+
+      const profileTask = profile.tasks[i];
+      if (profileTask.profile && profileTask.profile.length > 0) {
+        applyWeightsToChildren(nodes, child, profileTask.profile);
+      }
+    }
+  }
+}
+
+/**
+ * Apply a weight array to the children of a node, normalizing to [0, 1].
+ */
+function applyWeightsToChildren(
+  nodes: Map<string, TreeNode>,
+  parent: TreeNode,
+  weights: number[],
+): void {
+  const maxWeight = Math.max(...weights);
+  if (maxWeight <= 0) return;
+
+  for (let i = 0; i < parent.children.length && i < weights.length; i++) {
+    const child = nodes.get(parent.children[i]);
+    if (!child) continue;
+    child.edgeWeight = weights[i] / maxWeight;
   }
 }

@@ -90,6 +90,13 @@ export interface TreeNode {
   // Visual state
   state: TreeNodeState;
 
+  /**
+   * Weight of the edge from this node's parent to this node.
+   * Null means no weight information (draw at default thickness).
+   * Values are normalized 0-1 by the tree builder.
+   */
+  edgeWeight: number | null;
+
   // Data payload
   data: TreeNodeData;
 }
