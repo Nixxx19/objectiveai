@@ -43,14 +43,12 @@ public class RoundtripTest
     private static Dictionary<string, Type> BuildTitleMap()
     {
         var map = new Dictionary<string, Type>();
-        var assembly = typeof(ObjectiveAI.Attributes.JsonSchemaTitleAttribute).Assembly;
+        var assembly = typeof(JsonSchemaTitleAttribute).Assembly;
         foreach (var type in assembly.GetExportedTypes())
         {
             var attr = type.GetCustomAttribute<JsonSchemaTitleAttribute>();
             if (attr != null)
-            {
                 map[attr.Title] = type;
-            }
         }
         return map;
     }
@@ -85,10 +83,6 @@ public class RoundtripTest
         {
             ConvertTopLevelEnum(type, result);
         }
-        else if (type.IsInterface)
-        {
-            ConvertTopLevelInterface(type, result);
-        }
         else
         {
             ConvertTopLevelClass(type, result);
@@ -97,9 +91,12 @@ public class RoundtripTest
         return result;
     }
 
+    // -----------------------------------------------------------------------
+    // Flat enum (type: "string" + enum, no anyOf)
+    // -----------------------------------------------------------------------
+
     private void ConvertTopLevelEnum(Type type, Dictionary<string, object?> result)
     {
-        // Check if enum members have descriptions → anyOf pattern
         var members = type.GetFields(BindingFlags.Public | BindingFlags.Static);
         bool hasDescriptions = members.Any(m => m.GetCustomAttribute<DescriptionAttribute>() != null);
 
@@ -132,118 +129,255 @@ public class RoundtripTest
         }
     }
 
-    private void ConvertTopLevelInterface(Type type, Dictionary<string, object?> result)
-    {
-        // Check for stored $ref targets (marker interface pattern)
-        var refsAttr = type.GetCustomAttribute<JsonSchemaAnyOfRefsAttribute>();
-        if (refsAttr != null && refsAttr.Refs.Length > 0)
-        {
-            var anyOf = new List<object?>();
-            foreach (var refTitle in refsAttr.Refs)
-            {
-                anyOf.Add(new Dictionary<string, object?> { ["$ref"] = refTitle });
-            }
-            result["anyOf"] = anyOf;
-            return;
-        }
-
-        // Find variant types (general anyOf interface pattern)
-        var variants = FindVariantTypes(type);
-
-        if (variants.Count > 0)
-        {
-            var anyOf = new List<object?>();
-            foreach (var variant in variants)
-            {
-                anyOf.Add(ConvertVariantType(variant));
-            }
-            result["anyOf"] = anyOf;
-        }
-    }
+    // -----------------------------------------------------------------------
+    // Class conversion (union classes, regular objects, wrappers, etc.)
+    // -----------------------------------------------------------------------
 
     private void ConvertTopLevelClass(Type type, Dictionary<string, object?> result)
     {
-        // Check for variant types (flattened model pattern)
-        var variants = FindVariantTypes(type);
+        var allProps = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        var variantProps = allProps.Where(p => p.GetCustomAttribute<JsonSchemaVariantAttribute>() != null).ToList();
+        var regularProps = allProps.Where(p => p.GetCustomAttribute<JsonPropertyNameAttribute>() != null).ToList();
+        var refAttr = type.GetCustomAttribute<JsonSchemaRefAttribute>();
+        var nullableAttr = allProps.FirstOrDefault(p => p.Name == "Value" && p.GetCustomAttribute<JsonSchemaNullableAttribute>() != null);
 
-        if (type.GetProperties().Length == 0 && variants.Count == 0)
+        // Value wrapper (single Value property, no [JsonPropertyName])
+        if (IsValueWrapper(type, allProps))
         {
-            // Empty object type
-            result["type"] = "object";
+            ConvertValueWrapper(type, allProps, result);
             return;
         }
 
-        // Check if this is a wrapper type (single "Value" property + no [JsonPropertyName])
-        var props = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-        if (IsArrayWrapper(type, props))
+        // Array wrapper (single Items property of List<>)
+        if (IsArrayWrapper(type, allProps))
         {
-            ConvertArrayWrapper(type, props, result);
-            return;
-        }
-        if (IsValueWrapper(type, props))
-        {
-            ConvertValueWrapper(type, props, result);
+            ConvertArrayWrapper(type, allProps, result);
             return;
         }
 
-        // Regular object type
-        result["type"] = "object";
-
-        if (variants.Count > 0)
+        // Nullable wrapper (single Value? property with [JsonSchemaNullable])
+        if (nullableAttr != null && allProps.Length == 1)
         {
-            // Check if this is a flattened $ref model (single variant with $ref, no anyOf)
-            if (variants.Count == 1)
+            ConvertNullableWrapper(type, nullableAttr, result);
+            return;
+        }
+
+        // Union class (has variant properties)
+        if (variantProps.Count > 0)
+        {
+            var anyOf = variantProps.Select(ConvertVariantProperty).ToList<object?>();
+            result["anyOf"] = anyOf;
+
+            // If also has regular properties, this is a flattened model with anyOf
+            if (regularProps.Count > 0)
             {
-                var singleVariant = variants[0];
-                var singleRefAttr = singleVariant.GetCustomAttribute<JsonSchemaRefAttribute>();
-                var singleProps = singleVariant.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-                bool isSingleValueRef = singleRefAttr != null
-                    && singleProps.Length == 1 && singleProps[0].Name == "Value"
-                    && singleProps[0].GetCustomAttribute<JsonPropertyNameAttribute>() == null;
-                if (isSingleValueRef)
-                {
-                    // Direct $ref on top level (not anyOf)
-                    result["$ref"] = singleRefAttr!.RefTitle;
-                }
-                else
-                {
-                    var anyOf = new List<object?>();
-                    anyOf.Add(ConvertVariantType(singleVariant));
-                    result["anyOf"] = anyOf;
-                }
+                result["type"] = "object";
+                result["properties"] = ConvertProperties(regularProps);
+            }
+            return;
+        }
+
+        // Flattened ref model ($ref + properties)
+        if (refAttr != null)
+        {
+            result["type"] = "object";
+            result["$ref"] = refAttr.RefTitle;
+            if (regularProps.Count > 0)
+                result["properties"] = ConvertProperties(regularProps);
+            return;
+        }
+
+        // Regular object class
+        if (regularProps.Count > 0 || allProps.Length == 0)
+        {
+            result["type"] = "object";
+            if (regularProps.Count > 0)
+                result["properties"] = ConvertProperties(regularProps);
+
+            var apAttr = type.GetCustomAttribute<JsonSchemaAdditionalPropertiesAttribute>();
+            if (apAttr != null)
+                result["additionalProperties"] = apAttr.Allowed;
+            return;
+        }
+
+        // Empty object
+        result["type"] = "object";
+    }
+
+    // -----------------------------------------------------------------------
+    // Variant property → anyOf entry reconstruction
+    // -----------------------------------------------------------------------
+
+    private Dictionary<string, object?> ConvertVariantProperty(PropertyInfo prop)
+    {
+        var attr = prop.GetCustomAttribute<JsonSchemaVariantAttribute>()!;
+        var result = new Dictionary<string, object?>();
+
+        // Title
+        result["title"] = attr.Title;
+
+        // Description
+        var desc = prop.GetCustomAttribute<DescriptionAttribute>()?.Description;
+        if (desc != null)
+            result["description"] = desc;
+
+        // Type
+        if (attr.Type != null)
+            result["type"] = attr.Type;
+
+        // Enum
+        if (attr.Enum != null)
+            result["enum"] = attr.Enum.Select(v => (object?)v).ToList();
+
+        // $ref
+        if (attr.Ref != null)
+            result["$ref"] = attr.Ref;
+
+        // For wrapper/inline-object variants, extract properties from the property's type
+        var propType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+        var wrapperAttr = propType.GetCustomAttribute<JsonSchemaVariantWrapperAttribute>();
+
+        if (wrapperAttr != null)
+        {
+            // Discriminated variant wrapper — get properties from the wrapper class
+            var wrapperRegularProps = propType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                .Where(p => p.GetCustomAttribute<JsonPropertyNameAttribute>() != null).ToList();
+            if (wrapperRegularProps.Count > 0)
+                result["properties"] = ConvertProperties(wrapperRegularProps);
+        }
+        else if (attr.Type == "object" && attr.Ref == null && !IsDictionaryType(propType))
+        {
+            // Inline object variant — get properties from the property's type
+            var inlineProps = propType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.GetCustomAttribute<JsonPropertyNameAttribute>() != null).ToList();
+            if (inlineProps.Count > 0)
+                result["properties"] = ConvertProperties(inlineProps);
+
+            // additionalProperties on inline class
+            var apAttr = propType.GetCustomAttribute<JsonSchemaAdditionalPropertiesAttribute>();
+            if (apAttr != null)
+                result["additionalProperties"] = apAttr.Allowed;
+
+            var apSchemaAttr = propType.GetCustomAttribute<JsonSchemaAdditionalPropertiesSchemaAttribute>();
+            if (apSchemaAttr != null)
+                AddAdditionalPropertiesSchema(result, apSchemaAttr);
+        }
+        else if (attr.Type == "object" && attr.Ref == null && IsDictionaryType(propType))
+        {
+            // Dictionary variant — additionalProperties from the value type
+            var apSchemaAttr = prop.GetCustomAttribute<JsonSchemaAdditionalPropertiesSchemaAttribute>();
+            if (apSchemaAttr != null)
+                AddAdditionalPropertiesSchema(result, apSchemaAttr);
+            else
+            {
+                // Infer additionalProperties from Dictionary<string, V> generic type
+                var valType = propType.GetGenericArguments()[1];
+                if (valType != typeof(JsonElement))
+                    result["additionalProperties"] = TryConvertAsRef(valType) ?? ConvertType(valType);
+            }
+        }
+        else if (attr.Type == "array")
+        {
+            // Check for stored items schema (complex items with inline anyOf)
+            var itemsSchemaAttr = prop.GetCustomAttribute<JsonSchemaItemsSchemaAttribute>();
+            if (itemsSchemaAttr != null)
+            {
+                var itemsEl = JsonDocument.Parse(itemsSchemaAttr.Json).RootElement;
+                result["items"] = JsonElementToStructure(itemsEl);
             }
             else
             {
-                var anyOf = new List<object?>();
-                foreach (var variant in variants)
+                // Array variant — items from List<T>
+                var listType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+                if (listType.IsGenericType && listType.GetGenericTypeDefinition() == typeof(List<>))
                 {
-                    anyOf.Add(ConvertVariantType(variant));
+                    var itemType = listType.GetGenericArguments()[0];
+                    var itemsNullable = prop.GetCustomAttribute<JsonSchemaItemsNullableAttribute>() != null;
+                    var itemsRange = prop.GetCustomAttribute<JsonSchemaItemsRangeAttribute>();
+
+                    if (itemsNullable)
+                    {
+                        var actualItemType = Nullable.GetUnderlyingType(itemType) ?? itemType;
+                        var nonNullSchema = TryConvertAsRef(actualItemType) ?? ConvertType(actualItemType);
+                        if (itemsRange != null)
+                        {
+                            if (itemsRange.Minimum != null)
+                                nonNullSchema["minimum"] = ParseJsonNumber(itemsRange.Minimum);
+                            if (itemsRange.Maximum != null)
+                                nonNullSchema["maximum"] = ParseJsonNumber(itemsRange.Maximum);
+                        }
+                        result["items"] = new Dictionary<string, object?>
+                        {
+                            ["anyOf"] = new List<object?> { nonNullSchema, new Dictionary<string, object?> { ["type"] = "null" } }
+                        };
+                    }
+                    else
+                    {
+                        var itemSchema = TryConvertAsRef(itemType) ?? ConvertType(itemType);
+                        // Drill down through nested arrays for item constraints
+                        var target = itemSchema;
+                        while (target.TryGetValue("type", out var iType) && iType as string == "array"
+                               && target.TryGetValue("items", out var innerItems) && innerItems is Dictionary<string, object?> innerDict)
+                            target = innerDict;
+
+                        if (itemsRange != null)
+                        {
+                            if (itemsRange.Minimum != null)
+                                target["minimum"] = ParseJsonNumber(itemsRange.Minimum);
+                            if (itemsRange.Maximum != null)
+                                target["maximum"] = ParseJsonNumber(itemsRange.Maximum);
+                        }
+                        result["items"] = itemSchema;
+                    }
                 }
-                result["anyOf"] = anyOf;
             }
         }
 
-        var properties = ConvertProperties(type);
-        if (properties.Count > 0)
-            result["properties"] = properties;
+        // Range constraints (minimum/maximum)
+        var range = prop.GetCustomAttribute<JsonSchemaRangeAttribute>();
+        if (range != null)
+        {
+            if (attr.Type == "array")
+            {
+                // On array variants, range = minItems/maxItems
+                if (range.Minimum != null)
+                    result["minItems"] = ParseJsonNumber(range.Minimum);
+                if (range.Maximum != null)
+                    result["maxItems"] = ParseJsonNumber(range.Maximum);
+            }
+            else
+            {
+                if (range.Minimum != null)
+                    result["minimum"] = ParseJsonNumber(range.Minimum);
+                if (range.Maximum != null)
+                    result["maximum"] = ParseJsonNumber(range.Maximum);
+            }
+        }
 
-        var additionalProps = type.GetCustomAttribute<JsonSchemaAdditionalPropertiesAttribute>();
-        if (additionalProps != null)
-            result["additionalProperties"] = additionalProps.Allowed;
+        // Pattern
+        var regex = prop.GetCustomAttribute<RegularExpressionAttribute>();
+        if (regex != null)
+            result["pattern"] = regex.Pattern;
+
+        // Format
+        var fmt = prop.GetCustomAttribute<JsonSchemaFormatAttribute>();
+        if (fmt != null)
+            result["format"] = fmt.Format;
+
+        return result;
     }
 
     // -----------------------------------------------------------------------
     // Property conversion
     // -----------------------------------------------------------------------
 
-    private Dictionary<string, object?> ConvertProperties(Type type)
+    private Dictionary<string, object?> ConvertProperties(List<PropertyInfo> props)
     {
         var result = new Dictionary<string, object?>();
-        foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        foreach (var prop in props)
         {
             var jsonName = prop.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name;
             if (jsonName == null) continue;
-
             result[jsonName] = ConvertProperty(prop);
         }
         return result;
@@ -253,7 +387,6 @@ public class RoundtripTest
     {
         var result = new Dictionary<string, object?>();
 
-        // Description
         var desc = prop.GetCustomAttribute<DescriptionAttribute>()?.Description;
         if (desc != null)
             result["description"] = desc;
@@ -264,9 +397,19 @@ public class RoundtripTest
             ? Nullable.GetUnderlyingType(propType) ?? propType
             : propType;
 
-        if (!isNullable)
+        // Check for stored inline anyOf
+        var inlineAnyOf = prop.GetCustomAttribute<JsonSchemaPropertyAnyOfAttribute>();
+        if (inlineAnyOf != null && !isNullable)
         {
-            // Non-nullable property
+            // Non-nullable: stored value is the anyOf JSON array
+            var anyOfJson = JsonDocument.Parse(inlineAnyOf.Json).RootElement;
+            var anyOf = new List<object?>();
+            foreach (var variant in anyOfJson.EnumerateArray())
+                anyOf.Add(JsonElementToStructure(variant));
+            result["anyOf"] = anyOf;
+        }
+        else if (!isNullable)
+        {
             var typeSchema = TryConvertAsRef(innerType) ?? ConvertType(innerType, prop);
             result.MergeFrom(typeSchema);
             AddConstraints(result, prop);
@@ -274,11 +417,21 @@ public class RoundtripTest
         }
         else
         {
-            // Nullable property → anyOf: [nonNullSchema, {type: "null"}]
-            var nonNullSchema = TryConvertAsRef(innerType) ?? ConvertType(innerType, prop);
-            AddConstraints(nonNullSchema, prop);
-            AddArrayItemConstraints(nonNullSchema, prop);
-
+            // Check if the non-null variant has stored inline anyOf
+            var nullableInlineAnyOf = prop.GetCustomAttribute<JsonSchemaPropertyAnyOfAttribute>();
+            Dictionary<string, object?> nonNullSchema;
+            if (nullableInlineAnyOf != null)
+            {
+                // Use stored JSON for the non-null variant
+                var el = JsonDocument.Parse(nullableInlineAnyOf.Json).RootElement;
+                nonNullSchema = (Dictionary<string, object?>)JsonElementToStructure(el)!;
+            }
+            else
+            {
+                nonNullSchema = TryConvertAsRef(innerType) ?? ConvertType(innerType, prop);
+                AddConstraints(nonNullSchema, prop);
+                AddArrayItemConstraints(nonNullSchema, prop);
+            }
             result["anyOf"] = new List<object?>
             {
                 nonNullSchema,
@@ -289,9 +442,12 @@ public class RoundtripTest
         // Default value
         var defaultAttr = prop.GetCustomAttribute<JsonSchemaDefaultAttribute>();
         if (defaultAttr != null)
-        {
             result["default"] = ParseJsonDefault(defaultAttr.JsonValue);
-        }
+
+        // omitempty
+        var omitEmpty = prop.GetCustomAttribute<JsonSchemaOmitEmptyAttribute>();
+        if (omitEmpty != null)
+            result["omitempty"] = true;
 
         return result;
     }
@@ -303,9 +459,7 @@ public class RoundtripTest
     private Dictionary<string, object?>? TryConvertAsRef(Type type)
     {
         if (TypeToTitle.TryGetValue(type, out var title))
-        {
             return new Dictionary<string, object?> { ["$ref"] = title };
-        }
         return null;
     }
 
@@ -317,57 +471,41 @@ public class RoundtripTest
             if (prop != null)
             {
                 var fmt = prop.GetCustomAttribute<JsonSchemaFormatAttribute>()?.Format;
-                if (fmt != null)
-                    result["format"] = fmt;
-
-                // Check for enum values
+                if (fmt != null) result["format"] = fmt;
                 var enumAttr = prop.GetCustomAttribute<JsonSchemaEnumAttribute>();
                 if (enumAttr != null)
-                {
                     result["enum"] = enumAttr.Values.Select(v => (object?)v).ToList();
-                }
             }
             return result;
         }
 
         if (type == typeof(long))
             return new Dictionary<string, object?> { ["type"] = "integer" };
-
         if (type == typeof(ulong))
             return new Dictionary<string, object?> { ["type"] = "integer" };
-
         if (type == typeof(double))
             return new Dictionary<string, object?> { ["type"] = "number" };
-
         if (type == typeof(bool))
             return new Dictionary<string, object?> { ["type"] = "boolean" };
-
         if (type == typeof(DateTimeOffset))
             return new Dictionary<string, object?> { ["type"] = "string", ["format"] = "date-time" };
-
         if (type == typeof(JsonElement))
-            return new Dictionary<string, object?>(); // bare schema
+            return new Dictionary<string, object?>();
 
         // List<T>
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
         {
             var itemType = type.GetGenericArguments()[0];
             var result = new Dictionary<string, object?> { ["type"] = "array" };
-
             var itemSchema = TryConvertAsRef(itemType) ?? ConvertType(itemType);
 
-            // Check for Nullable<T> items (value type)
             if (IsNullableType(itemType))
             {
                 var innerItemType = Nullable.GetUnderlyingType(itemType)!;
                 var nonNullSchema = TryConvertAsRef(innerItemType) ?? ConvertType(innerItemType);
                 itemSchema = new Dictionary<string, object?>
                 {
-                    ["anyOf"] = new List<object?>
-                    {
-                        nonNullSchema,
-                        new Dictionary<string, object?> { ["type"] = "null" }
-                    }
+                    ["anyOf"] = new List<object?> { nonNullSchema, new Dictionary<string, object?> { ["type"] = "null" } }
                 };
             }
 
@@ -381,149 +519,18 @@ public class RoundtripTest
             var valType = type.GetGenericArguments()[1];
             var result = new Dictionary<string, object?> { ["type"] = "object" };
             if (valType != typeof(JsonElement))
-            {
                 result["additionalProperties"] = TryConvertAsRef(valType) ?? ConvertType(valType);
-            }
             return result;
         }
 
-        // Known type
         if (TypeToTitle.TryGetValue(type, out var title))
-        {
             return new Dictionary<string, object?> { ["$ref"] = title };
-        }
 
         return new Dictionary<string, object?>();
     }
 
     // -----------------------------------------------------------------------
-    // Variant types
-    // -----------------------------------------------------------------------
-
-    private List<Type> FindVariantTypes(Type type)
-    {
-        var variants = new List<Type>();
-        var assembly = type.Assembly;
-        var baseName = type.Name;
-
-        // For interfaces, strip the 'I' prefix
-        if (type.IsInterface && baseName.StartsWith("I"))
-            baseName = baseName[1..];
-
-        int i = 1;
-        while (true)
-        {
-            var variantName = $"{baseName}Variant{i}";
-            var variantType = assembly.GetTypes().FirstOrDefault(t => t.Name == variantName && t.Namespace == type.Namespace);
-            if (variantType == null)
-                break;
-            variants.Add(variantType);
-            i++;
-        }
-        return variants;
-    }
-
-    private Dictionary<string, object?> ConvertVariantType(Type variant)
-    {
-        var result = new Dictionary<string, object?>();
-
-        // Description
-        var desc = variant.GetCustomAttribute<DescriptionAttribute>()?.Description;
-        if (desc != null)
-            result["description"] = desc;
-
-        // Check for $ref + type + properties pattern (e.g., Message variants)
-        var refAttr = variant.GetCustomAttribute<JsonSchemaRefAttribute>();
-        var variantTypeAttr = variant.GetCustomAttribute<JsonSchemaVariantTypeAttribute>();
-
-        var props = variant.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-        // Check if this is a value wrapper (single "Value" property with no [JsonPropertyName])
-        if (props.Length == 1 && props[0].Name == "Value" && props[0].GetCustomAttribute<JsonPropertyNameAttribute>() == null)
-        {
-            var valProp = props[0];
-            var isValNullable = valProp.GetCustomAttribute<JsonSchemaNullableAttribute>() != null;
-
-            if (isValNullable)
-            {
-                // Nullable value variant → anyOf: [{nonNullSchema}, {type: "null"}]
-                var valType = valProp.PropertyType;
-                var innerType = Nullable.GetUnderlyingType(valType) ?? valType;
-                var nonNullSchema = TryConvertAsRef(innerType) ?? ConvertType(innerType, valProp);
-                AddConstraints(nonNullSchema, valProp);
-                result["anyOf"] = new List<object?>
-                {
-                    nonNullSchema,
-                    new Dictionary<string, object?> { ["type"] = "null" }
-                };
-                return result;
-            }
-
-            if (refAttr != null)
-            {
-                // $ref variant (with possible description)
-                result["$ref"] = refAttr.RefTitle;
-            }
-            else
-            {
-                var valType = valProp.PropertyType;
-                var typeSchema = TryConvertAsRef(valType) ?? ConvertType(valType, valProp);
-                result.MergeFrom(typeSchema);
-            }
-
-            // Add constraints from the Value property
-            AddConstraints(result, valProp);
-            AddArrayItemConstraints(result, valProp);
-
-            return result;
-        }
-
-        // Variant with properties
-        if (variantTypeAttr != null)
-        {
-            // Has explicit type (e.g., "object")
-            result["type"] = variantTypeAttr.Type;
-        }
-        else if (refAttr == null)
-        {
-            // No $ref, regular object variant
-            result["type"] = "object";
-        }
-
-        if (refAttr != null)
-        {
-            result["$ref"] = refAttr.RefTitle;
-        }
-
-        // Check for additionalProperties: false
-        var additionalProps = variant.GetCustomAttribute<JsonSchemaAdditionalPropertiesAttribute>();
-        if (additionalProps != null)
-            result["additionalProperties"] = additionalProps.Allowed;
-
-        // Check for additionalProperties schema (true or $ref)
-        var apSchema = variant.GetCustomAttribute<JsonSchemaAdditionalPropertiesSchemaAttribute>();
-        if (apSchema != null)
-        {
-            if (apSchema.Schema == "true")
-            {
-                result["additionalProperties"] = true;
-            }
-            else if (apSchema.Schema.StartsWith("$ref:"))
-            {
-                var apRefTitle = apSchema.Schema[5..];
-                result["additionalProperties"] = new Dictionary<string, object?> { ["$ref"] = apRefTitle };
-            }
-        }
-
-        var properties = ConvertProperties(variant);
-        if (properties.Count > 0)
-            result["properties"] = properties;
-
-        return result;
-    }
-
-    // -----------------------------------------------------------------------
-    // Helpers
+    // Wrapper detection and conversion
     // -----------------------------------------------------------------------
 
     private bool IsArrayWrapper(Type type, PropertyInfo[] props)
@@ -560,29 +567,20 @@ public class RoundtripTest
 
             result["items"] = new Dictionary<string, object?>
             {
-                ["anyOf"] = new List<object?>
-                {
-                    nonNullSchema,
-                    new Dictionary<string, object?> { ["type"] = "null" }
-                }
+                ["anyOf"] = new List<object?> { nonNullSchema, new Dictionary<string, object?> { ["type"] = "null" } }
             };
         }
         else
         {
             var itemSchema = TryConvertAsRef(itemType) ?? ConvertType(itemType);
 
-            // Check for Nullable<T> items (value type)
             if (IsNullableType(itemType))
             {
                 var innerType = Nullable.GetUnderlyingType(itemType)!;
                 var nonNullSchema = TryConvertAsRef(innerType) ?? ConvertType(innerType);
                 itemSchema = new Dictionary<string, object?>
                 {
-                    ["anyOf"] = new List<object?>
-                    {
-                        nonNullSchema,
-                        new Dictionary<string, object?> { ["type"] = "null" }
-                    }
+                    ["anyOf"] = new List<object?> { nonNullSchema, new Dictionary<string, object?> { ["type"] = "null" } }
                 };
             }
 
@@ -597,77 +595,62 @@ public class RoundtripTest
             result["items"] = itemSchema;
         }
 
-        // minItems/maxItems from range attribute on the Items property
         var range = itemsProp.GetCustomAttribute<JsonSchemaRangeAttribute>();
         if (range != null)
         {
-            if (range.Minimum != null)
-                result["minItems"] = ParseJsonNumber(range.Minimum);
-            if (range.Maximum != null)
-                result["maxItems"] = ParseJsonNumber(range.Maximum);
+            if (range.Minimum != null) result["minItems"] = ParseJsonNumber(range.Minimum);
+            if (range.Maximum != null) result["maxItems"] = ParseJsonNumber(range.Maximum);
         }
     }
 
     private bool IsValueWrapper(Type type, PropertyInfo[] props)
     {
         if (props.Length != 1 || props[0].Name != "Value") return false;
-        return props[0].GetCustomAttribute<JsonPropertyNameAttribute>() == null;
+        if (props[0].GetCustomAttribute<JsonPropertyNameAttribute>() != null) return false;
+        if (props[0].GetCustomAttribute<JsonSchemaNullableAttribute>() != null) return false;
+        return true;
     }
 
     private void ConvertValueWrapper(Type type, PropertyInfo[] props, Dictionary<string, object?> result)
     {
         var prop = props[0];
         var propType = prop.PropertyType;
-        var isNullable = IsNullableType(propType);
-
-        if (isNullable)
-        {
-            var innerType = propType.IsGenericType && propType.GetGenericTypeDefinition() == typeof(Nullable<>)
-                ? Nullable.GetUnderlyingType(propType)!
-                : propType;
-
-            var nonNullSchema = TryConvertAsRef(innerType) ?? ConvertType(innerType, prop);
-            AddConstraints(nonNullSchema, prop);
-
-            result["anyOf"] = new List<object?>
-            {
-                nonNullSchema,
-                new Dictionary<string, object?> { ["type"] = "null" }
-            };
-        }
-        else
-        {
-            var typeSchema = TryConvertAsRef(propType) ?? ConvertType(propType, prop);
-            result.MergeFrom(typeSchema);
-            AddConstraints(result, prop);
-        }
+        var typeSchema = TryConvertAsRef(propType) ?? ConvertType(propType, prop);
+        result.MergeFrom(typeSchema);
+        AddConstraints(result, prop);
     }
 
-    private static bool IsNullableType(Type type)
+    private void ConvertNullableWrapper(Type type, PropertyInfo prop, Dictionary<string, object?> result)
     {
-        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-            return true;
-        return false;
+        var propType = prop.PropertyType;
+        var innerType = Nullable.GetUnderlyingType(propType) ?? propType;
+        var nonNullSchema = TryConvertAsRef(innerType) ?? ConvertType(innerType, prop);
+        AddConstraints(nonNullSchema, prop);
+        result["anyOf"] = new List<object?>
+        {
+            nonNullSchema,
+            new Dictionary<string, object?> { ["type"] = "null" }
+        };
     }
+
+    // -----------------------------------------------------------------------
+    // Constraints
+    // -----------------------------------------------------------------------
 
     private void AddConstraints(Dictionary<string, object?> schema, PropertyInfo prop)
     {
         var range = prop.GetCustomAttribute<JsonSchemaRangeAttribute>();
         if (range != null)
         {
-            if (range.Minimum != null)
-                schema["minimum"] = ParseJsonNumber(range.Minimum);
-            if (range.Maximum != null)
-                schema["maximum"] = ParseJsonNumber(range.Maximum);
+            if (range.Minimum != null) schema["minimum"] = ParseJsonNumber(range.Minimum);
+            if (range.Maximum != null) schema["maximum"] = ParseJsonNumber(range.Maximum);
         }
 
         var regex = prop.GetCustomAttribute<RegularExpressionAttribute>();
-        if (regex != null)
-            schema["pattern"] = regex.Pattern;
+        if (regex != null) schema["pattern"] = regex.Pattern;
 
         var fmt = prop.GetCustomAttribute<JsonSchemaFormatAttribute>();
-        if (fmt != null)
-            schema["format"] = fmt.Format;
+        if (fmt != null) schema["format"] = fmt.Format;
 
         var enumAttr = prop.GetCustomAttribute<JsonSchemaEnumAttribute>();
         if (enumAttr != null)
@@ -675,12 +658,7 @@ public class RoundtripTest
 
         var apSchemaAttr = prop.GetCustomAttribute<JsonSchemaAdditionalPropertiesSchemaAttribute>();
         if (apSchemaAttr != null)
-        {
-            if (apSchemaAttr.Schema == "true")
-                schema["additionalProperties"] = true;
-            else if (apSchemaAttr.Schema.StartsWith("$ref:"))
-                schema["additionalProperties"] = new Dictionary<string, object?> { ["$ref"] = apSchemaAttr.Schema[5..] };
-        }
+            AddAdditionalPropertiesSchema(schema, apSchemaAttr);
     }
 
     private void AddArrayItemConstraints(Dictionary<string, object?> schema, PropertyInfo prop)
@@ -693,57 +671,96 @@ public class RoundtripTest
             var dictRange = prop.GetCustomAttribute<JsonSchemaItemsRangeAttribute>();
             if (dictRange != null)
             {
-                if (dictRange.Minimum != null)
-                    apDict["minimum"] = ParseJsonNumber(dictRange.Minimum);
-                if (dictRange.Maximum != null)
-                    apDict["maximum"] = ParseJsonNumber(dictRange.Maximum);
+                if (dictRange.Minimum != null) apDict["minimum"] = ParseJsonNumber(dictRange.Minimum);
+                if (dictRange.Maximum != null) apDict["maximum"] = ParseJsonNumber(dictRange.Maximum);
             }
             return;
         }
 
-        // Only applies to array types
-        if (!schema.ContainsKey("type") || schema["type"] as string != "array")
-            return;
+        if (!schema.ContainsKey("type") || schema["type"] as string != "array") return;
 
         var itemsNullable = prop.GetCustomAttribute<JsonSchemaItemsNullableAttribute>() != null;
         var itemsRange = prop.GetCustomAttribute<JsonSchemaItemsRangeAttribute>();
 
         if (itemsNullable && schema.TryGetValue("items", out var currentItems) && currentItems is Dictionary<string, object?> currentItemsDict)
         {
-            // Wrap items in anyOf with null
             var nonNullSchema = new Dictionary<string, object?>(currentItemsDict);
             if (itemsRange != null)
             {
-                if (itemsRange.Minimum != null)
-                    nonNullSchema["minimum"] = ParseJsonNumber(itemsRange.Minimum);
-                if (itemsRange.Maximum != null)
-                    nonNullSchema["maximum"] = ParseJsonNumber(itemsRange.Maximum);
+                if (itemsRange.Minimum != null) nonNullSchema["minimum"] = ParseJsonNumber(itemsRange.Minimum);
+                if (itemsRange.Maximum != null) nonNullSchema["maximum"] = ParseJsonNumber(itemsRange.Maximum);
             }
-
             schema["items"] = new Dictionary<string, object?>
             {
-                ["anyOf"] = new List<object?>
-                {
-                    nonNullSchema,
-                    new Dictionary<string, object?> { ["type"] = "null" }
-                }
+                ["anyOf"] = new List<object?> { nonNullSchema, new Dictionary<string, object?> { ["type"] = "null" } }
             };
         }
         else if (itemsRange != null && schema.TryGetValue("items", out var items) && items is Dictionary<string, object?> itemsDict)
         {
-            // Drill down through nested arrays to find the leaf items
             var target = itemsDict;
             while (target.TryGetValue("type", out var iType) && iType as string == "array"
                 && target.TryGetValue("items", out var innerItems) && innerItems is Dictionary<string, object?> innerDict)
-            {
                 target = innerDict;
-            }
 
-            if (itemsRange.Minimum != null)
-                target["minimum"] = ParseJsonNumber(itemsRange.Minimum);
-            if (itemsRange.Maximum != null)
-                target["maximum"] = ParseJsonNumber(itemsRange.Maximum);
+            if (itemsRange.Minimum != null) target["minimum"] = ParseJsonNumber(itemsRange.Minimum);
+            if (itemsRange.Maximum != null) target["maximum"] = ParseJsonNumber(itemsRange.Maximum);
         }
+    }
+
+    // -----------------------------------------------------------------------
+    // Helpers
+    // -----------------------------------------------------------------------
+
+    private static void AddAdditionalPropertiesSchema(Dictionary<string, object?> result, JsonSchemaAdditionalPropertiesSchemaAttribute attr)
+    {
+        if (attr.Schema == "true")
+            result["additionalProperties"] = true;
+        else if (attr.Schema.StartsWith("$ref:"))
+            result["additionalProperties"] = new Dictionary<string, object?> { ["$ref"] = attr.Schema[5..] };
+        else if (attr.Schema.StartsWith("{") || attr.Schema.StartsWith("["))
+        {
+            // Complex JSON schema (inline anyOf, etc.)
+            var el = JsonDocument.Parse(attr.Schema).RootElement;
+            result["additionalProperties"] = JsonElementToStructure(el);
+        }
+    }
+
+    /// <summary>
+    /// Convert a JsonElement to the Dictionary/List/string/number structure used by the harness.
+    /// </summary>
+    private static object? JsonElementToStructure(JsonElement el)
+    {
+        return el.ValueKind switch
+        {
+            JsonValueKind.Object => el.EnumerateObject().ToDictionary(p => p.Name, p => JsonElementToStructure(p.Value)),
+            JsonValueKind.Array => el.EnumerateArray().Select(JsonElementToStructure).ToList<object?>(),
+            JsonValueKind.String => el.GetString(),
+            JsonValueKind.Number => ParseJsonNumberFromElement(el),
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
+            JsonValueKind.Null => null,
+            _ => null,
+        };
+    }
+
+    private static object ParseJsonNumberFromElement(JsonElement el)
+    {
+        var raw = el.GetRawText();
+        if (raw.Contains('.') || raw.Contains('e') || raw.Contains('E'))
+            return el.GetDouble();
+        if (el.TryGetInt64(out var l)) return l;
+        if (el.TryGetUInt64(out var ul)) return (long)ul;
+        return el.GetDouble();
+    }
+
+    private static bool IsDictionaryType(Type type)
+    {
+        return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>);
+    }
+
+    private static bool IsNullableType(Type type)
+    {
+        return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
     }
 
     private static object ParseJsonNumber(string s)
@@ -777,8 +794,6 @@ internal static class DictExtensions
     internal static void MergeFrom(this Dictionary<string, object?> target, Dictionary<string, object?> source)
     {
         foreach (var kv in source)
-        {
             target[kv.Key] = kv.Value;
-        }
     }
 }
