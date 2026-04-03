@@ -62,7 +62,7 @@ Multimodal responses:
 ```
 """")]
 [JsonSchemaTitle("vector.completions.VectorResponses")]
-public class VectorCompletionsVectorResponses
+public partial class VectorResponses
 {
-    public List<AgentCompletionsMessageRichContent> Items { get; set; } = [];
+    public List<RichContent> Items { get; set; } = [];
 }

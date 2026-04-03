@@ -12,7 +12,7 @@ namespace ObjectiveAI.Functions.Expression;
 /// </summary>
 [Description("Schema for a boolean input.")]
 [JsonSchemaTitle("functions.expression.BooleanInputSchema")]
-public class FunctionsExpressionBooleanInputSchema
+public partial class BooleanInputSchema
 {
     /// <summary>
     /// Human-readable description of the boolean.
@@ -24,5 +24,5 @@ public class FunctionsExpressionBooleanInputSchema
     public string? Description { get; set; } = null;
 
     [JsonPropertyName("type")]
-    public FunctionsExpressionBooleanInputSchemaType Type { get; set; } = default!;
+    public BooleanInputSchemaType Type { get; set; } = default!;
 }

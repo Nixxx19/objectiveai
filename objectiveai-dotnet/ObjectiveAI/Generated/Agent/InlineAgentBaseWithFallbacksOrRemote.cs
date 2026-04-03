@@ -26,19 +26,19 @@ Used in swarm definitions to allow agents to be specified inline
 hashmap during conversion.
 """)]
 [JsonSchemaTitle("agent.InlineAgentBaseWithFallbacksOrRemote")]
-[JsonConverter(typeof(AgentInlineAgentBaseWithFallbacksOrRemoteConverter))]
-public class AgentInlineAgentBaseWithFallbacksOrRemote
+[JsonConverter(typeof(InlineAgentBaseWithFallbacksOrRemoteConverter))]
+public partial class InlineAgentBaseWithFallbacksOrRemote
 {
     [JsonSchemaVariant("AgentBase", Ref = "agent.InlineAgentBaseWithFallbacks")]
-    public AgentInlineAgentBaseWithFallbacks? AgentBase { get; set; }
+    public InlineAgentBaseWithFallbacks? AgentBase { get; set; }
 
     [JsonSchemaVariant("Remote", Ref = "RemotePath")]
     public RemotePath? Remote { get; set; }
 }
 
-public class AgentInlineAgentBaseWithFallbacksOrRemoteConverter : JsonConverter<AgentInlineAgentBaseWithFallbacksOrRemote>
+public class InlineAgentBaseWithFallbacksOrRemoteConverter : JsonConverter<InlineAgentBaseWithFallbacksOrRemote>
 {
-    public override AgentInlineAgentBaseWithFallbacksOrRemote? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override InlineAgentBaseWithFallbacksOrRemote? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -47,16 +47,16 @@ public class AgentInlineAgentBaseWithFallbacksOrRemoteConverter : JsonConverter<
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<AgentInlineAgentBaseWithFallbacks>(raw, options); if (val0 != null) return new AgentInlineAgentBaseWithFallbacksOrRemote { AgentBase = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<InlineAgentBaseWithFallbacks>(raw, options); if (val0 != null) return new InlineAgentBaseWithFallbacksOrRemote { AgentBase = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<RemotePath>(raw, options); if (val1 != null) return new AgentInlineAgentBaseWithFallbacksOrRemote { Remote = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<RemotePath>(raw, options); if (val1 != null) return new InlineAgentBaseWithFallbacksOrRemote { Remote = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of AgentInlineAgentBaseWithFallbacksOrRemote");
+        throw new JsonException($"Data did not match any variant of InlineAgentBaseWithFallbacksOrRemote");
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentInlineAgentBaseWithFallbacksOrRemote value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, InlineAgentBaseWithFallbacksOrRemote value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.AgentBase != null)

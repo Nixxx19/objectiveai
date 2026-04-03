@@ -12,7 +12,7 @@ namespace ObjectiveAI.Functions.Expression;
 /// </summary>
 [Description("Schema for a floating-point number input.")]
 [JsonSchemaTitle("functions.expression.NumberInputSchema")]
-public class FunctionsExpressionNumberInputSchema
+public partial class NumberInputSchema
 {
     /// <summary>
     /// Human-readable description of the number.
@@ -44,5 +44,5 @@ public class FunctionsExpressionNumberInputSchema
     public double? Minimum { get; set; } = null;
 
     [JsonPropertyName("type")]
-    public FunctionsExpressionNumberInputSchemaType Type { get; set; } = default!;
+    public NumberInputSchemaType Type { get; set; } = default!;
 }

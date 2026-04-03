@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Completions.Response;
 /// </summary>
 [Description("Detailed cost breakdown.")]
 [JsonSchemaTitle("agent.completions.response.CostDetails")]
-public class AgentCompletionsResponseCostDetails
+public partial class CostDetails
 {
     /// <summary>
     /// Cost charged by the immediate upstream (e.g., OpenRouter).

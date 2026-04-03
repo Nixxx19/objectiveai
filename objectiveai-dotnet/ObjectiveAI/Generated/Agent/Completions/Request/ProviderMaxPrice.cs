@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Completions.Request;
 /// </summary>
 [Description("Maximum price constraints per token type.")]
 [JsonSchemaTitle("agent.completions.request.ProviderMaxPrice")]
-public class AgentCompletionsRequestProviderMaxPrice
+public partial class ProviderMaxPrice
 {
     /// <summary>
     /// Maximum price per audio second.

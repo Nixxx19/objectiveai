@@ -13,7 +13,7 @@ namespace ObjectiveAI.Functions;
 /// </summary>
 [Description("Response from listing functions.")]
 [JsonSchemaTitle("functions.ListFunctionResponse")]
-public class FunctionsListFunctionResponse
+public partial class ListFunctionResponse
 {
     /// <summary>
     /// List of available functions.

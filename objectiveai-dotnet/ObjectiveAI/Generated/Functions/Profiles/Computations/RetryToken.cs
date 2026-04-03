@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Profiles.Computations;
 
 [JsonSchemaTitle("functions.profiles.computations.RetryToken")]
-public class FunctionsProfilesComputationsRetryToken
+public partial class RetryToken
 {
     [JsonSchemaItemsNullable]
     public List<string?> Items { get; set; } = [];

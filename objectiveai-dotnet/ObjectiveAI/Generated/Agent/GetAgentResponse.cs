@@ -15,26 +15,26 @@ namespace ObjectiveAI.Agent;
 [Description("Response containing a single Agent with creation timestamp.")]
 [JsonSchemaTitle("agent.GetAgentResponse")]
 [JsonSchemaRef("RemotePath")]
-[JsonConverter(typeof(AgentGetAgentResponseConverter))]
-public class AgentGetAgentResponse
+[JsonConverter(typeof(GetAgentResponseConverter))]
+public partial class GetAgentResponse
 {
     [JsonIgnore]
     public RemotePath Base { get; set; } = default!;
 }
 
-public class AgentGetAgentResponseConverter : JsonConverter<AgentGetAgentResponse>
+public class GetAgentResponseConverter : JsonConverter<GetAgentResponse>
 {
-    public override AgentGetAgentResponse? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override GetAgentResponse? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
         var baseObj = JsonSerializer.Deserialize<RemotePath>(raw, options)!;
-        var result = new AgentGetAgentResponse { Base = baseObj };
+        var result = new GetAgentResponse { Base = baseObj };
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentGetAgentResponse value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, GetAgentResponse value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

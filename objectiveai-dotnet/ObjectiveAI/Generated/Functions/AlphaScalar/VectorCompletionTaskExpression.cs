@@ -3,23 +3,22 @@
 
 using ObjectiveAI.Agent.Completions.Message;
 using ObjectiveAI.Attributes;
-using ObjectiveAI.Functions.Expression;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 
 namespace ObjectiveAI.Functions.AlphaScalar;
 
 [JsonSchemaTitle("functions.alpha_scalar.VectorCompletionTaskExpression")]
-public class FunctionsAlphaScalarVectorCompletionTaskExpression
+public partial class VectorCompletionTaskExpression
 {
     [JsonPropertyName("messages")]
-    public FunctionsExpressionExpression Messages { get; set; } = default!;
+    public ObjectiveAI.Functions.Expression.Expression Messages { get; set; } = default!;
 
     [JsonPropertyName("responses")]
-    public List<AgentCompletionsMessageRichContent> Responses { get; set; } = default!;
+    public List<RichContent> Responses { get; set; } = default!;
 
     [JsonPropertyName("skip")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public FunctionsExpressionExpression? Skip { get; set; } = null;
+    public ObjectiveAI.Functions.Expression.Expression? Skip { get; set; } = null;
 }

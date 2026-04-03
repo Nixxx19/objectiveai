@@ -12,8 +12,8 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("A function call.")]
 [JsonSchemaTitle("agent.completions.message.AssistantToolCallType")]
-[JsonConverter(typeof(JsonStringEnumConverter<AgentCompletionsMessageAssistantToolCallType>))]
-public enum AgentCompletionsMessageAssistantToolCallType
+[JsonConverter(typeof(JsonStringEnumConverter<AssistantToolCallType>))]
+public enum AssistantToolCallType
 {
     [JsonStringEnumMemberName("function")]
     Function

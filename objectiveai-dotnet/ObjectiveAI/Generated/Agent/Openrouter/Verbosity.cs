@@ -21,8 +21,8 @@ This setting hints to the model how detailed its responses should be.
 Not all models support this parameter.
 """)]
 [JsonSchemaTitle("agent.openrouter.Verbosity")]
-[JsonConverter(typeof(AgentOpenrouterVerbosityConverter))]
-public class AgentOpenrouterVerbosity
+[JsonConverter(typeof(VerbosityConverter))]
+public partial class Verbosity
 {
     /// <summary>
     /// Minimal output, concise responses.
@@ -53,25 +53,25 @@ public class AgentOpenrouterVerbosity
     public string? Max { get; set; }
 }
 
-public class AgentOpenrouterVerbosityConverter : JsonConverter<AgentOpenrouterVerbosity>
+public class VerbosityConverter : JsonConverter<Verbosity>
 {
-    public override AgentOpenrouterVerbosity? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Verbosity? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         if (reader.TokenType != JsonTokenType.String)
-            throw new JsonException("Expected string for AgentOpenrouterVerbosity");
+            throw new JsonException("Expected string for Verbosity");
         var str = reader.GetString()!;
         return str switch
         {
-            "low" => new AgentOpenrouterVerbosity { Low = "low" },
-            "medium" => new AgentOpenrouterVerbosity { Medium = "medium" },
-            "high" => new AgentOpenrouterVerbosity { High = "high" },
-            "max" => new AgentOpenrouterVerbosity { Max = "max" },
-            _ => throw new JsonException($"Unknown variant of AgentOpenrouterVerbosity: {str}")
+            "low" => new Verbosity { Low = "low" },
+            "medium" => new Verbosity { Medium = "medium" },
+            "high" => new Verbosity { High = "high" },
+            "max" => new Verbosity { Max = "max" },
+            _ => throw new JsonException($"Unknown variant of Verbosity: {str}")
         };
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentOpenrouterVerbosity value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Verbosity value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Low != null)

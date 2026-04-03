@@ -13,8 +13,8 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("Expression variant of [`SimpleContent`] for dynamic content.")]
 [JsonSchemaTitle("agent.completions.message.SimpleContentExpression")]
-[JsonConverter(typeof(AgentCompletionsMessageSimpleContentExpressionConverter))]
-public class AgentCompletionsMessageSimpleContentExpression
+[JsonConverter(typeof(SimpleContentExpressionConverter))]
+public partial class SimpleContentExpression
 {
     /// <summary>
     /// Plain text content.
@@ -48,9 +48,9 @@ public class AgentCompletionsMessageSimpleContentExpression
     public List<JsonElement>? Parts { get; set; }
 }
 
-public class AgentCompletionsMessageSimpleContentExpressionConverter : JsonConverter<AgentCompletionsMessageSimpleContentExpression>
+public class SimpleContentExpressionConverter : JsonConverter<SimpleContentExpression>
 {
-    public override AgentCompletionsMessageSimpleContentExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override SimpleContentExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -60,19 +60,19 @@ public class AgentCompletionsMessageSimpleContentExpressionConverter : JsonConve
         if (el.ValueKind == JsonValueKind.String)
         {
             var str = el.GetString()!;
-            return new AgentCompletionsMessageSimpleContentExpression { Text = str };
+            return new SimpleContentExpression { Text = str };
         }
 
         if (el.ValueKind == JsonValueKind.Array)
         {
             var val = JsonSerializer.Deserialize<List<JsonElement>>(raw, options);
-            return new AgentCompletionsMessageSimpleContentExpression { Parts = val };
+            return new SimpleContentExpression { Parts = val };
         }
 
-        throw new JsonException($"Data did not match any variant of AgentCompletionsMessageSimpleContentExpression");
+        throw new JsonException($"Data did not match any variant of SimpleContentExpression");
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentCompletionsMessageSimpleContentExpression value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, SimpleContentExpression value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Text != null)

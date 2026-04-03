@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace ObjectiveAI.Functions.Profiles.Computations.Request;
 
-public class FunctionsProfilesComputationsRequestTargetScalar
+public partial class TargetScalar
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("scalar")]
@@ -19,7 +19,7 @@ public class FunctionsProfilesComputationsRequestTargetScalar
     public double Value { get; set; } = default!;
 }
 
-public class FunctionsProfilesComputationsRequestTargetVector
+public partial class TargetVector
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("vector")]
@@ -30,7 +30,7 @@ public class FunctionsProfilesComputationsRequestTargetVector
     public List<double> Value { get; set; } = default!;
 }
 
-public class FunctionsProfilesComputationsRequestTargetVectorWinner
+public partial class TargetVectorWinner
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("vector_winner")]
@@ -43,22 +43,22 @@ public class FunctionsProfilesComputationsRequestTargetVectorWinner
 
 
 [JsonSchemaTitle("functions.profiles.computations.request.Target")]
-[JsonConverter(typeof(FunctionsProfilesComputationsRequestTargetConverter))]
-public class FunctionsProfilesComputationsRequestTarget
+[JsonConverter(typeof(TargetConverter))]
+public partial class Target
 {
     [JsonSchemaVariant("Scalar", Type = "object")]
-    public FunctionsProfilesComputationsRequestTargetScalar? Scalar { get; set; }
+    public TargetScalar? Scalar { get; set; }
 
     [JsonSchemaVariant("Vector", Type = "object")]
-    public FunctionsProfilesComputationsRequestTargetVector? Vector { get; set; }
+    public TargetVector? Vector { get; set; }
 
     [JsonSchemaVariant("VectorWinner", Type = "object")]
-    public FunctionsProfilesComputationsRequestTargetVectorWinner? VectorWinner { get; set; }
+    public TargetVectorWinner? VectorWinner { get; set; }
 }
 
-public class FunctionsProfilesComputationsRequestTargetConverter : JsonConverter<FunctionsProfilesComputationsRequestTarget>
+public class TargetConverter : JsonConverter<Target>
 {
-    public override FunctionsProfilesComputationsRequestTarget? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Target? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -73,7 +73,7 @@ public class FunctionsProfilesComputationsRequestTargetConverter : JsonConverter
                     match0 = false;
                 if (match0)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsProfilesComputationsRequestTargetScalar>(raw, options); if (val != null) return new FunctionsProfilesComputationsRequestTarget { Scalar = val }; }
+                    try { var val = JsonSerializer.Deserialize<TargetScalar>(raw, options); if (val != null) return new Target { Scalar = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -83,7 +83,7 @@ public class FunctionsProfilesComputationsRequestTargetConverter : JsonConverter
                     match1 = false;
                 if (match1)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsProfilesComputationsRequestTargetVector>(raw, options); if (val != null) return new FunctionsProfilesComputationsRequestTarget { Vector = val }; }
+                    try { var val = JsonSerializer.Deserialize<TargetVector>(raw, options); if (val != null) return new Target { Vector = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -93,16 +93,16 @@ public class FunctionsProfilesComputationsRequestTargetConverter : JsonConverter
                     match2 = false;
                 if (match2)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsProfilesComputationsRequestTargetVectorWinner>(raw, options); if (val != null) return new FunctionsProfilesComputationsRequestTarget { VectorWinner = val }; }
+                    try { var val = JsonSerializer.Deserialize<TargetVectorWinner>(raw, options); if (val != null) return new Target { VectorWinner = val }; }
                     catch (JsonException) { }
                 }
             }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsProfilesComputationsRequestTarget");
+        throw new JsonException($"Data did not match any variant of Target");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsProfilesComputationsRequestTarget value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Target value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Scalar != null)

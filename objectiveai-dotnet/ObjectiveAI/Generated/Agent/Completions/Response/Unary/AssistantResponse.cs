@@ -14,21 +14,21 @@ namespace ObjectiveAI.Agent.Completions.Response.Unary;
 /// </summary>
 [Description("An assistant response in a unary agent completion.")]
 [JsonSchemaTitle("agent.completions.response.unary.AssistantResponse")]
-public class AgentCompletionsResponseUnaryAssistantResponse
+public partial class AssistantResponse
 {
     [JsonPropertyName("agent")]
     public string Agent { get; set; } = default!;
 
     [JsonPropertyName("content")]
     [JsonSchemaNullable]
-    public AgentCompletionsMessageRichContent? Content { get; set; } = null;
+    public RichContent? Content { get; set; } = null;
 
     [JsonPropertyName("created")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
     public ulong Created { get; set; } = default!;
 
     [JsonPropertyName("finish_reason")]
-    public AgentCompletionsResponseFinishReason FinishReason { get; set; } = default!;
+    public FinishReason FinishReason { get; set; } = default!;
 
     [JsonPropertyName("index")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
@@ -36,7 +36,7 @@ public class AgentCompletionsResponseUnaryAssistantResponse
 
     [JsonPropertyName("logprobs")]
     [JsonSchemaNullable]
-    public AgentCompletionsResponseLogprobs? Logprobs { get; set; } = null;
+    public Logprobs? Logprobs { get; set; } = null;
 
     [JsonPropertyName("model")]
     public string Model { get; set; } = default!;
@@ -56,7 +56,7 @@ public class AgentCompletionsResponseUnaryAssistantResponse
     public string? Refusal { get; set; } = null;
 
     [JsonPropertyName("role")]
-    public AgentCompletionsResponseAssistantRole Role { get; set; } = default!;
+    public AssistantRole Role { get; set; } = default!;
 
     [JsonPropertyName("service_tier")]
     [JsonSchemaOmitEmpty]
@@ -70,7 +70,7 @@ public class AgentCompletionsResponseUnaryAssistantResponse
 
     [JsonPropertyName("tool_calls")]
     [JsonSchemaNullable]
-    public List<AgentCompletionsMessageAssistantToolCall>? ToolCalls { get; set; } = null;
+    public List<AssistantToolCall>? ToolCalls { get; set; } = null;
 
     [JsonPropertyName("upstream_id")]
     public string UpstreamId { get; set; } = default!;
@@ -80,5 +80,5 @@ public class AgentCompletionsResponseUnaryAssistantResponse
     /// </summary>
     [Description("Upstream usage for this assistant response (set by upstream clients).")]
     [JsonPropertyName("usage")]
-    public AgentCompletionsResponseUpstreamUsage Usage { get; set; } = default!;
+    public UpstreamUsage Usage { get; set; } = default!;
 }

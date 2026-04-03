@@ -11,26 +11,26 @@ namespace ObjectiveAI.Functions;
 
 [JsonSchemaTitle("functions.GetFunctionResponse")]
 [JsonSchemaRef("RemotePath")]
-[JsonConverter(typeof(FunctionsGetFunctionResponseConverter))]
-public class FunctionsGetFunctionResponse
+[JsonConverter(typeof(GetFunctionResponseConverter))]
+public partial class GetFunctionResponse
 {
     [JsonIgnore]
     public RemotePath Base { get; set; } = default!;
 }
 
-public class FunctionsGetFunctionResponseConverter : JsonConverter<FunctionsGetFunctionResponse>
+public class GetFunctionResponseConverter : JsonConverter<GetFunctionResponse>
 {
-    public override FunctionsGetFunctionResponse? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override GetFunctionResponse? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
         var baseObj = JsonSerializer.Deserialize<RemotePath>(raw, options)!;
-        var result = new FunctionsGetFunctionResponse { Base = baseObj };
+        var result = new GetFunctionResponse { Base = baseObj };
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsGetFunctionResponse value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, GetFunctionResponse value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

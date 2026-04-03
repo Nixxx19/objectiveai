@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Agent.Completions.Message;
 
 [JsonSchemaVariantWrapper("agent.completions.message.DeveloperMessageExpression", Type = "object")]
-public class AgentCompletionsMessageMessageExpressionDeveloper
+public partial class MessageExpressionDeveloper
 {
     [JsonPropertyName("role")]
     [JsonSchemaEnum("developer")]
@@ -17,7 +17,7 @@ public class AgentCompletionsMessageMessageExpressionDeveloper
 }
 
 [JsonSchemaVariantWrapper("agent.completions.message.SystemMessageExpression", Type = "object")]
-public class AgentCompletionsMessageMessageExpressionSystem
+public partial class MessageExpressionSystem
 {
     [JsonPropertyName("role")]
     [JsonSchemaEnum("system")]
@@ -25,7 +25,7 @@ public class AgentCompletionsMessageMessageExpressionSystem
 }
 
 [JsonSchemaVariantWrapper("agent.completions.message.UserMessageExpression", Type = "object")]
-public class AgentCompletionsMessageMessageExpressionUser
+public partial class MessageExpressionUser
 {
     [JsonPropertyName("role")]
     [JsonSchemaEnum("user")]
@@ -33,7 +33,7 @@ public class AgentCompletionsMessageMessageExpressionUser
 }
 
 [JsonSchemaVariantWrapper("agent.completions.message.AssistantMessageExpression", Type = "object")]
-public class AgentCompletionsMessageMessageExpressionAssistant
+public partial class MessageExpressionAssistant
 {
     [JsonPropertyName("role")]
     [JsonSchemaEnum("assistant")]
@@ -41,7 +41,7 @@ public class AgentCompletionsMessageMessageExpressionAssistant
 }
 
 [JsonSchemaVariantWrapper("agent.completions.message.ToolMessageExpression", Type = "object")]
-public class AgentCompletionsMessageMessageExpressionTool
+public partial class MessageExpressionTool
 {
     [JsonPropertyName("role")]
     [JsonSchemaEnum("tool")]
@@ -64,28 +64,28 @@ where message content can be computed from the function input at runtime.
 Supports both JMESPath and Starlark expressions.
 """)]
 [JsonSchemaTitle("agent.completions.message.MessageExpression")]
-[JsonConverter(typeof(AgentCompletionsMessageMessageExpressionConverter))]
-public class AgentCompletionsMessageMessageExpression
+[JsonConverter(typeof(MessageExpressionConverter))]
+public partial class MessageExpression
 {
     [JsonSchemaVariant("Developer", Ref = "agent.completions.message.DeveloperMessageExpression", Type = "object")]
-    public AgentCompletionsMessageMessageExpressionDeveloper? Developer { get; set; }
+    public MessageExpressionDeveloper? Developer { get; set; }
 
     [JsonSchemaVariant("System", Ref = "agent.completions.message.SystemMessageExpression", Type = "object")]
-    public AgentCompletionsMessageMessageExpressionSystem? System { get; set; }
+    public MessageExpressionSystem? System { get; set; }
 
     [JsonSchemaVariant("User", Ref = "agent.completions.message.UserMessageExpression", Type = "object")]
-    public AgentCompletionsMessageMessageExpressionUser? User { get; set; }
+    public MessageExpressionUser? User { get; set; }
 
     [JsonSchemaVariant("Assistant", Ref = "agent.completions.message.AssistantMessageExpression", Type = "object")]
-    public AgentCompletionsMessageMessageExpressionAssistant? Assistant { get; set; }
+    public MessageExpressionAssistant? Assistant { get; set; }
 
     [JsonSchemaVariant("Tool", Ref = "agent.completions.message.ToolMessageExpression", Type = "object")]
-    public AgentCompletionsMessageMessageExpressionTool? Tool { get; set; }
+    public MessageExpressionTool? Tool { get; set; }
 }
 
-public class AgentCompletionsMessageMessageExpressionConverter : JsonConverter<AgentCompletionsMessageMessageExpression>
+public class MessageExpressionConverter : JsonConverter<MessageExpression>
 {
-    public override AgentCompletionsMessageMessageExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override MessageExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -100,7 +100,7 @@ public class AgentCompletionsMessageMessageExpressionConverter : JsonConverter<A
                     match0 = false;
                 if (match0)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageMessageExpressionDeveloper>(raw, options); if (val != null) return new AgentCompletionsMessageMessageExpression { Developer = val }; }
+                    try { var val = JsonSerializer.Deserialize<MessageExpressionDeveloper>(raw, options); if (val != null) return new MessageExpression { Developer = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -110,7 +110,7 @@ public class AgentCompletionsMessageMessageExpressionConverter : JsonConverter<A
                     match1 = false;
                 if (match1)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageMessageExpressionSystem>(raw, options); if (val != null) return new AgentCompletionsMessageMessageExpression { System = val }; }
+                    try { var val = JsonSerializer.Deserialize<MessageExpressionSystem>(raw, options); if (val != null) return new MessageExpression { System = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -120,7 +120,7 @@ public class AgentCompletionsMessageMessageExpressionConverter : JsonConverter<A
                     match2 = false;
                 if (match2)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageMessageExpressionUser>(raw, options); if (val != null) return new AgentCompletionsMessageMessageExpression { User = val }; }
+                    try { var val = JsonSerializer.Deserialize<MessageExpressionUser>(raw, options); if (val != null) return new MessageExpression { User = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -130,7 +130,7 @@ public class AgentCompletionsMessageMessageExpressionConverter : JsonConverter<A
                     match3 = false;
                 if (match3)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageMessageExpressionAssistant>(raw, options); if (val != null) return new AgentCompletionsMessageMessageExpression { Assistant = val }; }
+                    try { var val = JsonSerializer.Deserialize<MessageExpressionAssistant>(raw, options); if (val != null) return new MessageExpression { Assistant = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -140,16 +140,16 @@ public class AgentCompletionsMessageMessageExpressionConverter : JsonConverter<A
                     match4 = false;
                 if (match4)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageMessageExpressionTool>(raw, options); if (val != null) return new AgentCompletionsMessageMessageExpression { Tool = val }; }
+                    try { var val = JsonSerializer.Deserialize<MessageExpressionTool>(raw, options); if (val != null) return new MessageExpression { Tool = val }; }
                     catch (JsonException) { }
                 }
             }
         }
 
-        throw new JsonException($"Data did not match any variant of AgentCompletionsMessageMessageExpression");
+        throw new JsonException($"Data did not match any variant of MessageExpression");
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentCompletionsMessageMessageExpression value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, MessageExpression value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Developer != null)

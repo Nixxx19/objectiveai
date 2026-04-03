@@ -8,16 +8,16 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Config;
 
 [JsonSchemaTitle("config.ViewerConfig")]
-public class ConfigViewerConfig
+public partial class ViewerConfig
 {
     [JsonPropertyName("local")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public ConfigViewerLocalConfig? Local { get; set; } = null;
+    public ViewerLocalConfig? Local { get; set; } = null;
 
     [JsonPropertyName("mode")]
     [JsonSchemaDefault(""""
 "local"
 """")]
-    public ConfigViewerMode Mode { get; set; } = ConfigViewerMode.Local;
+    public ViewerMode Mode { get; set; } = ViewerMode.Local;
 }

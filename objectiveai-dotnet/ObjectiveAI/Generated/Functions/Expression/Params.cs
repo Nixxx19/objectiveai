@@ -12,14 +12,14 @@ namespace ObjectiveAI.Functions.Expression;
 /// </summary>
 [Description("Owned version of expression parameters.")]
 [JsonSchemaTitle("functions.expression.Params")]
-public class FunctionsExpressionParams
+public partial class Params
 {
     /// <summary>
     /// The function's input data.
     /// </summary>
     [Description("The function's input data.")]
     [JsonPropertyName("input")]
-    public FunctionsExpressionInputValue Input { get; set; } = default!;
+    public InputValue Input { get; set; } = default!;
 
     /// <summary>
     /// Current map index. Only populated for mapped task expressions.
@@ -36,5 +36,5 @@ public class FunctionsExpressionParams
     [Description("Results from executed tasks. Only populated for task output expressions.")]
     [JsonPropertyName("output")]
     [JsonSchemaNullable]
-    public FunctionsExpressionTaskOutput? Output { get; set; } = null;
+    public TaskOutput? Output { get; set; } = null;
 }

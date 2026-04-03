@@ -18,19 +18,19 @@ A swarm specification that is either an inline swarm base
 or a remote path reference.
 """)]
 [JsonSchemaTitle("swarm.InlineSwarmBaseOrRemote")]
-[JsonConverter(typeof(SwarmInlineSwarmBaseOrRemoteConverter))]
-public class SwarmInlineSwarmBaseOrRemote
+[JsonConverter(typeof(InlineSwarmBaseOrRemoteConverter))]
+public partial class InlineSwarmBaseOrRemote
 {
     [JsonSchemaVariant("SwarmBase", Ref = "swarm.InlineSwarmBase")]
-    public SwarmInlineSwarmBase? SwarmBase { get; set; }
+    public InlineSwarmBase? SwarmBase { get; set; }
 
     [JsonSchemaVariant("Remote", Ref = "RemotePath")]
     public RemotePath? Remote { get; set; }
 }
 
-public class SwarmInlineSwarmBaseOrRemoteConverter : JsonConverter<SwarmInlineSwarmBaseOrRemote>
+public class InlineSwarmBaseOrRemoteConverter : JsonConverter<InlineSwarmBaseOrRemote>
 {
-    public override SwarmInlineSwarmBaseOrRemote? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override InlineSwarmBaseOrRemote? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -39,16 +39,16 @@ public class SwarmInlineSwarmBaseOrRemoteConverter : JsonConverter<SwarmInlineSw
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<SwarmInlineSwarmBase>(raw, options); if (val0 != null) return new SwarmInlineSwarmBaseOrRemote { SwarmBase = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<InlineSwarmBase>(raw, options); if (val0 != null) return new InlineSwarmBaseOrRemote { SwarmBase = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<RemotePath>(raw, options); if (val1 != null) return new SwarmInlineSwarmBaseOrRemote { Remote = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<RemotePath>(raw, options); if (val1 != null) return new InlineSwarmBaseOrRemote { Remote = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of SwarmInlineSwarmBaseOrRemote");
+        throw new JsonException($"Data did not match any variant of InlineSwarmBaseOrRemote");
     }
 
-    public override void Write(Utf8JsonWriter writer, SwarmInlineSwarmBaseOrRemote value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, InlineSwarmBaseOrRemote value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.SwarmBase != null)

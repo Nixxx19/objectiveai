@@ -12,7 +12,7 @@ namespace ObjectiveAI.Functions;
 /// </summary>
 [Description("Query parameters for the list functions endpoint.")]
 [JsonSchemaTitle("functions.ListFunctionsRequest")]
-public class FunctionsListFunctionsRequest
+public partial class ListFunctionsRequest
 {
     /// <summary>
     /// Optional source filter for listing functions.
@@ -21,5 +21,5 @@ public class FunctionsListFunctionsRequest
     [JsonPropertyName("source")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public FunctionsListFunctionsSource? Source { get; set; } = null;
+    public ListFunctionsSource? Source { get; set; } = null;
 }

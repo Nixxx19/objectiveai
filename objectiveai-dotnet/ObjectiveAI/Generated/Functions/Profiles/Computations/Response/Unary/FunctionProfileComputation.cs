@@ -12,20 +12,20 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Profiles.Computations.Response.Unary;
 
 [JsonSchemaTitle("functions.profiles.computations.response.unary.FunctionProfileComputation")]
-public class FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation
+public partial class FunctionProfileComputation
 {
     [JsonPropertyName("created")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
     public ulong Created { get; set; } = default!;
 
     [JsonPropertyName("executions")]
-    public List<FunctionsProfilesComputationsResponseUnaryFunctionExecution> Executions { get; set; } = default!;
+    public List<FunctionExecution> Executions { get; set; } = default!;
 
     [JsonPropertyName("executions_errors")]
     public bool ExecutionsErrors { get; set; } = default!;
 
     [JsonPropertyName("fitting_stats")]
-    public FunctionsProfilesComputationsResponseFittingStats FittingStats { get; set; } = default!;
+    public FittingStats FittingStats { get; set; } = default!;
 
     [JsonPropertyName("function")]
     [JsonSchemaNullable]
@@ -35,15 +35,15 @@ public class FunctionsProfilesComputationsResponseUnaryFunctionProfileComputatio
     public string Id { get; set; } = default!;
 
     [JsonPropertyName("object")]
-    public FunctionsProfilesComputationsResponseUnaryObject Object { get; set; } = default!;
+    public Object Object { get; set; } = default!;
 
     [JsonPropertyName("profile")]
-    public FunctionsInlineTasksProfile Profile { get; set; } = default!;
+    public InlineTasksProfile Profile { get; set; } = default!;
 
     [JsonPropertyName("retry_token")]
     [JsonSchemaNullable]
     public string? RetryToken { get; set; } = null;
 
     [JsonPropertyName("usage")]
-    public AgentCompletionsResponseUsage Usage { get; set; } = default!;
+    public Usage Usage { get; set; } = default!;
 }

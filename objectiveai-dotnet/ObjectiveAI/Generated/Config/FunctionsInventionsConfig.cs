@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Config;
 
 [JsonSchemaTitle("config.FunctionsInventionsConfig")]
-public class ConfigFunctionsInventionsConfig
+public partial class FunctionsInventionsConfig
 {
     [JsonPropertyName("remote")]
     [JsonSchemaDefault(""""

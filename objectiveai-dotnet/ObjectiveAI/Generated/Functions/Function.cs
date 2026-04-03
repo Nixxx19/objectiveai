@@ -31,27 +31,27 @@ Use [`compile_tasks`](Self::compile_tasks) to preview how task expressions resol
 for given inputs.
 """)]
 [JsonSchemaTitle("functions.Function")]
-[JsonConverter(typeof(FunctionsFunctionConverter))]
-public class FunctionsFunction
+[JsonConverter(typeof(FunctionConverter))]
+public partial class Function
 {
     /// <summary>
     /// A remote function with metadata (description, schema, etc.).
     /// </summary>
     [Description("A remote function with metadata (description, schema, etc.).")]
     [JsonSchemaVariant("Remote", Ref = "functions.RemoteFunction")]
-    public FunctionsRemoteFunction? Remote { get; set; }
+    public RemoteFunction? Remote { get; set; }
 
     /// <summary>
     /// An inline function definition without metadata.
     /// </summary>
     [Description("An inline function definition without metadata.")]
     [JsonSchemaVariant("Inline", Ref = "functions.InlineFunction")]
-    public FunctionsInlineFunction? Inline { get; set; }
+    public InlineFunction? Inline { get; set; }
 }
 
-public class FunctionsFunctionConverter : JsonConverter<FunctionsFunction>
+public class FunctionConverter : JsonConverter<Function>
 {
-    public override FunctionsFunction? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Function? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -60,16 +60,16 @@ public class FunctionsFunctionConverter : JsonConverter<FunctionsFunction>
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<FunctionsRemoteFunction>(raw, options); if (val0 != null) return new FunctionsFunction { Remote = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<RemoteFunction>(raw, options); if (val0 != null) return new Function { Remote = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<FunctionsInlineFunction>(raw, options); if (val1 != null) return new FunctionsFunction { Inline = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<InlineFunction>(raw, options); if (val1 != null) return new Function { Inline = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsFunction");
+        throw new JsonException($"Data did not match any variant of Function");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsFunction value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Function value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Remote != null)

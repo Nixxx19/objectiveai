@@ -20,7 +20,7 @@ Credits are the billing unit for ObjectiveAI. This response provides
 a complete view of the user's credit status.
 """)]
 [JsonSchemaTitle("auth.GetCreditsResponse")]
-public class AuthGetCreditsResponse
+public partial class GetCreditsResponse
 {
     /// <summary>
     /// The current available credit balance.

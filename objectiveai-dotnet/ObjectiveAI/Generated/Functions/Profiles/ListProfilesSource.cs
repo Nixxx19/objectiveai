@@ -12,8 +12,8 @@ namespace ObjectiveAI.Functions.Profiles;
 /// </summary>
 [Description("Source filter for listing profiles.")]
 [JsonSchemaTitle("functions.profiles.ListProfilesSource")]
-[JsonConverter(typeof(JsonStringEnumConverter<FunctionsProfilesListProfilesSource>))]
-public enum FunctionsProfilesListProfilesSource
+[JsonConverter(typeof(JsonStringEnumConverter<ListProfilesSource>))]
+public enum ListProfilesSource
 {
     [JsonStringEnumMemberName("all")]
     All,

@@ -12,7 +12,7 @@ namespace ObjectiveAI.Functions.Profiles;
 /// </summary>
 [Description("Query parameters for the list profiles endpoint.")]
 [JsonSchemaTitle("functions.profiles.ListProfilesRequest")]
-public class FunctionsProfilesListProfilesRequest
+public partial class ListProfilesRequest
 {
     /// <summary>
     /// Optional source filter for listing profiles.
@@ -21,5 +21,5 @@ public class FunctionsProfilesListProfilesRequest
     [JsonPropertyName("source")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public FunctionsProfilesListProfilesSource? Source { get; set; } = null;
+    public ListProfilesSource? Source { get; set; } = null;
 }

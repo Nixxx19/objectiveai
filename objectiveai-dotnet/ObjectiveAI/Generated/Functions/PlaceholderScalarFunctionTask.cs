@@ -21,26 +21,26 @@ Always produces `Scalar(0.5)` before the output expression
 is applied.
 """)]
 [JsonSchemaTitle("functions.PlaceholderScalarFunctionTask")]
-public class FunctionsPlaceholderScalarFunctionTask
+public partial class PlaceholderScalarFunctionTask
 {
     /// <summary>
     /// The resolved input.
     /// </summary>
     [Description("The resolved input.")]
     [JsonPropertyName("input")]
-    public FunctionsExpressionInputValue Input { get; set; } = default!;
+    public InputValue Input { get; set; } = default!;
 
     /// <summary>
     /// JSON Schema defining the expected input structure.
     /// </summary>
     [Description("JSON Schema defining the expected input structure.")]
     [JsonPropertyName("input_schema")]
-    public FunctionsExpressionInputSchema InputSchema { get; set; } = default!;
+    public ObjectiveAI.Functions.Expression.InputSchema InputSchema { get; set; } = default!;
 
     /// <summary>
     /// Expression to transform the fixed 0.5 output.
     /// </summary>
     [Description("Expression to transform the fixed 0.5 output.")]
     [JsonPropertyName("output")]
-    public FunctionsExpressionExpression Output { get; set; } = default!;
+    public ObjectiveAI.Functions.Expression.Expression Output { get; set; } = default!;
 }

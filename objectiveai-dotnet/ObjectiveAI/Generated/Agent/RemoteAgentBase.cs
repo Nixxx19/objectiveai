@@ -20,31 +20,31 @@ Like [`InlineAgentBase`] but includes a description field for remote storage.
 """)]
 [JsonSchemaTitle("agent.RemoteAgentBase")]
 [JsonSchemaRef("agent.InlineAgentBase")]
-[JsonConverter(typeof(AgentRemoteAgentBaseConverter))]
-public class AgentRemoteAgentBase
+[JsonConverter(typeof(RemoteAgentBaseConverter))]
+public partial class RemoteAgentBase
 {
     [JsonIgnore]
-    public AgentInlineAgentBase Base { get; set; } = default!;
+    public InlineAgentBase Base { get; set; } = default!;
 
     [JsonPropertyName("description")]
     public string Description { get; set; } = default!;
 }
 
-public class AgentRemoteAgentBaseConverter : JsonConverter<AgentRemoteAgentBase>
+public class RemoteAgentBaseConverter : JsonConverter<RemoteAgentBase>
 {
-    public override AgentRemoteAgentBase? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override RemoteAgentBase? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
-        var baseObj = JsonSerializer.Deserialize<AgentInlineAgentBase>(raw, options)!;
-        var result = new AgentRemoteAgentBase { Base = baseObj };
+        var baseObj = JsonSerializer.Deserialize<InlineAgentBase>(raw, options)!;
+        var result = new RemoteAgentBase { Base = baseObj };
         if (doc.RootElement.TryGetProperty("description", out var _DescriptionEl))
             result.Description = JsonSerializer.Deserialize<string>(_DescriptionEl.GetRawText(), options)!;
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentRemoteAgentBase value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, RemoteAgentBase value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

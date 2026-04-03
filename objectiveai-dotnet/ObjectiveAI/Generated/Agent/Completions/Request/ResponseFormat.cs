@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Completions.Request;
 /// Plain text response (default).
 /// </summary>
 [Description("Plain text response (default).")]
-public class AgentCompletionsRequestResponseFormatText
+public partial class ResponseFormatText
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("text")]
@@ -23,7 +23,7 @@ public class AgentCompletionsRequestResponseFormatText
 /// Response must be valid JSON.
 /// </summary>
 [Description("Response must be valid JSON.")]
-public class AgentCompletionsRequestResponseFormatJsonObject
+public partial class ResponseFormatJsonObject
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("json_object")]
@@ -34,7 +34,7 @@ public class AgentCompletionsRequestResponseFormatJsonObject
 /// Response must conform to a JSON schema.
 /// </summary>
 [Description("Response must conform to a JSON schema.")]
-public class AgentCompletionsRequestResponseFormatJsonSchema
+public partial class ResponseFormatJsonSchema
 {
     /// <summary>
     /// The JSON Schema definition.
@@ -53,7 +53,7 @@ public class AgentCompletionsRequestResponseFormatJsonSchema
 /// Response must conform to a grammar.
 /// </summary>
 [Description("Response must conform to a grammar.")]
-public class AgentCompletionsRequestResponseFormatGrammar
+public partial class ResponseFormatGrammar
 {
     [JsonPropertyName("grammar")]
     public string Grammar { get; set; } = default!;
@@ -67,7 +67,7 @@ public class AgentCompletionsRequestResponseFormatGrammar
 /// Response must be valid Python code.
 /// </summary>
 [Description("Response must be valid Python code.")]
-public class AgentCompletionsRequestResponseFormatPython
+public partial class ResponseFormatPython
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("python")]
@@ -78,7 +78,7 @@ public class AgentCompletionsRequestResponseFormatPython
 /// The final assistant message will contain this tool call
 /// </summary>
 [Description("The final assistant message will contain this tool call")]
-public class AgentCompletionsRequestResponseFormatToolCall
+public partial class ResponseFormatToolCall
 {
     /// <summary>
     /// A description of the tool.
@@ -122,55 +122,55 @@ public class AgentCompletionsRequestResponseFormatToolCall
 /// </summary>
 [Description("The format of the model's response.")]
 [JsonSchemaTitle("agent.completions.request.ResponseFormat")]
-[JsonConverter(typeof(AgentCompletionsRequestResponseFormatConverter))]
-public class AgentCompletionsRequestResponseFormat
+[JsonConverter(typeof(ResponseFormatConverter))]
+public partial class ResponseFormat
 {
     /// <summary>
     /// Plain text response (default).
     /// </summary>
     [Description("Plain text response (default).")]
     [JsonSchemaVariant("Text", Type = "object")]
-    public AgentCompletionsRequestResponseFormatText? Text { get; set; }
+    public ResponseFormatText? Text { get; set; }
 
     /// <summary>
     /// Response must be valid JSON.
     /// </summary>
     [Description("Response must be valid JSON.")]
     [JsonSchemaVariant("JsonObject", Type = "object")]
-    public AgentCompletionsRequestResponseFormatJsonObject? JsonObject { get; set; }
+    public ResponseFormatJsonObject? JsonObject { get; set; }
 
     /// <summary>
     /// Response must conform to a JSON schema.
     /// </summary>
     [Description("Response must conform to a JSON schema.")]
     [JsonSchemaVariant("JsonSchema", Type = "object")]
-    public AgentCompletionsRequestResponseFormatJsonSchema? JsonSchema { get; set; }
+    public ResponseFormatJsonSchema? JsonSchema { get; set; }
 
     /// <summary>
     /// Response must conform to a grammar.
     /// </summary>
     [Description("Response must conform to a grammar.")]
     [JsonSchemaVariant("Grammar", Type = "object")]
-    public AgentCompletionsRequestResponseFormatGrammar? Grammar { get; set; }
+    public ResponseFormatGrammar? Grammar { get; set; }
 
     /// <summary>
     /// Response must be valid Python code.
     /// </summary>
     [Description("Response must be valid Python code.")]
     [JsonSchemaVariant("Python", Type = "object")]
-    public AgentCompletionsRequestResponseFormatPython? Python { get; set; }
+    public ResponseFormatPython? Python { get; set; }
 
     /// <summary>
     /// The final assistant message will contain this tool call
     /// </summary>
     [Description("The final assistant message will contain this tool call")]
     [JsonSchemaVariant("ToolCall", Type = "object")]
-    public AgentCompletionsRequestResponseFormatToolCall? ToolCall { get; set; }
+    public ResponseFormatToolCall? ToolCall { get; set; }
 }
 
-public class AgentCompletionsRequestResponseFormatConverter : JsonConverter<AgentCompletionsRequestResponseFormat>
+public class ResponseFormatConverter : JsonConverter<ResponseFormat>
 {
-    public override AgentCompletionsRequestResponseFormat? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override ResponseFormat? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -185,7 +185,7 @@ public class AgentCompletionsRequestResponseFormatConverter : JsonConverter<Agen
                     match0 = false;
                 if (match0)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsRequestResponseFormatText>(raw, options); if (val != null) return new AgentCompletionsRequestResponseFormat { Text = val }; }
+                    try { var val = JsonSerializer.Deserialize<ResponseFormatText>(raw, options); if (val != null) return new ResponseFormat { Text = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -195,7 +195,7 @@ public class AgentCompletionsRequestResponseFormatConverter : JsonConverter<Agen
                     match1 = false;
                 if (match1)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsRequestResponseFormatJsonObject>(raw, options); if (val != null) return new AgentCompletionsRequestResponseFormat { JsonObject = val }; }
+                    try { var val = JsonSerializer.Deserialize<ResponseFormatJsonObject>(raw, options); if (val != null) return new ResponseFormat { JsonObject = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -205,7 +205,7 @@ public class AgentCompletionsRequestResponseFormatConverter : JsonConverter<Agen
                     match2 = false;
                 if (match2)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsRequestResponseFormatJsonSchema>(raw, options); if (val != null) return new AgentCompletionsRequestResponseFormat { JsonSchema = val }; }
+                    try { var val = JsonSerializer.Deserialize<ResponseFormatJsonSchema>(raw, options); if (val != null) return new ResponseFormat { JsonSchema = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -215,7 +215,7 @@ public class AgentCompletionsRequestResponseFormatConverter : JsonConverter<Agen
                     match3 = false;
                 if (match3)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsRequestResponseFormatGrammar>(raw, options); if (val != null) return new AgentCompletionsRequestResponseFormat { Grammar = val }; }
+                    try { var val = JsonSerializer.Deserialize<ResponseFormatGrammar>(raw, options); if (val != null) return new ResponseFormat { Grammar = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -225,7 +225,7 @@ public class AgentCompletionsRequestResponseFormatConverter : JsonConverter<Agen
                     match4 = false;
                 if (match4)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsRequestResponseFormatPython>(raw, options); if (val != null) return new AgentCompletionsRequestResponseFormat { Python = val }; }
+                    try { var val = JsonSerializer.Deserialize<ResponseFormatPython>(raw, options); if (val != null) return new ResponseFormat { Python = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -235,16 +235,16 @@ public class AgentCompletionsRequestResponseFormatConverter : JsonConverter<Agen
                     match5 = false;
                 if (match5)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsRequestResponseFormatToolCall>(raw, options); if (val != null) return new AgentCompletionsRequestResponseFormat { ToolCall = val }; }
+                    try { var val = JsonSerializer.Deserialize<ResponseFormatToolCall>(raw, options); if (val != null) return new ResponseFormat { ToolCall = val }; }
                     catch (JsonException) { }
                 }
             }
         }
 
-        throw new JsonException($"Data did not match any variant of AgentCompletionsRequestResponseFormat");
+        throw new JsonException($"Data did not match any variant of ResponseFormat");
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentCompletionsRequestResponseFormat value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, ResponseFormat value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Text != null)

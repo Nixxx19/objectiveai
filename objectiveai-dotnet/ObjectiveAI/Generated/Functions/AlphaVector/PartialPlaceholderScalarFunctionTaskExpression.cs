@@ -9,18 +9,18 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.AlphaVector;
 
 [JsonSchemaTitle("functions.alpha_vector.PartialPlaceholderScalarFunctionTaskExpression")]
-public class FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpression
+public partial class PartialPlaceholderScalarFunctionTaskExpression
 {
     [JsonPropertyName("input")]
-    public FunctionsExpressionExpression Input { get; set; } = default!;
+    public ObjectiveAI.Functions.Expression.Expression Input { get; set; } = default!;
 
     [JsonPropertyName("input_schema")]
-    public FunctionsExpressionObjectInputSchema InputSchema { get; set; } = default!;
+    public ObjectInputSchema InputSchema { get; set; } = default!;
 
     [JsonPropertyName("skip")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public FunctionsExpressionExpression? Skip { get; set; } = null;
+    public ObjectiveAI.Functions.Expression.Expression? Skip { get; set; } = null;
 
     [JsonPropertyName("spec")]
     public string Spec { get; set; } = default!;

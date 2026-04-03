@@ -21,90 +21,90 @@ Defines the expected structure and constraints for input data.
 Used by remote Functions to document and validate their inputs.
 """)]
 [JsonSchemaTitle("functions.expression.InputSchema")]
-[JsonConverter(typeof(FunctionsExpressionInputSchemaConverter))]
-public class FunctionsExpressionInputSchema
+[JsonConverter(typeof(InputSchemaConverter))]
+public partial class InputSchema
 {
     /// <summary>
     /// A union of schemas - input must match at least one.
     /// </summary>
     [Description("A union of schemas - input must match at least one.")]
     [JsonSchemaVariant("AnyOf", Ref = "functions.expression.AnyOfInputSchema")]
-    public FunctionsExpressionAnyOfInputSchema? AnyOf { get; set; }
+    public AnyOfInputSchema? AnyOf { get; set; }
 
     /// <summary>
     /// An object with named properties.
     /// </summary>
     [Description("An object with named properties.")]
     [JsonSchemaVariant("Object", Ref = "functions.expression.ObjectInputSchema")]
-    public FunctionsExpressionObjectInputSchema? Object { get; set; }
+    public ObjectInputSchema? Object { get; set; }
 
     /// <summary>
     /// An array of items.
     /// </summary>
     [Description("An array of items.")]
     [JsonSchemaVariant("Array", Ref = "functions.expression.ArrayInputSchema")]
-    public FunctionsExpressionArrayInputSchema? Array { get; set; }
+    public ArrayInputSchema? Array { get; set; }
 
     /// <summary>
     /// A string value.
     /// </summary>
     [Description("A string value.")]
     [JsonSchemaVariant("String", Ref = "functions.expression.StringInputSchema")]
-    public FunctionsExpressionStringInputSchema? String { get; set; }
+    public StringInputSchema? String { get; set; }
 
     /// <summary>
     /// An integer value.
     /// </summary>
     [Description("An integer value.")]
     [JsonSchemaVariant("Integer", Ref = "functions.expression.IntegerInputSchema")]
-    public FunctionsExpressionIntegerInputSchema? Integer { get; set; }
+    public IntegerInputSchema? Integer { get; set; }
 
     /// <summary>
     /// A floating-point number.
     /// </summary>
     [Description("A floating-point number.")]
     [JsonSchemaVariant("Number", Ref = "functions.expression.NumberInputSchema")]
-    public FunctionsExpressionNumberInputSchema? Number { get; set; }
+    public NumberInputSchema? Number { get; set; }
 
     /// <summary>
     /// A boolean value.
     /// </summary>
     [Description("A boolean value.")]
     [JsonSchemaVariant("Boolean", Ref = "functions.expression.BooleanInputSchema")]
-    public FunctionsExpressionBooleanInputSchema? Boolean { get; set; }
+    public BooleanInputSchema? Boolean { get; set; }
 
     /// <summary>
     /// An image (URL or base64).
     /// </summary>
     [Description("An image (URL or base64).")]
     [JsonSchemaVariant("Image", Ref = "functions.expression.ImageInputSchema")]
-    public FunctionsExpressionImageInputSchema? Image { get; set; }
+    public ImageInputSchema? Image { get; set; }
 
     /// <summary>
     /// Audio content.
     /// </summary>
     [Description("Audio content.")]
     [JsonSchemaVariant("Audio", Ref = "functions.expression.AudioInputSchema")]
-    public FunctionsExpressionAudioInputSchema? Audio { get; set; }
+    public AudioInputSchema? Audio { get; set; }
 
     /// <summary>
     /// Video content.
     /// </summary>
     [Description("Video content.")]
     [JsonSchemaVariant("Video", Ref = "functions.expression.VideoInputSchema")]
-    public FunctionsExpressionVideoInputSchema? Video { get; set; }
+    public VideoInputSchema? Video { get; set; }
 
     /// <summary>
     /// A file.
     /// </summary>
     [Description("A file.")]
     [JsonSchemaVariant("File", Ref = "functions.expression.FileInputSchema")]
-    public FunctionsExpressionFileInputSchema? File { get; set; }
+    public FileInputSchema? File { get; set; }
 }
 
-public class FunctionsExpressionInputSchemaConverter : JsonConverter<FunctionsExpressionInputSchema>
+public class InputSchemaConverter : JsonConverter<InputSchema>
 {
-    public override FunctionsExpressionInputSchema? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override InputSchema? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -113,34 +113,34 @@ public class FunctionsExpressionInputSchemaConverter : JsonConverter<FunctionsEx
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<FunctionsExpressionAnyOfInputSchema>(raw, options); if (val0 != null) return new FunctionsExpressionInputSchema { AnyOf = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<AnyOfInputSchema>(raw, options); if (val0 != null) return new InputSchema { AnyOf = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<FunctionsExpressionObjectInputSchema>(raw, options); if (val1 != null) return new FunctionsExpressionInputSchema { Object = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<ObjectInputSchema>(raw, options); if (val1 != null) return new InputSchema { Object = val1 }; }
             catch (JsonException) { }
-            try { var val2 = JsonSerializer.Deserialize<FunctionsExpressionArrayInputSchema>(raw, options); if (val2 != null) return new FunctionsExpressionInputSchema { Array = val2 }; }
+            try { var val2 = JsonSerializer.Deserialize<ArrayInputSchema>(raw, options); if (val2 != null) return new InputSchema { Array = val2 }; }
             catch (JsonException) { }
-            try { var val3 = JsonSerializer.Deserialize<FunctionsExpressionStringInputSchema>(raw, options); if (val3 != null) return new FunctionsExpressionInputSchema { String = val3 }; }
+            try { var val3 = JsonSerializer.Deserialize<StringInputSchema>(raw, options); if (val3 != null) return new InputSchema { String = val3 }; }
             catch (JsonException) { }
-            try { var val4 = JsonSerializer.Deserialize<FunctionsExpressionIntegerInputSchema>(raw, options); if (val4 != null) return new FunctionsExpressionInputSchema { Integer = val4 }; }
+            try { var val4 = JsonSerializer.Deserialize<IntegerInputSchema>(raw, options); if (val4 != null) return new InputSchema { Integer = val4 }; }
             catch (JsonException) { }
-            try { var val5 = JsonSerializer.Deserialize<FunctionsExpressionNumberInputSchema>(raw, options); if (val5 != null) return new FunctionsExpressionInputSchema { Number = val5 }; }
+            try { var val5 = JsonSerializer.Deserialize<NumberInputSchema>(raw, options); if (val5 != null) return new InputSchema { Number = val5 }; }
             catch (JsonException) { }
-            try { var val6 = JsonSerializer.Deserialize<FunctionsExpressionBooleanInputSchema>(raw, options); if (val6 != null) return new FunctionsExpressionInputSchema { Boolean = val6 }; }
+            try { var val6 = JsonSerializer.Deserialize<BooleanInputSchema>(raw, options); if (val6 != null) return new InputSchema { Boolean = val6 }; }
             catch (JsonException) { }
-            try { var val7 = JsonSerializer.Deserialize<FunctionsExpressionImageInputSchema>(raw, options); if (val7 != null) return new FunctionsExpressionInputSchema { Image = val7 }; }
+            try { var val7 = JsonSerializer.Deserialize<ImageInputSchema>(raw, options); if (val7 != null) return new InputSchema { Image = val7 }; }
             catch (JsonException) { }
-            try { var val8 = JsonSerializer.Deserialize<FunctionsExpressionAudioInputSchema>(raw, options); if (val8 != null) return new FunctionsExpressionInputSchema { Audio = val8 }; }
+            try { var val8 = JsonSerializer.Deserialize<AudioInputSchema>(raw, options); if (val8 != null) return new InputSchema { Audio = val8 }; }
             catch (JsonException) { }
-            try { var val9 = JsonSerializer.Deserialize<FunctionsExpressionVideoInputSchema>(raw, options); if (val9 != null) return new FunctionsExpressionInputSchema { Video = val9 }; }
+            try { var val9 = JsonSerializer.Deserialize<VideoInputSchema>(raw, options); if (val9 != null) return new InputSchema { Video = val9 }; }
             catch (JsonException) { }
-            try { var val10 = JsonSerializer.Deserialize<FunctionsExpressionFileInputSchema>(raw, options); if (val10 != null) return new FunctionsExpressionInputSchema { File = val10 }; }
+            try { var val10 = JsonSerializer.Deserialize<FileInputSchema>(raw, options); if (val10 != null) return new InputSchema { File = val10 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsExpressionInputSchema");
+        throw new JsonException($"Data did not match any variant of InputSchema");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsExpressionInputSchema value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, InputSchema value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.AnyOf != null)

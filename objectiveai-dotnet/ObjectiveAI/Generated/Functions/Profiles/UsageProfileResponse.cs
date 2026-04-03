@@ -12,7 +12,7 @@ namespace ObjectiveAI.Functions.Profiles;
 /// </summary>
 [Description("Usage statistics for a profile.")]
 [JsonSchemaTitle("functions.profiles.UsageProfileResponse")]
-public class FunctionsProfilesUsageProfileResponse
+public partial class UsageProfileResponse
 {
     /// <summary>
     /// Total completion tokens used.

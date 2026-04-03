@@ -9,14 +9,14 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.AlphaVector.Expression;
 
 [JsonSchemaTitle("functions.alpha_vector.expression.VectorFunctionInputValue")]
-public class FunctionsAlphaVectorExpressionVectorFunctionInputValue
+public partial class VectorFunctionInputValue
 {
     [JsonPropertyName("context")]
     [JsonSchemaAdditionalPropertiesSchema("$ref:functions.expression.InputValue")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public Dictionary<string, FunctionsExpressionInputValue>? Context { get; set; } = null;
+    public Dictionary<string, InputValue>? Context { get; set; } = null;
 
     [JsonPropertyName("items")]
-    public List<FunctionsExpressionInputValue> Items { get; set; } = default!;
+    public List<InputValue> Items { get; set; } = default!;
 }

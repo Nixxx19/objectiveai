@@ -14,27 +14,27 @@ namespace ObjectiveAI.Functions;
 /// </summary>
 [Description("A remote profile, either tasks-based or auto.")]
 [JsonSchemaTitle("functions.RemoteProfile")]
-[JsonConverter(typeof(FunctionsRemoteProfileConverter))]
-public class FunctionsRemoteProfile
+[JsonConverter(typeof(RemoteProfileConverter))]
+public partial class RemoteProfile
 {
     /// <summary>
     /// Tasks-based profile with per-task configuration.
     /// </summary>
     [Description("Tasks-based profile with per-task configuration.")]
     [JsonSchemaVariant("Tasks", Ref = "functions.RemoteTasksProfile")]
-    public FunctionsRemoteTasksProfile? Tasks { get; set; }
+    public RemoteTasksProfile? Tasks { get; set; }
 
     /// <summary>
     /// Auto profile that applies a single swarm+weights to all vector completion tasks.
     /// </summary>
     [Description("Auto profile that applies a single swarm+weights to all vector completion tasks.")]
     [JsonSchemaVariant("Auto", Ref = "swarm.RemoteSwarmBase")]
-    public SwarmRemoteSwarmBase? Auto { get; set; }
+    public RemoteSwarmBase? Auto { get; set; }
 }
 
-public class FunctionsRemoteProfileConverter : JsonConverter<FunctionsRemoteProfile>
+public class RemoteProfileConverter : JsonConverter<RemoteProfile>
 {
-    public override FunctionsRemoteProfile? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override RemoteProfile? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -43,16 +43,16 @@ public class FunctionsRemoteProfileConverter : JsonConverter<FunctionsRemoteProf
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<FunctionsRemoteTasksProfile>(raw, options); if (val0 != null) return new FunctionsRemoteProfile { Tasks = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<RemoteTasksProfile>(raw, options); if (val0 != null) return new RemoteProfile { Tasks = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<SwarmRemoteSwarmBase>(raw, options); if (val1 != null) return new FunctionsRemoteProfile { Auto = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<RemoteSwarmBase>(raw, options); if (val1 != null) return new RemoteProfile { Auto = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsRemoteProfile");
+        throw new JsonException($"Data did not match any variant of RemoteProfile");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsRemoteProfile value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, RemoteProfile value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Tasks != null)

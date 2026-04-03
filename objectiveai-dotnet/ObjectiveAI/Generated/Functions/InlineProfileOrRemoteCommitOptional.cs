@@ -18,19 +18,19 @@ A profile specification that is either an inline profile definition
 or a remote path reference.
 """)]
 [JsonSchemaTitle("functions.InlineProfileOrRemoteCommitOptional")]
-[JsonConverter(typeof(FunctionsInlineProfileOrRemoteCommitOptionalConverter))]
-public class FunctionsInlineProfileOrRemoteCommitOptional
+[JsonConverter(typeof(InlineProfileOrRemoteCommitOptionalConverter))]
+public partial class InlineProfileOrRemoteCommitOptional
 {
     [JsonSchemaVariant("Inline", Ref = "functions.InlineProfile")]
-    public FunctionsInlineProfile? Inline { get; set; }
+    public InlineProfile? Inline { get; set; }
 
     [JsonSchemaVariant("Remote", Ref = "RemotePathCommitOptional")]
     public RemotePathCommitOptional? Remote { get; set; }
 }
 
-public class FunctionsInlineProfileOrRemoteCommitOptionalConverter : JsonConverter<FunctionsInlineProfileOrRemoteCommitOptional>
+public class InlineProfileOrRemoteCommitOptionalConverter : JsonConverter<InlineProfileOrRemoteCommitOptional>
 {
-    public override FunctionsInlineProfileOrRemoteCommitOptional? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override InlineProfileOrRemoteCommitOptional? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -39,16 +39,16 @@ public class FunctionsInlineProfileOrRemoteCommitOptionalConverter : JsonConvert
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<FunctionsInlineProfile>(raw, options); if (val0 != null) return new FunctionsInlineProfileOrRemoteCommitOptional { Inline = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<InlineProfile>(raw, options); if (val0 != null) return new InlineProfileOrRemoteCommitOptional { Inline = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<RemotePathCommitOptional>(raw, options); if (val1 != null) return new FunctionsInlineProfileOrRemoteCommitOptional { Remote = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<RemotePathCommitOptional>(raw, options); if (val1 != null) return new InlineProfileOrRemoteCommitOptional { Remote = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsInlineProfileOrRemoteCommitOptional");
+        throw new JsonException($"Data did not match any variant of InlineProfileOrRemoteCommitOptional");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsInlineProfileOrRemoteCommitOptional value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, InlineProfileOrRemoteCommitOptional value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Inline != null)

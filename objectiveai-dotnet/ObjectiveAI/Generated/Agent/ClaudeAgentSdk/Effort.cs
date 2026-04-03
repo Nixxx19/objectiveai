@@ -19,8 +19,8 @@ The effort level for model output.
 This setting hints to the model how detailed its responses should be.
 """)]
 [JsonSchemaTitle("agent.claude_agent_sdk.Effort")]
-[JsonConverter(typeof(AgentClaudeAgentSdkEffortConverter))]
-public class AgentClaudeAgentSdkEffort
+[JsonConverter(typeof(EffortConverter))]
+public partial class Effort
 {
     /// <summary>
     /// Minimal output, concise responses.
@@ -51,25 +51,25 @@ public class AgentClaudeAgentSdkEffort
     public string? Max { get; set; }
 }
 
-public class AgentClaudeAgentSdkEffortConverter : JsonConverter<AgentClaudeAgentSdkEffort>
+public class EffortConverter : JsonConverter<Effort>
 {
-    public override AgentClaudeAgentSdkEffort? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Effort? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         if (reader.TokenType != JsonTokenType.String)
-            throw new JsonException("Expected string for AgentClaudeAgentSdkEffort");
+            throw new JsonException("Expected string for Effort");
         var str = reader.GetString()!;
         return str switch
         {
-            "low" => new AgentClaudeAgentSdkEffort { Low = "low" },
-            "medium" => new AgentClaudeAgentSdkEffort { Medium = "medium" },
-            "high" => new AgentClaudeAgentSdkEffort { High = "high" },
-            "max" => new AgentClaudeAgentSdkEffort { Max = "max" },
-            _ => throw new JsonException($"Unknown variant of AgentClaudeAgentSdkEffort: {str}")
+            "low" => new Effort { Low = "low" },
+            "medium" => new Effort { Medium = "medium" },
+            "high" => new Effort { High = "high" },
+            "max" => new Effort { Max = "max" },
+            _ => throw new JsonException($"Unknown variant of Effort: {str}")
         };
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentClaudeAgentSdkEffort value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Effort value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Low != null)

@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Config;
 
 [JsonSchemaTitle("config.ApiHeadersConfig")]
-public class ConfigApiHeadersConfig
+public partial class ApiHeadersConfig
 {
     [JsonPropertyName("http_referer")]
     [JsonSchemaOmitEmpty]

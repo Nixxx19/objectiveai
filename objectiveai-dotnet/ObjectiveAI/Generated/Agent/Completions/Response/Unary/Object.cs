@@ -12,8 +12,8 @@ namespace ObjectiveAI.Agent.Completions.Response.Unary;
 /// </summary>
 [Description("A agent completion object.")]
 [JsonSchemaTitle("agent.completions.response.unary.Object")]
-[JsonConverter(typeof(JsonStringEnumConverter<AgentCompletionsResponseUnaryObject>))]
-public enum AgentCompletionsResponseUnaryObject
+[JsonConverter(typeof(JsonStringEnumConverter<Object>))]
+public enum Object
 {
     [JsonStringEnumMemberName("agent.completion")]
     AgentCompletion

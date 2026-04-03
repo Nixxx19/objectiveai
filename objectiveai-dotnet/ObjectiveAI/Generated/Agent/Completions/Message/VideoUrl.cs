@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("A video URL for multimodal input.")]
 [JsonSchemaTitle("agent.completions.message.VideoUrl")]
-public class AgentCompletionsMessageVideoUrl
+public partial class VideoUrl
 {
     /// <summary>
     /// The URL of the video.

@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Completions.Response;
 /// </summary>
 [Description("A top alternative token with its log probability.")]
 [JsonSchemaTitle("agent.completions.response.TopLogprob")]
-public class AgentCompletionsResponseTopLogprob
+public partial class TopLogprob
 {
     /// <summary>
     /// The raw bytes of the token.

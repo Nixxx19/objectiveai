@@ -12,12 +12,12 @@ namespace ObjectiveAI.Functions;
 /// </summary>
 [Description("Response from listing function-profile pairs.")]
 [JsonSchemaTitle("functions.ListFunctionProfilePairResponse")]
-public class FunctionsListFunctionProfilePairResponse
+public partial class ListFunctionProfilePairResponse
 {
     /// <summary>
     /// List of available function-profile pairs.
     /// </summary>
     [Description("List of available function-profile pairs.")]
     [JsonPropertyName("data")]
-    public List<FunctionsListFunctionProfilePairItem> Data { get; set; } = default!;
+    public List<ListFunctionProfilePairItem> Data { get; set; } = default!;
 }

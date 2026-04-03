@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("A file attachment for multimodal input.")]
 [JsonSchemaTitle("agent.completions.message.File")]
-public class AgentCompletionsMessageFile
+public partial class File
 {
     /// <summary>
     /// Base64-encoded file data.

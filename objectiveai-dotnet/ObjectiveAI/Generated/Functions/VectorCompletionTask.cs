@@ -3,7 +3,6 @@
 
 using ObjectiveAI.Agent.Completions.Message;
 using ObjectiveAI.Attributes;
-using ObjectiveAI.Functions.Expression;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 
@@ -14,14 +13,14 @@ namespace ObjectiveAI.Functions;
 /// </summary>
 [Description("A compiled vector completion task ready for execution.")]
 [JsonSchemaTitle("functions.VectorCompletionTask")]
-public class FunctionsVectorCompletionTask
+public partial class VectorCompletionTask
 {
     /// <summary>
     /// The resolved conversation messages.
     /// </summary>
     [Description("The resolved conversation messages.")]
     [JsonPropertyName("messages")]
-    public List<AgentCompletionsMessageMessage> Messages { get; set; } = default!;
+    public List<ObjectiveAI.Agent.Completions.Message.Message> Messages { get; set; } = default!;
 
     /// <summary>
     /// Expression to transform the task result into a valid function output.
@@ -38,12 +37,12 @@ Must return a `TaskOutputOwned` valid for the parent function's type (scalar or 
 See [`VectorCompletionTaskExpression::output`] for full documentation.
 """)]
     [JsonPropertyName("output")]
-    public FunctionsExpressionExpression Output { get; set; } = default!;
+    public ObjectiveAI.Functions.Expression.Expression Output { get; set; } = default!;
 
     /// <summary>
     /// The resolved response options the LLMs can vote for.
     /// </summary>
     [Description("The resolved response options the LLMs can vote for.")]
     [JsonPropertyName("responses")]
-    public List<AgentCompletionsMessageRichContent> Responses { get; set; } = default!;
+    public List<RichContent> Responses { get; set; } = default!;
 }

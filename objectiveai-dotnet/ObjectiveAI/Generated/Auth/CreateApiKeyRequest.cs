@@ -26,7 +26,7 @@ Request to create a new API key.
 * `description` - Optional description providing additional context.
 """)]
 [JsonSchemaTitle("auth.CreateApiKeyRequest")]
-public class AuthCreateApiKeyRequest
+public partial class CreateApiKeyRequest
 {
     /// <summary>
     /// An optional description providing additional context about the key's purpose.

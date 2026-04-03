@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("An image URL for multimodal input.")]
 [JsonSchemaTitle("agent.completions.message.ImageUrl")]
-public class AgentCompletionsMessageImageUrl
+public partial class ImageUrl
 {
     /// <summary>
     /// The detail level for image processing.
@@ -21,7 +21,7 @@ public class AgentCompletionsMessageImageUrl
     [JsonPropertyName("detail")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsMessageImageUrlDetail? Detail { get; set; } = null;
+    public ImageUrlDetail? Detail { get; set; } = null;
 
     /// <summary>
     /// The URL of the image (can be a data URL or HTTP URL).

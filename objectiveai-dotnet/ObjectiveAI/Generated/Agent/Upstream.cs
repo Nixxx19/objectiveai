@@ -13,8 +13,8 @@ namespace ObjectiveAI.Agent;
 /// </summary>
 [Description("Supported agent upstreams.")]
 [JsonSchemaTitle("agent.Upstream")]
-[JsonConverter(typeof(AgentUpstreamConverter))]
-public class AgentUpstream
+[JsonConverter(typeof(UpstreamConverter))]
+public partial class Upstream
 {
     /// <summary>
     /// Unknown Upstream.
@@ -45,25 +45,25 @@ public class AgentUpstream
     public string? Mock { get; set; }
 }
 
-public class AgentUpstreamConverter : JsonConverter<AgentUpstream>
+public class UpstreamConverter : JsonConverter<Upstream>
 {
-    public override AgentUpstream? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Upstream? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         if (reader.TokenType != JsonTokenType.String)
-            throw new JsonException("Expected string for AgentUpstream");
+            throw new JsonException("Expected string for Upstream");
         var str = reader.GetString()!;
         return str switch
         {
-            "unknown" => new AgentUpstream { Unknown = "unknown" },
-            "openrouter" => new AgentUpstream { Openrouter = "openrouter" },
-            "claude_agent_sdk" => new AgentUpstream { ClaudeAgentSdk = "claude_agent_sdk" },
-            "mock" => new AgentUpstream { Mock = "mock" },
-            _ => throw new JsonException($"Unknown variant of AgentUpstream: {str}")
+            "unknown" => new Upstream { Unknown = "unknown" },
+            "openrouter" => new Upstream { Openrouter = "openrouter" },
+            "claude_agent_sdk" => new Upstream { ClaudeAgentSdk = "claude_agent_sdk" },
+            "mock" => new Upstream { Mock = "mock" },
+            _ => throw new JsonException($"Unknown variant of Upstream: {str}")
         };
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentUpstream value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Upstream value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Unknown != null)

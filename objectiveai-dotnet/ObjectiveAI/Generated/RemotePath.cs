@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace ObjectiveAI;
 
-public class RemotePathGithub
+public partial class RemotePathGithub
 {
     [JsonPropertyName("commit")]
     public string Commit { get; set; } = default!;
@@ -24,7 +24,7 @@ public class RemotePathGithub
     public string Repository { get; set; } = default!;
 }
 
-public class RemotePathFilesystem
+public partial class RemotePathFilesystem
 {
     [JsonPropertyName("commit")]
     public string Commit { get; set; } = default!;
@@ -40,7 +40,7 @@ public class RemotePathFilesystem
     public string Repository { get; set; } = default!;
 }
 
-public class RemotePathMock
+public partial class RemotePathMock
 {
     [JsonPropertyName("name")]
     public string Name { get; set; } = default!;
@@ -53,7 +53,7 @@ public class RemotePathMock
 
 [JsonSchemaTitle("RemotePath")]
 [JsonConverter(typeof(RemotePathConverter))]
-public class RemotePath
+public partial class RemotePath
 {
     [JsonSchemaVariant("Github", Type = "object")]
     public RemotePathGithub? Github { get; set; }

@@ -12,8 +12,8 @@ namespace ObjectiveAI.Functions;
 /// </summary>
 [Description("Source filter for listing function-profile pairs.")]
 [JsonSchemaTitle("functions.ListFunctionProfilePairsSource")]
-[JsonConverter(typeof(JsonStringEnumConverter<FunctionsListFunctionProfilePairsSource>))]
-public enum FunctionsListFunctionProfilePairsSource
+[JsonConverter(typeof(JsonStringEnumConverter<ListFunctionProfilePairsSource>))]
+public enum ListFunctionProfilePairsSource
 {
     [JsonStringEnumMemberName("objectiveai")]
     Objectiveai

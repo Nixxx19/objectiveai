@@ -20,7 +20,7 @@ This is the per-assistant-response usage yielded by upstream clients.
 It includes upstream-specific fields like `cost_multiplier` and `is_byok`.
 """)]
 [JsonSchemaTitle("agent.completions.response.UpstreamUsage")]
-public class AgentCompletionsResponseUpstreamUsage
+public partial class UpstreamUsage
 {
     /// <summary>
     /// Number of tokens in the completion.
@@ -37,7 +37,7 @@ public class AgentCompletionsResponseUpstreamUsage
     [JsonPropertyName("completion_tokens_details")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsResponseCompletionTokensDetails? CompletionTokensDetails { get; set; } = null;
+    public CompletionTokensDetails? CompletionTokensDetails { get; set; } = null;
 
     /// <summary>
     /// The cost charged by ObjectiveAI for this request.
@@ -54,7 +54,7 @@ public class AgentCompletionsResponseUpstreamUsage
     [JsonPropertyName("cost_details")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsResponseCostDetails? CostDetails { get; set; } = null;
+    public CostDetails? CostDetails { get; set; } = null;
 
     /// <summary>
     /// The multiplier applied to compute ObjectiveAI's charge.
@@ -86,7 +86,7 @@ public class AgentCompletionsResponseUpstreamUsage
     [JsonPropertyName("prompt_tokens_details")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsResponsePromptTokensDetails? PromptTokensDetails { get; set; } = null;
+    public PromptTokensDetails? PromptTokensDetails { get; set; } = null;
 
     /// <summary>
     /// Total cost including ObjectiveAI's charge plus all upstream charges.

@@ -9,19 +9,19 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions;
 
 [JsonSchemaTitle("functions.FullInlineFunction")]
-[JsonConverter(typeof(FunctionsFullInlineFunctionConverter))]
-public class FunctionsFullInlineFunction
+[JsonConverter(typeof(FullInlineFunctionConverter))]
+public partial class FullInlineFunction
 {
     [JsonSchemaVariant("Alpha", Ref = "functions.AlphaInlineFunction")]
-    public FunctionsAlphaInlineFunction? Alpha { get; set; }
+    public AlphaInlineFunction? Alpha { get; set; }
 
     [JsonSchemaVariant("Standard", Ref = "functions.InlineFunction")]
-    public FunctionsInlineFunction? Standard { get; set; }
+    public InlineFunction? Standard { get; set; }
 }
 
-public class FunctionsFullInlineFunctionConverter : JsonConverter<FunctionsFullInlineFunction>
+public class FullInlineFunctionConverter : JsonConverter<FullInlineFunction>
 {
-    public override FunctionsFullInlineFunction? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override FullInlineFunction? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -30,16 +30,16 @@ public class FunctionsFullInlineFunctionConverter : JsonConverter<FunctionsFullI
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<FunctionsAlphaInlineFunction>(raw, options); if (val0 != null) return new FunctionsFullInlineFunction { Alpha = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<AlphaInlineFunction>(raw, options); if (val0 != null) return new FullInlineFunction { Alpha = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<FunctionsInlineFunction>(raw, options); if (val1 != null) return new FunctionsFullInlineFunction { Standard = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<InlineFunction>(raw, options); if (val1 != null) return new FullInlineFunction { Standard = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsFullInlineFunction");
+        throw new JsonException($"Data did not match any variant of FullInlineFunction");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsFullInlineFunction value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, FullInlineFunction value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Alpha != null)

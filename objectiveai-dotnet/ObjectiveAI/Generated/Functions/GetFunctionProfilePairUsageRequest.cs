@@ -13,7 +13,7 @@ namespace ObjectiveAI.Functions;
 /// </summary>
 [Description("Request parameters for getting usage of a specific function-profile pair.")]
 [JsonSchemaTitle("functions.GetFunctionProfilePairUsageRequest")]
-public class FunctionsGetFunctionProfilePairUsageRequest
+public partial class GetFunctionProfilePairUsageRequest
 {
     /// <summary>
     /// The function path.

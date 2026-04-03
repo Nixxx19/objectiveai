@@ -8,8 +8,8 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Expression;
 
 [JsonSchemaTitle("functions.expression.StringInputSchemaType")]
-[JsonConverter(typeof(JsonStringEnumConverter<FunctionsExpressionStringInputSchemaType>))]
-public enum FunctionsExpressionStringInputSchemaType
+[JsonConverter(typeof(JsonStringEnumConverter<StringInputSchemaType>))]
+public enum StringInputSchemaType
 {
     [JsonStringEnumMemberName("string")]
     String

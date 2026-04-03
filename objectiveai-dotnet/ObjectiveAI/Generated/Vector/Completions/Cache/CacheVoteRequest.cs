@@ -10,14 +10,14 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Vector.Completions.Cache;
 
 [JsonSchemaTitle("vector.completions.cache.CacheVoteRequest")]
-public class VectorCompletionsCacheCacheVoteRequest
+public partial class CacheVoteRequest
 {
     [JsonPropertyName("agent")]
-    public AgentInlineAgentBaseWithFallbacksOrRemote Agent { get; set; } = default!;
+    public InlineAgentBaseWithFallbacksOrRemote Agent { get; set; } = default!;
 
     [JsonPropertyName("messages")]
-    public List<AgentCompletionsMessageMessage> Messages { get; set; } = default!;
+    public List<ObjectiveAI.Agent.Completions.Message.Message> Messages { get; set; } = default!;
 
     [JsonPropertyName("responses")]
-    public List<AgentCompletionsMessageRichContent> Responses { get; set; } = default!;
+    public List<RichContent> Responses { get; set; } = default!;
 }

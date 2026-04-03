@@ -9,11 +9,11 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Profiles.Computations.Request;
 
 [JsonSchemaTitle("functions.profiles.computations.request.DatasetItem")]
-public class FunctionsProfilesComputationsRequestDatasetItem
+public partial class DatasetItem
 {
     [JsonPropertyName("input")]
-    public FunctionsExpressionInputValue Input { get; set; } = default!;
+    public InputValue Input { get; set; } = default!;
 
     [JsonPropertyName("target")]
-    public FunctionsProfilesComputationsRequestTarget Target { get; set; } = default!;
+    public Target Target { get; set; } = default!;
 }

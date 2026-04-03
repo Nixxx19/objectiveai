@@ -9,19 +9,19 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions;
 
 [JsonSchemaTitle("functions.FullRemoteFunction")]
-[JsonConverter(typeof(FunctionsFullRemoteFunctionConverter))]
-public class FunctionsFullRemoteFunction
+[JsonConverter(typeof(FullRemoteFunctionConverter))]
+public partial class FullRemoteFunction
 {
     [JsonSchemaVariant("Alpha", Ref = "functions.AlphaRemoteFunction")]
-    public FunctionsAlphaRemoteFunction? Alpha { get; set; }
+    public AlphaRemoteFunction? Alpha { get; set; }
 
     [JsonSchemaVariant("Standard", Ref = "functions.RemoteFunction")]
-    public FunctionsRemoteFunction? Standard { get; set; }
+    public RemoteFunction? Standard { get; set; }
 }
 
-public class FunctionsFullRemoteFunctionConverter : JsonConverter<FunctionsFullRemoteFunction>
+public class FullRemoteFunctionConverter : JsonConverter<FullRemoteFunction>
 {
-    public override FunctionsFullRemoteFunction? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override FullRemoteFunction? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -30,16 +30,16 @@ public class FunctionsFullRemoteFunctionConverter : JsonConverter<FunctionsFullR
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<FunctionsAlphaRemoteFunction>(raw, options); if (val0 != null) return new FunctionsFullRemoteFunction { Alpha = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<AlphaRemoteFunction>(raw, options); if (val0 != null) return new FullRemoteFunction { Alpha = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<FunctionsRemoteFunction>(raw, options); if (val1 != null) return new FunctionsFullRemoteFunction { Standard = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<RemoteFunction>(raw, options); if (val1 != null) return new FullRemoteFunction { Standard = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsFullRemoteFunction");
+        throw new JsonException($"Data did not match any variant of FullRemoteFunction");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsFullRemoteFunction value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, FullRemoteFunction value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Alpha != null)

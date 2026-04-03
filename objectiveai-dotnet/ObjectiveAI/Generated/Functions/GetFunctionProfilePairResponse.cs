@@ -13,19 +13,19 @@ namespace ObjectiveAI.Functions;
 /// </summary>
 [Description("Response from getting a function-profile pair.")]
 [JsonSchemaTitle("functions.GetFunctionProfilePairResponse")]
-public class FunctionsGetFunctionProfilePairResponse
+public partial class GetFunctionProfilePairResponse
 {
     /// <summary>
     /// The function.
     /// </summary>
     [Description("The function.")]
     [JsonPropertyName("function")]
-    public FunctionsGetFunctionResponse Function { get; set; } = default!;
+    public GetFunctionResponse Function { get; set; } = default!;
 
     /// <summary>
     /// The profile.
     /// </summary>
     [Description("The profile.")]
     [JsonPropertyName("profile")]
-    public FunctionsProfilesGetProfileResponse Profile { get; set; } = default!;
+    public GetProfileResponse Profile { get; set; } = default!;
 }

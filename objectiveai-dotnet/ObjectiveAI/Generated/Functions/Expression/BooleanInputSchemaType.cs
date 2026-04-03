@@ -8,8 +8,8 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Expression;
 
 [JsonSchemaTitle("functions.expression.BooleanInputSchemaType")]
-[JsonConverter(typeof(JsonStringEnumConverter<FunctionsExpressionBooleanInputSchemaType>))]
-public enum FunctionsExpressionBooleanInputSchemaType
+[JsonConverter(typeof(JsonStringEnumConverter<BooleanInputSchemaType>))]
+public enum BooleanInputSchemaType
 {
     [JsonStringEnumMemberName("boolean")]
     Boolean

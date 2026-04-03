@@ -13,8 +13,8 @@ namespace ObjectiveAI.Functions.Expression;
 /// </summary>
 [Description("Predefined expression behaviors that require no user-authored code.")]
 [JsonSchemaTitle("functions.expression.Special")]
-[JsonConverter(typeof(FunctionsExpressionSpecialConverter))]
-public class FunctionsExpressionSpecial
+[JsonConverter(typeof(SpecialConverter))]
+public partial class Special
 {
     /// <summary>
     /// Returns the params input as-is.
@@ -70,28 +70,28 @@ Vector: L1 normalize. Vectors: L1 normalize each.
     public string? InputItemsOptionalContextMerge { get; set; }
 }
 
-public class FunctionsExpressionSpecialConverter : JsonConverter<FunctionsExpressionSpecial>
+public class SpecialConverter : JsonConverter<Special>
 {
-    public override FunctionsExpressionSpecial? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Special? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         if (reader.TokenType != JsonTokenType.String)
-            throw new JsonException("Expected string for FunctionsExpressionSpecial");
+            throw new JsonException("Expected string for Special");
         var str = reader.GetString()!;
         return str switch
         {
-            "input" => new FunctionsExpressionSpecial { Input = "input" },
-            "output" => new FunctionsExpressionSpecial { Output = "output" },
-            "task_output_l1_normalized" => new FunctionsExpressionSpecial { TaskOutputL1Normalized = "task_output_l1_normalized" },
-            "task_output_weighted_sum" => new FunctionsExpressionSpecial { TaskOutputWeightedSum = "task_output_weighted_sum" },
-            "input_items_output_length" => new FunctionsExpressionSpecial { InputItemsOutputLength = "input_items_output_length" },
-            "input_items_optional_context_split" => new FunctionsExpressionSpecial { InputItemsOptionalContextSplit = "input_items_optional_context_split" },
-            "input_items_optional_context_merge" => new FunctionsExpressionSpecial { InputItemsOptionalContextMerge = "input_items_optional_context_merge" },
-            _ => throw new JsonException($"Unknown variant of FunctionsExpressionSpecial: {str}")
+            "input" => new Special { Input = "input" },
+            "output" => new Special { Output = "output" },
+            "task_output_l1_normalized" => new Special { TaskOutputL1Normalized = "task_output_l1_normalized" },
+            "task_output_weighted_sum" => new Special { TaskOutputWeightedSum = "task_output_weighted_sum" },
+            "input_items_output_length" => new Special { InputItemsOutputLength = "input_items_output_length" },
+            "input_items_optional_context_split" => new Special { InputItemsOptionalContextSplit = "input_items_optional_context_split" },
+            "input_items_optional_context_merge" => new Special { InputItemsOptionalContextMerge = "input_items_optional_context_merge" },
+            _ => throw new JsonException($"Unknown variant of Special: {str}")
         };
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsExpressionSpecial value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Special value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Input != null)

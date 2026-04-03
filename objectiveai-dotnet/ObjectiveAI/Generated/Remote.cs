@@ -14,7 +14,7 @@ namespace ObjectiveAI;
 [Description("The remote source where a function, profile, or agent is hosted.")]
 [JsonSchemaTitle("Remote")]
 [JsonConverter(typeof(RemoteConverter))]
-public class Remote
+public partial class Remote
 {
     /// <summary>
     /// GitHub repository.

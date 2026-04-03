@@ -22,15 +22,15 @@ Represents any JSON-like value that can be passed to a Function,
 including rich content types (images, audio, video, files).
 """)]
 [JsonSchemaTitle("functions.expression.InputValue")]
-[JsonConverter(typeof(FunctionsExpressionInputValueConverter))]
-public class FunctionsExpressionInputValue
+[JsonConverter(typeof(InputValueConverter))]
+public partial class InputValue
 {
     /// <summary>
     /// Rich content (image, audio, video, file).
     /// </summary>
     [Description("Rich content (image, audio, video, file).")]
     [JsonSchemaVariant("RichContentPart", Ref = "agent.completions.message.RichContentPart")]
-    public AgentCompletionsMessageRichContentPart? RichContentPart { get; set; }
+    public RichContentPart? RichContentPart { get; set; }
 
     /// <summary>
     /// An object with string keys.
@@ -38,14 +38,14 @@ public class FunctionsExpressionInputValue
     [Description("An object with string keys.")]
     [JsonSchemaVariant("Object", Type = "object")]
     [JsonSchemaAdditionalPropertiesSchema("$ref:functions.expression.InputValue")]
-    public Dictionary<string, FunctionsExpressionInputValue>? Object { get; set; }
+    public Dictionary<string, InputValue>? Object { get; set; }
 
     /// <summary>
     /// An array of values.
     /// </summary>
     [Description("An array of values.")]
     [JsonSchemaVariant("Array", Type = "array")]
-    public List<FunctionsExpressionInputValue>? Array { get; set; }
+    public List<InputValue>? Array { get; set; }
 
     /// <summary>
     /// A string value.
@@ -78,9 +78,9 @@ public class FunctionsExpressionInputValue
     public bool? Boolean { get; set; }
 }
 
-public class FunctionsExpressionInputValueConverter : JsonConverter<FunctionsExpressionInputValue>
+public class InputValueConverter : JsonConverter<InputValue>
 {
-    public override FunctionsExpressionInputValue? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override InputValue? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -90,37 +90,37 @@ public class FunctionsExpressionInputValueConverter : JsonConverter<FunctionsExp
         if (el.ValueKind == JsonValueKind.String)
         {
             var str = el.GetString()!;
-            return new FunctionsExpressionInputValue { String = str };
+            return new InputValue { String = str };
         }
 
         if (el.ValueKind == JsonValueKind.Number)
         {
             if (el.TryGetInt64(out var intVal))
-                return new FunctionsExpressionInputValue { Integer = intVal };
-            return new FunctionsExpressionInputValue { Number = el.GetDouble() };
+                return new InputValue { Integer = intVal };
+            return new InputValue { Number = el.GetDouble() };
         }
 
         if (el.ValueKind == JsonValueKind.True || el.ValueKind == JsonValueKind.False)
-            return new FunctionsExpressionInputValue { Boolean = el.GetBoolean() };
+            return new InputValue { Boolean = el.GetBoolean() };
 
         if (el.ValueKind == JsonValueKind.Array)
         {
-            var val = JsonSerializer.Deserialize<List<FunctionsExpressionInputValue>>(raw, options);
-            return new FunctionsExpressionInputValue { Array = val };
+            var val = JsonSerializer.Deserialize<List<InputValue>>(raw, options);
+            return new InputValue { Array = val };
         }
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<AgentCompletionsMessageRichContentPart>(raw, options); if (val0 != null) return new FunctionsExpressionInputValue { RichContentPart = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<RichContentPart>(raw, options); if (val0 != null) return new InputValue { RichContentPart = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<Dictionary<string, FunctionsExpressionInputValue>>(raw, options); if (val1 != null) return new FunctionsExpressionInputValue { Object = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<Dictionary<string, InputValue>>(raw, options); if (val1 != null) return new InputValue { Object = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsExpressionInputValue");
+        throw new JsonException($"Data did not match any variant of InputValue");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsExpressionInputValue value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, InputValue value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.RichContentPart != null)

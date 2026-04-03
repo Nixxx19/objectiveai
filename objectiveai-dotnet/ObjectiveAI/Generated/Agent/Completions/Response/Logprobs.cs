@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Completions.Response;
 /// </summary>
 [Description("Log probabilities for generated tokens.")]
 [JsonSchemaTitle("agent.completions.response.Logprobs")]
-public class AgentCompletionsResponseLogprobs
+public partial class Logprobs
 {
     /// <summary>
     /// Log probabilities for content tokens.
@@ -20,7 +20,7 @@ public class AgentCompletionsResponseLogprobs
     [Description("Log probabilities for content tokens.")]
     [JsonPropertyName("content")]
     [JsonSchemaNullable]
-    public List<AgentCompletionsResponseLogprob>? Content { get; set; } = null;
+    public List<Logprob>? Content { get; set; } = null;
 
     /// <summary>
     /// Log probabilities for refusal tokens.
@@ -28,5 +28,5 @@ public class AgentCompletionsResponseLogprobs
     [Description("Log probabilities for refusal tokens.")]
     [JsonPropertyName("refusal")]
     [JsonSchemaNullable]
-    public List<AgentCompletionsResponseLogprob>? Refusal { get; set; } = null;
+    public List<Logprob>? Refusal { get; set; } = null;
 }

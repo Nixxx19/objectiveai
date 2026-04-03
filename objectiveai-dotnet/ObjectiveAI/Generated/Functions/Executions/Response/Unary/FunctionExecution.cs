@@ -16,7 +16,7 @@ namespace ObjectiveAI.Functions.Executions.Response.Unary;
 /// </summary>
 [Description("A complete function execution response (non-streaming).")]
 [JsonSchemaTitle("functions.executions.response.unary.FunctionExecution")]
-public class FunctionsExecutionsResponseUnaryFunctionExecution
+public partial class FunctionExecution
 {
     /// <summary>
     /// Unix timestamp when the execution was created.
@@ -32,7 +32,7 @@ public class FunctionsExecutionsResponseUnaryFunctionExecution
     [Description("Error details if the execution failed.")]
     [JsonPropertyName("error")]
     [JsonSchemaNullable]
-    public ErrorResponseError? Error { get; set; } = null;
+    public ResponseError? Error { get; set; } = null;
 
     /// <summary>
     /// The function used (if remote).
@@ -54,14 +54,14 @@ public class FunctionsExecutionsResponseUnaryFunctionExecution
     /// </summary>
     [Description("Object type identifier.")]
     [JsonPropertyName("object")]
-    public FunctionsExecutionsResponseUnaryObject Object { get; set; } = default!;
+    public Object Object { get; set; } = default!;
 
     /// <summary>
     /// The final output (scalar or vector score).
     /// </summary>
     [Description("The final output (scalar or vector score).")]
     [JsonPropertyName("output")]
-    public FunctionsExecutionsResponseOutput Output { get; set; } = default!;
+    public Output Output { get; set; } = default!;
 
     /// <summary>
     /// The profile used (if remote).
@@ -77,7 +77,7 @@ public class FunctionsExecutionsResponseUnaryFunctionExecution
     [Description("Reasoning summary if reasoning was enabled.")]
     [JsonPropertyName("reasoning")]
     [JsonSchemaNullable]
-    public FunctionsExecutionsResponseUnaryReasoningSummary? Reasoning { get; set; } = null;
+    public ReasoningSummary? Reasoning { get; set; } = null;
 
     /// <summary>
     /// Token for retrying this execution with cached votes.
@@ -92,7 +92,7 @@ public class FunctionsExecutionsResponseUnaryFunctionExecution
     /// </summary>
     [Description("Results from each task in the function.")]
     [JsonPropertyName("tasks")]
-    public List<FunctionsExecutionsResponseUnaryTask> Tasks { get; set; } = default!;
+    public List<Task> Tasks { get; set; } = default!;
 
     /// <summary>
     /// Whether any tasks encountered errors.
@@ -106,5 +106,5 @@ public class FunctionsExecutionsResponseUnaryFunctionExecution
     /// </summary>
     [Description("Aggregated token and cost usage.")]
     [JsonPropertyName("usage")]
-    public AgentCompletionsResponseUsage Usage { get; set; } = default!;
+    public Usage Usage { get; set; } = default!;
 }

@@ -9,17 +9,17 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.AlphaScalar;
 
 [JsonSchemaTitle("functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression")]
-public class FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpression
+public partial class PlaceholderScalarFunctionTaskExpression
 {
     [JsonPropertyName("depth")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
     public ulong Depth { get; set; } = default!;
 
     [JsonPropertyName("input")]
-    public FunctionsExpressionExpression Input { get; set; } = default!;
+    public ObjectiveAI.Functions.Expression.Expression Input { get; set; } = default!;
 
     [JsonPropertyName("input_schema")]
-    public FunctionsExpressionObjectInputSchema InputSchema { get; set; } = default!;
+    public ObjectInputSchema InputSchema { get; set; } = default!;
 
     [JsonPropertyName("max_branch_width")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
@@ -43,7 +43,7 @@ public class FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpression
     [JsonPropertyName("skip")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public FunctionsExpressionExpression? Skip { get; set; } = null;
+    public ObjectiveAI.Functions.Expression.Expression? Skip { get; set; } = null;
 
     [JsonPropertyName("spec")]
     public string Spec { get; set; } = default!;

@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Inventions;
 
 [JsonSchemaTitle("functions.inventions.IndexObject")]
-public class FunctionsInventionsIndexObject
+public partial class IndexObject
 {
     [JsonPropertyName("index")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]

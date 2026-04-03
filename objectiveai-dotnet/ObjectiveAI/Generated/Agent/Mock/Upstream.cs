@@ -12,8 +12,8 @@ namespace ObjectiveAI.Agent.Mock;
 /// </summary>
 [Description("Mock upstream marker.")]
 [JsonSchemaTitle("agent.mock.Upstream")]
-[JsonConverter(typeof(JsonStringEnumConverter<AgentMockUpstream>))]
-public enum AgentMockUpstream
+[JsonConverter(typeof(JsonStringEnumConverter<Upstream>))]
+public enum Upstream
 {
     [JsonStringEnumMemberName("mock")]
     Mock

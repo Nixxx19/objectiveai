@@ -19,8 +19,8 @@ The level of effort the model should put into reasoning.
 Only supported by some models.
 """)]
 [JsonSchemaTitle("agent.openrouter.ReasoningEffort")]
-[JsonConverter(typeof(AgentOpenrouterReasoningEffortConverter))]
-public class AgentOpenrouterReasoningEffort
+[JsonConverter(typeof(ReasoningEffortConverter))]
+public partial class ReasoningEffort
 {
     /// <summary>
     /// No reasoning.
@@ -65,27 +65,27 @@ public class AgentOpenrouterReasoningEffort
     public string? Xhigh { get; set; }
 }
 
-public class AgentOpenrouterReasoningEffortConverter : JsonConverter<AgentOpenrouterReasoningEffort>
+public class ReasoningEffortConverter : JsonConverter<ReasoningEffort>
 {
-    public override AgentOpenrouterReasoningEffort? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override ReasoningEffort? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         if (reader.TokenType != JsonTokenType.String)
-            throw new JsonException("Expected string for AgentOpenrouterReasoningEffort");
+            throw new JsonException("Expected string for ReasoningEffort");
         var str = reader.GetString()!;
         return str switch
         {
-            "none" => new AgentOpenrouterReasoningEffort { None = "none" },
-            "minimal" => new AgentOpenrouterReasoningEffort { Minimal = "minimal" },
-            "low" => new AgentOpenrouterReasoningEffort { Low = "low" },
-            "medium" => new AgentOpenrouterReasoningEffort { Medium = "medium" },
-            "high" => new AgentOpenrouterReasoningEffort { High = "high" },
-            "xhigh" => new AgentOpenrouterReasoningEffort { Xhigh = "xhigh" },
-            _ => throw new JsonException($"Unknown variant of AgentOpenrouterReasoningEffort: {str}")
+            "none" => new ReasoningEffort { None = "none" },
+            "minimal" => new ReasoningEffort { Minimal = "minimal" },
+            "low" => new ReasoningEffort { Low = "low" },
+            "medium" => new ReasoningEffort { Medium = "medium" },
+            "high" => new ReasoningEffort { High = "high" },
+            "xhigh" => new ReasoningEffort { Xhigh = "xhigh" },
+            _ => throw new JsonException($"Unknown variant of ReasoningEffort: {str}")
         };
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentOpenrouterReasoningEffort value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, ReasoningEffort value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.None != null)

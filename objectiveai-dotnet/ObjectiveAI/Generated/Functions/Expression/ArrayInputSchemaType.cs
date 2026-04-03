@@ -8,8 +8,8 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Expression;
 
 [JsonSchemaTitle("functions.expression.ArrayInputSchemaType")]
-[JsonConverter(typeof(JsonStringEnumConverter<FunctionsExpressionArrayInputSchemaType>))]
-public enum FunctionsExpressionArrayInputSchemaType
+[JsonConverter(typeof(JsonStringEnumConverter<ArrayInputSchemaType>))]
+public enum ArrayInputSchemaType
 {
     [JsonStringEnumMemberName("array")]
     Array

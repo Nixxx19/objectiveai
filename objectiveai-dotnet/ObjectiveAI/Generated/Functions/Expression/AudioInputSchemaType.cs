@@ -8,8 +8,8 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Expression;
 
 [JsonSchemaTitle("functions.expression.AudioInputSchemaType")]
-[JsonConverter(typeof(JsonStringEnumConverter<FunctionsExpressionAudioInputSchemaType>))]
-public enum FunctionsExpressionAudioInputSchemaType
+[JsonConverter(typeof(JsonStringEnumConverter<AudioInputSchemaType>))]
+public enum AudioInputSchemaType
 {
     [JsonStringEnumMemberName("audio")]
     Audio

@@ -5,7 +5,6 @@ using ObjectiveAI.Agent.Completions.Response;
 using ObjectiveAI.Attributes;
 using ObjectiveAI.Error;
 using ObjectiveAI.Vector.Completions.Response;
-using ObjectiveAI.Vector.Completions.Response.Streaming;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 
@@ -24,14 +23,14 @@ Each chunk contains incremental updates to the completion. Use the
 [`push`](Self::push) method to accumulate chunks into a complete response.
 """)]
 [JsonSchemaTitle("functions.executions.response.streaming.VectorCompletionTaskChunk")]
-public class FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk
+public partial class VectorCompletionTaskChunk
 {
     /// <summary>
     /// Incremental agent completion chunks from each agent.
     /// </summary>
     [Description("Incremental agent completion chunks from each agent.")]
     [JsonPropertyName("completions")]
-    public List<VectorCompletionsResponseStreamingAgentCompletionChunk> Completions { get; set; } = default!;
+    public List<ObjectiveAI.Vector.Completions.Response.Streaming.AgentCompletionChunk> Completions { get; set; } = default!;
 
     /// <summary>
     /// Unix timestamp when the completion was created.
@@ -44,7 +43,7 @@ public class FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk
     [JsonPropertyName("error")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public ErrorResponseError? Error { get; set; } = null;
+    public ResponseError? Error { get; set; } = null;
 
     /// <summary>
     /// Unique identifier for this vector completion.
@@ -64,7 +63,7 @@ public class FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk
 Object type identifier (`"vector.completion.chunk"`).
 """")]
     [JsonPropertyName("object")]
-    public VectorCompletionsResponseStreamingObject Object { get; set; } = default!;
+    public ObjectiveAI.Vector.Completions.Response.Streaming.Object Object { get; set; } = default!;
 
     /// <summary>
     /// Current weighted scores. Updated as new votes arrive.
@@ -96,14 +95,14 @@ Object type identifier (`"vector.completion.chunk"`).
     [JsonPropertyName("usage")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsResponseUsage? Usage { get; set; } = null;
+    public Usage? Usage { get; set; } = null;
 
     /// <summary>
     /// Votes received so far. New votes are appended in subsequent chunks.
     /// </summary>
     [Description("Votes received so far. New votes are appended in subsequent chunks.")]
     [JsonPropertyName("votes")]
-    public List<VectorCompletionsResponseVote> Votes { get; set; } = default!;
+    public List<Vote> Votes { get; set; } = default!;
 
     /// <summary>
     /// Current weight distribution across responses. Updated as new votes arrive.

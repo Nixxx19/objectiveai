@@ -16,8 +16,8 @@ namespace ObjectiveAI.Functions;
 [Description("A compiled scalar function task ready for execution.")]
 [JsonSchemaTitle("functions.ScalarFunctionTask")]
 [JsonSchemaRef("RemotePath")]
-[JsonConverter(typeof(FunctionsScalarFunctionTaskConverter))]
-public class FunctionsScalarFunctionTask
+[JsonConverter(typeof(ScalarFunctionTaskConverter))]
+public partial class ScalarFunctionTask
 {
     [JsonIgnore]
     public RemotePath Base { get; set; } = default!;
@@ -27,7 +27,7 @@ public class FunctionsScalarFunctionTask
     /// </summary>
     [Description("The resolved input to pass to the function.")]
     [JsonPropertyName("input")]
-    public FunctionsExpressionInputValue Input { get; set; } = default!;
+    public InputValue Input { get; set; } = default!;
 
     /// <summary>
     /// Expression to transform the task result into a valid function output.
@@ -44,26 +44,26 @@ Must return a `TaskOutputOwned` valid for the parent function's type (scalar or 
 See [`ScalarFunctionTaskExpression::output`] for full documentation.
 """)]
     [JsonPropertyName("output")]
-    public FunctionsExpressionExpression Output { get; set; } = default!;
+    public ObjectiveAI.Functions.Expression.Expression Output { get; set; } = default!;
 }
 
-public class FunctionsScalarFunctionTaskConverter : JsonConverter<FunctionsScalarFunctionTask>
+public class ScalarFunctionTaskConverter : JsonConverter<ScalarFunctionTask>
 {
-    public override FunctionsScalarFunctionTask? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override ScalarFunctionTask? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
         var baseObj = JsonSerializer.Deserialize<RemotePath>(raw, options)!;
-        var result = new FunctionsScalarFunctionTask { Base = baseObj };
+        var result = new ScalarFunctionTask { Base = baseObj };
         if (doc.RootElement.TryGetProperty("input", out var _InputEl))
-            result.Input = JsonSerializer.Deserialize<FunctionsExpressionInputValue>(_InputEl.GetRawText(), options)!;
+            result.Input = JsonSerializer.Deserialize<InputValue>(_InputEl.GetRawText(), options)!;
         if (doc.RootElement.TryGetProperty("output", out var _OutputEl))
-            result.Output = JsonSerializer.Deserialize<FunctionsExpressionExpression>(_OutputEl.GetRawText(), options)!;
+            result.Output = JsonSerializer.Deserialize<ObjectiveAI.Functions.Expression.Expression>(_OutputEl.GetRawText(), options)!;
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsScalarFunctionTask value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, ScalarFunctionTask value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

@@ -64,7 +64,7 @@ println!("{}", key); // Outputs: apk<uuid>
 ```
 """")]
 [JsonSchemaTitle("PrefixedUuid")]
-public class PrefixedUuid
+public partial class PrefixedUuid
 {
     [JsonPropertyName("uuid")]
     [JsonSchemaFormat("uuid")]

@@ -21,47 +21,47 @@ Always produces `Vector(vec![1/N; output_length])` before
 the output expression is applied.
 """)]
 [JsonSchemaTitle("functions.PlaceholderVectorFunctionTask")]
-public class FunctionsPlaceholderVectorFunctionTask
+public partial class PlaceholderVectorFunctionTask
 {
     /// <summary>
     /// The resolved input.
     /// </summary>
     [Description("The resolved input.")]
     [JsonPropertyName("input")]
-    public FunctionsExpressionInputValue Input { get; set; } = default!;
+    public InputValue Input { get; set; } = default!;
 
     /// <summary>
     /// Expression merging sub-inputs back into one input.
     /// </summary>
     [Description("Expression merging sub-inputs back into one input.")]
     [JsonPropertyName("input_merge")]
-    public FunctionsExpressionExpression InputMerge { get; set; } = default!;
+    public ObjectiveAI.Functions.Expression.Expression InputMerge { get; set; } = default!;
 
     /// <summary>
     /// JSON Schema defining the expected input structure.
     /// </summary>
     [Description("JSON Schema defining the expected input structure.")]
     [JsonPropertyName("input_schema")]
-    public FunctionsExpressionInputSchema InputSchema { get; set; } = default!;
+    public ObjectiveAI.Functions.Expression.InputSchema InputSchema { get; set; } = default!;
 
     /// <summary>
     /// Expression transforming input into sub-inputs for swiss system.
     /// </summary>
     [Description("Expression transforming input into sub-inputs for swiss system.")]
     [JsonPropertyName("input_split")]
-    public FunctionsExpressionExpression InputSplit { get; set; } = default!;
+    public ObjectiveAI.Functions.Expression.Expression InputSplit { get; set; } = default!;
 
     /// <summary>
     /// Expression to transform the equalized vector output.
     /// </summary>
     [Description("Expression to transform the equalized vector output.")]
     [JsonPropertyName("output")]
-    public FunctionsExpressionExpression Output { get; set; } = default!;
+    public ObjectiveAI.Functions.Expression.Expression Output { get; set; } = default!;
 
     /// <summary>
     /// Expression computing the expected output vector length.
     /// </summary>
     [Description("Expression computing the expected output vector length.")]
     [JsonPropertyName("output_length")]
-    public FunctionsExpressionExpression OutputLength { get; set; } = default!;
+    public ObjectiveAI.Functions.Expression.Expression OutputLength { get; set; } = default!;
 }

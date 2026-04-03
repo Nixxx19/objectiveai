@@ -13,8 +13,8 @@ namespace ObjectiveAI.Agent.Completions.Request;
 /// </summary>
 [Description("How to sort/prioritize providers.")]
 [JsonSchemaTitle("agent.completions.request.ProviderSort")]
-[JsonConverter(typeof(AgentCompletionsRequestProviderSortConverter))]
-public class AgentCompletionsRequestProviderSort
+[JsonConverter(typeof(ProviderSortConverter))]
+public partial class ProviderSort
 {
     /// <summary>
     /// Prioritize by price (cheapest first).
@@ -38,24 +38,24 @@ public class AgentCompletionsRequestProviderSort
     public string? Latency { get; set; }
 }
 
-public class AgentCompletionsRequestProviderSortConverter : JsonConverter<AgentCompletionsRequestProviderSort>
+public class ProviderSortConverter : JsonConverter<ProviderSort>
 {
-    public override AgentCompletionsRequestProviderSort? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override ProviderSort? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         if (reader.TokenType != JsonTokenType.String)
-            throw new JsonException("Expected string for AgentCompletionsRequestProviderSort");
+            throw new JsonException("Expected string for ProviderSort");
         var str = reader.GetString()!;
         return str switch
         {
-            "price" => new AgentCompletionsRequestProviderSort { Price = "price" },
-            "throughput" => new AgentCompletionsRequestProviderSort { Throughput = "throughput" },
-            "latency" => new AgentCompletionsRequestProviderSort { Latency = "latency" },
-            _ => throw new JsonException($"Unknown variant of AgentCompletionsRequestProviderSort: {str}")
+            "price" => new ProviderSort { Price = "price" },
+            "throughput" => new ProviderSort { Throughput = "throughput" },
+            "latency" => new ProviderSort { Latency = "latency" },
+            _ => throw new JsonException($"Unknown variant of ProviderSort: {str}")
         };
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentCompletionsRequestProviderSort value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, ProviderSort value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Price != null)

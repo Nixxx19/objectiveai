@@ -21,7 +21,7 @@ Once disabled, the API key can no longer be used for authentication.
 This action is reversible only by creating a new key.
 """)]
 [JsonSchemaTitle("auth.DisableApiKeyRequest")]
-public class AuthDisableApiKeyRequest
+public partial class DisableApiKeyRequest
 {
     /// <summary>
     /// The API key to disable.

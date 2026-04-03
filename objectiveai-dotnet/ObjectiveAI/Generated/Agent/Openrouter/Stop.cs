@@ -21,8 +21,8 @@ When the model generates any of these sequences, it immediately
 stops producing further tokens.
 """)]
 [JsonSchemaTitle("agent.openrouter.Stop")]
-[JsonConverter(typeof(AgentOpenrouterStopConverter))]
-public class AgentOpenrouterStop
+[JsonConverter(typeof(StopConverter))]
+public partial class Stop
 {
     /// <summary>
     /// A single stop sequence.
@@ -39,9 +39,9 @@ public class AgentOpenrouterStop
     public List<string>? Strings { get; set; }
 }
 
-public class AgentOpenrouterStopConverter : JsonConverter<AgentOpenrouterStop>
+public class StopConverter : JsonConverter<Stop>
 {
-    public override AgentOpenrouterStop? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Stop? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -51,19 +51,19 @@ public class AgentOpenrouterStopConverter : JsonConverter<AgentOpenrouterStop>
         if (el.ValueKind == JsonValueKind.String)
         {
             var str = el.GetString()!;
-            return new AgentOpenrouterStop { String = str };
+            return new Stop { String = str };
         }
 
         if (el.ValueKind == JsonValueKind.Array)
         {
             var val = JsonSerializer.Deserialize<List<string>>(raw, options);
-            return new AgentOpenrouterStop { Strings = val };
+            return new Stop { Strings = val };
         }
 
-        throw new JsonException($"Data did not match any variant of AgentOpenrouterStop");
+        throw new JsonException($"Data did not match any variant of Stop");
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentOpenrouterStop value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Stop value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.String != null)

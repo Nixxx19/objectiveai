@@ -13,7 +13,7 @@ namespace ObjectiveAI.Functions.Expression;
 /// </summary>
 [Description("A JMESPath expression.")]
 [JsonSchemaAdditionalProperties(false)]
-public class FunctionsExpressionExpressionJMESPath
+public partial class ExpressionJMESPath
 {
     [JsonPropertyName("$jmespath")]
     public string Jmespath { get; set; } = default!;
@@ -24,7 +24,7 @@ public class FunctionsExpressionExpressionJMESPath
 /// </summary>
 [Description("A Starlark expression.")]
 [JsonSchemaAdditionalProperties(false)]
-public class FunctionsExpressionExpressionStarlark
+public partial class ExpressionStarlark
 {
     [JsonPropertyName("$starlark")]
     public string Starlark { get; set; } = default!;
@@ -35,10 +35,10 @@ public class FunctionsExpressionExpressionStarlark
 /// </summary>
 [Description("A predefined special expression variant.")]
 [JsonSchemaAdditionalProperties(false)]
-public class FunctionsExpressionExpressionSpecial
+public partial class ExpressionSpecial
 {
     [JsonPropertyName("$special")]
-    public FunctionsExpressionSpecial Special { get; set; } = default!;
+    public Special Special { get; set; } = default!;
 }
 
 
@@ -77,8 +77,8 @@ Starlark:
 ```
 """")]
 [JsonSchemaTitle("functions.expression.Expression")]
-[JsonConverter(typeof(FunctionsExpressionExpressionConverter))]
-public class FunctionsExpressionExpression
+[JsonConverter(typeof(ExpressionConverter))]
+public partial class Expression
 {
     /// <summary>
     /// A JMESPath expression.
@@ -86,7 +86,7 @@ public class FunctionsExpressionExpression
     [Description("A JMESPath expression.")]
     [JsonSchemaVariant("JMESPath", Type = "object")]
     [JsonSchemaAdditionalProperties(false)]
-    public FunctionsExpressionExpressionJMESPath? JMESPath { get; set; }
+    public ExpressionJMESPath? JMESPath { get; set; }
 
     /// <summary>
     /// A Starlark expression.
@@ -94,7 +94,7 @@ public class FunctionsExpressionExpression
     [Description("A Starlark expression.")]
     [JsonSchemaVariant("Starlark", Type = "object")]
     [JsonSchemaAdditionalProperties(false)]
-    public FunctionsExpressionExpressionStarlark? Starlark { get; set; }
+    public ExpressionStarlark? Starlark { get; set; }
 
     /// <summary>
     /// A predefined special expression variant.
@@ -102,12 +102,12 @@ public class FunctionsExpressionExpression
     [Description("A predefined special expression variant.")]
     [JsonSchemaVariant("Special", Type = "object")]
     [JsonSchemaAdditionalProperties(false)]
-    public FunctionsExpressionExpressionSpecial? Special { get; set; }
+    public ExpressionSpecial? Special { get; set; }
 }
 
-public class FunctionsExpressionExpressionConverter : JsonConverter<FunctionsExpressionExpression>
+public class ExpressionConverter : JsonConverter<Expression>
 {
-    public override FunctionsExpressionExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Expression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -116,18 +116,18 @@ public class FunctionsExpressionExpressionConverter : JsonConverter<FunctionsExp
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<FunctionsExpressionExpressionJMESPath>(raw, options); if (val0 != null) return new FunctionsExpressionExpression { JMESPath = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<ExpressionJMESPath>(raw, options); if (val0 != null) return new Expression { JMESPath = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<FunctionsExpressionExpressionStarlark>(raw, options); if (val1 != null) return new FunctionsExpressionExpression { Starlark = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<ExpressionStarlark>(raw, options); if (val1 != null) return new Expression { Starlark = val1 }; }
             catch (JsonException) { }
-            try { var val2 = JsonSerializer.Deserialize<FunctionsExpressionExpressionSpecial>(raw, options); if (val2 != null) return new FunctionsExpressionExpression { Special = val2 }; }
+            try { var val2 = JsonSerializer.Deserialize<ExpressionSpecial>(raw, options); if (val2 != null) return new Expression { Special = val2 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsExpressionExpression");
+        throw new JsonException($"Data did not match any variant of Expression");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsExpressionExpression value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Expression value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.JMESPath != null)

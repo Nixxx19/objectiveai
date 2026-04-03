@@ -8,8 +8,8 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Inventions.Recursive.Response.Streaming;
 
 [JsonSchemaTitle("functions.inventions.recursive.response.streaming.Object")]
-[JsonConverter(typeof(JsonStringEnumConverter<FunctionsInventionsRecursiveResponseStreamingObject>))]
-public enum FunctionsInventionsRecursiveResponseStreamingObject
+[JsonConverter(typeof(JsonStringEnumConverter<Object>))]
+public enum Object
 {
     [JsonStringEnumMemberName("alpha.scalar.function.invention.recursive.chunk")]
     AlphaScalarFunctionInventionRecursiveChunk,

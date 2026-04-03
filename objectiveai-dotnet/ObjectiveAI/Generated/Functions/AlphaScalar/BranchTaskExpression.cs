@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.AlphaScalar;
 
 [JsonSchemaVariantWrapper("functions.alpha_scalar.ScalarFunctionTaskExpression", Type = "object")]
-public class FunctionsAlphaScalarBranchTaskExpressionScalarFunction
+public partial class BranchTaskExpressionScalarFunction
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("alpha.scalar.function")]
@@ -17,7 +17,7 @@ public class FunctionsAlphaScalarBranchTaskExpressionScalarFunction
 }
 
 [JsonSchemaVariantWrapper("functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression", Type = "object")]
-public class FunctionsAlphaScalarBranchTaskExpressionPlaceholderScalarFunction
+public partial class BranchTaskExpressionPlaceholderScalarFunction
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("placeholder.alpha.scalar.function")]
@@ -26,19 +26,19 @@ public class FunctionsAlphaScalarBranchTaskExpressionPlaceholderScalarFunction
 
 
 [JsonSchemaTitle("functions.alpha_scalar.BranchTaskExpression")]
-[JsonConverter(typeof(FunctionsAlphaScalarBranchTaskExpressionConverter))]
-public class FunctionsAlphaScalarBranchTaskExpression
+[JsonConverter(typeof(BranchTaskExpressionConverter))]
+public partial class BranchTaskExpression
 {
     [JsonSchemaVariant("ScalarFunction", Ref = "functions.alpha_scalar.ScalarFunctionTaskExpression", Type = "object")]
-    public FunctionsAlphaScalarBranchTaskExpressionScalarFunction? ScalarFunction { get; set; }
+    public BranchTaskExpressionScalarFunction? ScalarFunction { get; set; }
 
     [JsonSchemaVariant("PlaceholderScalarFunction", Ref = "functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression", Type = "object")]
-    public FunctionsAlphaScalarBranchTaskExpressionPlaceholderScalarFunction? PlaceholderScalarFunction { get; set; }
+    public BranchTaskExpressionPlaceholderScalarFunction? PlaceholderScalarFunction { get; set; }
 }
 
-public class FunctionsAlphaScalarBranchTaskExpressionConverter : JsonConverter<FunctionsAlphaScalarBranchTaskExpression>
+public class BranchTaskExpressionConverter : JsonConverter<BranchTaskExpression>
 {
-    public override FunctionsAlphaScalarBranchTaskExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override BranchTaskExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -53,7 +53,7 @@ public class FunctionsAlphaScalarBranchTaskExpressionConverter : JsonConverter<F
                     match0 = false;
                 if (match0)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsAlphaScalarBranchTaskExpressionScalarFunction>(raw, options); if (val != null) return new FunctionsAlphaScalarBranchTaskExpression { ScalarFunction = val }; }
+                    try { var val = JsonSerializer.Deserialize<BranchTaskExpressionScalarFunction>(raw, options); if (val != null) return new BranchTaskExpression { ScalarFunction = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -63,16 +63,16 @@ public class FunctionsAlphaScalarBranchTaskExpressionConverter : JsonConverter<F
                     match1 = false;
                 if (match1)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsAlphaScalarBranchTaskExpressionPlaceholderScalarFunction>(raw, options); if (val != null) return new FunctionsAlphaScalarBranchTaskExpression { PlaceholderScalarFunction = val }; }
+                    try { var val = JsonSerializer.Deserialize<BranchTaskExpressionPlaceholderScalarFunction>(raw, options); if (val != null) return new BranchTaskExpression { PlaceholderScalarFunction = val }; }
                     catch (JsonException) { }
                 }
             }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsAlphaScalarBranchTaskExpression");
+        throw new JsonException($"Data did not match any variant of BranchTaskExpression");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsAlphaScalarBranchTaskExpression value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, BranchTaskExpression value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.ScalarFunction != null)

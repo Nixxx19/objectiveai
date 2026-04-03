@@ -9,19 +9,19 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Executions.Response.Unary;
 
 [JsonSchemaTitle("functions.executions.response.unary.Task")]
-[JsonConverter(typeof(FunctionsExecutionsResponseUnaryTaskConverter))]
-public class FunctionsExecutionsResponseUnaryTask
+[JsonConverter(typeof(TaskConverter))]
+public partial class Task
 {
     [JsonSchemaVariant("FunctionExecution", Ref = "functions.executions.response.unary.FunctionExecutionTask")]
-    public FunctionsExecutionsResponseUnaryFunctionExecutionTask? FunctionExecution { get; set; }
+    public FunctionExecutionTask? FunctionExecution { get; set; }
 
     [JsonSchemaVariant("VectorCompletion", Ref = "functions.executions.response.unary.VectorCompletionTask")]
-    public FunctionsExecutionsResponseUnaryVectorCompletionTask? VectorCompletion { get; set; }
+    public VectorCompletionTask? VectorCompletion { get; set; }
 }
 
-public class FunctionsExecutionsResponseUnaryTaskConverter : JsonConverter<FunctionsExecutionsResponseUnaryTask>
+public class TaskConverter : JsonConverter<Task>
 {
-    public override FunctionsExecutionsResponseUnaryTask? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Task? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -30,16 +30,16 @@ public class FunctionsExecutionsResponseUnaryTaskConverter : JsonConverter<Funct
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<FunctionsExecutionsResponseUnaryFunctionExecutionTask>(raw, options); if (val0 != null) return new FunctionsExecutionsResponseUnaryTask { FunctionExecution = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<FunctionExecutionTask>(raw, options); if (val0 != null) return new Task { FunctionExecution = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<FunctionsExecutionsResponseUnaryVectorCompletionTask>(raw, options); if (val1 != null) return new FunctionsExecutionsResponseUnaryTask { VectorCompletion = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<VectorCompletionTask>(raw, options); if (val1 != null) return new Task { VectorCompletion = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsExecutionsResponseUnaryTask");
+        throw new JsonException($"Data did not match any variant of Task");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsExecutionsResponseUnaryTask value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Task value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.FunctionExecution != null)

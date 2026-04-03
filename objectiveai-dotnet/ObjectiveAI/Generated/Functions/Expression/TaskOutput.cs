@@ -13,8 +13,8 @@ namespace ObjectiveAI.Functions.Expression;
 /// </summary>
 [Description("Owned task output variants.")]
 [JsonSchemaTitle("functions.expression.TaskOutput")]
-[JsonConverter(typeof(FunctionsExpressionTaskOutputConverter))]
-public class FunctionsExpressionTaskOutput
+[JsonConverter(typeof(TaskOutputConverter))]
+public partial class TaskOutput
 {
     /// <summary>
     /// A single scalar score.
@@ -48,9 +48,9 @@ public class FunctionsExpressionTaskOutput
     public JsonElement? Err { get; set; }
 }
 
-public class FunctionsExpressionTaskOutputConverter : JsonConverter<FunctionsExpressionTaskOutput>
+public class TaskOutputConverter : JsonConverter<TaskOutput>
 {
-    public override FunctionsExpressionTaskOutput? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override TaskOutput? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -59,21 +59,21 @@ public class FunctionsExpressionTaskOutputConverter : JsonConverter<FunctionsExp
 
         if (el.ValueKind == JsonValueKind.Number)
         {
-            return new FunctionsExpressionTaskOutput { Scalar = el.GetDouble() };
+            return new TaskOutput { Scalar = el.GetDouble() };
         }
 
         if (el.ValueKind == JsonValueKind.Array)
         {
-            try { var val = JsonSerializer.Deserialize<List<double>>(raw, options); if (val != null) return new FunctionsExpressionTaskOutput { Vector = val }; }
+            try { var val = JsonSerializer.Deserialize<List<double>>(raw, options); if (val != null) return new TaskOutput { Vector = val }; }
             catch (JsonException) { }
-            try { var val = JsonSerializer.Deserialize<List<List<double>>>(raw, options); if (val != null) return new FunctionsExpressionTaskOutput { Vectors = val }; }
+            try { var val = JsonSerializer.Deserialize<List<List<double>>>(raw, options); if (val != null) return new TaskOutput { Vectors = val }; }
             catch (JsonException) { }
         }
 
-        return new FunctionsExpressionTaskOutput { Err = el.Clone() };
+        return new TaskOutput { Err = el.Clone() };
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsExpressionTaskOutput value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, TaskOutput value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Scalar != null)

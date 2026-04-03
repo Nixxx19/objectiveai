@@ -13,7 +13,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Profiles.Computations.Response.Streaming;
 
 [JsonSchemaTitle("functions.profiles.computations.response.streaming.FunctionExecutionChunk")]
-public class FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk
+public partial class FunctionExecutionChunk
 {
     [JsonPropertyName("created")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
@@ -26,7 +26,7 @@ public class FunctionsProfilesComputationsResponseStreamingFunctionExecutionChun
     [JsonPropertyName("error")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public ErrorResponseError? Error { get; set; } = null;
+    public ResponseError? Error { get; set; } = null;
 
     [JsonPropertyName("function")]
     [JsonSchemaNullable]
@@ -44,12 +44,12 @@ public class FunctionsProfilesComputationsResponseStreamingFunctionExecutionChun
     public ulong N { get; set; } = default!;
 
     [JsonPropertyName("object")]
-    public FunctionsExecutionsResponseStreamingObject Object { get; set; } = default!;
+    public ObjectiveAI.Functions.Executions.Response.Streaming.Object Object { get; set; } = default!;
 
     [JsonPropertyName("output")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public FunctionsExecutionsResponseOutput? Output { get; set; } = null;
+    public Output? Output { get; set; } = null;
 
     [JsonPropertyName("profile")]
     [JsonSchemaNullable]
@@ -58,7 +58,7 @@ public class FunctionsProfilesComputationsResponseStreamingFunctionExecutionChun
     [JsonPropertyName("reasoning")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public FunctionsExecutionsResponseStreamingReasoningSummaryChunk? Reasoning { get; set; } = null;
+    public ReasoningSummaryChunk? Reasoning { get; set; } = null;
 
     [JsonPropertyName("retry")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
@@ -70,7 +70,7 @@ public class FunctionsProfilesComputationsResponseStreamingFunctionExecutionChun
     public string? RetryToken { get; set; } = null;
 
     [JsonPropertyName("tasks")]
-    public List<FunctionsExecutionsResponseStreamingTaskChunk> Tasks { get; set; } = default!;
+    public List<TaskChunk> Tasks { get; set; } = default!;
 
     [JsonPropertyName("tasks_errors")]
     [JsonSchemaOmitEmpty]
@@ -80,5 +80,5 @@ public class FunctionsProfilesComputationsResponseStreamingFunctionExecutionChun
     [JsonPropertyName("usage")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsResponseUsage? Usage { get; set; } = null;
+    public Usage? Usage { get; set; } = null;
 }

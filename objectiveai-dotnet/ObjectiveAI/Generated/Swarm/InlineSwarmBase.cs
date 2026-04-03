@@ -22,14 +22,14 @@ Contains a list of agent configurations that will be validated, deduplicated,
 and sorted when converting to an [`InlineSwarm`].
 """)]
 [JsonSchemaTitle("swarm.InlineSwarmBase")]
-public class SwarmInlineSwarmBase
+public partial class InlineSwarmBase
 {
     /// <summary>
     /// The LLMs in this swarm, with optional counts and fallbacks.
     /// </summary>
     [Description("The LLMs in this swarm, with optional counts and fallbacks.")]
     [JsonPropertyName("agents")]
-    public List<AgentInlineAgentBaseWithFallbacksOrRemoteWithCount> Agents { get; set; } = default!;
+    public List<InlineAgentBaseWithFallbacksOrRemoteWithCount> Agents { get; set; } = default!;
 
     /// <summary>
     /// Optional weights for each agent. If `None`, uniform weights are used.

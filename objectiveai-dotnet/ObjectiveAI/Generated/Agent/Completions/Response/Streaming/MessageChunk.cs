@@ -10,19 +10,19 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Agent.Completions.Response.Streaming;
 
 [JsonSchemaTitle("agent.completions.response.streaming.MessageChunk")]
-[JsonConverter(typeof(AgentCompletionsResponseStreamingMessageChunkConverter))]
-public class AgentCompletionsResponseStreamingMessageChunk
+[JsonConverter(typeof(MessageChunkConverter))]
+public partial class MessageChunk
 {
     [JsonSchemaVariant("Assistant", Ref = "agent.completions.response.streaming.AssistantResponseChunk")]
-    public AgentCompletionsResponseStreamingAssistantResponseChunk? Assistant { get; set; }
+    public AssistantResponseChunk? Assistant { get; set; }
 
     [JsonSchemaVariant("Tool", Ref = "agent.completions.response.ToolResponse")]
-    public AgentCompletionsResponseToolResponse? Tool { get; set; }
+    public ToolResponse? Tool { get; set; }
 }
 
-public class AgentCompletionsResponseStreamingMessageChunkConverter : JsonConverter<AgentCompletionsResponseStreamingMessageChunk>
+public class MessageChunkConverter : JsonConverter<MessageChunk>
 {
-    public override AgentCompletionsResponseStreamingMessageChunk? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override MessageChunk? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -31,16 +31,16 @@ public class AgentCompletionsResponseStreamingMessageChunkConverter : JsonConver
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<AgentCompletionsResponseStreamingAssistantResponseChunk>(raw, options); if (val0 != null) return new AgentCompletionsResponseStreamingMessageChunk { Assistant = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<AssistantResponseChunk>(raw, options); if (val0 != null) return new MessageChunk { Assistant = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<AgentCompletionsResponseToolResponse>(raw, options); if (val1 != null) return new AgentCompletionsResponseStreamingMessageChunk { Tool = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<ToolResponse>(raw, options); if (val1 != null) return new MessageChunk { Tool = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of AgentCompletionsResponseStreamingMessageChunk");
+        throw new JsonException($"Data did not match any variant of MessageChunk");
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentCompletionsResponseStreamingMessageChunk value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, MessageChunk value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Assistant != null)

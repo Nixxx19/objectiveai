@@ -6,18 +6,16 @@ using ObjectiveAI.Agent.Completions.Response;
 using ObjectiveAI.Attributes;
 using ObjectiveAI.Error;
 using ObjectiveAI.Functions;
-using ObjectiveAI.Functions.Inventions.Response.Streaming;
-using ObjectiveAI.Functions.Inventions.State;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 
 namespace ObjectiveAI.Functions.Inventions.Recursive.Response.Streaming;
 
 [JsonSchemaTitle("functions.inventions.recursive.response.streaming.FunctionInventionChunk")]
-public class FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk
+public partial class FunctionInventionChunk
 {
     [JsonPropertyName("completions")]
-    public List<FunctionsInventionsResponseStreamingAgentCompletionChunk> Completions { get; set; } = default!;
+    public List<ObjectiveAI.Functions.Inventions.Response.Streaming.AgentCompletionChunk> Completions { get; set; } = default!;
 
     [JsonPropertyName("created")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
@@ -26,12 +24,12 @@ public class FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk
     [JsonPropertyName("error")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public ErrorResponseError? Error { get; set; } = null;
+    public ResponseError? Error { get; set; } = null;
 
     [JsonPropertyName("function")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public FunctionsFullRemoteFunction? Function { get; set; } = null;
+    public FullRemoteFunction? Function { get; set; } = null;
 
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -41,7 +39,7 @@ public class FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk
     public ulong Index { get; set; } = default!;
 
     [JsonPropertyName("object")]
-    public FunctionsInventionsResponseStreamingObject Object { get; set; } = default!;
+    public ObjectiveAI.Functions.Inventions.Response.Streaming.Object Object { get; set; } = default!;
 
     [JsonPropertyName("path")]
     [JsonSchemaOmitEmpty]
@@ -51,10 +49,10 @@ public class FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk
     [JsonPropertyName("state")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public FunctionsInventionsStateState? State { get; set; } = null;
+    public ObjectiveAI.Functions.Inventions.State.State? State { get; set; } = null;
 
     [JsonPropertyName("usage")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsResponseUsage? Usage { get; set; } = null;
+    public Usage? Usage { get; set; } = null;
 }

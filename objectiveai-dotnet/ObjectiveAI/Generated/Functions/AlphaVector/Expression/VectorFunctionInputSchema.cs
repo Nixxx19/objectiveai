@@ -9,13 +9,13 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.AlphaVector.Expression;
 
 [JsonSchemaTitle("functions.alpha_vector.expression.VectorFunctionInputSchema")]
-public class FunctionsAlphaVectorExpressionVectorFunctionInputSchema
+public partial class VectorFunctionInputSchema
 {
     [JsonPropertyName("context")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public FunctionsExpressionObjectInputSchema? Context { get; set; } = null;
+    public ObjectInputSchema? Context { get; set; } = null;
 
     [JsonPropertyName("items")]
-    public FunctionsExpressionInputSchema Items { get; set; } = default!;
+    public ObjectiveAI.Functions.Expression.InputSchema Items { get; set; } = default!;
 }

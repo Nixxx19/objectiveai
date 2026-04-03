@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// Text content.
 /// </summary>
 [Description("Text content.")]
-public class AgentCompletionsMessageRichContentPartText
+public partial class RichContentPartText
 {
     [JsonPropertyName("text")]
     public string Text { get; set; } = default!;
@@ -26,10 +26,10 @@ public class AgentCompletionsMessageRichContentPartText
 /// An image URL.
 /// </summary>
 [Description("An image URL.")]
-public class AgentCompletionsMessageRichContentPartImageUrl
+public partial class RichContentPartImageUrl
 {
     [JsonPropertyName("image_url")]
-    public AgentCompletionsMessageImageUrl ImageUrl { get; set; } = default!;
+    public ImageUrl ImageUrl { get; set; } = default!;
 
     [JsonPropertyName("type")]
     [JsonSchemaEnum("image_url")]
@@ -40,10 +40,10 @@ public class AgentCompletionsMessageRichContentPartImageUrl
 /// Audio input.
 /// </summary>
 [Description("Audio input.")]
-public class AgentCompletionsMessageRichContentPartInputAudio
+public partial class RichContentPartInputAudio
 {
     [JsonPropertyName("input_audio")]
-    public AgentCompletionsMessageInputAudio InputAudio { get; set; } = default!;
+    public InputAudio InputAudio { get; set; } = default!;
 
     [JsonPropertyName("type")]
     [JsonSchemaEnum("input_audio")]
@@ -54,38 +54,38 @@ public class AgentCompletionsMessageRichContentPartInputAudio
 /// Video input.
 /// </summary>
 [Description("Video input.")]
-public class AgentCompletionsMessageRichContentPartInputVideo
+public partial class RichContentPartInputVideo
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("input_video")]
     public string Type { get; set; } = default!;
 
     [JsonPropertyName("video_url")]
-    public AgentCompletionsMessageVideoUrl VideoUrl { get; set; } = default!;
+    public VideoUrl VideoUrl { get; set; } = default!;
 }
 
 /// <summary>
 /// A video URL.
 /// </summary>
 [Description("A video URL.")]
-public class AgentCompletionsMessageRichContentPartVideoUrl
+public partial class RichContentPartVideoUrl
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("video_url")]
     public string Type { get; set; } = default!;
 
     [JsonPropertyName("video_url")]
-    public AgentCompletionsMessageVideoUrl VideoUrl { get; set; } = default!;
+    public VideoUrl VideoUrl { get; set; } = default!;
 }
 
 /// <summary>
 /// A file.
 /// </summary>
 [Description("A file.")]
-public class AgentCompletionsMessageRichContentPartFile
+public partial class RichContentPartFile
 {
     [JsonPropertyName("file")]
-    public AgentCompletionsMessageFile File { get; set; } = default!;
+    public File File { get; set; } = default!;
 
     [JsonPropertyName("type")]
     [JsonSchemaEnum("file")]
@@ -98,55 +98,55 @@ public class AgentCompletionsMessageRichContentPartFile
 /// </summary>
 [Description("A part of rich content.")]
 [JsonSchemaTitle("agent.completions.message.RichContentPart")]
-[JsonConverter(typeof(AgentCompletionsMessageRichContentPartConverter))]
-public class AgentCompletionsMessageRichContentPart
+[JsonConverter(typeof(RichContentPartConverter))]
+public partial class RichContentPart
 {
     /// <summary>
     /// Text content.
     /// </summary>
     [Description("Text content.")]
     [JsonSchemaVariant("Text", Type = "object")]
-    public AgentCompletionsMessageRichContentPartText? Text { get; set; }
+    public RichContentPartText? Text { get; set; }
 
     /// <summary>
     /// An image URL.
     /// </summary>
     [Description("An image URL.")]
     [JsonSchemaVariant("ImageUrl", Type = "object")]
-    public AgentCompletionsMessageRichContentPartImageUrl? ImageUrl { get; set; }
+    public RichContentPartImageUrl? ImageUrl { get; set; }
 
     /// <summary>
     /// Audio input.
     /// </summary>
     [Description("Audio input.")]
     [JsonSchemaVariant("InputAudio", Type = "object")]
-    public AgentCompletionsMessageRichContentPartInputAudio? InputAudio { get; set; }
+    public RichContentPartInputAudio? InputAudio { get; set; }
 
     /// <summary>
     /// Video input.
     /// </summary>
     [Description("Video input.")]
     [JsonSchemaVariant("InputVideo", Type = "object")]
-    public AgentCompletionsMessageRichContentPartInputVideo? InputVideo { get; set; }
+    public RichContentPartInputVideo? InputVideo { get; set; }
 
     /// <summary>
     /// A video URL.
     /// </summary>
     [Description("A video URL.")]
     [JsonSchemaVariant("VideoUrl", Type = "object")]
-    public AgentCompletionsMessageRichContentPartVideoUrl? VideoUrl { get; set; }
+    public RichContentPartVideoUrl? VideoUrl { get; set; }
 
     /// <summary>
     /// A file.
     /// </summary>
     [Description("A file.")]
     [JsonSchemaVariant("File", Type = "object")]
-    public AgentCompletionsMessageRichContentPartFile? File { get; set; }
+    public RichContentPartFile? File { get; set; }
 }
 
-public class AgentCompletionsMessageRichContentPartConverter : JsonConverter<AgentCompletionsMessageRichContentPart>
+public class RichContentPartConverter : JsonConverter<RichContentPart>
 {
-    public override AgentCompletionsMessageRichContentPart? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override RichContentPart? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -161,7 +161,7 @@ public class AgentCompletionsMessageRichContentPartConverter : JsonConverter<Age
                     match0 = false;
                 if (match0)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageRichContentPartText>(raw, options); if (val != null) return new AgentCompletionsMessageRichContentPart { Text = val }; }
+                    try { var val = JsonSerializer.Deserialize<RichContentPartText>(raw, options); if (val != null) return new RichContentPart { Text = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -171,7 +171,7 @@ public class AgentCompletionsMessageRichContentPartConverter : JsonConverter<Age
                     match1 = false;
                 if (match1)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageRichContentPartImageUrl>(raw, options); if (val != null) return new AgentCompletionsMessageRichContentPart { ImageUrl = val }; }
+                    try { var val = JsonSerializer.Deserialize<RichContentPartImageUrl>(raw, options); if (val != null) return new RichContentPart { ImageUrl = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -181,7 +181,7 @@ public class AgentCompletionsMessageRichContentPartConverter : JsonConverter<Age
                     match2 = false;
                 if (match2)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageRichContentPartInputAudio>(raw, options); if (val != null) return new AgentCompletionsMessageRichContentPart { InputAudio = val }; }
+                    try { var val = JsonSerializer.Deserialize<RichContentPartInputAudio>(raw, options); if (val != null) return new RichContentPart { InputAudio = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -191,7 +191,7 @@ public class AgentCompletionsMessageRichContentPartConverter : JsonConverter<Age
                     match3 = false;
                 if (match3)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageRichContentPartInputVideo>(raw, options); if (val != null) return new AgentCompletionsMessageRichContentPart { InputVideo = val }; }
+                    try { var val = JsonSerializer.Deserialize<RichContentPartInputVideo>(raw, options); if (val != null) return new RichContentPart { InputVideo = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -201,7 +201,7 @@ public class AgentCompletionsMessageRichContentPartConverter : JsonConverter<Age
                     match4 = false;
                 if (match4)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageRichContentPartVideoUrl>(raw, options); if (val != null) return new AgentCompletionsMessageRichContentPart { VideoUrl = val }; }
+                    try { var val = JsonSerializer.Deserialize<RichContentPartVideoUrl>(raw, options); if (val != null) return new RichContentPart { VideoUrl = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -211,16 +211,16 @@ public class AgentCompletionsMessageRichContentPartConverter : JsonConverter<Age
                     match5 = false;
                 if (match5)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageRichContentPartFile>(raw, options); if (val != null) return new AgentCompletionsMessageRichContentPart { File = val }; }
+                    try { var val = JsonSerializer.Deserialize<RichContentPartFile>(raw, options); if (val != null) return new RichContentPart { File = val }; }
                     catch (JsonException) { }
                 }
             }
         }
 
-        throw new JsonException($"Data did not match any variant of AgentCompletionsMessageRichContentPart");
+        throw new JsonException($"Data did not match any variant of RichContentPart");
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentCompletionsMessageRichContentPart value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, RichContentPart value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Text != null)

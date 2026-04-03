@@ -18,8 +18,8 @@ The model is instructed via the prompt to output a specific key.
 This is the default and most widely supported mode.
 """)]
 [JsonSchemaTitle("agent.claude_agent_sdk.OutputMode")]
-[JsonConverter(typeof(JsonStringEnumConverter<AgentClaudeAgentSdkOutputMode>))]
-public enum AgentClaudeAgentSdkOutputMode
+[JsonConverter(typeof(JsonStringEnumConverter<OutputMode>))]
+public enum OutputMode
 {
     [JsonStringEnumMemberName("instruction")]
     Instruction

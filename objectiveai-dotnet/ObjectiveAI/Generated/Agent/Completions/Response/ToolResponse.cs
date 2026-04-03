@@ -13,21 +13,21 @@ namespace ObjectiveAI.Agent.Completions.Response;
 /// </summary>
 [Description("A tool message containing the result of a tool call.")]
 [JsonSchemaTitle("agent.completions.response.ToolResponse")]
-public class AgentCompletionsResponseToolResponse
+public partial class ToolResponse
 {
     /// <summary>
     /// The content of the tool response.
     /// </summary>
     [Description("The content of the tool response.")]
     [JsonPropertyName("content")]
-    public AgentCompletionsMessageRichContent Content { get; set; } = default!;
+    public RichContent Content { get; set; } = default!;
 
     [JsonPropertyName("index")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
     public ulong Index { get; set; } = default!;
 
     [JsonPropertyName("role")]
-    public AgentCompletionsResponseToolRole Role { get; set; } = default!;
+    public ToolRole Role { get; set; } = default!;
 
     /// <summary>
     /// The ID of the tool call this message responds to.

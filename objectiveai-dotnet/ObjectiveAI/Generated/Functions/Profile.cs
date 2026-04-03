@@ -21,27 +21,27 @@ Profiles contain the weights and nested configurations needed to execute
 a Function. They correspond to a Function's task structure.
 """)]
 [JsonSchemaTitle("functions.Profile")]
-[JsonConverter(typeof(FunctionsProfileConverter))]
-public class FunctionsProfile
+[JsonConverter(typeof(ProfileConverter))]
+public partial class Profile
 {
     /// <summary>
     /// A remote profile with metadata.
     /// </summary>
     [Description("A remote profile with metadata.")]
     [JsonSchemaVariant("Remote", Ref = "functions.RemoteProfile")]
-    public FunctionsRemoteProfile? Remote { get; set; }
+    public RemoteProfile? Remote { get; set; }
 
     /// <summary>
     /// An inline profile definition.
     /// </summary>
     [Description("An inline profile definition.")]
     [JsonSchemaVariant("Inline", Ref = "functions.InlineProfile")]
-    public FunctionsInlineProfile? Inline { get; set; }
+    public InlineProfile? Inline { get; set; }
 }
 
-public class FunctionsProfileConverter : JsonConverter<FunctionsProfile>
+public class ProfileConverter : JsonConverter<Profile>
 {
-    public override FunctionsProfile? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Profile? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -50,16 +50,16 @@ public class FunctionsProfileConverter : JsonConverter<FunctionsProfile>
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<FunctionsRemoteProfile>(raw, options); if (val0 != null) return new FunctionsProfile { Remote = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<RemoteProfile>(raw, options); if (val0 != null) return new Profile { Remote = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<FunctionsInlineProfile>(raw, options); if (val1 != null) return new FunctionsProfile { Inline = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<InlineProfile>(raw, options); if (val1 != null) return new Profile { Inline = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsProfile");
+        throw new JsonException($"Data did not match any variant of Profile");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsProfile value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Profile value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Remote != null)

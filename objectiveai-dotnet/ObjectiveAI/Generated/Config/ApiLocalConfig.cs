@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Config;
 
 [JsonSchemaTitle("config.ApiLocalConfig")]
-public class ConfigApiLocalConfig
+public partial class ApiLocalConfig
 {
     [JsonPropertyName("claude_agent_sdk")]
     [JsonSchemaOmitEmpty]

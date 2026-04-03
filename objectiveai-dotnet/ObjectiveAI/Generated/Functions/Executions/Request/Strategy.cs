@@ -12,7 +12,7 @@ namespace ObjectiveAI.Functions.Executions.Request;
 /// Scalar or Vector
 /// </summary>
 [Description("Scalar or Vector")]
-public class FunctionsExecutionsRequestStrategyDefault
+public partial class StrategyDefault
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("default")]
@@ -23,7 +23,7 @@ public class FunctionsExecutionsRequestStrategyDefault
 /// Vector
 /// </summary>
 [Description("Vector")]
-public class FunctionsExecutionsRequestStrategySwissSystem
+public partial class StrategySwissSystem
 {
     /// <summary>
     /// How many vector responses for each execution
@@ -50,27 +50,27 @@ public class FunctionsExecutionsRequestStrategySwissSystem
 
 
 [JsonSchemaTitle("functions.executions.request.Strategy")]
-[JsonConverter(typeof(FunctionsExecutionsRequestStrategyConverter))]
-public class FunctionsExecutionsRequestStrategy
+[JsonConverter(typeof(StrategyConverter))]
+public partial class Strategy
 {
     /// <summary>
     /// Scalar or Vector
     /// </summary>
     [Description("Scalar or Vector")]
     [JsonSchemaVariant("Default", Type = "object")]
-    public FunctionsExecutionsRequestStrategyDefault? Default { get; set; }
+    public StrategyDefault? Default { get; set; }
 
     /// <summary>
     /// Vector
     /// </summary>
     [Description("Vector")]
     [JsonSchemaVariant("SwissSystem", Type = "object")]
-    public FunctionsExecutionsRequestStrategySwissSystem? SwissSystem { get; set; }
+    public StrategySwissSystem? SwissSystem { get; set; }
 }
 
-public class FunctionsExecutionsRequestStrategyConverter : JsonConverter<FunctionsExecutionsRequestStrategy>
+public class StrategyConverter : JsonConverter<Strategy>
 {
-    public override FunctionsExecutionsRequestStrategy? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Strategy? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -85,7 +85,7 @@ public class FunctionsExecutionsRequestStrategyConverter : JsonConverter<Functio
                     match0 = false;
                 if (match0)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsExecutionsRequestStrategyDefault>(raw, options); if (val != null) return new FunctionsExecutionsRequestStrategy { Default = val }; }
+                    try { var val = JsonSerializer.Deserialize<StrategyDefault>(raw, options); if (val != null) return new Strategy { Default = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -95,16 +95,16 @@ public class FunctionsExecutionsRequestStrategyConverter : JsonConverter<Functio
                     match1 = false;
                 if (match1)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsExecutionsRequestStrategySwissSystem>(raw, options); if (val != null) return new FunctionsExecutionsRequestStrategy { SwissSystem = val }; }
+                    try { var val = JsonSerializer.Deserialize<StrategySwissSystem>(raw, options); if (val != null) return new Strategy { SwissSystem = val }; }
                     catch (JsonException) { }
                 }
             }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsExecutionsRequestStrategy");
+        throw new JsonException($"Data did not match any variant of Strategy");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsExecutionsRequestStrategy value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Strategy value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Default != null)

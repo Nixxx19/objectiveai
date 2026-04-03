@@ -8,8 +8,8 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Executions.Response.Unary;
 
 [JsonSchemaTitle("functions.executions.response.unary.Object")]
-[JsonConverter(typeof(JsonStringEnumConverter<FunctionsExecutionsResponseUnaryObject>))]
-public enum FunctionsExecutionsResponseUnaryObject
+[JsonConverter(typeof(JsonStringEnumConverter<Object>))]
+public enum Object
 {
     [JsonStringEnumMemberName("scalar.function.execution")]
     ScalarFunctionExecution,

@@ -13,7 +13,7 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("A developer message (similar to system, but from the developer).")]
 [JsonSchemaVariantWrapper("agent.completions.message.DeveloperMessage", Type = "object")]
-public class AgentCompletionsMessageMessageDeveloper
+public partial class MessageDeveloper
 {
     [JsonPropertyName("role")]
     [JsonSchemaEnum("developer")]
@@ -25,7 +25,7 @@ public class AgentCompletionsMessageMessageDeveloper
 /// </summary>
 [Description("A system message setting context or instructions.")]
 [JsonSchemaVariantWrapper("agent.completions.message.SystemMessage", Type = "object")]
-public class AgentCompletionsMessageMessageSystem
+public partial class MessageSystem
 {
     [JsonPropertyName("role")]
     [JsonSchemaEnum("system")]
@@ -37,7 +37,7 @@ public class AgentCompletionsMessageMessageSystem
 /// </summary>
 [Description("A user message from the end user.")]
 [JsonSchemaVariantWrapper("agent.completions.message.UserMessage", Type = "object")]
-public class AgentCompletionsMessageMessageUser
+public partial class MessageUser
 {
     [JsonPropertyName("role")]
     [JsonSchemaEnum("user")]
@@ -49,7 +49,7 @@ public class AgentCompletionsMessageMessageUser
 /// </summary>
 [Description("An assistant message (model's previous response).")]
 [JsonSchemaVariantWrapper("agent.completions.message.AssistantMessage", Type = "object")]
-public class AgentCompletionsMessageMessageAssistant
+public partial class MessageAssistant
 {
     [JsonPropertyName("role")]
     [JsonSchemaEnum("assistant")]
@@ -61,7 +61,7 @@ public class AgentCompletionsMessageMessageAssistant
 /// </summary>
 [Description("A tool message containing the result of a tool call.")]
 [JsonSchemaVariantWrapper("agent.completions.message.ToolMessage", Type = "object")]
-public class AgentCompletionsMessageMessageTool
+public partial class MessageTool
 {
     [JsonPropertyName("role")]
     [JsonSchemaEnum("tool")]
@@ -74,48 +74,48 @@ public class AgentCompletionsMessageMessageTool
 /// </summary>
 [Description("A message in the conversation.")]
 [JsonSchemaTitle("agent.completions.message.Message")]
-[JsonConverter(typeof(AgentCompletionsMessageMessageConverter))]
-public class AgentCompletionsMessageMessage
+[JsonConverter(typeof(MessageConverter))]
+public partial class Message
 {
     /// <summary>
     /// A developer message (similar to system, but from the developer).
     /// </summary>
     [Description("A developer message (similar to system, but from the developer).")]
     [JsonSchemaVariant("Developer", Ref = "agent.completions.message.DeveloperMessage", Type = "object")]
-    public AgentCompletionsMessageMessageDeveloper? Developer { get; set; }
+    public MessageDeveloper? Developer { get; set; }
 
     /// <summary>
     /// A system message setting context or instructions.
     /// </summary>
     [Description("A system message setting context or instructions.")]
     [JsonSchemaVariant("System", Ref = "agent.completions.message.SystemMessage", Type = "object")]
-    public AgentCompletionsMessageMessageSystem? System { get; set; }
+    public MessageSystem? System { get; set; }
 
     /// <summary>
     /// A user message from the end user.
     /// </summary>
     [Description("A user message from the end user.")]
     [JsonSchemaVariant("User", Ref = "agent.completions.message.UserMessage", Type = "object")]
-    public AgentCompletionsMessageMessageUser? User { get; set; }
+    public MessageUser? User { get; set; }
 
     /// <summary>
     /// An assistant message (model's previous response).
     /// </summary>
     [Description("An assistant message (model's previous response).")]
     [JsonSchemaVariant("Assistant", Ref = "agent.completions.message.AssistantMessage", Type = "object")]
-    public AgentCompletionsMessageMessageAssistant? Assistant { get; set; }
+    public MessageAssistant? Assistant { get; set; }
 
     /// <summary>
     /// A tool message containing the result of a tool call.
     /// </summary>
     [Description("A tool message containing the result of a tool call.")]
     [JsonSchemaVariant("Tool", Ref = "agent.completions.message.ToolMessage", Type = "object")]
-    public AgentCompletionsMessageMessageTool? Tool { get; set; }
+    public MessageTool? Tool { get; set; }
 }
 
-public class AgentCompletionsMessageMessageConverter : JsonConverter<AgentCompletionsMessageMessage>
+public class MessageConverter : JsonConverter<Message>
 {
-    public override AgentCompletionsMessageMessage? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Message? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -130,7 +130,7 @@ public class AgentCompletionsMessageMessageConverter : JsonConverter<AgentComple
                     match0 = false;
                 if (match0)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageMessageDeveloper>(raw, options); if (val != null) return new AgentCompletionsMessageMessage { Developer = val }; }
+                    try { var val = JsonSerializer.Deserialize<MessageDeveloper>(raw, options); if (val != null) return new Message { Developer = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -140,7 +140,7 @@ public class AgentCompletionsMessageMessageConverter : JsonConverter<AgentComple
                     match1 = false;
                 if (match1)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageMessageSystem>(raw, options); if (val != null) return new AgentCompletionsMessageMessage { System = val }; }
+                    try { var val = JsonSerializer.Deserialize<MessageSystem>(raw, options); if (val != null) return new Message { System = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -150,7 +150,7 @@ public class AgentCompletionsMessageMessageConverter : JsonConverter<AgentComple
                     match2 = false;
                 if (match2)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageMessageUser>(raw, options); if (val != null) return new AgentCompletionsMessageMessage { User = val }; }
+                    try { var val = JsonSerializer.Deserialize<MessageUser>(raw, options); if (val != null) return new Message { User = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -160,7 +160,7 @@ public class AgentCompletionsMessageMessageConverter : JsonConverter<AgentComple
                     match3 = false;
                 if (match3)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageMessageAssistant>(raw, options); if (val != null) return new AgentCompletionsMessageMessage { Assistant = val }; }
+                    try { var val = JsonSerializer.Deserialize<MessageAssistant>(raw, options); if (val != null) return new Message { Assistant = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -170,16 +170,16 @@ public class AgentCompletionsMessageMessageConverter : JsonConverter<AgentComple
                     match4 = false;
                 if (match4)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageMessageTool>(raw, options); if (val != null) return new AgentCompletionsMessageMessage { Tool = val }; }
+                    try { var val = JsonSerializer.Deserialize<MessageTool>(raw, options); if (val != null) return new Message { Tool = val }; }
                     catch (JsonException) { }
                 }
             }
         }
 
-        throw new JsonException($"Data did not match any variant of AgentCompletionsMessageMessage");
+        throw new JsonException($"Data did not match any variant of Message");
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentCompletionsMessageMessage value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Message value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Developer != null)

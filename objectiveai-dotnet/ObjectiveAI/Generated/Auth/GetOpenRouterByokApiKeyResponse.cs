@@ -12,7 +12,7 @@ namespace ObjectiveAI.Auth;
 /// </summary>
 [Description("Response containing the user's OpenRouter BYOK API key.")]
 [JsonSchemaTitle("auth.GetOpenRouterByokApiKeyResponse")]
-public class AuthGetOpenRouterByokApiKeyResponse
+public partial class GetOpenRouterByokApiKeyResponse
 {
     /// <summary>
     /// The OpenRouter API key, or `None` if not configured.

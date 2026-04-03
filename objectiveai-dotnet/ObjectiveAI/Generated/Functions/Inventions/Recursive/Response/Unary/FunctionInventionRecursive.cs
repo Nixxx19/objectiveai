@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Inventions.Recursive.Response.Unary;
 
 [JsonSchemaTitle("functions.inventions.recursive.response.unary.FunctionInventionRecursive")]
-public class FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive
+public partial class FunctionInventionRecursive
 {
     [JsonPropertyName("created")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
@@ -19,14 +19,14 @@ public class FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive
     public string Id { get; set; } = default!;
 
     [JsonPropertyName("inventions")]
-    public List<FunctionsInventionsRecursiveResponseUnaryFunctionInvention> Inventions { get; set; } = default!;
+    public List<FunctionInvention> Inventions { get; set; } = default!;
 
     [JsonPropertyName("inventions_errors")]
     public bool InventionsErrors { get; set; } = default!;
 
     [JsonPropertyName("object")]
-    public FunctionsInventionsRecursiveResponseUnaryObject Object { get; set; } = default!;
+    public Object Object { get; set; } = default!;
 
     [JsonPropertyName("usage")]
-    public AgentCompletionsResponseUsage Usage { get; set; } = default!;
+    public Usage Usage { get; set; } = default!;
 }

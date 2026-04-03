@@ -12,7 +12,7 @@ namespace ObjectiveAI;
 /// </summary>
 [Description("An entry in weights with an explicit weight and optional invert flag.")]
 [JsonSchemaTitle("WeightsEntry")]
-public class WeightsEntry
+public partial class WeightsEntry
 {
     /// <summary>
     /// If true, invert this agent's vote distribution before combining.

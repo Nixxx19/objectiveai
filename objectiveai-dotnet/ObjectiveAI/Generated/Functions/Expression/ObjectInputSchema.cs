@@ -12,7 +12,7 @@ namespace ObjectiveAI.Functions.Expression;
 /// </summary>
 [Description("Schema for an object input with named properties.")]
 [JsonSchemaTitle("functions.expression.ObjectInputSchema")]
-public class FunctionsExpressionObjectInputSchema
+public partial class ObjectInputSchema
 {
     /// <summary>
     /// Human-readable description of the object.
@@ -29,7 +29,7 @@ public class FunctionsExpressionObjectInputSchema
     [Description("Schema for each property in the object.")]
     [JsonPropertyName("properties")]
     [JsonSchemaAdditionalPropertiesSchema("$ref:functions.expression.InputSchema")]
-    public Dictionary<string, FunctionsExpressionInputSchema> Properties { get; set; } = default!;
+    public Dictionary<string, InputSchema> Properties { get; set; } = default!;
 
     /// <summary>
     /// List of property names that must be present.
@@ -41,5 +41,5 @@ public class FunctionsExpressionObjectInputSchema
     public List<string>? Required { get; set; } = null;
 
     [JsonPropertyName("type")]
-    public FunctionsExpressionObjectInputSchemaType Type { get; set; } = default!;
+    public ObjectInputSchemaType Type { get; set; } = default!;
 }

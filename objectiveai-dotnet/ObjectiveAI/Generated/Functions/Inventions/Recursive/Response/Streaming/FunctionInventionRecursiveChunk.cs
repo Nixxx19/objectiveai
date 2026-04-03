@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Inventions.Recursive.Response.Streaming;
 
 [JsonSchemaTitle("functions.inventions.recursive.response.streaming.FunctionInventionRecursiveChunk")]
-public class FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk
+public partial class FunctionInventionRecursiveChunk
 {
     [JsonPropertyName("created")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
@@ -19,7 +19,7 @@ public class FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecur
     public string Id { get; set; } = default!;
 
     [JsonPropertyName("inventions")]
-    public List<FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk> Inventions { get; set; } = default!;
+    public List<FunctionInventionChunk> Inventions { get; set; } = default!;
 
     [JsonPropertyName("inventions_errors")]
     [JsonSchemaOmitEmpty]
@@ -27,10 +27,10 @@ public class FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecur
     public bool? InventionsErrors { get; set; } = null;
 
     [JsonPropertyName("object")]
-    public FunctionsInventionsRecursiveResponseStreamingObject Object { get; set; } = default!;
+    public Object Object { get; set; } = default!;
 
     [JsonPropertyName("usage")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsResponseUsage? Usage { get; set; } = null;
+    public Usage? Usage { get; set; } = null;
 }

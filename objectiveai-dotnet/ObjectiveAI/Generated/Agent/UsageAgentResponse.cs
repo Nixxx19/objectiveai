@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent;
 /// </summary>
 [Description("Usage statistics for an Agent.")]
 [JsonSchemaTitle("agent.UsageAgentResponse")]
-public class AgentUsageAgentResponse
+public partial class UsageAgentResponse
 {
     /// <summary>
     /// Total completion tokens generated.

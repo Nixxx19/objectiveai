@@ -15,26 +15,26 @@ namespace ObjectiveAI.Swarm;
 [Description("Response containing a single Swarm.")]
 [JsonSchemaTitle("swarm.GetSwarmResponse")]
 [JsonSchemaRef("RemotePath")]
-[JsonConverter(typeof(SwarmGetSwarmResponseConverter))]
-public class SwarmGetSwarmResponse
+[JsonConverter(typeof(GetSwarmResponseConverter))]
+public partial class GetSwarmResponse
 {
     [JsonIgnore]
     public RemotePath Base { get; set; } = default!;
 }
 
-public class SwarmGetSwarmResponseConverter : JsonConverter<SwarmGetSwarmResponse>
+public class GetSwarmResponseConverter : JsonConverter<GetSwarmResponse>
 {
-    public override SwarmGetSwarmResponse? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override GetSwarmResponse? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
         var baseObj = JsonSerializer.Deserialize<RemotePath>(raw, options)!;
-        var result = new SwarmGetSwarmResponse { Base = baseObj };
+        var result = new GetSwarmResponse { Base = baseObj };
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, SwarmGetSwarmResponse value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, GetSwarmResponse value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

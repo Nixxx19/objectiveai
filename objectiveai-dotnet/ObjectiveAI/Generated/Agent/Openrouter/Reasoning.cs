@@ -28,7 +28,7 @@ This struct configures those capabilities.
 only supported by some models. Unsupported fields are silently ignored.
 """")]
 [JsonSchemaTitle("agent.openrouter.Reasoning")]
-public class AgentOpenrouterReasoning
+public partial class Reasoning
 {
     /// <summary>
     /// The reasoning effort level.
@@ -43,7 +43,7 @@ Only supported by some models.
     [JsonPropertyName("effort")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentOpenrouterReasoningEffort? Effort { get; set; } = null;
+    public ReasoningEffort? Effort { get; set; } = null;
 
     /// <summary>
     /// Whether reasoning is enabled. Defaults to `true` if other fields are set.
@@ -83,5 +83,5 @@ Only supported by some models.
     [JsonPropertyName("summary_verbosity")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentOpenrouterReasoningSummaryVerbosity? SummaryVerbosity { get; set; } = null;
+    public ReasoningSummaryVerbosity? SummaryVerbosity { get; set; } = null;
 }

@@ -22,15 +22,15 @@ Similar to [`InputValue`] but object values and array elements can be
 expressions (JMESPath or Starlark) that are evaluated during compilation.
 """)]
 [JsonSchemaTitle("functions.expression.InputValueExpression")]
-[JsonConverter(typeof(FunctionsExpressionInputValueExpressionConverter))]
-public class FunctionsExpressionInputValueExpression
+[JsonConverter(typeof(InputValueExpressionConverter))]
+public partial class InputValueExpression
 {
     /// <summary>
     /// Rich content (image, audio, video, file).
     /// </summary>
     [Description("Rich content (image, audio, video, file).")]
     [JsonSchemaVariant("RichContentPart", Ref = "agent.completions.message.RichContentPart")]
-    public AgentCompletionsMessageRichContentPart? RichContentPart { get; set; }
+    public RichContentPart? RichContentPart { get; set; }
 
     /// <summary>
     /// An object with values that may be expressions.
@@ -111,9 +111,9 @@ public class FunctionsExpressionInputValueExpression
     public bool? Boolean { get; set; }
 }
 
-public class FunctionsExpressionInputValueExpressionConverter : JsonConverter<FunctionsExpressionInputValueExpression>
+public class InputValueExpressionConverter : JsonConverter<InputValueExpression>
 {
-    public override FunctionsExpressionInputValueExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override InputValueExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -123,37 +123,37 @@ public class FunctionsExpressionInputValueExpressionConverter : JsonConverter<Fu
         if (el.ValueKind == JsonValueKind.String)
         {
             var str = el.GetString()!;
-            return new FunctionsExpressionInputValueExpression { String = str };
+            return new InputValueExpression { String = str };
         }
 
         if (el.ValueKind == JsonValueKind.Number)
         {
             if (el.TryGetInt64(out var intVal))
-                return new FunctionsExpressionInputValueExpression { Integer = intVal };
-            return new FunctionsExpressionInputValueExpression { Number = el.GetDouble() };
+                return new InputValueExpression { Integer = intVal };
+            return new InputValueExpression { Number = el.GetDouble() };
         }
 
         if (el.ValueKind == JsonValueKind.True || el.ValueKind == JsonValueKind.False)
-            return new FunctionsExpressionInputValueExpression { Boolean = el.GetBoolean() };
+            return new InputValueExpression { Boolean = el.GetBoolean() };
 
         if (el.ValueKind == JsonValueKind.Array)
         {
             var val = JsonSerializer.Deserialize<List<JsonElement>>(raw, options);
-            return new FunctionsExpressionInputValueExpression { Array = val };
+            return new InputValueExpression { Array = val };
         }
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<AgentCompletionsMessageRichContentPart>(raw, options); if (val0 != null) return new FunctionsExpressionInputValueExpression { RichContentPart = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<RichContentPart>(raw, options); if (val0 != null) return new InputValueExpression { RichContentPart = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(raw, options); if (val1 != null) return new FunctionsExpressionInputValueExpression { Object = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(raw, options); if (val1 != null) return new InputValueExpression { Object = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsExpressionInputValueExpression");
+        throw new JsonException($"Data did not match any variant of InputValueExpression");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsExpressionInputValueExpression value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, InputValueExpression value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.RichContentPart != null)

@@ -12,7 +12,7 @@ namespace ObjectiveAI.Functions.Expression;
 /// </summary>
 [Description("Schema for an array input.")]
 [JsonSchemaTitle("functions.expression.ArrayInputSchema")]
-public class FunctionsExpressionArrayInputSchema
+public partial class ArrayInputSchema
 {
     /// <summary>
     /// Human-readable description of the array.
@@ -28,7 +28,7 @@ public class FunctionsExpressionArrayInputSchema
     /// </summary>
     [Description("Schema for each item in the array.")]
     [JsonPropertyName("items")]
-    public FunctionsExpressionInputSchema Items { get; set; } = default!;
+    public InputSchema Items { get; set; } = default!;
 
     /// <summary>
     /// Maximum number of items allowed.
@@ -51,5 +51,5 @@ public class FunctionsExpressionArrayInputSchema
     public ulong? MinItems { get; set; } = null;
 
     [JsonPropertyName("type")]
-    public FunctionsExpressionArrayInputSchemaType Type { get; set; } = default!;
+    public ArrayInputSchemaType Type { get; set; } = default!;
 }

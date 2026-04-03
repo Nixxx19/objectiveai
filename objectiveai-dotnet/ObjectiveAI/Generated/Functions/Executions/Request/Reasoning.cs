@@ -9,8 +9,8 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Executions.Request;
 
 [JsonSchemaTitle("functions.executions.request.Reasoning")]
-public class FunctionsExecutionsRequestReasoning
+public partial class Reasoning
 {
     [JsonPropertyName("agent")]
-    public AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional Agent { get; set; } = default!;
+    public InlineAgentBaseWithFallbacksOrRemoteCommitOptional Agent { get; set; } = default!;
 }

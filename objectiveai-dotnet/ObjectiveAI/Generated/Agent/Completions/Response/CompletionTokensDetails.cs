@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Completions.Response;
 /// </summary>
 [Description("Detailed breakdown of completion token usage.")]
 [JsonSchemaTitle("agent.completions.response.CompletionTokensDetails")]
-public class AgentCompletionsResponseCompletionTokensDetails
+public partial class CompletionTokensDetails
 {
     /// <summary>
     /// Tokens from accepted predictions (speculative decoding).

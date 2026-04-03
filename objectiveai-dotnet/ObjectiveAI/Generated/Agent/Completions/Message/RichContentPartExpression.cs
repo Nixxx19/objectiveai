@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace ObjectiveAI.Agent.Completions.Message;
 
-public class AgentCompletionsMessageRichContentPartExpressionText
+public partial class RichContentPartExpressionText
 {
     /// <summary>
     /// A value that can be either a literal or an expression.
@@ -80,7 +80,7 @@ Starlark expression:
     public string Type { get; set; } = default!;
 }
 
-public class AgentCompletionsMessageRichContentPartExpressionImageUrl
+public partial class RichContentPartExpressionImageUrl
 {
     /// <summary>
     /// A value that can be either a literal or an expression.
@@ -152,7 +152,7 @@ Starlark expression:
     public string Type { get; set; } = default!;
 }
 
-public class AgentCompletionsMessageRichContentPartExpressionInputAudio
+public partial class RichContentPartExpressionInputAudio
 {
     /// <summary>
     /// A value that can be either a literal or an expression.
@@ -224,7 +224,7 @@ Starlark expression:
     public string Type { get; set; } = default!;
 }
 
-public class AgentCompletionsMessageRichContentPartExpressionInputVideo
+public partial class RichContentPartExpressionInputVideo
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("input_video")]
@@ -296,7 +296,7 @@ Starlark expression:
     public JsonElement VideoUrl { get; set; } = default!;
 }
 
-public class AgentCompletionsMessageRichContentPartExpressionVideoUrl
+public partial class RichContentPartExpressionVideoUrl
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("video_url")]
@@ -368,7 +368,7 @@ Starlark expression:
     public JsonElement VideoUrl { get; set; } = default!;
 }
 
-public class AgentCompletionsMessageRichContentPartExpressionFile
+public partial class RichContentPartExpressionFile
 {
     /// <summary>
     /// A value that can be either a literal or an expression.
@@ -446,31 +446,31 @@ Starlark expression:
 /// </summary>
 [Description("Expression variant of [`RichContentPart`] for dynamic content.")]
 [JsonSchemaTitle("agent.completions.message.RichContentPartExpression")]
-[JsonConverter(typeof(AgentCompletionsMessageRichContentPartExpressionConverter))]
-public class AgentCompletionsMessageRichContentPartExpression
+[JsonConverter(typeof(RichContentPartExpressionConverter))]
+public partial class RichContentPartExpression
 {
     [JsonSchemaVariant("Text", Type = "object")]
-    public AgentCompletionsMessageRichContentPartExpressionText? Text { get; set; }
+    public RichContentPartExpressionText? Text { get; set; }
 
     [JsonSchemaVariant("ImageUrl", Type = "object")]
-    public AgentCompletionsMessageRichContentPartExpressionImageUrl? ImageUrl { get; set; }
+    public RichContentPartExpressionImageUrl? ImageUrl { get; set; }
 
     [JsonSchemaVariant("InputAudio", Type = "object")]
-    public AgentCompletionsMessageRichContentPartExpressionInputAudio? InputAudio { get; set; }
+    public RichContentPartExpressionInputAudio? InputAudio { get; set; }
 
     [JsonSchemaVariant("InputVideo", Type = "object")]
-    public AgentCompletionsMessageRichContentPartExpressionInputVideo? InputVideo { get; set; }
+    public RichContentPartExpressionInputVideo? InputVideo { get; set; }
 
     [JsonSchemaVariant("VideoUrl", Type = "object")]
-    public AgentCompletionsMessageRichContentPartExpressionVideoUrl? VideoUrl { get; set; }
+    public RichContentPartExpressionVideoUrl? VideoUrl { get; set; }
 
     [JsonSchemaVariant("File", Type = "object")]
-    public AgentCompletionsMessageRichContentPartExpressionFile? File { get; set; }
+    public RichContentPartExpressionFile? File { get; set; }
 }
 
-public class AgentCompletionsMessageRichContentPartExpressionConverter : JsonConverter<AgentCompletionsMessageRichContentPartExpression>
+public class RichContentPartExpressionConverter : JsonConverter<RichContentPartExpression>
 {
-    public override AgentCompletionsMessageRichContentPartExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override RichContentPartExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -485,7 +485,7 @@ public class AgentCompletionsMessageRichContentPartExpressionConverter : JsonCon
                     match0 = false;
                 if (match0)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageRichContentPartExpressionText>(raw, options); if (val != null) return new AgentCompletionsMessageRichContentPartExpression { Text = val }; }
+                    try { var val = JsonSerializer.Deserialize<RichContentPartExpressionText>(raw, options); if (val != null) return new RichContentPartExpression { Text = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -495,7 +495,7 @@ public class AgentCompletionsMessageRichContentPartExpressionConverter : JsonCon
                     match1 = false;
                 if (match1)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageRichContentPartExpressionImageUrl>(raw, options); if (val != null) return new AgentCompletionsMessageRichContentPartExpression { ImageUrl = val }; }
+                    try { var val = JsonSerializer.Deserialize<RichContentPartExpressionImageUrl>(raw, options); if (val != null) return new RichContentPartExpression { ImageUrl = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -505,7 +505,7 @@ public class AgentCompletionsMessageRichContentPartExpressionConverter : JsonCon
                     match2 = false;
                 if (match2)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageRichContentPartExpressionInputAudio>(raw, options); if (val != null) return new AgentCompletionsMessageRichContentPartExpression { InputAudio = val }; }
+                    try { var val = JsonSerializer.Deserialize<RichContentPartExpressionInputAudio>(raw, options); if (val != null) return new RichContentPartExpression { InputAudio = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -515,7 +515,7 @@ public class AgentCompletionsMessageRichContentPartExpressionConverter : JsonCon
                     match3 = false;
                 if (match3)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageRichContentPartExpressionInputVideo>(raw, options); if (val != null) return new AgentCompletionsMessageRichContentPartExpression { InputVideo = val }; }
+                    try { var val = JsonSerializer.Deserialize<RichContentPartExpressionInputVideo>(raw, options); if (val != null) return new RichContentPartExpression { InputVideo = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -525,7 +525,7 @@ public class AgentCompletionsMessageRichContentPartExpressionConverter : JsonCon
                     match4 = false;
                 if (match4)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageRichContentPartExpressionVideoUrl>(raw, options); if (val != null) return new AgentCompletionsMessageRichContentPartExpression { VideoUrl = val }; }
+                    try { var val = JsonSerializer.Deserialize<RichContentPartExpressionVideoUrl>(raw, options); if (val != null) return new RichContentPartExpression { VideoUrl = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -535,16 +535,16 @@ public class AgentCompletionsMessageRichContentPartExpressionConverter : JsonCon
                     match5 = false;
                 if (match5)
                 {
-                    try { var val = JsonSerializer.Deserialize<AgentCompletionsMessageRichContentPartExpressionFile>(raw, options); if (val != null) return new AgentCompletionsMessageRichContentPartExpression { File = val }; }
+                    try { var val = JsonSerializer.Deserialize<RichContentPartExpressionFile>(raw, options); if (val != null) return new RichContentPartExpression { File = val }; }
                     catch (JsonException) { }
                 }
             }
         }
 
-        throw new JsonException($"Data did not match any variant of AgentCompletionsMessageRichContentPartExpression");
+        throw new JsonException($"Data did not match any variant of RichContentPartExpression");
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentCompletionsMessageRichContentPartExpression value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, RichContentPartExpression value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Text != null)

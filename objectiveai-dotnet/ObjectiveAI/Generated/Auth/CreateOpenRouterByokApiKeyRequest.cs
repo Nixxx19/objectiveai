@@ -20,7 +20,7 @@ This allows users to provide their own OpenRouter API key for routing
 requests through OpenRouter's model marketplace.
 """)]
 [JsonSchemaTitle("auth.CreateOpenRouterByokApiKeyRequest")]
-public class AuthCreateOpenRouterByokApiKeyRequest
+public partial class CreateOpenRouterByokApiKeyRequest
 {
     /// <summary>
     /// The OpenRouter API key to associate with the user's account.

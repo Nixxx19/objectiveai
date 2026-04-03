@@ -13,19 +13,19 @@ namespace ObjectiveAI.Functions;
 /// </summary>
 [Description("A full function, either remote or inline.")]
 [JsonSchemaTitle("functions.FullFunction")]
-[JsonConverter(typeof(FunctionsFullFunctionConverter))]
-public class FunctionsFullFunction
+[JsonConverter(typeof(FullFunctionConverter))]
+public partial class FullFunction
 {
     [JsonSchemaVariant("Remote", Ref = "functions.FullRemoteFunction")]
-    public FunctionsFullRemoteFunction? Remote { get; set; }
+    public FullRemoteFunction? Remote { get; set; }
 
     [JsonSchemaVariant("Inline", Ref = "functions.FullInlineFunction")]
-    public FunctionsFullInlineFunction? Inline { get; set; }
+    public FullInlineFunction? Inline { get; set; }
 }
 
-public class FunctionsFullFunctionConverter : JsonConverter<FunctionsFullFunction>
+public class FullFunctionConverter : JsonConverter<FullFunction>
 {
-    public override FunctionsFullFunction? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override FullFunction? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -34,16 +34,16 @@ public class FunctionsFullFunctionConverter : JsonConverter<FunctionsFullFunctio
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<FunctionsFullRemoteFunction>(raw, options); if (val0 != null) return new FunctionsFullFunction { Remote = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<FullRemoteFunction>(raw, options); if (val0 != null) return new FullFunction { Remote = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<FunctionsFullInlineFunction>(raw, options); if (val1 != null) return new FunctionsFullFunction { Inline = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<FullInlineFunction>(raw, options); if (val1 != null) return new FullFunction { Inline = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsFullFunction");
+        throw new JsonException($"Data did not match any variant of FullFunction");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsFullFunction value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, FullFunction value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Remote != null)

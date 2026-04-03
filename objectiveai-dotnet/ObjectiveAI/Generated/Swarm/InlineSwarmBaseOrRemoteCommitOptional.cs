@@ -18,19 +18,19 @@ Like [`InlineSwarmBaseOrRemote`] but with optional commit.
 Used in request types where commit resolution happens server-side.
 """)]
 [JsonSchemaTitle("swarm.InlineSwarmBaseOrRemoteCommitOptional")]
-[JsonConverter(typeof(SwarmInlineSwarmBaseOrRemoteCommitOptionalConverter))]
-public class SwarmInlineSwarmBaseOrRemoteCommitOptional
+[JsonConverter(typeof(InlineSwarmBaseOrRemoteCommitOptionalConverter))]
+public partial class InlineSwarmBaseOrRemoteCommitOptional
 {
     [JsonSchemaVariant("SwarmBase", Ref = "swarm.InlineSwarmBase")]
-    public SwarmInlineSwarmBase? SwarmBase { get; set; }
+    public InlineSwarmBase? SwarmBase { get; set; }
 
     [JsonSchemaVariant("Remote", Ref = "RemotePathCommitOptional")]
     public RemotePathCommitOptional? Remote { get; set; }
 }
 
-public class SwarmInlineSwarmBaseOrRemoteCommitOptionalConverter : JsonConverter<SwarmInlineSwarmBaseOrRemoteCommitOptional>
+public class InlineSwarmBaseOrRemoteCommitOptionalConverter : JsonConverter<InlineSwarmBaseOrRemoteCommitOptional>
 {
-    public override SwarmInlineSwarmBaseOrRemoteCommitOptional? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override InlineSwarmBaseOrRemoteCommitOptional? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -39,16 +39,16 @@ public class SwarmInlineSwarmBaseOrRemoteCommitOptionalConverter : JsonConverter
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<SwarmInlineSwarmBase>(raw, options); if (val0 != null) return new SwarmInlineSwarmBaseOrRemoteCommitOptional { SwarmBase = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<InlineSwarmBase>(raw, options); if (val0 != null) return new InlineSwarmBaseOrRemoteCommitOptional { SwarmBase = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<RemotePathCommitOptional>(raw, options); if (val1 != null) return new SwarmInlineSwarmBaseOrRemoteCommitOptional { Remote = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<RemotePathCommitOptional>(raw, options); if (val1 != null) return new InlineSwarmBaseOrRemoteCommitOptional { Remote = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of SwarmInlineSwarmBaseOrRemoteCommitOptional");
+        throw new JsonException($"Data did not match any variant of InlineSwarmBaseOrRemoteCommitOptional");
     }
 
-    public override void Write(Utf8JsonWriter writer, SwarmInlineSwarmBaseOrRemoteCommitOptional value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, InlineSwarmBaseOrRemoteCommitOptional value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.SwarmBase != null)

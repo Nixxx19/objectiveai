@@ -20,7 +20,7 @@ Controls which providers are used and in what order when routing
 requests to upstream model hosts.
 """)]
 [JsonSchemaTitle("agent.openrouter.Provider")]
-public class AgentOpenrouterProvider
+public partial class Provider
 {
     /// <summary>
     /// Whether to allow fallback to other providers if preferred ones fail.
@@ -69,7 +69,7 @@ Defaults to `true`.
     [JsonPropertyName("quantizations")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public List<AgentOpenrouterProviderQuantization>? Quantizations { get; set; } = null;
+    public List<ProviderQuantization>? Quantizations { get; set; } = null;
 
     /// <summary>
     /// Whether to require that the provider supports all request parameters.

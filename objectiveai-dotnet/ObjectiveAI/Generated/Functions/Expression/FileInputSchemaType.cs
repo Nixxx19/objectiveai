@@ -8,8 +8,8 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Expression;
 
 [JsonSchemaTitle("functions.expression.FileInputSchemaType")]
-[JsonConverter(typeof(JsonStringEnumConverter<FunctionsExpressionFileInputSchemaType>))]
-public enum FunctionsExpressionFileInputSchemaType
+[JsonConverter(typeof(JsonStringEnumConverter<FileInputSchemaType>))]
+public enum FileInputSchemaType
 {
     [JsonStringEnumMemberName("file")]
     File

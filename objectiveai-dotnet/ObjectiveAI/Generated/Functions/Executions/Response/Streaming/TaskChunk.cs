@@ -9,19 +9,19 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Executions.Response.Streaming;
 
 [JsonSchemaTitle("functions.executions.response.streaming.TaskChunk")]
-[JsonConverter(typeof(FunctionsExecutionsResponseStreamingTaskChunkConverter))]
-public class FunctionsExecutionsResponseStreamingTaskChunk
+[JsonConverter(typeof(TaskChunkConverter))]
+public partial class TaskChunk
 {
     [JsonSchemaVariant("FunctionExecution", Ref = "functions.executions.response.streaming.FunctionExecutionTaskChunk")]
-    public FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk? FunctionExecution { get; set; }
+    public FunctionExecutionTaskChunk? FunctionExecution { get; set; }
 
     [JsonSchemaVariant("VectorCompletion", Ref = "functions.executions.response.streaming.VectorCompletionTaskChunk")]
-    public FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk? VectorCompletion { get; set; }
+    public VectorCompletionTaskChunk? VectorCompletion { get; set; }
 }
 
-public class FunctionsExecutionsResponseStreamingTaskChunkConverter : JsonConverter<FunctionsExecutionsResponseStreamingTaskChunk>
+public class TaskChunkConverter : JsonConverter<TaskChunk>
 {
-    public override FunctionsExecutionsResponseStreamingTaskChunk? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override TaskChunk? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -30,16 +30,16 @@ public class FunctionsExecutionsResponseStreamingTaskChunkConverter : JsonConver
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk>(raw, options); if (val0 != null) return new FunctionsExecutionsResponseStreamingTaskChunk { FunctionExecution = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<FunctionExecutionTaskChunk>(raw, options); if (val0 != null) return new TaskChunk { FunctionExecution = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk>(raw, options); if (val1 != null) return new FunctionsExecutionsResponseStreamingTaskChunk { VectorCompletion = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<VectorCompletionTaskChunk>(raw, options); if (val1 != null) return new TaskChunk { VectorCompletion = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsExecutionsResponseStreamingTaskChunk");
+        throw new JsonException($"Data did not match any variant of TaskChunk");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsExecutionsResponseStreamingTaskChunk value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, TaskChunk value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.FunctionExecution != null)

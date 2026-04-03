@@ -12,7 +12,7 @@ namespace ObjectiveAI.Swarm;
 /// </summary>
 [Description("Usage statistics for a Swarm.")]
 [JsonSchemaTitle("swarm.UsageSwarmResponse")]
-public class SwarmUsageSwarmResponse
+public partial class UsageSwarmResponse
 {
     /// <summary>
     /// Total completion tokens generated across all agents.

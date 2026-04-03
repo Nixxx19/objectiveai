@@ -40,6 +40,44 @@ var genericPrefixes = DetectGenericPrefixes(allTitles);
 Console.WriteLine($"Detected {genericPrefixes.Count} generic prefixes");
 
 // ---------------------------------------------------------------------------
+// Detect ambiguous short names (same class name in multiple namespaces)
+// ---------------------------------------------------------------------------
+
+var namespaceTypeNames = new Dictionary<string, HashSet<string>>();
+foreach (var title in allTitles)
+{
+    var ns = GetNamespaceForTitle(title);
+    var shortName = TitleToClassName(title);
+    if (!namespaceTypeNames.TryGetValue(ns, out var names))
+    {
+        names = [];
+        namespaceTypeNames[ns] = names;
+    }
+    names.Add(shortName);
+}
+
+var ambiguousNames = namespaceTypeNames
+    .SelectMany(kv => kv.Value.Select(n => (Name: n, Ns: kv.Key)))
+    .GroupBy(x => x.Name)
+    .Where(g => g.Select(x => x.Ns).Distinct().Count() > 1)
+    .Select(g => g.Key)
+    .ToHashSet();
+
+// Also mark names that collide with their own namespace's last segment
+// (e.g., class Expression in namespace ObjectiveAI.Functions.Expression)
+foreach (var (ns, names) in namespaceTypeNames)
+{
+    var lastSegment = ns.Split('.').Last();
+    if (names.Contains(lastSegment))
+        ambiguousNames.Add(lastSegment);
+}
+
+Console.WriteLine($"Detected {ambiguousNames.Count} ambiguous short names");
+
+// Per-file namespace — captured by ResolveRefType for collision detection
+var currentNs = "ObjectiveAI";
+
+// ---------------------------------------------------------------------------
 // Clean generated directory
 // ---------------------------------------------------------------------------
 
@@ -75,6 +113,7 @@ foreach (var (filePath, entries) in fileGroups)
     sb.AppendLine();
 
     var ns = FilePathToNamespace(filePath);
+    currentNs = ns;
 
     var usings = new HashSet<string>
     {
@@ -117,7 +156,7 @@ Console.WriteLine("Done!");
 
 string GenerateType(string title, JsonElement schema, HashSet<string> usings)
 {
-    var pascalName = TitleToPascal(title);
+    var pascalName = TitleToClassName(title);
     var hasProperties = schema.TryGetProperty("properties", out var propsEl);
     var hasAnyOf = schema.TryGetProperty("anyOf", out var anyOfEl);
     var hasRef = schema.TryGetProperty("$ref", out _);
@@ -204,7 +243,7 @@ string GenerateUnionClass(string title, string pascalName, string? description, 
     AppendDescription(sb, description);
     sb.AppendLine($"[JsonSchemaTitle(\"{title}\")]");
     sb.AppendLine($"[JsonConverter(typeof({pascalName}Converter))]");
-    sb.AppendLine($"public class {pascalName}");
+    sb.AppendLine($"public partial class {pascalName}");
     sb.AppendLine("{");
 
     for (int i = 0; i < variantInfos.Count; i++)
@@ -460,9 +499,9 @@ string GenerateWrapperClass(string className, string refTitle, string jsonType, 
     var wrapperAttrParts = new List<string> { EscapeCSharpString(refTitle) };
     wrapperAttrParts.Add($"Type = {EscapeCSharpString(jsonType)}");
     sb.AppendLine($"[JsonSchemaVariantWrapper({string.Join(", ", wrapperAttrParts)})]");
-    sb.AppendLine($"public class {className}");
+    sb.AppendLine($"public partial class {className}");
     sb.AppendLine("{");
-    EmitProperties(sb, propsEl, usings);
+    EmitProperties(sb, propsEl, usings, className);
     sb.AppendLine("}");
     return sb.ToString();
 }
@@ -477,9 +516,9 @@ string GenerateInlineObjectClass(string className, string? description, JsonElem
     AppendDescription(sb, description);
     if (hasAp && apEl.ValueKind == JsonValueKind.False)
         sb.AppendLine("[JsonSchemaAdditionalProperties(false)]");
-    sb.AppendLine($"public class {className}");
+    sb.AppendLine($"public partial class {className}");
     sb.AppendLine("{");
-    EmitProperties(sb, propsEl, usings);
+    EmitProperties(sb, propsEl, usings, className);
     sb.AppendLine("}");
     return sb.ToString();
 }
@@ -783,7 +822,7 @@ string GenerateNullableWrapper(string title, string pascalName, string? descript
     var sb = new StringBuilder();
     AppendDescription(sb, description);
     sb.AppendLine($"[JsonSchemaTitle(\"{title}\")]");
-    sb.AppendLine($"public class {pascalName}");
+    sb.AppendLine($"public partial class {pascalName}");
     sb.AppendLine("{");
     EmitPropertyConstraintAttributes(sb, nonNullVariant, "    ");
     sb.AppendLine($"    [JsonSchemaNullable]");
@@ -803,10 +842,10 @@ string GenerateObjectClass(string title, string pascalName, string? description,
     sb.AppendLine($"[JsonSchemaTitle(\"{title}\")]");
     if (schema.TryGetProperty("additionalProperties", out var addPropEl) && addPropEl.ValueKind == JsonValueKind.False)
         sb.AppendLine("[JsonSchemaAdditionalProperties(false)]");
-    sb.AppendLine($"public class {pascalName}");
+    sb.AppendLine($"public partial class {pascalName}");
     sb.AppendLine("{");
     if (propsEl.ValueKind != JsonValueKind.Undefined)
-        EmitProperties(sb, propsEl, usings);
+        EmitProperties(sb, propsEl, usings, pascalName);
     sb.AppendLine("}");
     return sb.ToString();
 }
@@ -826,14 +865,14 @@ string GenerateFlattenedRefModel(string title, string pascalName, string? descri
     sb.AppendLine($"[JsonSchemaTitle(\"{title}\")]");
     sb.AppendLine($"[JsonSchemaRef(\"{refTitle}\")]");
     sb.AppendLine($"[JsonConverter(typeof({pascalName}Converter))]");
-    sb.AppendLine($"public class {pascalName}");
+    sb.AppendLine($"public partial class {pascalName}");
     sb.AppendLine("{");
     sb.AppendLine("    [JsonIgnore]");
     sb.AppendLine($"    public {refType} Base {{ get; set; }} = default!;");
     if (propsEl.ValueKind != JsonValueKind.Undefined)
     {
         sb.AppendLine();
-        EmitProperties(sb, propsEl, usings);
+        EmitProperties(sb, propsEl, usings, pascalName);
     }
     sb.AppendLine("}");
     sb.AppendLine();
@@ -955,7 +994,7 @@ string GenerateArrayWrapper(string title, string pascalName, string? description
     var sb = new StringBuilder();
     AppendDescription(sb, description);
     sb.AppendLine($"[JsonSchemaTitle(\"{title}\")]");
-    sb.AppendLine($"public class {pascalName}");
+    sb.AppendLine($"public partial class {pascalName}");
     sb.AppendLine("{");
 
     var itemType = "JsonElement";
@@ -1011,7 +1050,7 @@ string GeneratePrimitiveWrapper(string title, string pascalName, string? descrip
     var sb = new StringBuilder();
     AppendDescription(sb, description);
     sb.AppendLine($"[JsonSchemaTitle(\"{title}\")]");
-    sb.AppendLine($"public class {pascalName}");
+    sb.AppendLine($"public partial class {pascalName}");
     sb.AppendLine("{");
     var csType = ConvertSchemaToType(schema, usings);
     EmitPropertyConstraintAttributes(sb, schema, "    ");
@@ -1024,7 +1063,7 @@ string GeneratePrimitiveWrapper(string title, string pascalName, string? descrip
 // Property emission
 // ===========================================================================
 
-void EmitProperties(StringBuilder sb, JsonElement propsEl, HashSet<string> usings)
+void EmitProperties(StringBuilder sb, JsonElement propsEl, HashSet<string> usings, string? enclosingClassName = null)
 {
     var props = propsEl.EnumerateObject().OrderBy(p => p.Name).ToList();
     for (int i = 0; i < props.Count; i++)
@@ -1034,6 +1073,8 @@ void EmitProperties(StringBuilder sb, JsonElement propsEl, HashSet<string> using
         var propSchema = prop.Value;
         var propDesc = GetString(propSchema, "description");
         var csPropName = ToPascalCase(propName.TrimStart('$'));
+        if (enclosingClassName != null && csPropName == enclosingClassName)
+            csPropName += "Value";
 
         if (propDesc != null)
         {
@@ -1084,6 +1125,9 @@ void EmitProperties(StringBuilder sb, JsonElement propsEl, HashSet<string> using
             defaultInit = ConvertDefaultValue(defaultEl, csType);
             var jsonDefault = defaultEl.GetRawText();
             sb.AppendLine($"    [JsonSchemaDefault({EscapeCSharpString(jsonDefault)})]");
+            // If property name matches type name, enum member syntax won't compile in initializer
+            if (defaultInit != null && csPropName == csType && defaultInit.StartsWith(csType + "."))
+                defaultInit = "default!";
         }
 
         if (isNullable)
@@ -1414,7 +1458,7 @@ string ConvertDefaultValue(JsonElement defaultEl, string csType)
         {
             foreach (var (schemaTitle, schemaBody) in schemas)
             {
-                if (TitleToPascal(schemaTitle) == csType)
+                if (TitleToClassName(schemaTitle) == csType)
                 {
                     // Only flat enums (type: string + enum, no anyOf) stay as C# enums
                     if (schemaBody.TryGetProperty("enum", out _) && GetString(schemaBody, "type") == "string"
@@ -1445,10 +1489,20 @@ string ConvertDefaultValue(JsonElement defaultEl, string csType)
 
 string ResolveRefType(string refTitle, HashSet<string> usings)
 {
-    var pascalName = TitleToPascal(refTitle);
-    var ns = GetNamespaceForTitle(refTitle);
-    usings.Add(ns);
-    return pascalName;
+    var shortName = TitleToClassName(refTitle);
+    var refNs = GetNamespaceForTitle(refTitle);
+
+    // Same namespace — no using needed, no collision possible
+    if (refNs == currentNs)
+        return shortName;
+
+    // Ambiguous name — fully qualify to avoid collision
+    if (ambiguousNames.Contains(shortName))
+        return $"{refNs}.{shortName}";
+
+    // Unambiguous — add using and return short name
+    usings.Add(refNs);
+    return shortName;
 }
 
 string GetNamespaceForTitle(string title)
@@ -1463,6 +1517,12 @@ string GetNamespaceForTitle(string title)
 // ===========================================================================
 // Naming helpers
 // ===========================================================================
+
+string TitleToClassName(string title)
+{
+    var parts = title.Split('.');
+    return parts.Last();
+}
 
 string TitleToPascal(string title)
 {

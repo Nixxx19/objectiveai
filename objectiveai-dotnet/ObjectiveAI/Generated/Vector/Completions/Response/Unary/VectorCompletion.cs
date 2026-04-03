@@ -22,14 +22,14 @@ Contains the final scores, all votes from the swarm, and the underlying
 agent completions that produced those votes.
 """)]
 [JsonSchemaTitle("vector.completions.response.unary.VectorCompletion")]
-public class VectorCompletionsResponseUnaryVectorCompletion
+public partial class VectorCompletion
 {
     /// <summary>
     /// The underlying agent completions from each agent in the swarm.
     /// </summary>
     [Description("The underlying agent completions from each agent in the swarm.")]
     [JsonPropertyName("completions")]
-    public List<VectorCompletionsResponseUnaryAgentCompletion> Completions { get; set; } = default!;
+    public List<AgentCompletion> Completions { get; set; } = default!;
 
     /// <summary>
     /// Unix timestamp when the completion was created.
@@ -53,7 +53,7 @@ public class VectorCompletionsResponseUnaryVectorCompletion
 Object type identifier (`"vector.completion"`).
 """")]
     [JsonPropertyName("object")]
-    public VectorCompletionsResponseUnaryObject Object { get; set; } = default!;
+    public Object Object { get; set; } = default!;
 
     /// <summary>
     /// Final weighted scores for each response option. Sums to 1.
@@ -75,14 +75,14 @@ Object type identifier (`"vector.completion"`).
     /// </summary>
     [Description("Aggregated token and cost usage across all completions.")]
     [JsonPropertyName("usage")]
-    public AgentCompletionsResponseUsage Usage { get; set; } = default!;
+    public Usage Usage { get; set; } = default!;
 
     /// <summary>
     /// Individual votes from each agent, showing their selections.
     /// </summary>
     [Description("Individual votes from each agent, showing their selections.")]
     [JsonPropertyName("votes")]
-    public List<VectorCompletionsResponseVote> Votes { get; set; } = default!;
+    public List<Vote> Votes { get; set; } = default!;
 
     /// <summary>
     /// Total weight allocated to each response option. Same length as `scores`.

@@ -8,20 +8,20 @@ using System.Text.Json.Serialization;
 
 namespace ObjectiveAI.Functions.AlphaVector;
 
-public class FunctionsAlphaVectorInlineFunctionBranch
+public partial class InlineFunctionBranch
 {
     [JsonPropertyName("tasks")]
-    public List<FunctionsAlphaVectorBranchTaskExpression> Tasks { get; set; } = default!;
+    public List<BranchTaskExpression> Tasks { get; set; } = default!;
 
     [JsonPropertyName("type")]
     [JsonSchemaEnum("alpha.vector.branch.function")]
     public string Type { get; set; } = default!;
 }
 
-public class FunctionsAlphaVectorInlineFunctionLeaf
+public partial class InlineFunctionLeaf
 {
     [JsonPropertyName("tasks")]
-    public List<FunctionsAlphaVectorLeafTaskExpression> Tasks { get; set; } = default!;
+    public List<LeafTaskExpression> Tasks { get; set; } = default!;
 
     [JsonPropertyName("type")]
     [JsonSchemaEnum("alpha.vector.leaf.function")]
@@ -30,19 +30,19 @@ public class FunctionsAlphaVectorInlineFunctionLeaf
 
 
 [JsonSchemaTitle("functions.alpha_vector.InlineFunction")]
-[JsonConverter(typeof(FunctionsAlphaVectorInlineFunctionConverter))]
-public class FunctionsAlphaVectorInlineFunction
+[JsonConverter(typeof(InlineFunctionConverter))]
+public partial class InlineFunction
 {
     [JsonSchemaVariant("Branch", Type = "object")]
-    public FunctionsAlphaVectorInlineFunctionBranch? Branch { get; set; }
+    public InlineFunctionBranch? Branch { get; set; }
 
     [JsonSchemaVariant("Leaf", Type = "object")]
-    public FunctionsAlphaVectorInlineFunctionLeaf? Leaf { get; set; }
+    public InlineFunctionLeaf? Leaf { get; set; }
 }
 
-public class FunctionsAlphaVectorInlineFunctionConverter : JsonConverter<FunctionsAlphaVectorInlineFunction>
+public class InlineFunctionConverter : JsonConverter<InlineFunction>
 {
-    public override FunctionsAlphaVectorInlineFunction? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override InlineFunction? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -57,7 +57,7 @@ public class FunctionsAlphaVectorInlineFunctionConverter : JsonConverter<Functio
                     match0 = false;
                 if (match0)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsAlphaVectorInlineFunctionBranch>(raw, options); if (val != null) return new FunctionsAlphaVectorInlineFunction { Branch = val }; }
+                    try { var val = JsonSerializer.Deserialize<InlineFunctionBranch>(raw, options); if (val != null) return new InlineFunction { Branch = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -67,16 +67,16 @@ public class FunctionsAlphaVectorInlineFunctionConverter : JsonConverter<Functio
                     match1 = false;
                 if (match1)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsAlphaVectorInlineFunctionLeaf>(raw, options); if (val != null) return new FunctionsAlphaVectorInlineFunction { Leaf = val }; }
+                    try { var val = JsonSerializer.Deserialize<InlineFunctionLeaf>(raw, options); if (val != null) return new InlineFunction { Leaf = val }; }
                     catch (JsonException) { }
                 }
             }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsAlphaVectorInlineFunction");
+        throw new JsonException($"Data did not match any variant of InlineFunction");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsAlphaVectorInlineFunction value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, InlineFunction value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Branch != null)

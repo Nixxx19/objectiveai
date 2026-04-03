@@ -11,26 +11,26 @@ namespace ObjectiveAI.Functions.Profiles;
 
 [JsonSchemaTitle("functions.profiles.GetProfileResponse")]
 [JsonSchemaRef("RemotePath")]
-[JsonConverter(typeof(FunctionsProfilesGetProfileResponseConverter))]
-public class FunctionsProfilesGetProfileResponse
+[JsonConverter(typeof(GetProfileResponseConverter))]
+public partial class GetProfileResponse
 {
     [JsonIgnore]
     public RemotePath Base { get; set; } = default!;
 }
 
-public class FunctionsProfilesGetProfileResponseConverter : JsonConverter<FunctionsProfilesGetProfileResponse>
+public class GetProfileResponseConverter : JsonConverter<GetProfileResponse>
 {
-    public override FunctionsProfilesGetProfileResponse? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override GetProfileResponse? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
         var baseObj = JsonSerializer.Deserialize<RemotePath>(raw, options)!;
-        var result = new FunctionsProfilesGetProfileResponse { Base = baseObj };
+        var result = new GetProfileResponse { Base = baseObj };
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsProfilesGetProfileResponse value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, GetProfileResponse value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

@@ -14,11 +14,11 @@ namespace ObjectiveAI.Agent;
 [Description("An [`AgentWithFallbacks`] with a count (post-validation swarm agent slot).")]
 [JsonSchemaTitle("agent.AgentWithFallbacksWithCount")]
 [JsonSchemaRef("agent.AgentWithFallbacks")]
-[JsonConverter(typeof(AgentAgentWithFallbacksWithCountConverter))]
-public class AgentAgentWithFallbacksWithCount
+[JsonConverter(typeof(AgentWithFallbacksWithCountConverter))]
+public partial class AgentWithFallbacksWithCount
 {
     [JsonIgnore]
-    public AgentAgentWithFallbacks Base { get; set; } = default!;
+    public AgentWithFallbacks Base { get; set; } = default!;
 
     /// <summary>
     /// Number of instances of this agent in the swarm. Defaults to 1.
@@ -30,21 +30,21 @@ public class AgentAgentWithFallbacksWithCount
     public ulong Count { get; set; } = 1;
 }
 
-public class AgentAgentWithFallbacksWithCountConverter : JsonConverter<AgentAgentWithFallbacksWithCount>
+public class AgentWithFallbacksWithCountConverter : JsonConverter<AgentWithFallbacksWithCount>
 {
-    public override AgentAgentWithFallbacksWithCount? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override AgentWithFallbacksWithCount? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
-        var baseObj = JsonSerializer.Deserialize<AgentAgentWithFallbacks>(raw, options)!;
-        var result = new AgentAgentWithFallbacksWithCount { Base = baseObj };
+        var baseObj = JsonSerializer.Deserialize<AgentWithFallbacks>(raw, options)!;
+        var result = new AgentWithFallbacksWithCount { Base = baseObj };
         if (doc.RootElement.TryGetProperty("count", out var _CountEl))
             result.Count = JsonSerializer.Deserialize<ulong>(_CountEl.GetRawText(), options)!;
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentAgentWithFallbacksWithCount value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, AgentWithFallbacksWithCount value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

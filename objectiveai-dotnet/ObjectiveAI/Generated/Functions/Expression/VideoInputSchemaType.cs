@@ -8,8 +8,8 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Expression;
 
 [JsonSchemaTitle("functions.expression.VideoInputSchemaType")]
-[JsonConverter(typeof(JsonStringEnumConverter<FunctionsExpressionVideoInputSchemaType>))]
-public enum FunctionsExpressionVideoInputSchemaType
+[JsonConverter(typeof(JsonStringEnumConverter<VideoInputSchemaType>))]
+public enum VideoInputSchemaType
 {
     [JsonStringEnumMemberName("video")]
     Video

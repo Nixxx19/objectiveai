@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.AlphaVector;
 
 [JsonSchemaVariantWrapper("functions.alpha_vector.ScalarFunctionTaskExpression", Type = "object")]
-public class FunctionsAlphaVectorBranchTaskExpressionScalarFunction
+public partial class BranchTaskExpressionScalarFunction
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("alpha.scalar.function")]
@@ -17,7 +17,7 @@ public class FunctionsAlphaVectorBranchTaskExpressionScalarFunction
 }
 
 [JsonSchemaVariantWrapper("functions.alpha_vector.VectorFunctionTaskExpression", Type = "object")]
-public class FunctionsAlphaVectorBranchTaskExpressionVectorFunction
+public partial class BranchTaskExpressionVectorFunction
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("alpha.vector.function")]
@@ -25,7 +25,7 @@ public class FunctionsAlphaVectorBranchTaskExpressionVectorFunction
 }
 
 [JsonSchemaVariantWrapper("functions.alpha_vector.PlaceholderScalarFunctionTaskExpression", Type = "object")]
-public class FunctionsAlphaVectorBranchTaskExpressionPlaceholderScalarFunction
+public partial class BranchTaskExpressionPlaceholderScalarFunction
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("placeholder.alpha.scalar.function")]
@@ -33,7 +33,7 @@ public class FunctionsAlphaVectorBranchTaskExpressionPlaceholderScalarFunction
 }
 
 [JsonSchemaVariantWrapper("functions.alpha_vector.PlaceholderVectorFunctionTaskExpression", Type = "object")]
-public class FunctionsAlphaVectorBranchTaskExpressionPlaceholderVectorFunction
+public partial class BranchTaskExpressionPlaceholderVectorFunction
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("placeholder.alpha.vector.function")]
@@ -42,25 +42,25 @@ public class FunctionsAlphaVectorBranchTaskExpressionPlaceholderVectorFunction
 
 
 [JsonSchemaTitle("functions.alpha_vector.BranchTaskExpression")]
-[JsonConverter(typeof(FunctionsAlphaVectorBranchTaskExpressionConverter))]
-public class FunctionsAlphaVectorBranchTaskExpression
+[JsonConverter(typeof(BranchTaskExpressionConverter))]
+public partial class BranchTaskExpression
 {
     [JsonSchemaVariant("ScalarFunction", Ref = "functions.alpha_vector.ScalarFunctionTaskExpression", Type = "object")]
-    public FunctionsAlphaVectorBranchTaskExpressionScalarFunction? ScalarFunction { get; set; }
+    public BranchTaskExpressionScalarFunction? ScalarFunction { get; set; }
 
     [JsonSchemaVariant("VectorFunction", Ref = "functions.alpha_vector.VectorFunctionTaskExpression", Type = "object")]
-    public FunctionsAlphaVectorBranchTaskExpressionVectorFunction? VectorFunction { get; set; }
+    public BranchTaskExpressionVectorFunction? VectorFunction { get; set; }
 
     [JsonSchemaVariant("PlaceholderScalarFunction", Ref = "functions.alpha_vector.PlaceholderScalarFunctionTaskExpression", Type = "object")]
-    public FunctionsAlphaVectorBranchTaskExpressionPlaceholderScalarFunction? PlaceholderScalarFunction { get; set; }
+    public BranchTaskExpressionPlaceholderScalarFunction? PlaceholderScalarFunction { get; set; }
 
     [JsonSchemaVariant("PlaceholderVectorFunction", Ref = "functions.alpha_vector.PlaceholderVectorFunctionTaskExpression", Type = "object")]
-    public FunctionsAlphaVectorBranchTaskExpressionPlaceholderVectorFunction? PlaceholderVectorFunction { get; set; }
+    public BranchTaskExpressionPlaceholderVectorFunction? PlaceholderVectorFunction { get; set; }
 }
 
-public class FunctionsAlphaVectorBranchTaskExpressionConverter : JsonConverter<FunctionsAlphaVectorBranchTaskExpression>
+public class BranchTaskExpressionConverter : JsonConverter<BranchTaskExpression>
 {
-    public override FunctionsAlphaVectorBranchTaskExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override BranchTaskExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -75,7 +75,7 @@ public class FunctionsAlphaVectorBranchTaskExpressionConverter : JsonConverter<F
                     match0 = false;
                 if (match0)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsAlphaVectorBranchTaskExpressionScalarFunction>(raw, options); if (val != null) return new FunctionsAlphaVectorBranchTaskExpression { ScalarFunction = val }; }
+                    try { var val = JsonSerializer.Deserialize<BranchTaskExpressionScalarFunction>(raw, options); if (val != null) return new BranchTaskExpression { ScalarFunction = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -85,7 +85,7 @@ public class FunctionsAlphaVectorBranchTaskExpressionConverter : JsonConverter<F
                     match1 = false;
                 if (match1)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsAlphaVectorBranchTaskExpressionVectorFunction>(raw, options); if (val != null) return new FunctionsAlphaVectorBranchTaskExpression { VectorFunction = val }; }
+                    try { var val = JsonSerializer.Deserialize<BranchTaskExpressionVectorFunction>(raw, options); if (val != null) return new BranchTaskExpression { VectorFunction = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -95,7 +95,7 @@ public class FunctionsAlphaVectorBranchTaskExpressionConverter : JsonConverter<F
                     match2 = false;
                 if (match2)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsAlphaVectorBranchTaskExpressionPlaceholderScalarFunction>(raw, options); if (val != null) return new FunctionsAlphaVectorBranchTaskExpression { PlaceholderScalarFunction = val }; }
+                    try { var val = JsonSerializer.Deserialize<BranchTaskExpressionPlaceholderScalarFunction>(raw, options); if (val != null) return new BranchTaskExpression { PlaceholderScalarFunction = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -105,16 +105,16 @@ public class FunctionsAlphaVectorBranchTaskExpressionConverter : JsonConverter<F
                     match3 = false;
                 if (match3)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsAlphaVectorBranchTaskExpressionPlaceholderVectorFunction>(raw, options); if (val != null) return new FunctionsAlphaVectorBranchTaskExpression { PlaceholderVectorFunction = val }; }
+                    try { var val = JsonSerializer.Deserialize<BranchTaskExpressionPlaceholderVectorFunction>(raw, options); if (val != null) return new BranchTaskExpression { PlaceholderVectorFunction = val }; }
                     catch (JsonException) { }
                 }
             }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsAlphaVectorBranchTaskExpression");
+        throw new JsonException($"Data did not match any variant of BranchTaskExpression");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsAlphaVectorBranchTaskExpression value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, BranchTaskExpression value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.ScalarFunction != null)

@@ -21,7 +21,7 @@ Contains identifiers for each task's votes that can be reused in a
 subsequent execution. Serialized as base64-encoded JSON.
 """)]
 [JsonSchemaTitle("functions.executions.RetryToken")]
-public class FunctionsExecutionsRetryToken
+public partial class RetryToken
 {
     [JsonSchemaItemsNullable]
     public List<string?> Items { get; set; } = [];

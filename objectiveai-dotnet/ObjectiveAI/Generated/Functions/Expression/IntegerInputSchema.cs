@@ -12,7 +12,7 @@ namespace ObjectiveAI.Functions.Expression;
 /// </summary>
 [Description("Schema for an integer input.")]
 [JsonSchemaTitle("functions.expression.IntegerInputSchema")]
-public class FunctionsExpressionIntegerInputSchema
+public partial class IntegerInputSchema
 {
     /// <summary>
     /// Human-readable description of the integer.
@@ -44,5 +44,5 @@ public class FunctionsExpressionIntegerInputSchema
     public long? Minimum { get; set; } = null;
 
     [JsonPropertyName("type")]
-    public FunctionsExpressionIntegerInputSchemaType Type { get; set; } = default!;
+    public IntegerInputSchemaType Type { get; set; } = default!;
 }

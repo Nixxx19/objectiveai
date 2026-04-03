@@ -18,11 +18,11 @@ An [`InlineAgentBaseWithFallbacksOrRemote`] with a count
 """)]
 [JsonSchemaTitle("agent.InlineAgentBaseWithFallbacksOrRemoteWithCount")]
 [JsonSchemaRef("agent.InlineAgentBaseWithFallbacksOrRemote")]
-[JsonConverter(typeof(AgentInlineAgentBaseWithFallbacksOrRemoteWithCountConverter))]
-public class AgentInlineAgentBaseWithFallbacksOrRemoteWithCount
+[JsonConverter(typeof(InlineAgentBaseWithFallbacksOrRemoteWithCountConverter))]
+public partial class InlineAgentBaseWithFallbacksOrRemoteWithCount
 {
     [JsonIgnore]
-    public AgentInlineAgentBaseWithFallbacksOrRemote Base { get; set; } = default!;
+    public InlineAgentBaseWithFallbacksOrRemote Base { get; set; } = default!;
 
     /// <summary>
     /// Number of instances of this agent in the swarm. Defaults to 1.
@@ -34,21 +34,21 @@ public class AgentInlineAgentBaseWithFallbacksOrRemoteWithCount
     public ulong Count { get; set; } = 1;
 }
 
-public class AgentInlineAgentBaseWithFallbacksOrRemoteWithCountConverter : JsonConverter<AgentInlineAgentBaseWithFallbacksOrRemoteWithCount>
+public class InlineAgentBaseWithFallbacksOrRemoteWithCountConverter : JsonConverter<InlineAgentBaseWithFallbacksOrRemoteWithCount>
 {
-    public override AgentInlineAgentBaseWithFallbacksOrRemoteWithCount? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override InlineAgentBaseWithFallbacksOrRemoteWithCount? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
-        var baseObj = JsonSerializer.Deserialize<AgentInlineAgentBaseWithFallbacksOrRemote>(raw, options)!;
-        var result = new AgentInlineAgentBaseWithFallbacksOrRemoteWithCount { Base = baseObj };
+        var baseObj = JsonSerializer.Deserialize<InlineAgentBaseWithFallbacksOrRemote>(raw, options)!;
+        var result = new InlineAgentBaseWithFallbacksOrRemoteWithCount { Base = baseObj };
         if (doc.RootElement.TryGetProperty("count", out var _CountEl))
             result.Count = JsonSerializer.Deserialize<ulong>(_CountEl.GetRawText(), options)!;
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentInlineAgentBaseWithFallbacksOrRemoteWithCount value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, InlineAgentBaseWithFallbacksOrRemoteWithCount value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

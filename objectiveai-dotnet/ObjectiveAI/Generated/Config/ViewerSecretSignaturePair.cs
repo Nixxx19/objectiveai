@@ -24,7 +24,7 @@ by computing SHA256(secret) and comparing against the incoming header value.
 Knowing the signature does not reveal the secret (preimage resistance).
 """)]
 [JsonSchemaTitle("config.ViewerSecretSignaturePair")]
-public class ConfigViewerSecretSignaturePair
+public partial class ViewerSecretSignaturePair
 {
     /// <summary>
     /// The secret for the viewer server.

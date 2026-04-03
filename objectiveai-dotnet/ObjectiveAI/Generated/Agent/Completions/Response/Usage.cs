@@ -20,7 +20,7 @@ This is the "primary" usage type that aggregates across all upstream
 assistant responses within a single agent completion.
 """")]
 [JsonSchemaTitle("agent.completions.response.Usage")]
-public class AgentCompletionsResponseUsage
+public partial class Usage
 {
     /// <summary>
     /// Total tokens generated across all assistant responses.
@@ -37,7 +37,7 @@ public class AgentCompletionsResponseUsage
     [JsonPropertyName("completion_tokens_details")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsResponseCompletionTokensDetails? CompletionTokensDetails { get; set; } = null;
+    public CompletionTokensDetails? CompletionTokensDetails { get; set; } = null;
 
     /// <summary>
     /// Cost charged by ObjectiveAI for this request.
@@ -54,7 +54,7 @@ public class AgentCompletionsResponseUsage
     [JsonPropertyName("cost_details")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsResponseCostDetails? CostDetails { get; set; } = null;
+    public CostDetails? CostDetails { get; set; } = null;
 
     /// <summary>
     /// Total prompt tokens across all assistant responses.
@@ -71,7 +71,7 @@ public class AgentCompletionsResponseUsage
     [JsonPropertyName("prompt_tokens_details")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsResponsePromptTokensDetails? PromptTokensDetails { get; set; } = null;
+    public PromptTokensDetails? PromptTokensDetails { get; set; } = null;
 
     /// <summary>
     /// Total cost including upstream provider charges. Only differs from `cost`

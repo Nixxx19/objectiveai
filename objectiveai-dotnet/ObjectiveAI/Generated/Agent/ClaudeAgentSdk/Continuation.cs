@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Agent.ClaudeAgentSdk;
 
 [JsonSchemaTitle("agent.claude_agent_sdk.Continuation")]
-public class AgentClaudeAgentSdkContinuation
+public partial class Continuation
 {
     [JsonPropertyName("mcp_sessions")]
     public Dictionary<string, string> McpSessions { get; set; } = default!;
@@ -17,5 +17,5 @@ public class AgentClaudeAgentSdkContinuation
     public string SessionId { get; set; } = default!;
 
     [JsonPropertyName("upstream")]
-    public AgentClaudeAgentSdkUpstream Upstream { get; set; } = default!;
+    public Upstream Upstream { get; set; } = default!;
 }

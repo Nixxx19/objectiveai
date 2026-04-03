@@ -12,14 +12,14 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("A user message from the end user.")]
 [JsonSchemaTitle("agent.completions.message.UserMessage")]
-public class AgentCompletionsMessageUserMessage
+public partial class UserMessage
 {
     /// <summary>
     /// The message content (supports text, images, audio, video, files).
     /// </summary>
     [Description("The message content (supports text, images, audio, video, files).")]
     [JsonPropertyName("content")]
-    public AgentCompletionsMessageRichContent Content { get; set; } = default!;
+    public RichContent Content { get; set; } = default!;
 
     /// <summary>
     /// Optional name for the user.

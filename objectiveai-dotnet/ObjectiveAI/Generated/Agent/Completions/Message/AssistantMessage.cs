@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("An assistant message (model's previous response).")]
 [JsonSchemaTitle("agent.completions.message.AssistantMessage")]
-public class AgentCompletionsMessageAssistantMessage
+public partial class AssistantMessage
 {
     /// <summary>
     /// The message content, if any.
@@ -21,7 +21,7 @@ public class AgentCompletionsMessageAssistantMessage
     [JsonPropertyName("content")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsMessageRichContent? Content { get; set; } = null;
+    public RichContent? Content { get; set; } = null;
 
     /// <summary>
     /// Optional name for the assistant.
@@ -57,5 +57,5 @@ public class AgentCompletionsMessageAssistantMessage
     [JsonPropertyName("tool_calls")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public List<AgentCompletionsMessageAssistantToolCall>? ToolCalls { get; set; } = null;
+    public List<AssistantToolCall>? ToolCalls { get; set; } = null;
 }

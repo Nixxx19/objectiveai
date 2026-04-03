@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Inventions;
 
 [JsonSchemaTitle("functions.inventions.TasksLengthObject")]
-public class FunctionsInventionsTasksLengthObject
+public partial class TasksLengthObject
 {
     [JsonPropertyName("tasks_length")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]

@@ -21,7 +21,7 @@ This extends [`ApiKeyWithMetadata`](super::ApiKeyWithMetadata) with
 the total cost incurred by requests using this key.
 """)]
 [JsonSchemaTitle("auth.ListApiKeyItem")]
-public class AuthListApiKeyItem
+public partial class ListApiKeyItem
 {
     /// <summary>
     /// The API key itself.

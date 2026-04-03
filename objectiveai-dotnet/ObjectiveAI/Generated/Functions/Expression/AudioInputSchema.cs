@@ -12,7 +12,7 @@ namespace ObjectiveAI.Functions.Expression;
 /// </summary>
 [Description("Schema for an audio input.")]
 [JsonSchemaTitle("functions.expression.AudioInputSchema")]
-public class FunctionsExpressionAudioInputSchema
+public partial class AudioInputSchema
 {
     /// <summary>
     /// Human-readable description of the expected audio.
@@ -24,5 +24,5 @@ public class FunctionsExpressionAudioInputSchema
     public string? Description { get; set; } = null;
 
     [JsonPropertyName("type")]
-    public FunctionsExpressionAudioInputSchemaType Type { get; set; } = default!;
+    public AudioInputSchemaType Type { get; set; } = default!;
 }

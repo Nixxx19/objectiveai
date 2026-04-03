@@ -12,8 +12,8 @@ namespace ObjectiveAI.Agent;
 /// </summary>
 [Description("Source filter for listing agents.")]
 [JsonSchemaTitle("agent.ListAgentsSource")]
-[JsonConverter(typeof(JsonStringEnumConverter<AgentListAgentsSource>))]
-public enum AgentListAgentsSource
+[JsonConverter(typeof(JsonStringEnumConverter<ListAgentsSource>))]
+public enum ListAgentsSource
 {
     [JsonStringEnumMemberName("all")]
     All,

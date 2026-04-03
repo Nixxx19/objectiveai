@@ -13,7 +13,7 @@ namespace ObjectiveAI.Functions.Profiles;
 /// </summary>
 [Description("Response from listing profiles.")]
 [JsonSchemaTitle("functions.profiles.ListProfileResponse")]
-public class FunctionsProfilesListProfileResponse
+public partial class ListProfileResponse
 {
     /// <summary>
     /// List of available profiles.

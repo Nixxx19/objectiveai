@@ -8,30 +8,30 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Config;
 
 [JsonSchemaTitle("config.Config")]
-public class ConfigConfig
+public partial class Config
 {
     [JsonPropertyName("agents")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public ConfigAgentsConfig? Agents { get; set; } = null;
+    public AgentsConfig? Agents { get; set; } = null;
 
     [JsonPropertyName("api")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public ConfigApiConfig? Api { get; set; } = null;
+    public ApiConfig? Api { get; set; } = null;
 
     [JsonPropertyName("functions")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public ConfigFunctionsConfig? Functions { get; set; } = null;
+    public FunctionsConfig? Functions { get; set; } = null;
 
     [JsonPropertyName("swarms")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public ConfigSwarmsConfig? Swarms { get; set; } = null;
+    public SwarmsConfig? Swarms { get; set; } = null;
 
     [JsonPropertyName("viewer")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public ConfigViewerConfig? Viewer { get; set; } = null;
+    public ViewerConfig? Viewer { get; set; } = null;
 }

@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Completions.Response;
 /// </summary>
 [Description("Detailed breakdown of prompt token usage.")]
 [JsonSchemaTitle("agent.completions.response.PromptTokensDetails")]
-public class AgentCompletionsResponsePromptTokensDetails
+public partial class PromptTokensDetails
 {
     /// <summary>
     /// Audio input tokens.

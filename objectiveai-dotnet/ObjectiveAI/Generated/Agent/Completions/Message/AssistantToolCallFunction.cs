@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("Details of a function call made by the assistant.")]
 [JsonSchemaTitle("agent.completions.message.AssistantToolCallFunction")]
-public class AgentCompletionsMessageAssistantToolCallFunction
+public partial class AssistantToolCallFunction
 {
     /// <summary>
     /// The arguments to pass to the function, as a JSON string.

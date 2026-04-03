@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Config;
 
 [JsonSchemaTitle("config.ViewerLocalConfig")]
-public class ConfigViewerLocalConfig
+public partial class ViewerLocalConfig
 {
     [JsonPropertyName("secret")]
     [JsonSchemaOmitEmpty]

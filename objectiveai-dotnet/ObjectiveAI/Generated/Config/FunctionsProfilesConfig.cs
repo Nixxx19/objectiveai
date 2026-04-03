@@ -8,15 +8,15 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Config;
 
 [JsonSchemaTitle("config.FunctionsProfilesConfig")]
-public class ConfigFunctionsProfilesConfig
+public partial class FunctionsProfilesConfig
 {
     [JsonPropertyName("favorites")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public List<ConfigFavorite>? Favorites { get; set; } = null;
+    public List<Favorite>? Favorites { get; set; } = null;
 
     [JsonPropertyName("pairs")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public ConfigFunctionsProfilesPairsConfig? Pairs { get; set; } = null;
+    public FunctionsProfilesPairsConfig? Pairs { get; set; } = null;
 }

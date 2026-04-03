@@ -17,8 +17,8 @@ Wrapper for function execution output, distinguishing between
 a null output value and a missing output.
 """)]
 [JsonSchemaTitle("functions.executions.response.Output")]
-public class FunctionsExecutionsResponseOutput
+public partial class Output
 {
     [JsonPropertyName("output")]
-    public FunctionsExpressionTaskOutput Output { get; set; } = default!;
+    public TaskOutput OutputValue { get; set; } = default!;
 }

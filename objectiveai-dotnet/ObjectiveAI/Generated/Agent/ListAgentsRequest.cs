@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent;
 /// </summary>
 [Description("Query parameters for the list agents endpoint.")]
 [JsonSchemaTitle("agent.ListAgentsRequest")]
-public class AgentListAgentsRequest
+public partial class ListAgentsRequest
 {
     /// <summary>
     /// Optional source filter for listing agents.
@@ -21,5 +21,5 @@ public class AgentListAgentsRequest
     [JsonPropertyName("source")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentListAgentsSource? Source { get; set; } = null;
+    public ListAgentsSource? Source { get; set; } = null;
 }

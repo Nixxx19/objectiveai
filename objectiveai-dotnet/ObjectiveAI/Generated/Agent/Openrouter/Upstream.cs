@@ -12,8 +12,8 @@ namespace ObjectiveAI.Agent.Openrouter;
 /// </summary>
 [Description("OpenRouter upstream marker.")]
 [JsonSchemaTitle("agent.openrouter.Upstream")]
-[JsonConverter(typeof(JsonStringEnumConverter<AgentOpenrouterUpstream>))]
-public enum AgentOpenrouterUpstream
+[JsonConverter(typeof(JsonStringEnumConverter<Upstream>))]
+public enum Upstream
 {
     [JsonStringEnumMemberName("openrouter")]
     Openrouter

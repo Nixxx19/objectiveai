@@ -23,7 +23,7 @@ code and a message. The message can be any JSON value, allowing for
 both simple string errors and structured error objects.
 """)]
 [JsonSchemaTitle("error.ResponseError")]
-public class ErrorResponseError
+public partial class ResponseError
 {
     /// <summary>
     /// The HTTP status code of the error response.

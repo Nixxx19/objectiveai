@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Completions.Response;
 /// </summary>
 [Description("Log probability information for a single token.")]
 [JsonSchemaTitle("agent.completions.response.Logprob")]
-public class AgentCompletionsResponseLogprob
+public partial class Logprob
 {
     /// <summary>
     /// The raw bytes of the token.
@@ -29,7 +29,7 @@ public class AgentCompletionsResponseLogprob
     [Description("The log probability of this token.")]
     [JsonPropertyName("logprob")]
     [JsonSchemaRange(Minimum = "-3.4028234663852886e+38", Maximum = "3.4028234663852886e+38")]
-    public double Logprob { get; set; } = default!;
+    public double LogprobValue { get; set; } = default!;
 
     /// <summary>
     /// The token string.
@@ -43,5 +43,5 @@ public class AgentCompletionsResponseLogprob
     /// </summary>
     [Description("The top alternative tokens and their log probabilities.")]
     [JsonPropertyName("top_logprobs")]
-    public List<AgentCompletionsResponseTopLogprob> TopLogprobs { get; set; } = default!;
+    public List<TopLogprob> TopLogprobs { get; set; } = default!;
 }

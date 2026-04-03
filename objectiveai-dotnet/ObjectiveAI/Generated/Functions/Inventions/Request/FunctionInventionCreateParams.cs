@@ -3,7 +3,6 @@
 
 using ObjectiveAI;
 using ObjectiveAI.Agent;
-using ObjectiveAI.Agent.Completions.Request;
 using ObjectiveAI.Attributes;
 using ObjectiveAI.Functions.Inventions.State;
 using System.ComponentModel;
@@ -12,10 +11,10 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Inventions.Request;
 
 [JsonSchemaTitle("functions.inventions.request.FunctionInventionCreateParams")]
-public class FunctionsInventionsRequestFunctionInventionCreateParams
+public partial class FunctionInventionCreateParams
 {
     [JsonPropertyName("agent")]
-    public AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional Agent { get; set; } = default!;
+    public InlineAgentBaseWithFallbacksOrRemoteCommitOptional Agent { get; set; } = default!;
 
     /// <summary>
     /// Continuation from a previous completion, as a base64-encoded string.
@@ -54,7 +53,7 @@ Defaults to 3 if not specified.
     [JsonPropertyName("provider")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsRequestProvider? Provider { get; set; } = null;
+    public ObjectiveAI.Agent.Completions.Request.Provider? Provider { get; set; } = null;
 
     [JsonPropertyName("remote")]
     [JsonSchemaOmitEmpty]
@@ -68,7 +67,7 @@ Defaults to 3 if not specified.
     public long? Seed { get; set; } = null;
 
     [JsonPropertyName("state")]
-    public FunctionsInventionsStateParamsStateOrRemoteCommitOptional State { get; set; } = default!;
+    public ParamsStateOrRemoteCommitOptional State { get; set; } = default!;
 
     [JsonPropertyName("stream")]
     [JsonSchemaOmitEmpty]

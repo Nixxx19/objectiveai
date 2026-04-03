@@ -12,7 +12,7 @@ namespace ObjectiveAI.Functions.Expression;
 /// </summary>
 [Description("Schema for a string input.")]
 [JsonSchemaTitle("functions.expression.StringInputSchema")]
-public class FunctionsExpressionStringInputSchema
+public partial class StringInputSchema
 {
     /// <summary>
     /// Human-readable description of the string.
@@ -33,5 +33,5 @@ public class FunctionsExpressionStringInputSchema
     public List<string>? Enum { get; set; } = null;
 
     [JsonPropertyName("type")]
-    public FunctionsExpressionStringInputSchemaType Type { get; set; } = default!;
+    public StringInputSchemaType Type { get; set; } = default!;
 }

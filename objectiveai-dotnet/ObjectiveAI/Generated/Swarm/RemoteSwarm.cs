@@ -14,31 +14,31 @@ namespace ObjectiveAI.Swarm;
 [Description("A validated remote Swarm with metadata and computed content-addressed ID.")]
 [JsonSchemaTitle("swarm.RemoteSwarm")]
 [JsonSchemaRef("swarm.InlineSwarm")]
-[JsonConverter(typeof(SwarmRemoteSwarmConverter))]
-public class SwarmRemoteSwarm
+[JsonConverter(typeof(RemoteSwarmConverter))]
+public partial class RemoteSwarm
 {
     [JsonIgnore]
-    public SwarmInlineSwarm Base { get; set; } = default!;
+    public InlineSwarm Base { get; set; } = default!;
 
     [JsonPropertyName("description")]
     public string Description { get; set; } = default!;
 }
 
-public class SwarmRemoteSwarmConverter : JsonConverter<SwarmRemoteSwarm>
+public class RemoteSwarmConverter : JsonConverter<RemoteSwarm>
 {
-    public override SwarmRemoteSwarm? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override RemoteSwarm? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
-        var baseObj = JsonSerializer.Deserialize<SwarmInlineSwarm>(raw, options)!;
-        var result = new SwarmRemoteSwarm { Base = baseObj };
+        var baseObj = JsonSerializer.Deserialize<InlineSwarm>(raw, options)!;
+        var result = new RemoteSwarm { Base = baseObj };
         if (doc.RootElement.TryGetProperty("description", out var _DescriptionEl))
             result.Description = JsonSerializer.Deserialize<string>(_DescriptionEl.GetRawText(), options)!;
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, SwarmRemoteSwarm value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, RemoteSwarm value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("A tool call delta in a streaming response.")]
 [JsonSchemaTitle("agent.completions.message.AssistantToolCallDelta")]
-public class AgentCompletionsMessageAssistantToolCallDelta
+public partial class AssistantToolCallDelta
 {
     /// <summary>
     /// The function call details.
@@ -21,7 +21,7 @@ public class AgentCompletionsMessageAssistantToolCallDelta
     [JsonPropertyName("function")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsMessageAssistantToolCallFunctionDelta? Function { get; set; } = null;
+    public AssistantToolCallFunctionDelta? Function { get; set; } = null;
 
     /// <summary>
     /// The unique ID of this tool call.
@@ -49,5 +49,5 @@ The type of tool call (always "function").
     [JsonPropertyName("type")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsMessageAssistantToolCallType? Type { get; set; } = null;
+    public AssistantToolCallType? Type { get; set; } = null;
 }

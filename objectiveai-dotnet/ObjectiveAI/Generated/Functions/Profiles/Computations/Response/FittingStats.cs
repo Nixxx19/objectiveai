@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Profiles.Computations.Response;
 
 [JsonSchemaTitle("functions.profiles.computations.response.FittingStats")]
-public class FunctionsProfilesComputationsResponseFittingStats
+public partial class FittingStats
 {
     [JsonPropertyName("errors")]
     [JsonSchemaRange(Minimum = "0", Maximum = "4294967295")]

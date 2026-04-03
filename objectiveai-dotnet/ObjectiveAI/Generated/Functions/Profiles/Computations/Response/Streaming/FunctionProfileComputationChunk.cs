@@ -12,14 +12,14 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Profiles.Computations.Response.Streaming;
 
 [JsonSchemaTitle("functions.profiles.computations.response.streaming.FunctionProfileComputationChunk")]
-public class FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk
+public partial class FunctionProfileComputationChunk
 {
     [JsonPropertyName("created")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
     public ulong Created { get; set; } = default!;
 
     [JsonPropertyName("executions")]
-    public List<FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk> Executions { get; set; } = default!;
+    public List<FunctionExecutionChunk> Executions { get; set; } = default!;
 
     [JsonPropertyName("executions_errors")]
     [JsonSchemaOmitEmpty]
@@ -29,7 +29,7 @@ public class FunctionsProfilesComputationsResponseStreamingFunctionProfileComput
     [JsonPropertyName("fitting_stats")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public FunctionsProfilesComputationsResponseFittingStats? FittingStats { get; set; } = null;
+    public FittingStats? FittingStats { get; set; } = null;
 
     [JsonPropertyName("function")]
     [JsonSchemaNullable]
@@ -39,12 +39,12 @@ public class FunctionsProfilesComputationsResponseStreamingFunctionProfileComput
     public string Id { get; set; } = default!;
 
     [JsonPropertyName("object")]
-    public FunctionsProfilesComputationsResponseStreamingObject Object { get; set; } = default!;
+    public Object Object { get; set; } = default!;
 
     [JsonPropertyName("profile")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public FunctionsInlineTasksProfile? Profile { get; set; } = null;
+    public InlineTasksProfile? Profile { get; set; } = null;
 
     [JsonPropertyName("retry_token")]
     [JsonSchemaOmitEmpty]
@@ -54,5 +54,5 @@ public class FunctionsProfilesComputationsResponseStreamingFunctionProfileComput
     [JsonPropertyName("usage")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsResponseUsage? Usage { get; set; } = null;
+    public Usage? Usage { get; set; } = null;
 }

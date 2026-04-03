@@ -20,8 +20,8 @@ Configuration for a single task within a Profile.
 Each variant corresponds to a task type in the Function definition.
 """)]
 [JsonSchemaTitle("functions.TaskProfile")]
-[JsonConverter(typeof(FunctionsTaskProfileConverter))]
-public class FunctionsTaskProfile
+[JsonConverter(typeof(TaskProfileConverter))]
+public partial class TaskProfile
 {
     /// <summary>
     /// Profile for a nested function task (references another profile).
@@ -35,7 +35,7 @@ public class FunctionsTaskProfile
     /// </summary>
     [Description("Inline profile for a task (tasks-based or auto).")]
     [JsonSchemaVariant("Inline", Ref = "functions.InlineProfile")]
-    public FunctionsInlineProfile? Inline { get; set; }
+    public InlineProfile? Inline { get; set; }
 
     /// <summary>
     /// Placeholder task — no configuration needed, output is fixed.
@@ -45,9 +45,9 @@ public class FunctionsTaskProfile
     public Dictionary<string, JsonElement>? Placeholder { get; set; }
 }
 
-public class FunctionsTaskProfileConverter : JsonConverter<FunctionsTaskProfile>
+public class TaskProfileConverter : JsonConverter<TaskProfile>
 {
-    public override FunctionsTaskProfile? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override TaskProfile? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -56,18 +56,18 @@ public class FunctionsTaskProfileConverter : JsonConverter<FunctionsTaskProfile>
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<RemotePath>(raw, options); if (val0 != null) return new FunctionsTaskProfile { Remote = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<RemotePath>(raw, options); if (val0 != null) return new TaskProfile { Remote = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<FunctionsInlineProfile>(raw, options); if (val1 != null) return new FunctionsTaskProfile { Inline = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<InlineProfile>(raw, options); if (val1 != null) return new TaskProfile { Inline = val1 }; }
             catch (JsonException) { }
-            try { var val2 = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(raw, options); if (val2 != null) return new FunctionsTaskProfile { Placeholder = val2 }; }
+            try { var val2 = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(raw, options); if (val2 != null) return new TaskProfile { Placeholder = val2 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsTaskProfile");
+        throw new JsonException($"Data did not match any variant of TaskProfile");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsTaskProfile value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, TaskProfile value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Remote != null)

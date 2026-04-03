@@ -13,14 +13,14 @@ namespace ObjectiveAI.Functions;
 /// </summary>
 [Description("An inline tasks-based profile definition without metadata.")]
 [JsonSchemaTitle("functions.InlineTasksProfile")]
-public class FunctionsInlineTasksProfile
+public partial class InlineTasksProfile
 {
     /// <summary>
     /// Configuration for each task in the corresponding Function.
     /// </summary>
     [Description("Configuration for each task in the corresponding Function.")]
     [JsonPropertyName("tasks")]
-    public List<FunctionsTaskProfile> Tasks { get; set; } = default!;
+    public List<TaskProfile> Tasks { get; set; } = default!;
 
     /// <summary>
     /// Optional weights for each Task in the corresponding Function.

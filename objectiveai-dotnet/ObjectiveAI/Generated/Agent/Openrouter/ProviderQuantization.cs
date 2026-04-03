@@ -21,8 +21,8 @@ Quantization reduces model precision to decrease memory usage and
 increase inference speed, potentially at the cost of output quality.
 """)]
 [JsonSchemaTitle("agent.openrouter.ProviderQuantization")]
-[JsonConverter(typeof(AgentOpenrouterProviderQuantizationConverter))]
-public class AgentOpenrouterProviderQuantization
+[JsonConverter(typeof(ProviderQuantizationConverter))]
+public partial class ProviderQuantization
 {
     /// <summary>
     /// 4-bit integer quantization.
@@ -88,30 +88,30 @@ public class AgentOpenrouterProviderQuantization
     public string? Unknown { get; set; }
 }
 
-public class AgentOpenrouterProviderQuantizationConverter : JsonConverter<AgentOpenrouterProviderQuantization>
+public class ProviderQuantizationConverter : JsonConverter<ProviderQuantization>
 {
-    public override AgentOpenrouterProviderQuantization? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override ProviderQuantization? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         if (reader.TokenType != JsonTokenType.String)
-            throw new JsonException("Expected string for AgentOpenrouterProviderQuantization");
+            throw new JsonException("Expected string for ProviderQuantization");
         var str = reader.GetString()!;
         return str switch
         {
-            "int4" => new AgentOpenrouterProviderQuantization { Int4 = "int4" },
-            "int8" => new AgentOpenrouterProviderQuantization { Int8 = "int8" },
-            "fp4" => new AgentOpenrouterProviderQuantization { Fp4 = "fp4" },
-            "fp6" => new AgentOpenrouterProviderQuantization { Fp6 = "fp6" },
-            "fp8" => new AgentOpenrouterProviderQuantization { Fp8 = "fp8" },
-            "fp16" => new AgentOpenrouterProviderQuantization { Fp16 = "fp16" },
-            "bf16" => new AgentOpenrouterProviderQuantization { Bf16 = "bf16" },
-            "fp32" => new AgentOpenrouterProviderQuantization { Fp32 = "fp32" },
-            "unknown" => new AgentOpenrouterProviderQuantization { Unknown = "unknown" },
-            _ => throw new JsonException($"Unknown variant of AgentOpenrouterProviderQuantization: {str}")
+            "int4" => new ProviderQuantization { Int4 = "int4" },
+            "int8" => new ProviderQuantization { Int8 = "int8" },
+            "fp4" => new ProviderQuantization { Fp4 = "fp4" },
+            "fp6" => new ProviderQuantization { Fp6 = "fp6" },
+            "fp8" => new ProviderQuantization { Fp8 = "fp8" },
+            "fp16" => new ProviderQuantization { Fp16 = "fp16" },
+            "bf16" => new ProviderQuantization { Bf16 = "bf16" },
+            "fp32" => new ProviderQuantization { Fp32 = "fp32" },
+            "unknown" => new ProviderQuantization { Unknown = "unknown" },
+            _ => throw new JsonException($"Unknown variant of ProviderQuantization: {str}")
         };
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentOpenrouterProviderQuantization value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, ProviderQuantization value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Int4 != null)

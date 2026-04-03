@@ -22,11 +22,11 @@ Stored as `profile.json` in repositories and referenced by
 """)]
 [JsonSchemaTitle("functions.RemoteTasksProfile")]
 [JsonSchemaRef("functions.InlineTasksProfile")]
-[JsonConverter(typeof(FunctionsRemoteTasksProfileConverter))]
-public class FunctionsRemoteTasksProfile
+[JsonConverter(typeof(RemoteTasksProfileConverter))]
+public partial class RemoteTasksProfile
 {
     [JsonIgnore]
-    public FunctionsInlineTasksProfile Base { get; set; } = default!;
+    public InlineTasksProfile Base { get; set; } = default!;
 
     /// <summary>
     /// Human-readable description of the profile.
@@ -36,21 +36,21 @@ public class FunctionsRemoteTasksProfile
     public string Description { get; set; } = default!;
 }
 
-public class FunctionsRemoteTasksProfileConverter : JsonConverter<FunctionsRemoteTasksProfile>
+public class RemoteTasksProfileConverter : JsonConverter<RemoteTasksProfile>
 {
-    public override FunctionsRemoteTasksProfile? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override RemoteTasksProfile? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
-        var baseObj = JsonSerializer.Deserialize<FunctionsInlineTasksProfile>(raw, options)!;
-        var result = new FunctionsRemoteTasksProfile { Base = baseObj };
+        var baseObj = JsonSerializer.Deserialize<InlineTasksProfile>(raw, options)!;
+        var result = new RemoteTasksProfile { Base = baseObj };
         if (doc.RootElement.TryGetProperty("description", out var _DescriptionEl))
             result.Description = JsonSerializer.Deserialize<string>(_DescriptionEl.GetRawText(), options)!;
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsRemoteTasksProfile value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, RemoteTasksProfile value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

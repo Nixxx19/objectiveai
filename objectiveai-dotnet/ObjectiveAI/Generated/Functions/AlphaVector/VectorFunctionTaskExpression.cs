@@ -4,7 +4,6 @@
 using ObjectiveAI;
 using ObjectiveAI.Attributes;
 using ObjectiveAI.Functions.AlphaVector.Expression;
-using ObjectiveAI.Functions.Expression;
 using System.ComponentModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -13,38 +12,38 @@ namespace ObjectiveAI.Functions.AlphaVector;
 
 [JsonSchemaTitle("functions.alpha_vector.VectorFunctionTaskExpression")]
 [JsonSchemaRef("RemotePath")]
-[JsonConverter(typeof(FunctionsAlphaVectorVectorFunctionTaskExpressionConverter))]
-public class FunctionsAlphaVectorVectorFunctionTaskExpression
+[JsonConverter(typeof(VectorFunctionTaskExpressionConverter))]
+public partial class VectorFunctionTaskExpression
 {
     [JsonIgnore]
     public RemotePath Base { get; set; } = default!;
 
     [JsonPropertyName("input")]
-    public FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression Input { get; set; } = default!;
+    public VectorFunctionInputValueExpression Input { get; set; } = default!;
 
     [JsonPropertyName("skip")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public FunctionsExpressionExpression? Skip { get; set; } = null;
+    public ObjectiveAI.Functions.Expression.Expression? Skip { get; set; } = null;
 }
 
-public class FunctionsAlphaVectorVectorFunctionTaskExpressionConverter : JsonConverter<FunctionsAlphaVectorVectorFunctionTaskExpression>
+public class VectorFunctionTaskExpressionConverter : JsonConverter<VectorFunctionTaskExpression>
 {
-    public override FunctionsAlphaVectorVectorFunctionTaskExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override VectorFunctionTaskExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
         var baseObj = JsonSerializer.Deserialize<RemotePath>(raw, options)!;
-        var result = new FunctionsAlphaVectorVectorFunctionTaskExpression { Base = baseObj };
+        var result = new VectorFunctionTaskExpression { Base = baseObj };
         if (doc.RootElement.TryGetProperty("input", out var _InputEl))
-            result.Input = JsonSerializer.Deserialize<FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression>(_InputEl.GetRawText(), options)!;
+            result.Input = JsonSerializer.Deserialize<VectorFunctionInputValueExpression>(_InputEl.GetRawText(), options)!;
         if (doc.RootElement.TryGetProperty("skip", out var _SkipEl) && _SkipEl.ValueKind != JsonValueKind.Null)
-            result.Skip = JsonSerializer.Deserialize<FunctionsExpressionExpression>(_SkipEl.GetRawText(), options);
+            result.Skip = JsonSerializer.Deserialize<ObjectiveAI.Functions.Expression.Expression>(_SkipEl.GetRawText(), options);
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsAlphaVectorVectorFunctionTaskExpression value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, VectorFunctionTaskExpression value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

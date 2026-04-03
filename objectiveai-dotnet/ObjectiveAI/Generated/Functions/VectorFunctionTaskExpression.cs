@@ -3,7 +3,6 @@
 
 using ObjectiveAI;
 using ObjectiveAI.Attributes;
-using ObjectiveAI.Functions.Expression;
 using System.ComponentModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -16,8 +15,8 @@ namespace ObjectiveAI.Functions;
 [Description("Expression for a task that calls a vector function (pre-compilation).")]
 [JsonSchemaTitle("functions.VectorFunctionTaskExpression")]
 [JsonSchemaRef("RemotePath")]
-[JsonConverter(typeof(FunctionsVectorFunctionTaskExpressionConverter))]
-public class FunctionsVectorFunctionTaskExpression
+[JsonConverter(typeof(VectorFunctionTaskExpressionConverter))]
+public partial class VectorFunctionTaskExpression
 {
     [JsonIgnore]
     public RemotePath Base { get; set; } = default!;
@@ -104,7 +103,7 @@ Each instance receives `map` as an integer index (0-based).
     [JsonPropertyName("map")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public FunctionsExpressionExpression? Map { get; set; } = null;
+    public ObjectiveAI.Functions.Expression.Expression? Map { get; set; } = null;
 
     /// <summary>
     /// Expression to transform the task result into a valid function output.
@@ -141,7 +140,7 @@ profile weights. If a function has only one task, that task's output becomes the
 output directly.
 """)]
     [JsonPropertyName("output")]
-    public FunctionsExpressionExpression Output { get; set; } = default!;
+    public ObjectiveAI.Functions.Expression.Expression Output { get; set; } = default!;
 
     /// <summary>
     /// If this expression evaluates to true, skip the task. Receives: `input`.
@@ -150,30 +149,30 @@ output directly.
     [JsonPropertyName("skip")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public FunctionsExpressionExpression? Skip { get; set; } = null;
+    public ObjectiveAI.Functions.Expression.Expression? Skip { get; set; } = null;
 }
 
-public class FunctionsVectorFunctionTaskExpressionConverter : JsonConverter<FunctionsVectorFunctionTaskExpression>
+public class VectorFunctionTaskExpressionConverter : JsonConverter<VectorFunctionTaskExpression>
 {
-    public override FunctionsVectorFunctionTaskExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override VectorFunctionTaskExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
         var baseObj = JsonSerializer.Deserialize<RemotePath>(raw, options)!;
-        var result = new FunctionsVectorFunctionTaskExpression { Base = baseObj };
+        var result = new VectorFunctionTaskExpression { Base = baseObj };
         if (doc.RootElement.TryGetProperty("input", out var _InputEl))
             result.Input = JsonSerializer.Deserialize<JsonElement>(_InputEl.GetRawText(), options)!;
         if (doc.RootElement.TryGetProperty("map", out var _MapEl) && _MapEl.ValueKind != JsonValueKind.Null)
-            result.Map = JsonSerializer.Deserialize<FunctionsExpressionExpression>(_MapEl.GetRawText(), options);
+            result.Map = JsonSerializer.Deserialize<ObjectiveAI.Functions.Expression.Expression>(_MapEl.GetRawText(), options);
         if (doc.RootElement.TryGetProperty("output", out var _OutputEl))
-            result.Output = JsonSerializer.Deserialize<FunctionsExpressionExpression>(_OutputEl.GetRawText(), options)!;
+            result.Output = JsonSerializer.Deserialize<ObjectiveAI.Functions.Expression.Expression>(_OutputEl.GetRawText(), options)!;
         if (doc.RootElement.TryGetProperty("skip", out var _SkipEl) && _SkipEl.ValueKind != JsonValueKind.Null)
-            result.Skip = JsonSerializer.Deserialize<FunctionsExpressionExpression>(_SkipEl.GetRawText(), options);
+            result.Skip = JsonSerializer.Deserialize<ObjectiveAI.Functions.Expression.Expression>(_SkipEl.GetRawText(), options);
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsVectorFunctionTaskExpression value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, VectorFunctionTaskExpression value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

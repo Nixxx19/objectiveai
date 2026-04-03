@@ -23,27 +23,27 @@ expression are expanded into multiple tasks, one per integer index from
 0 to the evaluated count.
 """)]
 [JsonSchemaTitle("functions.CompiledTask")]
-[JsonConverter(typeof(FunctionsCompiledTaskConverter))]
-public class FunctionsCompiledTask
+[JsonConverter(typeof(CompiledTaskConverter))]
+public partial class CompiledTask
 {
     /// <summary>
     /// A single task (no mapping).
     /// </summary>
     [Description("A single task (no mapping).")]
     [JsonSchemaVariant("One", Ref = "functions.Task")]
-    public FunctionsTask? One { get; set; }
+    public Task? One { get; set; }
 
     /// <summary>
     /// Multiple task instances from mapped execution.
     /// </summary>
     [Description("Multiple task instances from mapped execution.")]
     [JsonSchemaVariant("Many", Type = "array")]
-    public List<FunctionsTask>? Many { get; set; }
+    public List<Task>? Many { get; set; }
 }
 
-public class FunctionsCompiledTaskConverter : JsonConverter<FunctionsCompiledTask>
+public class CompiledTaskConverter : JsonConverter<CompiledTask>
 {
-    public override FunctionsCompiledTask? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override CompiledTask? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -52,20 +52,20 @@ public class FunctionsCompiledTaskConverter : JsonConverter<FunctionsCompiledTas
 
         if (el.ValueKind == JsonValueKind.Array)
         {
-            var val = JsonSerializer.Deserialize<List<FunctionsTask>>(raw, options);
-            return new FunctionsCompiledTask { Many = val };
+            var val = JsonSerializer.Deserialize<List<Task>>(raw, options);
+            return new CompiledTask { Many = val };
         }
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<FunctionsTask>(raw, options); if (val0 != null) return new FunctionsCompiledTask { One = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<Task>(raw, options); if (val0 != null) return new CompiledTask { One = val0 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsCompiledTask");
+        throw new JsonException($"Data did not match any variant of CompiledTask");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsCompiledTask value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, CompiledTask value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.One != null)

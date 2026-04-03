@@ -12,7 +12,7 @@ namespace ObjectiveAI.Functions.Expression;
 /// </summary>
 [Description("Schema for a video input (URL or base64-encoded).")]
 [JsonSchemaTitle("functions.expression.VideoInputSchema")]
-public class FunctionsExpressionVideoInputSchema
+public partial class VideoInputSchema
 {
     /// <summary>
     /// Human-readable description of the expected video.
@@ -24,5 +24,5 @@ public class FunctionsExpressionVideoInputSchema
     public string? Description { get; set; } = null;
 
     [JsonPropertyName("type")]
-    public FunctionsExpressionVideoInputSchemaType Type { get; set; } = default!;
+    public VideoInputSchemaType Type { get; set; } = default!;
 }

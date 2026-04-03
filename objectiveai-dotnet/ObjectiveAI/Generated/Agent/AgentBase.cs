@@ -13,19 +13,19 @@ namespace ObjectiveAI.Agent;
 /// </summary>
 [Description("An Agent base definition, either remote (with metadata) or inline.")]
 [JsonSchemaTitle("agent.AgentBase")]
-[JsonConverter(typeof(AgentAgentBaseConverter))]
-public class AgentAgentBase
+[JsonConverter(typeof(AgentBaseConverter))]
+public partial class AgentBase
 {
     [JsonSchemaVariant("Remote", Ref = "agent.RemoteAgentBase")]
-    public AgentRemoteAgentBase? Remote { get; set; }
+    public RemoteAgentBase? Remote { get; set; }
 
     [JsonSchemaVariant("Inline", Ref = "agent.InlineAgentBase")]
-    public AgentInlineAgentBase? Inline { get; set; }
+    public InlineAgentBase? Inline { get; set; }
 }
 
-public class AgentAgentBaseConverter : JsonConverter<AgentAgentBase>
+public class AgentBaseConverter : JsonConverter<AgentBase>
 {
-    public override AgentAgentBase? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override AgentBase? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -34,16 +34,16 @@ public class AgentAgentBaseConverter : JsonConverter<AgentAgentBase>
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<AgentRemoteAgentBase>(raw, options); if (val0 != null) return new AgentAgentBase { Remote = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<RemoteAgentBase>(raw, options); if (val0 != null) return new AgentBase { Remote = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<AgentInlineAgentBase>(raw, options); if (val1 != null) return new AgentAgentBase { Inline = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<InlineAgentBase>(raw, options); if (val1 != null) return new AgentBase { Inline = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of AgentAgentBase");
+        throw new JsonException($"Data did not match any variant of AgentBase");
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentAgentBase value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, AgentBase value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Remote != null)

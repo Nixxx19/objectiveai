@@ -19,8 +19,8 @@ Verbosity of the reasoning summary included in responses.
 Only supported by some models.
 """)]
 [JsonSchemaTitle("agent.openrouter.ReasoningSummaryVerbosity")]
-[JsonConverter(typeof(AgentOpenrouterReasoningSummaryVerbosityConverter))]
-public class AgentOpenrouterReasoningSummaryVerbosity
+[JsonConverter(typeof(ReasoningSummaryVerbosityConverter))]
+public partial class ReasoningSummaryVerbosity
 {
     /// <summary>
     /// Let the model decide (default, normalized away).
@@ -44,24 +44,24 @@ public class AgentOpenrouterReasoningSummaryVerbosity
     public string? Detailed { get; set; }
 }
 
-public class AgentOpenrouterReasoningSummaryVerbosityConverter : JsonConverter<AgentOpenrouterReasoningSummaryVerbosity>
+public class ReasoningSummaryVerbosityConverter : JsonConverter<ReasoningSummaryVerbosity>
 {
-    public override AgentOpenrouterReasoningSummaryVerbosity? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override ReasoningSummaryVerbosity? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         if (reader.TokenType != JsonTokenType.String)
-            throw new JsonException("Expected string for AgentOpenrouterReasoningSummaryVerbosity");
+            throw new JsonException("Expected string for ReasoningSummaryVerbosity");
         var str = reader.GetString()!;
         return str switch
         {
-            "auto" => new AgentOpenrouterReasoningSummaryVerbosity { Auto = "auto" },
-            "concise" => new AgentOpenrouterReasoningSummaryVerbosity { Concise = "concise" },
-            "detailed" => new AgentOpenrouterReasoningSummaryVerbosity { Detailed = "detailed" },
-            _ => throw new JsonException($"Unknown variant of AgentOpenrouterReasoningSummaryVerbosity: {str}")
+            "auto" => new ReasoningSummaryVerbosity { Auto = "auto" },
+            "concise" => new ReasoningSummaryVerbosity { Concise = "concise" },
+            "detailed" => new ReasoningSummaryVerbosity { Detailed = "detailed" },
+            _ => throw new JsonException($"Unknown variant of ReasoningSummaryVerbosity: {str}")
         };
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentOpenrouterReasoningSummaryVerbosity value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, ReasoningSummaryVerbosity value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Auto != null)

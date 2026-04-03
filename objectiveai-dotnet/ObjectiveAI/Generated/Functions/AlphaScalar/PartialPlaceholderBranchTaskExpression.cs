@@ -10,32 +10,32 @@ namespace ObjectiveAI.Functions.AlphaScalar;
 
 [JsonSchemaTitle("functions.alpha_scalar.PartialPlaceholderBranchTaskExpression")]
 [JsonSchemaRef("functions.alpha_scalar.PartialPlaceholderScalarFunctionTaskExpression")]
-[JsonConverter(typeof(FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionConverter))]
-public class FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression
+[JsonConverter(typeof(PartialPlaceholderBranchTaskExpressionConverter))]
+public partial class PartialPlaceholderBranchTaskExpression
 {
     [JsonIgnore]
-    public FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpression Base { get; set; } = default!;
+    public PartialPlaceholderScalarFunctionTaskExpression Base { get; set; } = default!;
 
     [JsonPropertyName("type")]
     [JsonSchemaEnum("placeholder.alpha.scalar.function")]
     public string Type { get; set; } = default!;
 }
 
-public class FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionConverter : JsonConverter<FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression>
+public class PartialPlaceholderBranchTaskExpressionConverter : JsonConverter<PartialPlaceholderBranchTaskExpression>
 {
-    public override FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override PartialPlaceholderBranchTaskExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
-        var baseObj = JsonSerializer.Deserialize<FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpression>(raw, options)!;
-        var result = new FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression { Base = baseObj };
+        var baseObj = JsonSerializer.Deserialize<PartialPlaceholderScalarFunctionTaskExpression>(raw, options)!;
+        var result = new PartialPlaceholderBranchTaskExpression { Base = baseObj };
         if (doc.RootElement.TryGetProperty("type", out var _TypeEl))
             result.Type = JsonSerializer.Deserialize<string>(_TypeEl.GetRawText(), options)!;
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, PartialPlaceholderBranchTaskExpression value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

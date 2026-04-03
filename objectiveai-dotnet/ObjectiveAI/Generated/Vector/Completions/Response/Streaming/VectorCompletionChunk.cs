@@ -22,14 +22,14 @@ Each chunk contains incremental updates to the completion. Use the
 [`push`](Self::push) method to accumulate chunks into a complete response.
 """)]
 [JsonSchemaTitle("vector.completions.response.streaming.VectorCompletionChunk")]
-public class VectorCompletionsResponseStreamingVectorCompletionChunk
+public partial class VectorCompletionChunk
 {
     /// <summary>
     /// Incremental agent completion chunks from each agent.
     /// </summary>
     [Description("Incremental agent completion chunks from each agent.")]
     [JsonPropertyName("completions")]
-    public List<VectorCompletionsResponseStreamingAgentCompletionChunk> Completions { get; set; } = default!;
+    public List<AgentCompletionChunk> Completions { get; set; } = default!;
 
     /// <summary>
     /// Unix timestamp when the completion was created.
@@ -53,7 +53,7 @@ public class VectorCompletionsResponseStreamingVectorCompletionChunk
 Object type identifier (`"vector.completion.chunk"`).
 """")]
     [JsonPropertyName("object")]
-    public VectorCompletionsResponseStreamingObject Object { get; set; } = default!;
+    public Object Object { get; set; } = default!;
 
     /// <summary>
     /// Current weighted scores. Updated as new votes arrive.
@@ -77,14 +77,14 @@ Object type identifier (`"vector.completion.chunk"`).
     [JsonPropertyName("usage")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsResponseUsage? Usage { get; set; } = null;
+    public Usage? Usage { get; set; } = null;
 
     /// <summary>
     /// Votes received so far. New votes are appended in subsequent chunks.
     /// </summary>
     [Description("Votes received so far. New votes are appended in subsequent chunks.")]
     [JsonPropertyName("votes")]
-    public List<VectorCompletionsResponseVote> Votes { get; set; } = default!;
+    public List<Vote> Votes { get; set; } = default!;
 
     /// <summary>
     /// Current weight distribution across responses. Updated as new votes arrive.

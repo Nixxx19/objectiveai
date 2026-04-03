@@ -12,8 +12,8 @@ namespace ObjectiveAI.Agent.Completions.Response.Streaming;
 /// </summary>
 [Description("A agent completion chunk object.")]
 [JsonSchemaTitle("agent.completions.response.streaming.Object")]
-[JsonConverter(typeof(JsonStringEnumConverter<AgentCompletionsResponseStreamingObject>))]
-public enum AgentCompletionsResponseStreamingObject
+[JsonConverter(typeof(JsonStringEnumConverter<Object>))]
+public enum Object
 {
     [JsonStringEnumMemberName("agent.completion.chunk")]
     AgentCompletionChunk

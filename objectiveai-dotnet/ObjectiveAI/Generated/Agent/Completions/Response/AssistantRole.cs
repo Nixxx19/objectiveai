@@ -12,8 +12,8 @@ namespace ObjectiveAI.Agent.Completions.Response;
 /// </summary>
 [Description("The assistant role.")]
 [JsonSchemaTitle("agent.completions.response.AssistantRole")]
-[JsonConverter(typeof(JsonStringEnumConverter<AgentCompletionsResponseAssistantRole>))]
-public enum AgentCompletionsResponseAssistantRole
+[JsonConverter(typeof(JsonStringEnumConverter<AssistantRole>))]
+public enum AssistantRole
 {
     [JsonStringEnumMemberName("assistant")]
     Assistant

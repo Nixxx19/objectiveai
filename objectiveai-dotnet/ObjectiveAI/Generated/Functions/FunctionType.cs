@@ -9,8 +9,8 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions;
 
 [JsonSchemaTitle("functions.FunctionType")]
-[JsonConverter(typeof(FunctionsFunctionTypeConverter))]
-public class FunctionsFunctionType
+[JsonConverter(typeof(FunctionTypeConverter))]
+public partial class FunctionType
 {
     [JsonSchemaVariant("Scalar", Type = "string", Enum = new[] { "scalar.function" })]
     public string? Scalar { get; set; }
@@ -19,23 +19,23 @@ public class FunctionsFunctionType
     public string? Vector { get; set; }
 }
 
-public class FunctionsFunctionTypeConverter : JsonConverter<FunctionsFunctionType>
+public class FunctionTypeConverter : JsonConverter<FunctionType>
 {
-    public override FunctionsFunctionType? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override FunctionType? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         if (reader.TokenType != JsonTokenType.String)
-            throw new JsonException("Expected string for FunctionsFunctionType");
+            throw new JsonException("Expected string for FunctionType");
         var str = reader.GetString()!;
         return str switch
         {
-            "scalar.function" => new FunctionsFunctionType { Scalar = "scalar.function" },
-            "vector.function" => new FunctionsFunctionType { Vector = "vector.function" },
-            _ => throw new JsonException($"Unknown variant of FunctionsFunctionType: {str}")
+            "scalar.function" => new FunctionType { Scalar = "scalar.function" },
+            "vector.function" => new FunctionType { Vector = "vector.function" },
+            _ => throw new JsonException($"Unknown variant of FunctionType: {str}")
         };
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsFunctionType value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, FunctionType value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Scalar != null)

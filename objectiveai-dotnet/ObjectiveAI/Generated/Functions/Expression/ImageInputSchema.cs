@@ -12,7 +12,7 @@ namespace ObjectiveAI.Functions.Expression;
 /// </summary>
 [Description("Schema for an image input (URL or base64-encoded).")]
 [JsonSchemaTitle("functions.expression.ImageInputSchema")]
-public class FunctionsExpressionImageInputSchema
+public partial class ImageInputSchema
 {
     /// <summary>
     /// Human-readable description of the expected image.
@@ -24,5 +24,5 @@ public class FunctionsExpressionImageInputSchema
     public string? Description { get; set; } = null;
 
     [JsonPropertyName("type")]
-    public FunctionsExpressionImageInputSchemaType Type { get; set; } = default!;
+    public ImageInputSchemaType Type { get; set; } = default!;
 }

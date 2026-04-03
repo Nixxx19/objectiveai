@@ -16,8 +16,8 @@ namespace ObjectiveAI.Functions;
 [Description("A compiled vector function task ready for execution.")]
 [JsonSchemaTitle("functions.VectorFunctionTask")]
 [JsonSchemaRef("RemotePath")]
-[JsonConverter(typeof(FunctionsVectorFunctionTaskConverter))]
-public class FunctionsVectorFunctionTask
+[JsonConverter(typeof(VectorFunctionTaskConverter))]
+public partial class VectorFunctionTask
 {
     [JsonIgnore]
     public RemotePath Base { get; set; } = default!;
@@ -27,7 +27,7 @@ public class FunctionsVectorFunctionTask
     /// </summary>
     [Description("The resolved input to pass to the function.")]
     [JsonPropertyName("input")]
-    public FunctionsExpressionInputValue Input { get; set; } = default!;
+    public InputValue Input { get; set; } = default!;
 
     /// <summary>
     /// Expression to transform the task result into a valid function output.
@@ -44,26 +44,26 @@ Must return a `TaskOutputOwned` valid for the parent function's type (scalar or 
 See [`VectorFunctionTaskExpression::output`] for full documentation.
 """)]
     [JsonPropertyName("output")]
-    public FunctionsExpressionExpression Output { get; set; } = default!;
+    public ObjectiveAI.Functions.Expression.Expression Output { get; set; } = default!;
 }
 
-public class FunctionsVectorFunctionTaskConverter : JsonConverter<FunctionsVectorFunctionTask>
+public class VectorFunctionTaskConverter : JsonConverter<VectorFunctionTask>
 {
-    public override FunctionsVectorFunctionTask? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override VectorFunctionTask? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
         var baseObj = JsonSerializer.Deserialize<RemotePath>(raw, options)!;
-        var result = new FunctionsVectorFunctionTask { Base = baseObj };
+        var result = new VectorFunctionTask { Base = baseObj };
         if (doc.RootElement.TryGetProperty("input", out var _InputEl))
-            result.Input = JsonSerializer.Deserialize<FunctionsExpressionInputValue>(_InputEl.GetRawText(), options)!;
+            result.Input = JsonSerializer.Deserialize<InputValue>(_InputEl.GetRawText(), options)!;
         if (doc.RootElement.TryGetProperty("output", out var _OutputEl))
-            result.Output = JsonSerializer.Deserialize<FunctionsExpressionExpression>(_OutputEl.GetRawText(), options)!;
+            result.Output = JsonSerializer.Deserialize<ObjectiveAI.Functions.Expression.Expression>(_OutputEl.GetRawText(), options)!;
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsVectorFunctionTask value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, VectorFunctionTask value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

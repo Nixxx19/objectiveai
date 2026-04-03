@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("Audio input for multimodal messages.")]
 [JsonSchemaTitle("agent.completions.message.InputAudio")]
-public class AgentCompletionsMessageInputAudio
+public partial class InputAudio
 {
     /// <summary>
     /// Base64-encoded audio data.

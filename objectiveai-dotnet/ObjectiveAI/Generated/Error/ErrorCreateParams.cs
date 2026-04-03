@@ -12,7 +12,7 @@ namespace ObjectiveAI.Error;
 /// </summary>
 [Description("Request to trigger an error response for testing purposes.")]
 [JsonSchemaTitle("error.ErrorCreateParams")]
-public class ErrorErrorCreateParams
+public partial class ErrorCreateParams
 {
     /// <summary>
     /// Random seed for deterministic error generation.

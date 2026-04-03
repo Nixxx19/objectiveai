@@ -13,7 +13,7 @@ namespace ObjectiveAI.Functions;
 /// </summary>
 [Description("A function-profile pair in a list response.")]
 [JsonSchemaTitle("functions.ListFunctionProfilePairItem")]
-public class FunctionsListFunctionProfilePairItem
+public partial class ListFunctionProfilePairItem
 {
     /// <summary>
     /// The function.

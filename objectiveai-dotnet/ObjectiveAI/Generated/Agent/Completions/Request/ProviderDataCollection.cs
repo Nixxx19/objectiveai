@@ -13,8 +13,8 @@ namespace ObjectiveAI.Agent.Completions.Request;
 /// </summary>
 [Description("Data collection policy for providers.")]
 [JsonSchemaTitle("agent.completions.request.ProviderDataCollection")]
-[JsonConverter(typeof(AgentCompletionsRequestProviderDataCollectionConverter))]
-public class AgentCompletionsRequestProviderDataCollection
+[JsonConverter(typeof(ProviderDataCollectionConverter))]
+public partial class ProviderDataCollection
 {
     /// <summary>
     /// Do not allow data collection.
@@ -31,23 +31,23 @@ public class AgentCompletionsRequestProviderDataCollection
     public string? Allow { get; set; }
 }
 
-public class AgentCompletionsRequestProviderDataCollectionConverter : JsonConverter<AgentCompletionsRequestProviderDataCollection>
+public class ProviderDataCollectionConverter : JsonConverter<ProviderDataCollection>
 {
-    public override AgentCompletionsRequestProviderDataCollection? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override ProviderDataCollection? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         if (reader.TokenType != JsonTokenType.String)
-            throw new JsonException("Expected string for AgentCompletionsRequestProviderDataCollection");
+            throw new JsonException("Expected string for ProviderDataCollection");
         var str = reader.GetString()!;
         return str switch
         {
-            "deny" => new AgentCompletionsRequestProviderDataCollection { Deny = "deny" },
-            "allow" => new AgentCompletionsRequestProviderDataCollection { Allow = "allow" },
-            _ => throw new JsonException($"Unknown variant of AgentCompletionsRequestProviderDataCollection: {str}")
+            "deny" => new ProviderDataCollection { Deny = "deny" },
+            "allow" => new ProviderDataCollection { Allow = "allow" },
+            _ => throw new JsonException($"Unknown variant of ProviderDataCollection: {str}")
         };
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentCompletionsRequestProviderDataCollection value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, ProviderDataCollection value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Deny != null)

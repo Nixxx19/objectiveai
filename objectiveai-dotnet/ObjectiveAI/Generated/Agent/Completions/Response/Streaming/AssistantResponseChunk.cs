@@ -24,7 +24,7 @@ accumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion
 using the [`push`](Self::push) method.
 """)]
 [JsonSchemaTitle("agent.completions.response.streaming.AssistantResponseChunk")]
-public class AgentCompletionsResponseStreamingAssistantResponseChunk
+public partial class AssistantResponseChunk
 {
     [JsonPropertyName("agent")]
     public string Agent { get; set; } = default!;
@@ -32,7 +32,7 @@ public class AgentCompletionsResponseStreamingAssistantResponseChunk
     [JsonPropertyName("content")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsMessageRichContent? Content { get; set; } = null;
+    public RichContent? Content { get; set; } = null;
 
     [JsonPropertyName("created")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
@@ -40,7 +40,7 @@ public class AgentCompletionsResponseStreamingAssistantResponseChunk
 
     [JsonPropertyName("finish_reason")]
     [JsonSchemaNullable]
-    public AgentCompletionsResponseFinishReason? FinishReason { get; set; } = null;
+    public FinishReason? FinishReason { get; set; } = null;
 
     [JsonPropertyName("index")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
@@ -49,7 +49,7 @@ public class AgentCompletionsResponseStreamingAssistantResponseChunk
     [JsonPropertyName("logprobs")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsResponseLogprobs? Logprobs { get; set; } = null;
+    public Logprobs? Logprobs { get; set; } = null;
 
     [JsonPropertyName("model")]
     public string Model { get; set; } = default!;
@@ -70,7 +70,7 @@ public class AgentCompletionsResponseStreamingAssistantResponseChunk
     public string? Refusal { get; set; } = null;
 
     [JsonPropertyName("role")]
-    public AgentCompletionsResponseAssistantRole Role { get; set; } = default!;
+    public AssistantRole Role { get; set; } = default!;
 
     [JsonPropertyName("service_tier")]
     [JsonSchemaOmitEmpty]
@@ -85,7 +85,7 @@ public class AgentCompletionsResponseStreamingAssistantResponseChunk
     [JsonPropertyName("tool_calls")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public List<AgentCompletionsMessageAssistantToolCallDelta>? ToolCalls { get; set; } = null;
+    public List<AssistantToolCallDelta>? ToolCalls { get; set; } = null;
 
     [JsonPropertyName("upstream_id")]
     public string UpstreamId { get; set; } = default!;
@@ -97,5 +97,5 @@ public class AgentCompletionsResponseStreamingAssistantResponseChunk
     [JsonPropertyName("usage")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsResponseUpstreamUsage? Usage { get; set; } = null;
+    public UpstreamUsage? Usage { get; set; } = null;
 }

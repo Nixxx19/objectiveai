@@ -5,7 +5,6 @@ using ObjectiveAI.Agent.Completions.Response;
 using ObjectiveAI.Attributes;
 using ObjectiveAI.Error;
 using ObjectiveAI.Vector.Completions.Response;
-using ObjectiveAI.Vector.Completions.Response.Unary;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 
@@ -24,14 +23,14 @@ Contains the final scores, all votes from the swarm, and the underlying
 agent completions that produced those votes.
 """)]
 [JsonSchemaTitle("functions.executions.response.unary.VectorCompletionTask")]
-public class FunctionsExecutionsResponseUnaryVectorCompletionTask
+public partial class VectorCompletionTask
 {
     /// <summary>
     /// The underlying agent completions from each agent in the swarm.
     /// </summary>
     [Description("The underlying agent completions from each agent in the swarm.")]
     [JsonPropertyName("completions")]
-    public List<VectorCompletionsResponseUnaryAgentCompletion> Completions { get; set; } = default!;
+    public List<ObjectiveAI.Vector.Completions.Response.Unary.AgentCompletion> Completions { get; set; } = default!;
 
     /// <summary>
     /// Unix timestamp when the completion was created.
@@ -43,7 +42,7 @@ public class FunctionsExecutionsResponseUnaryVectorCompletionTask
 
     [JsonPropertyName("error")]
     [JsonSchemaNullable]
-    public ErrorResponseError? Error { get; set; } = null;
+    public ResponseError? Error { get; set; } = null;
 
     /// <summary>
     /// Unique identifier for this vector completion.
@@ -63,7 +62,7 @@ public class FunctionsExecutionsResponseUnaryVectorCompletionTask
 Object type identifier (`"vector.completion"`).
 """")]
     [JsonPropertyName("object")]
-    public VectorCompletionsResponseUnaryObject Object { get; set; } = default!;
+    public ObjectiveAI.Vector.Completions.Response.Unary.Object Object { get; set; } = default!;
 
     /// <summary>
     /// Final weighted scores for each response option. Sums to 1.
@@ -93,14 +92,14 @@ Object type identifier (`"vector.completion"`).
     /// </summary>
     [Description("Aggregated token and cost usage across all completions.")]
     [JsonPropertyName("usage")]
-    public AgentCompletionsResponseUsage Usage { get; set; } = default!;
+    public Usage Usage { get; set; } = default!;
 
     /// <summary>
     /// Individual votes from each agent, showing their selections.
     /// </summary>
     [Description("Individual votes from each agent, showing their selections.")]
     [JsonPropertyName("votes")]
-    public List<VectorCompletionsResponseVote> Votes { get; set; } = default!;
+    public List<Vote> Votes { get; set; } = default!;
 
     /// <summary>
     /// Total weight allocated to each response option. Same length as `scores`.

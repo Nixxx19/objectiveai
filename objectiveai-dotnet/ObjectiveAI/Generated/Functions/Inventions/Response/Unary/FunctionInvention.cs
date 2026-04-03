@@ -6,17 +6,16 @@ using ObjectiveAI.Agent.Completions.Response;
 using ObjectiveAI.Attributes;
 using ObjectiveAI.Error;
 using ObjectiveAI.Functions;
-using ObjectiveAI.Functions.Inventions.State;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 
 namespace ObjectiveAI.Functions.Inventions.Response.Unary;
 
 [JsonSchemaTitle("functions.inventions.response.unary.FunctionInvention")]
-public class FunctionsInventionsResponseUnaryFunctionInvention
+public partial class FunctionInvention
 {
     [JsonPropertyName("completions")]
-    public List<FunctionsInventionsResponseUnaryAgentCompletion> Completions { get; set; } = default!;
+    public List<AgentCompletion> Completions { get; set; } = default!;
 
     [JsonPropertyName("created")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
@@ -24,25 +23,25 @@ public class FunctionsInventionsResponseUnaryFunctionInvention
 
     [JsonPropertyName("error")]
     [JsonSchemaNullable]
-    public ErrorResponseError? Error { get; set; } = null;
+    public ResponseError? Error { get; set; } = null;
 
     [JsonPropertyName("function")]
     [JsonSchemaNullable]
-    public FunctionsFullRemoteFunction? Function { get; set; } = null;
+    public FullRemoteFunction? Function { get; set; } = null;
 
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
 
     [JsonPropertyName("object")]
-    public FunctionsInventionsResponseUnaryObject Object { get; set; } = default!;
+    public Object Object { get; set; } = default!;
 
     [JsonPropertyName("path")]
     [JsonSchemaNullable]
     public RemotePath? Path { get; set; } = null;
 
     [JsonPropertyName("state")]
-    public FunctionsInventionsStateState State { get; set; } = default!;
+    public ObjectiveAI.Functions.Inventions.State.State State { get; set; } = default!;
 
     [JsonPropertyName("usage")]
-    public AgentCompletionsResponseUsage Usage { get; set; } = default!;
+    public Usage Usage { get; set; } = default!;
 }

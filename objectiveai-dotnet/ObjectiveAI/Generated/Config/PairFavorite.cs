@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Config;
 
 [JsonSchemaTitle("config.PairFavorite")]
-public class ConfigPairFavorite
+public partial class PairFavorite
 {
     [JsonPropertyName("function")]
     public RemotePathCommitOptional Function { get; set; } = default!;

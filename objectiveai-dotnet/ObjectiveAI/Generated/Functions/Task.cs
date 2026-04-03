@@ -13,7 +13,7 @@ namespace ObjectiveAI.Functions;
 /// </summary>
 [Description("Calls a scalar function (produces a single score).")]
 [JsonSchemaVariantWrapper("functions.ScalarFunctionTask", Type = "object")]
-public class FunctionsTaskScalarFunction
+public partial class TaskScalarFunction
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("scalar.function")]
@@ -25,7 +25,7 @@ public class FunctionsTaskScalarFunction
 /// </summary>
 [Description("Calls a vector function (produces a vector of scores).")]
 [JsonSchemaVariantWrapper("functions.VectorFunctionTask", Type = "object")]
-public class FunctionsTaskVectorFunction
+public partial class TaskVectorFunction
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("vector.function")]
@@ -37,7 +37,7 @@ public class FunctionsTaskVectorFunction
 /// </summary>
 [Description("Runs a vector completion.")]
 [JsonSchemaVariantWrapper("functions.VectorCompletionTask", Type = "object")]
-public class FunctionsTaskVectorCompletion
+public partial class TaskVectorCompletion
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("vector.completion")]
@@ -49,7 +49,7 @@ public class FunctionsTaskVectorCompletion
 /// </summary>
 [Description("Placeholder scalar function (always outputs 0.5).")]
 [JsonSchemaVariantWrapper("functions.PlaceholderScalarFunctionTask", Type = "object")]
-public class FunctionsTaskPlaceholderScalarFunction
+public partial class TaskPlaceholderScalarFunction
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("placeholder.scalar.function")]
@@ -61,7 +61,7 @@ public class FunctionsTaskPlaceholderScalarFunction
 /// </summary>
 [Description("Placeholder vector function (always outputs equalized vector).")]
 [JsonSchemaVariantWrapper("functions.PlaceholderVectorFunctionTask", Type = "object")]
-public class FunctionsTaskPlaceholderVectorFunction
+public partial class TaskPlaceholderVectorFunction
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("placeholder.vector.function")]
@@ -82,48 +82,48 @@ Produced by compiling a [`TaskExpression`] against input data. All
 expressions have been resolved to concrete values.
 """)]
 [JsonSchemaTitle("functions.Task")]
-[JsonConverter(typeof(FunctionsTaskConverter))]
-public class FunctionsTask
+[JsonConverter(typeof(TaskConverter))]
+public partial class Task
 {
     /// <summary>
     /// Calls a scalar function (produces a single score).
     /// </summary>
     [Description("Calls a scalar function (produces a single score).")]
     [JsonSchemaVariant("ScalarFunction", Ref = "functions.ScalarFunctionTask", Type = "object")]
-    public FunctionsTaskScalarFunction? ScalarFunction { get; set; }
+    public TaskScalarFunction? ScalarFunction { get; set; }
 
     /// <summary>
     /// Calls a vector function (produces a vector of scores).
     /// </summary>
     [Description("Calls a vector function (produces a vector of scores).")]
     [JsonSchemaVariant("VectorFunction", Ref = "functions.VectorFunctionTask", Type = "object")]
-    public FunctionsTaskVectorFunction? VectorFunction { get; set; }
+    public TaskVectorFunction? VectorFunction { get; set; }
 
     /// <summary>
     /// Runs a vector completion.
     /// </summary>
     [Description("Runs a vector completion.")]
     [JsonSchemaVariant("VectorCompletion", Ref = "functions.VectorCompletionTask", Type = "object")]
-    public FunctionsTaskVectorCompletion? VectorCompletion { get; set; }
+    public TaskVectorCompletion? VectorCompletion { get; set; }
 
     /// <summary>
     /// Placeholder scalar function (always outputs 0.5).
     /// </summary>
     [Description("Placeholder scalar function (always outputs 0.5).")]
     [JsonSchemaVariant("PlaceholderScalarFunction", Ref = "functions.PlaceholderScalarFunctionTask", Type = "object")]
-    public FunctionsTaskPlaceholderScalarFunction? PlaceholderScalarFunction { get; set; }
+    public TaskPlaceholderScalarFunction? PlaceholderScalarFunction { get; set; }
 
     /// <summary>
     /// Placeholder vector function (always outputs equalized vector).
     /// </summary>
     [Description("Placeholder vector function (always outputs equalized vector).")]
     [JsonSchemaVariant("PlaceholderVectorFunction", Ref = "functions.PlaceholderVectorFunctionTask", Type = "object")]
-    public FunctionsTaskPlaceholderVectorFunction? PlaceholderVectorFunction { get; set; }
+    public TaskPlaceholderVectorFunction? PlaceholderVectorFunction { get; set; }
 }
 
-public class FunctionsTaskConverter : JsonConverter<FunctionsTask>
+public class TaskConverter : JsonConverter<Task>
 {
-    public override FunctionsTask? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Task? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -138,7 +138,7 @@ public class FunctionsTaskConverter : JsonConverter<FunctionsTask>
                     match0 = false;
                 if (match0)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsTaskScalarFunction>(raw, options); if (val != null) return new FunctionsTask { ScalarFunction = val }; }
+                    try { var val = JsonSerializer.Deserialize<TaskScalarFunction>(raw, options); if (val != null) return new Task { ScalarFunction = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -148,7 +148,7 @@ public class FunctionsTaskConverter : JsonConverter<FunctionsTask>
                     match1 = false;
                 if (match1)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsTaskVectorFunction>(raw, options); if (val != null) return new FunctionsTask { VectorFunction = val }; }
+                    try { var val = JsonSerializer.Deserialize<TaskVectorFunction>(raw, options); if (val != null) return new Task { VectorFunction = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -158,7 +158,7 @@ public class FunctionsTaskConverter : JsonConverter<FunctionsTask>
                     match2 = false;
                 if (match2)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsTaskVectorCompletion>(raw, options); if (val != null) return new FunctionsTask { VectorCompletion = val }; }
+                    try { var val = JsonSerializer.Deserialize<TaskVectorCompletion>(raw, options); if (val != null) return new Task { VectorCompletion = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -168,7 +168,7 @@ public class FunctionsTaskConverter : JsonConverter<FunctionsTask>
                     match3 = false;
                 if (match3)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsTaskPlaceholderScalarFunction>(raw, options); if (val != null) return new FunctionsTask { PlaceholderScalarFunction = val }; }
+                    try { var val = JsonSerializer.Deserialize<TaskPlaceholderScalarFunction>(raw, options); if (val != null) return new Task { PlaceholderScalarFunction = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -178,16 +178,16 @@ public class FunctionsTaskConverter : JsonConverter<FunctionsTask>
                     match4 = false;
                 if (match4)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsTaskPlaceholderVectorFunction>(raw, options); if (val != null) return new FunctionsTask { PlaceholderVectorFunction = val }; }
+                    try { var val = JsonSerializer.Deserialize<TaskPlaceholderVectorFunction>(raw, options); if (val != null) return new Task { PlaceholderVectorFunction = val }; }
                     catch (JsonException) { }
                 }
             }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsTask");
+        throw new JsonException($"Data did not match any variant of Task");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsTask value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Task value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.ScalarFunction != null)

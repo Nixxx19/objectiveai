@@ -13,19 +13,19 @@ namespace ObjectiveAI.Swarm;
 /// </summary>
 [Description("A validated Swarm, either remote (with metadata) or inline.")]
 [JsonSchemaTitle("swarm.Swarm")]
-[JsonConverter(typeof(SwarmSwarmConverter))]
-public class SwarmSwarm
+[JsonConverter(typeof(SwarmConverter))]
+public partial class Swarm
 {
     [JsonSchemaVariant("Remote", Ref = "swarm.RemoteSwarm")]
-    public SwarmRemoteSwarm? Remote { get; set; }
+    public RemoteSwarm? Remote { get; set; }
 
     [JsonSchemaVariant("Inline", Ref = "swarm.InlineSwarm")]
-    public SwarmInlineSwarm? Inline { get; set; }
+    public InlineSwarm? Inline { get; set; }
 }
 
-public class SwarmSwarmConverter : JsonConverter<SwarmSwarm>
+public class SwarmConverter : JsonConverter<Swarm>
 {
-    public override SwarmSwarm? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Swarm? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -34,16 +34,16 @@ public class SwarmSwarmConverter : JsonConverter<SwarmSwarm>
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<SwarmRemoteSwarm>(raw, options); if (val0 != null) return new SwarmSwarm { Remote = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<RemoteSwarm>(raw, options); if (val0 != null) return new Swarm { Remote = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<SwarmInlineSwarm>(raw, options); if (val1 != null) return new SwarmSwarm { Inline = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<InlineSwarm>(raw, options); if (val1 != null) return new Swarm { Inline = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of SwarmSwarm");
+        throw new JsonException($"Data did not match any variant of Swarm");
     }
 
-    public override void Write(Utf8JsonWriter writer, SwarmSwarm value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Swarm value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Remote != null)

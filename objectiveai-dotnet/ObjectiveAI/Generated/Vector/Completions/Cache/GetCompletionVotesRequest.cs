@@ -12,7 +12,7 @@ namespace ObjectiveAI.Vector.Completions.Cache;
 /// </summary>
 [Description("Request body for retrieving completion votes by vector completion ID.")]
 [JsonSchemaTitle("vector.completions.cache.GetCompletionVotesRequest")]
-public class VectorCompletionsCacheGetCompletionVotesRequest
+public partial class GetCompletionVotesRequest
 {
     /// <summary>
     /// The vector completion ID.

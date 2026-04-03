@@ -14,11 +14,11 @@ namespace ObjectiveAI.Agent;
 [Description("An [`InlineAgentBase`] with optional fallbacks (no description).")]
 [JsonSchemaTitle("agent.InlineAgentBaseWithFallbacks")]
 [JsonSchemaRef("agent.InlineAgentBase")]
-[JsonConverter(typeof(AgentInlineAgentBaseWithFallbacksConverter))]
-public class AgentInlineAgentBaseWithFallbacks
+[JsonConverter(typeof(InlineAgentBaseWithFallbacksConverter))]
+public partial class InlineAgentBaseWithFallbacks
 {
     [JsonIgnore]
-    public AgentInlineAgentBase Base { get; set; } = default!;
+    public InlineAgentBase Base { get; set; } = default!;
 
     /// <summary>
     /// Fallback agents to try if the primary fails.
@@ -27,24 +27,24 @@ public class AgentInlineAgentBaseWithFallbacks
     [JsonPropertyName("fallbacks")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public List<AgentInlineAgentBase>? Fallbacks { get; set; } = null;
+    public List<InlineAgentBase>? Fallbacks { get; set; } = null;
 }
 
-public class AgentInlineAgentBaseWithFallbacksConverter : JsonConverter<AgentInlineAgentBaseWithFallbacks>
+public class InlineAgentBaseWithFallbacksConverter : JsonConverter<InlineAgentBaseWithFallbacks>
 {
-    public override AgentInlineAgentBaseWithFallbacks? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override InlineAgentBaseWithFallbacks? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
-        var baseObj = JsonSerializer.Deserialize<AgentInlineAgentBase>(raw, options)!;
-        var result = new AgentInlineAgentBaseWithFallbacks { Base = baseObj };
+        var baseObj = JsonSerializer.Deserialize<InlineAgentBase>(raw, options)!;
+        var result = new InlineAgentBaseWithFallbacks { Base = baseObj };
         if (doc.RootElement.TryGetProperty("fallbacks", out var _FallbacksEl) && _FallbacksEl.ValueKind != JsonValueKind.Null)
-            result.Fallbacks = JsonSerializer.Deserialize<List<AgentInlineAgentBase>>(_FallbacksEl.GetRawText(), options);
+            result.Fallbacks = JsonSerializer.Deserialize<List<InlineAgentBase>>(_FallbacksEl.GetRawText(), options);
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentInlineAgentBaseWithFallbacks value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, InlineAgentBaseWithFallbacks value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

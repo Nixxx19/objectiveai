@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Inventions.State;
 
 [JsonSchemaVariantWrapper("functions.inventions.state.AlphaScalarBranchState", Type = "object")]
-public class FunctionsInventionsStateStateAlphaScalarBranch
+public partial class StateAlphaScalarBranch
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("alpha.scalar.branch.function")]
@@ -17,7 +17,7 @@ public class FunctionsInventionsStateStateAlphaScalarBranch
 }
 
 [JsonSchemaVariantWrapper("functions.inventions.state.AlphaScalarLeafState", Type = "object")]
-public class FunctionsInventionsStateStateAlphaScalarLeaf
+public partial class StateAlphaScalarLeaf
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("alpha.scalar.leaf.function")]
@@ -25,7 +25,7 @@ public class FunctionsInventionsStateStateAlphaScalarLeaf
 }
 
 [JsonSchemaVariantWrapper("functions.inventions.state.AlphaVectorBranchState", Type = "object")]
-public class FunctionsInventionsStateStateAlphaVectorBranch
+public partial class StateAlphaVectorBranch
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("alpha.vector.branch.function")]
@@ -33,7 +33,7 @@ public class FunctionsInventionsStateStateAlphaVectorBranch
 }
 
 [JsonSchemaVariantWrapper("functions.inventions.state.AlphaVectorLeafState", Type = "object")]
-public class FunctionsInventionsStateStateAlphaVectorLeaf
+public partial class StateAlphaVectorLeaf
 {
     [JsonPropertyName("type")]
     [JsonSchemaEnum("alpha.vector.leaf.function")]
@@ -42,25 +42,25 @@ public class FunctionsInventionsStateStateAlphaVectorLeaf
 
 
 [JsonSchemaTitle("functions.inventions.state.State")]
-[JsonConverter(typeof(FunctionsInventionsStateStateConverter))]
-public class FunctionsInventionsStateState
+[JsonConverter(typeof(StateConverter))]
+public partial class State
 {
     [JsonSchemaVariant("AlphaScalarBranch", Ref = "functions.inventions.state.AlphaScalarBranchState", Type = "object")]
-    public FunctionsInventionsStateStateAlphaScalarBranch? AlphaScalarBranch { get; set; }
+    public StateAlphaScalarBranch? AlphaScalarBranch { get; set; }
 
     [JsonSchemaVariant("AlphaScalarLeaf", Ref = "functions.inventions.state.AlphaScalarLeafState", Type = "object")]
-    public FunctionsInventionsStateStateAlphaScalarLeaf? AlphaScalarLeaf { get; set; }
+    public StateAlphaScalarLeaf? AlphaScalarLeaf { get; set; }
 
     [JsonSchemaVariant("AlphaVectorBranch", Ref = "functions.inventions.state.AlphaVectorBranchState", Type = "object")]
-    public FunctionsInventionsStateStateAlphaVectorBranch? AlphaVectorBranch { get; set; }
+    public StateAlphaVectorBranch? AlphaVectorBranch { get; set; }
 
     [JsonSchemaVariant("AlphaVectorLeaf", Ref = "functions.inventions.state.AlphaVectorLeafState", Type = "object")]
-    public FunctionsInventionsStateStateAlphaVectorLeaf? AlphaVectorLeaf { get; set; }
+    public StateAlphaVectorLeaf? AlphaVectorLeaf { get; set; }
 }
 
-public class FunctionsInventionsStateStateConverter : JsonConverter<FunctionsInventionsStateState>
+public class StateConverter : JsonConverter<State>
 {
-    public override FunctionsInventionsStateState? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override State? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -75,7 +75,7 @@ public class FunctionsInventionsStateStateConverter : JsonConverter<FunctionsInv
                     match0 = false;
                 if (match0)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsInventionsStateStateAlphaScalarBranch>(raw, options); if (val != null) return new FunctionsInventionsStateState { AlphaScalarBranch = val }; }
+                    try { var val = JsonSerializer.Deserialize<StateAlphaScalarBranch>(raw, options); if (val != null) return new State { AlphaScalarBranch = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -85,7 +85,7 @@ public class FunctionsInventionsStateStateConverter : JsonConverter<FunctionsInv
                     match1 = false;
                 if (match1)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsInventionsStateStateAlphaScalarLeaf>(raw, options); if (val != null) return new FunctionsInventionsStateState { AlphaScalarLeaf = val }; }
+                    try { var val = JsonSerializer.Deserialize<StateAlphaScalarLeaf>(raw, options); if (val != null) return new State { AlphaScalarLeaf = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -95,7 +95,7 @@ public class FunctionsInventionsStateStateConverter : JsonConverter<FunctionsInv
                     match2 = false;
                 if (match2)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsInventionsStateStateAlphaVectorBranch>(raw, options); if (val != null) return new FunctionsInventionsStateState { AlphaVectorBranch = val }; }
+                    try { var val = JsonSerializer.Deserialize<StateAlphaVectorBranch>(raw, options); if (val != null) return new State { AlphaVectorBranch = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -105,16 +105,16 @@ public class FunctionsInventionsStateStateConverter : JsonConverter<FunctionsInv
                     match3 = false;
                 if (match3)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsInventionsStateStateAlphaVectorLeaf>(raw, options); if (val != null) return new FunctionsInventionsStateState { AlphaVectorLeaf = val }; }
+                    try { var val = JsonSerializer.Deserialize<StateAlphaVectorLeaf>(raw, options); if (val != null) return new State { AlphaVectorLeaf = val }; }
                     catch (JsonException) { }
                 }
             }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsInventionsStateState");
+        throw new JsonException($"Data did not match any variant of State");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsInventionsStateState value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, State value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.AlphaScalarBranch != null)

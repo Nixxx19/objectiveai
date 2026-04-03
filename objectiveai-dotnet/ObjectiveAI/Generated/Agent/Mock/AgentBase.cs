@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Mock;
 /// </summary>
 [Description("The base configuration for a Mock Agent (without computed ID).")]
 [JsonSchemaTitle("agent.mock.AgentBase")]
-public class AgentMockAgentBase
+public partial class AgentBase
 {
     /// <summary>
     /// If true, the mock client will return an error instead of a response.
@@ -55,7 +55,7 @@ Incompatible with output modes other than `instruction`.
     /// </summary>
     [Description("The output mode for vector completions. Ignored for agent completions.")]
     [JsonPropertyName("output_mode")]
-    public AgentMockOutputMode OutputMode { get; set; } = default!;
+    public OutputMode OutputMode { get; set; } = default!;
 
     /// <summary>
     /// Number of top log probabilities to return (2-20).
@@ -78,5 +78,5 @@ Number of top log probabilities to return (2-20).
     /// </summary>
     [Description("The upstream provider marker.")]
     [JsonPropertyName("upstream")]
-    public AgentMockUpstream Upstream { get; set; } = default!;
+    public Upstream Upstream { get; set; } = default!;
 }

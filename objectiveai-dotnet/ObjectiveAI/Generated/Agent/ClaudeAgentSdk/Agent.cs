@@ -14,7 +14,7 @@ namespace ObjectiveAI.Agent.ClaudeAgentSdk;
 /// </summary>
 [Description("A validated Claude Agent SDK Agent with its computed content-addressed ID.")]
 [JsonSchemaTitle("agent.claude_agent_sdk.Agent")]
-public class AgentClaudeAgentSdkAgent
+public partial class Agent
 {
     /// <summary>
     /// The effort level for model output.
@@ -23,7 +23,7 @@ public class AgentClaudeAgentSdkAgent
     [JsonPropertyName("effort")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentClaudeAgentSdkEffort? Effort { get; set; } = null;
+    public Effort? Effort { get; set; } = null;
 
     /// <summary>
     /// The deterministic content-addressed ID (22-character base62 string).
@@ -39,7 +39,7 @@ public class AgentClaudeAgentSdkAgent
     [JsonPropertyName("mcp_servers")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public List<AgentMcpServer>? McpServers { get; set; } = null;
+    public List<McpServer>? McpServers { get; set; } = null;
 
     /// <summary>
     /// The upstream language model identifier.
@@ -53,7 +53,7 @@ public class AgentClaudeAgentSdkAgent
     /// </summary>
     [Description("The output mode for vector completions. Ignored for agent completions.")]
     [JsonPropertyName("output_mode")]
-    public AgentClaudeAgentSdkOutputMode OutputMode { get; set; } = default!;
+    public OutputMode OutputMode { get; set; } = default!;
 
     /// <summary>
     /// Rich content prepended to the user's prompt.
@@ -62,7 +62,7 @@ public class AgentClaudeAgentSdkAgent
     [JsonPropertyName("prefix_content")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsMessageRichContent? PrefixContent { get; set; } = null;
+    public RichContent? PrefixContent { get; set; } = null;
 
     /// <summary>
     /// Rich content appended after the user's prompt.
@@ -71,7 +71,7 @@ public class AgentClaudeAgentSdkAgent
     [JsonPropertyName("suffix_content")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsMessageRichContent? SuffixContent { get; set; } = null;
+    public RichContent? SuffixContent { get; set; } = null;
 
     /// <summary>
     /// Enable synthetic reasoning for non-reasoning LLMs.
@@ -125,5 +125,5 @@ Defaults to `true`. Set to `false` to disable.
     /// </summary>
     [Description("The upstream provider marker.")]
     [JsonPropertyName("upstream")]
-    public AgentClaudeAgentSdkUpstream Upstream { get; set; } = default!;
+    public Upstream Upstream { get; set; } = default!;
 }

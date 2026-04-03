@@ -18,19 +18,19 @@ Like [`InlineAgentBaseWithFallbacksOrRemote`] but with optional commit.
 Used in request types where commit resolution happens server-side.
 """)]
 [JsonSchemaTitle("agent.InlineAgentBaseWithFallbacksOrRemoteCommitOptional")]
-[JsonConverter(typeof(AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalConverter))]
-public class AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional
+[JsonConverter(typeof(InlineAgentBaseWithFallbacksOrRemoteCommitOptionalConverter))]
+public partial class InlineAgentBaseWithFallbacksOrRemoteCommitOptional
 {
     [JsonSchemaVariant("AgentBase", Ref = "agent.InlineAgentBaseWithFallbacks")]
-    public AgentInlineAgentBaseWithFallbacks? AgentBase { get; set; }
+    public InlineAgentBaseWithFallbacks? AgentBase { get; set; }
 
     [JsonSchemaVariant("Remote", Ref = "RemotePathCommitOptional")]
     public RemotePathCommitOptional? Remote { get; set; }
 }
 
-public class AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalConverter : JsonConverter<AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional>
+public class InlineAgentBaseWithFallbacksOrRemoteCommitOptionalConverter : JsonConverter<InlineAgentBaseWithFallbacksOrRemoteCommitOptional>
 {
-    public override AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override InlineAgentBaseWithFallbacksOrRemoteCommitOptional? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -39,16 +39,16 @@ public class AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalConverter : 
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<AgentInlineAgentBaseWithFallbacks>(raw, options); if (val0 != null) return new AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional { AgentBase = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<InlineAgentBaseWithFallbacks>(raw, options); if (val0 != null) return new InlineAgentBaseWithFallbacksOrRemoteCommitOptional { AgentBase = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<RemotePathCommitOptional>(raw, options); if (val1 != null) return new AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional { Remote = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<RemotePathCommitOptional>(raw, options); if (val1 != null) return new InlineAgentBaseWithFallbacksOrRemoteCommitOptional { Remote = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional");
+        throw new JsonException($"Data did not match any variant of InlineAgentBaseWithFallbacksOrRemoteCommitOptional");
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, InlineAgentBaseWithFallbacksOrRemoteCommitOptional value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.AgentBase != null)

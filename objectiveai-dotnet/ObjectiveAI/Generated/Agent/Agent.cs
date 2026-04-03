@@ -13,19 +13,19 @@ namespace ObjectiveAI.Agent;
 /// </summary>
 [Description("A validated Agent, either remote (with metadata) or inline.")]
 [JsonSchemaTitle("agent.Agent")]
-[JsonConverter(typeof(AgentAgentConverter))]
-public class AgentAgent
+[JsonConverter(typeof(AgentConverter))]
+public partial class Agent
 {
     [JsonSchemaVariant("Remote", Ref = "agent.RemoteAgent")]
-    public AgentRemoteAgent? Remote { get; set; }
+    public RemoteAgent? Remote { get; set; }
 
     [JsonSchemaVariant("Inline", Ref = "agent.InlineAgent")]
-    public AgentInlineAgent? Inline { get; set; }
+    public InlineAgent? Inline { get; set; }
 }
 
-public class AgentAgentConverter : JsonConverter<AgentAgent>
+public class AgentConverter : JsonConverter<Agent>
 {
-    public override AgentAgent? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Agent? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -34,16 +34,16 @@ public class AgentAgentConverter : JsonConverter<AgentAgent>
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<AgentRemoteAgent>(raw, options); if (val0 != null) return new AgentAgent { Remote = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<RemoteAgent>(raw, options); if (val0 != null) return new Agent { Remote = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<AgentInlineAgent>(raw, options); if (val1 != null) return new AgentAgent { Inline = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<InlineAgent>(raw, options); if (val1 != null) return new Agent { Inline = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of AgentAgent");
+        throw new JsonException($"Data did not match any variant of Agent");
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentAgent value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Agent value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Remote != null)

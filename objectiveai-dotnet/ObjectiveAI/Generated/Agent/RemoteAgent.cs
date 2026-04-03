@@ -14,31 +14,31 @@ namespace ObjectiveAI.Agent;
 [Description("A validated remote Agent with metadata and computed content-addressed ID.")]
 [JsonSchemaTitle("agent.RemoteAgent")]
 [JsonSchemaRef("agent.InlineAgent")]
-[JsonConverter(typeof(AgentRemoteAgentConverter))]
-public class AgentRemoteAgent
+[JsonConverter(typeof(RemoteAgentConverter))]
+public partial class RemoteAgent
 {
     [JsonIgnore]
-    public AgentInlineAgent Base { get; set; } = default!;
+    public InlineAgent Base { get; set; } = default!;
 
     [JsonPropertyName("description")]
     public string Description { get; set; } = default!;
 }
 
-public class AgentRemoteAgentConverter : JsonConverter<AgentRemoteAgent>
+public class RemoteAgentConverter : JsonConverter<RemoteAgent>
 {
-    public override AgentRemoteAgent? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override RemoteAgent? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
-        var baseObj = JsonSerializer.Deserialize<AgentInlineAgent>(raw, options)!;
-        var result = new AgentRemoteAgent { Base = baseObj };
+        var baseObj = JsonSerializer.Deserialize<InlineAgent>(raw, options)!;
+        var result = new RemoteAgent { Base = baseObj };
         if (doc.RootElement.TryGetProperty("description", out var _DescriptionEl))
             result.Description = JsonSerializer.Deserialize<string>(_DescriptionEl.GetRawText(), options)!;
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentRemoteAgent value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, RemoteAgent value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

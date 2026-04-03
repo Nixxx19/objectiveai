@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Inventions.State;
 
 [JsonSchemaTitle("functions.inventions.state.Params")]
-public class FunctionsInventionsStateParams
+public partial class Params
 {
     [JsonPropertyName("depth")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]

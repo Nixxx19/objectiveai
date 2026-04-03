@@ -13,7 +13,7 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("Expression variant of [`ToolMessage`] for dynamic content.")]
 [JsonSchemaTitle("agent.completions.message.ToolMessageExpression")]
-public class AgentCompletionsMessageToolMessageExpression
+public partial class ToolMessageExpression
 {
     /// <summary>
     /// The content expression.

@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("Function call details in a streaming tool call.")]
 [JsonSchemaTitle("agent.completions.message.AssistantToolCallFunctionDelta")]
-public class AgentCompletionsMessageAssistantToolCallFunctionDelta
+public partial class AssistantToolCallFunctionDelta
 {
     /// <summary>
     /// The arguments being streamed (accumulated across deltas).

@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent;
 /// </summary>
 [Description("An MCP server that the agent can connect to.")]
 [JsonSchemaTitle("agent.McpServer")]
-public class AgentMcpServer
+public partial class McpServer
 {
     /// <summary>
     /// Whether this MCP server uses authorization.

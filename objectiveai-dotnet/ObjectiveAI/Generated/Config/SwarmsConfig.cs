@@ -8,10 +8,10 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Config;
 
 [JsonSchemaTitle("config.SwarmsConfig")]
-public class ConfigSwarmsConfig
+public partial class SwarmsConfig
 {
     [JsonPropertyName("favorites")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public List<ConfigFavorite>? Favorites { get; set; } = null;
+    public List<Favorite>? Favorites { get; set; } = null;
 }

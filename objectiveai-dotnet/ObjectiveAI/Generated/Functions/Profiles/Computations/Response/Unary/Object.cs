@@ -8,8 +8,8 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Profiles.Computations.Response.Unary;
 
 [JsonSchemaTitle("functions.profiles.computations.response.unary.Object")]
-[JsonConverter(typeof(JsonStringEnumConverter<FunctionsProfilesComputationsResponseUnaryObject>))]
-public enum FunctionsProfilesComputationsResponseUnaryObject
+[JsonConverter(typeof(JsonStringEnumConverter<Object>))]
+public enum Object
 {
     [JsonStringEnumMemberName("function.profile.computation")]
     FunctionProfileComputation

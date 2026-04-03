@@ -10,19 +10,19 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Agent.Completions.Response.Unary;
 
 [JsonSchemaTitle("agent.completions.response.unary.Message")]
-[JsonConverter(typeof(AgentCompletionsResponseUnaryMessageConverter))]
-public class AgentCompletionsResponseUnaryMessage
+[JsonConverter(typeof(MessageConverter))]
+public partial class Message
 {
     [JsonSchemaVariant("Assistant", Ref = "agent.completions.response.unary.AssistantResponse")]
-    public AgentCompletionsResponseUnaryAssistantResponse? Assistant { get; set; }
+    public AssistantResponse? Assistant { get; set; }
 
     [JsonSchemaVariant("Tool", Ref = "agent.completions.response.ToolResponse")]
-    public AgentCompletionsResponseToolResponse? Tool { get; set; }
+    public ToolResponse? Tool { get; set; }
 }
 
-public class AgentCompletionsResponseUnaryMessageConverter : JsonConverter<AgentCompletionsResponseUnaryMessage>
+public class MessageConverter : JsonConverter<Message>
 {
-    public override AgentCompletionsResponseUnaryMessage? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Message? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -31,16 +31,16 @@ public class AgentCompletionsResponseUnaryMessageConverter : JsonConverter<Agent
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<AgentCompletionsResponseUnaryAssistantResponse>(raw, options); if (val0 != null) return new AgentCompletionsResponseUnaryMessage { Assistant = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<AssistantResponse>(raw, options); if (val0 != null) return new Message { Assistant = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<AgentCompletionsResponseToolResponse>(raw, options); if (val1 != null) return new AgentCompletionsResponseUnaryMessage { Tool = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<ToolResponse>(raw, options); if (val1 != null) return new Message { Tool = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of AgentCompletionsResponseUnaryMessage");
+        throw new JsonException($"Data did not match any variant of Message");
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentCompletionsResponseUnaryMessage value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Message value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Assistant != null)

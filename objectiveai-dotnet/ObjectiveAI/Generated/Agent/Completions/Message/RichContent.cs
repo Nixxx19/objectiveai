@@ -13,8 +13,8 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("Rich content for user/assistant messages (supports multimodal input).")]
 [JsonSchemaTitle("agent.completions.message.RichContent")]
-[JsonConverter(typeof(AgentCompletionsMessageRichContentConverter))]
-public class AgentCompletionsMessageRichContent
+[JsonConverter(typeof(RichContentConverter))]
+public partial class RichContent
 {
     /// <summary>
     /// Plain text content.
@@ -28,12 +28,12 @@ public class AgentCompletionsMessageRichContent
     /// </summary>
     [Description("Multi-part content (text, images, audio, video, files).")]
     [JsonSchemaVariant("Parts", Type = "array")]
-    public List<AgentCompletionsMessageRichContentPart>? Parts { get; set; }
+    public List<RichContentPart>? Parts { get; set; }
 }
 
-public class AgentCompletionsMessageRichContentConverter : JsonConverter<AgentCompletionsMessageRichContent>
+public class RichContentConverter : JsonConverter<RichContent>
 {
-    public override AgentCompletionsMessageRichContent? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override RichContent? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -43,19 +43,19 @@ public class AgentCompletionsMessageRichContentConverter : JsonConverter<AgentCo
         if (el.ValueKind == JsonValueKind.String)
         {
             var str = el.GetString()!;
-            return new AgentCompletionsMessageRichContent { Text = str };
+            return new RichContent { Text = str };
         }
 
         if (el.ValueKind == JsonValueKind.Array)
         {
-            var val = JsonSerializer.Deserialize<List<AgentCompletionsMessageRichContentPart>>(raw, options);
-            return new AgentCompletionsMessageRichContent { Parts = val };
+            var val = JsonSerializer.Deserialize<List<RichContentPart>>(raw, options);
+            return new RichContent { Parts = val };
         }
 
-        throw new JsonException($"Data did not match any variant of AgentCompletionsMessageRichContent");
+        throw new JsonException($"Data did not match any variant of RichContent");
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentCompletionsMessageRichContent value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, RichContent value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Text != null)

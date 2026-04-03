@@ -23,7 +23,7 @@ when it was created, when it expires (if ever), whether it has been
 disabled, and user-provided name and description.
 """)]
 [JsonSchemaTitle("auth.ApiKeyWithMetadata")]
-public class AuthApiKeyWithMetadata
+public partial class ApiKeyWithMetadata
 {
     /// <summary>
     /// The API key itself.

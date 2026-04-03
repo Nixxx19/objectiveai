@@ -10,20 +10,20 @@ using System.Text.Json.Serialization;
 
 namespace ObjectiveAI.Functions.Inventions.State;
 
-public class FunctionsInventionsStateInputSchemaScalarFunctionInputSchema
+public partial class InputSchemaScalarFunctionInputSchema
 {
     [JsonPropertyName("schema")]
-    public FunctionsExpressionObjectInputSchema Schema { get; set; } = default!;
+    public ObjectInputSchema Schema { get; set; } = default!;
 
     [JsonPropertyName("type")]
     [JsonSchemaEnum("alpha.scalar.function")]
     public string Type { get; set; } = default!;
 }
 
-public class FunctionsInventionsStateInputSchemaVectorFunctionInputSchema
+public partial class InputSchemaVectorFunctionInputSchema
 {
     [JsonPropertyName("schema")]
-    public FunctionsAlphaVectorExpressionVectorFunctionInputSchema Schema { get; set; } = default!;
+    public VectorFunctionInputSchema Schema { get; set; } = default!;
 
     [JsonPropertyName("type")]
     [JsonSchemaEnum("alpha.vector.function")]
@@ -42,19 +42,19 @@ The actual schema is nested under a `schema` key to avoid conflicts
 with the `type` tag field (since ObjectInputSchema has its own `type` field).
 """)]
 [JsonSchemaTitle("functions.inventions.state.InputSchema")]
-[JsonConverter(typeof(FunctionsInventionsStateInputSchemaConverter))]
-public class FunctionsInventionsStateInputSchema
+[JsonConverter(typeof(InputSchemaConverter))]
+public partial class InputSchema
 {
     [JsonSchemaVariant("ScalarFunctionInputSchema", Type = "object")]
-    public FunctionsInventionsStateInputSchemaScalarFunctionInputSchema? ScalarFunctionInputSchema { get; set; }
+    public InputSchemaScalarFunctionInputSchema? ScalarFunctionInputSchema { get; set; }
 
     [JsonSchemaVariant("VectorFunctionInputSchema", Type = "object")]
-    public FunctionsInventionsStateInputSchemaVectorFunctionInputSchema? VectorFunctionInputSchema { get; set; }
+    public InputSchemaVectorFunctionInputSchema? VectorFunctionInputSchema { get; set; }
 }
 
-public class FunctionsInventionsStateInputSchemaConverter : JsonConverter<FunctionsInventionsStateInputSchema>
+public class InputSchemaConverter : JsonConverter<InputSchema>
 {
-    public override FunctionsInventionsStateInputSchema? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override InputSchema? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -69,7 +69,7 @@ public class FunctionsInventionsStateInputSchemaConverter : JsonConverter<Functi
                     match0 = false;
                 if (match0)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsInventionsStateInputSchemaScalarFunctionInputSchema>(raw, options); if (val != null) return new FunctionsInventionsStateInputSchema { ScalarFunctionInputSchema = val }; }
+                    try { var val = JsonSerializer.Deserialize<InputSchemaScalarFunctionInputSchema>(raw, options); if (val != null) return new InputSchema { ScalarFunctionInputSchema = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -79,16 +79,16 @@ public class FunctionsInventionsStateInputSchemaConverter : JsonConverter<Functi
                     match1 = false;
                 if (match1)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsInventionsStateInputSchemaVectorFunctionInputSchema>(raw, options); if (val != null) return new FunctionsInventionsStateInputSchema { VectorFunctionInputSchema = val }; }
+                    try { var val = JsonSerializer.Deserialize<InputSchemaVectorFunctionInputSchema>(raw, options); if (val != null) return new InputSchema { VectorFunctionInputSchema = val }; }
                     catch (JsonException) { }
                 }
             }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsInventionsStateInputSchema");
+        throw new JsonException($"Data did not match any variant of InputSchema");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsInventionsStateInputSchema value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, InputSchema value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.ScalarFunctionInputSchema != null)

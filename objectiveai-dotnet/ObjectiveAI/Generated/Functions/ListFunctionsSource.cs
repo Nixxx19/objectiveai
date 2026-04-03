@@ -12,8 +12,8 @@ namespace ObjectiveAI.Functions;
 /// </summary>
 [Description("Source filter for listing functions.")]
 [JsonSchemaTitle("functions.ListFunctionsSource")]
-[JsonConverter(typeof(JsonStringEnumConverter<FunctionsListFunctionsSource>))]
-public enum FunctionsListFunctionsSource
+[JsonConverter(typeof(JsonStringEnumConverter<ListFunctionsSource>))]
+public enum ListFunctionsSource
 {
     [JsonStringEnumMemberName("all")]
     All,

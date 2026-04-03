@@ -36,7 +36,7 @@ selection), but when `top_logprobs` is used, votes may be probability
 distributions.
 """)]
 [JsonSchemaTitle("vector.completions.response.Vote")]
-public class VectorCompletionsResponseVote
+public partial class Vote
 {
     /// <summary>
     /// The agent that produced this vote (content-addressed ID).
@@ -107,7 +107,7 @@ request. Typically one element is 1.0 (selected) and the rest are 0.0.
 """)]
     [JsonPropertyName("vote")]
     [JsonSchemaItemsRange(Minimum = "-3.4028234663852886e+38", Maximum = "3.4028234663852886e+38")]
-    public List<double> Vote { get; set; } = default!;
+    public List<double> VoteValue { get; set; } = default!;
 
     /// <summary>
     /// The weight applied to this vote when computing final scores.

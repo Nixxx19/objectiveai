@@ -8,8 +8,8 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Agent.Completions.Response;
 
 [JsonSchemaTitle("agent.completions.response.ToolRole")]
-[JsonConverter(typeof(JsonStringEnumConverter<AgentCompletionsResponseToolRole>))]
-public enum AgentCompletionsResponseToolRole
+[JsonConverter(typeof(JsonStringEnumConverter<ToolRole>))]
+public enum ToolRole
 {
     [JsonStringEnumMemberName("tool")]
     Tool

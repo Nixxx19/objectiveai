@@ -42,14 +42,14 @@ The conversion:
 - Total agent count (sum of all counts) must be between 1 and 128
 """)]
 [JsonSchemaTitle("swarm.InlineSwarm")]
-public class SwarmInlineSwarm
+public partial class InlineSwarm
 {
     /// <summary>
     /// The validated and deduplicated LLMs, sorted by full_id.
     /// </summary>
     [Description("The validated and deduplicated LLMs, sorted by full_id.")]
     [JsonPropertyName("agents")]
-    public List<AgentAgentWithFallbacksWithCount> Agents { get; set; } = default!;
+    public List<AgentWithFallbacksWithCount> Agents { get; set; } = default!;
 
     /// <summary>
     /// The deterministic content-addressed ID (22-character base62 string).

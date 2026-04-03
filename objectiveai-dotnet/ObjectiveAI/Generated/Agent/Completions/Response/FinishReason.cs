@@ -13,8 +13,8 @@ namespace ObjectiveAI.Agent.Completions.Response;
 /// </summary>
 [Description("The reason the model stopped generating.")]
 [JsonSchemaTitle("agent.completions.response.FinishReason")]
-[JsonConverter(typeof(AgentCompletionsResponseFinishReasonConverter))]
-public class AgentCompletionsResponseFinishReason
+[JsonConverter(typeof(FinishReasonConverter))]
+public partial class FinishReason
 {
     /// <summary>
     /// The model reached a natural stop point or stop sequence.
@@ -52,26 +52,26 @@ public class AgentCompletionsResponseFinishReason
     public string? Error { get; set; }
 }
 
-public class AgentCompletionsResponseFinishReasonConverter : JsonConverter<AgentCompletionsResponseFinishReason>
+public class FinishReasonConverter : JsonConverter<FinishReason>
 {
-    public override AgentCompletionsResponseFinishReason? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override FinishReason? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         if (reader.TokenType != JsonTokenType.String)
-            throw new JsonException("Expected string for AgentCompletionsResponseFinishReason");
+            throw new JsonException("Expected string for FinishReason");
         var str = reader.GetString()!;
         return str switch
         {
-            "stop" => new AgentCompletionsResponseFinishReason { Stop = "stop" },
-            "length" => new AgentCompletionsResponseFinishReason { Length = "length" },
-            "tool_calls" => new AgentCompletionsResponseFinishReason { ToolCalls = "tool_calls" },
-            "content_filter" => new AgentCompletionsResponseFinishReason { ContentFilter = "content_filter" },
-            "error" => new AgentCompletionsResponseFinishReason { Error = "error" },
-            _ => throw new JsonException($"Unknown variant of AgentCompletionsResponseFinishReason: {str}")
+            "stop" => new FinishReason { Stop = "stop" },
+            "length" => new FinishReason { Length = "length" },
+            "tool_calls" => new FinishReason { ToolCalls = "tool_calls" },
+            "content_filter" => new FinishReason { ContentFilter = "content_filter" },
+            "error" => new FinishReason { Error = "error" },
+            _ => throw new JsonException($"Unknown variant of FinishReason: {str}")
         };
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentCompletionsResponseFinishReason value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, FinishReason value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Stop != null)

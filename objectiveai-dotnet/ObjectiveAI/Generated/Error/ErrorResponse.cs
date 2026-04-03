@@ -12,7 +12,7 @@ namespace ObjectiveAI.Error;
 /// </summary>
 [Description("Response from the error endpoint.")]
 [JsonSchemaTitle("error.ErrorResponse")]
-public class ErrorErrorResponse
+public partial class ErrorResponse
 {
     /// <summary>
     /// Whether the request completed successfully.

@@ -3,24 +3,23 @@
 
 using ObjectiveAI.Attributes;
 using ObjectiveAI.Functions.AlphaVector.Expression;
-using ObjectiveAI.Functions.Expression;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 
 namespace ObjectiveAI.Functions.AlphaVector;
 
 [JsonSchemaTitle("functions.alpha_vector.PlaceholderVectorFunctionTaskExpression")]
-public class FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpression
+public partial class PlaceholderVectorFunctionTaskExpression
 {
     [JsonPropertyName("depth")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
     public ulong Depth { get; set; } = default!;
 
     [JsonPropertyName("input")]
-    public FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression Input { get; set; } = default!;
+    public VectorFunctionInputValueExpression Input { get; set; } = default!;
 
     [JsonPropertyName("input_schema")]
-    public FunctionsAlphaVectorExpressionVectorFunctionInputSchema InputSchema { get; set; } = default!;
+    public VectorFunctionInputSchema InputSchema { get; set; } = default!;
 
     [JsonPropertyName("max_branch_width")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
@@ -44,7 +43,7 @@ public class FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpression
     [JsonPropertyName("skip")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public FunctionsExpressionExpression? Skip { get; set; } = null;
+    public ObjectiveAI.Functions.Expression.Expression? Skip { get; set; } = null;
 
     [JsonPropertyName("spec")]
     public string Spec { get; set; } = default!;

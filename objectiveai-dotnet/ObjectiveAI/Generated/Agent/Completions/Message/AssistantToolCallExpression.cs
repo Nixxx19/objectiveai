@@ -13,7 +13,7 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("A function call expression.")]
 [JsonSchemaTitle("agent.completions.message.AssistantToolCallExpression")]
-public class AgentCompletionsMessageAssistantToolCallExpression
+public partial class AssistantToolCallExpression
 {
     /// <summary>
     /// The function expression.

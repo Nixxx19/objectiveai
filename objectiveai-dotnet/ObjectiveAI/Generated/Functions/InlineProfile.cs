@@ -14,27 +14,27 @@ namespace ObjectiveAI.Functions;
 /// </summary>
 [Description("An inline profile, either tasks-based or auto.")]
 [JsonSchemaTitle("functions.InlineProfile")]
-[JsonConverter(typeof(FunctionsInlineProfileConverter))]
-public class FunctionsInlineProfile
+[JsonConverter(typeof(InlineProfileConverter))]
+public partial class InlineProfile
 {
     /// <summary>
     /// Tasks-based profile with per-task configuration.
     /// </summary>
     [Description("Tasks-based profile with per-task configuration.")]
     [JsonSchemaVariant("Tasks", Ref = "functions.InlineTasksProfile")]
-    public FunctionsInlineTasksProfile? Tasks { get; set; }
+    public InlineTasksProfile? Tasks { get; set; }
 
     /// <summary>
     /// Auto profile that applies a single swarm+weights to all vector completion tasks.
     /// </summary>
     [Description("Auto profile that applies a single swarm+weights to all vector completion tasks.")]
     [JsonSchemaVariant("Auto", Ref = "swarm.InlineSwarmBase")]
-    public SwarmInlineSwarmBase? Auto { get; set; }
+    public InlineSwarmBase? Auto { get; set; }
 }
 
-public class FunctionsInlineProfileConverter : JsonConverter<FunctionsInlineProfile>
+public class InlineProfileConverter : JsonConverter<InlineProfile>
 {
-    public override FunctionsInlineProfile? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override InlineProfile? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -43,16 +43,16 @@ public class FunctionsInlineProfileConverter : JsonConverter<FunctionsInlineProf
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<FunctionsInlineTasksProfile>(raw, options); if (val0 != null) return new FunctionsInlineProfile { Tasks = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<InlineTasksProfile>(raw, options); if (val0 != null) return new InlineProfile { Tasks = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<SwarmInlineSwarmBase>(raw, options); if (val1 != null) return new FunctionsInlineProfile { Auto = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<InlineSwarmBase>(raw, options); if (val1 != null) return new InlineProfile { Auto = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsInlineProfile");
+        throw new JsonException($"Data did not match any variant of InlineProfile");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsInlineProfile value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, InlineProfile value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Tasks != null)

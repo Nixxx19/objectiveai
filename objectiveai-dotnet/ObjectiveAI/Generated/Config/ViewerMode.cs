@@ -8,8 +8,8 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Config;
 
 [JsonSchemaTitle("config.ViewerMode")]
-[JsonConverter(typeof(JsonStringEnumConverter<ConfigViewerMode>))]
-public enum ConfigViewerMode
+[JsonConverter(typeof(JsonStringEnumConverter<ViewerMode>))]
+public enum ViewerMode
 {
     [JsonStringEnumMemberName("remote")]
     Remote,

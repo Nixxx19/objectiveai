@@ -14,31 +14,31 @@ namespace ObjectiveAI.Agent;
 [Description("A remote agent base definition with description and optional fallbacks.")]
 [JsonSchemaTitle("agent.RemoteAgentBaseWithFallbacks")]
 [JsonSchemaRef("agent.InlineAgentBaseWithFallbacks")]
-[JsonConverter(typeof(AgentRemoteAgentBaseWithFallbacksConverter))]
-public class AgentRemoteAgentBaseWithFallbacks
+[JsonConverter(typeof(RemoteAgentBaseWithFallbacksConverter))]
+public partial class RemoteAgentBaseWithFallbacks
 {
     [JsonIgnore]
-    public AgentInlineAgentBaseWithFallbacks Base { get; set; } = default!;
+    public InlineAgentBaseWithFallbacks Base { get; set; } = default!;
 
     [JsonPropertyName("description")]
     public string Description { get; set; } = default!;
 }
 
-public class AgentRemoteAgentBaseWithFallbacksConverter : JsonConverter<AgentRemoteAgentBaseWithFallbacks>
+public class RemoteAgentBaseWithFallbacksConverter : JsonConverter<RemoteAgentBaseWithFallbacks>
 {
-    public override AgentRemoteAgentBaseWithFallbacks? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override RemoteAgentBaseWithFallbacks? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
-        var baseObj = JsonSerializer.Deserialize<AgentInlineAgentBaseWithFallbacks>(raw, options)!;
-        var result = new AgentRemoteAgentBaseWithFallbacks { Base = baseObj };
+        var baseObj = JsonSerializer.Deserialize<InlineAgentBaseWithFallbacks>(raw, options)!;
+        var result = new RemoteAgentBaseWithFallbacks { Base = baseObj };
         if (doc.RootElement.TryGetProperty("description", out var _DescriptionEl))
             result.Description = JsonSerializer.Deserialize<string>(_DescriptionEl.GetRawText(), options)!;
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentRemoteAgentBaseWithFallbacks value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, RemoteAgentBaseWithFallbacks value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

@@ -12,7 +12,7 @@ namespace ObjectiveAI.Functions.Expression;
 /// </summary>
 [Description("Schema for a file input.")]
 [JsonSchemaTitle("functions.expression.FileInputSchema")]
-public class FunctionsExpressionFileInputSchema
+public partial class FileInputSchema
 {
     /// <summary>
     /// Human-readable description of the expected file.
@@ -24,5 +24,5 @@ public class FunctionsExpressionFileInputSchema
     public string? Description { get; set; } = null;
 
     [JsonPropertyName("type")]
-    public FunctionsExpressionFileInputSchemaType Type { get; set; } = default!;
+    public FileInputSchemaType Type { get; set; } = default!;
 }

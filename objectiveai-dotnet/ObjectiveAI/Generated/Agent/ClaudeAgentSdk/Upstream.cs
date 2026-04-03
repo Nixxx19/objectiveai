@@ -12,8 +12,8 @@ namespace ObjectiveAI.Agent.ClaudeAgentSdk;
 /// </summary>
 [Description("Claude Agent SDK upstream marker.")]
 [JsonSchemaTitle("agent.claude_agent_sdk.Upstream")]
-[JsonConverter(typeof(JsonStringEnumConverter<AgentClaudeAgentSdkUpstream>))]
-public enum AgentClaudeAgentSdkUpstream
+[JsonConverter(typeof(JsonStringEnumConverter<Upstream>))]
+public enum Upstream
 {
     [JsonStringEnumMemberName("claude_agent_sdk")]
     ClaudeAgentSdk

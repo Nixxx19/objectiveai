@@ -9,32 +9,32 @@ using System.Text.Json.Serialization;
 
 namespace ObjectiveAI.Functions.AlphaVector;
 
-public class FunctionsAlphaVectorRemoteFunctionBranch
+public partial class RemoteFunctionBranch
 {
     [JsonPropertyName("description")]
     public string Description { get; set; } = default!;
 
     [JsonPropertyName("input_schema")]
-    public FunctionsAlphaVectorExpressionVectorFunctionInputSchema InputSchema { get; set; } = default!;
+    public VectorFunctionInputSchema InputSchema { get; set; } = default!;
 
     [JsonPropertyName("tasks")]
-    public List<FunctionsAlphaVectorBranchTaskExpression> Tasks { get; set; } = default!;
+    public List<BranchTaskExpression> Tasks { get; set; } = default!;
 
     [JsonPropertyName("type")]
     [JsonSchemaEnum("alpha.vector.branch.function")]
     public string Type { get; set; } = default!;
 }
 
-public class FunctionsAlphaVectorRemoteFunctionLeaf
+public partial class RemoteFunctionLeaf
 {
     [JsonPropertyName("description")]
     public string Description { get; set; } = default!;
 
     [JsonPropertyName("input_schema")]
-    public FunctionsAlphaVectorExpressionVectorFunctionInputSchema InputSchema { get; set; } = default!;
+    public VectorFunctionInputSchema InputSchema { get; set; } = default!;
 
     [JsonPropertyName("tasks")]
-    public List<FunctionsAlphaVectorLeafTaskExpression> Tasks { get; set; } = default!;
+    public List<LeafTaskExpression> Tasks { get; set; } = default!;
 
     [JsonPropertyName("type")]
     [JsonSchemaEnum("alpha.vector.leaf.function")]
@@ -43,19 +43,19 @@ public class FunctionsAlphaVectorRemoteFunctionLeaf
 
 
 [JsonSchemaTitle("functions.alpha_vector.RemoteFunction")]
-[JsonConverter(typeof(FunctionsAlphaVectorRemoteFunctionConverter))]
-public class FunctionsAlphaVectorRemoteFunction
+[JsonConverter(typeof(RemoteFunctionConverter))]
+public partial class RemoteFunction
 {
     [JsonSchemaVariant("Branch", Type = "object")]
-    public FunctionsAlphaVectorRemoteFunctionBranch? Branch { get; set; }
+    public RemoteFunctionBranch? Branch { get; set; }
 
     [JsonSchemaVariant("Leaf", Type = "object")]
-    public FunctionsAlphaVectorRemoteFunctionLeaf? Leaf { get; set; }
+    public RemoteFunctionLeaf? Leaf { get; set; }
 }
 
-public class FunctionsAlphaVectorRemoteFunctionConverter : JsonConverter<FunctionsAlphaVectorRemoteFunction>
+public class RemoteFunctionConverter : JsonConverter<RemoteFunction>
 {
-    public override FunctionsAlphaVectorRemoteFunction? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override RemoteFunction? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -70,7 +70,7 @@ public class FunctionsAlphaVectorRemoteFunctionConverter : JsonConverter<Functio
                     match0 = false;
                 if (match0)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsAlphaVectorRemoteFunctionBranch>(raw, options); if (val != null) return new FunctionsAlphaVectorRemoteFunction { Branch = val }; }
+                    try { var val = JsonSerializer.Deserialize<RemoteFunctionBranch>(raw, options); if (val != null) return new RemoteFunction { Branch = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -80,16 +80,16 @@ public class FunctionsAlphaVectorRemoteFunctionConverter : JsonConverter<Functio
                     match1 = false;
                 if (match1)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsAlphaVectorRemoteFunctionLeaf>(raw, options); if (val != null) return new FunctionsAlphaVectorRemoteFunction { Leaf = val }; }
+                    try { var val = JsonSerializer.Deserialize<RemoteFunctionLeaf>(raw, options); if (val != null) return new RemoteFunction { Leaf = val }; }
                     catch (JsonException) { }
                 }
             }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsAlphaVectorRemoteFunction");
+        throw new JsonException($"Data did not match any variant of RemoteFunction");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsAlphaVectorRemoteFunction value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, RemoteFunction value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Branch != null)

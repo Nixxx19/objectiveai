@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Inventions;
 
 [JsonSchemaTitle("functions.inventions.EssayObject")]
-public class FunctionsInventionsEssayObject
+public partial class EssayObject
 {
     [JsonPropertyName("essay")]
     public string Essay { get; set; } = default!;

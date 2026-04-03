@@ -9,32 +9,32 @@ using System.Text.Json.Serialization;
 
 namespace ObjectiveAI.Functions.AlphaScalar;
 
-public class FunctionsAlphaScalarRemoteFunctionBranch
+public partial class RemoteFunctionBranch
 {
     [JsonPropertyName("description")]
     public string Description { get; set; } = default!;
 
     [JsonPropertyName("input_schema")]
-    public FunctionsExpressionObjectInputSchema InputSchema { get; set; } = default!;
+    public ObjectInputSchema InputSchema { get; set; } = default!;
 
     [JsonPropertyName("tasks")]
-    public List<FunctionsAlphaScalarBranchTaskExpression> Tasks { get; set; } = default!;
+    public List<BranchTaskExpression> Tasks { get; set; } = default!;
 
     [JsonPropertyName("type")]
     [JsonSchemaEnum("alpha.scalar.branch.function")]
     public string Type { get; set; } = default!;
 }
 
-public class FunctionsAlphaScalarRemoteFunctionLeaf
+public partial class RemoteFunctionLeaf
 {
     [JsonPropertyName("description")]
     public string Description { get; set; } = default!;
 
     [JsonPropertyName("input_schema")]
-    public FunctionsExpressionObjectInputSchema InputSchema { get; set; } = default!;
+    public ObjectInputSchema InputSchema { get; set; } = default!;
 
     [JsonPropertyName("tasks")]
-    public List<FunctionsAlphaScalarLeafTaskExpression> Tasks { get; set; } = default!;
+    public List<LeafTaskExpression> Tasks { get; set; } = default!;
 
     [JsonPropertyName("type")]
     [JsonSchemaEnum("alpha.scalar.leaf.function")]
@@ -43,19 +43,19 @@ public class FunctionsAlphaScalarRemoteFunctionLeaf
 
 
 [JsonSchemaTitle("functions.alpha_scalar.RemoteFunction")]
-[JsonConverter(typeof(FunctionsAlphaScalarRemoteFunctionConverter))]
-public class FunctionsAlphaScalarRemoteFunction
+[JsonConverter(typeof(RemoteFunctionConverter))]
+public partial class RemoteFunction
 {
     [JsonSchemaVariant("Branch", Type = "object")]
-    public FunctionsAlphaScalarRemoteFunctionBranch? Branch { get; set; }
+    public RemoteFunctionBranch? Branch { get; set; }
 
     [JsonSchemaVariant("Leaf", Type = "object")]
-    public FunctionsAlphaScalarRemoteFunctionLeaf? Leaf { get; set; }
+    public RemoteFunctionLeaf? Leaf { get; set; }
 }
 
-public class FunctionsAlphaScalarRemoteFunctionConverter : JsonConverter<FunctionsAlphaScalarRemoteFunction>
+public class RemoteFunctionConverter : JsonConverter<RemoteFunction>
 {
-    public override FunctionsAlphaScalarRemoteFunction? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override RemoteFunction? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -70,7 +70,7 @@ public class FunctionsAlphaScalarRemoteFunctionConverter : JsonConverter<Functio
                     match0 = false;
                 if (match0)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsAlphaScalarRemoteFunctionBranch>(raw, options); if (val != null) return new FunctionsAlphaScalarRemoteFunction { Branch = val }; }
+                    try { var val = JsonSerializer.Deserialize<RemoteFunctionBranch>(raw, options); if (val != null) return new RemoteFunction { Branch = val }; }
                     catch (JsonException) { }
                 }
             }
@@ -80,16 +80,16 @@ public class FunctionsAlphaScalarRemoteFunctionConverter : JsonConverter<Functio
                     match1 = false;
                 if (match1)
                 {
-                    try { var val = JsonSerializer.Deserialize<FunctionsAlphaScalarRemoteFunctionLeaf>(raw, options); if (val != null) return new FunctionsAlphaScalarRemoteFunction { Leaf = val }; }
+                    try { var val = JsonSerializer.Deserialize<RemoteFunctionLeaf>(raw, options); if (val != null) return new RemoteFunction { Leaf = val }; }
                     catch (JsonException) { }
                 }
             }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsAlphaScalarRemoteFunction");
+        throw new JsonException($"Data did not match any variant of RemoteFunction");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsAlphaScalarRemoteFunction value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, RemoteFunction value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Branch != null)

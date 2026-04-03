@@ -12,12 +12,12 @@ namespace ObjectiveAI.Functions.Expression;
 /// </summary>
 [Description("Schema for a union of possible types - input must match at least one.")]
 [JsonSchemaTitle("functions.expression.AnyOfInputSchema")]
-public class FunctionsExpressionAnyOfInputSchema
+public partial class AnyOfInputSchema
 {
     /// <summary>
     /// The possible schemas that the input can match.
     /// </summary>
     [Description("The possible schemas that the input can match.")]
     [JsonPropertyName("anyOf")]
-    public List<FunctionsExpressionInputSchema> AnyOf { get; set; } = default!;
+    public List<InputSchema> AnyOf { get; set; } = default!;
 }

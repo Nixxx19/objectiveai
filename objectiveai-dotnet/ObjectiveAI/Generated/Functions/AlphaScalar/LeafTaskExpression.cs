@@ -10,32 +10,32 @@ namespace ObjectiveAI.Functions.AlphaScalar;
 
 [JsonSchemaTitle("functions.alpha_scalar.LeafTaskExpression")]
 [JsonSchemaRef("functions.alpha_scalar.VectorCompletionTaskExpression")]
-[JsonConverter(typeof(FunctionsAlphaScalarLeafTaskExpressionConverter))]
-public class FunctionsAlphaScalarLeafTaskExpression
+[JsonConverter(typeof(LeafTaskExpressionConverter))]
+public partial class LeafTaskExpression
 {
     [JsonIgnore]
-    public FunctionsAlphaScalarVectorCompletionTaskExpression Base { get; set; } = default!;
+    public VectorCompletionTaskExpression Base { get; set; } = default!;
 
     [JsonPropertyName("type")]
     [JsonSchemaEnum("vector.completion")]
     public string Type { get; set; } = default!;
 }
 
-public class FunctionsAlphaScalarLeafTaskExpressionConverter : JsonConverter<FunctionsAlphaScalarLeafTaskExpression>
+public class LeafTaskExpressionConverter : JsonConverter<LeafTaskExpression>
 {
-    public override FunctionsAlphaScalarLeafTaskExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override LeafTaskExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
-        var baseObj = JsonSerializer.Deserialize<FunctionsAlphaScalarVectorCompletionTaskExpression>(raw, options)!;
-        var result = new FunctionsAlphaScalarLeafTaskExpression { Base = baseObj };
+        var baseObj = JsonSerializer.Deserialize<VectorCompletionTaskExpression>(raw, options)!;
+        var result = new LeafTaskExpression { Base = baseObj };
         if (doc.RootElement.TryGetProperty("type", out var _TypeEl))
             result.Type = JsonSerializer.Deserialize<string>(_TypeEl.GetRawText(), options)!;
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsAlphaScalarLeafTaskExpression value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, LeafTaskExpression value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

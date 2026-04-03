@@ -8,8 +8,8 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Config;
 
 [JsonSchemaTitle("config.ApiMode")]
-[JsonConverter(typeof(JsonStringEnumConverter<ConfigApiMode>))]
-public enum ConfigApiMode
+[JsonConverter(typeof(JsonStringEnumConverter<ApiMode>))]
+public enum ApiMode
 {
     [JsonStringEnumMemberName("remote")]
     Remote,

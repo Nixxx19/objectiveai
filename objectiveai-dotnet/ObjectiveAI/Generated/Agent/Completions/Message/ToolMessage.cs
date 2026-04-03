@@ -12,14 +12,14 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("A tool message containing the result of a tool call.")]
 [JsonSchemaTitle("agent.completions.message.ToolMessage")]
-public class AgentCompletionsMessageToolMessage
+public partial class ToolMessage
 {
     /// <summary>
     /// The content of the tool response.
     /// </summary>
     [Description("The content of the tool response.")]
     [JsonPropertyName("content")]
-    public AgentCompletionsMessageRichContent Content { get; set; } = default!;
+    public RichContent Content { get; set; } = default!;
 
     /// <summary>
     /// The ID of the tool call this message responds to.

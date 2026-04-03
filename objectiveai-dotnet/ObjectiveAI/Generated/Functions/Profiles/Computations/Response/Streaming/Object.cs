@@ -8,8 +8,8 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Profiles.Computations.Response.Streaming;
 
 [JsonSchemaTitle("functions.profiles.computations.response.streaming.Object")]
-[JsonConverter(typeof(JsonStringEnumConverter<FunctionsProfilesComputationsResponseStreamingObject>))]
-public enum FunctionsProfilesComputationsResponseStreamingObject
+[JsonConverter(typeof(JsonStringEnumConverter<Object>))]
+public enum Object
 {
     [JsonStringEnumMemberName("function.profile.computation.chunk")]
     FunctionProfileComputationChunk

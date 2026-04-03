@@ -27,8 +27,8 @@ responses. This enum controls *how* that constraint is enforced.
 completely ignored for agent completions.
 """)]
 [JsonSchemaTitle("agent.openrouter.OutputMode")]
-[JsonConverter(typeof(AgentOpenrouterOutputModeConverter))]
-public class AgentOpenrouterOutputMode
+[JsonConverter(typeof(OutputModeConverter))]
+public partial class OutputMode
 {
     /// <summary>
     /// The model is instructed via the prompt to output a specific key.
@@ -70,24 +70,24 @@ Requires model support for tool/function calling.
     public string? ToolCall { get; set; }
 }
 
-public class AgentOpenrouterOutputModeConverter : JsonConverter<AgentOpenrouterOutputMode>
+public class OutputModeConverter : JsonConverter<OutputMode>
 {
-    public override AgentOpenrouterOutputMode? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override OutputMode? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         if (reader.TokenType != JsonTokenType.String)
-            throw new JsonException("Expected string for AgentOpenrouterOutputMode");
+            throw new JsonException("Expected string for OutputMode");
         var str = reader.GetString()!;
         return str switch
         {
-            "instruction" => new AgentOpenrouterOutputMode { Instruction = "instruction" },
-            "json_schema" => new AgentOpenrouterOutputMode { JsonSchema = "json_schema" },
-            "tool_call" => new AgentOpenrouterOutputMode { ToolCall = "tool_call" },
-            _ => throw new JsonException($"Unknown variant of AgentOpenrouterOutputMode: {str}")
+            "instruction" => new OutputMode { Instruction = "instruction" },
+            "json_schema" => new OutputMode { JsonSchema = "json_schema" },
+            "tool_call" => new OutputMode { ToolCall = "tool_call" },
+            _ => throw new JsonException($"Unknown variant of OutputMode: {str}")
         };
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentOpenrouterOutputMode value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, OutputMode value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Instruction != null)

@@ -12,8 +12,8 @@ namespace ObjectiveAI.Vector.Completions.Response.Unary;
 /// </summary>
 [Description("A complete vector completion response.")]
 [JsonSchemaTitle("vector.completions.response.unary.Object")]
-[JsonConverter(typeof(JsonStringEnumConverter<VectorCompletionsResponseUnaryObject>))]
-public enum VectorCompletionsResponseUnaryObject
+[JsonConverter(typeof(JsonStringEnumConverter<Object>))]
+public enum Object
 {
     [JsonStringEnumMemberName("vector.completion")]
     VectorCompletion

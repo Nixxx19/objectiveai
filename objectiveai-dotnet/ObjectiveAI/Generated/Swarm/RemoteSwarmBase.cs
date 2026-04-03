@@ -20,11 +20,11 @@ Like [`InlineSwarmBase`] but includes a description for remote storage.
 """)]
 [JsonSchemaTitle("swarm.RemoteSwarmBase")]
 [JsonSchemaRef("swarm.InlineSwarmBase")]
-[JsonConverter(typeof(SwarmRemoteSwarmBaseConverter))]
-public class SwarmRemoteSwarmBase
+[JsonConverter(typeof(RemoteSwarmBaseConverter))]
+public partial class RemoteSwarmBase
 {
     [JsonIgnore]
-    public SwarmInlineSwarmBase Base { get; set; } = default!;
+    public InlineSwarmBase Base { get; set; } = default!;
 
     /// <summary>
     /// Human-readable description of what this swarm does.
@@ -34,21 +34,21 @@ public class SwarmRemoteSwarmBase
     public string Description { get; set; } = default!;
 }
 
-public class SwarmRemoteSwarmBaseConverter : JsonConverter<SwarmRemoteSwarmBase>
+public class RemoteSwarmBaseConverter : JsonConverter<RemoteSwarmBase>
 {
-    public override SwarmRemoteSwarmBase? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override RemoteSwarmBase? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
-        var baseObj = JsonSerializer.Deserialize<SwarmInlineSwarmBase>(raw, options)!;
-        var result = new SwarmRemoteSwarmBase { Base = baseObj };
+        var baseObj = JsonSerializer.Deserialize<InlineSwarmBase>(raw, options)!;
+        var result = new RemoteSwarmBase { Base = baseObj };
         if (doc.RootElement.TryGetProperty("description", out var _DescriptionEl))
             result.Description = JsonSerializer.Deserialize<string>(_DescriptionEl.GetRawText(), options)!;
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, SwarmRemoteSwarmBase value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, RemoteSwarmBase value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

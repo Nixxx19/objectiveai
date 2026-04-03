@@ -13,7 +13,7 @@ namespace ObjectiveAI.Agent;
 /// </summary>
 [Description("Response containing a list of Agents.")]
 [JsonSchemaTitle("agent.ListAgentResponse")]
-public class AgentListAgentResponse
+public partial class ListAgentResponse
 {
     /// <summary>
     /// The list of Agent summaries.

@@ -11,8 +11,8 @@ namespace ObjectiveAI.Config;
 
 [JsonSchemaTitle("config.Favorite")]
 [JsonSchemaRef("RemotePathCommitOptional")]
-[JsonConverter(typeof(ConfigFavoriteConverter))]
-public class ConfigFavorite
+[JsonConverter(typeof(FavoriteConverter))]
+public partial class Favorite
 {
     [JsonIgnore]
     public RemotePathCommitOptional Base { get; set; } = default!;
@@ -24,15 +24,15 @@ public class ConfigFavorite
     public string Note { get; set; } = default!;
 }
 
-public class ConfigFavoriteConverter : JsonConverter<ConfigFavorite>
+public class FavoriteConverter : JsonConverter<Favorite>
 {
-    public override ConfigFavorite? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Favorite? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
         var raw = doc.RootElement.GetRawText();
         var baseObj = JsonSerializer.Deserialize<RemotePathCommitOptional>(raw, options)!;
-        var result = new ConfigFavorite { Base = baseObj };
+        var result = new Favorite { Base = baseObj };
         if (doc.RootElement.TryGetProperty("name", out var _NameEl))
             result.Name = JsonSerializer.Deserialize<string>(_NameEl.GetRawText(), options)!;
         if (doc.RootElement.TryGetProperty("note", out var _NoteEl))
@@ -40,7 +40,7 @@ public class ConfigFavoriteConverter : JsonConverter<ConfigFavorite>
         return result;
     }
 
-    public override void Write(Utf8JsonWriter writer, ConfigFavorite value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Favorite value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         writer.WriteStartObject();

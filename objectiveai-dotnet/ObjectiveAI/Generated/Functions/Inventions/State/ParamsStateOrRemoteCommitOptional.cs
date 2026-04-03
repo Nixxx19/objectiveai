@@ -18,19 +18,19 @@ A state specification that is either an inline ParamsState definition
 or a remote path reference.
 """)]
 [JsonSchemaTitle("functions.inventions.state.ParamsStateOrRemoteCommitOptional")]
-[JsonConverter(typeof(FunctionsInventionsStateParamsStateOrRemoteCommitOptionalConverter))]
-public class FunctionsInventionsStateParamsStateOrRemoteCommitOptional
+[JsonConverter(typeof(ParamsStateOrRemoteCommitOptionalConverter))]
+public partial class ParamsStateOrRemoteCommitOptional
 {
     [JsonSchemaVariant("ParamsState", Ref = "functions.inventions.state.ParamsState")]
-    public FunctionsInventionsStateParamsState? ParamsState { get; set; }
+    public ParamsState? ParamsState { get; set; }
 
     [JsonSchemaVariant("Remote", Ref = "RemotePathCommitOptional")]
     public RemotePathCommitOptional? Remote { get; set; }
 }
 
-public class FunctionsInventionsStateParamsStateOrRemoteCommitOptionalConverter : JsonConverter<FunctionsInventionsStateParamsStateOrRemoteCommitOptional>
+public class ParamsStateOrRemoteCommitOptionalConverter : JsonConverter<ParamsStateOrRemoteCommitOptional>
 {
-    public override FunctionsInventionsStateParamsStateOrRemoteCommitOptional? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override ParamsStateOrRemoteCommitOptional? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -39,16 +39,16 @@ public class FunctionsInventionsStateParamsStateOrRemoteCommitOptionalConverter 
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<FunctionsInventionsStateParamsState>(raw, options); if (val0 != null) return new FunctionsInventionsStateParamsStateOrRemoteCommitOptional { ParamsState = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<ParamsState>(raw, options); if (val0 != null) return new ParamsStateOrRemoteCommitOptional { ParamsState = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<RemotePathCommitOptional>(raw, options); if (val1 != null) return new FunctionsInventionsStateParamsStateOrRemoteCommitOptional { Remote = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<RemotePathCommitOptional>(raw, options); if (val1 != null) return new ParamsStateOrRemoteCommitOptional { Remote = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of FunctionsInventionsStateParamsStateOrRemoteCommitOptional");
+        throw new JsonException($"Data did not match any variant of ParamsStateOrRemoteCommitOptional");
     }
 
-    public override void Write(Utf8JsonWriter writer, FunctionsInventionsStateParamsStateOrRemoteCommitOptional value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, ParamsStateOrRemoteCommitOptional value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.ParamsState != null)

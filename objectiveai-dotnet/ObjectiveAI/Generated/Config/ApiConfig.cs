@@ -8,26 +8,26 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Config;
 
 [JsonSchemaTitle("config.ApiConfig")]
-public class ConfigApiConfig
+public partial class ApiConfig
 {
     [JsonPropertyName("headers")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public ConfigApiHeadersConfig? Headers { get; set; } = null;
+    public ApiHeadersConfig? Headers { get; set; } = null;
 
     [JsonPropertyName("local")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public ConfigApiLocalConfig? Local { get; set; } = null;
+    public ApiLocalConfig? Local { get; set; } = null;
 
     [JsonPropertyName("mode")]
     [JsonSchemaDefault(""""
 "local"
 """")]
-    public ConfigApiMode Mode { get; set; } = ConfigApiMode.Local;
+    public ApiMode Mode { get; set; } = ApiMode.Local;
 
     [JsonPropertyName("remote")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public ConfigApiRemoteConfig? Remote { get; set; } = null;
+    public ApiRemoteConfig? Remote { get; set; } = null;
 }

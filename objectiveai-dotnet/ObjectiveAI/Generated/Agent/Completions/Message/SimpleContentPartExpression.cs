@@ -13,7 +13,7 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("A text part expression.")]
 [JsonSchemaTitle("agent.completions.message.SimpleContentPartExpression")]
-public class AgentCompletionsMessageSimpleContentPartExpression
+public partial class SimpleContentPartExpression
 {
     /// <summary>
     /// The text expression.

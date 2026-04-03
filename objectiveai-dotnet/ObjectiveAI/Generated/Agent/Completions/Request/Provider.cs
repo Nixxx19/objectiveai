@@ -12,7 +12,7 @@ namespace ObjectiveAI.Agent.Completions.Request;
 /// </summary>
 [Description("Provider routing and selection preferences.")]
 [JsonSchemaTitle("agent.completions.request.Provider")]
-public class AgentCompletionsRequestProvider
+public partial class Provider
 {
     /// <summary>
     /// Whether to allow providers to collect data.
@@ -21,7 +21,7 @@ public class AgentCompletionsRequestProvider
     [JsonPropertyName("data_collection")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsRequestProviderDataCollection? DataCollection { get; set; } = null;
+    public ProviderDataCollection? DataCollection { get; set; } = null;
 
     /// <summary>
     /// Hard maximum latency requirement (seconds).
@@ -40,7 +40,7 @@ public class AgentCompletionsRequestProvider
     [JsonPropertyName("max_price")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsRequestProviderMaxPrice? MaxPrice { get; set; } = null;
+    public ProviderMaxPrice? MaxPrice { get; set; } = null;
 
     /// <summary>
     /// Hard minimum throughput requirement (tokens/second).
@@ -79,7 +79,7 @@ public class AgentCompletionsRequestProvider
     [JsonPropertyName("sort")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public AgentCompletionsRequestProviderSort? Sort { get; set; } = null;
+    public ProviderSort? Sort { get; set; } = null;
 
     /// <summary>
     /// Whether to use zero data retention providers only.

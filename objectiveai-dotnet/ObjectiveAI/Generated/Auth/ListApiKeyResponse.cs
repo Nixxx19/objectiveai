@@ -12,12 +12,12 @@ namespace ObjectiveAI.Auth;
 /// </summary>
 [Description("Response containing a list of API keys.")]
 [JsonSchemaTitle("auth.ListApiKeyResponse")]
-public class AuthListApiKeyResponse
+public partial class ListApiKeyResponse
 {
     /// <summary>
     /// The list of API keys with their metadata and usage costs.
     /// </summary>
     [Description("The list of API keys with their metadata and usage costs.")]
     [JsonPropertyName("data")]
-    public List<AuthListApiKeyItem> Data { get; set; } = default!;
+    public List<ListApiKeyItem> Data { get; set; } = default!;
 }

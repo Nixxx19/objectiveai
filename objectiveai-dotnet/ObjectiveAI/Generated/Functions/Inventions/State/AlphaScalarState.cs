@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Functions.Inventions.State;
 
 [JsonSchemaTitle("functions.inventions.state.AlphaScalarState")]
-public class FunctionsInventionsStateAlphaScalarState
+public partial class AlphaScalarState
 {
     [JsonPropertyName("depth")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
@@ -18,7 +18,7 @@ public class FunctionsInventionsStateAlphaScalarState
     [JsonPropertyName("input_schema")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public FunctionsExpressionObjectInputSchema? InputSchema { get; set; } = null;
+    public ObjectInputSchema? InputSchema { get; set; } = null;
 
     [JsonPropertyName("max_branch_width")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]

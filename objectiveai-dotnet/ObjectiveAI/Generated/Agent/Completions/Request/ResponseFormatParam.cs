@@ -13,15 +13,15 @@ namespace ObjectiveAI.Agent.Completions.Request;
 /// </summary>
 [Description("Either a single response format or a per-agent map.")]
 [JsonSchemaTitle("agent.completions.request.ResponseFormatParam")]
-[JsonConverter(typeof(AgentCompletionsRequestResponseFormatParamConverter))]
-public class AgentCompletionsRequestResponseFormatParam
+[JsonConverter(typeof(ResponseFormatParamConverter))]
+public partial class ResponseFormatParam
 {
     /// <summary>
     /// A single response format applied to all agents.
     /// </summary>
     [Description("A single response format applied to all agents.")]
     [JsonSchemaVariant("Single", Ref = "agent.completions.request.ResponseFormat")]
-    public AgentCompletionsRequestResponseFormat? Single { get; set; }
+    public ResponseFormat? Single { get; set; }
 
     /// <summary>
     /// Per-agent response formats, keyed by agent ID.
@@ -29,12 +29,12 @@ public class AgentCompletionsRequestResponseFormatParam
     [Description("Per-agent response formats, keyed by agent ID.")]
     [JsonSchemaVariant("PerAgent", Type = "object")]
     [JsonSchemaAdditionalPropertiesSchema("$ref:agent.completions.request.ResponseFormat")]
-    public Dictionary<string, AgentCompletionsRequestResponseFormat>? PerAgent { get; set; }
+    public Dictionary<string, ResponseFormat>? PerAgent { get; set; }
 }
 
-public class AgentCompletionsRequestResponseFormatParamConverter : JsonConverter<AgentCompletionsRequestResponseFormatParam>
+public class ResponseFormatParamConverter : JsonConverter<ResponseFormatParam>
 {
-    public override AgentCompletionsRequestResponseFormatParam? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override ResponseFormatParam? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -43,16 +43,16 @@ public class AgentCompletionsRequestResponseFormatParamConverter : JsonConverter
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<AgentCompletionsRequestResponseFormat>(raw, options); if (val0 != null) return new AgentCompletionsRequestResponseFormatParam { Single = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<ResponseFormat>(raw, options); if (val0 != null) return new ResponseFormatParam { Single = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<Dictionary<string, AgentCompletionsRequestResponseFormat>>(raw, options); if (val1 != null) return new AgentCompletionsRequestResponseFormatParam { PerAgent = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<Dictionary<string, ResponseFormat>>(raw, options); if (val1 != null) return new ResponseFormatParam { PerAgent = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of AgentCompletionsRequestResponseFormatParam");
+        throw new JsonException($"Data did not match any variant of ResponseFormatParam");
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentCompletionsRequestResponseFormatParam value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, ResponseFormatParam value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Single != null)

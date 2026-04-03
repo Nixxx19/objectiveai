@@ -13,7 +13,7 @@ namespace ObjectiveAI.Swarm;
 /// </summary>
 [Description("Response containing a list of Swarms.")]
 [JsonSchemaTitle("swarm.ListSwarmResponse")]
-public class SwarmListSwarmResponse
+public partial class ListSwarmResponse
 {
     /// <summary>
     /// The list of Swarm summaries.

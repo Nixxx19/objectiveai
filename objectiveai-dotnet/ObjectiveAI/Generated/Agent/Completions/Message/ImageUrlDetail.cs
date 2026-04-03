@@ -13,8 +13,8 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("Detail level for image processing.")]
 [JsonSchemaTitle("agent.completions.message.ImageUrlDetail")]
-[JsonConverter(typeof(AgentCompletionsMessageImageUrlDetailConverter))]
-public class AgentCompletionsMessageImageUrlDetail
+[JsonConverter(typeof(ImageUrlDetailConverter))]
+public partial class ImageUrlDetail
 {
     /// <summary>
     /// Let the model decide the detail level.
@@ -38,24 +38,24 @@ public class AgentCompletionsMessageImageUrlDetail
     public string? High { get; set; }
 }
 
-public class AgentCompletionsMessageImageUrlDetailConverter : JsonConverter<AgentCompletionsMessageImageUrlDetail>
+public class ImageUrlDetailConverter : JsonConverter<ImageUrlDetail>
 {
-    public override AgentCompletionsMessageImageUrlDetail? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override ImageUrlDetail? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         if (reader.TokenType != JsonTokenType.String)
-            throw new JsonException("Expected string for AgentCompletionsMessageImageUrlDetail");
+            throw new JsonException("Expected string for ImageUrlDetail");
         var str = reader.GetString()!;
         return str switch
         {
-            "auto" => new AgentCompletionsMessageImageUrlDetail { Auto = "auto" },
-            "low" => new AgentCompletionsMessageImageUrlDetail { Low = "low" },
-            "high" => new AgentCompletionsMessageImageUrlDetail { High = "high" },
-            _ => throw new JsonException($"Unknown variant of AgentCompletionsMessageImageUrlDetail: {str}")
+            "auto" => new ImageUrlDetail { Auto = "auto" },
+            "low" => new ImageUrlDetail { Low = "low" },
+            "high" => new ImageUrlDetail { High = "high" },
+            _ => throw new JsonException($"Unknown variant of ImageUrlDetail: {str}")
         };
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentCompletionsMessageImageUrlDetail value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, ImageUrlDetail value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Auto != null)

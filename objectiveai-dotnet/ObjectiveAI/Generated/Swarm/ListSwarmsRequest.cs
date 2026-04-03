@@ -12,7 +12,7 @@ namespace ObjectiveAI.Swarm;
 /// </summary>
 [Description("Query parameters for the list swarms endpoint.")]
 [JsonSchemaTitle("swarm.ListSwarmsRequest")]
-public class SwarmListSwarmsRequest
+public partial class ListSwarmsRequest
 {
     /// <summary>
     /// Optional source filter for listing swarms.
@@ -21,5 +21,5 @@ public class SwarmListSwarmsRequest
     [JsonPropertyName("source")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public SwarmListSwarmsSource? Source { get; set; } = null;
+    public ListSwarmsSource? Source { get; set; } = null;
 }

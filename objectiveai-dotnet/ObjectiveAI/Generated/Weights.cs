@@ -22,7 +22,7 @@ Weights for a swarm's agents.
 """)]
 [JsonSchemaTitle("Weights")]
 [JsonConverter(typeof(WeightsConverter))]
-public class Weights
+public partial class Weights
 {
     /// <summary>
     /// Simple vector of decimal weights.

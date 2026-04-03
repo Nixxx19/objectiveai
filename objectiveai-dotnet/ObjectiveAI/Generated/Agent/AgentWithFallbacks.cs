@@ -13,19 +13,19 @@ namespace ObjectiveAI.Agent;
 /// </summary>
 [Description("A validated agent with optional fallbacks, either remote (with description) or inline.")]
 [JsonSchemaTitle("agent.AgentWithFallbacks")]
-[JsonConverter(typeof(AgentAgentWithFallbacksConverter))]
-public class AgentAgentWithFallbacks
+[JsonConverter(typeof(AgentWithFallbacksConverter))]
+public partial class AgentWithFallbacks
 {
     [JsonSchemaVariant("Remote", Ref = "agent.RemoteAgentWithFallbacks")]
-    public AgentRemoteAgentWithFallbacks? Remote { get; set; }
+    public RemoteAgentWithFallbacks? Remote { get; set; }
 
     [JsonSchemaVariant("Inline", Ref = "agent.InlineAgentWithFallbacks")]
-    public AgentInlineAgentWithFallbacks? Inline { get; set; }
+    public InlineAgentWithFallbacks? Inline { get; set; }
 }
 
-public class AgentAgentWithFallbacksConverter : JsonConverter<AgentAgentWithFallbacks>
+public class AgentWithFallbacksConverter : JsonConverter<AgentWithFallbacks>
 {
-    public override AgentAgentWithFallbacks? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override AgentWithFallbacks? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -34,16 +34,16 @@ public class AgentAgentWithFallbacksConverter : JsonConverter<AgentAgentWithFall
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<AgentRemoteAgentWithFallbacks>(raw, options); if (val0 != null) return new AgentAgentWithFallbacks { Remote = val0 }; }
+            try { var val0 = JsonSerializer.Deserialize<RemoteAgentWithFallbacks>(raw, options); if (val0 != null) return new AgentWithFallbacks { Remote = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<AgentInlineAgentWithFallbacks>(raw, options); if (val1 != null) return new AgentAgentWithFallbacks { Inline = val1 }; }
+            try { var val1 = JsonSerializer.Deserialize<InlineAgentWithFallbacks>(raw, options); if (val1 != null) return new AgentWithFallbacks { Inline = val1 }; }
             catch (JsonException) { }
         }
 
-        throw new JsonException($"Data did not match any variant of AgentAgentWithFallbacks");
+        throw new JsonException($"Data did not match any variant of AgentWithFallbacks");
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentAgentWithFallbacks value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, AgentWithFallbacks value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Remote != null)

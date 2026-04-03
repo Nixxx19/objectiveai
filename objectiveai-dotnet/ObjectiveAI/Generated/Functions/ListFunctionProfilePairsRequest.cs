@@ -12,7 +12,7 @@ namespace ObjectiveAI.Functions;
 /// </summary>
 [Description("Query parameters for the list function-profile pairs endpoint.")]
 [JsonSchemaTitle("functions.ListFunctionProfilePairsRequest")]
-public class FunctionsListFunctionProfilePairsRequest
+public partial class ListFunctionProfilePairsRequest
 {
     /// <summary>
     /// Optional source filter for listing function-profile pairs.
@@ -21,5 +21,5 @@ public class FunctionsListFunctionProfilePairsRequest
     [JsonPropertyName("source")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public FunctionsListFunctionProfilePairsSource? Source { get; set; } = null;
+    public ListFunctionProfilePairsSource? Source { get; set; } = null;
 }

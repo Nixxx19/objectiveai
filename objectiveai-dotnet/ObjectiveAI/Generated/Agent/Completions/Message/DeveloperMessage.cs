@@ -12,14 +12,14 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("A developer message.")]
 [JsonSchemaTitle("agent.completions.message.DeveloperMessage")]
-public class AgentCompletionsMessageDeveloperMessage
+public partial class DeveloperMessage
 {
     /// <summary>
     /// The message content.
     /// </summary>
     [Description("The message content.")]
     [JsonPropertyName("content")]
-    public AgentCompletionsMessageSimpleContent Content { get; set; } = default!;
+    public SimpleContent Content { get; set; } = default!;
 
     /// <summary>
     /// Optional name for the message author.

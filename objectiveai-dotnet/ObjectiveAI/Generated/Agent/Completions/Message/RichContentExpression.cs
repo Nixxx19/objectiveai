@@ -13,8 +13,8 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("Expression variant of [`RichContent`] for dynamic content.")]
 [JsonSchemaTitle("agent.completions.message.RichContentExpression")]
-[JsonConverter(typeof(AgentCompletionsMessageRichContentExpressionConverter))]
-public class AgentCompletionsMessageRichContentExpression
+[JsonConverter(typeof(RichContentExpressionConverter))]
+public partial class RichContentExpression
 {
     /// <summary>
     /// Plain text content.
@@ -48,9 +48,9 @@ public class AgentCompletionsMessageRichContentExpression
     public List<JsonElement>? Parts { get; set; }
 }
 
-public class AgentCompletionsMessageRichContentExpressionConverter : JsonConverter<AgentCompletionsMessageRichContentExpression>
+public class RichContentExpressionConverter : JsonConverter<RichContentExpression>
 {
-    public override AgentCompletionsMessageRichContentExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override RichContentExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) { reader.Read(); return null; }
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -60,19 +60,19 @@ public class AgentCompletionsMessageRichContentExpressionConverter : JsonConvert
         if (el.ValueKind == JsonValueKind.String)
         {
             var str = el.GetString()!;
-            return new AgentCompletionsMessageRichContentExpression { Text = str };
+            return new RichContentExpression { Text = str };
         }
 
         if (el.ValueKind == JsonValueKind.Array)
         {
             var val = JsonSerializer.Deserialize<List<JsonElement>>(raw, options);
-            return new AgentCompletionsMessageRichContentExpression { Parts = val };
+            return new RichContentExpression { Parts = val };
         }
 
-        throw new JsonException($"Data did not match any variant of AgentCompletionsMessageRichContentExpression");
+        throw new JsonException($"Data did not match any variant of RichContentExpression");
     }
 
-    public override void Write(Utf8JsonWriter writer, AgentCompletionsMessageRichContentExpression value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, RichContentExpression value, JsonSerializerOptions options)
     {
         if (value == null) { writer.WriteNullValue(); return; }
         if (value.Text != null)

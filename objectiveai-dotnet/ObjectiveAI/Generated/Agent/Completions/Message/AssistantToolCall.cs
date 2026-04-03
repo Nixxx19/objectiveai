@@ -12,14 +12,14 @@ namespace ObjectiveAI.Agent.Completions.Message;
 /// </summary>
 [Description("A function call with an ID and function details.")]
 [JsonSchemaTitle("agent.completions.message.AssistantToolCall")]
-public class AgentCompletionsMessageAssistantToolCall
+public partial class AssistantToolCall
 {
     /// <summary>
     /// The function being called.
     /// </summary>
     [Description("The function being called.")]
     [JsonPropertyName("function")]
-    public AgentCompletionsMessageAssistantToolCallFunction Function { get; set; } = default!;
+    public AssistantToolCallFunction Function { get; set; } = default!;
 
     /// <summary>
     /// The unique ID of this tool call.

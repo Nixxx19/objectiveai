@@ -9,9 +9,9 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Vector.Completions.Cache;
 
 [JsonSchemaTitle("vector.completions.cache.CompletionVotes")]
-public class VectorCompletionsCacheCompletionVotes
+public partial class CompletionVotes
 {
     [JsonPropertyName("data")]
     [JsonSchemaNullable]
-    public List<VectorCompletionsResponseVote>? Data { get; set; } = null;
+    public List<Vote>? Data { get; set; } = null;
 }

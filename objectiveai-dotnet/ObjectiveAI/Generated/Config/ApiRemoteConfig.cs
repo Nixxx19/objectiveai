@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace ObjectiveAI.Config;
 
 [JsonSchemaTitle("config.ApiRemoteConfig")]
-public class ConfigApiRemoteConfig
+public partial class ApiRemoteConfig
 {
     [JsonPropertyName("objectiveai_address")]
     [JsonSchemaOmitEmpty]

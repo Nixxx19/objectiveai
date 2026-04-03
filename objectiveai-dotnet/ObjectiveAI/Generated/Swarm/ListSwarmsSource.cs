@@ -12,8 +12,8 @@ namespace ObjectiveAI.Swarm;
 /// </summary>
 [Description("Source filter for listing swarms.")]
 [JsonSchemaTitle("swarm.ListSwarmsSource")]
-[JsonConverter(typeof(JsonStringEnumConverter<SwarmListSwarmsSource>))]
-public enum SwarmListSwarmsSource
+[JsonConverter(typeof(JsonStringEnumConverter<ListSwarmsSource>))]
+public enum ListSwarmsSource
 {
     [JsonStringEnumMemberName("all")]
     All,
