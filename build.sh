@@ -44,7 +44,7 @@ CLI_PID=$!
 run_phase objectiveai-rs-wasm-js/build.sh objectiveai-rs-pyo3/build.sh objectiveai-rs-cffi/build.sh
 
 # Phase 3: js + py + go (need wasm/pyo3/cffi from phase 2)
-run_phase objectiveai-js/build.sh objectiveai-py/build.sh objectiveai-go/build.sh
+run_phase objectiveai-js/build.sh objectiveai-py/build.sh objectiveai-go/build.sh objectiveai-dotnet/build.sh
 
 # Wait for CLI build
 if ! wait "$CLI_PID"; then
