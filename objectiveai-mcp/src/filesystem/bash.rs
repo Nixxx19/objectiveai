@@ -189,8 +189,6 @@ pub async fn execute_bash(
 
     // Prevent git from opening an interactive editor (would hang)
     env_overrides.entry("GIT_EDITOR".into()).or_insert_with(|| "true".into());
-    // Signal that commands are running inside Claude Code
-    env_overrides.entry("CLAUDECODE".into()).or_insert_with(|| "1".into());
 
     // Tmux socket isolation
     if let Some(tmux_env) = shell_state.get_tmux_env() {
