@@ -119,23 +119,24 @@ impl FilesystemTools {
         self.shell_state.init_snapshot().await;
     }
 
-    // --- Delegate methods for use from main.rs ---
-
-    pub fn read_file(&self, req: &ReadRequest) -> String {
+    #[tool(name = "Read", description = "Reads a file from the local filesystem.")]
+    fn read(&self, Parameters(req): Parameters<ReadRequest>) -> String {
         match super::read_file::read_file(&self.file_state, &req.file_path, req.offset, req.limit) {
             Ok(output) => output,
             Err(e) => e,
         }
     }
 
-    pub fn write_file(&self, req: &WriteRequest) -> String {
+    #[tool(name = "Write", description = "Write a file to the local filesystem.")]
+    fn write(&self, Parameters(req): Parameters<WriteRequest>) -> String {
         match super::write_file::write_file(&self.file_state, &req.file_path, &req.content) {
             Ok(output) => output,
             Err(e) => e,
         }
     }
 
-    pub fn edit_file(&self, req: &EditRequest) -> String {
+    #[tool(name = "Edit", description = "Performs exact string replacements in files.")]
+    fn edit(&self, Parameters(req): Parameters<EditRequest>) -> String {
         match super::edit_file::edit_file(
             &self.file_state,
             &req.file_path,
@@ -148,14 +149,16 @@ impl FilesystemTools {
         }
     }
 
-    pub async fn bash(&self, req: &BashRequest) -> String {
+    #[tool(name = "Bash", description = "Executes a given bash command and returns its output.")]
+    async fn bash(&self, Parameters(req): Parameters<BashRequest>) -> String {
         match super::bash::execute_bash(&self.shell_state, &req.command, req.timeout).await {
             Ok(output) => output,
             Err(e) => e,
         }
     }
 
-    pub fn glob_search(&self, req: &GlobRequest) -> String {
+    #[tool(name = "Glob", description = "Fast file pattern matching tool that works with any codebase size")]
+    fn glob(&self, Parameters(req): Parameters<GlobRequest>) -> String {
         match super::glob_search::glob_search(&req.pattern, req.path.as_deref()) {
             Ok(output) => {
                 if output.contains("\"truncated\": true") {
@@ -168,19 +171,20 @@ impl FilesystemTools {
         }
     }
 
-    pub fn grep_search(&self, req: &GrepRequest) -> String {
+    #[tool(name = "Grep", description = "A powerful search tool built on ripgrep")]
+    fn grep(&self, Parameters(req): Parameters<GrepRequest>) -> String {
         let input = super::grep_search::GrepSearchInput {
-            pattern: req.pattern.clone(),
-            path: req.path.clone(),
-            glob: req.glob.clone(),
-            output_mode: req.output_mode.clone(),
+            pattern: req.pattern,
+            path: req.path,
+            glob: req.glob,
+            output_mode: req.output_mode,
             before: req.before,
             after: req.after,
             context_short: req.context_short,
             context: req.context,
             line_numbers: req.line_numbers,
             case_insensitive: req.case_insensitive,
-            file_type: req.file_type.clone(),
+            file_type: req.file_type,
             head_limit: req.head_limit,
             offset: req.offset,
             multiline: req.multiline,
