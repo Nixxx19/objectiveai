@@ -19,9 +19,11 @@
   </PropertyGroup>
 
   <!-- Include native CFFI libraries from runtimes/ (built by build.sh) -->
+  <!-- Pack into NuGet under runtimes/ for package consumers -->
   <ItemGroup>
     <None Include="runtimes\**\*" Pack="true" PackagePath="runtimes" />
   </ItemGroup>
+
 
   <!-- Include README in the NuGet package -->
   <ItemGroup>

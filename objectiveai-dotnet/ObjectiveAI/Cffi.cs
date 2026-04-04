@@ -12,6 +12,49 @@ public static class Cffi
 {
     private const string Lib = "objectiveai_cffi";
 
+    static Cffi()
+    {
+        // Register a custom resolver that looks in runtimes/{rid}/native/
+        // relative to the ObjectiveAI assembly location. This handles the
+        // project-reference case where NuGet's runtime resolution doesn't apply.
+        NativeLibrary.SetDllImportResolver(typeof(Cffi).Assembly, (libraryName, assembly, searchPath) =>
+        {
+            if (libraryName != Lib)
+                return nint.Zero;
+
+            // Try default resolution first
+            if (NativeLibrary.TryLoad(libraryName, assembly, searchPath, out var handle))
+                return handle;
+
+            // Try runtimes/{rid}/native/ relative to assembly
+            var rid = RuntimeInformation.RuntimeIdentifier;
+            var assemblyDir = Path.GetDirectoryName(assembly.Location) ?? ".";
+
+            // Check alongside the assembly (e.g., bin/Release/net10.0/)
+            var candidates = new[]
+            {
+                Path.Combine(assemblyDir, "runtimes", rid, "native", NativeLibFileName()),
+                // Also check the ObjectiveAI project's runtimes/ folder (dev scenario)
+                Path.Combine(assemblyDir, "..", "..", "..", "..", "ObjectiveAI", "runtimes", rid, "native", NativeLibFileName()),
+            };
+
+            foreach (var path in candidates)
+            {
+                if (File.Exists(path) && NativeLibrary.TryLoad(path, out handle))
+                    return handle;
+            }
+
+            return nint.Zero;
+        });
+    }
+
+    private static string NativeLibFileName()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return "objectiveai_cffi.dll";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "libobjectiveai_cffi.dylib";
+        return "libobjectiveai_cffi.so";
+    }
+
     // -----------------------------------------------------------------------
     // Native extern declarations
     // -----------------------------------------------------------------------
