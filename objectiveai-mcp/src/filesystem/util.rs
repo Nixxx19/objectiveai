@@ -166,34 +166,26 @@ pub fn find_match_with_quote_normalization<'a>(content: &'a str, search: &str) -
         return Some(&content[idx..idx + search.len()]);
     }
 
-    // Normalize curly quotes in the search string to straight quotes
+    // Normalize both search and content: curly quotes → straight quotes
     let normalized_search = search
         .replace(LEFT_SINGLE_CURLY, "'")
         .replace(RIGHT_SINGLE_CURLY, "'")
         .replace(LEFT_DOUBLE_CURLY, "\"")
         .replace(RIGHT_DOUBLE_CURLY, "\"");
 
-    if normalized_search == search {
-        return None; // No curly quotes to normalize
-    }
-
-    // Try finding the normalized search directly in the original content.
-    // This handles the case where the search string had curly quotes but
-    // the file content has straight quotes.
-    if let Some(idx) = content.find(&normalized_search) {
-        return Some(&content[idx..idx + normalized_search.len()]);
-    }
-
-    // Try the reverse: normalize the content and search with the normalized
-    // search string. Walk the original content char-by-char to find the
-    // matching span, avoiding byte-length mismatches between original and
-    // normalized content.
     let normalized_content = content
         .replace(LEFT_SINGLE_CURLY, "'")
         .replace(RIGHT_SINGLE_CURLY, "'")
         .replace(LEFT_DOUBLE_CURLY, "\"")
         .replace(RIGHT_DOUBLE_CURLY, "\"");
 
+    // If neither had curly quotes, no normalization match possible
+    if normalized_search == search && normalized_content == content {
+        return None;
+    }
+
+    // Try finding the normalized search in the normalized content.
+    // Then map the position back to the original content.
     if let Some(norm_byte_idx) = normalized_content.find(&normalized_search) {
         // Count the number of characters before the match in normalized content
         let char_offset = normalized_content[..norm_byte_idx].chars().count();
