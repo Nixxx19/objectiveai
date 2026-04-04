@@ -1,0 +1,95 @@
+use super::state::{FileStateCache, FileStateEntry};
+use super::util;
+
+#[derive(Debug, serde::Serialize)]
+pub struct WriteFileOutput {
+    #[serde(rename = "type")]
+    pub kind: String,
+    #[serde(rename = "filePath")]
+    pub file_path: String,
+    pub content: String,
+    #[serde(rename = "structuredPatch")]
+    pub structured_patch: Vec<util::StructuredPatchHunk>,
+    #[serde(rename = "originalFile")]
+    pub original_file: Option<String>,
+}
+
+pub fn write_file(
+    file_state: &FileStateCache,
+    path: &str,
+    content: &str,
+) -> Result<String, String> {
+    let absolute_path = util::normalize_path_allow_missing(path)
+        .map_err(|e| format!("Failed to resolve path: {e}"))?;
+    let absolute_path_str = absolute_path.to_string_lossy().to_string();
+
+    // Check if file exists
+    let file_exists = absolute_path.exists();
+
+    if file_exists {
+        // Must-read check (error code 2)
+        let cached = file_state.get(&absolute_path_str);
+        match cached {
+            None => {
+                return Err("File has not been read yet. Read it first before writing to it.".into());
+            }
+            Some(entry) if entry.is_partial_view() => {
+                return Err("File has not been read yet. Read it first before writing to it.".into());
+            }
+            Some(entry) => {
+                // Staleness check (error code 3)
+                let current_mtime = util::get_file_mtime_ms(&absolute_path)
+                    .map_err(|e| format!("Failed to get file mtime: {e}"))?;
+                if current_mtime > entry.timestamp {
+                    return Err(
+                        "File has been modified since read, either by the user or by a linter. Read it again before attempting to write it.".into()
+                    );
+                }
+            }
+        }
+    }
+
+    // Read original content before overwriting (for patch generation)
+    let original_file = if file_exists {
+        std::fs::read_to_string(&absolute_path).ok()
+    } else {
+        None
+    };
+
+    // Create parent directories if needed
+    if let Some(parent) = absolute_path.parent() {
+        std::fs::create_dir_all(parent)
+            .map_err(|e| format!("Failed to create directories: {e}"))?;
+    }
+
+    // Write the file
+    std::fs::write(&absolute_path, content)
+        .map_err(|e| format!("Failed to write file: {e}"))?;
+
+    // Update readFileState
+    let mtime_ms = util::get_file_mtime_ms(&absolute_path)
+        .map_err(|e| format!("Failed to get file mtime: {e}"))?;
+    file_state.set(absolute_path_str.clone(), FileStateEntry {
+        content: util::normalize_line_endings(content),
+        timestamp: mtime_ms,
+        offset: None,
+        limit: None,
+    });
+
+    let patch = if let Some(ref orig) = original_file {
+        util::make_patch(orig, content)
+    } else {
+        vec![]
+    };
+
+    let output = WriteFileOutput {
+        kind: if original_file.is_some() { "update" } else { "create" }.into(),
+        file_path: absolute_path_str,
+        content: content.to_owned(),
+        structured_patch: patch,
+        original_file,
+    };
+
+    serde_json::to_string_pretty(&output)
+        .map_err(|e| format!("Failed to serialize output: {e}"))
+}

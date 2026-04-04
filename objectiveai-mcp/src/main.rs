@@ -1,3 +1,6 @@
+#[cfg(feature = "filesystem")]
+mod filesystem;
+
 use rmcp::{
     ServerHandler,
     handler::server::{router::tool::ToolRouter, wrapper::Parameters},

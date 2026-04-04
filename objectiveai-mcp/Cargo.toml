@@ -3,11 +3,19 @@ name = "objectiveai-mcp"
 version = "2.0.0"
 edition = "2024"
 
+[features]
+default = []
+filesystem = ["glob", "regex", "walkdir", "serde_json"]
+
 [dependencies]
 anyhow = "1.0.102"
+glob = { version = "0.3", optional = true }
+regex = { version = "1", optional = true }
 rmcp = { version = "0.16.0", features = ["server", "transport-io"] }
 schemars = "1.2.1"
 serde = { version = "1.0.228", features = ["derive"] }
+serde_json = { version = "1", optional = true }
 tokio = { version = "1.50.0", features = ["full"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+walkdir = { version = "2", optional = true }
