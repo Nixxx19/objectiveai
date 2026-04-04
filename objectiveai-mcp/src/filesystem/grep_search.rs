@@ -54,12 +54,23 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
         .build()
         .map_err(|e| format!("Invalid regex pattern: {e}"))?;
 
-    let glob_filter = input
-        .glob
-        .as_deref()
-        .map(Pattern::new)
-        .transpose()
-        .map_err(|e| format!("Invalid glob filter: {e}"))?;
+    // Split glob on whitespace/commas (preserving brace patterns), matching ripgrep CLI behavior
+    let glob_filters: Vec<Pattern> = match &input.glob {
+        Some(glob) => {
+            let mut patterns = Vec::new();
+            for raw in glob.split_whitespace() {
+                if raw.contains('{') && raw.contains('}') {
+                    patterns.push(Pattern::new(raw).map_err(|e| format!("Invalid glob filter: {e}"))?);
+                } else {
+                    for part in raw.split(',').filter(|s| !s.is_empty()) {
+                        patterns.push(Pattern::new(part).map_err(|e| format!("Invalid glob filter: {e}"))?);
+                    }
+                }
+            }
+            patterns
+        }
+        None => Vec::new(),
+    };
 
     let file_type = input.file_type.as_deref();
     let output_mode = input
@@ -89,7 +100,7 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
     let mut file_mtimes: Vec<(String, Option<std::time::SystemTime>)> = Vec::new();
 
     for file_path in collect_search_files(&base_path).map_err(|e| format!("Search failed: {e}"))? {
-        if !matches_filters(&file_path, glob_filter.as_ref(), file_type) {
+        if !matches_filters(&file_path, &glob_filters, file_type) {
             continue;
         }
 
@@ -143,10 +154,15 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
         filenames.push(rel_path.clone());
 
         if output_mode == "content" {
+            // Track which lines have been emitted to avoid duplicates from overlapping context
+            let mut emitted_lines: std::collections::HashSet<usize> = std::collections::HashSet::new();
             for index in matched_lines {
                 let start = index.saturating_sub(ctx_before);
                 let end = (index + ctx_after + 1).min(lines.len());
                 for (current, line) in lines.iter().enumerate().take(end).skip(start) {
+                    if !emitted_lines.insert(current) {
+                        continue; // Already emitted this line
+                    }
                     let prefix = if input.line_numbers.unwrap_or(true) {
                         format!("{rel_path}:{}:", current + 1)
                     } else {
@@ -212,8 +228,8 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
                         time_cmp
                     }
                 }
-                (Some(_), None) => std::cmp::Ordering::Less,
-                (None, Some(_)) => std::cmp::Ordering::Greater,
+                (Some(_), None) => std::cmp::Ordering::Greater, // b has mtime, a doesn't → a (no mtime) sorts to end
+                (None, Some(_)) => std::cmp::Ordering::Less,    // a has mtime, b doesn't → b (no mtime) sorts to end
                 (None, None) => a_name.cmp(b_name), // alphabetical when both None
             }
         });
@@ -309,11 +325,9 @@ fn type_to_extensions(file_type: &str) -> Option<&'static [&'static str]> {
     }
 }
 
-fn matches_filters(path: &Path, glob_filter: Option<&Pattern>, file_type: Option<&str>) -> bool {
-    if let Some(glob_filter) = glob_filter {
-        if !glob_filter.matches_path(path) {
-            return false;
-        }
+fn matches_filters(path: &Path, glob_filters: &[Pattern], file_type: Option<&str>) -> bool {
+    if !glob_filters.is_empty() && !glob_filters.iter().any(|p| p.matches_path(path)) {
+        return false;
     }
 
     if let Some(file_type) = file_type {
