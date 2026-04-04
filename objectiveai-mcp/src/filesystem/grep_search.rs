@@ -82,6 +82,8 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
     let mut filenames = Vec::new();
     let mut content_lines = Vec::new();
     let mut total_matches = 0usize;
+    let mut count_lines: Vec<String> = Vec::new();
+    let mut count_file_count = 0usize;
 
     // For files_with_matches mode, collect (path, mtime) pairs for sorting
     let mut file_mtimes: Vec<(String, Option<std::time::SystemTime>)> = Vec::new();
@@ -100,7 +102,8 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
         if output_mode == "count" {
             let count = regex.find_iter(&file_contents).count();
             if count > 0 {
-                filenames.push(rel_path);
+                count_lines.push(format!("{rel_path}:{count}"));
+                count_file_count += 1;
                 total_matches += count;
             }
             continue;
@@ -160,8 +163,8 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
         let (lines, limit, offset) = apply_limit(content_lines, input.head_limit, input.offset);
         let output = GrepSearchOutput {
             mode: Some(output_mode),
-            num_files: filenames.len(),
-            filenames,
+            num_files: 0,
+            filenames: Vec::new(),
             num_lines: Some(lines.len()),
             content: Some(lines.join("\n")),
             num_matches: None,
@@ -172,14 +175,36 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
             .map_err(|e| format!("Failed to serialize output: {e}"));
     }
 
-    // For files_with_matches, sort by mtime (newest first) then extract names
+    if output_mode == "count" {
+        let output = GrepSearchOutput {
+            mode: Some("count".into()),
+            num_files: count_file_count,
+            filenames: Vec::new(),
+            num_lines: None,
+            content: Some(count_lines.join("\n")),
+            num_matches: Some(total_matches),
+            applied_limit: None,
+            applied_offset: None,
+        };
+        return serde_json::to_string_pretty(&output)
+            .map_err(|e| format!("Failed to serialize output: {e}"));
+    }
+
+    // For files_with_matches, sort by mtime (newest first) with alphabetical tiebreaker
     if output_mode == "files_with_matches" {
-        file_mtimes.sort_by(|(_, a), (_, b)| {
-            match (b, a) {
-                (Some(b_time), Some(a_time)) => b_time.cmp(a_time), // newest first
-                (Some(_), None) => std::cmp::Ordering::Less,  // files with mtime before those without
+        file_mtimes.sort_by(|(a_name, a_time), (b_name, b_time)| {
+            match (b_time, a_time) {
+                (Some(b_t), Some(a_t)) => {
+                    let time_cmp = b_t.cmp(a_t); // newest first
+                    if time_cmp == std::cmp::Ordering::Equal {
+                        a_name.cmp(b_name) // alphabetical tiebreaker
+                    } else {
+                        time_cmp
+                    }
+                }
+                (Some(_), None) => std::cmp::Ordering::Less,
                 (None, Some(_)) => std::cmp::Ordering::Greater,
-                (None, None) => std::cmp::Ordering::Equal,
+                (None, None) => a_name.cmp(b_name), // alphabetical when both None
             }
         });
         filenames = file_mtimes.into_iter().map(|(name, _)| name).collect();
@@ -194,7 +219,7 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
         filenames,
         content: None,
         num_lines: None,
-        num_matches: (output_mode == "count").then_some(total_matches),
+        num_matches: None,
         applied_limit,
         applied_offset,
     };

@@ -1,3 +1,5 @@
+const MAX_OUTPUT_CHARS: usize = 30_000;
+
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::process::Stdio;
@@ -152,8 +154,8 @@ pub async fn execute_bash(
         command_parts.push("setopt NO_EXTENDED_GLOB 2>/dev/null || true".to_string());
     }
 
-    // 4. The user's command (wrapped in eval for alias expansion, stderr merged into stdout)
-    command_parts.push(format!("eval {} 2>&1", shell_quote(command)));
+    // 4. The user's command (wrapped in eval for alias expansion)
+    command_parts.push(format!("eval {}", shell_quote(command)));
 
     // 5. Save CWD after command execution
     let cwd_file = cwd_file_path();
@@ -197,17 +199,27 @@ pub async fn execute_bash(
 
     let output = match tokio::time::timeout(timeout_duration, child.wait_with_output()).await {
         Ok(Ok(output)) => {
-            let stdout_raw = String::from_utf8_lossy(&output.stdout).into_owned();
-            let stderr_raw = String::from_utf8_lossy(&output.stderr).into_owned();
+            let stdout_str = String::from_utf8_lossy(&output.stdout).to_string();
+            let stderr_str = String::from_utf8_lossy(&output.stderr).to_string();
 
-            // Merge stderr into stdout (matches Claude Code behavior — stderr was
-            // redirected via 2>&1 in the command, but capture any residual here too)
-            let combined = if !stderr_raw.is_empty() && !stdout_raw.is_empty() {
-                format!("{}\n{}", stdout_raw, stderr_raw)
-            } else if !stderr_raw.is_empty() {
-                stderr_raw
+            // Merge stderr after stdout at the application level (no shell-level 2>&1)
+            let combined = if stderr_str.is_empty() {
+                stdout_str
+            } else if stdout_str.is_empty() {
+                stderr_str
             } else {
-                stdout_raw
+                format!("{}\n{}", stdout_str, stderr_str)
+            };
+
+            // Truncate if output exceeds the limit
+            let combined = if combined.len() > MAX_OUTPUT_CHARS {
+                let total_lines = combined.lines().count();
+                let truncated = &combined[..MAX_OUTPUT_CHARS];
+                let kept_lines = truncated.lines().count();
+                let dropped = total_lines - kept_lines;
+                format!("{}\n\n... [{} lines truncated] ...", truncated, dropped)
+            } else {
+                combined
             };
 
             // Read the saved CWD from the temp file

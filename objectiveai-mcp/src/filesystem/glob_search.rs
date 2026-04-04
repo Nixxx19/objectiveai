@@ -49,12 +49,7 @@ pub fn glob_search(pattern: &str, path: Option<&str>) -> Result<String, String> 
     let filenames: Vec<String> = matches
         .into_iter()
         .take(100)
-        .map(|p| {
-            pathdiff::diff_paths(&p, &base_dir)
-                .unwrap_or(p.clone())
-                .to_string_lossy()
-                .into_owned()
-        })
+        .map(|p| p.to_string_lossy().into_owned())
         .collect();
 
     let output = GlobSearchOutput {

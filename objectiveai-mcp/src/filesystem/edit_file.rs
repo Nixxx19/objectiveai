@@ -78,6 +78,15 @@ pub fn edit_file(
             .map_err(|e| format!("Failed to serialize output: {e}"));
     }
 
+    if old_string.is_empty() && absolute_path.exists() {
+        // Check if file has content
+        let existing = std::fs::read_to_string(&absolute_path).unwrap_or_default();
+        if !existing.trim().is_empty() {
+            return Err("Cannot use empty old_string on a file that already has content. Provide the text you want to replace.".into());
+        }
+        // If file exists but is empty, allow the edit (replace empty with new_string)
+    }
+
     // Must-read check (error code 6)
     let cached = file_state.get(&absolute_path_str);
     match &cached {

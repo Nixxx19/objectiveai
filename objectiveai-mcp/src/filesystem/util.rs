@@ -88,21 +88,66 @@ pub struct StructuredPatchHunk {
     pub lines: Vec<String>,
 }
 
-/// Generate a simple patch between two strings.
+/// Generate a structured patch between two strings using line-level diff.
 pub fn make_patch(original: &str, updated: &str) -> Vec<StructuredPatchHunk> {
-    let mut lines = Vec::new();
-    for line in original.lines() {
-        lines.push(format!("-{line}"));
+    let old_lines: Vec<&str> = original.lines().collect();
+    let new_lines: Vec<&str> = updated.lines().collect();
+
+    if old_lines == new_lines {
+        return Vec::new();
     }
-    for line in updated.lines() {
-        lines.push(format!("+{line}"));
+
+    // Find first differing line
+    let common_prefix = old_lines
+        .iter()
+        .zip(new_lines.iter())
+        .take_while(|(a, b)| a == b)
+        .count();
+
+    // Find last differing line (from end)
+    let common_suffix = old_lines
+        .iter()
+        .rev()
+        .zip(new_lines.iter().rev())
+        .take_while(|(a, b)| a == b)
+        .count()
+        .min(old_lines.len() - common_prefix)
+        .min(new_lines.len() - common_prefix);
+
+    let old_changed_end = old_lines.len() - common_suffix;
+    let new_changed_end = new_lines.len() - common_suffix;
+
+    // Build hunk with up to 3 lines of context
+    let ctx = 3;
+    let hunk_old_start = common_prefix.saturating_sub(ctx);
+    let hunk_old_end = (old_changed_end + ctx).min(old_lines.len());
+    let hunk_new_start = common_prefix.saturating_sub(ctx);
+    let hunk_new_end = (new_changed_end + ctx).min(new_lines.len());
+
+    let mut lines = Vec::new();
+
+    // Context before
+    for i in hunk_old_start..common_prefix {
+        lines.push(format!(" {}", old_lines[i]));
+    }
+    // Removed lines
+    for i in common_prefix..old_changed_end {
+        lines.push(format!("-{}", old_lines[i]));
+    }
+    // Added lines
+    for i in common_prefix..new_changed_end {
+        lines.push(format!("+{}", new_lines[i]));
+    }
+    // Context after
+    for i in old_changed_end..hunk_old_end {
+        lines.push(format!(" {}", old_lines[i]));
     }
 
     vec![StructuredPatchHunk {
-        old_start: 1,
-        old_lines: original.lines().count(),
-        new_start: 1,
-        new_lines: updated.lines().count(),
+        old_start: hunk_old_start + 1, // 1-indexed
+        old_lines: hunk_old_end - hunk_old_start,
+        new_start: hunk_new_start + 1, // 1-indexed
+        new_lines: hunk_new_end - hunk_new_start,
         lines,
     }]
 }
