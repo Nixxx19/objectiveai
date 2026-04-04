@@ -29,7 +29,7 @@ pub fn read_file(
 ) -> Result<String, String> {
     // Check for blocked devices
     if util::is_blocked_device(path) {
-        return Err(format!("Reading from {path} is not allowed"));
+        return Err(format!("Cannot read '{path}': this device file would block or produce infinite output."));
     }
 
     let absolute_path = util::normalize_path(path)
@@ -69,6 +69,7 @@ pub fn read_file(
         timestamp: mtime_ms,
         offset,
         limit,
+        is_partial_view: false,
     });
 
     let output = ReadFileOutput {

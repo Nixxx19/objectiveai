@@ -74,6 +74,7 @@ pub fn write_file(
         timestamp: mtime_ms,
         offset: None,
         limit: None,
+        is_partial_view: false,
     });
 
     let patch = if let Some(ref orig) = original_file {

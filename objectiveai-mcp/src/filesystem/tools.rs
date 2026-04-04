@@ -119,7 +119,7 @@ impl FilesystemTools {
         self.shell_state.init_snapshot().await;
     }
 
-    #[tool(description = "Reads a file from the local filesystem.")]
+    #[tool(name = "Read", description = "Reads a file from the local filesystem.")]
     fn read(&self, Parameters(req): Parameters<ReadRequest>) -> String {
         match super::read_file::read_file(&self.file_state, &req.file_path, req.offset, req.limit) {
             Ok(output) => output,
@@ -127,7 +127,7 @@ impl FilesystemTools {
         }
     }
 
-    #[tool(description = "Write a file to the local filesystem.")]
+    #[tool(name = "Write", description = "Write a file to the local filesystem.")]
     fn write(&self, Parameters(req): Parameters<WriteRequest>) -> String {
         match super::write_file::write_file(&self.file_state, &req.file_path, &req.content) {
             Ok(output) => output,
@@ -135,7 +135,7 @@ impl FilesystemTools {
         }
     }
 
-    #[tool(description = "Performs exact string replacements in files.")]
+    #[tool(name = "Edit", description = "Performs exact string replacements in files.")]
     fn edit(&self, Parameters(req): Parameters<EditRequest>) -> String {
         match super::edit_file::edit_file(
             &self.file_state,
@@ -149,7 +149,7 @@ impl FilesystemTools {
         }
     }
 
-    #[tool(description = "Executes a given bash command and returns its output.")]
+    #[tool(name = "Bash", description = "Executes a given bash command and returns its output.")]
     async fn bash(&self, Parameters(req): Parameters<BashRequest>) -> String {
         match super::bash::execute_bash(&self.shell_state, &req.command, req.timeout).await {
             Ok(output) => output,
@@ -157,15 +157,21 @@ impl FilesystemTools {
         }
     }
 
-    #[tool(description = "Fast file pattern matching tool that works with any codebase size")]
+    #[tool(name = "Glob", description = "Fast file pattern matching tool that works with any codebase size")]
     fn glob(&self, Parameters(req): Parameters<GlobRequest>) -> String {
         match super::glob_search::glob_search(&req.pattern, req.path.as_deref()) {
-            Ok(output) => output,
+            Ok(output) => {
+                if output.contains("\"truncated\": true") {
+                    format!("{output}\n(Results are truncated. Consider using a more specific path or pattern.)")
+                } else {
+                    output
+                }
+            }
             Err(e) => e,
         }
     }
 
-    #[tool(description = "A powerful search tool built on ripgrep")]
+    #[tool(name = "Grep", description = "A powerful search tool built on ripgrep")]
     fn grep(&self, Parameters(req): Parameters<GrepRequest>) -> String {
         let input = super::grep_search::GrepSearchInput {
             pattern: req.pattern,

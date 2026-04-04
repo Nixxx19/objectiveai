@@ -1,3 +1,4 @@
+use std::cmp::Reverse;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -68,9 +69,19 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
         .unwrap_or_else(|| "files_with_matches".into());
     let context = input.context.or(input.context_short).unwrap_or(0);
 
+    let to_relative = |p: &Path| -> String {
+        pathdiff::diff_paths(p, &base_path)
+            .unwrap_or_else(|| p.to_path_buf())
+            .to_string_lossy()
+            .into_owned()
+    };
+
     let mut filenames = Vec::new();
     let mut content_lines = Vec::new();
     let mut total_matches = 0usize;
+
+    // For files_with_matches mode, collect (path, mtime) pairs for sorting
+    let mut file_mtimes: Vec<(String, Option<std::time::SystemTime>)> = Vec::new();
 
     for file_path in collect_search_files(&base_path).map_err(|e| format!("Search failed: {e}"))? {
         if !matches_filters(&file_path, glob_filter.as_ref(), file_type) {
@@ -81,10 +92,12 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
             continue;
         };
 
+        let rel_path = to_relative(&file_path);
+
         if output_mode == "count" {
             let count = regex.find_iter(&file_contents).count();
             if count > 0 {
-                filenames.push(file_path.to_string_lossy().into_owned());
+                filenames.push(rel_path);
                 total_matches += count;
             }
             continue;
@@ -103,18 +116,25 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
             continue;
         }
 
-        filenames.push(file_path.to_string_lossy().into_owned());
+        if output_mode == "files_with_matches" {
+            let mtime = fs::metadata(&file_path).and_then(|m| m.modified()).ok();
+            file_mtimes.push((rel_path, mtime));
+            continue;
+        }
+        filenames.push(rel_path.clone());
+
         if output_mode == "content" {
             for index in matched_lines {
                 let start = index.saturating_sub(input.before.unwrap_or(context));
                 let end = (index + input.after.unwrap_or(context) + 1).min(lines.len());
                 for (current, line) in lines.iter().enumerate().take(end).skip(start) {
                     let prefix = if input.line_numbers.unwrap_or(true) {
-                        format!("{}:{}:", file_path.to_string_lossy(), current + 1)
+                        format!("{rel_path}:{}:", current + 1)
                     } else {
-                        format!("{}:", file_path.to_string_lossy())
+                        format!("{rel_path}:")
                     };
-                    content_lines.push(format!("{prefix}{line}"));
+                    let truncated_line = if line.len() > 500 { &line[..500] } else { line };
+                    content_lines.push(format!("{prefix}{truncated_line}"));
                 }
             }
         }
@@ -136,6 +156,12 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
             .map_err(|e| format!("Failed to serialize output: {e}"));
     }
 
+    // For files_with_matches, sort by mtime (newest first) then extract names
+    if output_mode == "files_with_matches" {
+        file_mtimes.sort_by_key(|(_, mtime)| mtime.map(Reverse));
+        filenames = file_mtimes.into_iter().map(|(name, _)| name).collect();
+    }
+
     let (filenames, applied_limit, applied_offset) =
         apply_limit(filenames, input.head_limit, input.offset);
 
@@ -154,13 +180,24 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
         .map_err(|e| format!("Failed to serialize output: {e}"))
 }
 
+const VCS_DIRS: &[&str] = &[".git", ".svn", ".hg", ".bzr", ".jj", ".sl"];
+
+fn is_vcs_dir(entry: &walkdir::DirEntry) -> bool {
+    if entry.file_type().is_dir() {
+        let name = entry.file_name().to_string_lossy();
+        return VCS_DIRS.iter().any(|&vcs| name == vcs);
+    }
+    false
+}
+
 fn collect_search_files(base_path: &Path) -> std::io::Result<Vec<PathBuf>> {
     if base_path.is_file() {
         return Ok(vec![base_path.to_path_buf()]);
     }
 
     let mut files = Vec::new();
-    for entry in WalkDir::new(base_path) {
+    let walker = WalkDir::new(base_path).into_iter().filter_entry(|e| !is_vcs_dir(e));
+    for entry in walker {
         let entry = entry.map_err(|e| std::io::Error::other(e.to_string()))?;
         if entry.file_type().is_file() {
             files.push(entry.path().to_path_buf());

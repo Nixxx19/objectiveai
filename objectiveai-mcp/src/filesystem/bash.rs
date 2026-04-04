@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::process::Stdio;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
 
@@ -153,6 +154,9 @@ pub async fn execute_bash(
     // Build environment overrides
     let mut env_overrides: HashMap<String, String> = shell_state.get_session_env_vars();
 
+    // Set SHELL to the detected shell path
+    env_overrides.insert("SHELL".into(), shell_state.shell_path.clone());
+
     // Tmux socket isolation
     if let Some(tmux_env) = shell_state.get_tmux_env() {
         env_overrides.insert("TMUX".into(), tmux_env);
@@ -206,26 +210,55 @@ pub async fn execute_bash(
 }
 
 /// Detect the user's shell from environment.
+/// Checks CLAUDE_CODE_SHELL first, then SHELL, then tries common paths on Windows.
+/// Always returns a full path (or at least a validated executable path).
 fn detect_shell() -> String {
-    std::env::var("SHELL").unwrap_or_else(|_| {
-        if cfg!(windows) {
-            "bash".into()
-        } else {
-            "/bin/bash".into()
+    // 1. Check CLAUDE_CODE_SHELL env var first
+    if let Ok(shell) = std::env::var("CLAUDE_CODE_SHELL") {
+        if shell.contains("bash") || shell.contains("zsh") {
+            return shell;
         }
-    })
+    }
+
+    // 2. Check SHELL env var
+    if let Ok(shell) = std::env::var("SHELL") {
+        if !shell.is_empty() {
+            return shell;
+        }
+    }
+
+    // 3. On Windows (msys/git-bash), try common paths then `which`
+    if cfg!(windows) {
+        for candidate in &["/usr/bin/bash", "/bin/bash"] {
+            if std::path::Path::new(candidate).exists() {
+                return candidate.to_string();
+            }
+        }
+        // Fall back to `which bash`
+        if let Ok(output) = std::process::Command::new("which")
+            .arg("bash")
+            .output()
+        {
+            let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            if !path.is_empty() {
+                return path;
+            }
+        }
+    }
+
+    "/bin/bash".into()
 }
 
 /// Generate a unique CWD temp file path for this invocation.
+/// Uses an atomic counter combined with PID for uniqueness within a process.
+static CWD_COUNTER: AtomicU64 = AtomicU64::new(0);
 fn cwd_file_path() -> String {
-    let pid = std::process::id();
-    let ts = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_nanos();
+    let id = CWD_COUNTER.fetch_add(1, Ordering::Relaxed);
     format!(
-        "{}/objectiveai-mcp-{pid}-{ts}-cwd",
-        std::env::temp_dir().to_string_lossy()
+        "{}/objectiveai-mcp-{}-{}-cwd",
+        std::env::temp_dir().to_string_lossy(),
+        std::process::id(),
+        id,
     )
 }
 
@@ -264,6 +297,8 @@ async fn create_shell_snapshot(shell_path: &str) -> Result<String, String> {
         "true".into()
     };
 
+    let is_windows = cfg!(windows);
+
     let snapshot_script = if shell_type == "zsh" {
         format!(
             r#"
@@ -272,7 +307,7 @@ SNAPSHOT_FILE={snapshot}
 {{
   echo '# Shell snapshot (zsh)'
   typeset -f 2>/dev/null
-  alias 2>/dev/null | while IFS= read -r line; do echo "alias $line"; done
+  alias | sed 's/^alias //g' | sed 's/^/alias -- /'
   setopt 2>/dev/null | while IFS= read -r opt; do echo "setopt $opt"; done
 }} > "$SNAPSHOT_FILE" 2>/dev/null
 "#,
@@ -280,19 +315,30 @@ SNAPSHOT_FILE={snapshot}
             source = source_line,
         )
     } else {
+        // On Windows (msys/git-bash), filter out winpty aliases
+        let alias_cmd = if is_windows {
+            r#"alias | grep -v "='winpty " | sed 's/^alias //g' | sed 's/^/alias -- /'"#
+        } else {
+            r#"alias | sed 's/^alias //g' | sed 's/^/alias -- /'"#
+        };
+
         format!(
             r#"
 SNAPSHOT_FILE={snapshot}
+unalias -a 2>/dev/null || true
 {source}
 {{
   echo '# Shell snapshot (bash)'
   declare -f 2>/dev/null
-  alias 2>/dev/null | while IFS= read -r line; do echo "alias $line"; done
+  {alias_cmd}
   shopt -p 2>/dev/null
+  set -o | grep "on" | awk '{{print "set -o " $1}}'
+  echo "shopt -s expand_aliases"
 }} > "$SNAPSHOT_FILE" 2>/dev/null
 "#,
             snapshot = shell_quote(&snapshot_path),
             source = source_line,
+            alias_cmd = alias_cmd,
         )
     };
 

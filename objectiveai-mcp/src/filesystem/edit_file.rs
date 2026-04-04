@@ -105,6 +105,7 @@ pub fn edit_file(
         timestamp: mtime_ms,
         offset: None,
         limit: None,
+        is_partial_view: false,
     });
 
     let patch = util::make_patch(&original_file, &updated);

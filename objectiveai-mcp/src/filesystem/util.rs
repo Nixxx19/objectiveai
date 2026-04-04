@@ -121,7 +121,7 @@ pub fn find_match_with_quote_normalization<'a>(content: &'a str, search: &str) -
         return Some(&content[idx..idx + search.len()]);
     }
 
-    // Normalize curly quotes to straight quotes and try again
+    // Normalize curly quotes in the search string to straight quotes
     let normalized_search = search
         .replace(LEFT_SINGLE_CURLY, "'")
         .replace(RIGHT_SINGLE_CURLY, "'")
@@ -132,16 +132,40 @@ pub fn find_match_with_quote_normalization<'a>(content: &'a str, search: &str) -
         return None; // No curly quotes to normalize
     }
 
+    // Try finding the normalized search directly in the original content.
+    // This handles the case where the search string had curly quotes but
+    // the file content has straight quotes.
+    if let Some(idx) = content.find(&normalized_search) {
+        return Some(&content[idx..idx + normalized_search.len()]);
+    }
+
+    // Try the reverse: normalize the content and search with the normalized
+    // search string. Walk the original content char-by-char to find the
+    // matching span, avoiding byte-length mismatches between original and
+    // normalized content.
     let normalized_content = content
         .replace(LEFT_SINGLE_CURLY, "'")
         .replace(RIGHT_SINGLE_CURLY, "'")
         .replace(LEFT_DOUBLE_CURLY, "\"")
         .replace(RIGHT_DOUBLE_CURLY, "\"");
 
-    if let Some(idx) = normalized_content.find(&normalized_search) {
-        // Find the corresponding position in the original content
-        // This is approximate — works for same-length normalizations
-        Some(&content[idx..idx + search.len()])
+    if let Some(norm_byte_idx) = normalized_content.find(&normalized_search) {
+        // Count the number of characters before the match in normalized content
+        let char_offset = normalized_content[..norm_byte_idx].chars().count();
+        let match_char_len = normalized_search.chars().count();
+
+        // Map character offset back to byte offset in the original content
+        let orig_byte_start = content
+            .char_indices()
+            .nth(char_offset)
+            .map(|(i, _)| i)?;
+        let orig_byte_end = content
+            .char_indices()
+            .nth(char_offset + match_char_len)
+            .map(|(i, _)| i)
+            .unwrap_or(content.len());
+
+        Some(&content[orig_byte_start..orig_byte_end])
     } else {
         None
     }
