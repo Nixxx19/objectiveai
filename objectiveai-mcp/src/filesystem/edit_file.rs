@@ -186,8 +186,11 @@ pub fn edit_file(
         ));
     }
 
+    // Preserve the file's curly quote style in new_string when old_string matched via normalization
+    let actual_new_string = util::preserve_quote_style(old_string, &actual_old_string, new_string);
+
     // Apply the edit
-    let updated = util::apply_edit(&original_file, &actual_old_string, new_string, replace_all);
+    let updated = util::apply_edit(&original_file, &actual_old_string, &actual_new_string, replace_all);
 
     // Write the updated file (re-encode to UTF-16LE if original was UTF-16LE)
     if is_utf16le {

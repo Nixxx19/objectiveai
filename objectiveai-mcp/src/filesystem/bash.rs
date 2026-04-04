@@ -195,9 +195,6 @@ pub async fn execute_bash(
         env_overrides.insert("TMUX".into(), tmux_env);
     }
 
-    // Set terminal dimensions if not already set
-    env_overrides.entry("COLUMNS".into()).or_insert_with(|| "200".into());
-    env_overrides.entry("LINES".into()).or_insert_with(|| "50".into());
 
     let mut cmd = tokio::process::Command::new(&shell_state.shell_path);
     cmd.args(&args)

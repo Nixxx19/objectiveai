@@ -216,6 +216,88 @@ pub fn find_match_with_quote_normalization<'a>(content: &'a str, search: &str) -
     }
 }
 
+/// When old_string matched via quote normalization (curly quotes in file,
+/// straight quotes from model), apply the same curly quote style to new_string
+/// so the edit preserves the file's typography.
+pub fn preserve_quote_style(old_string: &str, actual_old_string: &str, new_string: &str) -> String {
+    // If they're the same, no normalization happened
+    if old_string == actual_old_string {
+        return new_string.to_owned();
+    }
+
+    // Detect which curly quote types were in the file's matched text
+    let has_double = actual_old_string.contains(LEFT_DOUBLE_CURLY)
+        || actual_old_string.contains(RIGHT_DOUBLE_CURLY);
+    let has_single = actual_old_string.contains(LEFT_SINGLE_CURLY)
+        || actual_old_string.contains(RIGHT_SINGLE_CURLY);
+
+    if !has_double && !has_single {
+        return new_string.to_owned();
+    }
+
+    let mut result = new_string.to_owned();
+    if has_double {
+        result = apply_curly_double_quotes(&result);
+    }
+    if has_single {
+        result = apply_curly_single_quotes(&result);
+    }
+    result
+}
+
+/// Returns true if the character at `index` in `chars` is in an opening-quote context.
+fn is_opening_context(chars: &[char], index: usize) -> bool {
+    if index == 0 {
+        return true;
+    }
+    matches!(
+        chars[index - 1],
+        ' ' | '\t' | '\n' | '\r' | '(' | '[' | '{' | '\u{2014}' | '\u{2013}'
+    )
+}
+
+/// Replace straight double quotes with curly double quotes using open/close heuristics.
+fn apply_curly_double_quotes(s: &str) -> String {
+    let chars: Vec<char> = s.chars().collect();
+    let mut result = String::with_capacity(s.len());
+    for (i, &ch) in chars.iter().enumerate() {
+        if ch == '"' {
+            if is_opening_context(&chars, i) {
+                result.push(LEFT_DOUBLE_CURLY);
+            } else {
+                result.push(RIGHT_DOUBLE_CURLY);
+            }
+        } else {
+            result.push(ch);
+        }
+    }
+    result
+}
+
+/// Replace straight single quotes with curly single quotes using open/close heuristics.
+/// Apostrophes in contractions (letter-'-letter) get right single curly quote.
+fn apply_curly_single_quotes(s: &str) -> String {
+    let chars: Vec<char> = s.chars().collect();
+    let mut result = String::with_capacity(s.len());
+    for (i, &ch) in chars.iter().enumerate() {
+        if ch == '\'' {
+            let prev_is_letter = i > 0 && chars[i - 1].is_alphabetic();
+            let next_is_letter = i + 1 < chars.len() && chars[i + 1].is_alphabetic();
+            if prev_is_letter && next_is_letter {
+                // Apostrophe in a contraction — use right single curly quote
+                result.push(RIGHT_SINGLE_CURLY);
+            } else if is_opening_context(&chars, i) {
+                result.push(LEFT_SINGLE_CURLY);
+            } else {
+                result.push(RIGHT_SINGLE_CURLY);
+            }
+        } else {
+            result.push(ch);
+        }
+    }
+    result
+}
+
 /// Apply an edit to file content.
 pub fn apply_edit(
     original: &str,
