@@ -208,11 +208,7 @@ public static class Cffi
     // -----------------------------------------------------------------------
 
     private static readonly object Lock = new();
-    private static readonly JsonSerializerOptions JsonOpts = new()
-    {
-        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-    };
+    private static readonly JsonSerializerOptions JsonOpts = new();
 
     private static byte[] ReadOutput(nint outPtr, nuint outLen)
     {

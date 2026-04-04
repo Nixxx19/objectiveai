@@ -10,10 +10,7 @@ namespace ObjectiveAI.Tests;
 
 public static class PushTestUtils
 {
-    private static readonly JsonSerializerOptions JsonOpts = new()
-    {
-        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
-    };
+    private static readonly JsonSerializerOptions JsonOpts = new();
 
     /// <summary>
     /// Deep copy via JSON round-trip (same as Go's deepCopy).
@@ -97,7 +94,7 @@ public static class PushTestUtils
             JsonValueKind.Object => el.EnumerateObject().ToDictionary(p => p.Name, p => JsonElementToObject(p.Value)),
             JsonValueKind.Array => el.EnumerateArray().Select(JsonElementToObject).ToList<object?>(),
             JsonValueKind.String => el.GetString(),
-            JsonValueKind.Number => el.TryGetInt64(out var l) ? (object)l : el.GetDouble(),
+            JsonValueKind.Number => el.GetDouble(),
             JsonValueKind.True => true,
             JsonValueKind.False => false,
             JsonValueKind.Null => null,

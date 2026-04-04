@@ -43,12 +43,38 @@ public class InlineAgentConverter : JsonConverter<InlineAgent>
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<ObjectiveAI.Agent.Openrouter.Agent>(raw, options); if (val0 != null) return new InlineAgent { Openrouter = val0 }; }
-            catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<ObjectiveAI.Agent.ClaudeAgentSdk.Agent>(raw, options); if (val1 != null) return new InlineAgent { ClaudeAgentSdk = val1 }; }
-            catch (JsonException) { }
-            try { var val2 = JsonSerializer.Deserialize<ObjectiveAI.Agent.Mock.Agent>(raw, options); if (val2 != null) return new InlineAgent { Mock = val2 }; }
-            catch (JsonException) { }
+            {
+                bool match0 = true;
+                if (!(el.TryGetProperty("upstream", out var c0_upstream) && c0_upstream.GetString() == "openrouter"))
+                    match0 = false;
+                if (match0)
+                {
+                    try { var val = JsonSerializer.Deserialize<ObjectiveAI.Agent.Openrouter.Agent>(raw, options); if (val != null) return new InlineAgent { Openrouter = val }; }
+                    catch (JsonException) { }
+                }
+            }
+            {
+                bool match1 = true;
+                if (!(el.TryGetProperty("output_mode", out var c1_output_mode) && c1_output_mode.GetString() == "instruction"))
+                    match1 = false;
+                if (!(el.TryGetProperty("upstream", out var c1_upstream) && c1_upstream.GetString() == "claude_agent_sdk"))
+                    match1 = false;
+                if (match1)
+                {
+                    try { var val = JsonSerializer.Deserialize<ObjectiveAI.Agent.ClaudeAgentSdk.Agent>(raw, options); if (val != null) return new InlineAgent { ClaudeAgentSdk = val }; }
+                    catch (JsonException) { }
+                }
+            }
+            {
+                bool match2 = true;
+                if (!(el.TryGetProperty("upstream", out var c2_upstream) && c2_upstream.GetString() == "mock"))
+                    match2 = false;
+                if (match2)
+                {
+                    try { var val = JsonSerializer.Deserialize<ObjectiveAI.Agent.Mock.Agent>(raw, options); if (val != null) return new InlineAgent { Mock = val }; }
+                    catch (JsonException) { }
+                }
+            }
         }
 
         throw new JsonException($"Data did not match any variant of InlineAgent");

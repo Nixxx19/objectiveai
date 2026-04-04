@@ -32,8 +32,16 @@ public class TaskChunkConverter : JsonConverter<TaskChunk>
         {
             try { var val0 = JsonSerializer.Deserialize<FunctionExecutionTaskChunk>(raw, options); if (val0 != null) return new TaskChunk { FunctionExecution = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<VectorCompletionTaskChunk>(raw, options); if (val1 != null) return new TaskChunk { VectorCompletion = val1 }; }
-            catch (JsonException) { }
+            {
+                bool match1 = true;
+                if (!(el.TryGetProperty("object", out var c1_object) && c1_object.GetString() == "vector.completion.chunk"))
+                    match1 = false;
+                if (match1)
+                {
+                    try { var val = JsonSerializer.Deserialize<VectorCompletionTaskChunk>(raw, options); if (val != null) return new TaskChunk { VectorCompletion = val }; }
+                    catch (JsonException) { }
+                }
+            }
         }
 
         throw new JsonException($"Data did not match any variant of TaskChunk");

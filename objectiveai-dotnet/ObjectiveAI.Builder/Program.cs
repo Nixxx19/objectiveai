@@ -790,11 +790,25 @@ List<EnumConstraint> GetEnumConstraintsForVariant(VariantInfo v)
         {
             foreach (var prop in refProps.EnumerateObject())
             {
+                // Direct inline enum
                 if (prop.Value.TryGetProperty("enum", out var enumEl) && enumEl.GetArrayLength() == 1)
                 {
                     constraints.Add(new(prop.Name, enumEl[0].GetString()!));
+                    continue;
                 }
-                // Also check inside nullable (anyOf with non-null having enum)
+                // Follow $ref to enum type (e.g., "role": {"$ref": "AssistantRole"} where AssistantRole has enum: ["assistant"])
+                if (prop.Value.TryGetProperty("$ref", out var propRef))
+                {
+                    var propRefTitle = propRef.GetString()!;
+                    if (schemas.TryGetValue(propRefTitle, out var propRefSchema)
+                        && propRefSchema.TryGetProperty("enum", out var refEnumEl)
+                        && refEnumEl.GetArrayLength() == 1)
+                    {
+                        constraints.Add(new(prop.Name, refEnumEl[0].GetString()!));
+                        continue;
+                    }
+                }
+                // Also check inside nullable (anyOf with non-null having enum or $ref to enum)
                 if (prop.Value.TryGetProperty("anyOf", out var anyOf))
                 {
                     foreach (var av in anyOf.EnumerateArray())
@@ -802,6 +816,16 @@ List<EnumConstraint> GetEnumConstraintsForVariant(VariantInfo v)
                         if (av.TryGetProperty("enum", out var ae) && ae.GetArrayLength() == 1 && GetString(av, "type") != "null")
                         {
                             constraints.Add(new(prop.Name, ae[0].GetString()!));
+                        }
+                        else if (av.TryGetProperty("$ref", out var avRef))
+                        {
+                            var avRefTitle = avRef.GetString()!;
+                            if (schemas.TryGetValue(avRefTitle, out var avRefSchema)
+                                && avRefSchema.TryGetProperty("enum", out var avRefEnum)
+                                && avRefEnum.GetArrayLength() == 1)
+                            {
+                                constraints.Add(new(prop.Name, avRefEnum[0].GetString()!));
+                            }
                         }
                     }
                 }

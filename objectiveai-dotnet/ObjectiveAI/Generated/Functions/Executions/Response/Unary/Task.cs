@@ -32,8 +32,16 @@ public class TaskConverter : JsonConverter<Task>
         {
             try { var val0 = JsonSerializer.Deserialize<FunctionExecutionTask>(raw, options); if (val0 != null) return new Task { FunctionExecution = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<VectorCompletionTask>(raw, options); if (val1 != null) return new Task { VectorCompletion = val1 }; }
-            catch (JsonException) { }
+            {
+                bool match1 = true;
+                if (!(el.TryGetProperty("object", out var c1_object) && c1_object.GetString() == "vector.completion"))
+                    match1 = false;
+                if (match1)
+                {
+                    try { var val = JsonSerializer.Deserialize<VectorCompletionTask>(raw, options); if (val != null) return new Task { VectorCompletion = val }; }
+                    catch (JsonException) { }
+                }
+            }
         }
 
         throw new JsonException($"Data did not match any variant of Task");

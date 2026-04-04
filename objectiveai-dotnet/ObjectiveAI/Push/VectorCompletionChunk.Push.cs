@@ -13,16 +13,12 @@ public partial class VectorCompletionChunk
             (a, b) => a.Push(b)
         );
         Votes.AddRange(other.Votes);
-        if (other.Scores.Count > 0)
-        {
-            Scores.Clear();
-            Scores.AddRange(other.Scores);
-        }
-        if (other.Weights.Count > 0)
-        {
-            Weights.Clear();
-            Weights.AddRange(other.Weights);
-        }
+        // scores: always replace
+        Scores.Clear();
+        Scores.AddRange(other.Scores);
+        // weights: always replace
+        Weights.Clear();
+        Weights.AddRange(other.Weights);
         var usage = Usage;
         PushOption(ref usage, other.Usage, (a, b) => a.Push(b));
         Usage = usage;

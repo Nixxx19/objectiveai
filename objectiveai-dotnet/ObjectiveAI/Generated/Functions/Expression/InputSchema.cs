@@ -115,26 +115,106 @@ public class InputSchemaConverter : JsonConverter<InputSchema>
         {
             try { var val0 = JsonSerializer.Deserialize<AnyOfInputSchema>(raw, options); if (val0 != null) return new InputSchema { AnyOf = val0 }; }
             catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<ObjectInputSchema>(raw, options); if (val1 != null) return new InputSchema { Object = val1 }; }
-            catch (JsonException) { }
-            try { var val2 = JsonSerializer.Deserialize<ArrayInputSchema>(raw, options); if (val2 != null) return new InputSchema { Array = val2 }; }
-            catch (JsonException) { }
-            try { var val3 = JsonSerializer.Deserialize<StringInputSchema>(raw, options); if (val3 != null) return new InputSchema { String = val3 }; }
-            catch (JsonException) { }
-            try { var val4 = JsonSerializer.Deserialize<IntegerInputSchema>(raw, options); if (val4 != null) return new InputSchema { Integer = val4 }; }
-            catch (JsonException) { }
-            try { var val5 = JsonSerializer.Deserialize<NumberInputSchema>(raw, options); if (val5 != null) return new InputSchema { Number = val5 }; }
-            catch (JsonException) { }
-            try { var val6 = JsonSerializer.Deserialize<BooleanInputSchema>(raw, options); if (val6 != null) return new InputSchema { Boolean = val6 }; }
-            catch (JsonException) { }
-            try { var val7 = JsonSerializer.Deserialize<ImageInputSchema>(raw, options); if (val7 != null) return new InputSchema { Image = val7 }; }
-            catch (JsonException) { }
-            try { var val8 = JsonSerializer.Deserialize<AudioInputSchema>(raw, options); if (val8 != null) return new InputSchema { Audio = val8 }; }
-            catch (JsonException) { }
-            try { var val9 = JsonSerializer.Deserialize<VideoInputSchema>(raw, options); if (val9 != null) return new InputSchema { Video = val9 }; }
-            catch (JsonException) { }
-            try { var val10 = JsonSerializer.Deserialize<FileInputSchema>(raw, options); if (val10 != null) return new InputSchema { File = val10 }; }
-            catch (JsonException) { }
+            {
+                bool match1 = true;
+                if (!(el.TryGetProperty("type", out var c1_type) && c1_type.GetString() == "object"))
+                    match1 = false;
+                if (match1)
+                {
+                    try { var val = JsonSerializer.Deserialize<ObjectInputSchema>(raw, options); if (val != null) return new InputSchema { Object = val }; }
+                    catch (JsonException) { }
+                }
+            }
+            {
+                bool match2 = true;
+                if (!(el.TryGetProperty("type", out var c2_type) && c2_type.GetString() == "array"))
+                    match2 = false;
+                if (match2)
+                {
+                    try { var val = JsonSerializer.Deserialize<ArrayInputSchema>(raw, options); if (val != null) return new InputSchema { Array = val }; }
+                    catch (JsonException) { }
+                }
+            }
+            {
+                bool match3 = true;
+                if (!(el.TryGetProperty("type", out var c3_type) && c3_type.GetString() == "string"))
+                    match3 = false;
+                if (match3)
+                {
+                    try { var val = JsonSerializer.Deserialize<StringInputSchema>(raw, options); if (val != null) return new InputSchema { String = val }; }
+                    catch (JsonException) { }
+                }
+            }
+            {
+                bool match4 = true;
+                if (!(el.TryGetProperty("type", out var c4_type) && c4_type.GetString() == "integer"))
+                    match4 = false;
+                if (match4)
+                {
+                    try { var val = JsonSerializer.Deserialize<IntegerInputSchema>(raw, options); if (val != null) return new InputSchema { Integer = val }; }
+                    catch (JsonException) { }
+                }
+            }
+            {
+                bool match5 = true;
+                if (!(el.TryGetProperty("type", out var c5_type) && c5_type.GetString() == "number"))
+                    match5 = false;
+                if (match5)
+                {
+                    try { var val = JsonSerializer.Deserialize<NumberInputSchema>(raw, options); if (val != null) return new InputSchema { Number = val }; }
+                    catch (JsonException) { }
+                }
+            }
+            {
+                bool match6 = true;
+                if (!(el.TryGetProperty("type", out var c6_type) && c6_type.GetString() == "boolean"))
+                    match6 = false;
+                if (match6)
+                {
+                    try { var val = JsonSerializer.Deserialize<BooleanInputSchema>(raw, options); if (val != null) return new InputSchema { Boolean = val }; }
+                    catch (JsonException) { }
+                }
+            }
+            {
+                bool match7 = true;
+                if (!(el.TryGetProperty("type", out var c7_type) && c7_type.GetString() == "image"))
+                    match7 = false;
+                if (match7)
+                {
+                    try { var val = JsonSerializer.Deserialize<ImageInputSchema>(raw, options); if (val != null) return new InputSchema { Image = val }; }
+                    catch (JsonException) { }
+                }
+            }
+            {
+                bool match8 = true;
+                if (!(el.TryGetProperty("type", out var c8_type) && c8_type.GetString() == "audio"))
+                    match8 = false;
+                if (match8)
+                {
+                    try { var val = JsonSerializer.Deserialize<AudioInputSchema>(raw, options); if (val != null) return new InputSchema { Audio = val }; }
+                    catch (JsonException) { }
+                }
+            }
+            {
+                bool match9 = true;
+                if (!(el.TryGetProperty("type", out var c9_type) && c9_type.GetString() == "video"))
+                    match9 = false;
+                if (match9)
+                {
+                    try { var val = JsonSerializer.Deserialize<VideoInputSchema>(raw, options); if (val != null) return new InputSchema { Video = val }; }
+                    catch (JsonException) { }
+                }
+            }
+            {
+                bool match10 = true;
+                if (!(el.TryGetProperty("type", out var c10_type) && c10_type.GetString() == "file"))
+                    match10 = false;
+                if (match10)
+                {
+                    try { var val = JsonSerializer.Deserialize<FileInputSchema>(raw, options); if (val != null) return new InputSchema { File = val }; }
+                    catch (JsonException) { }
+                }
+            }
         }
 
         throw new JsonException($"Data did not match any variant of InputSchema");

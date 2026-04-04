@@ -31,10 +31,26 @@ public class MessageConverter : JsonConverter<Message>
 
         if (el.ValueKind == JsonValueKind.Object)
         {
-            try { var val0 = JsonSerializer.Deserialize<AssistantResponse>(raw, options); if (val0 != null) return new Message { Assistant = val0 }; }
-            catch (JsonException) { }
-            try { var val1 = JsonSerializer.Deserialize<ToolResponse>(raw, options); if (val1 != null) return new Message { Tool = val1 }; }
-            catch (JsonException) { }
+            {
+                bool match0 = true;
+                if (!(el.TryGetProperty("role", out var c0_role) && c0_role.GetString() == "assistant"))
+                    match0 = false;
+                if (match0)
+                {
+                    try { var val = JsonSerializer.Deserialize<AssistantResponse>(raw, options); if (val != null) return new Message { Assistant = val }; }
+                    catch (JsonException) { }
+                }
+            }
+            {
+                bool match1 = true;
+                if (!(el.TryGetProperty("role", out var c1_role) && c1_role.GetString() == "tool"))
+                    match1 = false;
+                if (match1)
+                {
+                    try { var val = JsonSerializer.Deserialize<ToolResponse>(raw, options); if (val != null) return new Message { Tool = val }; }
+                    catch (JsonException) { }
+                }
+            }
         }
 
         throw new JsonException($"Data did not match any variant of Message");
