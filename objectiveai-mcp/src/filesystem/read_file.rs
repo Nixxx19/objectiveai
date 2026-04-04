@@ -5,7 +5,7 @@ const MAX_READ_SIZE_BYTES: u64 = 10 * 1024 * 1024; // 10 MB
 
 const BINARY_EXTENSIONS: &[&str] = &[
     // Images
-    "png", "jpg", "jpeg", "gif", "bmp", "ico", "tiff", "tif", "webp", "svg", "avif", "heic",
+    "png", "jpg", "jpeg", "gif", "bmp", "ico", "tiff", "tif", "webp", "avif", "heic",
     "heif", // Video
     "mp4", "avi", "mov", "wmv", "flv", "mkv", "webm", "m4v", "mpg", "mpeg",
     // Audio

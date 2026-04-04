@@ -78,13 +78,37 @@ pub fn edit_file(
             .map_err(|e| format!("Failed to serialize output: {e}"));
     }
 
-    if old_string.is_empty() && absolute_path.exists() {
-        // Check if file has content
+    // Empty old_string on existing file: allow if file is empty, reject if file has content
+    let is_empty_old_on_existing = old_string.is_empty() && absolute_path.exists();
+    if is_empty_old_on_existing {
         let existing = std::fs::read_to_string(&absolute_path).unwrap_or_default();
         if !existing.trim().is_empty() {
             return Err("Cannot use empty old_string on a file that already has content. Provide the text you want to replace.".into());
         }
-        // If file exists but is empty, allow the edit (replace empty with new_string)
+        // File is empty — write new_string directly, skip must-read check
+        std::fs::write(&absolute_path, new_string)
+            .map_err(|e| format!("Failed to write file: {e}"))?;
+        let mtime_ms = util::get_file_mtime_ms(&absolute_path)
+            .map_err(|e| format!("Failed to get file mtime: {e}"))?;
+        file_state.set(absolute_path_str.clone(), FileStateEntry {
+            content: util::normalize_line_endings(new_string),
+            timestamp: mtime_ms,
+            offset: None,
+            limit: None,
+            is_partial_view: false,
+        });
+        let patch = util::make_patch("", new_string);
+        let output = EditFileOutput {
+            file_path: absolute_path_str,
+            old_string: old_string.to_owned(),
+            new_string: new_string.to_owned(),
+            original_file: String::new(),
+            structured_patch: patch,
+            replace_all,
+            user_modified: false,
+        };
+        return serde_json::to_string_pretty(&output)
+            .map_err(|e| format!("Failed to serialize output: {e}"));
     }
 
     // Must-read check (error code 6)
