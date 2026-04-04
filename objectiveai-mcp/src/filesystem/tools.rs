@@ -127,7 +127,7 @@ impl FilesystemTools {
         }
     }
 
-    #[tool(name = "Write", description = "Write a file to the local filesystem.")]
+    #[tool(name = "Write", description = "Writes a file to the local filesystem.")]
     fn write(&self, Parameters(req): Parameters<WriteRequest>) -> String {
         match super::write_file::write_file(&self.file_state, &req.file_path, &req.content) {
             Ok(output) => output,
