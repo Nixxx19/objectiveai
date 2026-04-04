@@ -100,6 +100,7 @@ pub struct GrepRequest {
 pub struct FilesystemTools {
     pub tool_router: ToolRouter<Self>,
     file_state: FileStateCache,
+    shell_state: super::bash::ShellState,
 }
 
 #[tool_router]
@@ -107,8 +108,15 @@ impl FilesystemTools {
     pub fn new() -> Self {
         Self {
             tool_router: Self::tool_router(),
+            shell_state: super::bash::ShellState::new(),
             file_state: FileStateCache::new(),
         }
+    }
+
+    /// Initialize session state (shell snapshot, etc.).
+    /// Should be called once after construction.
+    pub async fn init(&self) {
+        self.shell_state.init_snapshot().await;
     }
 
     #[tool(description = "Reads a file from the local filesystem.")]
@@ -143,7 +151,7 @@ impl FilesystemTools {
 
     #[tool(description = "Executes a given bash command and returns its output.")]
     async fn bash(&self, Parameters(req): Parameters<BashRequest>) -> String {
-        match super::bash::execute_bash(&req.command, req.timeout).await {
+        match super::bash::execute_bash(&self.shell_state, &req.command, req.timeout).await {
             Ok(output) => output,
             Err(e) => e,
         }
