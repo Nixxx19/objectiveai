@@ -147,17 +147,27 @@ pub async fn execute_bash(
         command_parts.push(exports.join("; "));
     }
 
-    // 3. Disable extended glob patterns (security hardening)
-    if shell_state.shell_path.contains("bash") {
+    // 3. Source CLAUDE_ENV_FILE if set (for venv/conda activation, parent process env persistence)
+    if let Ok(env_file) = std::env::var("CLAUDE_ENV_FILE") {
+        if !env_file.is_empty() && std::path::Path::new(&env_file).exists() {
+            command_parts.push(format!("source {} 2>/dev/null || true", shell_quote(&env_file)));
+        }
+    }
+
+    // 4. Disable extended glob patterns (security hardening)
+    if std::env::var("CLAUDE_CODE_SHELL_PREFIX").is_ok() {
+        // When using a shell wrapper, disable extglob for both bash and zsh
+        command_parts.push("{ shopt -u extglob || setopt NO_EXTENDED_GLOB; } >/dev/null 2>&1 || true".to_string());
+    } else if shell_state.shell_path.contains("bash") {
         command_parts.push("shopt -u extglob 2>/dev/null || true".to_string());
     } else if shell_state.shell_path.contains("zsh") {
         command_parts.push("setopt NO_EXTENDED_GLOB 2>/dev/null || true".to_string());
     }
 
-    // 4. The user's command (wrapped in eval for alias expansion)
+    // 5. The user's command (wrapped in eval for alias expansion)
     command_parts.push(format!("eval {}", shell_quote(command)));
 
-    // 5. Save CWD after command execution
+    // 6. Save CWD after command execution
     let cwd_file = cwd_file_path();
     command_parts.push(format!("pwd -P >| {}", shell_quote(&cwd_file)));
 
@@ -181,6 +191,10 @@ pub async fn execute_bash(
     if let Some(tmux_env) = shell_state.get_tmux_env() {
         env_overrides.insert("TMUX".into(), tmux_env);
     }
+
+    // Set terminal dimensions if not already set
+    env_overrides.entry("COLUMNS".into()).or_insert_with(|| "200".into());
+    env_overrides.entry("LINES".into()).or_insert_with(|| "50".into());
 
     let mut cmd = tokio::process::Command::new(&shell_state.shell_path);
     cmd.args(&args)

@@ -223,16 +223,22 @@ pub fn apply_edit(
     new_string: &str,
     replace_all: bool,
 ) -> String {
-    if replace_all {
-        original.replace(old_string, new_string)
-    } else if new_string.is_empty() {
-        // Empty new_string: strip trailing newline if present
-        let with_newline = format!("{old_string}\n");
-        if original.contains(&with_newline) {
-            original.replacen(&with_newline, "", 1)
+    if new_string.is_empty() {
+        // When deleting (new_string is empty), strip trailing newline after each match
+        let strip_trailing =
+            !old_string.ends_with('\n') && original.contains(&format!("{old_string}\n"));
+        let search = if strip_trailing {
+            format!("{old_string}\n")
         } else {
-            original.replacen(old_string, "", 1)
+            old_string.to_string()
+        };
+        if replace_all {
+            original.replace(&search, "")
+        } else {
+            original.replacen(&search, "", 1)
         }
+    } else if replace_all {
+        original.replace(old_string, new_string)
     } else {
         original.replacen(old_string, new_string, 1)
     }

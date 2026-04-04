@@ -176,15 +176,25 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
     }
 
     if output_mode == "count" {
+        let (limited_count_lines, applied_limit, applied_offset) =
+            apply_limit(count_lines, input.head_limit, input.offset);
+
+        // Recompute file count and matches from LIMITED data
+        let limited_file_count = limited_count_lines.len();
+        let limited_matches: usize = limited_count_lines
+            .iter()
+            .filter_map(|line| line.rsplit(':').next()?.parse::<usize>().ok())
+            .sum();
+
         let output = GrepSearchOutput {
             mode: Some("count".into()),
-            num_files: count_file_count,
+            num_files: limited_file_count,
             filenames: Vec::new(),
             num_lines: None,
-            content: Some(count_lines.join("\n")),
-            num_matches: Some(total_matches),
-            applied_limit: None,
-            applied_offset: None,
+            content: Some(limited_count_lines.join("\n")),
+            num_matches: Some(limited_matches),
+            applied_limit,
+            applied_offset,
         };
         return serde_json::to_string_pretty(&output)
             .map_err(|e| format!("Failed to serialize output: {e}"));

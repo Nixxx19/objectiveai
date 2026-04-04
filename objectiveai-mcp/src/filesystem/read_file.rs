@@ -3,6 +3,34 @@ use super::util;
 
 const MAX_READ_SIZE_BYTES: u64 = 10 * 1024 * 1024; // 10 MB
 
+const BINARY_EXTENSIONS: &[&str] = &[
+    // Images
+    "png", "jpg", "jpeg", "gif", "bmp", "ico", "tiff", "tif", "webp", "svg", "avif", "heic",
+    "heif", // Video
+    "mp4", "avi", "mov", "wmv", "flv", "mkv", "webm", "m4v", "mpg", "mpeg",
+    // Audio
+    "mp3", "wav", "flac", "aac", "ogg", "wma", "m4a", "opus",
+    // Archives
+    "zip", "tar", "gz", "bz2", "xz", "7z", "rar", "zst", "lz4",
+    // Executables/Libraries
+    "exe", "dll", "so", "dylib", "o", "a", "lib", "obj", "class", "pyc", "pyo",
+    // Documents (binary)
+    "doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "ods", "odp",
+    // Databases
+    "db", "sqlite", "sqlite3", "mdb",
+    // Fonts
+    "ttf", "otf", "woff", "woff2", "eot",
+    // Other binary
+    "bin", "dat", "iso", "img", "dmg", "wasm", "deb", "rpm",
+];
+
+fn has_binary_extension(path: &std::path::Path) -> bool {
+    path.extension()
+        .and_then(|e| e.to_str())
+        .map(|e| BINARY_EXTENSIONS.iter().any(|&b| b.eq_ignore_ascii_case(e)))
+        .unwrap_or(false)
+}
+
 #[derive(Debug, serde::Serialize)]
 pub struct TextFilePayload {
     #[serde(rename = "filePath")]
@@ -37,6 +65,13 @@ pub fn read_file(
     let absolute_path = util::normalize_path(path)
         .map_err(|e| format!("Failed to resolve path: {e}"))?;
     let absolute_path_str = absolute_path.to_string_lossy().to_string();
+
+    if has_binary_extension(&absolute_path) {
+        return Err(format!(
+            "Cannot read binary file '{}'. Binary files are not supported.",
+            path
+        ));
+    }
 
     // Check file size before reading
     let metadata = std::fs::metadata(&absolute_path)
