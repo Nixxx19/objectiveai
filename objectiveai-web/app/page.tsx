@@ -1,350 +1,420 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import PromptBlock from "@/components/PromptBlock";
 
-export default function Home() {
-  const [copied, setCopied] = useState(false);
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState<false | "success" | "already">(
-    false,
-  );
-  const [submitting, setSubmitting] = useState(false);
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
-  const handleCopy = useCallback(async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      const ta = document.createElement("textarea");
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      document.body.removeChild(ta);
-    }
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  }, []);
+interface Vote {
+  agent: string;
+  model: string;
+  scores: number[];
+  revealed: boolean;
+}
 
-  const handleEarlyAccess = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!email || !email.includes("@")) return;
-      setSubmitting(true);
-      try {
-        const res = await fetch("/api/early-access", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        });
-        const data = await res.json();
-        if (data.already_subscribed) {
-          setSubmitted("already");
-        } else {
-          setSubmitted("success");
-        }
-      } catch {
-        setSubmitted("success");
-      } finally {
-        setSubmitting(false);
-      }
-    },
-    [email],
-  );
+interface VotingRound {
+  prompt: string;
+  responses: string[];
+  votes: Vote[];
+  weights: number[];
+  finalScores: number[];
+}
+
+// ---------------------------------------------------------------------------
+// Data: real-looking voting scenarios
+// ---------------------------------------------------------------------------
+
+const SCENARIOS: Omit<VotingRound, "votes" | "finalScores">[] = [
+  {
+    prompt: "Is this PR ready to merge?",
+    responses: ["ship it", "needs tests", "rethink"],
+    weights: [0.40, 0.35, 0.25],
+  },
+  {
+    prompt: "Rate content quality for publishing",
+    responses: ["publish", "revise", "reject"],
+    weights: [0.30, 0.45, 0.25],
+  },
+  {
+    prompt: "Classify support ticket severity",
+    responses: ["critical", "normal", "low"],
+    weights: [0.50, 0.30, 0.20],
+  },
+  {
+    prompt: "Evaluate candidate for role fit",
+    responses: ["strong yes", "lean yes", "no"],
+    weights: [0.35, 0.40, 0.25],
+  },
+];
+
+const AGENT_POOL = [
+  { agent: "agent-0", model: "gpt-4o" },
+  { agent: "agent-1", model: "claude-sonnet-4-20250514" },
+  { agent: "agent-2", model: "gemini-2.0-flash" },
+  { agent: "agent-3", model: "llama-3.1-70b" },
+  { agent: "agent-4", model: "mistral-large" },
+];
+
+function generateVotes(
+  numResponses: number,
+  agents: typeof AGENT_POOL
+): Vote[] {
+  return agents.slice(0, 3 + Math.floor(Math.random() * 2)).map((a) => {
+    const raw = Array.from({ length: numResponses }, () => Math.random());
+    // Make one score dominant for realism
+    const dominant = Math.floor(Math.random() * numResponses);
+    raw[dominant] *= 3;
+    const sum = raw.reduce((s, v) => s + v, 0);
+    const scores = raw.map((v) => Math.round((v / sum) * 100) / 100);
+    // Fix rounding
+    const diff = 1 - scores.reduce((s, v) => s + v, 0);
+    scores[0] = Math.round((scores[0] + diff) * 100) / 100;
+    return { ...a, scores, revealed: false };
+  });
+}
+
+function computeFinalScores(votes: Vote[], weights: number[]): number[] {
+  const numResponses = votes[0]?.scores.length ?? 0;
+  const totals = new Array(numResponses).fill(0);
+  let weightSum = 0;
+  votes.forEach((v, i) => {
+    const w = weights[i % weights.length];
+    weightSum += w;
+    v.scores.forEach((s, j) => {
+      totals[j] += s * w;
+    });
+  });
+  return totals.map((t) => Math.round((t / weightSum) * 100) / 100);
+}
+
+// ---------------------------------------------------------------------------
+// Voting visualization component
+// ---------------------------------------------------------------------------
+
+function VotingTerminal() {
+  const [round, setRound] = useState<VotingRound | null>(null);
+  const [revealIndex, setRevealIndex] = useState(-1);
+  const [showFinal, setShowFinal] = useState(false);
+  const [cycleCount, setCycleCount] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const startRound = useCallback(() => {
+    const scenario = SCENARIOS[cycleCount % SCENARIOS.length];
+    const votes = generateVotes(scenario.responses.length, AGENT_POOL);
+    const finalScores = computeFinalScores(votes, scenario.weights);
+    setRound({ ...scenario, votes, finalScores });
+    setRevealIndex(-1);
+    setShowFinal(false);
+  }, [cycleCount]);
 
   useEffect(() => {
-    const els = document.querySelectorAll(".landing-section, .landing-bottom-cta");
-    const reveal = (el: Element) => {
-      el.classList.add("visible");
+    startRound();
+  }, [startRound]);
+
+  // Reveal votes one by one
+  useEffect(() => {
+    if (!round) return;
+    if (revealIndex < round.votes.length) {
+      timerRef.current = setTimeout(
+        () => setRevealIndex((i) => i + 1),
+        revealIndex === -1 ? 800 : 600
+      );
+    } else if (!showFinal) {
+      timerRef.current = setTimeout(() => setShowFinal(true), 500);
+    } else {
+      // Pause on final, then cycle
+      timerRef.current = setTimeout(() => {
+        setCycleCount((c) => c + 1);
+      }, 4000);
+    }
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
     };
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            reveal(entry.target);
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.1 },
-    );
-    els.forEach((el) => {
-      if (el.getBoundingClientRect().top < window.innerHeight) {
-        reveal(el);
-      } else {
-        observer.observe(el);
-      }
-    });
-    return () => observer.disconnect();
-  }, []);
+  }, [round, revealIndex, showFinal]);
+
+  if (!round) return null;
 
   return (
-    <div className="landing">
-      {/* ─── Hero ─── */}
-      <section className="landing-hero">
-        <div className="landing-badge">API + CLI live</div>
-
-        <div className="landing-descriptor">
-          Your agent&apos;s advisory board
+    <div className="lp-terminal">
+      <div className="lp-terminal-chrome">
+        <span className="lp-terminal-dot" />
+        <span className="lp-terminal-title">vector completion</span>
+      </div>
+      <div className="lp-terminal-body">
+        <div className="lp-terminal-line lp-terminal-prompt">
+          <span className="lp-prompt-symbol">$</span>
+          <span className="lp-prompt-cmd">objective</span>
+          <span className="lp-prompt-arg">score</span>
+          <span className="lp-prompt-str">
+            &quot;{round.prompt}&quot;
+          </span>
         </div>
 
-        <h1 className="landing-h1">
-          Your agent doesn&apos;t
-          <br />
-          have to decide
-          <br />
-          alone.
-        </h1>
-
-        <p className="landing-sub">
-          ObjectiveAI runs <strong>swarms of AI agents that vote</strong> on your
-          inputs and return confidence-scored outputs. Not vibes &mdash;{" "}
-          <strong>probability distributions</strong> from every agent&apos;s actual
-          logprobs. One API call. Collective judgment.
-        </p>
-
-        {/* ── Primary CTA: Sign up ── */}
-        <div className="landing-hero-ctas">
-          <Link href="/api/auth/signin" className="landing-cta-btn primary">
-            Sign up free
-          </Link>
-          <Link href="/functions" className="landing-cta-btn secondary">
-            Browse functions
-          </Link>
+        <div className="lp-terminal-line lp-terminal-dim">
+          responses: [{round.responses.map((r, i) => (
+            <span key={i}>
+              {i > 0 && ", "}&quot;{r}&quot;
+            </span>
+          ))}]
         </div>
 
-        {/* ── Proof point ── */}
-        <p className="landing-proof">
-          <Link href="/functions" className="landing-proof-link">
-            20+ scoring functions live and callable
-          </Link>{" "}
-          &mdash; invented by our agents.
-        </p>
+        <div className="lp-terminal-spacer" />
 
-        {/* ── Terminal block ── */}
-        <div className="landing-terminal">
-          <div className="landing-terminal-bar">
-            <span className="landing-dot" />
-            <span className="landing-dot" />
-            <span className="landing-dot" />
-            <span className="landing-terminal-title">terminal</span>
+        {round.votes.map((vote, i) => (
+          <div
+            key={`${cycleCount}-${i}`}
+            className={`lp-vote-row ${i < revealIndex ? "lp-vote-visible" : ""}`}
+          >
+            <span className="lp-vote-agent">{vote.model}</span>
+            <span className="lp-vote-arrow">{"->"}</span>
+            <span className="lp-vote-scores">
+              [{vote.scores.map((s, j) => (
+                <span key={j} className="lp-vote-score">
+                  {j > 0 && " "}
+                  <span
+                    className={
+                      s === Math.max(...vote.scores)
+                        ? "lp-score-high"
+                        : ""
+                    }
+                  >
+                    {s.toFixed(2)}
+                  </span>
+                </span>
+              ))}]
+            </span>
           </div>
-          <div className="landing-terminal-body">
-            <button
-              className={`landing-copy ${copied ? "landing-copy-copied" : ""}`}
-              onClick={() =>
-                handleCopy("npm install objectiveai")
-              }
-            >
-              {copied ? "Copied!" : "Copy"}
-            </button>
-            <div className="landing-comment">
-              # install the SDK
-            </div>
-            <div className="landing-line">
-              <span className="landing-prompt">$</span>
-              <span className="landing-cmd">npm install objectiveai</span>
-            </div>
-          </div>
-        </div>
-        <p className="landing-install-alt">
-          Also available for <code>Rust</code>, <code>Go</code>, and <code>Python</code>
-        </p>
+        ))}
 
-        {/* ── Secondary CTA: Stay updated ── */}
-        <div className="landing-cli-notify" id="early-access">
-          <p className="landing-cli-notify-label">
-            Stay in the loop
-          </p>
-          {!submitted ? (
-            <form className="landing-ea-form" onSubmit={handleEarlyAccess}>
-              <input
-                type="email"
-                placeholder="you@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <button type="submit" disabled={submitting}>
-                {submitting ? "Sending..." : "Subscribe"}
-              </button>
-            </form>
-          ) : submitted === "already" ? (
-            <p className="landing-ea-confirmed">
-              You&apos;re already on the list!
-            </p>
-          ) : (
-            <p className="landing-ea-confirmed">
-              You&apos;re in. Updates only when it matters.
-            </p>
-          )}
-        </div>
-      </section>
-
-      {/* ─── The Problem / Key Insight ─── */}
-      <section className="landing-section">
-        <div className="landing-section-label">The Problem</div>
-        <h2 className="landing-h2">One model, one opinion.</h2>
-        <p className="landing-p">
-          Every AI tool asks a single model for a single answer and
-          throws away the uncertainty. You get a score, but no idea how confident
-          it is.
-        </p>
-        <p className="landing-p">
-          ObjectiveAI captures the{" "}
-          <strong>full probability distribution</strong> from every agent in the
-          swarm using logprobs &mdash; then combines them with learned
-          weights.
-        </p>
-
-        <div className="landing-insight">
-          <div className="landing-comparison">
-            <div className="landing-side landing-side-old">
-              <h4>Single Agent</h4>
-              <pre>{`input → agent → "ship it"
-
-// lost: agent was only 62% sure
-// lost: 35% said "needs tests"
-// lost: all nuance`}</pre>
+        {showFinal && (
+          <>
+            <div className="lp-terminal-spacer" />
+            <div className="lp-terminal-divider" />
+            <div className="lp-final-row">
+              <span className="lp-final-label">scores</span>
+              <span className="lp-final-eq">=</span>
+              <span className="lp-final-scores">
+                [{round.finalScores.map((s, i) => (
+                  <span key={i}>
+                    {i > 0 && " "}
+                    <span className="lp-final-value">{s.toFixed(2)}</span>
+                  </span>
+                ))}]
+              </span>
             </div>
-            <div className="landing-side landing-side-new">
-              <h4>ObjectiveAI Swarm</h4>
-              <pre>{`input → swarm → vote
-
-// Agent 1:  [0.62, 0.35, 0.03]
-// Agent 2:  [0.40, 0.55, 0.05]
-// Agent 3:  [0.71, 0.20, 0.09]
-// weighted: [0.58, 0.36, 0.06]`}</pre>
-            </div>
-          </div>
-          <div className="landing-score-area">
-            <div className="landing-score-label">
-              Swarm result &mdash; &ldquo;Is this PR ready to merge?&rdquo;
-            </div>
-            <div className="landing-scores">
-              {[
-                { label: "ship it", pct: 58, value: "0.58", high: true },
-                { label: "needs tests", pct: 36, value: "0.36", high: false },
-                { label: "rethink", pct: 6, value: "0.06", high: false },
-              ].map((s) => (
-                <div key={s.label} className="landing-score-row">
-                  <span className="landing-score-name">{s.label}</span>
-                  <div className="landing-score-track">
-                    <div
-                      className={`landing-score-fill ${s.high ? "high" : "low"}`}
-                      style={{ width: `${s.pct}%` }}
-                    />
-                  </div>
-                  <span className="landing-score-val">{s.value}</span>
-                </div>
+            <div className="lp-final-labels">
+              {round.responses.map((r, i) => (
+                <span key={i} className="lp-final-label-item">
+                  {r}: {(round.finalScores[i] * 100).toFixed(0)}%
+                </span>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
 
-      {/* ─── How It Works ─── */}
-      <section className="landing-section">
-        <div className="landing-section-label">How It Works</div>
-        <h2 className="landing-h2">Three concepts. That&apos;s it.</h2>
+// ---------------------------------------------------------------------------
+// Install command with copy
+// ---------------------------------------------------------------------------
 
-        <div className="landing-steps">
-          {[
-            {
-              num: "1",
-              title: "Swarms vote",
-              desc: "Configure a swarm of agents \u2014 different models, tools, MCP servers, system prompts. Each agent votes independently using its full logprob distribution, not just a sampled answer.",
-            },
-            {
-              num: "2",
-              title: "Functions score",
-              desc: (
-                <>
-                  A Function is a composable scoring pipeline: data in, score
-                  out. Defined as a <code>function.json</code> on GitHub,
-                  referenced by <code>owner/repo</code>. Agents can also invent functions
-                  on their own &mdash; recursively.
-                </>
-              ),
-            },
-            {
-              num: "3",
-              title: "Profiles learn",
-              desc: "Give ObjectiveAI a dataset of inputs and expected outputs. It optimizes the swarm weights to match \u2014 producing a Profile you can reuse. No fine-tuning. Just better voting.",
-            },
-          ].map((step) => (
-            <div key={step.num} className="landing-step">
-              <div className="landing-step-num">{step.num}</div>
-              <div>
-                <h3>{step.title}</h3>
-                <p>{step.desc}</p>
+function InstallCmd() {
+  const [copied, setCopied] = useState(false);
+  const cmd = "npm install objectiveai";
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(cmd);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* noop */
+    }
+  };
+
+  return (
+    <button className="lp-install" onClick={copy} title="Copy to clipboard">
+      <span className="lp-install-symbol">$</span>
+      <span className="lp-install-text">{cmd}</span>
+      <span className="lp-install-copy">{copied ? "copied" : "copy"}</span>
+    </button>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Email capture
+// ---------------------------------------------------------------------------
+
+function EmailCapture() {
+  const [email, setEmail] = useState("");
+  const [state, setState] = useState<
+    "idle" | "sending" | "done" | "exists" | "error"
+  >("idle");
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setState("sending");
+    try {
+      const res = await fetch("/api/early-access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const data = await res.json();
+      if (data.status === "already_subscribed") {
+        setState("exists");
+      } else if (res.ok) {
+        setState("done");
+      } else {
+        setState("error");
+      }
+    } catch {
+      setState("error");
+    }
+  };
+
+  if (state === "done") {
+    return <div className="lp-email-ok">noted. you are on the list.</div>;
+  }
+  if (state === "exists") {
+    return <div className="lp-email-ok">already subscribed.</div>;
+  }
+
+  return (
+    <form className="lp-email-form" onSubmit={submit}>
+      <input
+        type="email"
+        className="lp-email-input"
+        placeholder="email for updates"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        disabled={state === "sending"}
+      />
+      <button
+        type="submit"
+        className="lp-email-btn"
+        disabled={state === "sending" || !email.trim()}
+      >
+        {state === "sending" ? "..." : "notify me"}
+      </button>
+      {state === "error" && (
+        <span className="lp-email-err">something went wrong</span>
+      )}
+    </form>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Page
+// ---------------------------------------------------------------------------
+
+export default function Home() {
+  return (
+    <div className="landing">
+      <div className="lp-root">
+        {/* The machine. This IS the page. */}
+        <section className="lp-stage">
+          <div className="lp-stage-left">
+            <div className="lp-identity">
+              <h1 className="lp-wordmark">ObjectiveAI</h1>
+              <p className="lp-descriptor">
+                Ensemble LLM scoring pipelines as an API
+              </p>
+            </div>
+
+            <div className="lp-prose">
+              <p>
+                Multiple models vote with weighted probabilities.
+                Votes converge into structured numeric scores.
+                Not text. Not chat. Numbers you can trust.
+              </p>
+            </div>
+
+            <div className="lp-actions">
+              <InstallCmd />
+              <div className="lp-action-links">
+                <Link href="/api/auth/signin" className="lp-link-primary">
+                  sign in
+                </Link>
+                <Link href="/functions" className="lp-link-secondary">
+                  browse functions
+                </Link>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* ─── Use Cases ─── */}
-      <section className="landing-section">
-        <div className="landing-section-label">Use Cases</div>
-        <h2 className="landing-h2">Judgment where it matters.</h2>
-
-        <div className="landing-usecases">
-          {[
-            {
-              label: "Agent Judgment",
-              desc: "Your agent is about to make a decision. A swarm evaluates it and returns a confidence-scored verdict before anything ships.",
-            },
-            {
-              label: "Eval Pipelines",
-              desc: "Score outputs with a swarm instead of a single judge. Confidence intervals, not coin flips.",
-            },
-            {
-              label: "Content Moderation",
-              desc: "Multi-agent consensus on safety. Know when agents disagree \u2014 that\u2019s where the edge cases live.",
-            },
-            {
-              label: "Function Invention",
-              desc: "Agents invent scoring functions recursively, spawning sub-agents to build sub-functions. Judgment that builds itself.",
-            },
-          ].map((uc) => (
-            <div key={uc.label} className="landing-usecase">
-              <div className="landing-uc-label">{uc.label}</div>
-              {uc.desc}
+            <div className="lp-email-section">
+              <EmailCapture />
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
 
-      {/* ─── Browse ─── */}
-      <section className="landing-section">
-        <div className="landing-section-label">Browse</div>
-        <h2 className="landing-h2">Functions invented by agents.</h2>
-        <p className="landing-p">
-          Every function is open, forkable, and callable via the API.
-          See what agents have built.
-        </p>
-        <div className="landing-browse-link">
-          <Link href="/functions" className="landing-cta-btn secondary">
-            Browse functions &rarr;
-          </Link>
-        </div>
-      </section>
+          <div className="lp-stage-right">
+            <VotingTerminal />
+          </div>
+        </section>
 
-      {/* ─── Bottom CTA ─── */}
-      <section className="landing-bottom-cta">
-        <h2 className="landing-bottom-cta-headline">
-          Start building with ObjectiveAI
-        </h2>
-        <div className="landing-bottom-cta-block">
-          <PromptBlock variant="compact" />
-        </div>
-        <div className="landing-cta-links">
-          <Link href="/functions" className="landing-cta-btn secondary">
-            Browse functions
-          </Link>
-        </div>
-      </section>
+        {/* Concept strip: the vocabulary of the system */}
+        <section className="lp-concepts">
+          <div className="lp-concept">
+            <span className="lp-concept-name">swarm</span>
+            <span className="lp-concept-desc">
+              a group of agents — different models, prompts, tools — that vote independently
+            </span>
+          </div>
+          <div className="lp-concept">
+            <span className="lp-concept-name">vector completion</span>
+            <span className="lp-concept-desc">
+              the core primitive. produces score vectors, not text. each agent votes, weights combine, returns a probability distribution
+            </span>
+          </div>
+          <div className="lp-concept">
+            <span className="lp-concept-name">function</span>
+            <span className="lp-concept-desc">
+              a composable scoring pipeline. data in, score out. hosted on GitHub as function.json
+            </span>
+          </div>
+          <div className="lp-concept">
+            <span className="lp-concept-name">profile</span>
+            <span className="lp-concept-desc">
+              learned weights that optimize how a swarm votes. trained, not configured
+            </span>
+          </div>
+        </section>
+
+        {/* The API call. Show the code. */}
+        <section className="lp-code-section">
+          <div className="lp-code-block">
+            <div className="lp-code-header">
+              <span className="lp-code-lang">typescript</span>
+            </div>
+            <pre className="lp-code-pre"><code>{`import ObjectiveAI from "objectiveai";
+
+const client = new ObjectiveAI({ apiKey });
+
+const result = await client.functions.executions.create(
+  "your-org/content-quality",
+  {
+    input: { text: document.body },
+    profile: "production",
+  }
+);
+
+// result.output.scores
+// → [0.58, 0.36, 0.06]
+// → { publish: 0.58, revise: 0.36, reject: 0.06 }`}</code></pre>
+          </div>
+        </section>
+
+        <footer className="lp-footer">
+          <span className="lp-footer-text">
+            api.objective-ai.io
+          </span>
+        </footer>
+      </div>
     </div>
   );
 }

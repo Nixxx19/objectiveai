@@ -6,45 +6,42 @@ Next.js / React App Router. Maya's primary workspace.
 
 ## Visual Direction
 
-Dark, authoritative, brutalist-influenced. Infrastructure aesthetic, not consumer. "Supreme Court energy but not scary." Warm carbon + dusty copper palette — serious but not cold. Grain as a medium, not a filter.
+**Copper Spectrum. Material Honesty. Every Element Load-Bearing.**
 
-**The landing page is the reference implementation.** When building or updating any page, match the landing page's palette, typography feel, and spacing — not the older site-wide CSS variables. Landing page uses agent/swarm terminology throughout.
+Dark, infrastructure-first. "Agentic collective judgment harness" energy. All colors derive from copper (~hue 20°). Backgrounds are copper cooled to charcoal. Text is copper lightened to cream. Borders are copper at low alpha. Nothing arbitrary.
+
+No pills. No decorative borders. No shadows at rest on cards. Whitespace is the separator, not lines. Typography-driven hierarchy: JetBrains Mono for system/data/nav, Space Grotesk for headlines and body.
 
 ---
 
 ## Design System
 
-### Landing Page Palette (the canonical direction)
+### Copper Spectrum (unified palette — no split between landing and site)
 
-The landing page scopes its own vars on `.landing` in `globals.css`. These represent where we're going:
+| Variable | Value | Role |
+|----------|-------|------|
+| `--page-bg` | `#0b0908` | Copper cooled to near-black |
+| `--card-bg` | `#131010` | Copper ash — cards, surfaces |
+| `--bg-code` | `#0f0c0b` | Deeper than page — terminals, code |
+| `--border` | `rgba(180,140,120, 0.07)` | Copper at 7% — ghost border |
+| `--border-bright` | `rgba(180,140,120, 0.12)` | Copper at 12% |
+| `--border-brightest` | `rgba(180,140,120, 0.22)` | Copper at 22% — focus/active |
+| `--text` | `#ddd4c8` | Light copper — body |
+| `--text-dim` | `#9a8d80` | Mid copper — secondary |
+| `--text-muted` | `#5c5248` | Dark copper — labels |
+| `--text-heading` | `#f0e8de` | Near-white copper — headings |
+| `--accent` | `#c0a090` | Full copper — brand moments only |
 
-| Variable | Value | Usage |
-|----------|-------|-------|
-| `--l-bg` | `#0d0b09` | Page background — warm carbon |
-| `--l-bg-raised` | `#151310` | Cards, raised surfaces |
-| `--l-bg-code` | `#110f0c` | Terminal blocks, code backgrounds |
-| `--l-border` | `#221f1a` | Subtle dividers |
-| `--l-border-bright` | `#2e2a25` | More visible borders |
-| `--l-text` | `#e8e2da` | Primary body text |
-| `--l-text-dim` | `#958c82` | Secondary text, descriptions |
-| `--l-text-muted` | `#5a534a` | Labels, captions, lowest emphasis |
-| `--l-text-heading` | `#f7f2eb` | Headings, emphasis, strong |
-| `--l-accent` | `#c0a090` | Accent — dusty copper (status, links, highlights) |
+### Key Principles
 
-### Site-Wide CSS Variables (legacy, still used by browse/detail pages)
+- **Cards are borderless.** Background shift (`--card-bg` on `--page-bg`) IS the container. No border at rest. Hover brightens to `#171312`.
+- **Buttons use `box-shadow: inset` not `border`.** Filled and ghost buttons have identical dimensions. No optical size mismatch.
+- **Radius: 2-4px.** `--radius-sm: 2px` for tags/chips, `--radius-md: 3px` for buttons/inputs, `--radius-lg: 4px` for cards, `--radius-xl: 6px` for terminals.
+- **No pills anywhere.** No `border-radius: 50px`, no `border-radius: 50%` on icon buttons. Square icon buttons with 4px radius.
+- **No divider lines.** Sections separated by whitespace (72-100px). No `border-top`, no `<hr>`.
+- **Copper reserved for brand moments.** CTAs, terminal prompt, status badge, active states. Not on every interactive element.
 
-| Variable | Value | Notes |
-|----------|-------|-------|
-| `--page-bg` | `#1B1B1B` | Lighter than landing — will migrate to `#0a0a0a` |
-| `--text` | `#EDEDF2` | |
-| `--text-muted` | `#999999` | |
-| `--card-bg` | `#252525` | |
-| `--accent` | `#EDEDF2` | Monochrome accent |
-| `--border` | `rgba(237, 237, 242, 0.1)` | |
-
-As pages get touched, migrate them toward the landing palette. Don't do a bulk swap — update per-page as work happens.
-
-### Score Colors (unchanged, used everywhere)
+### Score Colors (functional, unchanged)
 
 | Variable | Value | Usage |
 |----------|-------|-------|
@@ -53,26 +50,30 @@ As pages get touched, migrate them toward the landing palette. Don't do a bulk s
 | `--color-danger` | `rgb(249, 115, 22)` | Scores ≥ 15% |
 | `--color-error` | `rgb(239, 68, 68)` | Scores < 15% |
 
-### Retired — Do Not Use in New Work
+### Retired — Do Not Use
 
-- Purple (`#6B5CFF`) — was v1 accent. Still in `design-tokens.css`. Do not propagate.
-- Green (`#3fb950`) — was landing page accent (GitHub green). Replaced by copper `#c0a090`.
-- `design-tokens.css` light theme vars — overridden by `globals.css`, ignore them.
+- Purple (`#6B5CFF`) — v1 accent. Dead.
+- Green (`#3fb950`) — v2 accent. Dead.
+- Flat hex borders (`#221f1a`, `#2e2a25`) — replaced by copper-at-alpha.
+- `border-radius: 50px` / `50%` — no pills.
+- `design-tokens.css` light theme vars — overridden, ignore.
 
 ### Typography
 
-| Context | Font | CSS Variable |
-|---------|------|-------------|
-| Body | Space Grotesk | `--font-space-grotesk` |
-| Monospace | JetBrains Mono | `--font-jetbrains-mono` |
+Two voices, one system:
 
-Both fonts loaded via `next/font/google` in `layout.tsx`. Migrate remaining pages component-by-component as they're touched — don't bulk swap.
+| Voice | Font | Usage |
+|-------|------|-------|
+| System | JetBrains Mono | Nav links, card titles, tags, labels, metadata, buttons, terminal, section labels |
+| Human | Space Grotesk | Headlines, body paragraphs, descriptions |
+
+Both loaded via `next/font/google` in `layout.tsx`.
 
 ### Spacing & Shape
 
-- Landing page uses `6px`–`8px` border-radius on cards/terminals, `3px`–`4px` on small elements (code tags, copy buttons, score bars)
-- Older site-wide vars (`--radius-sm: 8px`, `--radius-md: 12px`) are larger — new work should trend smaller and tighter
-- Landing sections: generous vertical spacing (80–100px padding-bottom)
+- Radius scale: `2px` (tags) → `3px` (buttons, inputs) → `4px` (cards, icon buttons) → `6px` (terminals)
+- Section spacing: 80-100px vertical padding. Whitespace IS the separator.
+- Button sizing: `box-shadow: inset 0 0 0 1px` for all borders — prevents optical size mismatch between filled and ghost variants
 
 ---
 
@@ -80,7 +81,7 @@ Both fonts loaded via `next/font/google` in `layout.tsx`. Migrate remaining page
 
 **ALL styles go in `globals.css`.** No separate CSS files per component.
 
-**Class naming:** `.pillBtn`, `.card`, `.tag`, `.site-nav`, `.landing-*`, `.promptBlock*`
+**Class naming:** `.pillBtn` (primary button), `.pillBtnGhost` (ghost button), `.card`, `.tag`, `.filterChip`, `.iconBtn`, `.site-nav`, `.landing-*`, `.promptBlock*`
 
 ### Hard Rules
 - **NO Tailwind.** The project does not use Tailwind.

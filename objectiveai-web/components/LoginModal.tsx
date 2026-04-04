@@ -147,12 +147,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         aria-labelledby="login-modal-title"
         style={{
           background: "var(--card-bg)",
-          borderRadius: "24px",
-          border: "1px solid var(--border)",
+          borderRadius: "6px",
           padding: "40px 36px 32px",
           width: "100%",
           maxWidth: "400px",
-          boxShadow: "0 16px 48px rgba(0, 0, 0, 0.2)",
           position: "relative",
         }}
       >
@@ -173,7 +171,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            borderRadius: "50%",
+            borderRadius: "4px",
             color: "var(--text-muted)",
             transition: "background 0.15s ease, color 0.15s ease",
           }}
@@ -229,8 +227,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           <div
             style={{
               background: "rgba(239, 68, 68, 0.1)",
-              border: "1px solid rgba(239, 68, 68, 0.3)",
-              borderRadius: "12px",
+              borderRadius: "4px",
               padding: "12px 16px",
               marginBottom: "20px",
               fontSize: "14px",
@@ -254,32 +251,30 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 onMouseLeave={() => setHoveredProvider(null)}
                 style={{
                   width: "100%",
-                  padding: "14px 20px",
-                  fontSize: "15px",
+                  padding: "10px 16px",
+                  fontSize: "13px",
                   fontWeight: 500,
-                  color: isHovered ? "var(--accent)" : "var(--text)",
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  color: isHovered ? "var(--text-heading)" : "var(--text)",
                   background: isHovered
-                    ? "rgba(107, 92, 255, 0.05)"
+                    ? "var(--accent-lighter)"
                     : "var(--page-bg)",
-                  border: `1px solid ${isHovered ? "var(--accent)" : "var(--border)"}`,
-                  borderRadius: "50px",
+                  border: "none",
+                  boxShadow: `inset 0 0 0 1px ${isHovered ? "var(--border-focus)" : "var(--border)"}`,
+                  borderRadius: "3px",
                   cursor: isAuthenticating ? "not-allowed" : "pointer",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  gap: "12px",
+                  gap: "10px",
                   transition: "all 0.15s ease",
-                  fontFamily: "inherit",
                   opacity: isAuthenticating ? 0.6 : 1,
                 }}
               >
                 <span
                   style={{
                     display: "flex",
-                    color:
-                      isHovered && provider.id !== "google"
-                        ? "var(--accent)"
-                        : undefined,
+                    color: undefined,
                   }}
                 >
                   {provider.icon}

@@ -235,10 +235,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           }}>
             <div style={{
               background: 'var(--card-bg)',
-              borderRadius: '12px',
+              borderRadius: '4px',
               padding: '12px 16px',
-              boxShadow: '0 4px 20px var(--shadow)',
-              border: '1px solid var(--border)',
               display: 'flex',
               flexDirection: 'column',
               gap: '12px',
@@ -257,10 +255,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                       onClick={() => setMobileMenuOpen(false)}
                       style={{
                         display: 'block',
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        color: 'var(--text)',
-                        opacity: 0.6,
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        fontFamily: 'var(--font-jetbrains-mono), monospace',
+                        color: 'var(--text-muted)',
                         textDecoration: 'none',
                       }}
                     >
@@ -273,10 +271,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                       onClick={() => setMobileMenuOpen(false)}
                       style={{
                         display: 'block',
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        color: 'var(--text)',
-                        opacity: isActive(link.href) ? 1 : 0.6,
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        fontFamily: 'var(--font-jetbrains-mono), monospace',
+                        color: isActive(link.href) ? 'var(--text)' : 'var(--text-muted)',
                         textDecoration: 'none',
                       }}
                     >
@@ -291,10 +289,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   onClick={() => setMobileMenuOpen(false)}
                   style={{
                     display: 'block',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: 'var(--text)',
-                    opacity: 0.6,
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    fontFamily: 'var(--font-jetbrains-mono), monospace',
+                    color: 'var(--text-muted)',
                     textDecoration: 'none',
                   }}
                 >
@@ -304,20 +302,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <a
                 href="/api/auth/signin"
                 onClick={() => setMobileMenuOpen(false)}
+                className="site-nav-cta"
                 style={{
-                  padding: '8px 16px',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  fontFamily: 'var(--font-geist-mono), monospace',
-                  color: 'var(--btn-solid-text)',
-                  background: 'var(--btn-solid-bg)',
-                  border: 'none',
-                  borderRadius: '20px',
                   textDecoration: 'none',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px',
                   alignSelf: 'flex-start',
                 }}
               >

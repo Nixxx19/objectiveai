@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ObjectiveAI — Design Evolution Exploration</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ══════════════════════════════════════
+     THE COPPER SPECTRUM
+     Everything derived from one hue (~20°)
+     ══════════════════════════════════════ */
+  :root {
+    /* Current palette (for comparison) */
+    --old-bg: #0d0b09;
+    --old-raised: #151310;
+    --old-border: #221f1a;
+    --old-border-b: #2e2a25;
+    --old-text: #e8e2da;
+    --old-dim: #958c82;
+    --old-muted: #5a534a;
+    --old-heading: #f7f2eb;
+    --old-accent: #c0a090;
+
+    /* ── NEW: Copper Spectrum ──
+       Every value lives on the same hue line (~20°).
+       Backgrounds, text, borders — all copper at different temperatures. */
+    --bg:          #0b0908;       /* Copper cooled to near-black */
+    --bg-raised:   #131010;       /* Copper ash — cards, surfaces */
+    --bg-inset:    #0f0c0b;       /* Deeper than bg — code, terminals */
+    --border:      rgba(180,140,120, 0.07);  /* Copper at 7% — the ghost border */
+    --border-vis:  rgba(180,140,120, 0.12);  /* Copper at 12% — when you need to see it */
+    --border-focus: rgba(180,140,120, 0.22); /* Copper at 22% — focus/active */
+    --text:        #ddd4c8;       /* Light copper — body text */
+    --dim:         #9a8d80;       /* Mid copper — secondary */
+    --muted:       #5c5248;       /* Dark copper — tertiary, labels */
+    --heading:     #f0e8de;       /* Near-white copper — headings */
+    --accent:      #c0a090;       /* Full copper — the brand moment */
+    --accent-hover:#d4b4a2;       /* Warmed copper — hover */
+    --accent-bg:   rgba(192,160,144, 0.06);  /* Copper wash — subtle backgrounds */
+
+    /* Score colors — unchanged, functional */
+    --score-green: rgb(34, 197, 94);
+    --score-yellow: rgb(234, 179, 8);
+    --score-orange: rgb(249, 115, 22);
+    --score-red: rgb(239, 68, 68);
+  }
+
+  body {
+    background: #060504;
+    color: var(--text);
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    line-height: 1.6;
+  }
+
+  /* ── Page header ── */
+  .page-header {
+    padding: 48px 32px 32px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .page-header h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .page-header p {
+    font-size: 14px;
+    color: var(--dim);
+    max-width: 600px;
+    line-height: 1.65;
+  }
+
+  /* ── Section scaffolding ── */
+  .section {
+    padding: 72px 32px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .section h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--heading);
+    margin-bottom: 8px;
+  }
+  .section > p {
+    font-size: 13px;
+    color: var(--dim);
+    margin-bottom: 32px;
+    max-width: 560px;
+    line-height: 1.6;
+  }
+
+  /* No dividers. Whitespace is the separator. */
+
+  /* ── Grids ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+  .option-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .rec { color: var(--accent); }
+
+  @media (max-width: 768px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  }
+
+  /* ══════════════════════════════════════
+     1. THE PALETTE — COPPER SPECTRUM
+     ══════════════════════════════════════ */
+  .palette-row {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 24px;
+  }
+  .palette-swatch {
+    flex: 1;
+    height: 56px;
+    display: flex;
+    align-items: flex-end;
+    padding: 6px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--dim);
+    border-radius: 2px;
+  }
+  .palette-swatch.dark-label { color: var(--muted); }
+  .palette-swatch.light-label { color: rgba(11,9,8,0.6); }
+
+  .palette-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 16px;
+  }
+  .palette-set {
+    padding: 20px;
+    border-radius: 4px;
+  }
+  .palette-set h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+  }
+  .palette-set.old { background: var(--old-bg); }
+  .palette-set.old h3 { color: var(--old-muted); }
+  .palette-set.new { background: var(--bg); }
+  .palette-set.new h3 { color: var(--muted); }
+
+  .swatch-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .swatch-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .swatch-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .swatch-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    flex: 1;
+  }
+  .swatch-hex {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  /* ══════════════════════════════════════
+     2. CARDS — BORDERLESS VS BORDERED
+     ══════════════════════════════════════ */
+  .card-demo {
+    padding: 20px;
+    border-radius: 4px;
+  }
+  .card-demo h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--heading);
+    margin-bottom: 6px;
+  }
+  .card-demo p {
+    font-size: 12px;
+    color: var(--dim);
+    line-height: 1.5;
+  }
+  .card-demo .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 12px;
+    display: flex;
+    gap: 12px;
+  }
+
+  /* A — Borderless (bg shift only) */
+  .card-borderless {
+    background: var(--bg-raised);
+    transition: background 0.15s;
+  }
+  .card-borderless:hover {
+    background: #171312;
+  }
+
+  /* B — Ghost border (copper at 7%, inset shadow so no size difference) */
+  .card-ghost-border {
+    background: var(--bg-raised);
+    box-shadow: inset 0 0 0 1px var(--border);
+    transition: box-shadow 0.15s;
+  }
+  .card-ghost-border:hover {
+    box-shadow: inset 0 0 0 1px var(--border-vis);
+  }
+
+  /* C — Bottom accent (copper line at bottom) */
+  .card-bottom-accent {
+    background: var(--bg-raised);
+    border-bottom: 2px solid var(--border-vis);
+    transition: border-color 0.15s;
+  }
+  .card-bottom-accent:hover {
+    border-bottom-color: var(--accent);
+  }
+
+  /* D — Inset (darker than page) */
+  .card-inset-new {
+    background: var(--bg-inset);
+    transition: background 0.15s;
+  }
+  .card-inset-new:hover {
+    background: #110e0c;
+  }
+
+  /* ══════════════════════════════════════
+     3. BUTTONS — SHARPER, PURPOSEFUL
+     ══════════════════════════════════════ */
+  .btn-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 20px; }
+
+  .btn {
+    padding: 10px 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* All buttons use box-shadow instead of border.
+     This means filled and ghost have identical box dimensions —
+     no optical size mismatch. The "border" doesn't eat into padding. */
+
+  /* Primary — copper fill, 3px radius */
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 1px transparent; /* same dimension as ghost */
+  }
+  .btn-primary:hover {
+    background: var(--accent-hover);
+  }
+
+  /* Ghost — inset shadow border, transparent bg */
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    box-shadow: inset 0 0 0 1px var(--border-vis);
+    border-radius: 3px;
+  }
+  .btn-ghost:hover {
+    box-shadow: inset 0 0 0 1px var(--border-focus);
+    color: var(--heading);
+  }
+
+  /* Quiet — no border, text only */
+  .btn-quiet {
+    background: transparent;
+    color: var(--dim);
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 1px transparent; /* same dimension */
+  }
+  .btn-quiet:hover {
+    color: var(--text);
+    background: var(--accent-bg);
+  }
+
+  /* ── OLD buttons for comparison ── */
+  .btn-old-pill {
+    padding: 12px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    background: var(--old-accent);
+    color: var(--old-bg);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .btn-old-ghost {
+    padding: 10px 24px;
+    font-size: 14px;
+    background: var(--old-raised);
+    border: 1px solid var(--old-border);
+    border-radius: 6px;
+    color: var(--old-text);
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .btn-old-provider {
+    padding: 14px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    border: 1px solid var(--old-border);
+    border-radius: 50px;
+    background: var(--old-bg);
+    color: var(--old-text);
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    width: 260px;
+    text-align: center;
+  }
+
+  /* ══════════════════════════════════════
+     4. TYPOGRAPHY — MONO-FORWARD
+     ══════════════════════════════════════ */
+  .type-demo {
+    margin-bottom: 24px;
+  }
+  .type-demo .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  /* ══════════════════════════════════════
+     5. TERMINALS & CODE
+     ══════════════════════════════════════ */
+  .terminal {
+    background: var(--bg-inset);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    background: rgba(180,140,120, 0.03);
+  }
+  .terminal-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(180,140,120, 0.12);
+  }
+  .terminal-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-left: 6px;
+  }
+  .terminal-body {
+    padding: 16px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .terminal-prompt { color: var(--accent); user-select: none; }
+  .terminal-cmd { color: var(--heading); }
+  .terminal-comment { color: var(--muted); font-size: 11px; }
+  .terminal-output { color: var(--dim); }
+
+  /* ── Old terminal for comparison ── */
+  .terminal-old {
+    background: #110f0c;
+    border: 1px solid #2e2a25;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .terminal-old .terminal-bar {
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid #221f1a;
+  }
+  .terminal-old .terminal-dot {
+    width: 10px;
+    height: 10px;
+    background: #2e2a25;
+  }
+
+  /* ══════════════════════════════════════
+     6. TAGS & BADGES
+     ══════════════════════════════════════ */
+  .tag-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+
+  .tag-new {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.02em;
+  }
+  .tag-copper {
+    background: var(--accent-bg);
+    color: var(--accent);
+  }
+  .tag-neutral {
+    background: rgba(180,140,120, 0.04);
+    color: var(--dim);
+  }
+  .tag-live {
+    background: rgba(34, 197, 94, 0.08);
+    color: rgb(34, 197, 94);
+  }
+
+  .badge-new {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+  }
+  .badge-new::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse-new 2s ease-in-out infinite;
+  }
+  @keyframes pulse-new {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+
+  /* Old tags for comparison */
+  .tag-old {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: rgba(192,160,144,0.10);
+    color: var(--old-accent);
+  }
+  .tag-old-secondary {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #221f1a;
+    color: #5a534a;
+  }
+
+  /* ══════════════════════════════════════
+     7. FUNCTION CARD — FULL RETHINK
+     ══════════════════════════════════════ */
+  .fn-card-new {
+    background: var(--bg-raised);
+    border-radius: 4px;
+    padding: 20px;
+    transition: background 0.15s;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    color: inherit;
+  }
+  .fn-card-new:hover {
+    background: #171312;
+  }
+  .fn-card-new .fn-owner {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .fn-card-new .fn-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--heading);
+    margin-bottom: 8px;
+  }
+  .fn-card-new .fn-desc {
+    font-size: 13px;
+    color: var(--dim);
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+  .fn-card-new .fn-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  /* Old function card for comparison */
+  .fn-card-old {
+    background: #151310;
+    border: 1px solid #221f1a;
+    border-radius: 6px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    color: inherit;
+  }
+  .fn-card-old .fn-owner {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #5a534a;
+    margin-bottom: 6px;
+  }
+  .fn-card-old .fn-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #f7f2eb;
+    margin-bottom: 8px;
+  }
+  .fn-card-old .fn-desc {
+    font-size: 13px;
+    color: #958c82;
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+  .fn-card-old .fn-cta {
+    color: #c0a090;
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  /* ══════════════════════════════════════
+     8. INPUTS & FORMS
+     ══════════════════════════════════════ */
+  .input-new {
+    width: 100%;
+    padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--heading);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .input-new::placeholder {
+    color: var(--muted);
+  }
+  .input-new:focus {
+    border-color: var(--border-focus);
+  }
+
+  .input-old {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 15px;
+    background: #151310;
+    border: 1px solid #221f1a;
+    border-radius: 6px;
+    color: #e8e2da;
+    outline: none;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .input-old:focus {
+    border-color: #c0a090;
+    box-shadow: 0 0 0 2px rgba(192,160,144,0.10);
+  }
+
+  /* ══════════════════════════════════════
+     9. SEARCH BAR
+     ══════════════════════════════════════ */
+  .search-new {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    background: var(--bg-raised);
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    transition: border-color 0.15s;
+  }
+  .search-new:focus-within {
+    border-color: var(--border-focus);
+  }
+  .search-new svg {
+    width: 16px;
+    height: 16px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .search-new input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+  }
+  .search-new input::placeholder {
+    color: var(--muted);
+  }
+
+  /* ══════════════════════════════════════
+     10. FILTER CHIPS
+     ══════════════════════════════════════ */
+  .chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+
+  .chip-new {
+    padding: 6px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--dim);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .chip-new:hover {
+    border-color: var(--border-vis);
+    color: var(--text);
+  }
+  .chip-new.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+
+  .chip-old {
+    padding: 8px 14px;
+    font-size: 13px;
+    background: transparent;
+    border: 1px solid #221f1a;
+    border-radius: 4px;
+    color: #e8e2da;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .chip-old.active {
+    background: #c0a090;
+    border-color: #c0a090;
+    color: #0d0b09;
+  }
+
+  /* ══════════════════════════════════════
+     11. MODAL
+     ══════════════════════════════════════ */
+  .modal-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+  .modal-backdrop {
+    background: rgba(11,9,8, 0.7);
+    backdrop-filter: blur(4px);
+    padding: 32px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 340px;
+  }
+
+  .modal-new {
+    background: var(--bg-raised);
+    border-radius: 6px;
+    padding: 32px 28px;
+    width: 100%;
+    max-width: 320px;
+  }
+  .modal-new h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--heading);
+    margin-bottom: 6px;
+  }
+  .modal-new p {
+    font-size: 13px;
+    color: var(--dim);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .modal-new .modal-provider {
+    width: 100%;
+    padding: 10px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    cursor: pointer;
+    text-align: center;
+    margin-bottom: 8px;
+    transition: border-color 0.15s;
+  }
+  .modal-new .modal-provider:hover {
+    border-color: var(--border-focus);
+  }
+
+  .modal-old {
+    background: #151310;
+    border-radius: 24px;
+    border: 1px solid #221f1a;
+    padding: 40px 36px 32px;
+    width: 100%;
+    max-width: 320px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.2);
+  }
+  .modal-old h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #f7f2eb;
+    margin-bottom: 6px;
+  }
+  .modal-old p {
+    font-size: 14px;
+    color: #958c82;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .modal-old .modal-provider-old {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    border: 1px solid #221f1a;
+    border-radius: 50px;
+    background: #0d0b09;
+    color: #e8e2da;
+    cursor: pointer;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  /* ══════════════════════════════════════
+     12. NAV
+     ══════════════════════════════════════ */
+  .nav-demo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+  .nav-new {
+    background: var(--bg);
+  }
+  .nav-new .nav-logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--heading);
+    letter-spacing: -0.02em;
+  }
+  .nav-new .nav-links {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+  .nav-new .nav-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.15s;
+    cursor: pointer;
+  }
+  .nav-new .nav-link:hover {
+    color: var(--text);
+  }
+
+  /* ══════════════════════════════════════
+     13. SCORE BARS (unchanged)
+     ══════════════════════════════════════ */
+  .score-area {
+    background: var(--bg-inset);
+    border-radius: 4px;
+    padding: 16px 20px;
+    margin-top: 16px;
+  }
+  .score-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+  .score-name { width: 80px; color: var(--dim); }
+  .score-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(180,140,120,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .score-fill {
+    height: 100%;
+    border-radius: 2px;
+  }
+  .score-fill.green { background: var(--score-green); }
+  .score-fill.low { background: var(--muted); }
+  .score-val { color: var(--dim); width: 32px; text-align: right; }
+
+  /* ══════════════════════════════════════
+     14. HERO MOCKUP
+     ══════════════════════════════════════ */
+  .hero-mockup {
+    padding: 80px 32px 60px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .hero-mockup .badge-new {
+    margin-bottom: 12px;
+  }
+  .hero-descriptor {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .hero-h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(36px, 5.5vw, 52px);
+    font-weight: 700;
+    color: var(--heading);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+  .hero-sub {
+    font-size: 15px;
+    color: var(--dim);
+    line-height: 1.65;
+    max-width: 480px;
+    margin-bottom: 28px;
+  }
+  .hero-sub strong { color: var(--text); font-weight: 500; }
+  .hero-ctas {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .hero-proof {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .hero-proof a {
+    color: var(--dim);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border-vis);
+    transition: color 0.15s;
+  }
+  .hero-proof a:hover {
+    color: var(--text);
+  }
+
+  /* ══════════════════════════════════════
+     15. STEP INDICATORS
+     ══════════════════════════════════════ */
+  .step-new {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+  .step-num-new {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-bg);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .step-content h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--heading);
+    margin-bottom: 4px;
+  }
+  .step-content p {
+    font-size: 13px;
+    color: var(--dim);
+    line-height: 1.55;
+  }
+
+  /* ══════════════════════════════════════
+     16. USE CASE CARDS
+     ══════════════════════════════════════ */
+  .usecase-new {
+    padding: 16px;
+    background: var(--bg-raised);
+    border-radius: 4px;
+    transition: background 0.15s;
+  }
+  .usecase-new:hover {
+    background: #171312;
+  }
+  .usecase-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--heading);
+    margin-bottom: 6px;
+  }
+  .usecase-desc {
+    font-size: 13px;
+    color: var(--dim);
+    line-height: 1.5;
+  }
+
+  /* ══════════════════════════════════════
+     COMPARISON HELPERS
+     ══════════════════════════════════════ */
+  .vs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  .vs-side {
+    min-width: 0;
+  }
+  .vs-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .vs-label.now { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════════════════ -->
+<div class="page-header">
+  <h1>Design Evolution</h1>
+  <p>Breaking free from border-driven composition, one-note copper, and the old pill/round vocabulary. Everything on the copper spectrum. Side-by-side where it matters.</p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     1. THE PALETTE
+     ═══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">01 — Palette</div>
+  <h2>The Copper Spectrum</h2>
+  <p>Every value on the same hue line (~20&deg;). Backgrounds are copper cooled to charcoal. Text is copper lightened to cream. Borders are copper at low alpha. Nothing arbitrary.</p>
+
+  <!-- Spectrum strip -->
+  <div class="palette-row">
+    <div class="palette-swatch dark-label" style="background: var(--bg);">bg</div>
+    <div class="palette-swatch dark-label" style="background: var(--bg-inset);">inset</div>
+    <div class="palette-swatch dark-label" style="background: var(--bg-raised);">raised</div>
+    <div class="palette-swatch dark-label" style="background: #1a1614;">border zone</div>
+    <div class="palette-swatch dark-label" style="background: var(--muted); color: #0b0908;">muted</div>
+    <div class="palette-swatch dark-label" style="background: var(--dim); color: #0b0908;">dim</div>
+    <div class="palette-swatch light-label" style="background: var(--accent);">accent</div>
+    <div class="palette-swatch light-label" style="background: var(--text);">text</div>
+    <div class="palette-swatch light-label" style="background: var(--heading);">heading</div>
+  </div>
+
+  <!-- Side-by-side -->
+  <div class="palette-compare">
+    <div class="palette-set old">
+      <h3>Current</h3>
+      <div class="swatch-list">
+        <div class="swatch-item">
+          <div class="swatch-dot" style="background: #0d0b09;"></div>
+          <span class="swatch-name">Background</span>
+          <span class="swatch-hex">#0d0b09</span>
+        </div>
+        <div class="swatch-item">
+          <div class="swatch-dot" style="background: #151310;"></div>
+          <span class="swatch-name">Cards</span>
+          <span class="swatch-hex">#151310</span>
+        </div>
+        <div class="swatch-item">
+          <div class="swatch-dot" style="background: #221f1a; border: 1px solid #333;"></div>
+          <span class="swatch-name">Border</span>
+          <span class="swatch-hex">#221f1a</span>
+        </div>
+        <div class="swatch-item">
+          <div class="swatch-dot" style="background: #5a534a;"></div>
+          <span class="swatch-name">Muted</span>
+          <span class="swatch-hex">#5a534a</span>
+        </div>
+        <div class="swatch-item">
+          <div class="swatch-dot" style="background: #958c82;"></div>
+          <span class="swatch-name">Dim</span>
+          <span class="swatch-hex">#958c82</span>
+        </div>
+        <div class="swatch-item">
+          <div class="swatch-dot" style="background: #e8e2da;"></div>
+          <span class="swatch-name">Text</span>
+          <span class="swatch-hex">#e8e2da</span>
+        </div>
+        <div class="swatch-item">
+          <div class="swatch-dot" style="background: #f7f2eb;"></div>
+          <span class="swatch-name">Heading</span>
+          <span class="swatch-hex">#f7f2eb</span>
+        </div>
+        <div class="swatch-item">
+          <div class="swatch-dot" style="background: #c0a090;"></div>
+          <span class="swatch-name">Accent</span>
+          <span class="swatch-hex">#c0a090</span>
+        </div>
+      </div>
+    </div>
+    <div class="palette-set new">
+      <h3>Proposed — Copper Spectrum</h3>
+      <div class="swatch-list">
+        <div class="swatch-item">
+          <div class="swatch-dot" style="background: #0b0908;"></div>
+          <span class="swatch-name">Background</span>
+          <span class="swatch-hex">#0b0908</span>
+        </div>
+        <div class="swatch-item">
+          <div class="swatch-dot" style="background: #131010;"></div>
+          <span class="swatch-name">Cards</span>
+          <span class="swatch-hex">#131010</span>
+        </div>
+        <div class="swatch-item">
+          <div class="swatch-dot" style="background: rgba(180,140,120,0.12); border: 1px solid rgba(180,140,120,0.12);"></div>
+          <span class="swatch-name">Border</span>
+          <span class="swatch-hex">copper @ 7-12%</span>
+        </div>
+        <div class="swatch-item">
+          <div class="swatch-dot" style="background: #5c5248;"></div>
+          <span class="swatch-name">Muted</span>
+          <span class="swatch-hex">#5c5248</span>
+        </div>
+        <div class="swatch-item">
+          <div class="swatch-dot" style="background: #9a8d80;"></div>
+          <span class="swatch-name">Dim</span>
+          <span class="swatch-hex">#9a8d80</span>
+        </div>
+        <div class="swatch-item">
+          <div class="swatch-dot" style="background: #ddd4c8;"></div>
+          <span class="swatch-name">Text</span>
+          <span class="swatch-hex">#ddd4c8</span>
+        </div>
+        <div class="swatch-item">
+          <div class="swatch-dot" style="background: #f0e8de;"></div>
+          <span class="swatch-name">Heading</span>
+          <span class="swatch-hex">#f0e8de</span>
+        </div>
+        <div class="swatch-item">
+          <div class="swatch-dot" style="background: #c0a090;"></div>
+          <span class="swatch-name">Accent</span>
+          <span class="swatch-hex">#c0a090</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-size: 12px; color: var(--muted); margin-top: -16px;">Key shift: borders become copper-at-alpha instead of flat hex. Text warms toward copper. Everything on one hue line.</p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     2. CARDS
+     ═══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">02 — Cards</div>
+  <h2>Killing the border reflex</h2>
+  <p>Four treatments. The first two avoid borders entirely — the background shift IS the boundary. Third uses a bottom accent for directional flow. Fourth is inset (darker than page).</p>
+
+  <div class="grid-2" style="margin-bottom: 32px;">
+    <div>
+      <div class="option-tag rec">Recommended</div>
+      <div class="card-demo card-borderless" style="border-radius: 4px;">
+        <h4>Borderless</h4>
+        <p>Background shift only. No border at rest, no border on hover. The raised surface is the container.</p>
+        <div class="meta"><span>scoring</span><span>3 agents</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="option-tag">Ghost border</div>
+      <div class="card-demo card-ghost-border" style="border-radius: 4px;">
+        <h4>Ghost Border</h4>
+        <p>Copper at 7% — barely visible. Hover brightens to 12%. For when you need containment but don't want lines.</p>
+        <div class="meta"><span>ranking</span><span>5 agents</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="option-tag">Bottom accent</div>
+      <div class="card-demo card-bottom-accent" style="border-radius: 4px;">
+        <h4>Bottom Accent</h4>
+        <p>One directional line, not a box. Copper bottom border that brightens on hover. Implies flow/direction.</p>
+        <div class="meta"><span>composite</span><span>8 agents</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="option-tag">Inset</div>
+      <div class="card-demo card-inset-new" style="border-radius: 4px;">
+        <h4>Inset</h4>
+        <p>Darker than page. For code, terminals, data displays. The opposite of "raised."</p>
+        <div class="meta"><span>terminal</span><span>output</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- vs current -->
+  <div class="vs-label">Current card for comparison</div>
+  <div style="max-width: 400px;">
+    <div class="fn-card-old">
+      <div class="fn-owner">objectiveai / sentiment-scorer</div>
+      <div class="fn-name">Sentiment Scorer</div>
+      <div class="fn-desc">Multi-agent sentiment analysis with confidence intervals.</div>
+      <div class="fn-cta">Run function &rarr;</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     3. BUTTONS
+     ═══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">03 — Buttons</div>
+  <h2>Sharper. Mono. No pills.</h2>
+  <p>3px radius, JetBrains Mono, three tiers. Primary = copper fill. Ghost = border. Quiet = text only. No more .pillBtn naming.</p>
+
+  <div class="vs">
+    <div class="vs-side">
+      <div class="vs-label now">Proposed</div>
+      <div class="btn-row">
+        <button class="btn btn-primary">Sign up free</button>
+        <button class="btn btn-ghost">Browse functions</button>
+        <button class="btn btn-quiet">Learn more</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" style="padding: 8px 16px; font-size: 12px;">Subscribe</button>
+        <button class="btn btn-ghost" style="padding: 8px 16px; font-size: 12px;">Copy</button>
+      </div>
+    </div>
+    <div class="vs-side">
+      <div class="vs-label">Current</div>
+      <div class="btn-row">
+        <button class="btn-old-pill">Sign up free</button>
+        <button class="btn-old-ghost">Browse functions</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn-old-provider">Continue with GitHub</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     4. TYPOGRAPHY
+     ═══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">04 — Typography</div>
+  <h2>Mono-forward hierarchy</h2>
+  <p>JetBrains Mono for labels, nav, card titles, metadata. Space Grotesk for headlines and body paragraphs. The monospace IS the brand voice.</p>
+
+  <div style="margin-bottom: 32px;">
+    <div class="type-demo">
+      <div class="label">Section label — JetBrains Mono 10px uppercase</div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent);">How It Works</div>
+    </div>
+    <div class="type-demo">
+      <div class="label">Section heading — Space Grotesk 24px 600</div>
+      <div style="font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 600; color: var(--heading);">Three concepts. That's it.</div>
+    </div>
+    <div class="type-demo">
+      <div class="label">Card title — JetBrains Mono 13px 600</div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--heading);">objectiveai/sentiment-scorer</div>
+    </div>
+    <div class="type-demo">
+      <div class="label">Body — Space Grotesk 14px 400</div>
+      <div style="font-family: 'Space Grotesk', sans-serif; font-size: 14px; color: var(--dim); line-height: 1.6; max-width: 480px;">ObjectiveAI captures the full probability distribution from every agent in the swarm using logprobs — then combines them with learned weights.</div>
+    </div>
+    <div class="type-demo">
+      <div class="label">Metadata — JetBrains Mono 10px</div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted);">3 agents &middot; scoring &middot; v2.1.0</div>
+    </div>
+    <div class="type-demo">
+      <div class="label">Nav link — JetBrains Mono 12px 500</div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; color: var(--muted);">Functions &nbsp;&nbsp; Docs &nbsp;&nbsp; Team</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     5. TERMINAL
+     ═══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">05 — Terminals</div>
+  <h2>Cleaner, no border box</h2>
+  <p>Terminal blocks use the inset background (darker than page). No border wrapping the whole thing. The bar uses a copper wash at 3%. Dots shrink to 8px.</p>
+
+  <div class="vs">
+    <div class="vs-side">
+      <div class="vs-label now">Proposed</div>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <span class="terminal-dot"></span>
+          <span class="terminal-dot"></span>
+          <span class="terminal-dot"></span>
+          <span class="terminal-title">terminal</span>
+        </div>
+        <div class="terminal-body">
+          <div class="terminal-comment"># install the SDK</div>
+          <div><span class="terminal-prompt">$ </span><span class="terminal-cmd">npm install objectiveai</span></div>
+          <div style="margin-top: 8px;"><span class="terminal-prompt">$ </span><span class="terminal-cmd">oai run sentiment-scorer --input "this product is excellent"</span></div>
+          <div class="terminal-output" style="margin-top: 4px;">  score: 0.87 &middot; confidence: 0.92 &middot; agents: 3/3 agreed</div>
+        </div>
+      </div>
+    </div>
+    <div class="vs-side">
+      <div class="vs-label">Current</div>
+      <div class="terminal-old">
+        <div class="terminal-bar">
+          <span class="terminal-dot"></span>
+          <span class="terminal-dot"></span>
+          <span class="terminal-dot"></span>
+          <span class="terminal-title">terminal</span>
+        </div>
+        <div class="terminal-body">
+          <div class="terminal-comment"># install the SDK</div>
+          <div><span class="terminal-prompt">$ </span><span class="terminal-cmd">npm install objectiveai</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     6. TAGS & CHIPS
+     ═══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">06 — Tags & Chips</div>
+  <h2>Tighter, flatter, 2px radius</h2>
+  <p>Tags at 2px radius, smaller padding. Filter chips also 2px — the active state stays copper fill but sharper.</p>
+
+  <div class="vs">
+    <div class="vs-side">
+      <div class="vs-label now">Proposed tags</div>
+      <div class="tag-row">
+        <span class="tag-new tag-copper">scoring</span>
+        <span class="tag-new tag-neutral">ranking</span>
+        <span class="tag-new tag-neutral">composite</span>
+        <span class="tag-new tag-live">live</span>
+      </div>
+      <div class="vs-label now" style="margin-top: 16px;">Proposed filter chips</div>
+      <div class="chip-row">
+        <span class="chip-new active">All</span>
+        <span class="chip-new">Scoring</span>
+        <span class="chip-new">Ranking</span>
+        <span class="chip-new">Composite</span>
+      </div>
+    </div>
+    <div class="vs-side">
+      <div class="vs-label">Current tags</div>
+      <div class="tag-row">
+        <span class="tag-old">scoring</span>
+        <span class="tag-old-secondary">ranking</span>
+        <span class="tag-old-secondary">composite</span>
+      </div>
+      <div class="vs-label" style="margin-top: 16px;">Current filter chips</div>
+      <div class="chip-row">
+        <span class="chip-old active">All</span>
+        <span class="chip-old">Scoring</span>
+        <span class="chip-old">Ranking</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     7. INPUTS & SEARCH
+     ═══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">07 — Inputs</div>
+  <h2>Inset bg, ghost border, mono</h2>
+  <p>Inputs use the inset background (darker than page). Ghost border that strengthens on focus. No copper glow ring — just a clean border-color shift.</p>
+
+  <div class="vs">
+    <div class="vs-side">
+      <div class="vs-label now">Proposed</div>
+      <input class="input-new" placeholder="Search functions..." />
+      <div style="margin-top: 12px;">
+        <div class="search-new">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input placeholder="Search functions..." />
+        </div>
+      </div>
+    </div>
+    <div class="vs-side">
+      <div class="vs-label">Current</div>
+      <input class="input-old" placeholder="Search functions..." />
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     8. MODAL
+     ═══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">08 — Modal</div>
+  <h2>No pills. No 24px radius. No 50px buttons.</h2>
+  <p>6px radius on the modal. 3px on provider buttons. No pill shapes anywhere.</p>
+
+  <div class="modal-compare">
+    <div>
+      <div class="vs-label now">Proposed</div>
+      <div class="modal-backdrop">
+        <div class="modal-new">
+          <h3>Sign in</h3>
+          <p>Choose a provider to continue.</p>
+          <button class="modal-provider">Continue with GitHub</button>
+          <button class="modal-provider">Continue with Google</button>
+          <button class="modal-provider">Continue with X</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="vs-label">Current</div>
+      <div class="modal-backdrop" style="background: rgba(0,0,0,0.6);">
+        <div class="modal-old">
+          <h3>Sign in</h3>
+          <p>Choose a provider to continue.</p>
+          <button class="modal-provider-old">Continue with GitHub</button>
+          <button class="modal-provider-old">Continue with Google</button>
+          <button class="modal-provider-old">Continue with X</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     9. FUNCTION CARD — FULL COMPARISON
+     ═══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">09 — Function Cards</div>
+  <h2>Browse grid rethink</h2>
+  <p>Borderless cards, mono titles, tighter tags, no "Run function &rarr;" CTA (the card itself is the click target).</p>
+
+  <div class="vs">
+    <div class="vs-side">
+      <div class="vs-label now">Proposed</div>
+      <div class="fn-card-new">
+        <div class="fn-owner">objectiveai / sentiment-scorer</div>
+        <div class="fn-name">sentiment-scorer</div>
+        <div class="fn-desc">Multi-agent sentiment analysis with confidence intervals from logprob distributions.</div>
+        <div class="fn-tags">
+          <span class="tag-new tag-copper">scoring</span>
+          <span class="tag-new tag-neutral">nlp</span>
+          <span class="tag-new tag-neutral">3 agents</span>
+        </div>
+      </div>
+      <div class="fn-card-new" style="margin-top: 8px;">
+        <div class="fn-owner">objectiveai / code-review-quality</div>
+        <div class="fn-name">code-review-quality</div>
+        <div class="fn-desc">Evaluates code review thoroughness across multiple dimensions with weighted agent consensus.</div>
+        <div class="fn-tags">
+          <span class="tag-new tag-copper">composite</span>
+          <span class="tag-new tag-neutral">dev-tools</span>
+          <span class="tag-new tag-neutral">5 agents</span>
+        </div>
+      </div>
+    </div>
+    <div class="vs-side">
+      <div class="vs-label">Current</div>
+      <div class="fn-card-old">
+        <div class="fn-owner">objectiveai / sentiment-scorer</div>
+        <div class="fn-name">Sentiment Scorer</div>
+        <div class="fn-desc">Multi-agent sentiment analysis with confidence intervals from logprob distributions.</div>
+        <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+          <span class="tag-old">scoring</span>
+          <span class="tag-old-secondary">nlp</span>
+        </div>
+        <div class="fn-cta">Run function &rarr;</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     10. NAV
+     ═══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">10 — Navigation</div>
+  <h2>Full mono nav</h2>
+  <p>All nav links in JetBrains Mono. Logo text in mono. CTA button sharp (3px). Cleaner, more system-like.</p>
+
+  <div class="nav-demo nav-new">
+    <div class="nav-logo">ObjectiveAI</div>
+    <div class="nav-links">
+      <a class="nav-link">Functions</a>
+      <a class="nav-link">Docs</a>
+      <a class="nav-link">Team</a>
+      <button class="btn btn-primary" style="padding: 7px 14px; font-size: 11px;">Sign up</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     11. HERO MOCKUP
+     ═══════════════════════════════════════════ -->
+<div class="section" style="padding-bottom: 0;">
+  <div class="section-label">11 — Hero Mockup</div>
+  <h2>Putting it together</h2>
+  <p>The hero section with the new palette, typography, buttons, and terminal. No borders on the terminal. Mono nav above. Copper used sparingly — badge, primary CTA, terminal prompt.</p>
+</div>
+
+<div style="background: var(--bg); padding-bottom: 60px;">
+  <!-- Nav -->
+  <div style="max-width: 900px; margin: 0 auto; padding: 0 32px;">
+    <div class="nav-demo nav-new" style="margin-bottom: 0; padding-top: 20px;">
+      <div class="nav-logo">ObjectiveAI</div>
+      <div class="nav-links">
+        <a class="nav-link">Functions</a>
+        <a class="nav-link">Docs</a>
+        <a class="nav-link">Team</a>
+        <button class="btn btn-primary" style="padding: 7px 14px; font-size: 11px;">Sign up</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero-mockup">
+    <div class="badge-new">API + CLI live</div>
+
+    <div class="hero-descriptor">Your agent's advisory board</div>
+
+    <h1 class="hero-h1">
+      Your agent doesn't<br>
+      have to decide<br>
+      alone.
+    </h1>
+
+    <p class="hero-sub">
+      ObjectiveAI runs <strong>swarms of AI agents that vote</strong> on your
+      inputs and return confidence-scored outputs. Not vibes —
+      <strong>probability distributions</strong> from every agent's actual
+      logprobs. One API call. Collective judgment.
+    </p>
+
+    <div class="hero-ctas">
+      <button class="btn btn-primary">Sign up free</button>
+      <button class="btn btn-ghost">Browse functions</button>
+    </div>
+
+    <p class="hero-proof">
+      <a href="#">20+ scoring functions live and callable</a> — invented by our agents.
+    </p>
+
+    <!-- Terminal -->
+    <div class="terminal" style="margin-top: 32px;">
+      <div class="terminal-bar">
+        <span class="terminal-dot"></span>
+        <span class="terminal-dot"></span>
+        <span class="terminal-dot"></span>
+        <span class="terminal-title">terminal</span>
+      </div>
+      <div class="terminal-body">
+        <div class="terminal-comment"># install the SDK</div>
+        <div><span class="terminal-prompt">$ </span><span class="terminal-cmd">npm install objectiveai</span></div>
+      </div>
+    </div>
+
+    <p style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 12px;">
+      Also available for <span style="color: var(--dim);">Rust</span>, <span style="color: var(--dim);">Go</span>, and <span style="color: var(--dim);">Python</span>
+    </p>
+
+    <!-- Score display -->
+    <div class="score-area" style="margin-top: 40px;">
+      <div class="score-label">Swarm result — "Is this PR ready to merge?"</div>
+      <div class="score-row">
+        <span class="score-name">ship it</span>
+        <div class="score-track"><div class="score-fill green" style="width: 58%;"></div></div>
+        <span class="score-val">0.58</span>
+      </div>
+      <div class="score-row">
+        <span class="score-name">needs tests</span>
+        <div class="score-track"><div class="score-fill low" style="width: 36%;"></div></div>
+        <span class="score-val">0.36</span>
+      </div>
+      <div class="score-row">
+        <span class="score-name">rethink</span>
+        <div class="score-track"><div class="score-fill low" style="width: 6%;"></div></div>
+        <span class="score-val">0.06</span>
+      </div>
+    </div>
+
+    <!-- Steps -->
+    <div style="margin-top: 48px;">
+      <div class="step-new">
+        <div class="step-num-new">1</div>
+        <div class="step-content">
+          <h3>Swarms vote</h3>
+          <p>Configure a swarm of agents — different models, tools, MCP servers, system prompts. Each agent votes independently using its full logprob distribution.</p>
+        </div>
+      </div>
+      <div class="step-new">
+        <div class="step-num-new">2</div>
+        <div class="step-content">
+          <h3>Functions score</h3>
+          <p>A Function is a composable scoring pipeline: data in, score out. Defined as a function.json on GitHub, referenced by owner/repo.</p>
+        </div>
+      </div>
+      <div class="step-new">
+        <div class="step-num-new">3</div>
+        <div class="step-content">
+          <h3>Profiles learn</h3>
+          <p>Give ObjectiveAI a dataset of inputs and expected outputs. It optimizes the swarm weights to match — producing a Profile you can reuse.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Use cases -->
+    <div class="grid-2" style="margin-top: 40px;">
+      <div class="usecase-new">
+        <div class="usecase-label">Agent Judgment</div>
+        <div class="usecase-desc">Your agent is about to make a decision. A swarm evaluates it and returns a confidence-scored verdict before anything ships.</div>
+      </div>
+      <div class="usecase-new">
+        <div class="usecase-label">Eval Pipelines</div>
+        <div class="usecase-desc">Score outputs with a swarm instead of a single judge. Confidence intervals, not coin flips.</div>
+      </div>
+      <div class="usecase-new">
+        <div class="usecase-label">Content Moderation</div>
+        <div class="usecase-desc">Multi-agent consensus on safety. Know when agents disagree — that's where the edge cases live.</div>
+      </div>
+      <div class="usecase-new">
+        <div class="usecase-label">Function Invention</div>
+        <div class="usecase-desc">Agents invent scoring functions recursively, spawning sub-agents to build sub-functions. Judgment that builds itself.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer note -->
+<div class="section" style="padding-top: 32px; padding-bottom: 48px;">
+  <p style="font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 500px;">
+    <strong style="color: var(--dim);">What changed:</strong> Palette unified on copper spectrum. Borders replaced with background layering. Typography pushed mono-forward. Shapes sharpened to 2-4px radius. Pills eliminated. Copper reserved for brand moments instead of everything.
+  </p>
+</div>
+
+</body>
+</html>
