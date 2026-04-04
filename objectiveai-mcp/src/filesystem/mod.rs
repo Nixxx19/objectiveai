@@ -4,7 +4,7 @@ mod glob_search;
 mod grep_search;
 mod read_file;
 mod state;
-mod tools;
+pub mod tools;
 mod util;
 mod write_file;
 
