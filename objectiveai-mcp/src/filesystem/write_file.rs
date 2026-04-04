@@ -41,9 +41,28 @@ pub fn write_file(
                 let current_mtime = util::get_file_mtime_ms(&absolute_path)
                     .map_err(|e| format!("Failed to get file mtime: {e}"))?;
                 if current_mtime > entry.timestamp {
-                    return Err(
-                        "File has been modified since read, either by the user or by a linter. Read it again before attempting to write it.".into()
-                    );
+                    // Windows content-comparison fallback for full reads
+                    let is_full_read = !entry.is_partial_view && entry.offset.is_none() && entry.limit.is_none();
+                    if is_full_read {
+                        if let Ok(current_content) = std::fs::read_to_string(&absolute_path) {
+                            let normalized_current = util::normalize_line_endings(&current_content);
+                            let normalized_cached = util::normalize_line_endings(&entry.content);
+                            if normalized_current != normalized_cached {
+                                return Err(
+                                    "File has been modified since read, either by the user or by a linter. Read it again before attempting to write it.".into()
+                                );
+                            }
+                            // Content unchanged despite mtime bump — allow write
+                        } else {
+                            return Err(
+                                "File has been modified since read, either by the user or by a linter. Read it again before attempting to write it.".into()
+                            );
+                        }
+                    } else {
+                        return Err(
+                            "File has been modified since read, either by the user or by a linter. Read it again before attempting to write it.".into()
+                        );
+                    }
                 }
             }
         }

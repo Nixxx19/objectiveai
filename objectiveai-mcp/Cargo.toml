@@ -5,11 +5,12 @@ edition = "2024"
 
 [features]
 default = []
-filesystem = ["glob", "regex", "walkdir", "serde_json", "pathdiff"]
+filesystem = ["glob", "regex", "walkdir", "serde_json", "pathdiff", "indexmap"]
 
 [dependencies]
 anyhow = "1.0.102"
 glob = { version = "0.3", optional = true }
+indexmap = { version = "2", optional = true }
 pathdiff = { version = "0.2", optional = true }
 regex = { version = "1", optional = true }
 rmcp = { version = "0.16.0", features = ["server", "transport-io"] }

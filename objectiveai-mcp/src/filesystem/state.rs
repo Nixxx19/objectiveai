@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use indexmap::IndexMap;
 use std::path::Path;
 use std::sync::{Arc, RwLock};
 
@@ -43,13 +43,13 @@ fn normalize_cache_key(path: &str) -> String {
 /// Limited to MAX_CACHE_ENTRIES entries; oldest entry is evicted when full.
 #[derive(Debug, Clone)]
 pub struct FileStateCache {
-    inner: Arc<RwLock<HashMap<String, FileStateEntry>>>,
+    inner: Arc<RwLock<IndexMap<String, FileStateEntry>>>,
 }
 
 impl FileStateCache {
     pub fn new() -> Self {
         Self {
-            inner: Arc::new(RwLock::new(HashMap::new())),
+            inner: Arc::new(RwLock::new(IndexMap::new())),
         }
     }
 
@@ -66,7 +66,7 @@ impl FileStateCache {
         // Evict an entry if we're at capacity and this is a new key
         if inner.len() >= MAX_CACHE_ENTRIES && !inner.contains_key(&key) {
             if let Some(first_key) = inner.keys().next().cloned() {
-                inner.remove(&first_key);
+                inner.shift_remove(&first_key);
             }
         }
         inner.insert(key, entry);

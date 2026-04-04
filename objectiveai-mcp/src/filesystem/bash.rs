@@ -10,6 +10,10 @@ pub struct BashOutput {
     pub stdout: String,
     pub stderr: String,
     pub interrupted: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub exit_code: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none", rename = "returnCodeInterpretation")]
+    pub return_code_interpretation: Option<String>,
 }
 
 /// Per-session shell state. Tracks CWD, shell snapshot, session env vars,
@@ -105,8 +109,8 @@ pub async fn execute_bash(
     command: &str,
     timeout_ms: Option<u64>,
 ) -> Result<String, String> {
-    // Default 120s, max 600s
-    let timeout_ms = timeout_ms.unwrap_or(120_000).min(600_000);
+    // Default 30 minutes, no hard max
+    let timeout_ms = timeout_ms.unwrap_or(1_800_000);
     let timeout_duration = Duration::from_millis(timeout_ms);
 
     // Track tmux usage
@@ -131,13 +135,27 @@ pub async fn execute_bash(
         command_parts.push(format!("source {} 2>/dev/null || true", shell_quote(snap)));
     }
 
-    // 2. CD into saved CWD
-    command_parts.push(format!("cd {}", shell_quote(&cwd.to_string_lossy())));
+    // 2. Source session environment variables
+    let session_env = shell_state.get_session_env_vars();
+    if !session_env.is_empty() {
+        let exports: Vec<String> = session_env
+            .iter()
+            .map(|(k, v)| format!("export {}={}", k, shell_quote(v)))
+            .collect();
+        command_parts.push(exports.join("; "));
+    }
 
-    // 3. The user's command (wrapped in eval for alias expansion)
-    command_parts.push(format!("eval {}", shell_quote(command)));
+    // 3. Disable extended glob patterns (security hardening)
+    if shell_state.shell_path.contains("bash") {
+        command_parts.push("shopt -u extglob 2>/dev/null || true".to_string());
+    } else if shell_state.shell_path.contains("zsh") {
+        command_parts.push("setopt NO_EXTENDED_GLOB 2>/dev/null || true".to_string());
+    }
 
-    // 4. Save CWD after command execution
+    // 4. The user's command (wrapped in eval for alias expansion, stderr merged into stdout)
+    command_parts.push(format!("eval {} 2>&1", shell_quote(command)));
+
+    // 5. Save CWD after command execution
     let cwd_file = cwd_file_path();
     command_parts.push(format!("pwd -P >| {}", shell_quote(&cwd_file)));
 
@@ -164,6 +182,7 @@ pub async fn execute_bash(
 
     let mut cmd = tokio::process::Command::new(&shell_state.shell_path);
     cmd.args(&args)
+        .current_dir(&cwd)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
@@ -178,8 +197,18 @@ pub async fn execute_bash(
 
     let output = match tokio::time::timeout(timeout_duration, child.wait_with_output()).await {
         Ok(Ok(output)) => {
-            let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
-            let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
+            let stdout_raw = String::from_utf8_lossy(&output.stdout).into_owned();
+            let stderr_raw = String::from_utf8_lossy(&output.stderr).into_owned();
+
+            // Merge stderr into stdout (matches Claude Code behavior — stderr was
+            // redirected via 2>&1 in the command, but capture any residual here too)
+            let combined = if !stderr_raw.is_empty() && !stdout_raw.is_empty() {
+                format!("{}\n{}", stdout_raw, stderr_raw)
+            } else if !stderr_raw.is_empty() {
+                stderr_raw
+            } else {
+                stdout_raw
+            };
 
             // Read the saved CWD from the temp file
             if let Ok(new_cwd) = std::fs::read_to_string(&cwd_file) {
@@ -191,10 +220,21 @@ pub async fn execute_bash(
             // Clean up the CWD file
             let _ = std::fs::remove_file(&cwd_file);
 
+            let exit_code = output.status.code();
+            let return_code_interpretation = exit_code.and_then(|code| {
+                if code == 0 {
+                    None
+                } else {
+                    Some(format!("exit_code:{code}"))
+                }
+            });
+
             BashOutput {
-                stdout,
-                stderr,
+                stdout: combined,
+                stderr: String::new(),
                 interrupted: false,
+                exit_code,
+                return_code_interpretation,
             }
         }
         Ok(Err(e)) => return Err(format!("Command failed: {e}")),
@@ -202,6 +242,8 @@ pub async fn execute_bash(
             stdout: String::new(),
             stderr: format!("Command timed out after {timeout_ms}ms"),
             interrupted: true,
+            exit_code: None,
+            return_code_interpretation: None,
         },
     };
 

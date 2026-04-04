@@ -1,4 +1,3 @@
-use std::cmp::Reverse;
 use std::fs;
 use std::path::Path;
 use std::time::Instant;
@@ -39,12 +38,11 @@ pub fn glob_search(pattern: &str, path: Option<&str>) -> Result<String, String> 
         }
     }
 
-    // Sort by modification time, newest first
-    matches.sort_by_key(|path| {
-        fs::metadata(path)
-            .and_then(|m| m.modified())
-            .ok()
-            .map(Reverse)
+    // Sort by modification time, oldest first (ascending mtime)
+    matches.sort_by(|a, b| {
+        let a_mtime = fs::metadata(a).and_then(|m| m.modified()).ok();
+        let b_mtime = fs::metadata(b).and_then(|m| m.modified()).ok();
+        a_mtime.cmp(&b_mtime)
     });
 
     let truncated = matches.len() > 100;

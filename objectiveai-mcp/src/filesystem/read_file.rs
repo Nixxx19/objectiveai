@@ -1,6 +1,8 @@
 use super::state::{FileStateCache, FileStateEntry};
 use super::util;
 
+const MAX_READ_SIZE_BYTES: u64 = 10 * 1024 * 1024; // 10 MB
+
 #[derive(Debug, serde::Serialize)]
 pub struct TextFilePayload {
     #[serde(rename = "filePath")]
@@ -35,6 +37,17 @@ pub fn read_file(
     let absolute_path = util::normalize_path(path)
         .map_err(|e| format!("Failed to resolve path: {e}"))?;
     let absolute_path_str = absolute_path.to_string_lossy().to_string();
+
+    // Check file size before reading
+    let metadata = std::fs::metadata(&absolute_path)
+        .map_err(|e| format!("Failed to read file metadata: {e}"))?;
+    let file_size = metadata.len();
+    if file_size > MAX_READ_SIZE_BYTES {
+        return Err(format!(
+            "File is too large to read ({file_size} bytes, max 10MB). \
+             Consider reading specific line ranges with offset and limit."
+        ));
+    }
 
     let raw_content = std::fs::read_to_string(&absolute_path)
         .map_err(|e| format!("Failed to read file: {e}"))?;

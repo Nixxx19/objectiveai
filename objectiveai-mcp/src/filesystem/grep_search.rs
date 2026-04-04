@@ -1,4 +1,3 @@
-use std::cmp::Reverse;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -67,7 +66,11 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
         .output_mode
         .clone()
         .unwrap_or_else(|| "files_with_matches".into());
-    let context = input.context.or(input.context_short).unwrap_or(0);
+    let (ctx_before, ctx_after) = if let Some(c) = input.context.or(input.context_short) {
+        (c, c) // -C overrides both -B and -A
+    } else {
+        (input.before.unwrap_or(0), input.after.unwrap_or(0))
+    };
 
     let to_relative = |p: &Path| -> String {
         pathdiff::diff_paths(p, &base_path)
@@ -105,10 +108,23 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
 
         let lines: Vec<&str> = file_contents.lines().collect();
         let mut matched_lines = Vec::new();
-        for (index, line) in lines.iter().enumerate() {
-            if regex.is_match(line) {
+        if input.multiline.unwrap_or(false) {
+            // Match against full content, find all match positions
+            for mat in regex.find_iter(&file_contents) {
+                let start_byte = mat.start();
+                // Count newlines before match start to get line number
+                let line_num = file_contents[..start_byte].matches('\n').count();
+                if !matched_lines.contains(&line_num) {
+                    matched_lines.push(line_num);
+                }
                 total_matches += 1;
-                matched_lines.push(index);
+            }
+        } else {
+            for (index, line) in lines.iter().enumerate() {
+                if regex.is_match(line) {
+                    total_matches += 1;
+                    matched_lines.push(index);
+                }
             }
         }
 
@@ -125,8 +141,8 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
 
         if output_mode == "content" {
             for index in matched_lines {
-                let start = index.saturating_sub(input.before.unwrap_or(context));
-                let end = (index + input.after.unwrap_or(context) + 1).min(lines.len());
+                let start = index.saturating_sub(ctx_before);
+                let end = (index + ctx_after + 1).min(lines.len());
                 for (current, line) in lines.iter().enumerate().take(end).skip(start) {
                     let prefix = if input.line_numbers.unwrap_or(true) {
                         format!("{rel_path}:{}:", current + 1)
@@ -158,7 +174,14 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
 
     // For files_with_matches, sort by mtime (newest first) then extract names
     if output_mode == "files_with_matches" {
-        file_mtimes.sort_by_key(|(_, mtime)| mtime.map(Reverse));
+        file_mtimes.sort_by(|(_, a), (_, b)| {
+            match (b, a) {
+                (Some(b_time), Some(a_time)) => b_time.cmp(a_time), // newest first
+                (Some(_), None) => std::cmp::Ordering::Less,  // files with mtime before those without
+                (None, Some(_)) => std::cmp::Ordering::Greater,
+                (None, None) => std::cmp::Ordering::Equal,
+            }
+        });
         filenames = file_mtimes.into_iter().map(|(name, _)| name).collect();
     }
 
@@ -206,18 +229,69 @@ fn collect_search_files(base_path: &Path) -> std::io::Result<Vec<PathBuf>> {
     Ok(files)
 }
 
+fn type_to_extensions(file_type: &str) -> Option<&'static [&'static str]> {
+    match file_type {
+        "rust" | "rs" => Some(&["rs"]),
+        "python" | "py" => Some(&["py", "pyi", "pyw"]),
+        "javascript" | "js" => Some(&["js", "mjs", "cjs", "jsx"]),
+        "typescript" | "ts" => Some(&["ts", "mts", "cts", "tsx"]),
+        "java" => Some(&["java"]),
+        "c" => Some(&["c", "h"]),
+        "cpp" => Some(&["cpp", "cxx", "cc", "c++", "hpp", "hxx", "hh", "h++"]),
+        "go" => Some(&["go"]),
+        "ruby" | "rb" => Some(&["rb", "rbw"]),
+        "php" => Some(&["php", "php3", "php4", "php5", "phtml"]),
+        "swift" => Some(&["swift"]),
+        "kotlin" | "kt" => Some(&["kt", "kts"]),
+        "scala" => Some(&["scala", "sc"]),
+        "r" => Some(&["r", "R", "Rmd"]),
+        "shell" | "sh" | "bash" => Some(&["sh", "bash", "zsh", "fish"]),
+        "html" => Some(&["html", "htm", "xhtml"]),
+        "css" => Some(&["css", "scss", "sass", "less"]),
+        "json" => Some(&["json", "jsonl", "geojson"]),
+        "yaml" | "yml" => Some(&["yaml", "yml"]),
+        "toml" => Some(&["toml"]),
+        "xml" => Some(&["xml", "xsl", "xslt", "svg"]),
+        "markdown" | "md" => Some(&["md", "markdown", "mkd"]),
+        "sql" => Some(&["sql"]),
+        "lua" => Some(&["lua"]),
+        "perl" | "pl" => Some(&["pl", "pm", "t"]),
+        "haskell" | "hs" => Some(&["hs", "lhs"]),
+        "elixir" | "ex" => Some(&["ex", "exs"]),
+        "erlang" | "erl" => Some(&["erl", "hrl"]),
+        "clojure" | "clj" => Some(&["clj", "cljs", "cljc", "edn"]),
+        "dart" => Some(&["dart"]),
+        "zig" => Some(&["zig"]),
+        "nim" => Some(&["nim"]),
+        "protobuf" | "proto" => Some(&["proto"]),
+        "graphql" | "gql" => Some(&["graphql", "gql"]),
+        "dockerfile" => Some(&["Dockerfile"]),
+        "make" => Some(&["mk", "mak"]),
+        "cmake" => Some(&["cmake"]),
+        "tf" | "terraform" => Some(&["tf", "tfvars"]),
+        "csharp" | "cs" => Some(&["cs"]),
+        _ => None, // Fall back to treating it as a literal extension
+    }
+}
+
 fn matches_filters(path: &Path, glob_filter: Option<&Pattern>, file_type: Option<&str>) -> bool {
     if let Some(glob_filter) = glob_filter {
-        let path_string = path.to_string_lossy();
-        if !glob_filter.matches(&path_string) && !glob_filter.matches_path(path) {
+        if !glob_filter.matches_path(path) {
             return false;
         }
     }
 
     if let Some(file_type) = file_type {
-        let extension = path.extension().and_then(|e| e.to_str());
-        if extension != Some(file_type) {
-            return false;
+        let extension = path.extension().and_then(|e| e.to_str()).unwrap_or("");
+        if let Some(extensions) = type_to_extensions(file_type) {
+            if !extensions.iter().any(|ext| ext.eq_ignore_ascii_case(extension)) {
+                return false;
+            }
+        } else {
+            // Treat as literal extension
+            if !extension.eq_ignore_ascii_case(file_type) {
+                return false;
+            }
         }
     }
 
