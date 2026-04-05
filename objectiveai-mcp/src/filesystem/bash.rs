@@ -24,6 +24,8 @@ pub struct BashOutput {
     pub persisted_output_path: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", rename = "persistedOutputSize")]
     pub persisted_output_size: Option<u64>,
+    #[serde(rename = "noOutputExpected", skip_serializing_if = "std::ops::Not::not")]
+    pub no_output_expected: bool,
 }
 
 /// Per-session shell state. Tracks CWD, shell snapshot, session env vars,
@@ -295,13 +297,8 @@ pub async fn execute_bash(
     // Clean up the CWD file
     let _ = std::fs::remove_file(&cwd_file);
 
-    let return_code_interpretation = exit_code.and_then(|code| {
-        if code == 0 {
-            None
-        } else {
-            Some(format!("exit_code:{code}"))
-        }
-    });
+    let return_code_interpretation = interpret_return_code(command, exit_code);
+    let no_output_expected = is_silent_command(command);
 
     let is_image = detect_base64_image(&combined);
 
@@ -320,6 +317,7 @@ pub async fn execute_bash(
         is_image,
         persisted_output_path,
         persisted_output_size,
+        no_output_expected,
     })
 }
 
@@ -432,6 +430,93 @@ fn detect_base64_image(output: &str) -> bool {
     rest[i..].starts_with(b";base64,")
 }
 
+/// Command-specific return code interpretation matching Claude Code's commandSemantics.
+fn interpret_return_code(command: &str, exit_code: Option<i32>) -> Option<String> {
+    let code = exit_code?;
+    if code == 0 {
+        return None;
+    }
+
+    // Extract the base command (first word, ignoring env vars and prefixes)
+    let base_cmd = command
+        .split(&['|', '&', ';'][..])
+        .next()
+        .unwrap_or("")
+        .split_whitespace()
+        .find(|w| !w.contains('=')) // skip env var assignments like FOO=bar
+        .unwrap_or("");
+
+    match base_cmd {
+        // grep/rg: 0=matches, 1=no matches, 2+=error
+        "grep" | "rg" | "egrep" | "fgrep" => {
+            if code == 1 {
+                Some("No matches found".into())
+            } else {
+                Some(format!("exit_code:{code}"))
+            }
+        }
+        // diff: 0=identical, 1=differences found, 2+=error
+        "diff" => {
+            if code == 1 {
+                Some("Files differ".into())
+            } else {
+                Some(format!("exit_code:{code}"))
+            }
+        }
+        // find: 0=success, 1=some dirs inaccessible, 2+=error
+        "find" => {
+            if code == 1 {
+                Some("Some directories were inaccessible".into())
+            } else {
+                Some(format!("exit_code:{code}"))
+            }
+        }
+        // test/[: 0=true, 1=false, 2+=error
+        "test" | "[" => {
+            if code == 1 {
+                Some("Condition is false".into())
+            } else {
+                Some(format!("exit_code:{code}"))
+            }
+        }
+        _ => Some(format!("exit_code:{code}")),
+    }
+}
+
+/// Detect if a command is expected to produce no output (silent commands).
+fn is_silent_command(command: &str) -> bool {
+    const SILENT_COMMANDS: &[&str] = &[
+        "mv", "cp", "rm", "mkdir", "rmdir", "chmod", "chown", "chgrp",
+        "touch", "ln", "cd", "export", "unset", "wait",
+    ];
+    const NEUTRAL_COMMANDS: &[&str] = &["echo", "printf", "true", "false", ":"];
+
+    // Split on shell operators and check each command segment
+    let mut has_non_fallback = false;
+    let mut last_was_or = false;
+
+    for segment in command.split(&['|', '&', ';'][..]) {
+        let segment = segment.trim();
+        if segment.is_empty() {
+            continue;
+        }
+        let base_cmd = segment.split_whitespace().next().unwrap_or("");
+
+        // After || operator, neutral commands don't count
+        if last_was_or && NEUTRAL_COMMANDS.contains(&base_cmd) {
+            last_was_or = false;
+            continue;
+        }
+        last_was_or = segment.ends_with('|'); // rough heuristic for ||
+
+        has_non_fallback = true;
+        if !SILENT_COMMANDS.contains(&base_cmd) {
+            return false;
+        }
+    }
+    has_non_fallback
+}
+
 /// Simple shell quoting for a single argument.
 fn shell_quote(s: &str) -> String {
     format!("'{}'", s.replace('\'', "'\\''"))
@@ -442,8 +527,10 @@ fn shell_quote(s: &str) -> String {
 async fn create_shell_snapshot(shell_path: &str) -> Result<String, String> {
     let shell_type = if shell_path.contains("zsh") {
         "zsh"
-    } else {
+    } else if shell_path.contains("bash") {
         "bash"
+    } else {
+        "sh"
     };
 
     let config_file = get_config_file(shell_path);
