@@ -183,13 +183,30 @@ where
         let id = response_id(created);
         let object = Object::LaboratoryExecutionChunk;
 
+        // Send begin to viewer
+        self.viewer.send_laboratory_execution_begin(
+            ctx.clone(),
+            id.clone(),
+            request.clone(),
+        );
+
+        // Helper: send error to viewer and return it
+        let send_err = |e: super::Error| -> super::Error {
+            self.viewer.send_laboratory_execution_error(
+                ctx.clone(),
+                id.clone(),
+                objectiveai::error::ResponseError::from(&e),
+            );
+            e
+        };
+
         if request.builder_agents.is_empty() {
-            return Err(super::Error::NoBuilderAgents);
+            return Err(send_err(super::Error::NoBuilderAgents));
         }
 
         // Connect to Docker
         let docker = bollard::Docker::connect_with_local_defaults()
-            .map_err(|e| super::Error::Docker(e.to_string()))?;
+            .map_err(|e| send_err(super::Error::Docker(e.to_string())))?;
 
         let tar_bytes = mcp_tar(super::mcp_binary::MCP_BINARY);
 
@@ -212,7 +229,8 @@ where
                     .await
                     .map_err(|e| super::Error::AgentCompletion(e.to_string()))
             },
-        )?;
+        )
+        .map_err(&send_err)?;
 
         let mut inline_agents = Vec::with_capacity(request.builder_agents.len());
         for (i, agent_wf) in resolved_agents.into_iter().enumerate() {
@@ -316,6 +334,8 @@ where
             })
             .collect();
 
+        let viewer_client = self.viewer.clone();
+        let viewer_ctx = ctx.clone();
         let mut merged = futures::stream::select_all(streams);
         Ok(async_stream::stream! {
             let mut accumulated_usage = objectiveai::agent::completions::response::Usage::default();
@@ -330,10 +350,11 @@ where
                         accumulated_usage.push(u);
                     }
                 }
+                viewer_client.send_laboratory_execution_continue(viewer_ctx.clone(), chunk.clone());
                 yield chunk;
             }
             // Final chunk with accumulated usage
-            yield LaboratoryExecutionChunk {
+            let final_chunk = LaboratoryExecutionChunk {
                 id,
                 builders: Vec::new(),
                 evaluations: Vec::new(),
@@ -342,6 +363,8 @@ where
                 object,
                 usage: Some(accumulated_usage),
             };
+            viewer_client.send_laboratory_execution_continue(viewer_ctx.clone(), final_chunk.clone());
+            yield final_chunk;
         })
     }
 
