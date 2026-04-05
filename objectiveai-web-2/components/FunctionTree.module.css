@@ -365,12 +365,64 @@
   flex-shrink: 0;
 }
 
+/* ── Collapse toggle ── */
+
+.collapseToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 16px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--copper-mid);
+  background: var(--ground);
+  border: 1px solid var(--copper-dim);
+  border-radius: 2px;
+  cursor: pointer;
+  padding: 0 3px;
+  flex-shrink: 0;
+  transition: border-color 150ms, color 150ms;
+}
+
+.collapseToggle:hover {
+  border-color: var(--copper-mid);
+  color: var(--copper-hot);
+}
+
+/* ── Collapse controls ── */
+
+.collapseControls {
+  display: flex;
+  gap: 6px;
+  padding: 0 0 8px;
+}
+
+.collapseBtn {
+  background: none;
+  border: 1px solid var(--node-border);
+  border-radius: var(--radius);
+  color: var(--info-dim);
+  padding: 3px 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  cursor: pointer;
+  transition: border-color 150ms, color 150ms;
+}
+
+.collapseBtn:hover {
+  border-color: var(--copper-dim);
+  color: var(--copper-mid);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .connector,
   .node,
   .responseWithScore,
   .distSegment,
-  .controlBtn {
+  .controlBtn,
+  .collapseToggle,
+  .collapseBtn {
     transition: none;
   }
 }

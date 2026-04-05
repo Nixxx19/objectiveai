@@ -7,7 +7,7 @@ const NODE_GAP_X = 12;
 const NODE_GAP_Y = 20;
 
 /** Measure a node's width based on its content */
-function measureWidth(node: TreeNode): number {
+function measureWidth(node: TreeNode, hasCollapsibleChildren: boolean): number {
   if (node.kind === "vector-completion") {
     const responses = node.responses ?? [];
     // Cap each pill label at 10 chars for layout; render truncates with CSS
@@ -19,9 +19,10 @@ function measureWidth(node: TreeNode): number {
     // 56px = VOTE badge + vcTop padding + gaps
     return Math.max(150, 56 + pillsWidth);
   }
-  // Function node: label + score + type
+  // Function node: label + score + type + optional collapse toggle
   const typeLen = node.functionType?.length ?? 0;
-  return Math.max(120, node.label.length * 6.5 + typeLen * 5 + 52);
+  const toggleSpace = hasCollapsibleChildren ? 24 : 0;
+  return Math.max(120, node.label.length * 6.5 + typeLen * 5 + 52 + toggleSpace);
 }
 
 /** Cached node measurements computed once per layout */
@@ -36,20 +37,27 @@ interface NodeMetrics {
  * equal to the sum of its children spans (or its own width).
  * Nodes are centered above their children.
  */
-export function layoutTree(root: TreeNode): LayoutNode {
+export function layoutTree(root: TreeNode, collapsed?: Set<string>): LayoutNode {
   // Single bottom-up pass: compute widths, heights, and spans together
   const metrics = new Map<string, NodeMetrics>();
-  computeMetrics(root, metrics);
+  computeMetrics(root, metrics, collapsed);
 
   // Top-down pass: assign positions using cached metrics
-  return assignPositions(root, 0, 0, metrics);
+  return assignPositions(root, 0, 0, metrics, collapsed);
 }
 
-function computeMetrics(node: TreeNode, metrics: Map<string, NodeMetrics>): NodeMetrics {
-  const width = measureWidth(node);
+function computeMetrics(
+  node: TreeNode,
+  metrics: Map<string, NodeMetrics>,
+  collapsed?: Set<string>
+): NodeMetrics {
+  const isCollapsed = collapsed?.has(node.id) ?? false;
+  const hasCollapsibleChildren = node.kind === "function" && node.children.length > 0;
+  const width = measureWidth(node, hasCollapsibleChildren);
   const height = node.kind === "vector-completion" ? VC_NODE_H : NODE_H;
 
-  if (node.children.length === 0) {
+  // Collapsed or leaf: span is just the node width
+  if (node.children.length === 0 || isCollapsed) {
     const m = { width, height, span: width };
     metrics.set(node.id, m);
     return m;
@@ -57,7 +65,7 @@ function computeMetrics(node: TreeNode, metrics: Map<string, NodeMetrics>): Node
 
   let childrenSpan = 0;
   for (const child of node.children) {
-    childrenSpan += computeMetrics(child, metrics).span;
+    childrenSpan += computeMetrics(child, metrics, collapsed).span;
   }
   childrenSpan += (node.children.length - 1) * NODE_GAP_X;
 
@@ -70,9 +78,11 @@ function assignPositions(
   node: TreeNode,
   left: number,
   top: number,
-  metrics: Map<string, NodeMetrics>
+  metrics: Map<string, NodeMetrics>,
+  collapsed?: Set<string>
 ): LayoutNode {
   const { width, height, span } = metrics.get(node.id)!;
+  const isCollapsed = collapsed?.has(node.id) ?? false;
 
   // Center this node in its span
   const x = left + (span - width) / 2;
@@ -80,7 +90,7 @@ function assignPositions(
 
   const children: LayoutNode[] = [];
 
-  if (node.children.length > 0) {
+  if (node.children.length > 0 && !isCollapsed) {
     let totalChildrenSpan = 0;
     for (const child of node.children) {
       totalChildrenSpan += metrics.get(child.id)!.span;
@@ -92,7 +102,7 @@ function assignPositions(
 
     for (const child of node.children) {
       const childSpan = metrics.get(child.id)!.span;
-      children.push(assignPositions(child, childLeft, childTop, metrics));
+      children.push(assignPositions(child, childLeft, childTop, metrics, collapsed));
       childLeft += childSpan + NODE_GAP_X;
     }
   }

@@ -16,12 +16,52 @@ interface Props {
   selectedNodeId?: string;
 }
 
+/** Walk tree, collect IDs of function nodes with children at depth >= threshold */
+function collectCollapsible(node: TreeNode, depth: number, threshold: number, out: Set<string>) {
+  if (depth >= threshold && node.kind === "function" && node.children.length > 0) {
+    out.add(node.id);
+  }
+  for (const child of node.children) collectCollapsible(child, depth + 1, threshold, out);
+}
+
+/** Walk tree, collect all function node IDs that have children */
+function collectAllCollapsible(node: TreeNode, out: Set<string>) {
+  if (node.kind === "function" && node.children.length > 0) {
+    out.add(node.id);
+  }
+  for (const child of node.children) collectAllCollapsible(child, out);
+}
+
 export function FunctionTree({ name, root, registry, executions, onNodeClick, selectedNodeId }: Props) {
+  // Build the logical tree once (stable reference for collapse init)
+  const tree = useMemo(() => buildTree(name, root, registry), [name, root, registry]);
+
+  const [collapsed, setCollapsed] = useState<Set<string>>(() => {
+    const set = new Set<string>();
+    collectCollapsible(tree, 0, 2, set);
+    return set;
+  });
+
+  const toggleCollapse = useCallback((nodeId: string) => {
+    setCollapsed(prev => {
+      const next = new Set(prev);
+      if (next.has(nodeId)) next.delete(nodeId);
+      else next.add(nodeId);
+      return next;
+    });
+  }, []);
+
+  const expandAll = useCallback(() => setCollapsed(new Set()), []);
+  const collapseAll = useCallback(() => {
+    const set = new Set<string>();
+    collectCollapsible(tree, 0, 2, set);
+    return setCollapsed(set);
+  }, [tree]);
+
   const { layout, bounds } = useMemo(() => {
-    const tree = buildTree(name, root, registry);
-    const l = layoutTree(tree);
+    const l = layoutTree(tree, collapsed);
     return { layout: l, bounds: layoutBounds(l) };
-  }, [name, root, registry]);
+  }, [tree, collapsed]);
 
   const pad = 32;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -40,26 +80,41 @@ export function FunctionTree({ name, root, registry, executions, onNodeClick, se
     scrollToCenter();
   }, [scrollToCenter]);
 
+  // Check if any nodes are collapsible
+  const hasCollapsible = useMemo(() => {
+    const set = new Set<string>();
+    collectAllCollapsible(tree, set);
+    return set.size > 0;
+  }, [tree]);
+
   return (
-    <div ref={containerRef} className={styles.container}>
-      <div
-        className={styles.canvas}
-        style={{
-          width: bounds.width + pad * 2,
-          height: bounds.height + pad * 2,
-          position: "relative",
-        }}
-      >
-        <svg
-          className={styles.connectors}
-          width={bounds.width + pad * 2}
-          height={bounds.height + pad * 2}
-          style={{ position: "absolute", top: 0, left: 0 }}
-          aria-hidden="true"
+    <div>
+      {hasCollapsible && (
+        <div className={styles.collapseControls}>
+          <button className={styles.collapseBtn} onClick={expandAll}>expand all</button>
+          <button className={styles.collapseBtn} onClick={collapseAll}>collapse</button>
+        </div>
+      )}
+      <div ref={containerRef} className={styles.container}>
+        <div
+          className={styles.canvas}
+          style={{
+            width: bounds.width + pad * 2,
+            height: bounds.height + pad * 2,
+            position: "relative",
+          }}
         >
-          <Connectors node={layout} pad={pad} executions={executions} />
-        </svg>
-        <Nodes node={layout} pad={pad} executions={executions} onNodeClick={onNodeClick} selectedNodeId={selectedNodeId} />
+          <svg
+            className={styles.connectors}
+            width={bounds.width + pad * 2}
+            height={bounds.height + pad * 2}
+            style={{ position: "absolute", top: 0, left: 0 }}
+            aria-hidden="true"
+          >
+            <Connectors node={layout} pad={pad} executions={executions} />
+          </svg>
+          <Nodes node={layout} pad={pad} executions={executions} onNodeClick={onNodeClick} selectedNodeId={selectedNodeId} collapsed={collapsed} toggleCollapse={toggleCollapse} />
+        </div>
       </div>
     </div>
   );
@@ -115,12 +170,16 @@ function Nodes({
   executions,
   onNodeClick,
   selectedNodeId,
+  collapsed,
+  toggleCollapse,
 }: {
   node: LayoutNode;
   pad: number;
   executions?: Map<string, NodeExecution>;
   onNodeClick?: (node: TreeNode) => void;
   selectedNodeId?: string;
+  collapsed: Set<string>;
+  toggleCollapse: (id: string) => void;
 }) {
   const elements: ReactNode[] = [];
 
@@ -129,6 +188,9 @@ function Nodes({
     const stateClass = exec ? styles[exec.state] : "";
     const isSelected = selectedNodeId === ln.node.id;
     const clickable = onNodeClick && ln.node.taskMeta;
+    const isCollapsed = collapsed.has(ln.node.id);
+    const hasChildren = ln.node.children.length > 0;
+    const showToggle = ln.node.kind === "function" && hasChildren;
 
     elements.push(
       <div
@@ -148,6 +210,9 @@ function Nodes({
             functionType={ln.node.functionType}
             mapped={ln.node.mapped}
             exec={exec}
+            isCollapsed={isCollapsed}
+            childCount={hasChildren ? ln.node.children.length : 0}
+            onToggle={showToggle ? (e) => { e.stopPropagation(); toggleCollapse(ln.node.id); } : undefined}
           />
         ) : (
           <VectorCompletionNode
@@ -171,16 +236,27 @@ function FunctionNode({
   functionType,
   mapped,
   exec,
+  isCollapsed,
+  childCount,
+  onToggle,
 }: {
   label: string;
   functionType?: string;
   mapped?: boolean;
   exec?: NodeExecution;
+  isCollapsed?: boolean;
+  childCount?: number;
+  onToggle?: (e: React.MouseEvent) => void;
 }) {
   return (
     <>
       <span className={styles.nodeLabel}>
         {mapped && <span className={styles.mapped}>map</span>}
+        {onToggle && (
+          <button className={styles.collapseToggle} onClick={onToggle}>
+            {isCollapsed ? `+${childCount}` : "−"}
+          </button>
+        )}
         {label}
       </span>
       <span className={styles.nodeType}>

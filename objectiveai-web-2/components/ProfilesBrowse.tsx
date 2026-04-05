@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import type { ProfileMeta } from "@/lib/profiles/types";
-import { fetchAllProfiles } from "@/lib/profiles/fetch";
+import { fetchDefaultProfiles } from "@/lib/profiles/fetch";
 import { ProfileCard } from "./ProfileCard";
 import styles from "./ProfileCard.module.css";
 
@@ -13,7 +13,7 @@ export function ProfilesBrowse() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchAllProfiles()
+    fetchDefaultProfiles()
       .then((data) => {
         if (!cancelled) {
           setProfiles(data);
@@ -28,16 +28,6 @@ export function ProfilesBrowse() {
       });
     return () => { cancelled = true; };
   }, []);
-
-  // Official profiles first, then alphabetical
-  const sorted = useMemo(() => {
-    return [...profiles].sort((a, b) => {
-      const aOfficial = a.owner === "ObjectiveAI" ? 0 : 1;
-      const bOfficial = b.owner === "ObjectiveAI" ? 0 : 1;
-      if (aOfficial !== bOfficial) return aOfficial - bOfficial;
-      return a.name.localeCompare(b.name);
-    });
-  }, [profiles]);
 
   if (loading) {
     return (
@@ -56,11 +46,11 @@ export function ProfilesBrowse() {
     <div className={styles.browse}>
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>profiles</h1>
-        <span className={styles.pageCount}>{profiles.length}</span>
+        <span className={styles.pageCount}>5 default</span>
       </div>
-      <div className={styles.grid}>
-        {sorted.map((p) => (
-          <ProfileCard key={`${p.owner}/${p.repository}`} profile={p} />
+      <div className={styles.showcaseGrid}>
+        {profiles.map((p) => (
+          <ProfileCard key={p.name} profile={p} />
         ))}
       </div>
     </div>

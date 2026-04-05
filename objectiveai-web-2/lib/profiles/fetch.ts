@@ -5,14 +5,8 @@ import type {
   ProfileLlm,
   ProfileFallback,
   ProfileTaskConfig,
+  TierBreakdown,
 } from "./types";
-
-interface PairsResponse {
-  data: Array<{
-    function: ProfileListItem;
-    profile: ProfileListItem;
-  }>;
-}
 
 interface RawLlm {
   model: string;
@@ -46,38 +40,35 @@ interface RawTasksProfile {
 
 type RawProfile = RawAutoProfile | RawTasksProfile;
 
-let profileCache: { data: ProfileMeta[]; ts: number } | null = null;
+const DEFAULT_PROFILE_SLUGS = [
+  "profile-nano",
+  "profile-mini",
+  "profile-standard",
+  "profile-giga",
+  "profile-giga-max",
+] as const;
+
+let defaultCache: { data: ProfileMeta[]; ts: number } | null = null;
 const CACHE_TTL = 60_000;
 
-export async function fetchAllProfiles(): Promise<ProfileMeta[]> {
-  if (profileCache && Date.now() - profileCache.ts < CACHE_TTL) {
-    return profileCache.data;
-  }
-
-  const [list, pairs] = await Promise.all([
-    apiFetch<{ data: ProfileListItem[] }>("/functions/profiles"),
-    apiFetch<PairsResponse>("/functions/profiles/pairs"),
-  ]);
-
-  // Build a map from profile repo → paired function
-  const pairMap = new Map<string, ProfileListItem>();
-  for (const p of pairs.data) {
-    const key = `${p.profile.owner}/${p.profile.repository}`;
-    // Only store if the function is different from the profile itself
-    if (p.function.repository !== p.profile.repository || p.function.owner !== p.profile.owner) {
-      pairMap.set(key, p.function);
-    }
+/** Fetch the 5 official default profiles directly by URL */
+export async function fetchDefaultProfiles(): Promise<ProfileMeta[]> {
+  if (defaultCache && Date.now() - defaultCache.ts < CACHE_TTL) {
+    return defaultCache.data;
   }
 
   const results = await Promise.allSettled(
-    list.data.map((item) => resolveProfile(item, pairMap))
+    DEFAULT_PROFILE_SLUGS.map((slug) =>
+      apiFetch<RawProfile>(`/functions/profiles/github/ObjectiveAI/${slug}`)
+        .then((raw) => parseAutoProfile(raw as RawAutoProfile, slug))
+    )
   );
 
   const profiles = results
     .filter((r): r is PromiseFulfilledResult<ProfileMeta> => r.status === "fulfilled")
     .map((r) => r.value);
 
-  profileCache = { data: profiles, ts: Date.now() };
+  defaultCache = { data: profiles, ts: Date.now() };
   return profiles;
 }
 
@@ -102,45 +93,48 @@ function parseFallback(raw: RawLlm): ProfileFallback {
   };
 }
 
-async function resolveProfile(
-  item: ProfileListItem,
-  pairMap: Map<string, ProfileListItem>
-): Promise<ProfileMeta> {
-  const detail = await apiFetch<RawProfile>(
-    `/functions/profiles/${item.remote}/${item.owner}/${item.repository}`
-  );
+/** Classify an agent into a tier based on its weight */
+function classifyTier(weight: number, maxWeight: number): "frontier" | "mid" | "budget" {
+  if (maxWeight === 0) return "budget";
+  const ratio = weight / maxWeight;
+  if (ratio >= 0.9) return "frontier";
+  if (ratio >= 0.2) return "mid";
+  return "budget";
+}
 
-  const isAuto = "ensemble" in detail;
-  const key = `${item.owner}/${item.repository}`;
+/** Build tier breakdown from LLMs and weights */
+function buildTiers(llms: ProfileLlm[], weights: number[]): TierBreakdown {
+  const maxWeight = Math.max(...weights, 0);
+  const tiers: TierBreakdown = { frontier: [], mid: [], budget: [] };
 
-  if (isAuto) {
-    const auto = detail as RawAutoProfile;
-    return {
-      ...item,
-      name: item.repository,
-      description: auto.description ?? "",
-      kind: "auto",
-      llms: auto.ensemble.llms.map(parseLlm),
-      weights: auto.profile,
-      taskConfigs: [],
-      taskWeights: [],
-      pairedFunction: pairMap.get(key) ?? null,
-    };
+  for (let i = 0; i < llms.length; i++) {
+    const w = weights[i] ?? 0;
+    const tier = classifyTier(w, maxWeight);
+    tiers[tier].push({ llm: llms[i], weight: w });
   }
 
-  const tasks = detail as RawTasksProfile;
+  return tiers;
+}
+
+function parseAutoProfile(raw: RawAutoProfile, slug: string): ProfileMeta {
+  const llms = raw.ensemble.llms.map(parseLlm);
+  const totalAgents = llms.reduce((sum, l) => sum + l.count, 0);
+  const tiers = buildTiers(llms, raw.profile);
+
   return {
-    ...item,
-    name: item.repository,
-    description: tasks.description ?? "",
-    kind: "tasks",
-    llms: [],
-    weights: [],
-    taskConfigs: tasks.tasks.map((t) => ({
-      llms: t.ensemble.llms.map(parseLlm),
-      weights: t.profile,
-    })),
-    taskWeights: tasks.profile,
-    pairedFunction: pairMap.get(key) ?? null,
+    remote: raw.remote,
+    owner: raw.owner,
+    repository: raw.repository,
+    commit: raw.commit,
+    name: slug.replace("profile-", ""),
+    description: raw.description ?? "",
+    kind: "auto",
+    llms,
+    weights: raw.profile,
+    taskConfigs: [],
+    taskWeights: [],
+    pairedFunction: null,
+    totalAgents,
+    tiers,
   };
 }

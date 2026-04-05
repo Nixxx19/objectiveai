@@ -30,6 +30,16 @@ export interface ProfileTaskConfig {
   weights: number[];
 }
 
+/** Agent tier classification */
+export type AgentTier = "frontier" | "mid" | "budget";
+
+/** Agents grouped by tier */
+export interface TierBreakdown {
+  frontier: { llm: ProfileLlm; weight: number }[];
+  mid: { llm: ProfileLlm; weight: number }[];
+  budget: { llm: ProfileLlm; weight: number }[];
+}
+
 /** Resolved profile with detail */
 export interface ProfileMeta {
   remote: string;
@@ -47,4 +57,8 @@ export interface ProfileMeta {
   taskWeights: number[];
   /** Paired function (if any) */
   pairedFunction: ProfileListItem | null;
+  /** Total effective agent count (sum of all LLM counts) */
+  totalAgents: number;
+  /** Agents grouped by tier (auto profiles only) */
+  tiers: TierBreakdown;
 }
