@@ -1,3 +1,5 @@
+pub mod agent_ref;
+pub mod path_ref;
 mod config;
 mod continuation;
 pub mod error;
@@ -13,6 +15,7 @@ mod swarms;
 mod functions;
 mod viewer;
 mod schemas;
+mod laboratories;
 
 #[cfg(test)]
 mod python_tests;
