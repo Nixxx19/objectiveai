@@ -316,7 +316,33 @@ where
             })
             .collect();
 
-        Ok(futures::stream::select_all(streams))
+        let mut merged = futures::stream::select_all(streams);
+        Ok(async_stream::stream! {
+            let mut accumulated_usage = objectiveai::agent::completions::response::Usage::default();
+            while let Some(chunk) = merged.next().await {
+                for builder in &chunk.builders {
+                    if let Some(u) = &builder.inner.usage {
+                        accumulated_usage.push(u);
+                    }
+                }
+                for evaluation in &chunk.evaluations {
+                    if let Some(u) = &evaluation.inner.usage {
+                        accumulated_usage.push(u);
+                    }
+                }
+                yield chunk;
+            }
+            // Final chunk with accumulated usage
+            yield LaboratoryExecutionChunk {
+                id,
+                builders: Vec::new(),
+                evaluations: Vec::new(),
+                error: None,
+                created,
+                object,
+                usage: Some(accumulated_usage),
+            };
+        })
     }
 
     /// Create a streaming evaluation for a single evaluation agent.
