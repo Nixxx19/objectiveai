@@ -38,6 +38,10 @@ pub fn edit_file(
         return Err("Cannot edit Jupyter Notebook files with the Edit tool. Use NotebookEdit instead.".into());
     }
 
+    // Desanitize inputs (reverse tokenizer sanitization, matching Claude Code)
+    let old_string = &util::desanitize(old_string);
+    let new_string = &util::strip_trailing_whitespace(&util::desanitize(new_string));
+
     // Error code 1: no-op edit
     if old_string == new_string {
         return Err("No changes to make: old_string and new_string are exactly the same.".into());

@@ -10,6 +10,7 @@ pub fn is_unc_path(path: &str) -> bool {
 }
 
 /// Search for a file with the same base name but different extension in the same directory.
+/// Returns the full path to the similar file, matching Claude Code's findSimilarFile behavior.
 pub fn find_similar_file(path: &Path) -> Option<String> {
     let parent = path.parent()?;
     let stem = path.file_stem()?.to_str()?;
@@ -19,10 +20,7 @@ pub fn find_similar_file(path: &Path) -> Option<String> {
         if entry_path.is_file() && entry_path != path {
             if let Some(entry_stem) = entry_path.file_stem().and_then(|s| s.to_str()) {
                 if entry_stem == stem {
-                    return entry_path
-                        .file_name()
-                        .and_then(|n| n.to_str())
-                        .map(|s| s.to_string());
+                    return Some(entry_path.to_string_lossy().into_owned());
                 }
             }
         }
@@ -33,14 +31,26 @@ pub fn find_similar_file(path: &Path) -> Option<String> {
 /// Check if the requested path exists under the current working directory.
 /// Handles "dropped repo folder" pattern where user requests /full/path/to/file
 /// but the file actually exists at $CWD/relative/path.
+/// Matches Claude Code's suggestPathUnderCwd: collects path components,
+/// then tries progressively shorter suffixes (from 1 component to all) under CWD.
 pub fn suggest_path_under_cwd(requested_path: &str) -> Option<String> {
     let cwd = std::env::current_dir().ok()?;
     let requested = Path::new(requested_path);
-    // Try stripping common prefixes and checking under CWD
-    for ancestor in requested.ancestors().skip(1) {
-        if let Ok(suffix) = requested.strip_prefix(ancestor) {
-            let candidate = cwd.join(suffix);
-            if candidate.exists() && candidate != requested {
+    let components: Vec<std::path::Component> = requested.components().collect();
+    if components.is_empty() {
+        return None;
+    }
+
+    // Try suffixes from shortest (just filename) to longest (all but first component).
+    // This matches Claude Code which iterates i from components.length-1 down to 1.
+    for i in (1..components.len()).rev() {
+        let suffix: PathBuf = components[i..].iter().collect();
+        let candidate = cwd.join(&suffix);
+        if candidate.exists() {
+            // Make sure we're not just returning the same path
+            let candidate_canonical = candidate.canonicalize().ok();
+            let requested_canonical = requested.canonicalize().ok();
+            if candidate_canonical != requested_canonical {
                 return Some(candidate.to_string_lossy().into_owned());
             }
         }
@@ -361,4 +371,74 @@ pub fn apply_edit(
     } else {
         original.replacen(old_string, new_string, 1)
     }
+}
+
+/// Strip trailing whitespace from each line while preserving line endings.
+/// Matches Claude Code's stripTrailingWhitespace behavior.
+pub fn strip_trailing_whitespace(s: &str) -> String {
+    let mut result = String::with_capacity(s.len());
+    let mut line_start = 0;
+    let bytes = s.as_bytes();
+    let len = bytes.len();
+    let mut i = 0;
+
+    while i < len {
+        if bytes[i] == b'\r' && i + 1 < len && bytes[i + 1] == b'\n' {
+            // CRLF
+            let line = &s[line_start..i];
+            result.push_str(line.trim_end());
+            result.push_str("\r\n");
+            i += 2;
+            line_start = i;
+        } else if bytes[i] == b'\n' || bytes[i] == b'\r' {
+            // LF or CR
+            let line = &s[line_start..i];
+            result.push_str(line.trim_end());
+            result.push(bytes[i] as char);
+            i += 1;
+            line_start = i;
+        } else {
+            i += 1;
+        }
+    }
+    // Last line (no trailing newline)
+    if line_start < len {
+        result.push_str(s[line_start..].trim_end());
+    }
+    result
+}
+
+/// Desanitization replacements matching Claude Code's DESANITIZATIONS constant.
+/// These reverse sanitization that the model's tokenizer may apply to certain XML-like tags.
+const DESANITIZATIONS: &[(&str, &str)] = &[
+    ("<fnr>", "<function_results>"),
+    ("<n>", "<name>"),
+    ("</n>", "</name>"),
+    ("<o>", "<output>"),
+    ("</o>", "</output>"),
+    ("<e>", "<error>"),
+    ("</e>", "</error>"),
+    ("<s>", "<system>"),
+    ("</s>", "</system>"),
+    ("<r>", "<result>"),
+    ("</r>", "</result>"),
+    ("< META_START >", "<META_START>"),
+    ("< META_END >", "<META_END>"),
+    ("< EOT >", "<EOT>"),
+    ("< META >", "<META>"),
+    ("< SOS >", "<SOS>"),
+    ("\n\nH:", "\n\nHuman:"),
+    ("\n\nA:", "\n\nAssistant:"),
+];
+
+/// Apply desanitization to a string, reversing tokenizer sanitization.
+/// Matches Claude Code's desanitize behavior.
+pub fn desanitize(s: &str) -> String {
+    let mut result = s.to_owned();
+    for &(from, to) in DESANITIZATIONS {
+        if result.contains(from) {
+            result = result.replace(from, to);
+        }
+    }
+    result
 }

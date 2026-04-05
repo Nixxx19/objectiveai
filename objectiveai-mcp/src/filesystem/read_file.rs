@@ -4,6 +4,8 @@ use std::path::Path;
 
 const MAX_READ_SIZE_BYTES: u64 = 10 * 1024 * 1024; // 10 MB
 const MAX_IMAGE_FILE_SIZE: u64 = 20 * 1024 * 1024; // 20 MB
+const PDF_MAX_PAGES_PER_READ: usize = 20;
+const PDF_MAX_EXTRACT_SIZE: u64 = 100 * 1024 * 1024; // 100MB
 
 const IMAGE_EXTENSIONS: &[&str] = &["png", "jpg", "jpeg", "gif", "webp"];
 
@@ -57,12 +59,10 @@ pub enum ReadOutput {
     Text(String),
     /// Image file (base64 data + media type)
     Image { base64: String, media_type: String },
-    /// Notebook cells (text + embedded images)
+    /// Notebook cells (text + embedded images), also used for PDF page images
     Notebook(Vec<super::notebook::NotebookBlock>),
     /// File unchanged since last read (dedup stub)
     FileUnchanged(String),
-    /// PDF not supported (error message)
-    Pdf(String),
 }
 
 #[derive(Debug, serde::Serialize)]
@@ -90,6 +90,7 @@ pub fn read_file(
     path: &str,
     offset: Option<usize>,
     limit: Option<usize>,
+    pages: Option<&str>,
 ) -> Result<ReadOutput, String> {
     // UNC path security check
     if util::is_unc_path(path) {
@@ -194,11 +195,9 @@ pub fn read_file(
         return Ok(ReadOutput::Notebook(blocks));
     }
 
-    // PDF files -- stub
+    // PDF files
     if ext.eq_ignore_ascii_case("pdf") {
-        return Ok(ReadOutput::Pdf(
-            "PDF reading is not yet supported. Use Bash with pdftotext or similar utilities.".into()
-        ));
+        return read_pdf(&absolute_path, pages);
     }
 
     // Binary file rejection
@@ -266,4 +265,172 @@ pub fn read_file(
     let json = serde_json::to_string_pretty(&output)
         .map_err(|e| format!("Failed to serialize output: {e}"))?;
     Ok(ReadOutput::Text(json))
+}
+
+/// Parse a PDF page range string like "1-5", "3", "10-20", "3-".
+/// Returns (first_page, last_page) where last_page may be usize::MAX for open-ended ranges.
+fn parse_pdf_page_range(pages: &str) -> Result<(usize, usize), String> {
+    let pages = pages.trim();
+    if let Some((first, last)) = pages.split_once('-') {
+        let first: usize = first.trim().parse()
+            .map_err(|_| format!("Invalid pages parameter: \"{pages}\". Use formats like \"1-5\", \"3\", or \"10-20\". Pages are 1-indexed."))?;
+        if first == 0 {
+            return Err("Pages are 1-indexed. Use 1 for the first page.".into());
+        }
+        let last_str = last.trim();
+        if last_str.is_empty() {
+            return Ok((first, usize::MAX)); // open-ended
+        }
+        let last: usize = last_str.parse()
+            .map_err(|_| format!("Invalid pages parameter: \"{pages}\". Use formats like \"1-5\", \"3\", or \"10-20\"."))?;
+        if last < first {
+            return Err(format!("Invalid page range: last page ({last}) is before first page ({first})."));
+        }
+        Ok((first, last))
+    } else {
+        let page: usize = pages.parse()
+            .map_err(|_| format!("Invalid pages parameter: \"{pages}\". Use formats like \"1-5\", \"3\", or \"10-20\". Pages are 1-indexed."))?;
+        if page == 0 {
+            return Err("Pages are 1-indexed. Use 1 for the first page.".into());
+        }
+        Ok((page, page))
+    }
+}
+
+/// Get PDF page count using pdfinfo.
+fn get_pdf_page_count(path: &std::path::Path) -> Result<usize, String> {
+    let output = std::process::Command::new("pdfinfo")
+        .arg(path.to_string_lossy().as_ref())
+        .output()
+        .map_err(|_| "pdfinfo not available. Install poppler-utils.".to_string())?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    for line in stdout.lines() {
+        if let Some(count_str) = line.strip_prefix("Pages:") {
+            if let Ok(count) = count_str.trim().parse::<usize>() {
+                return Ok(count);
+            }
+        }
+    }
+
+    // Fallback: assume it's small enough
+    Ok(1)
+}
+
+/// Extract PDF pages as JPEG images using pdftoppm.
+fn read_pdf(path: &std::path::Path, pages: Option<&str>) -> Result<ReadOutput, String> {
+    let file_size = std::fs::metadata(path)
+        .map_err(|e| format!("Failed to read PDF metadata: {e}"))?
+        .len();
+    if file_size > PDF_MAX_EXTRACT_SIZE {
+        return Err(format!("PDF file is too large ({file_size} bytes, max 100MB)."));
+    }
+
+    // Check if pdftoppm is available
+    let pdftoppm_check = std::process::Command::new("pdftoppm")
+        .arg("-v")
+        .output();
+    if pdftoppm_check.is_err() {
+        return Err("PDF reading requires pdftoppm (from poppler-utils). Install it with: apt install poppler-utils (Linux), brew install poppler (macOS), or pacman -S poppler (MSYS2).".into());
+    }
+
+    // Parse pages parameter
+    let (first_page, last_page) = if let Some(pages_str) = pages {
+        parse_pdf_page_range(pages_str)?
+    } else {
+        // Get page count first using pdfinfo
+        let page_count = get_pdf_page_count(path)?;
+        if page_count > 10 {
+            return Err(format!(
+                "PDF has {page_count} pages. Please specify a page range using the 'pages' parameter (max {PDF_MAX_PAGES_PER_READ} pages per request). Example: pages=\"1-10\""
+            ));
+        }
+        (1, page_count)
+    };
+
+    // Enforce max pages
+    let effective_last = if last_page == usize::MAX {
+        first_page + PDF_MAX_PAGES_PER_READ - 1
+    } else {
+        last_page.min(first_page + PDF_MAX_PAGES_PER_READ - 1)
+    };
+    if last_page != usize::MAX && (last_page - first_page + 1) > PDF_MAX_PAGES_PER_READ {
+        return Err(format!(
+            "Page range exceeds maximum of {PDF_MAX_PAGES_PER_READ} pages per request. Please use a smaller range."
+        ));
+    }
+
+    // Create temp dir for output images
+    let tmp_dir = std::env::temp_dir().join(format!(
+        "objectiveai-mcp-pdf-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_millis()
+    ));
+    std::fs::create_dir_all(&tmp_dir)
+        .map_err(|e| format!("Failed to create temp dir for PDF: {e}"))?;
+
+    // Run pdftoppm to extract pages as JPEG
+    let mut cmd = std::process::Command::new("pdftoppm");
+    cmd.arg("-jpeg")
+        .arg("-r").arg("150")  // 150 DPI
+        .arg("-f").arg(first_page.to_string())
+        .arg("-l").arg(effective_last.to_string())
+        .arg(path.to_string_lossy().as_ref())
+        .arg(tmp_dir.join("page").to_string_lossy().as_ref());
+
+    let output = cmd.output()
+        .map_err(|e| format!("Failed to run pdftoppm: {e}"))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        let _ = std::fs::remove_dir_all(&tmp_dir);
+        return Err(format!("pdftoppm failed: {stderr}"));
+    }
+
+    // Collect the generated JPEG files
+    let mut image_files: Vec<_> = std::fs::read_dir(&tmp_dir)
+        .map_err(|e| format!("Failed to read temp dir: {e}"))?
+        .filter_map(|e| e.ok())
+        .filter(|e| {
+            e.path().extension()
+                .and_then(|ext| ext.to_str())
+                .map(|ext| ext == "jpg")
+                .unwrap_or(false)
+        })
+        .collect();
+
+    // Sort by filename to get pages in order
+    image_files.sort_by_key(|e| e.file_name());
+
+    if image_files.is_empty() {
+        let _ = std::fs::remove_dir_all(&tmp_dir);
+        return Err("PDF extraction produced no pages. The PDF may be empty or corrupted.".into());
+    }
+
+    // Read each image and build notebook-style blocks (reuse NotebookBlock)
+    use super::notebook::NotebookBlock;
+    let mut blocks = Vec::new();
+
+    for (i, entry) in image_files.iter().enumerate() {
+        let img_bytes = std::fs::read(entry.path())
+            .map_err(|e| format!("Failed to read extracted page: {e}"))?;
+        let b64 = base64::Engine::encode(
+            &base64::engine::general_purpose::STANDARD,
+            &img_bytes,
+        );
+        // Add a text label before each page
+        blocks.push(NotebookBlock::Text(format!("Page {}:", first_page + i)));
+        blocks.push(NotebookBlock::Image {
+            base64: b64,
+            media_type: "image/jpeg".to_string(),
+        });
+    }
+
+    // Clean up temp dir
+    let _ = std::fs::remove_dir_all(&tmp_dir);
+
+    Ok(ReadOutput::Notebook(blocks))
 }

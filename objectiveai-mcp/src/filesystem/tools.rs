@@ -124,7 +124,7 @@ impl FilesystemTools {
 
     #[tool(name = "Read", description = "Reads a file from the local filesystem.")]
     fn read(&self, Parameters(req): Parameters<ReadRequest>) -> Result<CallToolResult, rmcp::ErrorData> {
-        match super::read_file::read_file(&self.file_state, &req.file_path, req.offset, req.limit) {
+        match super::read_file::read_file(&self.file_state, &req.file_path, req.offset, req.limit, req.pages.as_deref()) {
             Ok(super::read_file::ReadOutput::Text(json)) => {
                 Ok(CallToolResult::success(vec![Content::text(json)]))
             }
@@ -142,9 +142,6 @@ impl FilesystemTools {
             }
             Ok(super::read_file::ReadOutput::FileUnchanged(stub)) => {
                 Ok(CallToolResult::success(vec![Content::text(stub)]))
-            }
-            Ok(super::read_file::ReadOutput::Pdf(msg)) => {
-                Ok(CallToolResult::success(vec![Content::text(msg)]))
             }
             Err(e) => Ok(CallToolResult::error(vec![Content::text(e)])),
         }

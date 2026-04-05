@@ -105,8 +105,13 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
         }
 
         let Ok(file_contents) = fs::read_to_string(&file_path) else {
-            continue;
+            continue; // Skip files that can't be read as text
         };
+
+        // Skip binary files (null byte detection, matching ripgrep's heuristic)
+        if file_contents.as_bytes().contains(&0) {
+            continue;
+        }
 
         let rel_path = to_relative(&file_path);
 

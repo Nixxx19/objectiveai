@@ -204,133 +204,123 @@ pub async fn execute_bash(
     }
 
 
+    // Create a temp file to capture interleaved stdout+stderr at the OS level
+    let output_file_path = tool_results_dir().join(format!(
+        "bash-output-{}",
+        CWD_COUNTER.fetch_add(1, Ordering::Relaxed)
+    ));
+    std::fs::create_dir_all(tool_results_dir())
+        .map_err(|e| format!("Failed to create tool-results dir: {e}"))?;
+
+    let output_file = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .truncate(true)
+        .open(&output_file_path)
+        .map_err(|e| format!("Failed to create output file: {e}"))?;
+
+    let stdout_file = output_file
+        .try_clone()
+        .map_err(|e| format!("Failed to clone output file: {e}"))?;
+
     let mut cmd = tokio::process::Command::new(&shell_state.shell_path);
     cmd.args(&args)
         .current_dir(&cwd)
         .stdin(Stdio::null())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped());
+        .stdout(Stdio::from(stdout_file))
+        .stderr(Stdio::from(output_file));
 
     // Apply session env var overrides
     for (key, value) in &env_overrides {
         cmd.env(key, value);
     }
 
-    let child = cmd.spawn()
+    let mut child = cmd
+        .spawn()
         .map_err(|e| format!("Failed to spawn command: {e}"))?;
 
-    let output = match tokio::time::timeout(timeout_duration, child.wait_with_output()).await {
-        Ok(Ok(output)) => {
-            let stdout_str = String::from_utf8_lossy(&output.stdout).to_string();
-            let stderr_str = String::from_utf8_lossy(&output.stderr).to_string();
-
-            // Merge stderr after stdout at the application level (no shell-level 2>&1)
-            let combined = if stderr_str.is_empty() {
-                stdout_str
-            } else if stdout_str.is_empty() {
-                stderr_str
-            } else {
-                format!("{}\n{}", stdout_str, stderr_str)
-            };
-
-            let mut persisted_output_path: Option<String> = None;
-            let mut persisted_output_size: Option<u64> = None;
-
-            // If output exceeds inline limit, persist to file for later Read access
-            if combined.len() > MAX_OUTPUT_CHARS {
-                persisted_output_size = Some(combined.len() as u64);
-
-                if let Ok(dir) =
-                    std::fs::create_dir_all(tool_results_dir()).map(|_| tool_results_dir())
-                {
-                    let file_name = format!(
-                        "bash-output-{}",
-                        CWD_COUNTER.fetch_add(1, Ordering::Relaxed)
-                    );
-                    let file_path = dir.join(&file_name);
-                    // Cap persisted file at MAX_PERSISTED_SIZE
-                    let persist_content = if combined.len() > MAX_PERSISTED_SIZE {
-                        &combined[..MAX_PERSISTED_SIZE]
-                    } else {
-                        &combined
-                    };
-                    if std::fs::write(&file_path, persist_content).is_ok() {
-                        persisted_output_path =
-                            Some(file_path.to_string_lossy().into_owned());
-                    }
-                }
-            }
-
-            // Truncate inline output
-            let combined = if combined.len() > MAX_OUTPUT_CHARS {
-                let total_lines = combined.lines().count();
-                let truncated = &combined[..MAX_OUTPUT_CHARS];
-                let kept_lines = truncated.lines().count();
-                let dropped = total_lines - kept_lines;
-                if let Some(ref path) = persisted_output_path {
-                    format!(
-                        "{}\n\n... [{} lines truncated] ...\nFull output ({} bytes) saved to: {}\nUse the Read tool to access it.",
-                        truncated,
-                        dropped,
-                        persisted_output_size.unwrap_or(0),
-                        path
-                    )
-                } else {
-                    format!(
-                        "{}\n\n... [{} lines truncated] ...",
-                        truncated, dropped
-                    )
-                }
-            } else {
-                combined
-            };
-
-            // Read the saved CWD from the temp file
-            if let Ok(new_cwd) = std::fs::read_to_string(&cwd_file) {
-                let new_cwd = new_cwd.trim();
-                if !new_cwd.is_empty() {
-                    shell_state.set_cwd(PathBuf::from(new_cwd));
-                }
-            }
-            // Clean up the CWD file
-            let _ = std::fs::remove_file(&cwd_file);
-
-            let exit_code = output.status.code();
-            let return_code_interpretation = exit_code.and_then(|code| {
-                if code == 0 {
-                    None
-                } else {
-                    Some(format!("exit_code:{code}"))
-                }
-            });
-
-            let is_image = detect_base64_image(&combined);
-
-            BashOutput {
-                stdout: combined,
-                stderr: String::new(),
-                interrupted: false,
-                exit_code,
-                return_code_interpretation,
-                is_image,
-                persisted_output_path,
-                persisted_output_size,
-            }
-        }
+    // Wait for child to exit (output is in the file, not pipes)
+    let (exit_code, interrupted) = match tokio::time::timeout(timeout_duration, child.wait()).await
+    {
+        Ok(Ok(status)) => (status.code(), false),
         Ok(Err(e)) => return Err(format!("Command failed: {e}")),
-        Err(_) => BashOutput {
-            stdout: String::new(),
-            stderr: format!("Command timed out after {timeout_ms}ms"),
-            interrupted: true,
-            exit_code: None,
-            return_code_interpretation: None,
-            is_image: false,
-            persisted_output_path: None,
-            persisted_output_size: None,
-        },
+        Err(_) => {
+            // Timeout — kill the child, then read whatever output was written
+            let _ = child.kill().await;
+            (None, true)
+        }
     };
 
-    Ok(output)
+    // Read the output file
+    let full_output = std::fs::read_to_string(&output_file_path).unwrap_or_default();
+    let full_output_size = full_output.len();
+
+    let mut persisted_output_path: Option<String> = None;
+    let mut persisted_output_size: Option<u64> = None;
+
+    let combined = if full_output_size > MAX_OUTPUT_CHARS {
+        persisted_output_size = Some(full_output_size as u64);
+
+        // The file is already on disk — truncate it if it exceeds MAX_PERSISTED_SIZE
+        if full_output_size > MAX_PERSISTED_SIZE {
+            let _ = std::fs::write(&output_file_path, &full_output[..MAX_PERSISTED_SIZE]);
+        }
+        persisted_output_path = Some(output_file_path.to_string_lossy().into_owned());
+
+        // Build truncated inline output
+        let total_lines = full_output.lines().count();
+        let truncated = &full_output[..MAX_OUTPUT_CHARS];
+        let kept_lines = truncated.lines().count();
+        let dropped = total_lines - kept_lines;
+        format!(
+            "{}\n\n... [{} lines truncated] ...\nFull output ({} bytes) saved to: {}\nUse the Read tool to access it.",
+            truncated,
+            dropped,
+            full_output_size,
+            persisted_output_path.as_ref().unwrap()
+        )
+    } else {
+        // Small output — clean up the temp file
+        let _ = std::fs::remove_file(&output_file_path);
+        full_output
+    };
+
+    // Read the saved CWD from the temp file
+    if let Ok(new_cwd) = std::fs::read_to_string(&cwd_file) {
+        let new_cwd = new_cwd.trim();
+        if !new_cwd.is_empty() {
+            shell_state.set_cwd(PathBuf::from(new_cwd));
+        }
+    }
+    // Clean up the CWD file
+    let _ = std::fs::remove_file(&cwd_file);
+
+    let return_code_interpretation = exit_code.and_then(|code| {
+        if code == 0 {
+            None
+        } else {
+            Some(format!("exit_code:{code}"))
+        }
+    });
+
+    let is_image = detect_base64_image(&combined);
+
+    let stderr_msg = if interrupted {
+        format!("Command timed out after {timeout_ms}ms")
+    } else {
+        String::new()
+    };
+
+    Ok(BashOutput {
+        stdout: combined,
+        stderr: stderr_msg,
+        interrupted,
+        exit_code,
+        return_code_interpretation,
+        is_image,
+        persisted_output_path,
+        persisted_output_size,
+    })
 }
 
 /// Detect the user's shell from environment.
