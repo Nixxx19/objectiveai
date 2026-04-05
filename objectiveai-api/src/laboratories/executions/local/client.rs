@@ -70,11 +70,12 @@ async fn spawn_builder(
     docker: &bollard::Docker,
     image: &str,
     index: usize,
+    execution_id: &str,
     mcp_tar: &[u8],
 ) -> Result<u16, super::Error> {
     use bollard::models::{HostConfig, PortBinding, PortMap};
 
-    let container_name = format!("objectiveai-lab-builder-{index}");
+    let container_name = format!("objectiveai-{execution_id}-{index}");
     let options = CreateContainerOptionsBuilder::default()
         .name(container_name.as_str())
         .build();
@@ -254,7 +255,7 @@ where
             .builder_agents
             .iter()
             .enumerate()
-            .map(|(i, _)| spawn_builder(&docker, &request.docker_image, i, &tar_bytes))
+            .map(|(i, _)| spawn_builder(&docker, &request.docker_image, i, &id, &tar_bytes))
             .collect();
         let builder_resolve_futs: Vec<_> = request
             .builder_agents
@@ -441,7 +442,7 @@ where
 
             // Final chunk with accumulated usage
             let final_chunk = LaboratoryExecutionChunk {
-                id,
+                id: id.clone(),
                 builders: Vec::new(),
                 evaluations: Vec::new(),
                 error: None,
@@ -451,6 +452,14 @@ where
             };
             viewer_client.send_laboratory_execution_continue(viewer_ctx.clone(), final_chunk.clone());
             yield final_chunk;
+
+            // Cleanup: stop and remove all builder containers
+            let num_builders = request.builder_agents.len();
+            for i in 0..num_builders {
+                let name = format!("objectiveai-{id}-{i}");
+                let _ = docker.stop_container(&name, None).await;
+                let _ = docker.remove_container(&name, None).await;
+            }
         })
     }
 
