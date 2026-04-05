@@ -657,6 +657,22 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
             Arc::new(functions::executions::usage_handler::LogUsageHandler),
         ));
 
+    // Laboratory Executions Client
+    #[cfg(feature = "laboratories-local")]
+    let laboratory_executions_client: Arc<
+        crate::laboratories::executions::local::Client<_, _, _, _, _, _, _, _, _>,
+    > = Arc::new(crate::laboratories::executions::local::Client {
+        agent_client: agent_completions_client.clone(),
+        retrieve_router: retrieve_router.clone(),
+        usage_handler: Arc::new(
+            crate::laboratories::executions::usage_handler::LogUsageHandler,
+        ),
+        viewer: viewer_client.clone(),
+    });
+    #[cfg(not(feature = "laboratories-local"))]
+    let laboratory_executions_client =
+        Arc::new(crate::laboratories::executions::UnimplementedClient);
+
     // Functions Profiles Computations Client
     let profile_computations_client =
         Arc::new(functions::profiles::computations::ObjectiveAiClient::new(
@@ -1086,6 +1102,25 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                     objectiveai::error::request::ErrorCreateParams,
                 >| {
                     create_error(error_client, headers, persistent_cache, suppress_output, body)
+                }
+            }),
+        )
+        // Laboratory Executions - create
+        .route(
+            "/laboratories/executions",
+            axum::routing::post({
+                let laboratory_executions_client = laboratory_executions_client.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(body): Json<
+                    objectiveai::laboratories::executions::request::LaboratoryExecutionCreateParams,
+                >| {
+                    execute_laboratory(
+                        laboratory_executions_client,
+                        headers,
+                        persistent_cache,
+                        suppress_output,
+                        body,
+                    )
                 }
             }),
         )
@@ -2099,6 +2134,49 @@ async fn create_error(
         match client.create_unary(&ctx, &body) {
             Ok(r) => Json(r).into_response(),
             Err(e) => e.into_response(),
+        }
+    }
+}
+
+// Laboratory Executions
+
+async fn execute_laboratory(
+    client: Arc<
+        impl crate::laboratories::executions::LaboratoryClient<ctx::DefaultContextExt> + 'static,
+    >,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    request: objectiveai::laboratories::executions::request::LaboratoryExecutionCreateParams,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    if request.stream.unwrap_or(false) {
+        match client
+            .create_streaming_handle_usage(ctx, Arc::new(request))
+            .await
+        {
+            Ok(stream) => Sse::new(
+                stream
+                    .map(|chunk| {
+                        Ok::<Event, Infallible>(
+                            Event::default()
+                                .data(serde_json::to_string(&chunk).unwrap()),
+                        )
+                    })
+                    .chain(StreamOnce::new(
+                        Ok(Event::default().data("[DONE]")),
+                    )),
+            )
+            .into_response(),
+            Err(e) => ResponseError::from(&e).into_response(),
+        }
+    } else {
+        match client
+            .create_unary_handle_usage(ctx, Arc::new(request))
+            .await
+        {
+            Ok(r) => Json(r).into_response(),
+            Err(e) => ResponseError::from(&e).into_response(),
         }
     }
 }
