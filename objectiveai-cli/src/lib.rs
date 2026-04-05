@@ -1,4 +1,5 @@
 pub mod agent_ref;
+pub mod favorite_ref;
 pub mod path_ref;
 mod config;
 mod continuation;

@@ -2,33 +2,21 @@ use clap::Args;
 
 #[derive(Args)]
 pub struct AddFavorite {
-    /// Name
+    /// Favorite name
     #[arg(long)]
     pub name: String,
-    /// Remote source
-    #[arg(long, value_enum)]
-    pub remote: crate::remote::Remote,
-    /// Owner
+    /// Path (e.g. remote=github,owner=x,repository=y)
     #[arg(long)]
-    pub owner: String,
-    /// Repository
-    #[arg(long)]
-    pub repository: String,
-    /// Commit (optional)
-    #[arg(long)]
-    pub commit: Option<String>,
+    pub path: crate::path_ref::PathRef,
     /// Note
     #[arg(long)]
     pub note: String,
 }
 
 impl AddFavorite {
-    pub fn into_favorite(self) -> Result<objectiveai::config::Favorite, objectiveai::config::ConfigError> {
-        objectiveai::config::Favorite::new(
-            self.name,
-            self.remote.into_path(self.owner, self.repository, self.commit),
-            self.note,
-        )
+    pub fn into_favorite(self) -> Result<objectiveai::config::Favorite, crate::error::Error> {
+        let path = self.path.resolve()?;
+        Ok(objectiveai::config::Favorite::new(self.name, path, self.note)?)
     }
 }
 
@@ -71,46 +59,25 @@ impl EditFavorite {
 
 #[derive(Args)]
 pub struct AddPairFavorite {
-    /// Name
+    /// Favorite name
     #[arg(long)]
     pub name: String,
-    /// Function remote source
-    #[arg(long, value_enum)]
-    pub function_remote: crate::remote::Remote,
-    /// Function owner
+    /// Function path (e.g. remote=github,owner=x,repository=y)
     #[arg(long)]
-    pub function_owner: String,
-    /// Function repository
+    pub function: crate::path_ref::PathRef,
+    /// Profile path (e.g. remote=github,owner=x,repository=y)
     #[arg(long)]
-    pub function_repository: String,
-    /// Function commit (optional)
-    #[arg(long)]
-    pub function_commit: Option<String>,
-    /// Profile remote source
-    #[arg(long, value_enum)]
-    pub profile_remote: crate::remote::Remote,
-    /// Profile owner
-    #[arg(long)]
-    pub profile_owner: String,
-    /// Profile repository
-    #[arg(long)]
-    pub profile_repository: String,
-    /// Profile commit (optional)
-    #[arg(long)]
-    pub profile_commit: Option<String>,
-    /// Note for this favorite
+    pub profile: crate::path_ref::PathRef,
+    /// Note
     #[arg(long)]
     pub note: String,
 }
 
 impl AddPairFavorite {
-    pub fn into_pair_favorite(self) -> Result<objectiveai::config::PairFavorite, objectiveai::config::ConfigError> {
-        objectiveai::config::PairFavorite::new(
-            self.name,
-            self.function_remote.into_path(self.function_owner, self.function_repository, self.function_commit),
-            self.profile_remote.into_path(self.profile_owner, self.profile_repository, self.profile_commit),
-            self.note,
-        )
+    pub fn into_pair_favorite(self) -> Result<objectiveai::config::PairFavorite, crate::error::Error> {
+        let function = self.function.resolve()?;
+        let profile = self.profile.resolve()?;
+        Ok(objectiveai::config::PairFavorite::new(self.name, function, profile, self.note)?)
     }
 }
 

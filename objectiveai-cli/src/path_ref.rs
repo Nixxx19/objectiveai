@@ -1,4 +1,4 @@
-use crate::remote::RemoteWithMock;
+use crate::remote::Remote;
 
 /// Remote path reference in `key=value,key=value` format.
 ///
@@ -20,7 +20,7 @@ use crate::remote::RemoteWithMock;
 #[derive(Clone, Debug)]
 pub struct PathRef {
     pub favorite: Option<String>,
-    pub remote: Option<RemoteWithMock>,
+    pub remote: Option<Remote>,
     pub owner: Option<String>,
     pub repository: Option<String>,
     pub name: Option<String>,
@@ -67,9 +67,9 @@ impl std::fmt::Display for PathRef {
         }
         if let Some(remote) = &self.remote {
             let r = match remote {
-                RemoteWithMock::Github => "github",
-                RemoteWithMock::Filesystem => "filesystem",
-                RemoteWithMock::Mock => "mock",
+                Remote::Github => "github",
+                Remote::Filesystem => "filesystem",
+                Remote::Mock => "mock",
             };
             parts.push(format!("remote={r}"));
         }
@@ -89,11 +89,11 @@ impl std::fmt::Display for PathRef {
     }
 }
 
-fn parse_remote(s: &str) -> Result<RemoteWithMock, String> {
+fn parse_remote(s: &str) -> Result<Remote, String> {
     match s {
-        "github" => Ok(RemoteWithMock::Github),
-        "filesystem" => Ok(RemoteWithMock::Filesystem),
-        "mock" => Ok(RemoteWithMock::Mock),
+        "github" => Ok(Remote::Github),
+        "filesystem" => Ok(Remote::Filesystem),
+        "mock" => Ok(Remote::Mock),
         _ => Err(format!(
             "unknown remote: {s} (expected github, filesystem, or mock)"
         )),
@@ -102,23 +102,13 @@ fn parse_remote(s: &str) -> Result<RemoteWithMock, String> {
 
 impl PathRef {
     pub fn resolve(self) -> Result<objectiveai::RemotePathCommitOptional, crate::error::Error> {
-        if let Some(fav_name) = self.favorite {
-            let (_, mut config) = crate::config::read()?;
-            let favorites = config.agents().get_favorites().to_vec();
-            let fav = favorites
-                .into_iter()
-                .find(|f| f.get_name() == fav_name)
-                .ok_or_else(|| crate::error::Error::FavoriteNotFound(fav_name))?;
-            Ok(fav.path.clone())
-        } else {
-            self.remote
-                .ok_or(crate::error::Error::MissingArgs(
-                    "remote is required (or use favorite=)",
-                ))?
-                .into_path(self.owner, self.repository, self.name, self.commit)
-                .ok_or(crate::error::Error::MissingArgs(
-                    "owner and repository are required for github/filesystem, name for mock",
-                ))
-        }
+        self.remote
+            .ok_or(crate::error::Error::MissingArgs(
+                "remote is required",
+            ))?
+            .into_path(self.owner, self.repository, self.name, self.commit)
+            .ok_or(crate::error::Error::MissingArgs(
+                "owner and repository are required for github/filesystem, name for mock",
+            ))
     }
 }

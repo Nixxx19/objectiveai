@@ -105,110 +105,16 @@ fn collect_errors(chunk: &objectiveai::functions::executions::response::streamin
     }
 }
 
-/// Function args for executions — supports mock remote via RemoteWithMock.
-#[derive(Args)]
-pub struct FunctionArgs {
-    /// Get function by favorite name
-    #[arg(long, conflicts_with_all = [
-        "function_remote", "function_owner", "function_repository", "function_name", "function_commit"
-    ])]
-    pub function_favorite: Option<String>,
-    /// Function remote source (github, filesystem, or mock)
-    #[arg(long, value_enum,
-        requires_if("github", "function_owner"),
-        requires_if("github", "function_repository"),
-        requires_if("filesystem", "function_owner"),
-        requires_if("filesystem", "function_repository"),
-        requires_if("mock", "function_name"),
-    )]
-    pub function_remote: Option<crate::remote::RemoteWithMock>,
-    /// Function owner (github/filesystem)
-    #[arg(long, conflicts_with = "function_name")]
-    pub function_owner: Option<String>,
-    /// Function repository (github/filesystem)
-    #[arg(long, conflicts_with = "function_name")]
-    pub function_repository: Option<String>,
-    /// Function name (mock only)
-    #[arg(long, conflicts_with_all = ["function_owner", "function_repository", "function_commit"])]
-    pub function_name: Option<String>,
-    /// Function commit (optional, github/filesystem only)
-    #[arg(long)]
-    pub function_commit: Option<String>,
-}
-
-impl FunctionArgs {
-    fn resolve(self) -> Result<objectiveai::RemotePathCommitOptional, crate::error::Error> {
-        if let Some(fav_name) = self.function_favorite {
-            let (_, mut config) = crate::config::read()?;
-            let favorites = config.functions().get_favorites().to_vec();
-            let fav = favorites.into_iter().find(|f| f.get_name() == fav_name)
-                .ok_or_else(|| crate::error::Error::FavoriteNotFound(fav_name))?;
-            Ok(fav.path.clone())
-        } else {
-            self.function_remote
-                .ok_or(crate::error::Error::MissingArgs("--function-remote is required (or use --function-favorite)"))?
-                .into_path(self.function_owner, self.function_repository, self.function_name, self.function_commit)
-                .ok_or(crate::error::Error::MissingArgs("--function-owner and --function-repository are required for github/filesystem, --function-name for mock"))
-        }
-    }
-}
-
-/// Profile args for executions — supports mock remote via RemoteWithMock.
-#[derive(Args)]
-pub struct ProfileArgs {
-    /// Get profile by favorite name
-    #[arg(long, conflicts_with_all = [
-        "profile_remote", "profile_owner", "profile_repository", "profile_name", "profile_commit"
-    ])]
-    pub profile_favorite: Option<String>,
-    /// Profile remote source (github, filesystem, or mock)
-    #[arg(long, value_enum,
-        requires_if("github", "profile_owner"),
-        requires_if("github", "profile_repository"),
-        requires_if("filesystem", "profile_owner"),
-        requires_if("filesystem", "profile_repository"),
-        requires_if("mock", "profile_name"),
-    )]
-    pub profile_remote: Option<crate::remote::RemoteWithMock>,
-    /// Profile owner (github/filesystem)
-    #[arg(long, conflicts_with = "profile_name")]
-    pub profile_owner: Option<String>,
-    /// Profile repository (github/filesystem)
-    #[arg(long, conflicts_with = "profile_name")]
-    pub profile_repository: Option<String>,
-    /// Profile name (mock only)
-    #[arg(long, conflicts_with_all = ["profile_owner", "profile_repository", "profile_commit"])]
-    pub profile_name: Option<String>,
-    /// Profile commit (optional, github/filesystem only)
-    #[arg(long)]
-    pub profile_commit: Option<String>,
-}
-
-impl ProfileArgs {
-    fn resolve(self) -> Result<objectiveai::RemotePathCommitOptional, crate::error::Error> {
-        if let Some(fav_name) = self.profile_favorite {
-            let (_, mut config) = crate::config::read()?;
-            let favorites = config.functions().profiles().get_favorites().to_vec();
-            let fav = favorites.into_iter().find(|f| f.get_name() == fav_name)
-                .ok_or_else(|| crate::error::Error::FavoriteNotFound(fav_name))?;
-            Ok(fav.path.clone())
-        } else {
-            self.profile_remote
-                .ok_or(crate::error::Error::MissingArgs("--profile-remote is required (or use --profile-favorite)"))?
-                .into_path(self.profile_owner, self.profile_repository, self.profile_name, self.profile_commit)
-                .ok_or(crate::error::Error::MissingArgs("--profile-owner and --profile-repository are required for github/filesystem, --profile-name for mock"))
-        }
-    }
-}
-
 #[derive(Subcommand)]
 pub enum Commands {
     /// Standard execution strategy (scalar or vector)
     Standard {
-        #[command(flatten)]
-        function: FunctionArgs,
-        #[command(flatten)]
-        profile: ProfileArgs,
+        /// Function reference (e.g. favorite=name or remote=github,owner=x,repository=y)
+        #[arg(long)]
+        function: crate::favorite_ref::FavoriteRef,
+        /// Profile reference (e.g. favorite=name or remote=github,owner=x,repository=y)
+        #[arg(long)]
+        profile: crate::favorite_ref::FavoriteRef,
         #[command(flatten)]
         input: InputSource,
         #[command(flatten)]
@@ -222,10 +128,12 @@ pub enum Commands {
     },
     /// Swiss System tournament strategy (vector only)
     SwissSystem {
-        #[command(flatten)]
-        function: FunctionArgs,
-        #[command(flatten)]
-        profile: ProfileArgs,
+        /// Function reference (e.g. favorite=name or remote=github,owner=x,repository=y)
+        #[arg(long)]
+        function: crate::favorite_ref::FavoriteRef,
+        /// Profile reference (e.g. favorite=name or remote=github,owner=x,repository=y)
+        #[arg(long)]
+        profile: crate::favorite_ref::FavoriteRef,
         #[command(flatten)]
         input: InputSource,
         #[command(flatten)]
@@ -245,17 +153,27 @@ pub enum Commands {
     },
 }
 
+fn fn_favorites() -> Vec<objectiveai::config::Favorite> {
+    let (_, mut config) = crate::config::read().unwrap();
+    config.functions().get_favorites().to_vec()
+}
+
+fn profile_favorites() -> Vec<objectiveai::config::Favorite> {
+    let (_, mut config) = crate::config::read().unwrap();
+    config.functions().profiles().get_favorites().to_vec()
+}
+
 impl Commands {
     pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
         let (function_path, profile_path, input_source, continuation_args, retry_token, seed, strategy) = match self {
             Commands::Standard { function, profile, input, continuation, retry_token, seed } => {
-                let fp = function.resolve()?;
-                let pp = profile.resolve()?;
+                let fp = function.resolve(fn_favorites)?;
+                let pp = profile.resolve(profile_favorites)?;
                 (fp, pp, input, continuation, retry_token, seed, objectiveai::functions::executions::request::Strategy::Default)
             }
             Commands::SwissSystem { function, profile, input, continuation, retry_token, seed, pool, rounds } => {
-                let fp = function.resolve()?;
-                let pp = profile.resolve()?;
+                let fp = function.resolve(fn_favorites)?;
+                let pp = profile.resolve(profile_favorites)?;
                 let strategy = objectiveai::functions::executions::request::Strategy::SwissSystem { pool, rounds };
                 (fp, pp, input, continuation, retry_token, seed, strategy)
             }

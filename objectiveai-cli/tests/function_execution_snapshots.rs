@@ -22,10 +22,12 @@ macro_rules! snapshot_test {
             let input = serde_json::to_string(&serde_json::json!($input)).unwrap();
             let seed_str = $seed.to_string();
 
+            let function_str = format!("remote=mock,name={}", $function);
+            let profile_str = format!("remote=mock,name={}", $profile);
             let cli_result = cli_test_util::run_cli(&[
                 "functions", "executions", "create", "standard",
-                "--function-remote", "mock", "--function-name", $function,
-                "--profile-remote", "mock", "--profile-name", $profile,
+                "--function", &function_str,
+                "--profile", &profile_str,
                 "--input-inline", &input,
                 "--seed", &seed_str,
             ]);

@@ -1,16 +1,16 @@
-use crate::path_ref::PathRef;
+use crate::favorite_ref::FavoriteRef;
 
-/// Agent reference — a [`PathRef`] that resolves to an agent-specific type.
+/// Agent reference — a [`FavoriteRef`] that resolves to an agent-specific type.
 ///
-/// Parsed from `key=value,key=value` format. See [`PathRef`] for supported keys.
+/// Parsed from `key=value,key=value` format. See [`crate::path_ref::PathRef`] for supported keys.
 #[derive(Clone, Debug)]
-pub struct AgentRef(pub PathRef);
+pub struct AgentRef(pub FavoriteRef);
 
 impl std::str::FromStr for AgentRef {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        s.parse::<PathRef>().map(AgentRef)
+        s.parse::<FavoriteRef>().map(AgentRef)
     }
 }
 
@@ -27,10 +27,12 @@ impl AgentRef {
         objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
         crate::error::Error,
     > {
+        let path = self.0.resolve(|| {
+            let (_, mut config) = crate::config::read().unwrap();
+            config.agents().get_favorites().to_vec()
+        })?;
         Ok(
-            objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::Remote(
-                self.0.resolve()?,
-            ),
+            objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::Remote(path),
         )
     }
 }
