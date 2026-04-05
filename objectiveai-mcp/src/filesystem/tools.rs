@@ -1,7 +1,7 @@
 use rmcp::{
     handler::server::router::tool::ToolRouter,
     handler::server::wrapper::Parameters,
-    model::Content,
+    model::{CallToolResult, Content},
     schemars, tool, tool_router,
 };
 
@@ -17,6 +17,8 @@ pub struct ReadRequest {
     offset: Option<usize>,
     #[schemars(description = "The number of lines to read. Only provide if the file is too large to read at once")]
     limit: Option<usize>,
+    #[schemars(description = "Page range for PDF files (e.g., \"1-5\", \"3\", \"10-20\"). Only applicable to PDF files. Maximum 20 pages per request.")]
+    pages: Option<String>,
 }
 
 #[derive(Debug, serde::Deserialize, schemars::JsonSchema)]
@@ -121,10 +123,30 @@ impl FilesystemTools {
     }
 
     #[tool(name = "Read", description = "Reads a file from the local filesystem.")]
-    fn read(&self, Parameters(req): Parameters<ReadRequest>) -> String {
+    fn read(&self, Parameters(req): Parameters<ReadRequest>) -> Result<CallToolResult, rmcp::ErrorData> {
         match super::read_file::read_file(&self.file_state, &req.file_path, req.offset, req.limit) {
-            Ok(output) => output,
-            Err(e) => e,
+            Ok(super::read_file::ReadOutput::Text(json)) => {
+                Ok(CallToolResult::success(vec![Content::text(json)]))
+            }
+            Ok(super::read_file::ReadOutput::Image { base64, media_type }) => {
+                Ok(CallToolResult::success(vec![Content::image(base64, media_type)]))
+            }
+            Ok(super::read_file::ReadOutput::Notebook(blocks)) => {
+                let contents: Vec<Content> = blocks.into_iter().map(|b| match b {
+                    super::notebook::NotebookBlock::Text(text) => Content::text(text),
+                    super::notebook::NotebookBlock::Image { base64, media_type } => {
+                        Content::image(base64, media_type)
+                    }
+                }).collect();
+                Ok(CallToolResult::success(contents))
+            }
+            Ok(super::read_file::ReadOutput::FileUnchanged(stub)) => {
+                Ok(CallToolResult::success(vec![Content::text(stub)]))
+            }
+            Ok(super::read_file::ReadOutput::Pdf(msg)) => {
+                Ok(CallToolResult::success(vec![Content::text(msg)]))
+            }
+            Err(e) => Ok(CallToolResult::error(vec![Content::text(e)])),
         }
     }
 

@@ -1,4 +1,5 @@
 const MAX_OUTPUT_CHARS: usize = 30_000;
+const MAX_PERSISTED_SIZE: usize = 64 * 1024 * 1024; // 64MB
 
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -18,6 +19,10 @@ pub struct BashOutput {
     pub return_code_interpretation: Option<String>,
     #[serde(rename = "isImage", skip_serializing_if = "std::ops::Not::not")]
     pub is_image: bool,
+    #[serde(skip_serializing_if = "Option::is_none", rename = "persistedOutputPath")]
+    pub persisted_output_path: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none", rename = "persistedOutputSize")]
+    pub persisted_output_size: Option<u64>,
 }
 
 /// Per-session shell state. Tracks CWD, shell snapshot, session env vars,
@@ -227,13 +232,54 @@ pub async fn execute_bash(
                 format!("{}\n{}", stdout_str, stderr_str)
             };
 
-            // Truncate if output exceeds the limit
+            let mut persisted_output_path: Option<String> = None;
+            let mut persisted_output_size: Option<u64> = None;
+
+            // If output exceeds inline limit, persist to file for later Read access
+            if combined.len() > MAX_OUTPUT_CHARS {
+                persisted_output_size = Some(combined.len() as u64);
+
+                if let Ok(dir) =
+                    std::fs::create_dir_all(tool_results_dir()).map(|_| tool_results_dir())
+                {
+                    let file_name = format!(
+                        "bash-output-{}",
+                        CWD_COUNTER.fetch_add(1, Ordering::Relaxed)
+                    );
+                    let file_path = dir.join(&file_name);
+                    // Cap persisted file at MAX_PERSISTED_SIZE
+                    let persist_content = if combined.len() > MAX_PERSISTED_SIZE {
+                        &combined[..MAX_PERSISTED_SIZE]
+                    } else {
+                        &combined
+                    };
+                    if std::fs::write(&file_path, persist_content).is_ok() {
+                        persisted_output_path =
+                            Some(file_path.to_string_lossy().into_owned());
+                    }
+                }
+            }
+
+            // Truncate inline output
             let combined = if combined.len() > MAX_OUTPUT_CHARS {
                 let total_lines = combined.lines().count();
                 let truncated = &combined[..MAX_OUTPUT_CHARS];
                 let kept_lines = truncated.lines().count();
                 let dropped = total_lines - kept_lines;
-                format!("{}\n\n... [{} lines truncated] ...", truncated, dropped)
+                if let Some(ref path) = persisted_output_path {
+                    format!(
+                        "{}\n\n... [{} lines truncated] ...\nFull output ({} bytes) saved to: {}\nUse the Read tool to access it.",
+                        truncated,
+                        dropped,
+                        persisted_output_size.unwrap_or(0),
+                        path
+                    )
+                } else {
+                    format!(
+                        "{}\n\n... [{} lines truncated] ...",
+                        truncated, dropped
+                    )
+                }
             } else {
                 combined
             };
@@ -266,6 +312,8 @@ pub async fn execute_bash(
                 exit_code,
                 return_code_interpretation,
                 is_image,
+                persisted_output_path,
+                persisted_output_size,
             }
         }
         Ok(Err(e)) => return Err(format!("Command failed: {e}")),
@@ -276,6 +324,8 @@ pub async fn execute_bash(
             exit_code: None,
             return_code_interpretation: None,
             is_image: false,
+            persisted_output_path: None,
+            persisted_output_size: None,
         },
     };
 
@@ -333,6 +383,13 @@ fn cwd_file_path() -> String {
         std::process::id(),
         id,
     )
+}
+
+fn tool_results_dir() -> std::path::PathBuf {
+    std::env::temp_dir().join(format!(
+        "objectiveai-mcp-{}-tool-results",
+        std::process::id()
+    ))
 }
 
 /// Parsed data URI components.

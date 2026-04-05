@@ -5,7 +5,7 @@ edition = "2024"
 
 [features]
 default = []
-filesystem = ["glob", "regex", "walkdir", "serde_json", "pathdiff", "indexmap"]
+filesystem = ["glob", "regex", "walkdir", "serde_json", "pathdiff", "indexmap", "base64"]
 cli = ["dep:objectiveai-cli", "serde_json"]
 cli-viewer = ["cli", "objectiveai-cli/viewer"]
 cli-rustpython = ["cli", "objectiveai-cli/rustpython"]
@@ -13,6 +13,7 @@ cli-systempython = ["cli", "objectiveai-cli/systempython"]
 
 [dependencies]
 anyhow = "1.0.102"
+base64 = { version = "0.22", optional = true }
 futures = "0.3"
 glob = { version = "0.3", optional = true }
 indexmap = { version = "2", optional = true }
