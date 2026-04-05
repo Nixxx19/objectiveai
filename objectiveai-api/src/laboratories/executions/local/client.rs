@@ -62,22 +62,40 @@ fn mcp_tar(binary: &[u8]) -> Vec<u8> {
     ar.into_inner().expect("failed to finalize tar archive")
 }
 
+const MCP_CONTAINER_PORT: &str = "3000/tcp";
+
 /// Spawn a single builder container: create, start, upload MCP binary, and start the MCP server.
-/// Returns the container ID.
+/// Returns the host port that the MCP server is exposed on.
 async fn spawn_builder(
     docker: &bollard::Docker,
     image: &str,
     index: usize,
     mcp_tar: &[u8],
-) -> Result<String, super::Error> {
+) -> Result<u16, super::Error> {
+    use bollard::models::{HostConfig, PortBinding, PortMap};
+
     let container_name = format!("objectiveai-lab-builder-{index}");
     let options = CreateContainerOptionsBuilder::default()
         .name(container_name.as_str())
         .build();
 
+    let mut port_bindings = PortMap::new();
+    port_bindings.insert(
+        MCP_CONTAINER_PORT.to_string(),
+        Some(vec![PortBinding {
+            host_ip: Some("0.0.0.0".to_string()),
+            host_port: Some(String::new()), // Docker assigns a free port
+        }]),
+    );
+
     let config = ContainerCreateBody {
         image: Some(image.to_string()),
         cmd: Some(vec!["sleep".to_string(), "infinity".to_string()]),
+        exposed_ports: Some(vec![MCP_CONTAINER_PORT.to_string()]),
+        host_config: Some(HostConfig {
+            port_bindings: Some(port_bindings),
+            ..Default::default()
+        }),
         ..Default::default()
     };
 
@@ -91,6 +109,7 @@ async fn spawn_builder(
         .await
         .map_err(|e| super::Error::Docker(e.to_string()))?;
 
+    // Upload the MCP binary
     let upload_options = UploadToContainerOptionsBuilder::default()
         .path("/")
         .build();
@@ -104,8 +123,10 @@ async fn spawn_builder(
         .await
         .map_err(|e| super::Error::Docker(e.to_string()))?;
 
+    // Start the MCP server with PORT env var
     let exec_options = CreateExecOptions {
         cmd: Some(vec!["/objectiveai-mcp"]),
+        env: Some(vec!["PORT=3000"]),
         attach_stdin: Some(true),
         attach_stdout: Some(true),
         attach_stderr: Some(true),
@@ -122,7 +143,25 @@ async fn spawn_builder(
         .await
         .map_err(|e| super::Error::Docker(e.to_string()))?;
 
-    Ok(container.id)
+    // Inspect container to get the assigned host port
+    let inspect = docker
+        .inspect_container(&container.id, None)
+        .await
+        .map_err(|e| super::Error::Docker(e.to_string()))?;
+
+    let host_port = inspect
+        .network_settings
+        .and_then(|ns| ns.ports)
+        .and_then(|ports| ports.get(MCP_CONTAINER_PORT).cloned())
+        .flatten()
+        .and_then(|bindings| bindings.into_iter().next())
+        .and_then(|b| b.host_port)
+        .and_then(|p| p.parse::<u16>().ok())
+        .ok_or_else(|| super::Error::Docker(
+            format!("failed to get host port for container {container_name}"),
+        ))?;
+
+    Ok(host_port)
 }
 
 /// Add an MCP server address to an inline agent base.
@@ -222,7 +261,7 @@ where
             .iter()
             .map(|agent_ref| self.retrieve_router.get_agent(&ctx, agent_ref.clone()))
             .collect();
-        let (container_ids, resolved_agents) = tokio::try_join!(
+        let (host_ports, resolved_agents) = tokio::try_join!(
             futures::future::try_join_all(docker_futs),
             async {
                 futures::future::try_join_all(resolve_futs)
@@ -236,9 +275,8 @@ where
         for (i, agent_wf) in resolved_agents.into_iter().enumerate() {
             let mut agent_base = agent_wf.inline().inner.clone().into_base();
 
-            // TODO: derive MCP URL from container networking
-            let mcp_url = format!("http://{}:3000", container_ids[i]);
-            inject_mcp_server(&mut agent_base, mcp_url);
+            let host_port = host_ports[i];
+            inject_mcp_server(&mut agent_base, format!("http://localhost:{host_port}"));
 
             inline_agents.push(agent_base);
         }
