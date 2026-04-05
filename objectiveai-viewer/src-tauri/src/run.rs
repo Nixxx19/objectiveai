@@ -11,6 +11,7 @@ use tauri::Emitter;
 use tokio::sync::mpsc;
 use crate::agent;
 use crate::functions;
+use crate::laboratories;
 
 #[derive(Envconfig)]
 struct EnvConfigBuilder {
@@ -105,6 +106,16 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                 let tx = tx.clone();
                 move |Json(request): Json<functions::inventions::recursive::request::Request>| async move {
                     tx.send(Event::FunctionsInventionsRecursive(request)).ok();
+                    StatusCode::OK
+                }
+            }),
+        )
+        .route(
+            "/laboratories/executions",
+            axum::routing::post({
+                let tx = tx.clone();
+                move |Json(request): Json<laboratories::executions::request::Request>| async move {
+                    tx.send(Event::LaboratoriesExecutions(request)).ok();
                     StatusCode::OK
                 }
             }),
@@ -213,6 +224,7 @@ pub enum Event {
     AgentCompletions(agent::completions::request::Request),
     FunctionsExecutions(functions::executions::request::Request),
     FunctionsInventionsRecursive(functions::inventions::recursive::request::Request),
+    LaboratoriesExecutions(laboratories::executions::request::Request),
 }
 
 impl Event {
@@ -221,6 +233,7 @@ impl Event {
             Event::AgentCompletions(_) => "agent-completions",
             Event::FunctionsExecutions(_) => "functions-executions",
             Event::FunctionsInventionsRecursive(_) => "functions-inventions-recursive",
+            Event::LaboratoriesExecutions(_) => "laboratories-executions",
         }
     }
 }

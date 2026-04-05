@@ -8,15 +8,19 @@ import {
   FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema,
   FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema,
   FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema,
+  LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema,
+  LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkSchema,
   ErrorResponseErrorSchema,
   agentCompletionsResponseStreamingAgentCompletionChunkMerged,
   functionsExecutionsResponseStreamingFunctionExecutionChunkMerged,
   functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged,
+  laboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkMerged,
 } from "objectiveai";
 import type {
   AgentCompletionsResponseStreamingAgentCompletionChunk,
   FunctionsExecutionsResponseStreamingFunctionExecutionChunk,
   FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk,
+  LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk,
 } from "objectiveai";
 
 // Extended schemas with required id
@@ -34,6 +38,11 @@ const FunctionInventionRecursiveCreateParamsSchema = FunctionsInventionsRecursiv
   id: z.string(),
 });
 type FunctionInventionRecursiveCreateParams = z.infer<typeof FunctionInventionRecursiveCreateParamsSchema>;
+
+const LaboratoryExecutionCreateParamsSchema = LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema.extend({
+  id: z.string(),
+});
+type LaboratoryExecutionCreateParams = z.infer<typeof LaboratoryExecutionCreateParamsSchema>;
 
 const ResponseErrorSchema = ErrorResponseErrorSchema.extend({
   id: z.string(),
@@ -54,6 +63,11 @@ type FunctionExecutionEvent =
 type FunctionInventionRecursiveEvent =
   | { type: "begin"; data: FunctionInventionRecursiveCreateParams }
   | { type: "chunk"; data: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk }
+  | { type: "error"; data: ResponseError };
+
+type LaboratoryExecutionEvent =
+  | { type: "begin"; data: LaboratoryExecutionCreateParams }
+  | { type: "chunk"; data: LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk }
   | { type: "error"; data: ResponseError };
 
 // Entry in the list
@@ -81,7 +95,15 @@ interface FunctionInventionRecursiveEntry {
   error: ResponseError | null;
 }
 
-type Entry = AgentCompletionEntry | FunctionExecutionEntry | FunctionInventionRecursiveEntry;
+interface LaboratoryExecutionEntry {
+  kind: "laboratory";
+  id: string;
+  request: LaboratoryExecutionCreateParams;
+  chunk: LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk | null;
+  error: ResponseError | null;
+}
+
+type Entry = AgentCompletionEntry | FunctionExecutionEntry | FunctionInventionRecursiveEntry | LaboratoryExecutionEntry;
 
 function classifyAgentCompletion(payload: unknown): AgentCompletionEvent | null {
   const beginParse = AgentCompletionCreateParamsSchema.safeParse(payload);
@@ -109,6 +131,16 @@ function classifyFunctionInventionRecursive(payload: unknown): FunctionInvention
   const errorParse = ResponseErrorSchema.safeParse(payload);
   if (errorParse.success) return { type: "error", data: errorParse.data };
   const chunkParse = FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema.safeParse(payload);
+  if (chunkParse.success) return { type: "chunk", data: chunkParse.data };
+  return null;
+}
+
+function classifyLaboratoryExecution(payload: unknown): LaboratoryExecutionEvent | null {
+  const beginParse = LaboratoryExecutionCreateParamsSchema.safeParse(payload);
+  if (beginParse.success) return { type: "begin", data: beginParse.data };
+  const errorParse = ResponseErrorSchema.safeParse(payload);
+  if (errorParse.success) return { type: "error", data: errorParse.data };
+  const chunkParse = LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkSchema.safeParse(payload);
   if (chunkParse.success) return { type: "chunk", data: chunkParse.data };
   return null;
 }
@@ -235,10 +267,47 @@ function App() {
       });
     });
 
+    const unlistenLaboratory = listen<unknown>("laboratories-executions", (event) => {
+      const classified = classifyLaboratoryExecution(event.payload);
+      if (!classified) return;
+
+      setEntries((prev) => {
+        switch (classified.type) {
+          case "begin":
+            return [...prev, {
+              kind: "laboratory" as const,
+              id: classified.data.id,
+              request: classified.data,
+              chunk: null,
+              error: null,
+            }];
+          case "error": {
+            const id = classified.data.id;
+            if (!prev.some((e) => e.id === id)) return prev;
+            return prev.map((e) =>
+              e.id === id ? { ...e, error: classified.data } : e
+            );
+          }
+          case "chunk": {
+            const id = classified.data.id;
+            if (!prev.some((e) => e.id === id && e.kind === "laboratory")) return prev;
+            return prev.map((e) => {
+              if (e.id !== id || e.kind !== "laboratory") return e;
+              const [merged] = e.chunk
+                ? laboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkMerged(e.chunk, classified.data)
+                : [classified.data, true];
+              return { ...e, chunk: merged };
+            });
+          }
+        }
+      });
+    });
+
     return () => {
       unlistenAgentCompletion.then((fn) => fn());
       unlistenExecution.then((fn) => fn());
       unlistenInvention.then((fn) => fn());
+      unlistenLaboratory.then((fn) => fn());
     };
   }, []);
 

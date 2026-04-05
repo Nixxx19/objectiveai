@@ -57,6 +57,9 @@ impl<CTXEXT: ctx::ContextExt + Send + Sync + 'static> Client<CTXEXT> {
                     super::request::Request::FunctionInventionRecursive(_) => {
                         format!("{}/functions/inventions/recursive", address)
                     }
+                    super::request::Request::LaboratoryExecution(_) => {
+                        format!("{}/laboratories/executions", address)
+                    }
                 };
 
                 let body = match serde_json::to_vec(&request) {
@@ -252,6 +255,44 @@ impl<CTXEXT: ctx::ContextExt + Send + Sync + 'static> Client<CTXEXT> {
     ) {
         self.send_with_ctx(ctx, super::request::Request::FunctionInventionRecursive(
             super::request::FunctionInventionRecursiveRequest::Continue(chunk),
+        ));
+    }
+
+    pub fn send_laboratory_execution_begin(
+        &self,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
+        id: String,
+        request: Arc<objectiveai::laboratories::executions::request::LaboratoryExecutionCreateParams>,
+    ) {
+        self.send_with_ctx(ctx, super::request::Request::LaboratoryExecution(
+            super::request::LaboratoryExecutionRequest::Begin(super::request::LaboratoryExecutionCreateParams {
+                id,
+                inner: request,
+            }),
+        ));
+    }
+
+    pub fn send_laboratory_execution_continue(
+        &self,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
+        chunk: objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk,
+    ) {
+        self.send_with_ctx(ctx, super::request::Request::LaboratoryExecution(
+            super::request::LaboratoryExecutionRequest::Continue(chunk),
+        ));
+    }
+
+    pub fn send_laboratory_execution_error(
+        &self,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
+        id: String,
+        error: objectiveai::error::ResponseError,
+    ) {
+        self.send_with_ctx(ctx, super::request::Request::LaboratoryExecution(
+            super::request::LaboratoryExecutionRequest::Error(super::request::ResponseError {
+                id,
+                inner: error,
+            }),
         ));
     }
 

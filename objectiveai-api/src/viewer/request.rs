@@ -54,9 +54,25 @@ pub enum FunctionInventionRecursiveRequest {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LaboratoryExecutionCreateParams {
+    pub id: String,
+    #[serde(flatten)]
+    pub inner: Arc<objectiveai::laboratories::executions::request::LaboratoryExecutionCreateParams>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum LaboratoryExecutionRequest {
+    Begin(LaboratoryExecutionCreateParams),
+    Continue(objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk),
+    Error(ResponseError),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Request {
     AgentCompletion(AgentCompletionRequest),
     FunctionExecution(FunctionExecutionRequest),
     FunctionInventionRecursive(FunctionInventionRecursiveRequest),
+    LaboratoryExecution(LaboratoryExecutionRequest),
 }
