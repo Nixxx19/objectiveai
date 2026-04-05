@@ -135,6 +135,8 @@ struct EnvConfigBuilder {
     mock_delay_ms: Option<u64>,
     #[envconfig(from = "MOCK_MAX_TOOL_CALLS")]
     mock_max_tool_calls: Option<u32>,
+    #[envconfig(from = "FUNCTION_INVENTION_FORBID_OVERWRITE")]
+    function_invention_forbid_overwrite: Option<String>,
     #[envconfig(from = "ADDRESS")]
     address: Option<String>,
     #[envconfig(from = "PORT")]
@@ -195,6 +197,7 @@ impl EnvConfigBuilder {
             config_base_dir: self.config_base_dir,
             mock_delay_ms: self.mock_delay_ms,
             mock_max_tool_calls: self.mock_max_tool_calls,
+            function_invention_forbid_overwrite: self.function_invention_forbid_overwrite.map(|s| parse_bool(&s)),
             address: self.address,
             port: self.port,
             suppress_output: None,
@@ -251,6 +254,7 @@ pub struct ConfigBuilder {
     pub config_base_dir: Option<String>,
     pub mock_delay_ms: Option<u64>,
     pub mock_max_tool_calls: Option<u32>,
+    pub function_invention_forbid_overwrite: Option<bool>,
     pub address: Option<String>,
     pub port: Option<u16>,
     pub suppress_output: Option<bool>,
@@ -326,6 +330,7 @@ impl ConfigBuilder {
             },
             mock_delay_ms: self.mock_delay_ms.unwrap_or(0),
             mock_max_tool_calls: self.mock_max_tool_calls.unwrap_or(1000),
+            function_invention_forbid_overwrite: self.function_invention_forbid_overwrite.unwrap_or(false),
             address: self.address.unwrap_or_else(|| "0.0.0.0".to_string()),
             port: self.port.unwrap_or(5000),
             suppress_output: self.suppress_output.unwrap_or(false),
@@ -381,6 +386,7 @@ pub struct Config {
     pub config_base_dir: std::path::PathBuf,
     pub mock_delay_ms: u64,
     pub mock_max_tool_calls: u32,
+    pub function_invention_forbid_overwrite: bool,
     pub address: String,
     pub port: u16,
     pub suppress_output: bool,
@@ -435,6 +441,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         config_base_dir,
         mock_delay_ms,
         mock_max_tool_calls,
+        function_invention_forbid_overwrite,
         address,
         port,
         suppress_output,
@@ -627,6 +634,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
             retrieve_router.clone(),
             Arc::new(functions::inventions::usage_handler::LogUsageHandler),
             true, // persist
+            function_invention_forbid_overwrite,
         ));
 
     // Function Inventions Recursive Client

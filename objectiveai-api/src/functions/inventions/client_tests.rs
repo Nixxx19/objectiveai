@@ -200,6 +200,7 @@ fn make_client() -> Arc<TestClient> {
         function_retrieve_router,
         Arc::new(StubInventionUsageHandler),
         true,
+        false,
     ))
 }
 

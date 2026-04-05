@@ -77,6 +77,7 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM,
         Arc<crate::retrieval::retrieve::Router<FFNG, FFNF, FFNM, CTXEXT>>,
     pub usage_handler: Arc<IUSG>,
     pub persist: bool,
+    pub forbid_overwrite: bool,
 }
 
 impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, FFNG, FFNF, FFNM>
@@ -95,6 +96,7 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, 
         >,
         usage_handler: Arc<IUSG>,
         persist: bool,
+        forbid_overwrite: bool,
     ) -> Self {
         Self {
             agent_client,
@@ -103,6 +105,7 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, IUSG, 
             retrieve_router,
             usage_handler,
             persist,
+            forbid_overwrite,
         }
     }
 }
@@ -382,6 +385,9 @@ where
 
         // Check name existence (skip if overwrite is true).
         if request.overwrite == Some(true) {
+            if self.forbid_overwrite {
+                return Err(super::Error::OverwriteForbidden);
+            }
             return Ok(());
         }
 

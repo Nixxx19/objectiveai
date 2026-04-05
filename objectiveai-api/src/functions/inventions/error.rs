@@ -12,6 +12,9 @@ pub enum Error {
     /// The name already exists and overwrite is not enabled.
     #[error("name already exists: {0}")]
     NameAlreadyExists(String),
+    /// Overwrite was requested but is forbidden by server configuration.
+    #[error("overwrite forbidden")]
+    OverwriteForbidden,
     /// GitHub token validation failed.
     #[error("github token error: {0}")]
     GithubToken(#[from] crate::github::Error),
@@ -38,6 +41,7 @@ impl StatusError for Error {
             Error::AgentCompletions(e) => e.status(),
             Error::InvalidState(_) => 400,
             Error::NameAlreadyExists(_) => 409,
+            Error::OverwriteForbidden => 403,
             Error::GithubToken(e) => e.status(),
             Error::GithubTokenMissingPermissions(_) => 403,
             Error::StateNotFound => 404,
@@ -60,6 +64,10 @@ impl StatusError for Error {
             Error::NameAlreadyExists(name) => serde_json::json!({
                 "kind": "name_already_exists",
                 "error": format!("Repository '{}' already exists. Set overwrite to true to allow this.", name),
+            }),
+            Error::OverwriteForbidden => serde_json::json!({
+                "kind": "overwrite_forbidden",
+                "error": "Overwrite is forbidden by server configuration.",
             }),
             Error::GithubToken(e) => serde_json::json!({
                 "kind": "github_token",

@@ -227,6 +227,7 @@ fn make_client() -> Arc<TestClient> {
         function_retrieve_router,
         Arc::new(StubInventionUsageHandler),
         true,
+        false,
     ));
     let viewer_client = Arc::new(crate::viewer::Client::new(
         reqwest::Client::new(),
