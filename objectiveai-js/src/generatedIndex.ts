@@ -5,6 +5,7 @@ export * from "./auth/index";
 export * from "./config/index";
 export * from "./error/index";
 export * from "./functions/index";
+export * from "./laboratories/index";
 export * from "./swarm/index";
 export * from "./vector/index";
 export * from "./prefixedUuid";

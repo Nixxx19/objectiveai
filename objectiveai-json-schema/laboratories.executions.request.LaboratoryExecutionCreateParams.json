@@ -57,10 +57,16 @@
       }
     },
     "evaluation_output_schema": {
-      "description": "Output schema for evaluation (InputSchema as JSON).",
+      "description": "Output schema for evaluation.",
+      "$ref": "functions.expression.InputSchema"
+    },
+    "max_evaluation_retries": {
+      "description": "Maximum number of evaluation retries if validation fails.\nDefaults to 3 if not specified.",
       "anyOf": [
         {
-          "$ref": "functions.expression.InputSchema"
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
         },
         {
           "type": "null"

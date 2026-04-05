@@ -82268,6 +82268,4041 @@ declare function wasmFunctionsAlphaCheckLeafVectorFunction(fn: FunctionsAlphaVec
 declare function wasmFunctionsAlphaCheckBranchScalarFunction(fn: FunctionsAlphaScalarInlineFunction, children?: Record<string, FunctionsFullRemoteFunction>): void;
 declare function wasmFunctionsAlphaCheckBranchVectorFunction(fn: FunctionsAlphaVectorInlineFunction, children?: Record<string, FunctionsFullRemoteFunction>): void;
 
+declare const LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema: z.ZodObject<{
+    builder_agents: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodUnion<readonly [z.ZodObject<{
+        frequency_penalty: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        logit_bias: z.ZodOptional<z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodNumber>>>;
+        max_completion_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        max_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
+        min_p: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        model: z.ZodString;
+        output_mode: z.ZodDefault<z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>>;
+        post_system_prefix_messages: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>>]>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"developer">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>>]>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"system">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"user">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>>>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                function: z.ZodObject<{
+                    arguments: z.ZodString;
+                    name: z.ZodString;
+                }, z.core.$strip>;
+                id: z.ZodString;
+                type: z.ZodLiteral<"function">;
+            }, z.core.$strip>>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"assistant">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>;
+            tool_call_id: z.ZodString;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"tool">;
+        }, z.core.$strip>>]>>>>;
+        prefix_messages: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>>]>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"developer">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>>]>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"system">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"user">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>>>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                function: z.ZodObject<{
+                    arguments: z.ZodString;
+                    name: z.ZodString;
+                }, z.core.$strip>;
+                id: z.ZodString;
+                type: z.ZodLiteral<"function">;
+            }, z.core.$strip>>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"assistant">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>;
+            tool_call_id: z.ZodString;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"tool">;
+        }, z.core.$strip>>]>>>>;
+        presence_penalty: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        provider: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            allow_fallbacks: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            ignore: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodString>>>;
+            only: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodString>>>;
+            order: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodString>>>;
+            quantizations: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodLiteral<"int4">, z.ZodLiteral<"int8">, z.ZodLiteral<"fp4">, z.ZodLiteral<"fp6">, z.ZodLiteral<"fp8">, z.ZodLiteral<"fp16">, z.ZodLiteral<"bf16">, z.ZodLiteral<"fp32">, z.ZodLiteral<"unknown">]>>>>;
+            require_parameters: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        }, z.core.$strip>>>;
+        reasoning: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            effort: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"none">, z.ZodLiteral<"minimal">, z.ZodLiteral<"low">, z.ZodLiteral<"medium">, z.ZodLiteral<"high">, z.ZodLiteral<"xhigh">]>>>;
+            enabled: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            max_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            summary_verbosity: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"concise">, z.ZodLiteral<"detailed">]>>>;
+        }, z.core.$strip>>>;
+        repetition_penalty: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        stop: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodString>]>>>;
+        suffix_messages: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>>]>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"developer">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>>]>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"system">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"user">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>>>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                function: z.ZodObject<{
+                    arguments: z.ZodString;
+                    name: z.ZodString;
+                }, z.core.$strip>;
+                id: z.ZodString;
+                type: z.ZodLiteral<"function">;
+            }, z.core.$strip>>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"assistant">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>;
+            tool_call_id: z.ZodString;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"tool">;
+        }, z.core.$strip>>]>>>>;
+        synthetic_reasoning: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        temperature: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        top_a: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        top_k: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        top_p: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        upstream: z.ZodLiteral<"openrouter">;
+        verbosity: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"low">, z.ZodLiteral<"medium">, z.ZodLiteral<"high">, z.ZodLiteral<"max">]>>>;
+    }, z.core.$strip>, z.ZodObject<{
+        effort: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"low">, z.ZodLiteral<"medium">, z.ZodLiteral<"high">, z.ZodLiteral<"max">]>>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
+        model: z.ZodString;
+        output_mode: z.ZodLiteral<"instruction">;
+        prefix_content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>>>;
+        suffix_content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>>>;
+        synthetic_reasoning: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        system_prompt: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        thinking: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        upstream: z.ZodLiteral<"claude_agent_sdk">;
+    }, z.core.$strip>, z.ZodObject<{
+        error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
+        top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        upstream: z.ZodLiteral<"mock">;
+    }, z.core.$strip>]>, z.ZodObject<{
+        fallbacks: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            frequency_penalty: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            logit_bias: z.ZodOptional<z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodNumber>>>;
+            max_completion_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            max_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
+            min_p: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            model: z.ZodString;
+            output_mode: z.ZodDefault<z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>>;
+            post_system_prefix_messages: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>>]>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"developer">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>>]>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"system">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>, z.ZodObject<{
+                    image_url: z.ZodObject<{
+                        detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"image_url">;
+                }, z.core.$strip>, z.ZodObject<{
+                    input_audio: z.ZodObject<{
+                        data: z.ZodString;
+                        format: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"input_audio">;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"input_video">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"video_url">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    file: z.ZodObject<{
+                        file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"file">;
+                }, z.core.$strip>]>>]>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"user">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>, z.ZodObject<{
+                    image_url: z.ZodObject<{
+                        detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"image_url">;
+                }, z.core.$strip>, z.ZodObject<{
+                    input_audio: z.ZodObject<{
+                        data: z.ZodString;
+                        format: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"input_audio">;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"input_video">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"video_url">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    file: z.ZodObject<{
+                        file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"file">;
+                }, z.core.$strip>]>>]>>>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    function: z.ZodObject<{
+                        arguments: z.ZodString;
+                        name: z.ZodString;
+                    }, z.core.$strip>;
+                    id: z.ZodString;
+                    type: z.ZodLiteral<"function">;
+                }, z.core.$strip>>>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"assistant">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>, z.ZodObject<{
+                    image_url: z.ZodObject<{
+                        detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"image_url">;
+                }, z.core.$strip>, z.ZodObject<{
+                    input_audio: z.ZodObject<{
+                        data: z.ZodString;
+                        format: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"input_audio">;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"input_video">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"video_url">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    file: z.ZodObject<{
+                        file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"file">;
+                }, z.core.$strip>]>>]>;
+                tool_call_id: z.ZodString;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"tool">;
+            }, z.core.$strip>>]>>>>;
+            prefix_messages: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>>]>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"developer">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>>]>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"system">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>, z.ZodObject<{
+                    image_url: z.ZodObject<{
+                        detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"image_url">;
+                }, z.core.$strip>, z.ZodObject<{
+                    input_audio: z.ZodObject<{
+                        data: z.ZodString;
+                        format: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"input_audio">;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"input_video">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"video_url">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    file: z.ZodObject<{
+                        file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"file">;
+                }, z.core.$strip>]>>]>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"user">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>, z.ZodObject<{
+                    image_url: z.ZodObject<{
+                        detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"image_url">;
+                }, z.core.$strip>, z.ZodObject<{
+                    input_audio: z.ZodObject<{
+                        data: z.ZodString;
+                        format: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"input_audio">;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"input_video">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"video_url">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    file: z.ZodObject<{
+                        file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"file">;
+                }, z.core.$strip>]>>]>>>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    function: z.ZodObject<{
+                        arguments: z.ZodString;
+                        name: z.ZodString;
+                    }, z.core.$strip>;
+                    id: z.ZodString;
+                    type: z.ZodLiteral<"function">;
+                }, z.core.$strip>>>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"assistant">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>, z.ZodObject<{
+                    image_url: z.ZodObject<{
+                        detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"image_url">;
+                }, z.core.$strip>, z.ZodObject<{
+                    input_audio: z.ZodObject<{
+                        data: z.ZodString;
+                        format: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"input_audio">;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"input_video">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"video_url">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    file: z.ZodObject<{
+                        file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"file">;
+                }, z.core.$strip>]>>]>;
+                tool_call_id: z.ZodString;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"tool">;
+            }, z.core.$strip>>]>>>>;
+            presence_penalty: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            provider: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                allow_fallbacks: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+                ignore: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodString>>>;
+                only: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodString>>>;
+                order: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodString>>>;
+                quantizations: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodLiteral<"int4">, z.ZodLiteral<"int8">, z.ZodLiteral<"fp4">, z.ZodLiteral<"fp6">, z.ZodLiteral<"fp8">, z.ZodLiteral<"fp16">, z.ZodLiteral<"bf16">, z.ZodLiteral<"fp32">, z.ZodLiteral<"unknown">]>>>>;
+                require_parameters: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            }, z.core.$strip>>>;
+            reasoning: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                effort: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"none">, z.ZodLiteral<"minimal">, z.ZodLiteral<"low">, z.ZodLiteral<"medium">, z.ZodLiteral<"high">, z.ZodLiteral<"xhigh">]>>>;
+                enabled: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+                max_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                summary_verbosity: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"concise">, z.ZodLiteral<"detailed">]>>>;
+            }, z.core.$strip>>>;
+            repetition_penalty: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            stop: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodString>]>>>;
+            suffix_messages: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>>]>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"developer">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>>]>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"system">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>, z.ZodObject<{
+                    image_url: z.ZodObject<{
+                        detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"image_url">;
+                }, z.core.$strip>, z.ZodObject<{
+                    input_audio: z.ZodObject<{
+                        data: z.ZodString;
+                        format: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"input_audio">;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"input_video">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"video_url">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    file: z.ZodObject<{
+                        file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"file">;
+                }, z.core.$strip>]>>]>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"user">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>, z.ZodObject<{
+                    image_url: z.ZodObject<{
+                        detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"image_url">;
+                }, z.core.$strip>, z.ZodObject<{
+                    input_audio: z.ZodObject<{
+                        data: z.ZodString;
+                        format: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"input_audio">;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"input_video">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"video_url">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    file: z.ZodObject<{
+                        file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"file">;
+                }, z.core.$strip>]>>]>>>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    function: z.ZodObject<{
+                        arguments: z.ZodString;
+                        name: z.ZodString;
+                    }, z.core.$strip>;
+                    id: z.ZodString;
+                    type: z.ZodLiteral<"function">;
+                }, z.core.$strip>>>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"assistant">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>, z.ZodObject<{
+                    image_url: z.ZodObject<{
+                        detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"image_url">;
+                }, z.core.$strip>, z.ZodObject<{
+                    input_audio: z.ZodObject<{
+                        data: z.ZodString;
+                        format: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"input_audio">;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"input_video">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"video_url">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    file: z.ZodObject<{
+                        file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"file">;
+                }, z.core.$strip>]>>]>;
+                tool_call_id: z.ZodString;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"tool">;
+            }, z.core.$strip>>]>>>>;
+            synthetic_reasoning: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            temperature: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            top_a: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            top_k: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            top_p: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            upstream: z.ZodLiteral<"openrouter">;
+            verbosity: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"low">, z.ZodLiteral<"medium">, z.ZodLiteral<"high">, z.ZodLiteral<"max">]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            effort: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"low">, z.ZodLiteral<"medium">, z.ZodLiteral<"high">, z.ZodLiteral<"max">]>>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
+            model: z.ZodString;
+            output_mode: z.ZodLiteral<"instruction">;
+            prefix_content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>>>;
+            suffix_content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>>>;
+            synthetic_reasoning: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            system_prompt: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            thinking: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            upstream: z.ZodLiteral<"claude_agent_sdk">;
+        }, z.core.$strip>, z.ZodObject<{
+            error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
+            top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            upstream: z.ZodLiteral<"mock">;
+        }, z.core.$strip>]>>>>;
+    }, z.core.$strip>>, z.ZodUnion<readonly [z.ZodObject<{
+        commit: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        owner: z.ZodString;
+        remote: z.ZodLiteral<"github">;
+        repository: z.ZodString;
+    }, z.core.$strip>, z.ZodObject<{
+        commit: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        owner: z.ZodString;
+        remote: z.ZodLiteral<"filesystem">;
+        repository: z.ZodString;
+    }, z.core.$strip>, z.ZodObject<{
+        name: z.ZodString;
+        remote: z.ZodLiteral<"mock">;
+    }, z.core.$strip>]>]>>;
+    builder_continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    builder_messages: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>>]>;
+        name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    }, z.core.$strip>, z.ZodObject<{
+        role: z.ZodLiteral<"developer">;
+    }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>>]>;
+        name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    }, z.core.$strip>, z.ZodObject<{
+        role: z.ZodLiteral<"system">;
+    }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>;
+        name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    }, z.core.$strip>, z.ZodObject<{
+        role: z.ZodLiteral<"user">;
+    }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+        content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>>>;
+        name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            function: z.ZodObject<{
+                arguments: z.ZodString;
+                name: z.ZodString;
+            }, z.core.$strip>;
+            id: z.ZodString;
+            type: z.ZodLiteral<"function">;
+        }, z.core.$strip>>>>;
+    }, z.core.$strip>, z.ZodObject<{
+        role: z.ZodLiteral<"assistant">;
+    }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>;
+        tool_call_id: z.ZodString;
+    }, z.core.$strip>, z.ZodObject<{
+        role: z.ZodLiteral<"tool">;
+    }, z.core.$strip>>]>>;
+    docker_image: z.ZodString;
+    evaluation_agent: z.ZodUnion<readonly [z.ZodIntersection<z.ZodUnion<readonly [z.ZodObject<{
+        frequency_penalty: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        logit_bias: z.ZodOptional<z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodNumber>>>;
+        max_completion_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        max_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
+        min_p: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        model: z.ZodString;
+        output_mode: z.ZodDefault<z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>>;
+        post_system_prefix_messages: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>>]>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"developer">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>>]>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"system">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"user">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>>>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                function: z.ZodObject<{
+                    arguments: z.ZodString;
+                    name: z.ZodString;
+                }, z.core.$strip>;
+                id: z.ZodString;
+                type: z.ZodLiteral<"function">;
+            }, z.core.$strip>>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"assistant">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>;
+            tool_call_id: z.ZodString;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"tool">;
+        }, z.core.$strip>>]>>>>;
+        prefix_messages: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>>]>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"developer">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>>]>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"system">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"user">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>>>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                function: z.ZodObject<{
+                    arguments: z.ZodString;
+                    name: z.ZodString;
+                }, z.core.$strip>;
+                id: z.ZodString;
+                type: z.ZodLiteral<"function">;
+            }, z.core.$strip>>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"assistant">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>;
+            tool_call_id: z.ZodString;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"tool">;
+        }, z.core.$strip>>]>>>>;
+        presence_penalty: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        provider: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            allow_fallbacks: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            ignore: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodString>>>;
+            only: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodString>>>;
+            order: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodString>>>;
+            quantizations: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodLiteral<"int4">, z.ZodLiteral<"int8">, z.ZodLiteral<"fp4">, z.ZodLiteral<"fp6">, z.ZodLiteral<"fp8">, z.ZodLiteral<"fp16">, z.ZodLiteral<"bf16">, z.ZodLiteral<"fp32">, z.ZodLiteral<"unknown">]>>>>;
+            require_parameters: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        }, z.core.$strip>>>;
+        reasoning: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            effort: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"none">, z.ZodLiteral<"minimal">, z.ZodLiteral<"low">, z.ZodLiteral<"medium">, z.ZodLiteral<"high">, z.ZodLiteral<"xhigh">]>>>;
+            enabled: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            max_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            summary_verbosity: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"concise">, z.ZodLiteral<"detailed">]>>>;
+        }, z.core.$strip>>>;
+        repetition_penalty: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        stop: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodString>]>>>;
+        suffix_messages: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>>]>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"developer">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>>]>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"system">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"user">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>>>;
+            name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                function: z.ZodObject<{
+                    arguments: z.ZodString;
+                    name: z.ZodString;
+                }, z.core.$strip>;
+                id: z.ZodString;
+                type: z.ZodLiteral<"function">;
+            }, z.core.$strip>>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"assistant">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>;
+            tool_call_id: z.ZodString;
+        }, z.core.$strip>, z.ZodObject<{
+            role: z.ZodLiteral<"tool">;
+        }, z.core.$strip>>]>>>>;
+        synthetic_reasoning: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        temperature: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        top_a: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        top_k: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        top_p: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        upstream: z.ZodLiteral<"openrouter">;
+        verbosity: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"low">, z.ZodLiteral<"medium">, z.ZodLiteral<"high">, z.ZodLiteral<"max">]>>>;
+    }, z.core.$strip>, z.ZodObject<{
+        effort: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"low">, z.ZodLiteral<"medium">, z.ZodLiteral<"high">, z.ZodLiteral<"max">]>>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
+        model: z.ZodString;
+        output_mode: z.ZodLiteral<"instruction">;
+        prefix_content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>>>;
+        suffix_content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>>>;
+        synthetic_reasoning: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        system_prompt: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        thinking: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        upstream: z.ZodLiteral<"claude_agent_sdk">;
+    }, z.core.$strip>, z.ZodObject<{
+        error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
+        top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        upstream: z.ZodLiteral<"mock">;
+    }, z.core.$strip>]>, z.ZodObject<{
+        fallbacks: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            frequency_penalty: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            logit_bias: z.ZodOptional<z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodNumber>>>;
+            max_completion_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            max_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
+            min_p: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            model: z.ZodString;
+            output_mode: z.ZodDefault<z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>>;
+            post_system_prefix_messages: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>>]>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"developer">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>>]>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"system">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>, z.ZodObject<{
+                    image_url: z.ZodObject<{
+                        detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"image_url">;
+                }, z.core.$strip>, z.ZodObject<{
+                    input_audio: z.ZodObject<{
+                        data: z.ZodString;
+                        format: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"input_audio">;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"input_video">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"video_url">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    file: z.ZodObject<{
+                        file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"file">;
+                }, z.core.$strip>]>>]>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"user">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>, z.ZodObject<{
+                    image_url: z.ZodObject<{
+                        detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"image_url">;
+                }, z.core.$strip>, z.ZodObject<{
+                    input_audio: z.ZodObject<{
+                        data: z.ZodString;
+                        format: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"input_audio">;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"input_video">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"video_url">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    file: z.ZodObject<{
+                        file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"file">;
+                }, z.core.$strip>]>>]>>>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    function: z.ZodObject<{
+                        arguments: z.ZodString;
+                        name: z.ZodString;
+                    }, z.core.$strip>;
+                    id: z.ZodString;
+                    type: z.ZodLiteral<"function">;
+                }, z.core.$strip>>>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"assistant">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>, z.ZodObject<{
+                    image_url: z.ZodObject<{
+                        detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"image_url">;
+                }, z.core.$strip>, z.ZodObject<{
+                    input_audio: z.ZodObject<{
+                        data: z.ZodString;
+                        format: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"input_audio">;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"input_video">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"video_url">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    file: z.ZodObject<{
+                        file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"file">;
+                }, z.core.$strip>]>>]>;
+                tool_call_id: z.ZodString;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"tool">;
+            }, z.core.$strip>>]>>>>;
+            prefix_messages: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>>]>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"developer">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>>]>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"system">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>, z.ZodObject<{
+                    image_url: z.ZodObject<{
+                        detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"image_url">;
+                }, z.core.$strip>, z.ZodObject<{
+                    input_audio: z.ZodObject<{
+                        data: z.ZodString;
+                        format: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"input_audio">;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"input_video">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"video_url">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    file: z.ZodObject<{
+                        file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"file">;
+                }, z.core.$strip>]>>]>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"user">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>, z.ZodObject<{
+                    image_url: z.ZodObject<{
+                        detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"image_url">;
+                }, z.core.$strip>, z.ZodObject<{
+                    input_audio: z.ZodObject<{
+                        data: z.ZodString;
+                        format: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"input_audio">;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"input_video">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"video_url">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    file: z.ZodObject<{
+                        file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"file">;
+                }, z.core.$strip>]>>]>>>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    function: z.ZodObject<{
+                        arguments: z.ZodString;
+                        name: z.ZodString;
+                    }, z.core.$strip>;
+                    id: z.ZodString;
+                    type: z.ZodLiteral<"function">;
+                }, z.core.$strip>>>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"assistant">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>, z.ZodObject<{
+                    image_url: z.ZodObject<{
+                        detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"image_url">;
+                }, z.core.$strip>, z.ZodObject<{
+                    input_audio: z.ZodObject<{
+                        data: z.ZodString;
+                        format: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"input_audio">;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"input_video">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"video_url">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    file: z.ZodObject<{
+                        file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"file">;
+                }, z.core.$strip>]>>]>;
+                tool_call_id: z.ZodString;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"tool">;
+            }, z.core.$strip>>]>>>>;
+            presence_penalty: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            provider: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                allow_fallbacks: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+                ignore: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodString>>>;
+                only: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodString>>>;
+                order: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodString>>>;
+                quantizations: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodLiteral<"int4">, z.ZodLiteral<"int8">, z.ZodLiteral<"fp4">, z.ZodLiteral<"fp6">, z.ZodLiteral<"fp8">, z.ZodLiteral<"fp16">, z.ZodLiteral<"bf16">, z.ZodLiteral<"fp32">, z.ZodLiteral<"unknown">]>>>>;
+                require_parameters: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            }, z.core.$strip>>>;
+            reasoning: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                effort: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"none">, z.ZodLiteral<"minimal">, z.ZodLiteral<"low">, z.ZodLiteral<"medium">, z.ZodLiteral<"high">, z.ZodLiteral<"xhigh">]>>>;
+                enabled: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+                max_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                summary_verbosity: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"concise">, z.ZodLiteral<"detailed">]>>>;
+            }, z.core.$strip>>>;
+            repetition_penalty: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            stop: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodString>]>>>;
+            suffix_messages: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>>]>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"developer">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>>]>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"system">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>, z.ZodObject<{
+                    image_url: z.ZodObject<{
+                        detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"image_url">;
+                }, z.core.$strip>, z.ZodObject<{
+                    input_audio: z.ZodObject<{
+                        data: z.ZodString;
+                        format: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"input_audio">;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"input_video">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"video_url">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    file: z.ZodObject<{
+                        file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"file">;
+                }, z.core.$strip>]>>]>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"user">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>, z.ZodObject<{
+                    image_url: z.ZodObject<{
+                        detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"image_url">;
+                }, z.core.$strip>, z.ZodObject<{
+                    input_audio: z.ZodObject<{
+                        data: z.ZodString;
+                        format: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"input_audio">;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"input_video">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"video_url">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    file: z.ZodObject<{
+                        file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"file">;
+                }, z.core.$strip>]>>]>>>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    function: z.ZodObject<{
+                        arguments: z.ZodString;
+                        name: z.ZodString;
+                    }, z.core.$strip>;
+                    id: z.ZodString;
+                    type: z.ZodLiteral<"function">;
+                }, z.core.$strip>>>>;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"assistant">;
+            }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+                content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                    text: z.ZodString;
+                    type: z.ZodLiteral<"text">;
+                }, z.core.$strip>, z.ZodObject<{
+                    image_url: z.ZodObject<{
+                        detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"image_url">;
+                }, z.core.$strip>, z.ZodObject<{
+                    input_audio: z.ZodObject<{
+                        data: z.ZodString;
+                        format: z.ZodString;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"input_audio">;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"input_video">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    type: z.ZodLiteral<"video_url">;
+                    video_url: z.ZodObject<{
+                        url: z.ZodString;
+                    }, z.core.$strip>;
+                }, z.core.$strip>, z.ZodObject<{
+                    file: z.ZodObject<{
+                        file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                        filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    }, z.core.$strip>;
+                    type: z.ZodLiteral<"file">;
+                }, z.core.$strip>]>>]>;
+                tool_call_id: z.ZodString;
+            }, z.core.$strip>, z.ZodObject<{
+                role: z.ZodLiteral<"tool">;
+            }, z.core.$strip>>]>>>>;
+            synthetic_reasoning: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            temperature: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            top_a: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            top_k: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            top_p: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            upstream: z.ZodLiteral<"openrouter">;
+            verbosity: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"low">, z.ZodLiteral<"medium">, z.ZodLiteral<"high">, z.ZodLiteral<"max">]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            effort: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"low">, z.ZodLiteral<"medium">, z.ZodLiteral<"high">, z.ZodLiteral<"max">]>>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
+            model: z.ZodString;
+            output_mode: z.ZodLiteral<"instruction">;
+            prefix_content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>>>;
+            suffix_content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>>>;
+            synthetic_reasoning: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            system_prompt: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            thinking: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            upstream: z.ZodLiteral<"claude_agent_sdk">;
+        }, z.core.$strip>, z.ZodObject<{
+            error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
+            top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            upstream: z.ZodLiteral<"mock">;
+        }, z.core.$strip>]>>>>;
+    }, z.core.$strip>>, z.ZodUnion<readonly [z.ZodObject<{
+        commit: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        owner: z.ZodString;
+        remote: z.ZodLiteral<"github">;
+        repository: z.ZodString;
+    }, z.core.$strip>, z.ZodObject<{
+        commit: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        owner: z.ZodString;
+        remote: z.ZodLiteral<"filesystem">;
+        repository: z.ZodString;
+    }, z.core.$strip>, z.ZodObject<{
+        name: z.ZodString;
+        remote: z.ZodLiteral<"mock">;
+    }, z.core.$strip>]>]>;
+    evaluation_continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    evaluation_messages: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>>]>;
+        name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    }, z.core.$strip>, z.ZodObject<{
+        role: z.ZodLiteral<"developer">;
+    }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>>]>;
+        name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    }, z.core.$strip>, z.ZodObject<{
+        role: z.ZodLiteral<"system">;
+    }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>;
+        name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    }, z.core.$strip>, z.ZodObject<{
+        role: z.ZodLiteral<"user">;
+    }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+        content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>>>;
+        name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            function: z.ZodObject<{
+                arguments: z.ZodString;
+                name: z.ZodString;
+            }, z.core.$strip>;
+            id: z.ZodString;
+            type: z.ZodLiteral<"function">;
+        }, z.core.$strip>>>>;
+    }, z.core.$strip>, z.ZodObject<{
+        role: z.ZodLiteral<"assistant">;
+    }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>;
+        tool_call_id: z.ZodString;
+    }, z.core.$strip>, z.ZodObject<{
+        role: z.ZodLiteral<"tool">;
+    }, z.core.$strip>>]>>;
+    evaluation_output_schema: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
+    max_evaluation_retries: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    provider: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        data_collection: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"deny">, z.ZodLiteral<"allow">]>>>;
+        max_latency: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        max_price: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            audio: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            completion: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            image: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            prompt: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            request: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        min_throughput: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        preferred_max_latency: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        preferred_min_throughput: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        sort: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"price">, z.ZodLiteral<"throughput">, z.ZodLiteral<"latency">]>>>;
+        zdr: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    }, z.core.$strip>>>;
+    seed: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    stream: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+}, z.core.$strip>;
+type LaboratoriesExecutionsRequestLaboratoryExecutionCreateParams = z.infer<typeof LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema>;
+
+declare const LaboratoriesExecutionsResponseStreamingBuilderChunkSchema: z.ZodObject<{
+    container_index: z.ZodNumber;
+    continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    created: z.ZodNumber;
+    error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        code: z.ZodNumber;
+        message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+    }, z.core.$strip>>>;
+    id: z.ZodString;
+    index: z.ZodNumber;
+    messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+        agent: z.ZodString;
+        content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>>>;
+        created: z.ZodNumber;
+        finish_reason: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>>>;
+        index: z.ZodNumber;
+        logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                logprob: z.ZodNumber;
+                token: z.ZodString;
+                top_logprobs: z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    token: z.ZodString;
+                }, z.core.$strip>>;
+            }, z.core.$strip>>>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                logprob: z.ZodNumber;
+                token: z.ZodString;
+                top_logprobs: z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    token: z.ZodString;
+                }, z.core.$strip>>;
+            }, z.core.$strip>>>>;
+        }, z.core.$strip>>>;
+        model: z.ZodString;
+        provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        role: z.ZodLiteral<"assistant">;
+        service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            function: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                arguments: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>>>;
+            id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            index: z.ZodNumber;
+            type: z.ZodOptional<z.ZodNullable<z.ZodLiteral<"function">>>;
+        }, z.core.$strip>>>>;
+        upstream_id: z.ZodString;
+        usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            completion_tokens: z.ZodNumber;
+            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            cost: z.ZodNumber;
+            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                upstream_inference_cost: z.ZodNumber;
+                upstream_upstream_inference_cost: z.ZodNumber;
+            }, z.core.$strip>>>;
+            cost_multiplier: z.ZodNumber;
+            is_byok: z.ZodBoolean;
+            prompt_tokens: z.ZodNumber;
+            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            total_cost: z.ZodNumber;
+            total_tokens: z.ZodNumber;
+        }, z.core.$strip>>>;
+    }, z.core.$strip>, z.ZodObject<{
+        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>;
+        index: z.ZodNumber;
+        role: z.ZodLiteral<"tool">;
+        tool_call_id: z.ZodString;
+    }, z.core.$strip>]>>;
+    object: z.ZodLiteral<"agent.completion.chunk">;
+    upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
+    usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        completion_tokens: z.ZodNumber;
+        completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        cost: z.ZodNumber;
+        cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            upstream_inference_cost: z.ZodNumber;
+            upstream_upstream_inference_cost: z.ZodNumber;
+        }, z.core.$strip>>>;
+        prompt_tokens: z.ZodNumber;
+        prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        total_cost: z.ZodNumber;
+        total_tokens: z.ZodNumber;
+    }, z.core.$strip>>>;
+}, z.core.$strip>;
+type LaboratoriesExecutionsResponseStreamingBuilderChunk = z.infer<typeof LaboratoriesExecutionsResponseStreamingBuilderChunkSchema>;
+
+declare const LaboratoriesExecutionsResponseStreamingEvaluationChunkSchema: z.ZodObject<{
+    container_index: z.ZodNumber;
+    continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    created: z.ZodNumber;
+    error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        code: z.ZodNumber;
+        message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+    }, z.core.$strip>>>;
+    id: z.ZodString;
+    index: z.ZodNumber;
+    messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+        agent: z.ZodString;
+        content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>>>;
+        created: z.ZodNumber;
+        finish_reason: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>>>;
+        index: z.ZodNumber;
+        logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                logprob: z.ZodNumber;
+                token: z.ZodString;
+                top_logprobs: z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    token: z.ZodString;
+                }, z.core.$strip>>;
+            }, z.core.$strip>>>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                logprob: z.ZodNumber;
+                token: z.ZodString;
+                top_logprobs: z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    token: z.ZodString;
+                }, z.core.$strip>>;
+            }, z.core.$strip>>>>;
+        }, z.core.$strip>>>;
+        model: z.ZodString;
+        provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        role: z.ZodLiteral<"assistant">;
+        service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            function: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                arguments: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>>>;
+            id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            index: z.ZodNumber;
+            type: z.ZodOptional<z.ZodNullable<z.ZodLiteral<"function">>>;
+        }, z.core.$strip>>>>;
+        upstream_id: z.ZodString;
+        usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            completion_tokens: z.ZodNumber;
+            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            cost: z.ZodNumber;
+            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                upstream_inference_cost: z.ZodNumber;
+                upstream_upstream_inference_cost: z.ZodNumber;
+            }, z.core.$strip>>>;
+            cost_multiplier: z.ZodNumber;
+            is_byok: z.ZodBoolean;
+            prompt_tokens: z.ZodNumber;
+            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            total_cost: z.ZodNumber;
+            total_tokens: z.ZodNumber;
+        }, z.core.$strip>>>;
+    }, z.core.$strip>, z.ZodObject<{
+        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>;
+        index: z.ZodNumber;
+        role: z.ZodLiteral<"tool">;
+        tool_call_id: z.ZodString;
+    }, z.core.$strip>]>>;
+    object: z.ZodLiteral<"agent.completion.chunk">;
+    output: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionInputValue, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputValue, unknown>>>>;
+    upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
+    usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        completion_tokens: z.ZodNumber;
+        completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        cost: z.ZodNumber;
+        cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            upstream_inference_cost: z.ZodNumber;
+            upstream_upstream_inference_cost: z.ZodNumber;
+        }, z.core.$strip>>>;
+        prompt_tokens: z.ZodNumber;
+        prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        total_cost: z.ZodNumber;
+        total_tokens: z.ZodNumber;
+    }, z.core.$strip>>>;
+}, z.core.$strip>;
+type LaboratoriesExecutionsResponseStreamingEvaluationChunk = z.infer<typeof LaboratoriesExecutionsResponseStreamingEvaluationChunkSchema>;
+
+declare const LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkSchema: z.ZodObject<{
+    builders: z.ZodArray<z.ZodObject<{
+        container_index: z.ZodNumber;
+        continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        created: z.ZodNumber;
+        error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            code: z.ZodNumber;
+            message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+        }, z.core.$strip>>>;
+        id: z.ZodString;
+        index: z.ZodNumber;
+        messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            agent: z.ZodString;
+            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>>>;
+            created: z.ZodNumber;
+            finish_reason: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>>>;
+            index: z.ZodNumber;
+            logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodNumber;
+                    token: z.ZodString;
+                    top_logprobs: z.ZodArray<z.ZodObject<{
+                        bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                        logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                        token: z.ZodString;
+                    }, z.core.$strip>>;
+                }, z.core.$strip>>>>;
+                refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodNumber;
+                    token: z.ZodString;
+                    top_logprobs: z.ZodArray<z.ZodObject<{
+                        bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                        logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                        token: z.ZodString;
+                    }, z.core.$strip>>;
+                }, z.core.$strip>>>>;
+            }, z.core.$strip>>>;
+            model: z.ZodString;
+            provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            role: z.ZodLiteral<"assistant">;
+            service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                function: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    arguments: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>>>;
+                id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                index: z.ZodNumber;
+                type: z.ZodOptional<z.ZodNullable<z.ZodLiteral<"function">>>;
+            }, z.core.$strip>>>>;
+            upstream_id: z.ZodString;
+            usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                completion_tokens: z.ZodNumber;
+                completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                }, z.core.$strip>>>;
+                cost: z.ZodNumber;
+                cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    upstream_inference_cost: z.ZodNumber;
+                    upstream_upstream_inference_cost: z.ZodNumber;
+                }, z.core.$strip>>>;
+                cost_multiplier: z.ZodNumber;
+                is_byok: z.ZodBoolean;
+                prompt_tokens: z.ZodNumber;
+                prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                }, z.core.$strip>>>;
+                total_cost: z.ZodNumber;
+                total_tokens: z.ZodNumber;
+            }, z.core.$strip>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>;
+            index: z.ZodNumber;
+            role: z.ZodLiteral<"tool">;
+            tool_call_id: z.ZodString;
+        }, z.core.$strip>]>>;
+        object: z.ZodLiteral<"agent.completion.chunk">;
+        upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
+        usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            completion_tokens: z.ZodNumber;
+            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            cost: z.ZodNumber;
+            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                upstream_inference_cost: z.ZodNumber;
+                upstream_upstream_inference_cost: z.ZodNumber;
+            }, z.core.$strip>>>;
+            prompt_tokens: z.ZodNumber;
+            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            total_cost: z.ZodNumber;
+            total_tokens: z.ZodNumber;
+        }, z.core.$strip>>>;
+    }, z.core.$strip>>;
+    created: z.ZodNumber;
+    error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        code: z.ZodNumber;
+        message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+    }, z.core.$strip>>>;
+    evaluations: z.ZodArray<z.ZodObject<{
+        container_index: z.ZodNumber;
+        continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        created: z.ZodNumber;
+        error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            code: z.ZodNumber;
+            message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+        }, z.core.$strip>>>;
+        id: z.ZodString;
+        index: z.ZodNumber;
+        messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            agent: z.ZodString;
+            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>>>;
+            created: z.ZodNumber;
+            finish_reason: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>>>;
+            index: z.ZodNumber;
+            logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodNumber;
+                    token: z.ZodString;
+                    top_logprobs: z.ZodArray<z.ZodObject<{
+                        bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                        logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                        token: z.ZodString;
+                    }, z.core.$strip>>;
+                }, z.core.$strip>>>>;
+                refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodNumber;
+                    token: z.ZodString;
+                    top_logprobs: z.ZodArray<z.ZodObject<{
+                        bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                        logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                        token: z.ZodString;
+                    }, z.core.$strip>>;
+                }, z.core.$strip>>>>;
+            }, z.core.$strip>>>;
+            model: z.ZodString;
+            provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            role: z.ZodLiteral<"assistant">;
+            service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                function: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    arguments: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>>>;
+                id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                index: z.ZodNumber;
+                type: z.ZodOptional<z.ZodNullable<z.ZodLiteral<"function">>>;
+            }, z.core.$strip>>>>;
+            upstream_id: z.ZodString;
+            usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                completion_tokens: z.ZodNumber;
+                completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                }, z.core.$strip>>>;
+                cost: z.ZodNumber;
+                cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    upstream_inference_cost: z.ZodNumber;
+                    upstream_upstream_inference_cost: z.ZodNumber;
+                }, z.core.$strip>>>;
+                cost_multiplier: z.ZodNumber;
+                is_byok: z.ZodBoolean;
+                prompt_tokens: z.ZodNumber;
+                prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                }, z.core.$strip>>>;
+                total_cost: z.ZodNumber;
+                total_tokens: z.ZodNumber;
+            }, z.core.$strip>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>;
+            index: z.ZodNumber;
+            role: z.ZodLiteral<"tool">;
+            tool_call_id: z.ZodString;
+        }, z.core.$strip>]>>;
+        object: z.ZodLiteral<"agent.completion.chunk">;
+        output: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionInputValue, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputValue, unknown>>>>;
+        upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
+        usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            completion_tokens: z.ZodNumber;
+            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            cost: z.ZodNumber;
+            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                upstream_inference_cost: z.ZodNumber;
+                upstream_upstream_inference_cost: z.ZodNumber;
+            }, z.core.$strip>>>;
+            prompt_tokens: z.ZodNumber;
+            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            total_cost: z.ZodNumber;
+            total_tokens: z.ZodNumber;
+        }, z.core.$strip>>>;
+    }, z.core.$strip>>;
+    id: z.ZodString;
+    object: z.ZodLiteral<"laboratory.execution.chunk">;
+    usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        completion_tokens: z.ZodNumber;
+        completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        cost: z.ZodNumber;
+        cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            upstream_inference_cost: z.ZodNumber;
+            upstream_upstream_inference_cost: z.ZodNumber;
+        }, z.core.$strip>>>;
+        prompt_tokens: z.ZodNumber;
+        prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        total_cost: z.ZodNumber;
+        total_tokens: z.ZodNumber;
+    }, z.core.$strip>>>;
+}, z.core.$strip>;
+type LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk = z.infer<typeof LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkSchema>;
+
+declare const LaboratoriesExecutionsResponseStreamingObjectSchema: z.ZodLiteral<"laboratory.execution.chunk">;
+type LaboratoriesExecutionsResponseStreamingObject = z.infer<typeof LaboratoriesExecutionsResponseStreamingObjectSchema>;
+
+declare const LaboratoriesExecutionsResponseUnaryBuilderSchema: z.ZodObject<{
+    container_index: z.ZodNumber;
+    continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    created: z.ZodNumber;
+    error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        code: z.ZodNumber;
+        message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+    }, z.core.$strip>>>;
+    id: z.ZodString;
+    index: z.ZodNumber;
+    messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+        agent: z.ZodString;
+        content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>>>;
+        created: z.ZodNumber;
+        finish_reason: z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>;
+        index: z.ZodNumber;
+        logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                logprob: z.ZodNumber;
+                token: z.ZodString;
+                top_logprobs: z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    token: z.ZodString;
+                }, z.core.$strip>>;
+            }, z.core.$strip>>>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                logprob: z.ZodNumber;
+                token: z.ZodString;
+                top_logprobs: z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    token: z.ZodString;
+                }, z.core.$strip>>;
+            }, z.core.$strip>>>>;
+        }, z.core.$strip>>>;
+        model: z.ZodString;
+        provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        role: z.ZodLiteral<"assistant">;
+        service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            function: z.ZodObject<{
+                arguments: z.ZodString;
+                name: z.ZodString;
+            }, z.core.$strip>;
+            id: z.ZodString;
+            type: z.ZodLiteral<"function">;
+        }, z.core.$strip>>>>;
+        upstream_id: z.ZodString;
+        usage: z.ZodObject<{
+            completion_tokens: z.ZodNumber;
+            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            cost: z.ZodNumber;
+            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                upstream_inference_cost: z.ZodNumber;
+                upstream_upstream_inference_cost: z.ZodNumber;
+            }, z.core.$strip>>>;
+            cost_multiplier: z.ZodNumber;
+            is_byok: z.ZodBoolean;
+            prompt_tokens: z.ZodNumber;
+            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            total_cost: z.ZodNumber;
+            total_tokens: z.ZodNumber;
+        }, z.core.$strip>;
+    }, z.core.$strip>, z.ZodObject<{
+        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>;
+        index: z.ZodNumber;
+        role: z.ZodLiteral<"tool">;
+        tool_call_id: z.ZodString;
+    }, z.core.$strip>]>>;
+    object: z.ZodLiteral<"agent.completion">;
+    upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
+    usage: z.ZodObject<{
+        completion_tokens: z.ZodNumber;
+        completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        cost: z.ZodNumber;
+        cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            upstream_inference_cost: z.ZodNumber;
+            upstream_upstream_inference_cost: z.ZodNumber;
+        }, z.core.$strip>>>;
+        prompt_tokens: z.ZodNumber;
+        prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        total_cost: z.ZodNumber;
+        total_tokens: z.ZodNumber;
+    }, z.core.$strip>;
+}, z.core.$strip>;
+type LaboratoriesExecutionsResponseUnaryBuilder = z.infer<typeof LaboratoriesExecutionsResponseUnaryBuilderSchema>;
+
+declare const LaboratoriesExecutionsResponseUnaryEvaluationSchema: z.ZodObject<{
+    container_index: z.ZodNumber;
+    continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    created: z.ZodNumber;
+    error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        code: z.ZodNumber;
+        message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+    }, z.core.$strip>>>;
+    id: z.ZodString;
+    index: z.ZodNumber;
+    messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+        agent: z.ZodString;
+        content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>>>;
+        created: z.ZodNumber;
+        finish_reason: z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>;
+        index: z.ZodNumber;
+        logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                logprob: z.ZodNumber;
+                token: z.ZodString;
+                top_logprobs: z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    token: z.ZodString;
+                }, z.core.$strip>>;
+            }, z.core.$strip>>>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                logprob: z.ZodNumber;
+                token: z.ZodString;
+                top_logprobs: z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    token: z.ZodString;
+                }, z.core.$strip>>;
+            }, z.core.$strip>>>>;
+        }, z.core.$strip>>>;
+        model: z.ZodString;
+        provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        role: z.ZodLiteral<"assistant">;
+        service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            function: z.ZodObject<{
+                arguments: z.ZodString;
+                name: z.ZodString;
+            }, z.core.$strip>;
+            id: z.ZodString;
+            type: z.ZodLiteral<"function">;
+        }, z.core.$strip>>>>;
+        upstream_id: z.ZodString;
+        usage: z.ZodObject<{
+            completion_tokens: z.ZodNumber;
+            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            cost: z.ZodNumber;
+            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                upstream_inference_cost: z.ZodNumber;
+                upstream_upstream_inference_cost: z.ZodNumber;
+            }, z.core.$strip>>>;
+            cost_multiplier: z.ZodNumber;
+            is_byok: z.ZodBoolean;
+            prompt_tokens: z.ZodNumber;
+            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            total_cost: z.ZodNumber;
+            total_tokens: z.ZodNumber;
+        }, z.core.$strip>;
+    }, z.core.$strip>, z.ZodObject<{
+        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>;
+        index: z.ZodNumber;
+        role: z.ZodLiteral<"tool">;
+        tool_call_id: z.ZodString;
+    }, z.core.$strip>]>>;
+    object: z.ZodLiteral<"agent.completion">;
+    output: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionInputValue, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputValue, unknown>>>>;
+    upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
+    usage: z.ZodObject<{
+        completion_tokens: z.ZodNumber;
+        completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        cost: z.ZodNumber;
+        cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            upstream_inference_cost: z.ZodNumber;
+            upstream_upstream_inference_cost: z.ZodNumber;
+        }, z.core.$strip>>>;
+        prompt_tokens: z.ZodNumber;
+        prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        total_cost: z.ZodNumber;
+        total_tokens: z.ZodNumber;
+    }, z.core.$strip>;
+}, z.core.$strip>;
+type LaboratoriesExecutionsResponseUnaryEvaluation = z.infer<typeof LaboratoriesExecutionsResponseUnaryEvaluationSchema>;
+
+declare const LaboratoriesExecutionsResponseUnaryLaboratoryExecutionSchema: z.ZodObject<{
+    builders: z.ZodArray<z.ZodObject<{
+        container_index: z.ZodNumber;
+        continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        created: z.ZodNumber;
+        error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            code: z.ZodNumber;
+            message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+        }, z.core.$strip>>>;
+        id: z.ZodString;
+        index: z.ZodNumber;
+        messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            agent: z.ZodString;
+            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>>>;
+            created: z.ZodNumber;
+            finish_reason: z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>;
+            index: z.ZodNumber;
+            logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodNumber;
+                    token: z.ZodString;
+                    top_logprobs: z.ZodArray<z.ZodObject<{
+                        bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                        logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                        token: z.ZodString;
+                    }, z.core.$strip>>;
+                }, z.core.$strip>>>>;
+                refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodNumber;
+                    token: z.ZodString;
+                    top_logprobs: z.ZodArray<z.ZodObject<{
+                        bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                        logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                        token: z.ZodString;
+                    }, z.core.$strip>>;
+                }, z.core.$strip>>>>;
+            }, z.core.$strip>>>;
+            model: z.ZodString;
+            provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            role: z.ZodLiteral<"assistant">;
+            service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                function: z.ZodObject<{
+                    arguments: z.ZodString;
+                    name: z.ZodString;
+                }, z.core.$strip>;
+                id: z.ZodString;
+                type: z.ZodLiteral<"function">;
+            }, z.core.$strip>>>>;
+            upstream_id: z.ZodString;
+            usage: z.ZodObject<{
+                completion_tokens: z.ZodNumber;
+                completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                }, z.core.$strip>>>;
+                cost: z.ZodNumber;
+                cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    upstream_inference_cost: z.ZodNumber;
+                    upstream_upstream_inference_cost: z.ZodNumber;
+                }, z.core.$strip>>>;
+                cost_multiplier: z.ZodNumber;
+                is_byok: z.ZodBoolean;
+                prompt_tokens: z.ZodNumber;
+                prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                }, z.core.$strip>>>;
+                total_cost: z.ZodNumber;
+                total_tokens: z.ZodNumber;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>;
+            index: z.ZodNumber;
+            role: z.ZodLiteral<"tool">;
+            tool_call_id: z.ZodString;
+        }, z.core.$strip>]>>;
+        object: z.ZodLiteral<"agent.completion">;
+        upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
+        usage: z.ZodObject<{
+            completion_tokens: z.ZodNumber;
+            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            cost: z.ZodNumber;
+            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                upstream_inference_cost: z.ZodNumber;
+                upstream_upstream_inference_cost: z.ZodNumber;
+            }, z.core.$strip>>>;
+            prompt_tokens: z.ZodNumber;
+            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            total_cost: z.ZodNumber;
+            total_tokens: z.ZodNumber;
+        }, z.core.$strip>;
+    }, z.core.$strip>>;
+    created: z.ZodNumber;
+    error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        code: z.ZodNumber;
+        message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+    }, z.core.$strip>>>;
+    evaluations: z.ZodArray<z.ZodObject<{
+        container_index: z.ZodNumber;
+        continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        created: z.ZodNumber;
+        error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            code: z.ZodNumber;
+            message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+        }, z.core.$strip>>>;
+        id: z.ZodString;
+        index: z.ZodNumber;
+        messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            agent: z.ZodString;
+            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>>>;
+            created: z.ZodNumber;
+            finish_reason: z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>;
+            index: z.ZodNumber;
+            logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodNumber;
+                    token: z.ZodString;
+                    top_logprobs: z.ZodArray<z.ZodObject<{
+                        bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                        logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                        token: z.ZodString;
+                    }, z.core.$strip>>;
+                }, z.core.$strip>>>>;
+                refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodNumber;
+                    token: z.ZodString;
+                    top_logprobs: z.ZodArray<z.ZodObject<{
+                        bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                        logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                        token: z.ZodString;
+                    }, z.core.$strip>>;
+                }, z.core.$strip>>>>;
+            }, z.core.$strip>>>;
+            model: z.ZodString;
+            provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            role: z.ZodLiteral<"assistant">;
+            service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                function: z.ZodObject<{
+                    arguments: z.ZodString;
+                    name: z.ZodString;
+                }, z.core.$strip>;
+                id: z.ZodString;
+                type: z.ZodLiteral<"function">;
+            }, z.core.$strip>>>>;
+            upstream_id: z.ZodString;
+            usage: z.ZodObject<{
+                completion_tokens: z.ZodNumber;
+                completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                }, z.core.$strip>>>;
+                cost: z.ZodNumber;
+                cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    upstream_inference_cost: z.ZodNumber;
+                    upstream_upstream_inference_cost: z.ZodNumber;
+                }, z.core.$strip>>>;
+                cost_multiplier: z.ZodNumber;
+                is_byok: z.ZodBoolean;
+                prompt_tokens: z.ZodNumber;
+                prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                }, z.core.$strip>>>;
+                total_cost: z.ZodNumber;
+                total_tokens: z.ZodNumber;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>;
+            index: z.ZodNumber;
+            role: z.ZodLiteral<"tool">;
+            tool_call_id: z.ZodString;
+        }, z.core.$strip>]>>;
+        object: z.ZodLiteral<"agent.completion">;
+        output: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionInputValue, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputValue, unknown>>>>;
+        upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
+        usage: z.ZodObject<{
+            completion_tokens: z.ZodNumber;
+            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            cost: z.ZodNumber;
+            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                upstream_inference_cost: z.ZodNumber;
+                upstream_upstream_inference_cost: z.ZodNumber;
+            }, z.core.$strip>>>;
+            prompt_tokens: z.ZodNumber;
+            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            total_cost: z.ZodNumber;
+            total_tokens: z.ZodNumber;
+        }, z.core.$strip>;
+    }, z.core.$strip>>;
+    id: z.ZodString;
+    object: z.ZodLiteral<"laboratory.execution">;
+    usage: z.ZodObject<{
+        completion_tokens: z.ZodNumber;
+        completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        cost: z.ZodNumber;
+        cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            upstream_inference_cost: z.ZodNumber;
+            upstream_upstream_inference_cost: z.ZodNumber;
+        }, z.core.$strip>>>;
+        prompt_tokens: z.ZodNumber;
+        prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        total_cost: z.ZodNumber;
+        total_tokens: z.ZodNumber;
+    }, z.core.$strip>;
+}, z.core.$strip>;
+type LaboratoriesExecutionsResponseUnaryLaboratoryExecution = z.infer<typeof LaboratoriesExecutionsResponseUnaryLaboratoryExecutionSchema>;
+
+declare const LaboratoriesExecutionsResponseUnaryObjectSchema: z.ZodLiteral<"laboratory.execution">;
+type LaboratoriesExecutionsResponseUnaryObject = z.infer<typeof LaboratoriesExecutionsResponseUnaryObjectSchema>;
+
 declare const SwarmGetSwarmResponseSchema: z.ZodIntersection<z.ZodUnion<readonly [z.ZodObject<{
     commit: z.ZodString;
     owner: z.ZodString;
@@ -103080,4 +107115,4 @@ declare function merge<T extends {}>(a: T | null | undefined, b: T | null | unde
 declare function mergedString(a: string, b: string): [string, boolean];
 declare function mergedNumberArray(a: number[], b: number[]): [number[], boolean];
 
-export { type AgentAgent, type AgentAgentBase, AgentAgentBaseSchema, AgentAgentSchema, type AgentAgentWithFallbacks, AgentAgentWithFallbacksSchema, type AgentAgentWithFallbacksWithCount, AgentAgentWithFallbacksWithCountSchema, type AgentClaudeAgentSdkAgent, type AgentClaudeAgentSdkAgentBase, AgentClaudeAgentSdkAgentBaseSchema, AgentClaudeAgentSdkAgentSchema, type AgentClaudeAgentSdkContinuation, AgentClaudeAgentSdkContinuationSchema, type AgentClaudeAgentSdkEffort, AgentClaudeAgentSdkEffortSchema, type AgentClaudeAgentSdkOutputMode, AgentClaudeAgentSdkOutputModeSchema, type AgentClaudeAgentSdkUpstream, AgentClaudeAgentSdkUpstreamSchema, type AgentCompletionsMessageAssistantMessage, type AgentCompletionsMessageAssistantMessageExpression, AgentCompletionsMessageAssistantMessageExpressionSchema, AgentCompletionsMessageAssistantMessageSchema, type AgentCompletionsMessageAssistantToolCall, type AgentCompletionsMessageAssistantToolCallDelta, AgentCompletionsMessageAssistantToolCallDeltaSchema, type AgentCompletionsMessageAssistantToolCallExpression, AgentCompletionsMessageAssistantToolCallExpressionSchema, type AgentCompletionsMessageAssistantToolCallFunction, type AgentCompletionsMessageAssistantToolCallFunctionDelta, AgentCompletionsMessageAssistantToolCallFunctionDeltaSchema, type AgentCompletionsMessageAssistantToolCallFunctionExpression, AgentCompletionsMessageAssistantToolCallFunctionExpressionSchema, AgentCompletionsMessageAssistantToolCallFunctionSchema, AgentCompletionsMessageAssistantToolCallSchema, type AgentCompletionsMessageAssistantToolCallType, AgentCompletionsMessageAssistantToolCallTypeSchema, type AgentCompletionsMessageDeveloperMessage, type AgentCompletionsMessageDeveloperMessageExpression, AgentCompletionsMessageDeveloperMessageExpressionSchema, AgentCompletionsMessageDeveloperMessageSchema, type AgentCompletionsMessageFile, AgentCompletionsMessageFileSchema, type AgentCompletionsMessageImageUrl, type AgentCompletionsMessageImageUrlDetail, AgentCompletionsMessageImageUrlDetailSchema, AgentCompletionsMessageImageUrlSchema, type AgentCompletionsMessageInputAudio, AgentCompletionsMessageInputAudioSchema, type AgentCompletionsMessageMessage, type AgentCompletionsMessageMessageExpression, AgentCompletionsMessageMessageExpressionSchema, AgentCompletionsMessageMessageSchema, type AgentCompletionsMessageRichContent, type AgentCompletionsMessageRichContentExpression, AgentCompletionsMessageRichContentExpressionSchema, type AgentCompletionsMessageRichContentPart, type AgentCompletionsMessageRichContentPartExpression, AgentCompletionsMessageRichContentPartExpressionSchema, AgentCompletionsMessageRichContentPartSchema, AgentCompletionsMessageRichContentSchema, type AgentCompletionsMessageSimpleContent, type AgentCompletionsMessageSimpleContentExpression, AgentCompletionsMessageSimpleContentExpressionSchema, type AgentCompletionsMessageSimpleContentPart, type AgentCompletionsMessageSimpleContentPartExpression, AgentCompletionsMessageSimpleContentPartExpressionSchema, AgentCompletionsMessageSimpleContentPartSchema, AgentCompletionsMessageSimpleContentSchema, type AgentCompletionsMessageSystemMessage, type AgentCompletionsMessageSystemMessageExpression, AgentCompletionsMessageSystemMessageExpressionSchema, AgentCompletionsMessageSystemMessageSchema, type AgentCompletionsMessageToolMessage, type AgentCompletionsMessageToolMessageExpression, AgentCompletionsMessageToolMessageExpressionSchema, AgentCompletionsMessageToolMessageSchema, type AgentCompletionsMessageUserMessage, type AgentCompletionsMessageUserMessageExpression, AgentCompletionsMessageUserMessageExpressionSchema, AgentCompletionsMessageUserMessageSchema, type AgentCompletionsMessageVideoUrl, AgentCompletionsMessageVideoUrlSchema, type AgentCompletionsRequestAgentCompletionCreateParams, AgentCompletionsRequestAgentCompletionCreateParamsSchema, type AgentCompletionsRequestAgentCompletionCreateParamsStreaming, AgentCompletionsRequestAgentCompletionCreateParamsStreamingSchema, type AgentCompletionsRequestAgentCompletionCreateParamsUnary, AgentCompletionsRequestAgentCompletionCreateParamsUnarySchema, type AgentCompletionsRequestProvider, type AgentCompletionsRequestProviderDataCollection, AgentCompletionsRequestProviderDataCollectionSchema, type AgentCompletionsRequestProviderMaxPrice, AgentCompletionsRequestProviderMaxPriceSchema, AgentCompletionsRequestProviderSchema, type AgentCompletionsRequestProviderSort, AgentCompletionsRequestProviderSortSchema, type AgentCompletionsRequestResponseFormat, type AgentCompletionsRequestResponseFormatParam, AgentCompletionsRequestResponseFormatParamSchema, AgentCompletionsRequestResponseFormatSchema, type AgentCompletionsResponseAssistantRole, AgentCompletionsResponseAssistantRoleSchema, type AgentCompletionsResponseCompletionTokensDetails, AgentCompletionsResponseCompletionTokensDetailsSchema, type AgentCompletionsResponseCostDetails, AgentCompletionsResponseCostDetailsSchema, type AgentCompletionsResponseFinishReason, AgentCompletionsResponseFinishReasonSchema, type AgentCompletionsResponseLogprob, AgentCompletionsResponseLogprobSchema, type AgentCompletionsResponseLogprobs, AgentCompletionsResponseLogprobsSchema, type AgentCompletionsResponsePromptTokensDetails, AgentCompletionsResponsePromptTokensDetailsSchema, type AgentCompletionsResponseStreamingAgentCompletionChunk, AgentCompletionsResponseStreamingAgentCompletionChunkSchema, type AgentCompletionsResponseStreamingAssistantResponseChunk, AgentCompletionsResponseStreamingAssistantResponseChunkSchema, type AgentCompletionsResponseStreamingMessageChunk, AgentCompletionsResponseStreamingMessageChunkSchema, type AgentCompletionsResponseStreamingObject, AgentCompletionsResponseStreamingObjectSchema, type AgentCompletionsResponseToolResponse, AgentCompletionsResponseToolResponseSchema, type AgentCompletionsResponseToolRole, AgentCompletionsResponseToolRoleSchema, type AgentCompletionsResponseTopLogprob, AgentCompletionsResponseTopLogprobSchema, type AgentCompletionsResponseUnaryAgentCompletion, AgentCompletionsResponseUnaryAgentCompletionSchema, type AgentCompletionsResponseUnaryAssistantResponse, AgentCompletionsResponseUnaryAssistantResponseSchema, type AgentCompletionsResponseUnaryMessage, AgentCompletionsResponseUnaryMessageSchema, type AgentCompletionsResponseUnaryObject, AgentCompletionsResponseUnaryObjectSchema, type AgentCompletionsResponseUpstreamUsage, AgentCompletionsResponseUpstreamUsageSchema, type AgentCompletionsResponseUsage, AgentCompletionsResponseUsageSchema, type AgentContinuation, AgentContinuationSchema, type AgentGetAgentResponse, AgentGetAgentResponseSchema, type AgentInlineAgent, type AgentInlineAgentBase, AgentInlineAgentBaseSchema, type AgentInlineAgentBaseWithFallbacks, type AgentInlineAgentBaseWithFallbacksOrRemote, type AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional, AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema, AgentInlineAgentBaseWithFallbacksOrRemoteSchema, type AgentInlineAgentBaseWithFallbacksOrRemoteWithCount, AgentInlineAgentBaseWithFallbacksOrRemoteWithCountSchema, AgentInlineAgentBaseWithFallbacksSchema, AgentInlineAgentSchema, type AgentInlineAgentWithFallbacks, AgentInlineAgentWithFallbacksSchema, type AgentListAgentResponse, AgentListAgentResponseSchema, type AgentListAgentsRequest, AgentListAgentsRequestSchema, type AgentListAgentsSource, AgentListAgentsSourceSchema, type AgentMcpServer, AgentMcpServerSchema, type AgentMockAgent, type AgentMockAgentBase, AgentMockAgentBaseSchema, AgentMockAgentSchema, type AgentMockContinuation, AgentMockContinuationSchema, type AgentMockOutputMode, AgentMockOutputModeSchema, type AgentMockUpstream, AgentMockUpstreamSchema, type AgentOpenrouterAgent, type AgentOpenrouterAgentBase, AgentOpenrouterAgentBaseSchema, AgentOpenrouterAgentSchema, type AgentOpenrouterContinuation, AgentOpenrouterContinuationSchema, type AgentOpenrouterOutputMode, AgentOpenrouterOutputModeSchema, type AgentOpenrouterProvider, type AgentOpenrouterProviderQuantization, AgentOpenrouterProviderQuantizationSchema, AgentOpenrouterProviderSchema, type AgentOpenrouterReasoning, type AgentOpenrouterReasoningEffort, AgentOpenrouterReasoningEffortSchema, AgentOpenrouterReasoningSchema, type AgentOpenrouterReasoningSummaryVerbosity, AgentOpenrouterReasoningSummaryVerbositySchema, type AgentOpenrouterStop, AgentOpenrouterStopSchema, type AgentOpenrouterUpstream, AgentOpenrouterUpstreamSchema, type AgentOpenrouterVerbosity, AgentOpenrouterVerbositySchema, type AgentOutputMode, AgentOutputModeSchema, type AgentRemoteAgent, type AgentRemoteAgentBase, AgentRemoteAgentBaseSchema, type AgentRemoteAgentBaseWithFallbacks, AgentRemoteAgentBaseWithFallbacksSchema, AgentRemoteAgentSchema, type AgentRemoteAgentWithFallbacks, AgentRemoteAgentWithFallbacksSchema, type AgentUpstream, AgentUpstreamSchema, type AgentUsageAgentResponse, AgentUsageAgentResponseSchema, type AuthApiKeyWithMetadata, AuthApiKeyWithMetadataSchema, type AuthCreateApiKeyRequest, AuthCreateApiKeyRequestSchema, type AuthCreateOpenRouterByokApiKeyRequest, AuthCreateOpenRouterByokApiKeyRequestSchema, type AuthDisableApiKeyRequest, AuthDisableApiKeyRequestSchema, type AuthGetCreditsResponse, AuthGetCreditsResponseSchema, type AuthGetOpenRouterByokApiKeyResponse, AuthGetOpenRouterByokApiKeyResponseSchema, type AuthListApiKeyItem, AuthListApiKeyItemSchema, type AuthListApiKeyResponse, AuthListApiKeyResponseSchema, type ConfigAgentsConfig, ConfigAgentsConfigSchema, type ConfigApiConfig, ConfigApiConfigSchema, type ConfigApiHeadersConfig, ConfigApiHeadersConfigSchema, type ConfigApiLocalConfig, ConfigApiLocalConfigSchema, type ConfigApiMode, ConfigApiModeSchema, type ConfigApiRemoteConfig, ConfigApiRemoteConfigSchema, type ConfigConfig, ConfigConfigSchema, type ConfigFavorite, ConfigFavoriteSchema, type ConfigFunctionsConfig, ConfigFunctionsConfigSchema, type ConfigFunctionsInventionsConfig, ConfigFunctionsInventionsConfigSchema, type ConfigFunctionsProfilesConfig, ConfigFunctionsProfilesConfigSchema, type ConfigFunctionsProfilesPairsConfig, ConfigFunctionsProfilesPairsConfigSchema, type ConfigPairFavorite, ConfigPairFavoriteSchema, type ConfigSwarmsConfig, ConfigSwarmsConfigSchema, type ConfigViewerConfig, ConfigViewerConfigSchema, type ConfigViewerLocalConfig, ConfigViewerLocalConfigSchema, type ConfigViewerMode, ConfigViewerModeSchema, type ConfigViewerSecretSignaturePair, ConfigViewerSecretSignaturePairSchema, type ErrorErrorCreateParams, ErrorErrorCreateParamsSchema, type ErrorErrorCreateParamsStreaming, ErrorErrorCreateParamsStreamingSchema, type ErrorErrorCreateParamsUnary, ErrorErrorCreateParamsUnarySchema, type ErrorErrorResponse, ErrorErrorResponseSchema, type ErrorResponseError, ErrorResponseErrorSchema, type FunctionsAlphaInlineFunction, FunctionsAlphaInlineFunctionSchema, type FunctionsAlphaRemoteFunction, FunctionsAlphaRemoteFunctionSchema, type FunctionsAlphaScalarBranchTaskExpression, FunctionsAlphaScalarBranchTaskExpressionSchema, type FunctionsAlphaScalarInlineFunction, FunctionsAlphaScalarInlineFunctionSchema, type FunctionsAlphaScalarLeafTaskExpression, FunctionsAlphaScalarLeafTaskExpressionSchema, type FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression, FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionSchema, type FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpression, FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpression, FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarRemoteFunction, FunctionsAlphaScalarRemoteFunctionSchema, type FunctionsAlphaScalarScalarFunctionTaskExpression, FunctionsAlphaScalarScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarVectorCompletionTaskExpression, FunctionsAlphaScalarVectorCompletionTaskExpressionSchema, type FunctionsAlphaVectorBranchTaskExpression, FunctionsAlphaVectorBranchTaskExpressionSchema, type FunctionsAlphaVectorExpressionVectorFunctionInputSchema, FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema, type FunctionsAlphaVectorExpressionVectorFunctionInputValue, type FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression, FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema, FunctionsAlphaVectorExpressionVectorFunctionInputValueSchema, type FunctionsAlphaVectorInlineFunction, FunctionsAlphaVectorInlineFunctionSchema, type FunctionsAlphaVectorLeafTaskExpression, FunctionsAlphaVectorLeafTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression, FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpression, FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression, FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema, type FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpression, FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpression, FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema, type FunctionsAlphaVectorRemoteFunction, FunctionsAlphaVectorRemoteFunctionSchema, type FunctionsAlphaVectorScalarFunctionTaskExpression, FunctionsAlphaVectorScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorVectorCompletionTaskExpression, FunctionsAlphaVectorVectorCompletionTaskExpressionSchema, type FunctionsAlphaVectorVectorFunctionTaskExpression, FunctionsAlphaVectorVectorFunctionTaskExpressionSchema, type FunctionsCheckScalarFieldsValidation, FunctionsCheckScalarFieldsValidationSchema, type FunctionsCheckVectorFieldsValidation, FunctionsCheckVectorFieldsValidationSchema, type FunctionsCompiledTask, FunctionsCompiledTaskSchema, type FunctionsExecutionsRequestFunctionExecutionCreateParams, FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema, type FunctionsExecutionsRequestReasoning, FunctionsExecutionsRequestReasoningSchema, type FunctionsExecutionsRequestStrategy, FunctionsExecutionsRequestStrategySchema, type FunctionsExecutionsResponseOutput, FunctionsExecutionsResponseOutputSchema, type FunctionsExecutionsResponseStreamingFunctionExecutionChunk, FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema, type FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk, FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema, type FunctionsExecutionsResponseStreamingObject, FunctionsExecutionsResponseStreamingObjectSchema, type FunctionsExecutionsResponseStreamingReasoningSummaryChunk, FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema, type FunctionsExecutionsResponseStreamingTaskChunk, FunctionsExecutionsResponseStreamingTaskChunkSchema, type FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk, FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema, type FunctionsExecutionsResponseUnaryFunctionExecution, FunctionsExecutionsResponseUnaryFunctionExecutionSchema, type FunctionsExecutionsResponseUnaryFunctionExecutionTask, FunctionsExecutionsResponseUnaryFunctionExecutionTaskSchema, type FunctionsExecutionsResponseUnaryObject, FunctionsExecutionsResponseUnaryObjectSchema, type FunctionsExecutionsResponseUnaryReasoningSummary, FunctionsExecutionsResponseUnaryReasoningSummarySchema, type FunctionsExecutionsResponseUnaryTask, FunctionsExecutionsResponseUnaryTaskSchema, type FunctionsExecutionsResponseUnaryVectorCompletionTask, FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema, type FunctionsExecutionsRetryToken, FunctionsExecutionsRetryTokenSchema, type FunctionsExpressionAnyOfInputSchema, FunctionsExpressionAnyOfInputSchemaSchema, type FunctionsExpressionArrayInputSchema, FunctionsExpressionArrayInputSchemaSchema, type FunctionsExpressionArrayInputSchemaType, FunctionsExpressionArrayInputSchemaTypeSchema, type FunctionsExpressionAudioInputSchema, FunctionsExpressionAudioInputSchemaSchema, type FunctionsExpressionAudioInputSchemaType, FunctionsExpressionAudioInputSchemaTypeSchema, type FunctionsExpressionBooleanInputSchema, FunctionsExpressionBooleanInputSchemaSchema, type FunctionsExpressionBooleanInputSchemaType, FunctionsExpressionBooleanInputSchemaTypeSchema, type FunctionsExpressionExpression, FunctionsExpressionExpressionSchema, type FunctionsExpressionFileInputSchema, FunctionsExpressionFileInputSchemaSchema, type FunctionsExpressionFileInputSchemaType, FunctionsExpressionFileInputSchemaTypeSchema, type FunctionsExpressionImageInputSchema, FunctionsExpressionImageInputSchemaSchema, type FunctionsExpressionImageInputSchemaType, FunctionsExpressionImageInputSchemaTypeSchema, type FunctionsExpressionInputSchema, FunctionsExpressionInputSchemaSchema, type FunctionsExpressionInputValue, type FunctionsExpressionInputValueExpression, type FunctionsExpressionInputValueExpressionObject, FunctionsExpressionInputValueExpressionSchema, type FunctionsExpressionInputValueObject, FunctionsExpressionInputValueSchema, type FunctionsExpressionIntegerInputSchema, FunctionsExpressionIntegerInputSchemaSchema, type FunctionsExpressionIntegerInputSchemaType, FunctionsExpressionIntegerInputSchemaTypeSchema, type FunctionsExpressionNumberInputSchema, FunctionsExpressionNumberInputSchemaSchema, type FunctionsExpressionNumberInputSchemaType, FunctionsExpressionNumberInputSchemaTypeSchema, type FunctionsExpressionObjectInputSchema, FunctionsExpressionObjectInputSchemaSchema, type FunctionsExpressionObjectInputSchemaType, FunctionsExpressionObjectInputSchemaTypeSchema, type FunctionsExpressionParams, FunctionsExpressionParamsSchema, type FunctionsExpressionSpecial, FunctionsExpressionSpecialSchema, type FunctionsExpressionStringInputSchema, FunctionsExpressionStringInputSchemaSchema, type FunctionsExpressionStringInputSchemaType, FunctionsExpressionStringInputSchemaTypeSchema, type FunctionsExpressionTaskOutput, FunctionsExpressionTaskOutputSchema, type FunctionsExpressionVideoInputSchema, FunctionsExpressionVideoInputSchemaSchema, type FunctionsExpressionVideoInputSchemaType, FunctionsExpressionVideoInputSchemaTypeSchema, type FunctionsFullFunction, FunctionsFullFunctionSchema, type FunctionsFullInlineFunction, type FunctionsFullInlineFunctionOrRemoteCommitOptional, FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema, FunctionsFullInlineFunctionSchema, type FunctionsFullRemoteFunction, FunctionsFullRemoteFunctionSchema, type FunctionsFunction, FunctionsFunctionSchema, type FunctionsFunctionType, FunctionsFunctionTypeSchema, type FunctionsGetFunctionProfilePairResponse, FunctionsGetFunctionProfilePairResponseSchema, type FunctionsGetFunctionProfilePairUsageRequest, FunctionsGetFunctionProfilePairUsageRequestSchema, type FunctionsGetFunctionResponse, FunctionsGetFunctionResponseSchema, type FunctionsInlineFunction, FunctionsInlineFunctionSchema, type FunctionsInlineProfile, type FunctionsInlineProfileOrRemoteCommitOptional, FunctionsInlineProfileOrRemoteCommitOptionalSchema, FunctionsInlineProfileSchema, type FunctionsInlineTasksProfile, FunctionsInlineTasksProfileSchema, type FunctionsInventionsDescriptionObject, FunctionsInventionsDescriptionObjectSchema, type FunctionsInventionsEssayObject, FunctionsInventionsEssayObjectSchema, type FunctionsInventionsEssayTasksObject, FunctionsInventionsEssayTasksObjectSchema, type FunctionsInventionsIndexObject, FunctionsInventionsIndexObjectSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreaming, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreamingSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnary, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnarySchema, type FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema, type FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema, type FunctionsInventionsRecursiveResponseStreamingObject, FunctionsInventionsRecursiveResponseStreamingObjectSchema, type FunctionsInventionsRecursiveResponseUnaryFunctionInvention, type FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive, FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiveSchema, FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema, type FunctionsInventionsRecursiveResponseUnaryObject, FunctionsInventionsRecursiveResponseUnaryObjectSchema, type FunctionsInventionsRequestFunctionInventionCreateParams, FunctionsInventionsRequestFunctionInventionCreateParamsSchema, type FunctionsInventionsRequestFunctionInventionCreateParamsStreaming, FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSchema, type FunctionsInventionsRequestFunctionInventionCreateParamsUnary, FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema, type FunctionsInventionsResponseStreamingAgentCompletionChunk, FunctionsInventionsResponseStreamingAgentCompletionChunkSchema, type FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseStreamingFunctionInventionChunkSchema, type FunctionsInventionsResponseStreamingObject, FunctionsInventionsResponseStreamingObjectSchema, type FunctionsInventionsResponseUnaryAgentCompletion, FunctionsInventionsResponseUnaryAgentCompletionSchema, type FunctionsInventionsResponseUnaryFunctionInvention, FunctionsInventionsResponseUnaryFunctionInventionSchema, type FunctionsInventionsResponseUnaryObject, FunctionsInventionsResponseUnaryObjectSchema, type FunctionsInventionsStateAlphaScalarBranchState, FunctionsInventionsStateAlphaScalarBranchStateSchema, type FunctionsInventionsStateAlphaScalarLeafState, FunctionsInventionsStateAlphaScalarLeafStateSchema, type FunctionsInventionsStateAlphaScalarState, FunctionsInventionsStateAlphaScalarStateSchema, type FunctionsInventionsStateAlphaVectorBranchState, FunctionsInventionsStateAlphaVectorBranchStateSchema, type FunctionsInventionsStateAlphaVectorLeafState, FunctionsInventionsStateAlphaVectorLeafStateSchema, type FunctionsInventionsStateAlphaVectorState, FunctionsInventionsStateAlphaVectorStateSchema, type FunctionsInventionsStateInputSchema, FunctionsInventionsStateInputSchemaSchema, type FunctionsInventionsStateParams, FunctionsInventionsStateParamsSchema, type FunctionsInventionsStateParamsState, type FunctionsInventionsStateParamsStateOrRemoteCommitOptional, FunctionsInventionsStateParamsStateOrRemoteCommitOptionalSchema, FunctionsInventionsStateParamsStateSchema, type FunctionsInventionsStateState, FunctionsInventionsStateStateSchema, type FunctionsInventionsTasksLengthObject, FunctionsInventionsTasksLengthObjectSchema, type FunctionsListFunctionProfilePairItem, FunctionsListFunctionProfilePairItemSchema, type FunctionsListFunctionProfilePairResponse, FunctionsListFunctionProfilePairResponseSchema, type FunctionsListFunctionProfilePairsRequest, FunctionsListFunctionProfilePairsRequestSchema, type FunctionsListFunctionProfilePairsSource, FunctionsListFunctionProfilePairsSourceSchema, type FunctionsListFunctionResponse, FunctionsListFunctionResponseSchema, type FunctionsListFunctionsRequest, FunctionsListFunctionsRequestSchema, type FunctionsListFunctionsSource, FunctionsListFunctionsSourceSchema, type FunctionsPlaceholderScalarFunctionTask, type FunctionsPlaceholderScalarFunctionTaskExpression, FunctionsPlaceholderScalarFunctionTaskExpressionSchema, FunctionsPlaceholderScalarFunctionTaskSchema, type FunctionsPlaceholderVectorFunctionTask, type FunctionsPlaceholderVectorFunctionTaskExpression, FunctionsPlaceholderVectorFunctionTaskExpressionSchema, FunctionsPlaceholderVectorFunctionTaskSchema, type FunctionsProfile, FunctionsProfileSchema, type FunctionsProfilesComputationsRequestDatasetItem, FunctionsProfilesComputationsRequestDatasetItemSchema, type FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParams, FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParamsSchema, type FunctionsProfilesComputationsRequestTarget, FunctionsProfilesComputationsRequestTargetSchema, type FunctionsProfilesComputationsResponseFittingStats, FunctionsProfilesComputationsResponseFittingStatsSchema, type FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk, FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema, type FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema, type FunctionsProfilesComputationsResponseStreamingObject, FunctionsProfilesComputationsResponseStreamingObjectSchema, type FunctionsProfilesComputationsResponseUnaryFunctionExecution, FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema, type FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation, FunctionsProfilesComputationsResponseUnaryFunctionProfileComputationSchema, type FunctionsProfilesComputationsResponseUnaryObject, FunctionsProfilesComputationsResponseUnaryObjectSchema, type FunctionsProfilesComputationsRetryToken, FunctionsProfilesComputationsRetryTokenSchema, type FunctionsProfilesGetProfileResponse, FunctionsProfilesGetProfileResponseSchema, type FunctionsProfilesListProfileResponse, FunctionsProfilesListProfileResponseSchema, type FunctionsProfilesListProfilesRequest, FunctionsProfilesListProfilesRequestSchema, type FunctionsProfilesListProfilesSource, FunctionsProfilesListProfilesSourceSchema, type FunctionsProfilesUsageProfileResponse, FunctionsProfilesUsageProfileResponseSchema, type FunctionsRemoteFunction, FunctionsRemoteFunctionSchema, type FunctionsRemoteProfile, FunctionsRemoteProfileSchema, type FunctionsRemoteTasksProfile, FunctionsRemoteTasksProfileSchema, type FunctionsScalarFunctionTask, type FunctionsScalarFunctionTaskExpression, FunctionsScalarFunctionTaskExpressionSchema, FunctionsScalarFunctionTaskSchema, type FunctionsTask, type FunctionsTaskExpression, FunctionsTaskExpressionSchema, type FunctionsTaskProfile, FunctionsTaskProfileSchema, FunctionsTaskSchema, type FunctionsUsageFunctionProfilePairResponse, FunctionsUsageFunctionProfilePairResponseSchema, type FunctionsUsageFunctionResponse, FunctionsUsageFunctionResponseSchema, type FunctionsVectorCompletionTask, type FunctionsVectorCompletionTaskExpression, FunctionsVectorCompletionTaskExpressionSchema, FunctionsVectorCompletionTaskSchema, type FunctionsVectorFunctionTask, type FunctionsVectorFunctionTaskExpression, FunctionsVectorFunctionTaskExpressionSchema, FunctionsVectorFunctionTaskSchema, ObjectiveAI, ObjectiveAIFetchError, type ObjectiveAIOptions, ObjectiveAIOptionsSchema, type PrefixedUuid, PrefixedUuidSchema, type Remote, type RemotePath, type RemotePathCommitOptional, RemotePathCommitOptionalSchema, RemotePathSchema, RemoteSchema, type RequestOptions, RequestOptionsSchema, Stream, type SwarmGetSwarmResponse, SwarmGetSwarmResponseSchema, type SwarmInlineSwarm, type SwarmInlineSwarmBase, type SwarmInlineSwarmBaseOrRemote, type SwarmInlineSwarmBaseOrRemoteCommitOptional, SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema, SwarmInlineSwarmBaseOrRemoteSchema, SwarmInlineSwarmBaseSchema, SwarmInlineSwarmSchema, type SwarmListSwarmResponse, SwarmListSwarmResponseSchema, type SwarmListSwarmsRequest, SwarmListSwarmsRequestSchema, type SwarmListSwarmsSource, SwarmListSwarmsSourceSchema, type SwarmRemoteSwarm, type SwarmRemoteSwarmBase, SwarmRemoteSwarmBaseSchema, SwarmRemoteSwarmSchema, type SwarmSwarm, type SwarmSwarmBase, SwarmSwarmBaseSchema, SwarmSwarmSchema, type SwarmUsageSwarmResponse, SwarmUsageSwarmResponseSchema, type VectorCompletionsCacheCacheVote, type VectorCompletionsCacheCacheVoteRequest, VectorCompletionsCacheCacheVoteRequestSchema, VectorCompletionsCacheCacheVoteSchema, type VectorCompletionsCacheCompletionVotes, VectorCompletionsCacheCompletionVotesSchema, type VectorCompletionsCacheGetCompletionVotesRequest, VectorCompletionsCacheGetCompletionVotesRequestSchema, type VectorCompletionsRequestVectorCompletionCreateParams, VectorCompletionsRequestVectorCompletionCreateParamsSchema, type VectorCompletionsRequestVectorCompletionCreateParamsStreaming, VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchema, type VectorCompletionsRequestVectorCompletionCreateParamsUnary, VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema, type VectorCompletionsResponseStreamingAgentCompletionChunk, VectorCompletionsResponseStreamingAgentCompletionChunkSchema, type VectorCompletionsResponseStreamingObject, VectorCompletionsResponseStreamingObjectSchema, type VectorCompletionsResponseStreamingVectorCompletionChunk, VectorCompletionsResponseStreamingVectorCompletionChunkSchema, type VectorCompletionsResponseUnaryAgentCompletion, VectorCompletionsResponseUnaryAgentCompletionSchema, type VectorCompletionsResponseUnaryObject, VectorCompletionsResponseUnaryObjectSchema, type VectorCompletionsResponseUnaryVectorCompletion, VectorCompletionsResponseUnaryVectorCompletionSchema, type VectorCompletionsResponseVote, VectorCompletionsResponseVoteSchema, type VectorCompletionsVectorResponses, VectorCompletionsVectorResponsesSchema, type Weights, type WeightsEntry, WeightsEntrySchema, WeightsSchema, agentCompletionsCreateAgentCompletion, agentCompletionsMessageAssistantToolCallDeltaMerged, agentCompletionsMessageAssistantToolCallDeltaMergedList, agentCompletionsMessageAssistantToolCallFunctionDeltaMerged, agentCompletionsMessageRichContentMerged, agentCompletionsResponseCompletionTokensDetailsMerged, agentCompletionsResponseCostDetailsMerged, agentCompletionsResponseLogprobsMerged, agentCompletionsResponsePromptTokensDetailsMerged, agentCompletionsResponseStreamingAgentCompletionChunkMerged, agentCompletionsResponseStreamingAssistantResponseChunkMerged, agentCompletionsResponseStreamingMessageChunkMerged, agentCompletionsResponseStreamingMessageChunkMergedList, agentCompletionsResponseUpstreamUsageMerged, agentCompletionsResponseUsageMerged, agentGetAgent, agentGetAgentUsage, agentListAgents, authCreateApiKey, authCreateOpenrouterByokApiKey, authDeleteOpenrouterByokApiKey, authDisableApiKey, authGetCredits, authGetOpenrouterByokApiKey, authListApiKeys, errorCreateError, functionsExecutionsCreateFunctionExecution, functionsExecutionsResponseStreamingFunctionExecutionChunkMerged, functionsExecutionsResponseStreamingReasoningSummaryChunkMerged, functionsExecutionsResponseStreamingTaskChunkMerged, functionsExecutionsResponseStreamingTaskChunkMergedList, functionsExecutionsResponseStreamingVectorCompletionTaskChunkMerged, functionsGetFunction, functionsGetFunctionProfilePairUsage, functionsGetFunctionUsage, functionsInventionsCreateFunctionInvention, functionsInventionsRecursiveCreateFunctionInventionRecursive, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMerged, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMergedList, functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMergedList, functionsInventionsResponseStreamingFunctionInventionChunkMerged, functionsListFunctionProfilePairs, functionsListFunctions, functionsProfilesComputationsComputeProfile, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMerged, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMergedList, functionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged, functionsProfilesGetProfile, functionsProfilesGetProfileUsage, functionsProfilesListProfiles, isResponseError, merge, mergedNumberArray, mergedString, numberIsEmpty, swarmGetSwarm, swarmGetSwarmUsage, swarmListSwarms, vectorCompletionsCacheGetCacheVote, vectorCompletionsCacheGetCompletionVotes, vectorCompletionsCreateVectorCompletion, vectorCompletionsResponseStreamingAgentCompletionChunkMerged, vectorCompletionsResponseStreamingAgentCompletionChunkMergedList, vectorCompletionsResponseStreamingVectorCompletionChunkMerged, vectorCompletionsResponseVoteMergedList, wasmAgentCompletionsMessagePromptId, wasmAgentCompletionsResponseStreamingAgentCompletionChunkMerged, wasmAgentCompletionsResponseStreamingAgentCompletionChunkNormalized, wasmAgentCompletionsResponseStreamingAgentCompletionChunkToUnary, wasmAgentCompletionsResponseStreamingGenerateAgentCompletionChunk, wasmAgentCompletionsResponseStreamingNormalizeAgentCompletionForTests, wasmAgentValidateAgent, wasmFunctionsAlphaCheckBranchScalarFunction, wasmFunctionsAlphaCheckBranchVectorFunction, wasmFunctionsAlphaCheckLeafScalarFunction, wasmFunctionsAlphaCheckLeafVectorFunction, wasmFunctionsCheckCheckScalarFields, wasmFunctionsCheckCheckVectorFields, wasmFunctionsCompileFunctionInputMerge, wasmFunctionsCompileFunctionInputSplit, wasmFunctionsCompileFunctionOutputLength, wasmFunctionsCompileFunctionTasks, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkMerged, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkNormalized, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkToUnary, wasmFunctionsExecutionsResponseStreamingGenerateFunctionExecutionChunk, wasmFunctionsExecutionsResponseStreamingNormalizeFunctionExecutionForTests, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkNormalized, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkToUnary, wasmFunctionsInventionsRecursiveResponseStreamingGenerateFunctionInventionRecursiveChunk, wasmFunctionsInventionsRecursiveResponseStreamingNormalizeFunctionInventionRecursiveForTests, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkMerged, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkNormalized, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkToUnary, wasmFunctionsInventionsResponseStreamingGenerateFunctionInventionChunk, wasmFunctionsInventionsResponseStreamingNormalizeFunctionInventionForTests, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkNormalized, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkToUnary, wasmFunctionsProfilesComputationsResponseStreamingGenerateFunctionProfileComputationChunk, wasmFunctionsProfilesComputationsResponseStreamingNormalizeFunctionProfileComputationForTests, wasmFunctionsValidateFunctionInput, wasmSwarmValidateSwarm, wasmVectorCompletionsResponseStreamingGenerateVectorCompletionChunk, wasmVectorCompletionsResponseStreamingNormalizeVectorCompletionForTests, wasmVectorCompletionsResponseStreamingVectorCompletionChunkMerged, wasmVectorCompletionsResponseStreamingVectorCompletionChunkNormalized, wasmVectorCompletionsResponseStreamingVectorCompletionChunkToUnary, wasmVectorCompletionsVectorResponseId };
+export { type AgentAgent, type AgentAgentBase, AgentAgentBaseSchema, AgentAgentSchema, type AgentAgentWithFallbacks, AgentAgentWithFallbacksSchema, type AgentAgentWithFallbacksWithCount, AgentAgentWithFallbacksWithCountSchema, type AgentClaudeAgentSdkAgent, type AgentClaudeAgentSdkAgentBase, AgentClaudeAgentSdkAgentBaseSchema, AgentClaudeAgentSdkAgentSchema, type AgentClaudeAgentSdkContinuation, AgentClaudeAgentSdkContinuationSchema, type AgentClaudeAgentSdkEffort, AgentClaudeAgentSdkEffortSchema, type AgentClaudeAgentSdkOutputMode, AgentClaudeAgentSdkOutputModeSchema, type AgentClaudeAgentSdkUpstream, AgentClaudeAgentSdkUpstreamSchema, type AgentCompletionsMessageAssistantMessage, type AgentCompletionsMessageAssistantMessageExpression, AgentCompletionsMessageAssistantMessageExpressionSchema, AgentCompletionsMessageAssistantMessageSchema, type AgentCompletionsMessageAssistantToolCall, type AgentCompletionsMessageAssistantToolCallDelta, AgentCompletionsMessageAssistantToolCallDeltaSchema, type AgentCompletionsMessageAssistantToolCallExpression, AgentCompletionsMessageAssistantToolCallExpressionSchema, type AgentCompletionsMessageAssistantToolCallFunction, type AgentCompletionsMessageAssistantToolCallFunctionDelta, AgentCompletionsMessageAssistantToolCallFunctionDeltaSchema, type AgentCompletionsMessageAssistantToolCallFunctionExpression, AgentCompletionsMessageAssistantToolCallFunctionExpressionSchema, AgentCompletionsMessageAssistantToolCallFunctionSchema, AgentCompletionsMessageAssistantToolCallSchema, type AgentCompletionsMessageAssistantToolCallType, AgentCompletionsMessageAssistantToolCallTypeSchema, type AgentCompletionsMessageDeveloperMessage, type AgentCompletionsMessageDeveloperMessageExpression, AgentCompletionsMessageDeveloperMessageExpressionSchema, AgentCompletionsMessageDeveloperMessageSchema, type AgentCompletionsMessageFile, AgentCompletionsMessageFileSchema, type AgentCompletionsMessageImageUrl, type AgentCompletionsMessageImageUrlDetail, AgentCompletionsMessageImageUrlDetailSchema, AgentCompletionsMessageImageUrlSchema, type AgentCompletionsMessageInputAudio, AgentCompletionsMessageInputAudioSchema, type AgentCompletionsMessageMessage, type AgentCompletionsMessageMessageExpression, AgentCompletionsMessageMessageExpressionSchema, AgentCompletionsMessageMessageSchema, type AgentCompletionsMessageRichContent, type AgentCompletionsMessageRichContentExpression, AgentCompletionsMessageRichContentExpressionSchema, type AgentCompletionsMessageRichContentPart, type AgentCompletionsMessageRichContentPartExpression, AgentCompletionsMessageRichContentPartExpressionSchema, AgentCompletionsMessageRichContentPartSchema, AgentCompletionsMessageRichContentSchema, type AgentCompletionsMessageSimpleContent, type AgentCompletionsMessageSimpleContentExpression, AgentCompletionsMessageSimpleContentExpressionSchema, type AgentCompletionsMessageSimpleContentPart, type AgentCompletionsMessageSimpleContentPartExpression, AgentCompletionsMessageSimpleContentPartExpressionSchema, AgentCompletionsMessageSimpleContentPartSchema, AgentCompletionsMessageSimpleContentSchema, type AgentCompletionsMessageSystemMessage, type AgentCompletionsMessageSystemMessageExpression, AgentCompletionsMessageSystemMessageExpressionSchema, AgentCompletionsMessageSystemMessageSchema, type AgentCompletionsMessageToolMessage, type AgentCompletionsMessageToolMessageExpression, AgentCompletionsMessageToolMessageExpressionSchema, AgentCompletionsMessageToolMessageSchema, type AgentCompletionsMessageUserMessage, type AgentCompletionsMessageUserMessageExpression, AgentCompletionsMessageUserMessageExpressionSchema, AgentCompletionsMessageUserMessageSchema, type AgentCompletionsMessageVideoUrl, AgentCompletionsMessageVideoUrlSchema, type AgentCompletionsRequestAgentCompletionCreateParams, AgentCompletionsRequestAgentCompletionCreateParamsSchema, type AgentCompletionsRequestAgentCompletionCreateParamsStreaming, AgentCompletionsRequestAgentCompletionCreateParamsStreamingSchema, type AgentCompletionsRequestAgentCompletionCreateParamsUnary, AgentCompletionsRequestAgentCompletionCreateParamsUnarySchema, type AgentCompletionsRequestProvider, type AgentCompletionsRequestProviderDataCollection, AgentCompletionsRequestProviderDataCollectionSchema, type AgentCompletionsRequestProviderMaxPrice, AgentCompletionsRequestProviderMaxPriceSchema, AgentCompletionsRequestProviderSchema, type AgentCompletionsRequestProviderSort, AgentCompletionsRequestProviderSortSchema, type AgentCompletionsRequestResponseFormat, type AgentCompletionsRequestResponseFormatParam, AgentCompletionsRequestResponseFormatParamSchema, AgentCompletionsRequestResponseFormatSchema, type AgentCompletionsResponseAssistantRole, AgentCompletionsResponseAssistantRoleSchema, type AgentCompletionsResponseCompletionTokensDetails, AgentCompletionsResponseCompletionTokensDetailsSchema, type AgentCompletionsResponseCostDetails, AgentCompletionsResponseCostDetailsSchema, type AgentCompletionsResponseFinishReason, AgentCompletionsResponseFinishReasonSchema, type AgentCompletionsResponseLogprob, AgentCompletionsResponseLogprobSchema, type AgentCompletionsResponseLogprobs, AgentCompletionsResponseLogprobsSchema, type AgentCompletionsResponsePromptTokensDetails, AgentCompletionsResponsePromptTokensDetailsSchema, type AgentCompletionsResponseStreamingAgentCompletionChunk, AgentCompletionsResponseStreamingAgentCompletionChunkSchema, type AgentCompletionsResponseStreamingAssistantResponseChunk, AgentCompletionsResponseStreamingAssistantResponseChunkSchema, type AgentCompletionsResponseStreamingMessageChunk, AgentCompletionsResponseStreamingMessageChunkSchema, type AgentCompletionsResponseStreamingObject, AgentCompletionsResponseStreamingObjectSchema, type AgentCompletionsResponseToolResponse, AgentCompletionsResponseToolResponseSchema, type AgentCompletionsResponseToolRole, AgentCompletionsResponseToolRoleSchema, type AgentCompletionsResponseTopLogprob, AgentCompletionsResponseTopLogprobSchema, type AgentCompletionsResponseUnaryAgentCompletion, AgentCompletionsResponseUnaryAgentCompletionSchema, type AgentCompletionsResponseUnaryAssistantResponse, AgentCompletionsResponseUnaryAssistantResponseSchema, type AgentCompletionsResponseUnaryMessage, AgentCompletionsResponseUnaryMessageSchema, type AgentCompletionsResponseUnaryObject, AgentCompletionsResponseUnaryObjectSchema, type AgentCompletionsResponseUpstreamUsage, AgentCompletionsResponseUpstreamUsageSchema, type AgentCompletionsResponseUsage, AgentCompletionsResponseUsageSchema, type AgentContinuation, AgentContinuationSchema, type AgentGetAgentResponse, AgentGetAgentResponseSchema, type AgentInlineAgent, type AgentInlineAgentBase, AgentInlineAgentBaseSchema, type AgentInlineAgentBaseWithFallbacks, type AgentInlineAgentBaseWithFallbacksOrRemote, type AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional, AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema, AgentInlineAgentBaseWithFallbacksOrRemoteSchema, type AgentInlineAgentBaseWithFallbacksOrRemoteWithCount, AgentInlineAgentBaseWithFallbacksOrRemoteWithCountSchema, AgentInlineAgentBaseWithFallbacksSchema, AgentInlineAgentSchema, type AgentInlineAgentWithFallbacks, AgentInlineAgentWithFallbacksSchema, type AgentListAgentResponse, AgentListAgentResponseSchema, type AgentListAgentsRequest, AgentListAgentsRequestSchema, type AgentListAgentsSource, AgentListAgentsSourceSchema, type AgentMcpServer, AgentMcpServerSchema, type AgentMockAgent, type AgentMockAgentBase, AgentMockAgentBaseSchema, AgentMockAgentSchema, type AgentMockContinuation, AgentMockContinuationSchema, type AgentMockOutputMode, AgentMockOutputModeSchema, type AgentMockUpstream, AgentMockUpstreamSchema, type AgentOpenrouterAgent, type AgentOpenrouterAgentBase, AgentOpenrouterAgentBaseSchema, AgentOpenrouterAgentSchema, type AgentOpenrouterContinuation, AgentOpenrouterContinuationSchema, type AgentOpenrouterOutputMode, AgentOpenrouterOutputModeSchema, type AgentOpenrouterProvider, type AgentOpenrouterProviderQuantization, AgentOpenrouterProviderQuantizationSchema, AgentOpenrouterProviderSchema, type AgentOpenrouterReasoning, type AgentOpenrouterReasoningEffort, AgentOpenrouterReasoningEffortSchema, AgentOpenrouterReasoningSchema, type AgentOpenrouterReasoningSummaryVerbosity, AgentOpenrouterReasoningSummaryVerbositySchema, type AgentOpenrouterStop, AgentOpenrouterStopSchema, type AgentOpenrouterUpstream, AgentOpenrouterUpstreamSchema, type AgentOpenrouterVerbosity, AgentOpenrouterVerbositySchema, type AgentOutputMode, AgentOutputModeSchema, type AgentRemoteAgent, type AgentRemoteAgentBase, AgentRemoteAgentBaseSchema, type AgentRemoteAgentBaseWithFallbacks, AgentRemoteAgentBaseWithFallbacksSchema, AgentRemoteAgentSchema, type AgentRemoteAgentWithFallbacks, AgentRemoteAgentWithFallbacksSchema, type AgentUpstream, AgentUpstreamSchema, type AgentUsageAgentResponse, AgentUsageAgentResponseSchema, type AuthApiKeyWithMetadata, AuthApiKeyWithMetadataSchema, type AuthCreateApiKeyRequest, AuthCreateApiKeyRequestSchema, type AuthCreateOpenRouterByokApiKeyRequest, AuthCreateOpenRouterByokApiKeyRequestSchema, type AuthDisableApiKeyRequest, AuthDisableApiKeyRequestSchema, type AuthGetCreditsResponse, AuthGetCreditsResponseSchema, type AuthGetOpenRouterByokApiKeyResponse, AuthGetOpenRouterByokApiKeyResponseSchema, type AuthListApiKeyItem, AuthListApiKeyItemSchema, type AuthListApiKeyResponse, AuthListApiKeyResponseSchema, type ConfigAgentsConfig, ConfigAgentsConfigSchema, type ConfigApiConfig, ConfigApiConfigSchema, type ConfigApiHeadersConfig, ConfigApiHeadersConfigSchema, type ConfigApiLocalConfig, ConfigApiLocalConfigSchema, type ConfigApiMode, ConfigApiModeSchema, type ConfigApiRemoteConfig, ConfigApiRemoteConfigSchema, type ConfigConfig, ConfigConfigSchema, type ConfigFavorite, ConfigFavoriteSchema, type ConfigFunctionsConfig, ConfigFunctionsConfigSchema, type ConfigFunctionsInventionsConfig, ConfigFunctionsInventionsConfigSchema, type ConfigFunctionsProfilesConfig, ConfigFunctionsProfilesConfigSchema, type ConfigFunctionsProfilesPairsConfig, ConfigFunctionsProfilesPairsConfigSchema, type ConfigPairFavorite, ConfigPairFavoriteSchema, type ConfigSwarmsConfig, ConfigSwarmsConfigSchema, type ConfigViewerConfig, ConfigViewerConfigSchema, type ConfigViewerLocalConfig, ConfigViewerLocalConfigSchema, type ConfigViewerMode, ConfigViewerModeSchema, type ConfigViewerSecretSignaturePair, ConfigViewerSecretSignaturePairSchema, type ErrorErrorCreateParams, ErrorErrorCreateParamsSchema, type ErrorErrorCreateParamsStreaming, ErrorErrorCreateParamsStreamingSchema, type ErrorErrorCreateParamsUnary, ErrorErrorCreateParamsUnarySchema, type ErrorErrorResponse, ErrorErrorResponseSchema, type ErrorResponseError, ErrorResponseErrorSchema, type FunctionsAlphaInlineFunction, FunctionsAlphaInlineFunctionSchema, type FunctionsAlphaRemoteFunction, FunctionsAlphaRemoteFunctionSchema, type FunctionsAlphaScalarBranchTaskExpression, FunctionsAlphaScalarBranchTaskExpressionSchema, type FunctionsAlphaScalarInlineFunction, FunctionsAlphaScalarInlineFunctionSchema, type FunctionsAlphaScalarLeafTaskExpression, FunctionsAlphaScalarLeafTaskExpressionSchema, type FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression, FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionSchema, type FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpression, FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpression, FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarRemoteFunction, FunctionsAlphaScalarRemoteFunctionSchema, type FunctionsAlphaScalarScalarFunctionTaskExpression, FunctionsAlphaScalarScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarVectorCompletionTaskExpression, FunctionsAlphaScalarVectorCompletionTaskExpressionSchema, type FunctionsAlphaVectorBranchTaskExpression, FunctionsAlphaVectorBranchTaskExpressionSchema, type FunctionsAlphaVectorExpressionVectorFunctionInputSchema, FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema, type FunctionsAlphaVectorExpressionVectorFunctionInputValue, type FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression, FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema, FunctionsAlphaVectorExpressionVectorFunctionInputValueSchema, type FunctionsAlphaVectorInlineFunction, FunctionsAlphaVectorInlineFunctionSchema, type FunctionsAlphaVectorLeafTaskExpression, FunctionsAlphaVectorLeafTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression, FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpression, FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression, FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema, type FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpression, FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpression, FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema, type FunctionsAlphaVectorRemoteFunction, FunctionsAlphaVectorRemoteFunctionSchema, type FunctionsAlphaVectorScalarFunctionTaskExpression, FunctionsAlphaVectorScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorVectorCompletionTaskExpression, FunctionsAlphaVectorVectorCompletionTaskExpressionSchema, type FunctionsAlphaVectorVectorFunctionTaskExpression, FunctionsAlphaVectorVectorFunctionTaskExpressionSchema, type FunctionsCheckScalarFieldsValidation, FunctionsCheckScalarFieldsValidationSchema, type FunctionsCheckVectorFieldsValidation, FunctionsCheckVectorFieldsValidationSchema, type FunctionsCompiledTask, FunctionsCompiledTaskSchema, type FunctionsExecutionsRequestFunctionExecutionCreateParams, FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema, type FunctionsExecutionsRequestReasoning, FunctionsExecutionsRequestReasoningSchema, type FunctionsExecutionsRequestStrategy, FunctionsExecutionsRequestStrategySchema, type FunctionsExecutionsResponseOutput, FunctionsExecutionsResponseOutputSchema, type FunctionsExecutionsResponseStreamingFunctionExecutionChunk, FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema, type FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk, FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema, type FunctionsExecutionsResponseStreamingObject, FunctionsExecutionsResponseStreamingObjectSchema, type FunctionsExecutionsResponseStreamingReasoningSummaryChunk, FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema, type FunctionsExecutionsResponseStreamingTaskChunk, FunctionsExecutionsResponseStreamingTaskChunkSchema, type FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk, FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema, type FunctionsExecutionsResponseUnaryFunctionExecution, FunctionsExecutionsResponseUnaryFunctionExecutionSchema, type FunctionsExecutionsResponseUnaryFunctionExecutionTask, FunctionsExecutionsResponseUnaryFunctionExecutionTaskSchema, type FunctionsExecutionsResponseUnaryObject, FunctionsExecutionsResponseUnaryObjectSchema, type FunctionsExecutionsResponseUnaryReasoningSummary, FunctionsExecutionsResponseUnaryReasoningSummarySchema, type FunctionsExecutionsResponseUnaryTask, FunctionsExecutionsResponseUnaryTaskSchema, type FunctionsExecutionsResponseUnaryVectorCompletionTask, FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema, type FunctionsExecutionsRetryToken, FunctionsExecutionsRetryTokenSchema, type FunctionsExpressionAnyOfInputSchema, FunctionsExpressionAnyOfInputSchemaSchema, type FunctionsExpressionArrayInputSchema, FunctionsExpressionArrayInputSchemaSchema, type FunctionsExpressionArrayInputSchemaType, FunctionsExpressionArrayInputSchemaTypeSchema, type FunctionsExpressionAudioInputSchema, FunctionsExpressionAudioInputSchemaSchema, type FunctionsExpressionAudioInputSchemaType, FunctionsExpressionAudioInputSchemaTypeSchema, type FunctionsExpressionBooleanInputSchema, FunctionsExpressionBooleanInputSchemaSchema, type FunctionsExpressionBooleanInputSchemaType, FunctionsExpressionBooleanInputSchemaTypeSchema, type FunctionsExpressionExpression, FunctionsExpressionExpressionSchema, type FunctionsExpressionFileInputSchema, FunctionsExpressionFileInputSchemaSchema, type FunctionsExpressionFileInputSchemaType, FunctionsExpressionFileInputSchemaTypeSchema, type FunctionsExpressionImageInputSchema, FunctionsExpressionImageInputSchemaSchema, type FunctionsExpressionImageInputSchemaType, FunctionsExpressionImageInputSchemaTypeSchema, type FunctionsExpressionInputSchema, FunctionsExpressionInputSchemaSchema, type FunctionsExpressionInputValue, type FunctionsExpressionInputValueExpression, type FunctionsExpressionInputValueExpressionObject, FunctionsExpressionInputValueExpressionSchema, type FunctionsExpressionInputValueObject, FunctionsExpressionInputValueSchema, type FunctionsExpressionIntegerInputSchema, FunctionsExpressionIntegerInputSchemaSchema, type FunctionsExpressionIntegerInputSchemaType, FunctionsExpressionIntegerInputSchemaTypeSchema, type FunctionsExpressionNumberInputSchema, FunctionsExpressionNumberInputSchemaSchema, type FunctionsExpressionNumberInputSchemaType, FunctionsExpressionNumberInputSchemaTypeSchema, type FunctionsExpressionObjectInputSchema, FunctionsExpressionObjectInputSchemaSchema, type FunctionsExpressionObjectInputSchemaType, FunctionsExpressionObjectInputSchemaTypeSchema, type FunctionsExpressionParams, FunctionsExpressionParamsSchema, type FunctionsExpressionSpecial, FunctionsExpressionSpecialSchema, type FunctionsExpressionStringInputSchema, FunctionsExpressionStringInputSchemaSchema, type FunctionsExpressionStringInputSchemaType, FunctionsExpressionStringInputSchemaTypeSchema, type FunctionsExpressionTaskOutput, FunctionsExpressionTaskOutputSchema, type FunctionsExpressionVideoInputSchema, FunctionsExpressionVideoInputSchemaSchema, type FunctionsExpressionVideoInputSchemaType, FunctionsExpressionVideoInputSchemaTypeSchema, type FunctionsFullFunction, FunctionsFullFunctionSchema, type FunctionsFullInlineFunction, type FunctionsFullInlineFunctionOrRemoteCommitOptional, FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema, FunctionsFullInlineFunctionSchema, type FunctionsFullRemoteFunction, FunctionsFullRemoteFunctionSchema, type FunctionsFunction, FunctionsFunctionSchema, type FunctionsFunctionType, FunctionsFunctionTypeSchema, type FunctionsGetFunctionProfilePairResponse, FunctionsGetFunctionProfilePairResponseSchema, type FunctionsGetFunctionProfilePairUsageRequest, FunctionsGetFunctionProfilePairUsageRequestSchema, type FunctionsGetFunctionResponse, FunctionsGetFunctionResponseSchema, type FunctionsInlineFunction, FunctionsInlineFunctionSchema, type FunctionsInlineProfile, type FunctionsInlineProfileOrRemoteCommitOptional, FunctionsInlineProfileOrRemoteCommitOptionalSchema, FunctionsInlineProfileSchema, type FunctionsInlineTasksProfile, FunctionsInlineTasksProfileSchema, type FunctionsInventionsDescriptionObject, FunctionsInventionsDescriptionObjectSchema, type FunctionsInventionsEssayObject, FunctionsInventionsEssayObjectSchema, type FunctionsInventionsEssayTasksObject, FunctionsInventionsEssayTasksObjectSchema, type FunctionsInventionsIndexObject, FunctionsInventionsIndexObjectSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreaming, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreamingSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnary, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnarySchema, type FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema, type FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema, type FunctionsInventionsRecursiveResponseStreamingObject, FunctionsInventionsRecursiveResponseStreamingObjectSchema, type FunctionsInventionsRecursiveResponseUnaryFunctionInvention, type FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive, FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiveSchema, FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema, type FunctionsInventionsRecursiveResponseUnaryObject, FunctionsInventionsRecursiveResponseUnaryObjectSchema, type FunctionsInventionsRequestFunctionInventionCreateParams, FunctionsInventionsRequestFunctionInventionCreateParamsSchema, type FunctionsInventionsRequestFunctionInventionCreateParamsStreaming, FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSchema, type FunctionsInventionsRequestFunctionInventionCreateParamsUnary, FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema, type FunctionsInventionsResponseStreamingAgentCompletionChunk, FunctionsInventionsResponseStreamingAgentCompletionChunkSchema, type FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseStreamingFunctionInventionChunkSchema, type FunctionsInventionsResponseStreamingObject, FunctionsInventionsResponseStreamingObjectSchema, type FunctionsInventionsResponseUnaryAgentCompletion, FunctionsInventionsResponseUnaryAgentCompletionSchema, type FunctionsInventionsResponseUnaryFunctionInvention, FunctionsInventionsResponseUnaryFunctionInventionSchema, type FunctionsInventionsResponseUnaryObject, FunctionsInventionsResponseUnaryObjectSchema, type FunctionsInventionsStateAlphaScalarBranchState, FunctionsInventionsStateAlphaScalarBranchStateSchema, type FunctionsInventionsStateAlphaScalarLeafState, FunctionsInventionsStateAlphaScalarLeafStateSchema, type FunctionsInventionsStateAlphaScalarState, FunctionsInventionsStateAlphaScalarStateSchema, type FunctionsInventionsStateAlphaVectorBranchState, FunctionsInventionsStateAlphaVectorBranchStateSchema, type FunctionsInventionsStateAlphaVectorLeafState, FunctionsInventionsStateAlphaVectorLeafStateSchema, type FunctionsInventionsStateAlphaVectorState, FunctionsInventionsStateAlphaVectorStateSchema, type FunctionsInventionsStateInputSchema, FunctionsInventionsStateInputSchemaSchema, type FunctionsInventionsStateParams, FunctionsInventionsStateParamsSchema, type FunctionsInventionsStateParamsState, type FunctionsInventionsStateParamsStateOrRemoteCommitOptional, FunctionsInventionsStateParamsStateOrRemoteCommitOptionalSchema, FunctionsInventionsStateParamsStateSchema, type FunctionsInventionsStateState, FunctionsInventionsStateStateSchema, type FunctionsInventionsTasksLengthObject, FunctionsInventionsTasksLengthObjectSchema, type FunctionsListFunctionProfilePairItem, FunctionsListFunctionProfilePairItemSchema, type FunctionsListFunctionProfilePairResponse, FunctionsListFunctionProfilePairResponseSchema, type FunctionsListFunctionProfilePairsRequest, FunctionsListFunctionProfilePairsRequestSchema, type FunctionsListFunctionProfilePairsSource, FunctionsListFunctionProfilePairsSourceSchema, type FunctionsListFunctionResponse, FunctionsListFunctionResponseSchema, type FunctionsListFunctionsRequest, FunctionsListFunctionsRequestSchema, type FunctionsListFunctionsSource, FunctionsListFunctionsSourceSchema, type FunctionsPlaceholderScalarFunctionTask, type FunctionsPlaceholderScalarFunctionTaskExpression, FunctionsPlaceholderScalarFunctionTaskExpressionSchema, FunctionsPlaceholderScalarFunctionTaskSchema, type FunctionsPlaceholderVectorFunctionTask, type FunctionsPlaceholderVectorFunctionTaskExpression, FunctionsPlaceholderVectorFunctionTaskExpressionSchema, FunctionsPlaceholderVectorFunctionTaskSchema, type FunctionsProfile, FunctionsProfileSchema, type FunctionsProfilesComputationsRequestDatasetItem, FunctionsProfilesComputationsRequestDatasetItemSchema, type FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParams, FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParamsSchema, type FunctionsProfilesComputationsRequestTarget, FunctionsProfilesComputationsRequestTargetSchema, type FunctionsProfilesComputationsResponseFittingStats, FunctionsProfilesComputationsResponseFittingStatsSchema, type FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk, FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema, type FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema, type FunctionsProfilesComputationsResponseStreamingObject, FunctionsProfilesComputationsResponseStreamingObjectSchema, type FunctionsProfilesComputationsResponseUnaryFunctionExecution, FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema, type FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation, FunctionsProfilesComputationsResponseUnaryFunctionProfileComputationSchema, type FunctionsProfilesComputationsResponseUnaryObject, FunctionsProfilesComputationsResponseUnaryObjectSchema, type FunctionsProfilesComputationsRetryToken, FunctionsProfilesComputationsRetryTokenSchema, type FunctionsProfilesGetProfileResponse, FunctionsProfilesGetProfileResponseSchema, type FunctionsProfilesListProfileResponse, FunctionsProfilesListProfileResponseSchema, type FunctionsProfilesListProfilesRequest, FunctionsProfilesListProfilesRequestSchema, type FunctionsProfilesListProfilesSource, FunctionsProfilesListProfilesSourceSchema, type FunctionsProfilesUsageProfileResponse, FunctionsProfilesUsageProfileResponseSchema, type FunctionsRemoteFunction, FunctionsRemoteFunctionSchema, type FunctionsRemoteProfile, FunctionsRemoteProfileSchema, type FunctionsRemoteTasksProfile, FunctionsRemoteTasksProfileSchema, type FunctionsScalarFunctionTask, type FunctionsScalarFunctionTaskExpression, FunctionsScalarFunctionTaskExpressionSchema, FunctionsScalarFunctionTaskSchema, type FunctionsTask, type FunctionsTaskExpression, FunctionsTaskExpressionSchema, type FunctionsTaskProfile, FunctionsTaskProfileSchema, FunctionsTaskSchema, type FunctionsUsageFunctionProfilePairResponse, FunctionsUsageFunctionProfilePairResponseSchema, type FunctionsUsageFunctionResponse, FunctionsUsageFunctionResponseSchema, type FunctionsVectorCompletionTask, type FunctionsVectorCompletionTaskExpression, FunctionsVectorCompletionTaskExpressionSchema, FunctionsVectorCompletionTaskSchema, type FunctionsVectorFunctionTask, type FunctionsVectorFunctionTaskExpression, FunctionsVectorFunctionTaskExpressionSchema, FunctionsVectorFunctionTaskSchema, type LaboratoriesExecutionsRequestLaboratoryExecutionCreateParams, LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema, type LaboratoriesExecutionsResponseStreamingBuilderChunk, LaboratoriesExecutionsResponseStreamingBuilderChunkSchema, type LaboratoriesExecutionsResponseStreamingEvaluationChunk, LaboratoriesExecutionsResponseStreamingEvaluationChunkSchema, type LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk, LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkSchema, type LaboratoriesExecutionsResponseStreamingObject, LaboratoriesExecutionsResponseStreamingObjectSchema, type LaboratoriesExecutionsResponseUnaryBuilder, LaboratoriesExecutionsResponseUnaryBuilderSchema, type LaboratoriesExecutionsResponseUnaryEvaluation, LaboratoriesExecutionsResponseUnaryEvaluationSchema, type LaboratoriesExecutionsResponseUnaryLaboratoryExecution, LaboratoriesExecutionsResponseUnaryLaboratoryExecutionSchema, type LaboratoriesExecutionsResponseUnaryObject, LaboratoriesExecutionsResponseUnaryObjectSchema, ObjectiveAI, ObjectiveAIFetchError, type ObjectiveAIOptions, ObjectiveAIOptionsSchema, type PrefixedUuid, PrefixedUuidSchema, type Remote, type RemotePath, type RemotePathCommitOptional, RemotePathCommitOptionalSchema, RemotePathSchema, RemoteSchema, type RequestOptions, RequestOptionsSchema, Stream, type SwarmGetSwarmResponse, SwarmGetSwarmResponseSchema, type SwarmInlineSwarm, type SwarmInlineSwarmBase, type SwarmInlineSwarmBaseOrRemote, type SwarmInlineSwarmBaseOrRemoteCommitOptional, SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema, SwarmInlineSwarmBaseOrRemoteSchema, SwarmInlineSwarmBaseSchema, SwarmInlineSwarmSchema, type SwarmListSwarmResponse, SwarmListSwarmResponseSchema, type SwarmListSwarmsRequest, SwarmListSwarmsRequestSchema, type SwarmListSwarmsSource, SwarmListSwarmsSourceSchema, type SwarmRemoteSwarm, type SwarmRemoteSwarmBase, SwarmRemoteSwarmBaseSchema, SwarmRemoteSwarmSchema, type SwarmSwarm, type SwarmSwarmBase, SwarmSwarmBaseSchema, SwarmSwarmSchema, type SwarmUsageSwarmResponse, SwarmUsageSwarmResponseSchema, type VectorCompletionsCacheCacheVote, type VectorCompletionsCacheCacheVoteRequest, VectorCompletionsCacheCacheVoteRequestSchema, VectorCompletionsCacheCacheVoteSchema, type VectorCompletionsCacheCompletionVotes, VectorCompletionsCacheCompletionVotesSchema, type VectorCompletionsCacheGetCompletionVotesRequest, VectorCompletionsCacheGetCompletionVotesRequestSchema, type VectorCompletionsRequestVectorCompletionCreateParams, VectorCompletionsRequestVectorCompletionCreateParamsSchema, type VectorCompletionsRequestVectorCompletionCreateParamsStreaming, VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchema, type VectorCompletionsRequestVectorCompletionCreateParamsUnary, VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema, type VectorCompletionsResponseStreamingAgentCompletionChunk, VectorCompletionsResponseStreamingAgentCompletionChunkSchema, type VectorCompletionsResponseStreamingObject, VectorCompletionsResponseStreamingObjectSchema, type VectorCompletionsResponseStreamingVectorCompletionChunk, VectorCompletionsResponseStreamingVectorCompletionChunkSchema, type VectorCompletionsResponseUnaryAgentCompletion, VectorCompletionsResponseUnaryAgentCompletionSchema, type VectorCompletionsResponseUnaryObject, VectorCompletionsResponseUnaryObjectSchema, type VectorCompletionsResponseUnaryVectorCompletion, VectorCompletionsResponseUnaryVectorCompletionSchema, type VectorCompletionsResponseVote, VectorCompletionsResponseVoteSchema, type VectorCompletionsVectorResponses, VectorCompletionsVectorResponsesSchema, type Weights, type WeightsEntry, WeightsEntrySchema, WeightsSchema, agentCompletionsCreateAgentCompletion, agentCompletionsMessageAssistantToolCallDeltaMerged, agentCompletionsMessageAssistantToolCallDeltaMergedList, agentCompletionsMessageAssistantToolCallFunctionDeltaMerged, agentCompletionsMessageRichContentMerged, agentCompletionsResponseCompletionTokensDetailsMerged, agentCompletionsResponseCostDetailsMerged, agentCompletionsResponseLogprobsMerged, agentCompletionsResponsePromptTokensDetailsMerged, agentCompletionsResponseStreamingAgentCompletionChunkMerged, agentCompletionsResponseStreamingAssistantResponseChunkMerged, agentCompletionsResponseStreamingMessageChunkMerged, agentCompletionsResponseStreamingMessageChunkMergedList, agentCompletionsResponseUpstreamUsageMerged, agentCompletionsResponseUsageMerged, agentGetAgent, agentGetAgentUsage, agentListAgents, authCreateApiKey, authCreateOpenrouterByokApiKey, authDeleteOpenrouterByokApiKey, authDisableApiKey, authGetCredits, authGetOpenrouterByokApiKey, authListApiKeys, errorCreateError, functionsExecutionsCreateFunctionExecution, functionsExecutionsResponseStreamingFunctionExecutionChunkMerged, functionsExecutionsResponseStreamingReasoningSummaryChunkMerged, functionsExecutionsResponseStreamingTaskChunkMerged, functionsExecutionsResponseStreamingTaskChunkMergedList, functionsExecutionsResponseStreamingVectorCompletionTaskChunkMerged, functionsGetFunction, functionsGetFunctionProfilePairUsage, functionsGetFunctionUsage, functionsInventionsCreateFunctionInvention, functionsInventionsRecursiveCreateFunctionInventionRecursive, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMerged, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMergedList, functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMergedList, functionsInventionsResponseStreamingFunctionInventionChunkMerged, functionsListFunctionProfilePairs, functionsListFunctions, functionsProfilesComputationsComputeProfile, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMerged, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMergedList, functionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged, functionsProfilesGetProfile, functionsProfilesGetProfileUsage, functionsProfilesListProfiles, isResponseError, merge, mergedNumberArray, mergedString, numberIsEmpty, swarmGetSwarm, swarmGetSwarmUsage, swarmListSwarms, vectorCompletionsCacheGetCacheVote, vectorCompletionsCacheGetCompletionVotes, vectorCompletionsCreateVectorCompletion, vectorCompletionsResponseStreamingAgentCompletionChunkMerged, vectorCompletionsResponseStreamingAgentCompletionChunkMergedList, vectorCompletionsResponseStreamingVectorCompletionChunkMerged, vectorCompletionsResponseVoteMergedList, wasmAgentCompletionsMessagePromptId, wasmAgentCompletionsResponseStreamingAgentCompletionChunkMerged, wasmAgentCompletionsResponseStreamingAgentCompletionChunkNormalized, wasmAgentCompletionsResponseStreamingAgentCompletionChunkToUnary, wasmAgentCompletionsResponseStreamingGenerateAgentCompletionChunk, wasmAgentCompletionsResponseStreamingNormalizeAgentCompletionForTests, wasmAgentValidateAgent, wasmFunctionsAlphaCheckBranchScalarFunction, wasmFunctionsAlphaCheckBranchVectorFunction, wasmFunctionsAlphaCheckLeafScalarFunction, wasmFunctionsAlphaCheckLeafVectorFunction, wasmFunctionsCheckCheckScalarFields, wasmFunctionsCheckCheckVectorFields, wasmFunctionsCompileFunctionInputMerge, wasmFunctionsCompileFunctionInputSplit, wasmFunctionsCompileFunctionOutputLength, wasmFunctionsCompileFunctionTasks, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkMerged, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkNormalized, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkToUnary, wasmFunctionsExecutionsResponseStreamingGenerateFunctionExecutionChunk, wasmFunctionsExecutionsResponseStreamingNormalizeFunctionExecutionForTests, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkNormalized, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkToUnary, wasmFunctionsInventionsRecursiveResponseStreamingGenerateFunctionInventionRecursiveChunk, wasmFunctionsInventionsRecursiveResponseStreamingNormalizeFunctionInventionRecursiveForTests, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkMerged, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkNormalized, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkToUnary, wasmFunctionsInventionsResponseStreamingGenerateFunctionInventionChunk, wasmFunctionsInventionsResponseStreamingNormalizeFunctionInventionForTests, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkNormalized, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkToUnary, wasmFunctionsProfilesComputationsResponseStreamingGenerateFunctionProfileComputationChunk, wasmFunctionsProfilesComputationsResponseStreamingNormalizeFunctionProfileComputationForTests, wasmFunctionsValidateFunctionInput, wasmSwarmValidateSwarm, wasmVectorCompletionsResponseStreamingGenerateVectorCompletionChunk, wasmVectorCompletionsResponseStreamingNormalizeVectorCompletionForTests, wasmVectorCompletionsResponseStreamingVectorCompletionChunkMerged, wasmVectorCompletionsResponseStreamingVectorCompletionChunkNormalized, wasmVectorCompletionsResponseStreamingVectorCompletionChunkToUnary, wasmVectorCompletionsVectorResponseId };

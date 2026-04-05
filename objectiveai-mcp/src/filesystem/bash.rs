@@ -2,6 +2,7 @@ const MAX_OUTPUT_CHARS: usize = 30_000;
 const MAX_PERSISTED_SIZE: usize = 64 * 1024 * 1024; // 64MB
 
 use std::collections::HashMap;
+use std::fs::OpenOptions;
 use std::path::PathBuf;
 use std::process::Stdio;
 use std::sync::atomic::{AtomicU64, Ordering};
