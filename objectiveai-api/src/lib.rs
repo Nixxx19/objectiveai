@@ -43,6 +43,8 @@ pub mod vector;
 pub mod mock;
 /// Viewer client for streaming events to the Tauri viewer.
 pub mod viewer;
+/// Laboratory execution orchestration.
+pub mod laboratories;
 /// Server runner
 mod run;
 

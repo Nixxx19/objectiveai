@@ -15,6 +15,7 @@ publish = true
 [features]
 default = []
 sqlite-persistent-cache = ["dep:rusqlite"]
+laboratories-local = ["dep:bollard", "dep:tar"]
 
 [dependencies]
 objectiveai = { path = "../objectiveai-rs", version = "2.0.0", default-features = false, features = ["http"] }
@@ -51,6 +52,8 @@ base62 = { version = "2.2.4" }
 tokio-util = { version = "0.7.18", features = ["io"] }
 futures-util = { version = "0.3.32" }
 rusqlite = { version = "0.31.0", features = ["bundled"], optional = true }
+bollard = { version = "0.20.2", optional = true }
+tar = { version = "0.4.45", optional = true }
 
 [dev-dependencies]
 dunce = "1.0.5"
