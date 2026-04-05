@@ -9,7 +9,7 @@ pub struct Builder {
     /// Builder index (0-based).
     pub index: u64,
     /// Container index (0-based).
-    pub container_index: u64,
+    pub agent_index: u64,
     #[serde(flatten)]
     pub inner: agent::completions::response::unary::AgentCompletion,
     pub error: Option<error::ResponseError>,
@@ -19,14 +19,14 @@ impl From<response::streaming::BuilderChunk> for Builder {
     fn from(
         response::streaming::BuilderChunk {
             index,
-            container_index,
+            agent_index,
             inner,
             error,
         }: response::streaming::BuilderChunk,
     ) -> Self {
         Self {
             index,
-            container_index,
+            agent_index,
             inner: inner.into(),
             error,
         }

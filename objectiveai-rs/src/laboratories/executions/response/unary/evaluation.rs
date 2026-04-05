@@ -9,7 +9,7 @@ pub struct Evaluation {
     /// Evaluation index (0-based).
     pub index: u64,
     /// Container index (0-based).
-    pub container_index: u64,
+    pub agent_index: u64,
     #[serde(flatten)]
     pub inner: agent::completions::response::unary::AgentCompletion,
     pub output: Option<functions::expression::InputValue>,
@@ -20,7 +20,7 @@ impl From<response::streaming::EvaluationChunk> for Evaluation {
     fn from(
         response::streaming::EvaluationChunk {
             index,
-            container_index,
+            agent_index,
             inner,
             output,
             error,
@@ -28,7 +28,7 @@ impl From<response::streaming::EvaluationChunk> for Evaluation {
     ) -> Self {
         Self {
             index,
-            container_index,
+            agent_index,
             inner: inner.into(),
             output,
             error,

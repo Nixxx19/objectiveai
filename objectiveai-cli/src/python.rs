@@ -55,6 +55,33 @@ pub fn exec_code<T: serde::de::DeserializeOwned>(code: &str) -> Result<T, crate:
     }
 }
 
+/// Execute inline Python code with string arguments passed as sys.argv[1:],
+/// and deserialize the output as JSON into `T`.
+pub fn exec_code_with_args<T: serde::de::DeserializeOwned>(code: &str, args: &[String]) -> Result<T, crate::error::Error> {
+    let raw = exec_code_raw_with_args(code, args)?;
+    let envelope: HarnessOutput = serde_json::from_str(&raw)
+        .map_err(|e| crate::error::Error::PythonHarnessBroken(e.to_string()))?;
+
+    let eval_err = if !envelope.eval.is_null() {
+        let eval_str = envelope.eval.to_string();
+        let mut de = serde_json::Deserializer::from_str(&eval_str);
+        match serde_path_to_error::deserialize(&mut de) {
+            Ok(result) => return Ok(result),
+            Err(e) => Some(e),
+        }
+    } else {
+        None
+    };
+
+    let mut de = serde_json::Deserializer::from_str(&envelope.stdout);
+    match serde_path_to_error::deserialize(&mut de) {
+        Ok(result) => Ok(result),
+        Err(stdout_err) => Err(crate::error::Error::PythonDeserialize(
+            eval_err.unwrap_or(stdout_err)
+        )),
+    }
+}
+
 /// Wraps user code in a harness that outputs a JSON envelope with eval and stdout.
 fn wrap_code(code: &str) -> String {
     use base64::Engine;
@@ -119,6 +146,42 @@ fn exec_code_raw(code: &str) -> Result<String, crate::error::Error> {
     {
         let _ = code;
         Err(crate::error::Error::PythonNotFound)
+    }
+}
+
+fn exec_code_raw_with_args(code: &str, args: &[String]) -> Result<String, crate::error::Error> {
+    let wrapped = wrap_code(code);
+    #[cfg(feature = "systempython")]
+    if let Some(result) = try_system_python_code_with_args(&wrapped, args) {
+        return result;
+    }
+    #[cfg(feature = "rustpython")]
+    {
+        let _ = args; // RustPython doesn't support sys.argv injection easily
+        return exec_code_rustpython(&wrapped);
+    }
+    #[cfg(not(feature = "rustpython"))]
+    {
+        let _ = (code, args);
+        Err(crate::error::Error::PythonNotFound)
+    }
+}
+
+#[cfg(feature = "systempython")]
+fn try_system_python_code_with_args(code: &str, args: &[String]) -> Option<Result<String, crate::error::Error>> {
+    use std::process::Command;
+    let python = find_system_python()?;
+    let output = Command::new(&python)
+        .arg("-c")
+        .arg(code)
+        .args(args)
+        .output()
+        .ok()?;
+    if output.status.success() {
+        Some(Ok(String::from_utf8_lossy(&output.stdout).into_owned()))
+    } else {
+        let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
+        Some(Err(crate::error::Error::PythonException(stderr)))
     }
 }
 

@@ -31,6 +31,10 @@ pub struct CreateArgs {
     #[command(flatten)]
     pub evaluation_continuation: EvaluationContinuationArgs,
 
+    /// Output python script
+    #[command(flatten)]
+    pub output_python: OutputPythonSource,
+
     /// Maximum number of evaluation retries if validation fails.
     #[arg(long)]
     pub max_evaluation_retries: Option<u32>,
@@ -38,6 +42,19 @@ pub struct CreateArgs {
     /// Seed for deterministic mock responses
     #[arg(long)]
     pub seed: Option<i64>,
+}
+
+/// Output python script source — file or inline.
+#[derive(Args)]
+#[group(multiple = false)]
+pub struct OutputPythonSource {
+    /// Inline Python output scoring code
+    #[arg(long)]
+    pub output_python_inline: Option<String>,
+
+    /// Path to a Python output scoring file
+    #[arg(long)]
+    pub output_python_file: Option<PathBuf>,
 }
 
 /// Messages for builder agents.

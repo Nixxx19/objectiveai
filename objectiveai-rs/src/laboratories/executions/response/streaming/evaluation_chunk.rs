@@ -11,7 +11,7 @@ pub struct EvaluationChunk {
     pub index: u64,
     /// Container index (0-based).
     #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
-    pub container_index: u64,
+    pub agent_index: u64,
     #[serde(flatten)]
     pub inner: agent::completions::response::streaming::AgentCompletionChunk,
     #[serde(skip_serializing_if = "Option::is_none")]

@@ -256,7 +256,7 @@ where
                 let request = request.clone();
                 let indexer = indexer.clone();
                 let id = id.clone();
-                let container_index = native_index as u64;
+                let agent_index = native_index as u64;
 
                 let agent_with_fallbacks = objectiveai::agent::InlineAgentBaseWithFallbacks {
                     inner: agent_base,
@@ -295,7 +295,7 @@ where
                                             id: id.clone(),
                                             builders: vec![BuilderChunk {
                                                 index: completion_index,
-                                                container_index,
+                                                agent_index,
                                                 inner: chunk,
                                                 error: None,
                                             }],
@@ -318,7 +318,7 @@ where
                                 id: id.clone(),
                                 builders: vec![BuilderChunk {
                                     index: completion_index,
-                                    container_index,
+                                    agent_index,
                                     inner: Default::default(),
                                     error: Some(objectiveai::error::ResponseError::from(&e)),
                                 }],
@@ -381,7 +381,7 @@ where
         created: u64,
         object: Object,
         evaluation_index: u64,
-        container_index: u64,
+        agent_index: u64,
         agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
     ) -> impl Stream<Item = LaboratoryExecutionChunk> + Send + 'static {
         let agent_client = self.agent_client.clone();
@@ -467,7 +467,7 @@ where
                                         builders: Vec::new(),
                                         evaluations: vec![EvaluationChunk {
                                             index: evaluation_index,
-                                            container_index,
+                                            agent_index,
                                             inner: chunk,
                                             output: None,
                                             error: None,
@@ -490,7 +490,7 @@ where
                             builders: Vec::new(),
                             evaluations: vec![EvaluationChunk {
                                 index: evaluation_index,
-                                container_index,
+                                agent_index,
                                 inner: Default::default(),
                                 output: None,
                                 error: Some(objectiveai::error::ResponseError::from(&e)),
@@ -548,7 +548,7 @@ where
                                 builders: Vec::new(),
                                 evaluations: vec![EvaluationChunk {
                                     index: evaluation_index,
-                                    container_index,
+                                    agent_index,
                                     inner: Default::default(),
                                     output: Some(input_value),
                                     error: None,
@@ -569,7 +569,7 @@ where
                                 builders: Vec::new(),
                                 evaluations: vec![EvaluationChunk {
                                     index: evaluation_index,
-                                    container_index,
+                                    agent_index,
                                     inner: Default::default(),
                                     output: None,
                                     error: Some(objectiveai::error::ResponseError::from(&err)),
@@ -604,7 +604,7 @@ where
                                 builders: Vec::new(),
                                 evaluations: vec![EvaluationChunk {
                                     index: evaluation_index,
-                                    container_index,
+                                    agent_index,
                                     inner: Default::default(),
                                     output: None,
                                     error: Some(objectiveai::error::ResponseError::from(&err)),
