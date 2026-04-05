@@ -32,7 +32,4 @@ pub enum Error {
     EmptyStream,
     #[error("config set forbidden by server configuration")]
     ConfigSetForbidden,
-    #[cfg(feature = "laboratory")]
-    #[error("docker error: {0}")]
-    Docker(#[from] bollard::errors::Error),
 }
