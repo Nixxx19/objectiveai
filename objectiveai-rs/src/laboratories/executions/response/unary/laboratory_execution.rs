@@ -1,0 +1,62 @@
+use crate::{agent, error, laboratories::executions::response};
+use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
+
+/// A complete laboratory execution response (non-streaming).
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "laboratories.executions.response.unary.LaboratoryExecution")]
+pub struct LaboratoryExecution {
+    /// Unique identifier for this execution.
+    pub id: String,
+    /// Results from each builder agent completion.
+    pub builders: Vec<super::Builder>,
+    /// Results from each evaluation agent completion.
+    pub evaluations: Vec<super::Evaluation>,
+    /// Error details if the execution failed.
+    pub error: Option<error::ResponseError>,
+    /// Unix timestamp when the execution was created.
+    pub created: u64,
+    /// Object type identifier.
+    pub object: super::Object,
+    /// Aggregated token and cost usage.
+    pub usage: agent::completions::response::Usage,
+}
+
+impl LaboratoryExecution {
+    pub fn any_usage(&self) -> bool {
+        self.usage.any_usage()
+    }
+
+    /// Normalize non-deterministic fields for test snapshot comparison.
+    pub fn normalize_for_tests(&mut self) {
+        self.id = String::new();
+        self.created = 0;
+    }
+}
+
+impl From<response::streaming::LaboratoryExecutionChunk> for LaboratoryExecution {
+    fn from(
+        response::streaming::LaboratoryExecutionChunk {
+            id,
+            builders,
+            evaluations,
+            error,
+            created,
+            object,
+            usage,
+        }: response::streaming::LaboratoryExecutionChunk,
+    ) -> Self {
+        Self {
+            id,
+            builders: builders.into_iter().map(super::Builder::from).collect(),
+            evaluations: evaluations
+                .into_iter()
+                .map(super::Evaluation::from)
+                .collect(),
+            error,
+            created,
+            object: object.into(),
+            usage: usage.unwrap_or_default(),
+        }
+    }
+}

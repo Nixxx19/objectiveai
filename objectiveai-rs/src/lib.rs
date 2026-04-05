@@ -36,6 +36,7 @@ pub mod auth;
 pub mod swarm;
 pub mod error;
 pub mod functions;
+pub mod laboratories;
 mod json_schema;
 pub use json_schema::*;
 pub mod prefixed_uuid;
