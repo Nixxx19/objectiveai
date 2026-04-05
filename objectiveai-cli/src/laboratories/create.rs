@@ -6,9 +6,7 @@ use super::create_args::CreateArgs;
 #[derive(serde::Serialize)]
 struct ResultItem {
     agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
-    #[serde(skip_serializing_if = "Option::is_none")]
     score: Option<f64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     error: Option<objectiveai::error::ResponseError>,
 }
 
