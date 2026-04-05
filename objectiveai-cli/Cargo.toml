@@ -8,7 +8,7 @@ default = ["viewer", "rustpython", "systempython"]
 viewer = ["dep:objectiveai-viewer"]
 rustpython = ["dep:rustpython"]
 systempython = []
-laboratory = ["dep:bollard"]
+laboratory = ["dep:bollard", "dep:tar"]
 
 [dependencies]
 objectiveai = { path = "../objectiveai-rs", version = "2.0.0" }
@@ -28,3 +28,4 @@ serde_path_to_error = "0.1.20"
 base64 = "0.22.1"
 futures = "0.3.32"
 bollard = { version = "0.20.2", optional = true }
+tar = { version = "0.4.45", optional = true }

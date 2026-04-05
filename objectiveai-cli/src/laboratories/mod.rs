@@ -1,4 +1,6 @@
 mod create;
+mod create_args;
+mod mcp_binary;
 
 use clap::Subcommand;
 
@@ -7,14 +9,14 @@ pub enum Commands {
     /// Create a new laboratory
     Create {
         #[command(flatten)]
-        args: create::CreateArgs,
+        args: create_args::CreateArgs,
     },
 }
 
 impl Commands {
     pub async fn handle(self, _cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         match self {
-            Commands::Create { args: _ } => unimplemented!(),
+            Commands::Create { args } => create::handle(args).await,
         }
     }
 }

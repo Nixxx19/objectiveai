@@ -1,188 +1,94 @@
-use clap::Args;
-use std::path::PathBuf;
+use bollard::exec::CreateExecOptions;
+use bollard::models::ContainerCreateBody;
+use bollard::query_parameters::{CreateContainerOptionsBuilder, UploadToContainerOptionsBuilder};
 
-#[derive(Args)]
-pub struct CreateArgs {
-    /// Docker image to use for the laboratory environment
-    #[arg(long)]
-    pub docker_image: String,
+use super::create_args::CreateArgs;
 
-    /// Builder agent(s) — at least one required.
-    /// Format: key=value,key=value (e.g. favorite=name or remote=github,owner=x,repository=y)
-    #[arg(long, required = true)]
-    pub builder_agent: Vec<crate::agent_ref::AgentRef>,
+pub async fn handle(args: CreateArgs) -> Result<crate::Output, crate::error::Error> {
+    let docker = bollard::Docker::connect_with_local_defaults()?;
+    let tar_bytes = mcp_tar(super::mcp_binary::MCP_BINARY);
 
-    /// Benchmark agent reference (e.g. favorite=name or remote=github,owner=x,repository=y)
-    #[arg(long)]
-    pub benchmark_agent: crate::agent_ref::AgentRef,
+    let futs: Vec<_> = args
+        .builder_agent
+        .iter()
+        .enumerate()
+        .map(|(i, _)| spawn_builder(&docker, &args.docker_image, i, &tar_bytes))
+        .collect();
 
-    #[command(flatten)]
-    pub python: PythonSource,
+    let results = futures::future::join_all(futs).await;
+    let mut container_ids = Vec::new();
+    for result in results {
+        container_ids.push(result?);
+    }
 
-    #[command(flatten)]
-    pub builder_messages: BuilderMessageSource,
-
-    #[command(flatten)]
-    pub benchmark_messages: BenchmarkMessageSource,
-
-    #[command(flatten)]
-    pub builder_continuation: BuilderContinuationArgs,
-
-    #[command(flatten)]
-    pub agent_continuation: AgentContinuationArgs,
-
-    #[command(flatten)]
-    pub benchmark_output_schema: BenchmarkOutputSchemaSource,
+    // MCP servers are now running in each container.
+    // Next: communicate with them via the attached streams.
+    unimplemented!()
 }
 
-/// Python script source — file or inline.
-#[derive(Args)]
-#[group(multiple = false)]
-pub struct PythonSource {
-    /// Inline Python code
-    #[arg(long)]
-    pub python_inline: Option<String>,
-
-    /// Path to a Python file
-    #[arg(long)]
-    pub python_file: Option<PathBuf>,
+/// Create a tar archive containing the MCP binary at the archive root.
+fn mcp_tar(binary: &[u8]) -> Vec<u8> {
+    let mut ar = tar::Builder::new(Vec::new());
+    let mut header = tar::Header::new_gnu();
+    header.set_size(binary.len() as u64);
+    header.set_mode(0o755);
+    header.set_cksum();
+    ar.append_data(&mut header, "objectiveai-mcp", binary)
+        .expect("failed to build tar archive");
+    ar.into_inner().expect("failed to finalize tar archive")
 }
 
-/// Messages for builder agents.
-#[derive(Args)]
-#[group(required = true, multiple = false)]
-pub struct BuilderMessageSource {
-    /// Builder agent messages as inline JSON array
-    #[arg(long)]
-    pub builder_messages_inline: Option<String>,
+/// Spawn a single builder container: create, start, upload MCP binary, and start the MCP server.
+/// Returns the container ID.
+async fn spawn_builder(
+    docker: &bollard::Docker,
+    image: &str,
+    index: usize,
+    mcp_tar: &[u8],
+) -> Result<String, crate::error::Error> {
+    // Create container with a keep-alive command
+    let container_name = format!("objectiveai-lab-builder-{index}");
+    let options = CreateContainerOptionsBuilder::default()
+        .name(container_name.as_str())
+        .build();
 
-    /// Builder agent messages from inline Python code
-    #[arg(long)]
-    pub builder_messages_python_inline: Option<String>,
+    let config = ContainerCreateBody {
+        image: Some(image.to_string()),
+        cmd: Some(vec!["sleep".to_string(), "infinity".to_string()]),
+        ..Default::default()
+    };
 
-    /// Builder agent messages from a Python file
-    #[arg(long)]
-    pub builder_messages_python_file: Option<PathBuf>,
-}
+    let container = docker
+        .create_container(Some(options), config)
+        .await?;
 
-/// Messages for the benchmark agent.
-#[derive(Args)]
-#[group(required = true, multiple = false)]
-pub struct BenchmarkMessageSource {
-    /// Benchmark agent messages as inline JSON array
-    #[arg(long)]
-    pub benchmark_messages_inline: Option<String>,
+    // Start the container
+    docker.start_container(&container.id, None).await?;
 
-    /// Benchmark agent messages from inline Python code
-    #[arg(long)]
-    pub benchmark_messages_python_inline: Option<String>,
+    // Upload the MCP binary to the container root
+    let upload_options = UploadToContainerOptionsBuilder::default()
+        .path("/")
+        .build();
 
-    /// Benchmark agent messages from a Python file
-    #[arg(long)]
-    pub benchmark_messages_python_file: Option<PathBuf>,
-}
+    docker
+        .upload_to_container(
+            &container.id,
+            Some(upload_options),
+            bollard::body_full(mcp_tar.to_vec().into()),
+        )
+        .await?;
 
-/// Continuation for builder agents.
-#[derive(Args)]
-pub struct BuilderContinuationArgs {
-    /// OpenRouter continuation from a previous response (base64-encoded).
-    #[arg(long, group = "builder_continuation")]
-    pub builder_openrouter_continuation_from_response: Option<String>,
+    // Start the MCP server inside the container
+    let exec_options = CreateExecOptions {
+        cmd: Some(vec!["/objectiveai-mcp"]),
+        attach_stdin: Some(true),
+        attach_stdout: Some(true),
+        attach_stderr: Some(true),
+        ..Default::default()
+    };
 
-    /// Claude Agent SDK continuation from a previous response (base64-encoded).
-    #[arg(long, group = "builder_continuation")]
-    pub builder_claude_agent_sdk_continuation_from_response: Option<String>,
+    let exec = docker.create_exec(&container.id, exec_options).await?;
+    let _start_result = docker.start_exec(&exec.id, None).await?;
 
-    /// Mock continuation from a previous response (base64-encoded).
-    #[arg(long, group = "builder_continuation")]
-    pub builder_mock_continuation_from_response: Option<String>,
-
-    /// OpenRouter continuation messages as inline JSON.
-    #[arg(long, group = "builder_continuation")]
-    pub builder_openrouter_continuation_messages_inline: Option<String>,
-
-    /// OpenRouter continuation messages from inline Python code.
-    #[arg(long, group = "builder_continuation")]
-    pub builder_openrouter_continuation_messages_python_inline: Option<String>,
-
-    /// OpenRouter continuation messages from a Python file.
-    #[arg(long, group = "builder_continuation")]
-    pub builder_openrouter_continuation_messages_python_file: Option<PathBuf>,
-
-    /// Mock continuation messages as inline JSON.
-    #[arg(long, group = "builder_continuation")]
-    pub builder_mock_continuation_messages_inline: Option<String>,
-
-    /// Mock continuation messages from inline Python code.
-    #[arg(long, group = "builder_continuation")]
-    pub builder_mock_continuation_messages_python_inline: Option<String>,
-
-    /// Mock continuation messages from a Python file.
-    #[arg(long, group = "builder_continuation")]
-    pub builder_mock_continuation_messages_python_file: Option<PathBuf>,
-
-    /// Claude Agent SDK continuation with a session ID.
-    #[arg(long, group = "builder_continuation")]
-    pub builder_claude_agent_sdk_continuation_session_id: Option<String>,
-}
-
-/// Continuation for the benchmark agent.
-#[derive(Args)]
-pub struct AgentContinuationArgs {
-    /// OpenRouter continuation from a previous response (base64-encoded).
-    #[arg(long, group = "agent_continuation")]
-    pub agent_openrouter_continuation_from_response: Option<String>,
-
-    /// Claude Agent SDK continuation from a previous response (base64-encoded).
-    #[arg(long, group = "agent_continuation")]
-    pub agent_claude_agent_sdk_continuation_from_response: Option<String>,
-
-    /// Mock continuation from a previous response (base64-encoded).
-    #[arg(long, group = "agent_continuation")]
-    pub agent_mock_continuation_from_response: Option<String>,
-
-    /// OpenRouter continuation messages as inline JSON.
-    #[arg(long, group = "agent_continuation")]
-    pub agent_openrouter_continuation_messages_inline: Option<String>,
-
-    /// OpenRouter continuation messages from inline Python code.
-    #[arg(long, group = "agent_continuation")]
-    pub agent_openrouter_continuation_messages_python_inline: Option<String>,
-
-    /// OpenRouter continuation messages from a Python file.
-    #[arg(long, group = "agent_continuation")]
-    pub agent_openrouter_continuation_messages_python_file: Option<PathBuf>,
-
-    /// Mock continuation messages as inline JSON.
-    #[arg(long, group = "agent_continuation")]
-    pub agent_mock_continuation_messages_inline: Option<String>,
-
-    /// Mock continuation messages from inline Python code.
-    #[arg(long, group = "agent_continuation")]
-    pub agent_mock_continuation_messages_python_inline: Option<String>,
-
-    /// Mock continuation messages from a Python file.
-    #[arg(long, group = "agent_continuation")]
-    pub agent_mock_continuation_messages_python_file: Option<PathBuf>,
-
-    /// Claude Agent SDK continuation with a session ID.
-    #[arg(long, group = "agent_continuation")]
-    pub agent_claude_agent_sdk_continuation_session_id: Option<String>,
-}
-
-/// Benchmark output schema source (objectiveai-rs InputSchema as JSON).
-#[derive(Args)]
-#[group(multiple = false)]
-pub struct BenchmarkOutputSchemaSource {
-    /// Benchmark output schema as inline JSON
-    #[arg(long)]
-    pub benchmark_output_schema_inline: Option<String>,
-
-    /// Benchmark output schema from inline Python code
-    #[arg(long)]
-    pub benchmark_output_schema_python_inline: Option<String>,
-
-    /// Benchmark output schema from a Python file
-    #[arg(long)]
-    pub benchmark_output_schema_python_file: Option<PathBuf>,
+    Ok(container.id)
 }

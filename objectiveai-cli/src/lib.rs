@@ -16,13 +16,11 @@ mod swarms;
 mod functions;
 mod viewer;
 mod schemas;
+#[cfg(feature = "laboratory")]
 mod laboratories;
 
 #[cfg(test)]
 mod python_tests;
-
-#[cfg(feature = "laboratory")]
-pub mod laboratory;
 
 mod run;
 
