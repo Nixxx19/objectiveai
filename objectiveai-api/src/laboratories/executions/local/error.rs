@@ -13,6 +13,12 @@ pub enum Error {
     /// Agent completion failed.
     #[error("agent completion error: {0}")]
     AgentCompletion(String),
+    /// Evaluation output failed to parse as JSON.
+    #[error("evaluation output parse error: {0}")]
+    EvaluationOutputParse(String),
+    /// Evaluation output does not match the expected schema.
+    #[error("evaluation output does not match schema")]
+    EvaluationOutputSchemaMismatch,
 }
 
 impl objectiveai::error::StatusError for Error {
@@ -22,6 +28,8 @@ impl objectiveai::error::StatusError for Error {
             Error::Mcp(_) => 500,
             Error::NoBuilderAgents => 400,
             Error::AgentCompletion(_) => 502,
+            Error::EvaluationOutputParse(_) => 400,
+            Error::EvaluationOutputSchemaMismatch => 400,
         }
     }
 
@@ -44,6 +52,14 @@ impl objectiveai::error::StatusError for Error {
                 Error::AgentCompletion(msg) => serde_json::json!({
                     "kind": "agent_completion",
                     "error": msg,
+                }),
+                Error::EvaluationOutputParse(msg) => serde_json::json!({
+                    "kind": "evaluation_output_parse",
+                    "error": msg,
+                }),
+                Error::EvaluationOutputSchemaMismatch => serde_json::json!({
+                    "kind": "evaluation_output_schema_mismatch",
+                    "error": "evaluation output does not match schema",
                 }),
             }
         }))

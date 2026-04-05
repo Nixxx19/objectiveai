@@ -7,12 +7,29 @@ use futures::{Stream, StreamExt};
 use crate::ctx;
 use crate::util::{ChoiceIndexer, StreamOnce};
 
+use objectiveai::agent::completions::message::{Message, UserMessage, RichContent, RichContentPart};
+
 type LaboratoryExecutionChunk =
     objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk;
 type BuilderChunk =
     objectiveai::laboratories::executions::response::streaming::BuilderChunk;
+type EvaluationChunk =
+    objectiveai::laboratories::executions::response::streaming::EvaluationChunk;
 type Object = objectiveai::laboratories::executions::response::streaming::Object;
 type Params = objectiveai::laboratories::executions::request::LaboratoryExecutionCreateParams;
+
+type Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK> =
+    crate::agent::completions::Continuation<
+        <OPENROUTER as crate::agent::completions::UpstreamClient<
+            objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation,
+        >>::State,
+        <CLAUDEAGENTSDK as crate::agent::completions::UpstreamClient<
+            objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
+        >>::State,
+        <MOCK as crate::agent::completions::UpstreamClient<
+            objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation,
+        >>::State,
+    >;
 
 pub fn response_id(created: u64) -> String {
     let uuid = uuid::Uuid::new_v4();
@@ -300,6 +317,273 @@ where
             .collect();
 
         Ok(futures::stream::select_all(streams))
+    }
+
+    /// Create a streaming evaluation for a single evaluation agent.
+    ///
+    /// Appends the evaluation schema to the messages, runs the agent completion,
+    /// parses the response as `InputValue`, validates against the schema, and
+    /// retries on error up to `max_evaluation_retries`.
+    pub fn create_evaluation_streaming(
+        self: Arc<Self>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
+        request: Arc<Params>,
+        id: String,
+        created: u64,
+        object: Object,
+        evaluation_index: u64,
+        container_index: u64,
+        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
+    ) -> impl Stream<Item = LaboratoryExecutionChunk> + Send + 'static {
+        let agent_client = self.agent_client.clone();
+        let max_retries = request.max_evaluation_retries.unwrap_or(3);
+
+        // Build the schema prompt suffix
+        let schema_text = format!(
+            "## evaluation schema\n\n{}",
+            serde_json::to_string_pretty(&request.evaluation_output_schema).unwrap(),
+        );
+
+        // Inject schema into messages: append to last user message or create one
+        let mut messages = request.evaluation_messages.clone();
+        let mut injected = false;
+        for msg in messages.iter_mut().rev() {
+            if let Message::User(user) = msg {
+                match &mut user.content {
+                    RichContent::Text(t) => {
+                        t.push_str("\n\n");
+                        t.push_str(&schema_text);
+                    }
+                    RichContent::Parts(parts) => {
+                        parts.push(RichContentPart::Text {
+                            text: format!("\n\n{schema_text}"),
+                        });
+                    }
+                }
+                injected = true;
+                break;
+            }
+        }
+        if !injected {
+            messages.push(Message::User(UserMessage {
+                content: RichContent::Text(schema_text.clone()),
+                name: None,
+            }));
+        }
+
+        let params = Arc::new(
+            objectiveai::agent::completions::request::AgentCompletionCreateParams {
+                messages,
+                provider: request.provider.clone(),
+                agent,
+                response_format: None,
+                seed: request.seed,
+                stream: Some(true),
+                continuation: request.evaluation_continuation.clone(),
+            },
+        );
+
+        async_stream::stream! {
+            let mut continuation: Option<Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK>> = None;
+            let mut retries = 0u32;
+
+            loop {
+                // Create agent completion stream
+                let stream_result = agent_client
+                    .create_streaming(
+                        ctx.clone(),
+                        params.clone(),
+                        continuation.take(),
+                        None,
+                        None,
+                        None,
+                        false,
+                    )
+                    .await;
+
+                let mut accumulated_chunk: Option<objectiveai::agent::completions::response::streaming::AgentCompletionChunk> = None;
+
+                match stream_result {
+                    Ok(stream) => {
+                        futures::pin_mut!(stream);
+                        while let Some(item) = stream.next().await {
+                            match item {
+                                crate::agent::completions::StreamItem::Chunk(chunk) => {
+                                    match &mut accumulated_chunk {
+                                        Some(acc) => acc.push(&chunk),
+                                        None => accumulated_chunk = Some(chunk.clone()),
+                                    }
+                                    yield LaboratoryExecutionChunk {
+                                        id: id.clone(),
+                                        builders: Vec::new(),
+                                        evaluations: vec![EvaluationChunk {
+                                            index: evaluation_index,
+                                            container_index,
+                                            inner: chunk,
+                                            output: None,
+                                            error: None,
+                                        }],
+                                        error: None,
+                                        created,
+                                        object,
+                                        usage: None,
+                                    };
+                                }
+                                crate::agent::completions::StreamItem::State(cont) => {
+                                    continuation = Some(cont);
+                                }
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        yield LaboratoryExecutionChunk {
+                            id: id.clone(),
+                            builders: Vec::new(),
+                            evaluations: vec![EvaluationChunk {
+                                index: evaluation_index,
+                                container_index,
+                                inner: Default::default(),
+                                output: None,
+                                error: Some(objectiveai::error::ResponseError::from(&e)),
+                            }],
+                            error: None,
+                            created,
+                            object,
+                            usage: None,
+                        };
+                        break;
+                    }
+                }
+
+                // Extract assistant content text from accumulated chunks
+                let content_text = accumulated_chunk
+                    .as_ref()
+                    .and_then(|chunk| {
+                        chunk.messages.iter().rev().find_map(|msg| {
+                            if let objectiveai::agent::completions::response::streaming::MessageChunk::Assistant(asst) = msg {
+                                asst.content.as_ref().map(|c| match c {
+                                    RichContent::Text(t) => t.clone(),
+                                    RichContent::Parts(parts) => parts
+                                        .iter()
+                                        .filter_map(|p| match p {
+                                            RichContentPart::Text { text } => Some(text.as_str()),
+                                            _ => None,
+                                        })
+                                        .collect::<Vec<_>>()
+                                        .join(""),
+                                })
+                            } else {
+                                None
+                            }
+                        })
+                    })
+                    .unwrap_or_default();
+
+                // Parse as InputValue
+                let parse_result: Result<objectiveai::functions::expression::InputValue, _> = {
+                    let mut de = serde_json::Deserializer::from_str(&content_text);
+                    serde_path_to_error::deserialize(&mut de)
+                };
+
+                match parse_result {
+                    Ok(input_value) => {
+                        // Validate against schema
+                        let valid = request
+                            .evaluation_output_schema
+                            .validate_input(&input_value);
+
+                        if valid {
+                            // Yield final chunk with output
+                            yield LaboratoryExecutionChunk {
+                                id: id.clone(),
+                                builders: Vec::new(),
+                                evaluations: vec![EvaluationChunk {
+                                    index: evaluation_index,
+                                    container_index,
+                                    inner: Default::default(),
+                                    output: Some(input_value),
+                                    error: None,
+                                }],
+                                error: None,
+                                created,
+                                object,
+                                usage: None,
+                            };
+                            break;
+                        }
+
+                        // Schema validation failed
+                        let err = super::Error::EvaluationOutputSchemaMismatch;
+                        if retries >= max_retries {
+                            yield LaboratoryExecutionChunk {
+                                id: id.clone(),
+                                builders: Vec::new(),
+                                evaluations: vec![EvaluationChunk {
+                                    index: evaluation_index,
+                                    container_index,
+                                    inner: Default::default(),
+                                    output: None,
+                                    error: Some(objectiveai::error::ResponseError::from(&err)),
+                                }],
+                                error: None,
+                                created,
+                                object,
+                                usage: None,
+                            };
+                            break;
+                        }
+
+                        // Retry with error message
+                        let retry_msg = format!(
+                            "{}\n\n## error\n\nevaluation output does not match schema",
+                            schema_text,
+                        );
+                        if let Some(ref mut cont) = continuation {
+                            cont.push_user_message(UserMessage {
+                                content: RichContent::Text(retry_msg),
+                                name: None,
+                            });
+                        }
+                        retries += 1;
+                    }
+                    Err(parse_err) => {
+                        // Parse failed
+                        let err = super::Error::EvaluationOutputParse(parse_err.to_string());
+                        if retries >= max_retries {
+                            yield LaboratoryExecutionChunk {
+                                id: id.clone(),
+                                builders: Vec::new(),
+                                evaluations: vec![EvaluationChunk {
+                                    index: evaluation_index,
+                                    container_index,
+                                    inner: Default::default(),
+                                    output: None,
+                                    error: Some(objectiveai::error::ResponseError::from(&err)),
+                                }],
+                                error: None,
+                                created,
+                                object,
+                                usage: None,
+                            };
+                            break;
+                        }
+
+                        // Retry with parse error
+                        let retry_msg = format!(
+                            "{}\n\n## error\n\n{}",
+                            schema_text, parse_err,
+                        );
+                        if let Some(ref mut cont) = continuation {
+                            cont.push_user_message(UserMessage {
+                                content: RichContent::Text(retry_msg),
+                                name: None,
+                            });
+                        }
+                        retries += 1;
+                    }
+                }
+            }
+        }
     }
 }
 

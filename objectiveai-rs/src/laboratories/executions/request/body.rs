@@ -18,10 +18,8 @@ pub struct LaboratoryExecutionCreateParams {
     /// Messages for the evaluation agent.
     pub evaluation_messages: Vec<agent::completions::message::Message>,
 
-    /// Output schema for evaluation (InputSchema as JSON).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[schemars(extend("omitempty" = true))]
-    pub evaluation_output_schema: Option<crate::functions::expression::InputSchema>,
+    /// Output schema for evaluation.
+    pub evaluation_output_schema: crate::functions::expression::InputSchema,
 
     /// Continuation from a previous builder completion, as a base64-encoded string.
     #[serde(skip_serializing_if = "Option::is_none")]
