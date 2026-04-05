@@ -30,4 +30,6 @@ pub enum Error {
     PythonHarnessBroken(String),
     #[error("stream ended without producing any chunks")]
     EmptyStream,
+    #[error("config set forbidden by server configuration")]
+    ConfigSetForbidden,
 }

@@ -26,11 +26,11 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
+    pub fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         match self {
             Commands::Config { command } => command.handle(),
-            Commands::Mode { command } => command.handle(),
-            Commands::Local { command } => command.handle(),
+            Commands::Mode { command } => command.handle(cli_config),
+            Commands::Local { command } => command.handle(cli_config),
             Commands::GenerateSecretSignaturePair => {
                 let pair = objectiveai::config::generate_viewer_secret_signature_pair();
                 Ok(crate::Output::ConfigGet(serde_json::to_string(&pair).unwrap()))

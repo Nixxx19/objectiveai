@@ -7,13 +7,13 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
+    pub fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         let (client, mut config) = crate::config::read()?;
         match self {
             Commands::Get => Ok(crate::Output::ConfigGet(crate::config::format_value(&config.viewer().local().get_secret()))),
             Commands::Set { value } => {
                 config.viewer().local().set_secret(value);
-                crate::config::write(&client, &config)?;
+                crate::config::write(&client, &config, cli_config)?;
                 Ok(crate::Output::ConfigSet)
             }
         }

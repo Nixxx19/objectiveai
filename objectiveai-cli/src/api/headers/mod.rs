@@ -42,20 +42,20 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
+    pub fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         match self {
             Commands::Config { command } => command.handle(),
-            Commands::XObjectiveaiAuthorization { command } => command.handle(),
-            Commands::XOpenrouterAuthorization { command } => command.handle(),
-            Commands::XGithubAuthorization { command } => command.handle(),
-            Commands::XMcpAuthorization { command } => command.handle(),
-            Commands::XViewerSignature { command } => command.handle(),
-            Commands::XViewerAddress { command } => command.handle(),
-            Commands::UserAgent { command } => command.handle(),
-            Commands::HttpReferer { command } => command.handle(),
-            Commands::XTitle { command } => command.handle(),
-            Commands::XCommitAuthorName { command } => command.handle(),
-            Commands::XCommitAuthorEmail { command } => command.handle(),
+            Commands::XObjectiveaiAuthorization { command } => command.handle(cli_config),
+            Commands::XOpenrouterAuthorization { command } => command.handle(cli_config),
+            Commands::XGithubAuthorization { command } => command.handle(cli_config),
+            Commands::XMcpAuthorization { command } => command.handle(cli_config),
+            Commands::XViewerSignature { command } => command.handle(cli_config),
+            Commands::XViewerAddress { command } => command.handle(cli_config),
+            Commands::UserAgent { command } => command.handle(cli_config),
+            Commands::HttpReferer { command } => command.handle(cli_config),
+            Commands::XTitle { command } => command.handle(cli_config),
+            Commands::XCommitAuthorName { command } => command.handle(cli_config),
+            Commands::XCommitAuthorEmail { command } => command.handle(cli_config),
         }
     }
 }

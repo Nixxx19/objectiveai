@@ -24,11 +24,11 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         match self {
             Commands::Recursive { command } => command.handle().await,
             Commands::Config { command } => command.handle(),
-            Commands::Remote { command } => command.handle(),
+            Commands::Remote { command } => command.handle(cli_config),
         }
     }
 }

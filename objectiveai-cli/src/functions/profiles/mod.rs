@@ -50,7 +50,7 @@ async fn list_source(
 }
 
 impl Commands {
-    pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         match self {
             Commands::Get { args } => {
                 let path = args.resolve(get_favorites)?;
@@ -73,8 +73,8 @@ impl Commands {
                 }
             }
             Commands::Config { command } => command.handle(),
-            Commands::Favorites { command } => command.handle(),
-            Commands::Pairs { command } => command.handle().await,
+            Commands::Favorites { command } => command.handle(cli_config),
+            Commands::Pairs { command } => command.handle(cli_config).await,
         }
     }
 }

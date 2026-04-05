@@ -39,13 +39,13 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
+    pub fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         match self {
             Commands::Config { command } => command.handle(),
-            Commands::Mode { command } => command.handle(),
-            Commands::Remote { command } => command.handle(),
-            Commands::Local { command } => command.handle(),
-            Commands::Headers { command } => command.handle(),
+            Commands::Mode { command } => command.handle(cli_config),
+            Commands::Remote { command } => command.handle(cli_config),
+            Commands::Local { command } => command.handle(cli_config),
+            Commands::Headers { command } => command.handle(cli_config),
         }
     }
 }

@@ -8,7 +8,7 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
-        match self { Commands::Config { command } => command.handle() }
+    pub fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
+        match self { Commands::Config { command } => command.handle(cli_config) }
     }
 }

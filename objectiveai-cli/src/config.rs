@@ -10,7 +10,10 @@ pub fn read() -> Result<(ConfigClient, Config), crate::error::Error> {
     Ok((client, config))
 }
 
-pub fn write(client: &ConfigClient, config: &Config) -> Result<(), crate::error::Error> {
+pub fn write(client: &ConfigClient, config: &Config, cli_config: &super::Config) -> Result<(), crate::error::Error> {
+    if cli_config.config_set_forbidden {
+        return Err(crate::error::Error::ConfigSetForbidden);
+    }
     client.write(config)?;
     Ok(())
 }
