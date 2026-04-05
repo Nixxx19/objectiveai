@@ -16,6 +16,8 @@ pub struct BashOutput {
     pub exit_code: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none", rename = "returnCodeInterpretation")]
     pub return_code_interpretation: Option<String>,
+    #[serde(rename = "isImage", skip_serializing_if = "std::ops::Not::not")]
+    pub is_image: bool,
 }
 
 /// Per-session shell state. Tracks CWD, shell snapshot, session env vars,
@@ -110,7 +112,7 @@ pub async fn execute_bash(
     shell_state: &ShellState,
     command: &str,
     timeout_ms: Option<u64>,
-) -> Result<String, String> {
+) -> Result<BashOutput, String> {
     // Default 30 minutes, no hard max
     let timeout_ms = timeout_ms.unwrap_or(1_800_000);
     let timeout_duration = Duration::from_millis(timeout_ms);
@@ -255,12 +257,15 @@ pub async fn execute_bash(
                 }
             });
 
+            let is_image = detect_base64_image(&combined);
+
             BashOutput {
                 stdout: combined,
                 stderr: String::new(),
                 interrupted: false,
                 exit_code,
                 return_code_interpretation,
+                is_image,
             }
         }
         Ok(Err(e)) => return Err(format!("Command failed: {e}")),
@@ -270,11 +275,11 @@ pub async fn execute_bash(
             interrupted: true,
             exit_code: None,
             return_code_interpretation: None,
+            is_image: false,
         },
     };
 
-    serde_json::to_string_pretty(&output)
-        .map_err(|e| format!("Failed to serialize output: {e}"))
+    Ok(output)
 }
 
 /// Detect the user's shell from environment.
@@ -328,6 +333,55 @@ fn cwd_file_path() -> String {
         std::process::id(),
         id,
     )
+}
+
+/// Parsed data URI components.
+pub struct ParsedDataUri {
+    pub media_type: String,
+    pub data: String,
+}
+
+/// Parse a data URI string into its media type and base64 payload.
+pub fn parse_data_uri(s: &str) -> Option<ParsedDataUri> {
+    let trimmed = s.trim();
+    let rest = trimmed.strip_prefix("data:")?;
+    let (media_type, after) = rest.split_once(';')?;
+    let data = after.strip_prefix("base64,")?;
+    if media_type.is_empty() || data.is_empty() {
+        return None;
+    }
+    Some(ParsedDataUri {
+        media_type: media_type.to_string(),
+        data: data.to_string(),
+    })
+}
+
+/// Check if content starts with a base64-encoded image data URI.
+/// Matches the official regex: /^data:image\/[a-z0-9.+_-]+;base64,/i
+fn detect_base64_image(output: &str) -> bool {
+    let s = output.as_bytes();
+    // Case-insensitive prefix check: "data:image/"
+    if s.len() < 11 {
+        return false;
+    }
+    if !s[..11].eq_ignore_ascii_case(b"data:image/") {
+        return false;
+    }
+    // Media subtype: [a-z0-9.+_-]+ then ";base64,"
+    let rest = &s[11..];
+    let mut i = 0;
+    while i < rest.len() {
+        let b = rest[i];
+        if b.is_ascii_alphanumeric() || b == b'.' || b == b'+' || b == b'_' || b == b'-' {
+            i += 1;
+        } else {
+            break;
+        }
+    }
+    if i == 0 {
+        return false;
+    }
+    rest[i..].starts_with(b";base64,")
 }
 
 /// Simple shell quoting for a single argument.

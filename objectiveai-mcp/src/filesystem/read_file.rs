@@ -57,19 +57,46 @@ pub fn read_file(
     offset: Option<usize>,
     limit: Option<usize>,
 ) -> Result<String, String> {
+    // UNC path security check
+    if util::is_unc_path(path) {
+        return Err("Cannot read files on UNC paths.".into());
+    }
+
     // Check for blocked devices
     if util::is_blocked_device(path) {
         return Err(format!("Cannot read '{path}': this device file would block or produce infinite output."));
     }
 
-    let absolute_path = util::normalize_path(path)
+    // Use normalize_path_allow_missing so we can provide suggestions for missing files
+    let absolute_path = util::normalize_path_allow_missing(path)
         .map_err(|e| format!("Failed to resolve path: {e}"))?;
     let absolute_path_str = absolute_path.to_string_lossy().to_string();
 
+    // File-not-found with suggestions
+    if !absolute_path.exists() {
+        let mut msg = format!(
+            "File does not exist. Note: your current working directory is {}.",
+            std::env::current_dir()
+                .map(|p| p.to_string_lossy().into_owned())
+                .unwrap_or_default()
+        );
+        if let Some(similar) = util::find_similar_file(&absolute_path) {
+            msg.push_str(&format!("\nDid you mean: {similar}"));
+        }
+        if let Some(suggested) = util::suggest_path_under_cwd(path) {
+            msg.push_str(&format!("\nSuggested path: {suggested}"));
+        }
+        return Err(msg);
+    }
+
     if has_binary_extension(&absolute_path) {
+        let ext = absolute_path
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("unknown");
         return Err(format!(
-            "Cannot read binary file '{}'. Binary files are not supported.",
-            path
+            "This tool cannot read binary files. The file appears to be a binary .{ext} file. \
+             Please use appropriate tools for binary file analysis."
         ));
     }
 

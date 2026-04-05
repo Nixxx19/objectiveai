@@ -28,6 +28,11 @@ pub fn edit_file(
     new_string: &str,
     replace_all: bool,
 ) -> Result<String, String> {
+    // UNC path security check
+    if util::is_unc_path(path) {
+        return Err("Cannot edit files on UNC paths.".into());
+    }
+
     // Reject Jupyter notebook files
     if path.ends_with(".ipynb") {
         return Err("Cannot edit Jupyter Notebook files with the Edit tool. Use NotebookEdit instead.".into());
@@ -35,7 +40,7 @@ pub fn edit_file(
 
     // Error code 1: no-op edit
     if old_string == new_string {
-        return Err("old_string and new_string must be different".into());
+        return Err("No changes to make: old_string and new_string are exactly the same.".into());
     }
 
     let absolute_path = util::normalize_path_allow_missing(path)
@@ -83,7 +88,7 @@ pub fn edit_file(
     if is_empty_old_on_existing {
         let existing = std::fs::read_to_string(&absolute_path).unwrap_or_default();
         if !existing.trim().is_empty() {
-            return Err("Cannot use empty old_string on a file that already has content. Provide the text you want to replace.".into());
+            return Err("Cannot create new file - file already exists.".into());
         }
         // File is empty — write new_string directly, skip must-read check
         std::fs::write(&absolute_path, new_string)
@@ -109,6 +114,23 @@ pub fn edit_file(
         };
         return serde_json::to_string_pretty(&output)
             .map_err(|e| format!("Failed to serialize output: {e}"));
+    }
+
+    // Error code 4: file does not exist
+    if !absolute_path.exists() {
+        let mut msg = format!(
+            "File does not exist. Note: your current working directory is {}.",
+            std::env::current_dir()
+                .map(|p| p.to_string_lossy().into_owned())
+                .unwrap_or_default()
+        );
+        if let Some(similar) = util::find_similar_file(&absolute_path) {
+            msg.push_str(&format!("\nDid you mean: {similar}"));
+        }
+        if let Some(suggested) = util::suggest_path_under_cwd(path) {
+            msg.push_str(&format!("\nSuggested path: {suggested}"));
+        }
+        return Err(msg);
     }
 
     // Must-read check (error code 6)
@@ -169,7 +191,7 @@ pub fn edit_file(
             Some(matched) => matched.to_owned(),
             None => {
                 // Error code 8: match not found
-                return Err("old_string not found in file".into());
+                return Err(format!("String to replace not found in file.\nString: {old_string}"));
             }
         }
     };
@@ -181,8 +203,9 @@ pub fn edit_file(
     if matches > 1 && !replace_all {
         return Err(format!(
             "Found {matches} matches of the string to replace, but replace_all is false. \
-             Either provide a larger string with more surrounding context to make it unique, \
-             or use replace_all to change every instance."
+             To replace all occurrences, set replace_all to true. To replace only one \
+             occurrence, please provide more context to uniquely identify the instance.\n\
+             String: {old_string}"
         ));
     }
 

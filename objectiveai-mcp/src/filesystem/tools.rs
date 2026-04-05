@@ -1,6 +1,7 @@
 use rmcp::{
     handler::server::router::tool::ToolRouter,
     handler::server::wrapper::Parameters,
+    model::Content,
     schemars, tool, tool_router,
 };
 
@@ -150,10 +151,18 @@ impl FilesystemTools {
     }
 
     #[tool(name = "Bash", description = "Executes a given bash command and returns its output.")]
-    async fn bash(&self, Parameters(req): Parameters<BashRequest>) -> String {
+    async fn bash(&self, Parameters(req): Parameters<BashRequest>) -> Content {
         match super::bash::execute_bash(&self.shell_state, &req.command, req.timeout).await {
-            Ok(output) => output,
-            Err(e) => e,
+            Ok(output) => {
+                if output.is_image {
+                    if let Some(parsed) = super::bash::parse_data_uri(&output.stdout) {
+                        return Content::image(parsed.data, parsed.media_type);
+                    }
+                }
+                let json = serde_json::to_string_pretty(&output).unwrap_or_default();
+                Content::text(json)
+            }
+            Err(e) => Content::text(e),
         }
     }
 

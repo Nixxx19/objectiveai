@@ -19,6 +19,11 @@ pub fn write_file(
     path: &str,
     content: &str,
 ) -> Result<String, String> {
+    // UNC path security check
+    if util::is_unc_path(path) {
+        return Err("Cannot write files on UNC paths.".into());
+    }
+
     let absolute_path = util::normalize_path_allow_missing(path)
         .map_err(|e| format!("Failed to resolve path: {e}"))?;
     let absolute_path_str = absolute_path.to_string_lossy().to_string();

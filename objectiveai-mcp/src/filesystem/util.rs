@@ -3,6 +3,51 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::time::UNIX_EPOCH;
 
+/// Check if a path is a UNC path (\\server\share or //server/share).
+/// UNC paths on Windows can trigger SMB authentication and leak NTLM credentials.
+pub fn is_unc_path(path: &str) -> bool {
+    path.starts_with("\\\\") || path.starts_with("//")
+}
+
+/// Search for a file with the same base name but different extension in the same directory.
+pub fn find_similar_file(path: &Path) -> Option<String> {
+    let parent = path.parent()?;
+    let stem = path.file_stem()?.to_str()?;
+    let entries = std::fs::read_dir(parent).ok()?;
+    for entry in entries.flatten() {
+        let entry_path = entry.path();
+        if entry_path.is_file() && entry_path != path {
+            if let Some(entry_stem) = entry_path.file_stem().and_then(|s| s.to_str()) {
+                if entry_stem == stem {
+                    return entry_path
+                        .file_name()
+                        .and_then(|n| n.to_str())
+                        .map(|s| s.to_string());
+                }
+            }
+        }
+    }
+    None
+}
+
+/// Check if the requested path exists under the current working directory.
+/// Handles "dropped repo folder" pattern where user requests /full/path/to/file
+/// but the file actually exists at $CWD/relative/path.
+pub fn suggest_path_under_cwd(requested_path: &str) -> Option<String> {
+    let cwd = std::env::current_dir().ok()?;
+    let requested = Path::new(requested_path);
+    // Try stripping common prefixes and checking under CWD
+    for ancestor in requested.ancestors().skip(1) {
+        if let Ok(suffix) = requested.strip_prefix(ancestor) {
+            let candidate = cwd.join(suffix);
+            if candidate.exists() && candidate != requested {
+                return Some(candidate.to_string_lossy().into_owned());
+            }
+        }
+    }
+    None
+}
+
 /// Normalize a path to an absolute canonical path.
 pub fn normalize_path(path: &str) -> io::Result<PathBuf> {
     let candidate = if Path::new(path).is_absolute() {
