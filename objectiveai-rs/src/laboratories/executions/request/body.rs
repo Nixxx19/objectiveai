@@ -32,6 +32,12 @@ pub struct LaboratoryExecutionCreateParams {
     #[schemars(extend("omitempty" = true))]
     pub evaluation_continuation: Option<String>,
 
+    /// Maximum number of evaluation retries if validation fails.
+    /// Defaults to 3 if not specified.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub max_evaluation_retries: Option<u32>,
+
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
     pub provider: Option<agent::completions::request::Provider>,
