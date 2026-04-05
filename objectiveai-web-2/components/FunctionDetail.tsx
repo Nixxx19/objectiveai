@@ -1,19 +1,14 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import type {
-  FunctionDefinition,
-  TaskDefinition,
-} from "@/lib/functions/types";
-import type { FunctionDef, Task, TreeNode, TaskMeta } from "@/lib/tree/types";
+import type { FunctionDefinition } from "@/lib/functions/types";
 import { fetchFunctionList, fetchFunctionDefinition } from "@/lib/functions/fetch";
 import { apiFetch } from "@/lib/client";
-import { buildTree } from "@/lib/tree/build";
-import { simulateTree } from "@/lib/tree/simulateTree";
-import { useExecution } from "@/lib/tree/useExecution";
-import { FunctionTree } from "./FunctionTree";
-import { ExecutionControls } from "./ExecutionControls";
+import { adaptDefinition, adaptSubFunctions } from "@/lib/tree/adapter";
+import { FunctionTree } from "@objectiveai/function-tree";
+import "@objectiveai/function-tree/styles";
+import "./FunctionTreeTheme.css";
 import styles from "./FunctionCard.module.css";
 
 interface Props {
@@ -29,7 +24,6 @@ export function FunctionDetail({ owner, repo }: Props) {
   const [allDefs, setAllDefs] = useState<DefMap>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
   const [schemaOpen, setSchemaOpen] = useState(false);
   const [pairedProfile, setPairedProfile] = useState<{ owner: string; repository: string } | null>(null);
 
@@ -79,23 +73,15 @@ export function FunctionDetail({ owner, repo }: Props) {
     return () => { cancelled = true; };
   }, [owner, repo]);
 
-  const treeData = useMemo(() => {
-    if (!rootDef) return null;
-    return convertToTreeTypes(repo, owner, rootDef, allDefs);
-  }, [rootDef, allDefs, repo, owner]);
+  const definition = useMemo(
+    () => rootDef ? adaptDefinition(rootDef) : null,
+    [rootDef]
+  );
 
-  const timeline = useMemo(() => {
-    if (!treeData) return null;
-    const tree = buildTree(repo, treeData.root, treeData.registry);
-    return simulateTree(tree);
-  }, [treeData, repo]);
-
-  const execution = useExecution(timeline ?? { frames: [], agents: [] });
-  const [simulating, setSimulating] = useState(false);
-
-  const handleNodeClick = useCallback((node: TreeNode) => {
-    setSelectedNode((prev) => prev?.id === node.id ? null : node);
-  }, []);
+  const resolvedSubFunctions = useMemo(
+    () => adaptSubFunctions(allDefs),
+    [allDefs]
+  );
 
   if (loading) {
     return (
@@ -110,7 +96,7 @@ export function FunctionDetail({ owner, repo }: Props) {
     return <div className={styles.error} role="alert">{error}</div>;
   }
 
-  if (!rootDef || !treeData) return null;
+  if (!rootDef || !definition) return null;
 
   const type = rootDef.type
     .replace(/^alpha\./, "")
@@ -186,43 +172,14 @@ export function FunctionDetail({ owner, repo }: Props) {
         )}
       </div>
 
-      {timeline && timeline.frames.length > 0 && (
-        <div style={{ marginBottom: 12 }}>
-          {!simulating ? (
-            <button
-              className={styles.schemaToggle}
-              style={{ width: "auto", display: "inline-flex", border: "1px solid var(--node-border)", borderRadius: "var(--radius)" }}
-              onClick={() => { setSimulating(true); execution.play(); }}
-            >
-              simulate execution
-            </button>
-          ) : (
-            <ExecutionControls
-              state={execution.state}
-              onStep={execution.stepForward}
-              onPlay={execution.play}
-              onPause={execution.pause}
-              onReset={() => { execution.reset(); setSimulating(false); }}
-            />
-          )}
-        </div>
-      )}
-
       <FunctionTree
-        name={repo}
-        root={treeData.root}
-        registry={treeData.registry}
-        executions={simulating ? execution.state.nodes : undefined}
-        onNodeClick={handleNodeClick}
-        selectedNodeId={selectedNode?.id}
+        data={null}
+        definition={definition}
+        resolvedSubFunctions={resolvedSubFunctions}
+        height={500}
+        borderless
+        config={{ theme: "dark" }}
       />
-
-      {selectedNode?.taskMeta && (
-        <NodeDetailPanel
-          node={selectedNode}
-          onClose={() => setSelectedNode(null)}
-        />
-      )}
     </div>
   );
 }
@@ -235,130 +192,6 @@ function renderSchemaType(prop: Record<string, unknown>): string {
       .join(" | ");
   }
   return (prop.type as string) ?? "object";
-}
-
-/** Format an expression for display */
-function formatExpr(expr: unknown): string {
-  if (!expr) return "";
-  if (typeof expr === "object" && expr !== null) {
-    const e = expr as Record<string, unknown>;
-    if (e.$starlark) return `$starlark: ${e.$starlark}`;
-    if (e.$jmespath) return `$jmespath: ${e.$jmespath}`;
-    return JSON.stringify(expr, null, 2);
-  }
-  return String(expr);
-}
-
-/** Extract message text from various formats */
-function extractMessageText(content: unknown): string {
-  if (typeof content === "string") return content;
-  if (typeof content === "object" && content !== null) {
-    const c = content as Record<string, unknown>;
-    if (c.$starlark) return `\${starlark} ${c.$starlark}`;
-    if (c.$jmespath) return `\${jmespath} ${c.$jmespath}`;
-    return JSON.stringify(content);
-  }
-  return String(content);
-}
-
-function NodeDetailPanel({ node, onClose }: { node: TreeNode; onClose: () => void }) {
-  const meta = node.taskMeta!;
-  const isVote = node.kind === "vector-completion";
-
-  return (
-    <div className={styles.nodeDetail}>
-      <div className={styles.nodeDetailHeader}>
-        <span className={styles.nodeDetailTitle}>
-          {isVote ? "vector.completion" : node.label}
-          {node.functionType && !isVote && (
-            <span style={{ color: "var(--info-dim)", marginLeft: 8, fontSize: 10 }}>
-              {node.functionType}
-            </span>
-          )}
-        </span>
-        <button className={styles.nodeDetailClose} onClick={onClose}>
-          close
-        </button>
-      </div>
-      <div className={styles.nodeDetailBody}>
-        {/* Messages (vote nodes) */}
-        {isVote && meta.messages != null && (
-          <div className={styles.nodeDetailSection}>
-            <span className={styles.nodeDetailLabel}>messages</span>
-            {Array.isArray(meta.messages) ? (
-              (meta.messages as Array<{ role: string; content: unknown }>).map((msg, i) => (
-                <div
-                  key={i}
-                  className={`${styles.nodeDetailMessage} ${
-                    msg.role === "system" ? styles.nodeDetailSystem : styles.nodeDetailUser
-                  }`}
-                >
-                  <div className={styles.nodeDetailRole}>{msg.role}</div>
-                  {extractMessageText(msg.content)}
-                </div>
-              ))
-            ) : (
-              <div className={styles.nodeDetailCode}>
-                {formatExpr(meta.messages)}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Full responses (vote nodes) */}
-        {isVote && meta.fullResponses != null && meta.fullResponses.length > 0 ? (
-          <div className={styles.nodeDetailSection}>
-            <span className={styles.nodeDetailLabel}>
-              responses ({meta.fullResponses.length})
-            </span>
-            {meta.fullResponses.map((r, i) => (
-              <div key={i} className={styles.nodeDetailResponse}>{r}</div>
-            ))}
-          </div>
-        ) : null}
-
-        {/* Output expression */}
-        {meta.outputExpr != null ? (
-          <div className={styles.nodeDetailSection}>
-            <span className={styles.nodeDetailLabel}>output</span>
-            <div className={styles.nodeDetailCode}>
-              {formatExpr(meta.outputExpr)}
-            </div>
-          </div>
-        ) : null}
-
-        {/* Input expression (function refs) */}
-        {meta.inputExpr != null ? (
-          <div className={styles.nodeDetailSection}>
-            <span className={styles.nodeDetailLabel}>input</span>
-            <div className={styles.nodeDetailCode}>
-              {formatExpr(meta.inputExpr)}
-            </div>
-          </div>
-        ) : null}
-
-        {/* Input schema (function nodes) */}
-        {meta.inputSchema != null && Object.keys(meta.inputSchema).length > 0 ? (
-          <div className={styles.nodeDetailSection}>
-            <span className={styles.nodeDetailLabel}>input_schema</span>
-            <div className={styles.nodeDetailCode}>
-              {JSON.stringify(meta.inputSchema, null, 2)}
-            </div>
-          </div>
-        ) : null}
-
-        {/* Description */}
-        {node.description && (
-          <div className={styles.nodeDetailSection}>
-            <span className={styles.nodeDetailLabel}>description</span>
-            <div style={{ fontFamily: "var(--font-sans)", fontSize: 11, color: "var(--info-dim)", lineHeight: 1.5 }}>
-              {node.description}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
 }
 
 /** Recursively fetch a function and all its sub-function definitions */
@@ -388,70 +221,4 @@ async function fetchRecursive(
   } catch {
     // Silently skip functions we can't fetch
   }
-}
-
-/** Convert API definitions to tree component types */
-function convertToTreeTypes(
-  rootRepo: string,
-  rootOwner: string,
-  rootDef: FunctionDefinition,
-  allDefs: DefMap
-): { root: FunctionDef; registry: Map<string, FunctionDef> } {
-  const registry = new Map<string, FunctionDef>();
-
-  for (const [key, def] of allDefs) {
-    const repoName = key.split("/").pop()!;
-    const converted: FunctionDef = {
-      type: normalizeType(def.type) as FunctionDef["type"],
-      description: def.description ?? "",
-      input_schema: (def.input_schema ?? {}) as FunctionDef["input_schema"],
-      tasks: def.tasks.map((t) => convertTask(t)),
-    };
-    registry.set(repoName, converted);
-    registry.set(key, converted);
-  }
-
-  const root: FunctionDef = {
-    type: normalizeType(rootDef.type) as FunctionDef["type"],
-    description: rootDef.description ?? "",
-    input_schema: (rootDef.input_schema ?? {}) as FunctionDef["input_schema"],
-    tasks: rootDef.tasks.map((t) => convertTask(t)),
-  };
-
-  return { root, registry };
-}
-
-function convertTask(task: TaskDefinition): Task {
-  if (task.type === "vector.completion") {
-    return {
-      type: "vector.completion",
-      messages: task.messages,
-      responses: task.responses ?? [],
-      output: task.output,
-      map: task.map,
-    } as Task;
-  }
-
-  if (task.type.startsWith("placeholder.")) {
-    return { type: task.type } as Task;
-  }
-
-  const name = task.repository ?? task.name ?? "unknown";
-  const remote = task.owner ?? task.remote;
-
-  return {
-    type: normalizeType(task.type),
-    name,
-    remote,
-    input: task.input,
-    output: task.output,
-    map: task.map,
-  } as Task;
-}
-
-function normalizeType(type: string): string {
-  let t = type;
-  if (!t.startsWith("alpha.")) t = `alpha.${t}`;
-  if (!t.endsWith(".function")) t = `${t}.function`;
-  return t;
 }
