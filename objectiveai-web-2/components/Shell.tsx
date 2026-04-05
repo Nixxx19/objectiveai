@@ -32,6 +32,14 @@ export function Shell({ children }: { children: ReactNode }) {
           >
             swarms
           </Link>
+          <Link
+            href="/profiles"
+            className={`${styles.navLink} ${
+              pathname.startsWith("/profiles") ? styles.navLinkActive : ""
+            }`}
+          >
+            profiles
+          </Link>
         </nav>
       </header>
       <main className={styles.main}>{children}</main>

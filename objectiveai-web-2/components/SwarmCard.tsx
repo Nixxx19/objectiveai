@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { SwarmMeta } from "@/lib/swarms/types";
 import styles from "./SwarmCard.module.css";
 
@@ -20,7 +21,7 @@ export function SwarmCard({ swarm }: { swarm: SwarmMeta }) {
   const label = swarmLabel(swarm.agents);
 
   return (
-    <div className={styles.card}>
+    <Link href={`/swarms/${swarm.id}`} className={styles.card}>
       <div className={styles.cardBody}>
         <div className={styles.cardHeader}>
           <span className={styles.cardName} title={swarm.id}>{label}</span>
@@ -70,6 +71,6 @@ export function SwarmCard({ swarm }: { swarm: SwarmMeta }) {
           </span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

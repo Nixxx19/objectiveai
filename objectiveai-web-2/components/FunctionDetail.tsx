@@ -1,13 +1,19 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
+import Link from "next/link";
 import type {
   FunctionDefinition,
   TaskDefinition,
 } from "@/lib/functions/types";
 import type { FunctionDef, Task, TreeNode, TaskMeta } from "@/lib/tree/types";
 import { fetchFunctionList, fetchFunctionDefinition } from "@/lib/functions/fetch";
+import { apiFetch } from "@/lib/client";
+import { buildTree } from "@/lib/tree/build";
+import { simulateTree } from "@/lib/tree/simulateTree";
+import { useExecution } from "@/lib/tree/useExecution";
 import { FunctionTree } from "./FunctionTree";
+import { ExecutionControls } from "./ExecutionControls";
 import styles from "./FunctionCard.module.css";
 
 interface Props {
@@ -25,9 +31,19 @@ export function FunctionDetail({ owner, repo }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
   const [schemaOpen, setSchemaOpen] = useState(false);
+  const [pairedProfile, setPairedProfile] = useState<{ owner: string; repository: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+
+    // Fetch paired profile in parallel (non-blocking)
+    apiFetch<{ data: Array<{ function: { owner: string; repository: string }; profile: { owner: string; repository: string } }> }>("/functions/profiles/pairs")
+      .then((pairs) => {
+        if (cancelled) return;
+        const match = pairs.data.find((p) => p.function.owner === owner && p.function.repository === repo);
+        if (match) setPairedProfile(match.profile);
+      })
+      .catch(() => { /* non-critical */ });
 
     fetchFunctionList()
       .then(async (items) => {
@@ -68,6 +84,15 @@ export function FunctionDetail({ owner, repo }: Props) {
     return convertToTreeTypes(repo, owner, rootDef, allDefs);
   }, [rootDef, allDefs, repo, owner]);
 
+  const timeline = useMemo(() => {
+    if (!treeData) return null;
+    const tree = buildTree(repo, treeData.root, treeData.registry);
+    return simulateTree(tree);
+  }, [treeData, repo]);
+
+  const execution = useExecution(timeline ?? { frames: [], agents: [] });
+  const [simulating, setSimulating] = useState(false);
+
   const handleNodeClick = useCallback((node: TreeNode) => {
     setSelectedNode((prev) => prev?.id === node.id ? null : node);
   }, []);
@@ -106,7 +131,20 @@ export function FunctionDetail({ owner, repo }: Props) {
         {rootDef.description && (
           <p className={styles.detailDescription}>{rootDef.description}</p>
         )}
-        <p className={styles.detailOwner}>{owner}</p>
+        <p className={styles.detailOwner}>
+          {owner}
+          {pairedProfile && (
+            <>
+              {" · profile "}
+              <Link
+                href={`/profiles`}
+                style={{ color: "var(--copper-dim)", textDecoration: "none" }}
+              >
+                {pairedProfile.repository}
+              </Link>
+            </>
+          )}
+        </p>
 
         {hasSchema && (
           <div className={styles.schema}>
@@ -148,10 +186,33 @@ export function FunctionDetail({ owner, repo }: Props) {
         )}
       </div>
 
+      {timeline && timeline.frames.length > 0 && (
+        <div style={{ marginBottom: 12 }}>
+          {!simulating ? (
+            <button
+              className={styles.schemaToggle}
+              style={{ width: "auto", display: "inline-flex", border: "1px solid var(--node-border)", borderRadius: "var(--radius)" }}
+              onClick={() => { setSimulating(true); execution.play(); }}
+            >
+              simulate execution
+            </button>
+          ) : (
+            <ExecutionControls
+              state={execution.state}
+              onStep={execution.stepForward}
+              onPlay={execution.play}
+              onPause={execution.pause}
+              onReset={() => { execution.reset(); setSimulating(false); }}
+            />
+          )}
+        </div>
+      )}
+
       <FunctionTree
         name={repo}
         root={treeData.root}
         registry={treeData.registry}
+        executions={simulating ? execution.state.nodes : undefined}
         onNodeClick={handleNodeClick}
         selectedNodeId={selectedNode?.id}
       />
