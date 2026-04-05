@@ -1,6 +1,5 @@
 mod create;
 mod create_args;
-mod mcp_binary;
 
 use clap::Subcommand;
 

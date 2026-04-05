@@ -12,177 +12,201 @@ pub struct CreateArgs {
     #[arg(long, required = true)]
     pub builder_agent: Vec<crate::agent_ref::AgentRef>,
 
-    /// Benchmark agent reference (e.g. favorite=name or remote=github,owner=x,repository=y)
+    /// Evaluation agent reference (e.g. favorite=name or remote=github,owner=x,repository=y)
     #[arg(long)]
-    pub benchmark_agent: crate::agent_ref::AgentRef,
-
-    #[command(flatten)]
-    pub python: PythonSource,
+    pub evaluation_agent: crate::agent_ref::AgentRef,
 
     #[command(flatten)]
     pub builder_messages: BuilderMessageSource,
 
     #[command(flatten)]
-    pub benchmark_messages: BenchmarkMessageSource,
+    pub evaluation_messages: EvaluationMessageSource,
+
+    #[command(flatten)]
+    pub evaluation_output_schema: EvaluationOutputSchemaSource,
 
     #[command(flatten)]
     pub builder_continuation: BuilderContinuationArgs,
 
     #[command(flatten)]
-    pub agent_continuation: AgentContinuationArgs,
+    pub evaluation_continuation: EvaluationContinuationArgs,
 
-    #[command(flatten)]
-    pub benchmark_output_schema: BenchmarkOutputSchemaSource,
-}
-
-/// Python script source — file or inline.
-#[derive(Args)]
-#[group(multiple = false)]
-pub struct PythonSource {
-    /// Inline Python code
+    /// Maximum number of evaluation retries if validation fails.
     #[arg(long)]
-    pub python_inline: Option<String>,
+    pub max_evaluation_retries: Option<u32>,
 
-    /// Path to a Python file
+    /// Seed for deterministic mock responses
     #[arg(long)]
-    pub python_file: Option<PathBuf>,
+    pub seed: Option<i64>,
 }
 
 /// Messages for builder agents.
 #[derive(Args)]
 #[group(required = true, multiple = false)]
 pub struct BuilderMessageSource {
-    /// Builder agent messages as inline JSON array
     #[arg(long)]
     pub builder_messages_inline: Option<String>,
-
-    /// Builder agent messages from inline Python code
     #[arg(long)]
     pub builder_messages_python_inline: Option<String>,
-
-    /// Builder agent messages from a Python file
     #[arg(long)]
     pub builder_messages_python_file: Option<PathBuf>,
 }
 
-/// Messages for the benchmark agent.
+impl BuilderMessageSource {
+    pub fn resolve(self) -> Result<Vec<objectiveai::agent::completions::message::Message>, crate::error::Error> {
+        if let Some(inline) = self.builder_messages_inline {
+            let mut de = serde_json::Deserializer::from_str(&inline);
+            return serde_path_to_error::deserialize(&mut de)
+                .map_err(crate::error::Error::PythonDeserialize);
+        }
+        if let Some(code) = self.builder_messages_python_inline {
+            return crate::python::exec_code(&code);
+        }
+        if let Some(path) = self.builder_messages_python_file {
+            return crate::python::exec_file(&path);
+        }
+        unreachable!("clap group ensures one is set")
+    }
+}
+
+/// Messages for the evaluation agent.
 #[derive(Args)]
 #[group(required = true, multiple = false)]
-pub struct BenchmarkMessageSource {
-    /// Benchmark agent messages as inline JSON array
+pub struct EvaluationMessageSource {
     #[arg(long)]
-    pub benchmark_messages_inline: Option<String>,
+    pub evaluation_messages_inline: Option<String>,
+    #[arg(long)]
+    pub evaluation_messages_python_inline: Option<String>,
+    #[arg(long)]
+    pub evaluation_messages_python_file: Option<PathBuf>,
+}
 
-    /// Benchmark agent messages from inline Python code
-    #[arg(long)]
-    pub benchmark_messages_python_inline: Option<String>,
+impl EvaluationMessageSource {
+    pub fn resolve(self) -> Result<Vec<objectiveai::agent::completions::message::Message>, crate::error::Error> {
+        if let Some(inline) = self.evaluation_messages_inline {
+            let mut de = serde_json::Deserializer::from_str(&inline);
+            return serde_path_to_error::deserialize(&mut de)
+                .map_err(crate::error::Error::PythonDeserialize);
+        }
+        if let Some(code) = self.evaluation_messages_python_inline {
+            return crate::python::exec_code(&code);
+        }
+        if let Some(path) = self.evaluation_messages_python_file {
+            return crate::python::exec_file(&path);
+        }
+        unreachable!("clap group ensures one is set")
+    }
+}
 
-    /// Benchmark agent messages from a Python file
+/// Evaluation output schema source (objectiveai-rs InputSchema as JSON).
+#[derive(Args)]
+#[group(required = true, multiple = false)]
+pub struct EvaluationOutputSchemaSource {
     #[arg(long)]
-    pub benchmark_messages_python_file: Option<PathBuf>,
+    pub evaluation_output_schema_inline: Option<String>,
+    #[arg(long)]
+    pub evaluation_output_schema_python_inline: Option<String>,
+    #[arg(long)]
+    pub evaluation_output_schema_python_file: Option<PathBuf>,
+}
+
+impl EvaluationOutputSchemaSource {
+    pub fn resolve(self) -> Result<objectiveai::functions::expression::InputSchema, crate::error::Error> {
+        if let Some(inline) = self.evaluation_output_schema_inline {
+            let mut de = serde_json::Deserializer::from_str(&inline);
+            return serde_path_to_error::deserialize(&mut de)
+                .map_err(crate::error::Error::PythonDeserialize);
+        }
+        if let Some(code) = self.evaluation_output_schema_python_inline {
+            return crate::python::exec_code(&code);
+        }
+        if let Some(path) = self.evaluation_output_schema_python_file {
+            return crate::python::exec_file(&path);
+        }
+        unreachable!("clap group ensures one is set")
+    }
 }
 
 /// Continuation for builder agents.
 #[derive(Args)]
 pub struct BuilderContinuationArgs {
-    /// OpenRouter continuation from a previous response (base64-encoded).
     #[arg(long, group = "builder_continuation")]
     pub builder_openrouter_continuation_from_response: Option<String>,
-
-    /// Claude Agent SDK continuation from a previous response (base64-encoded).
     #[arg(long, group = "builder_continuation")]
     pub builder_claude_agent_sdk_continuation_from_response: Option<String>,
-
-    /// Mock continuation from a previous response (base64-encoded).
     #[arg(long, group = "builder_continuation")]
     pub builder_mock_continuation_from_response: Option<String>,
-
-    /// OpenRouter continuation messages as inline JSON.
     #[arg(long, group = "builder_continuation")]
     pub builder_openrouter_continuation_messages_inline: Option<String>,
-
-    /// OpenRouter continuation messages from inline Python code.
     #[arg(long, group = "builder_continuation")]
     pub builder_openrouter_continuation_messages_python_inline: Option<String>,
-
-    /// OpenRouter continuation messages from a Python file.
     #[arg(long, group = "builder_continuation")]
     pub builder_openrouter_continuation_messages_python_file: Option<PathBuf>,
-
-    /// Mock continuation messages as inline JSON.
     #[arg(long, group = "builder_continuation")]
     pub builder_mock_continuation_messages_inline: Option<String>,
-
-    /// Mock continuation messages from inline Python code.
     #[arg(long, group = "builder_continuation")]
     pub builder_mock_continuation_messages_python_inline: Option<String>,
-
-    /// Mock continuation messages from a Python file.
     #[arg(long, group = "builder_continuation")]
     pub builder_mock_continuation_messages_python_file: Option<PathBuf>,
-
-    /// Claude Agent SDK continuation with a session ID.
     #[arg(long, group = "builder_continuation")]
     pub builder_claude_agent_sdk_continuation_session_id: Option<String>,
 }
 
-/// Continuation for the benchmark agent.
-#[derive(Args)]
-pub struct AgentContinuationArgs {
-    /// OpenRouter continuation from a previous response (base64-encoded).
-    #[arg(long, group = "agent_continuation")]
-    pub agent_openrouter_continuation_from_response: Option<String>,
-
-    /// Claude Agent SDK continuation from a previous response (base64-encoded).
-    #[arg(long, group = "agent_continuation")]
-    pub agent_claude_agent_sdk_continuation_from_response: Option<String>,
-
-    /// Mock continuation from a previous response (base64-encoded).
-    #[arg(long, group = "agent_continuation")]
-    pub agent_mock_continuation_from_response: Option<String>,
-
-    /// OpenRouter continuation messages as inline JSON.
-    #[arg(long, group = "agent_continuation")]
-    pub agent_openrouter_continuation_messages_inline: Option<String>,
-
-    /// OpenRouter continuation messages from inline Python code.
-    #[arg(long, group = "agent_continuation")]
-    pub agent_openrouter_continuation_messages_python_inline: Option<String>,
-
-    /// OpenRouter continuation messages from a Python file.
-    #[arg(long, group = "agent_continuation")]
-    pub agent_openrouter_continuation_messages_python_file: Option<PathBuf>,
-
-    /// Mock continuation messages as inline JSON.
-    #[arg(long, group = "agent_continuation")]
-    pub agent_mock_continuation_messages_inline: Option<String>,
-
-    /// Mock continuation messages from inline Python code.
-    #[arg(long, group = "agent_continuation")]
-    pub agent_mock_continuation_messages_python_inline: Option<String>,
-
-    /// Mock continuation messages from a Python file.
-    #[arg(long, group = "agent_continuation")]
-    pub agent_mock_continuation_messages_python_file: Option<PathBuf>,
-
-    /// Claude Agent SDK continuation with a session ID.
-    #[arg(long, group = "agent_continuation")]
-    pub agent_claude_agent_sdk_continuation_session_id: Option<String>,
+impl BuilderContinuationArgs {
+    pub fn resolve(self) -> Result<Option<String>, crate::error::Error> {
+        crate::continuation::resolve_continuation(crate::continuation::ContinuationFields {
+            openrouter_from_response: self.builder_openrouter_continuation_from_response,
+            claude_agent_sdk_from_response: self.builder_claude_agent_sdk_continuation_from_response,
+            mock_from_response: self.builder_mock_continuation_from_response,
+            openrouter_messages_inline: self.builder_openrouter_continuation_messages_inline,
+            openrouter_messages_python_inline: self.builder_openrouter_continuation_messages_python_inline,
+            openrouter_messages_python_file: self.builder_openrouter_continuation_messages_python_file,
+            mock_messages_inline: self.builder_mock_continuation_messages_inline,
+            mock_messages_python_inline: self.builder_mock_continuation_messages_python_inline,
+            mock_messages_python_file: self.builder_mock_continuation_messages_python_file,
+            claude_agent_sdk_session_id: self.builder_claude_agent_sdk_continuation_session_id,
+        })
+    }
 }
 
-/// Benchmark output schema source (objectiveai-rs InputSchema as JSON).
+/// Continuation for the evaluation agent.
 #[derive(Args)]
-#[group(multiple = false)]
-pub struct BenchmarkOutputSchemaSource {
-    /// Benchmark output schema as inline JSON
-    #[arg(long)]
-    pub benchmark_output_schema_inline: Option<String>,
+pub struct EvaluationContinuationArgs {
+    #[arg(long, group = "evaluation_continuation")]
+    pub evaluation_openrouter_continuation_from_response: Option<String>,
+    #[arg(long, group = "evaluation_continuation")]
+    pub evaluation_claude_agent_sdk_continuation_from_response: Option<String>,
+    #[arg(long, group = "evaluation_continuation")]
+    pub evaluation_mock_continuation_from_response: Option<String>,
+    #[arg(long, group = "evaluation_continuation")]
+    pub evaluation_openrouter_continuation_messages_inline: Option<String>,
+    #[arg(long, group = "evaluation_continuation")]
+    pub evaluation_openrouter_continuation_messages_python_inline: Option<String>,
+    #[arg(long, group = "evaluation_continuation")]
+    pub evaluation_openrouter_continuation_messages_python_file: Option<PathBuf>,
+    #[arg(long, group = "evaluation_continuation")]
+    pub evaluation_mock_continuation_messages_inline: Option<String>,
+    #[arg(long, group = "evaluation_continuation")]
+    pub evaluation_mock_continuation_messages_python_inline: Option<String>,
+    #[arg(long, group = "evaluation_continuation")]
+    pub evaluation_mock_continuation_messages_python_file: Option<PathBuf>,
+    #[arg(long, group = "evaluation_continuation")]
+    pub evaluation_claude_agent_sdk_continuation_session_id: Option<String>,
+}
 
-    /// Benchmark output schema from inline Python code
-    #[arg(long)]
-    pub benchmark_output_schema_python_inline: Option<String>,
-
-    /// Benchmark output schema from a Python file
-    #[arg(long)]
-    pub benchmark_output_schema_python_file: Option<PathBuf>,
+impl EvaluationContinuationArgs {
+    pub fn resolve(self) -> Result<Option<String>, crate::error::Error> {
+        crate::continuation::resolve_continuation(crate::continuation::ContinuationFields {
+            openrouter_from_response: self.evaluation_openrouter_continuation_from_response,
+            claude_agent_sdk_from_response: self.evaluation_claude_agent_sdk_continuation_from_response,
+            mock_from_response: self.evaluation_mock_continuation_from_response,
+            openrouter_messages_inline: self.evaluation_openrouter_continuation_messages_inline,
+            openrouter_messages_python_inline: self.evaluation_openrouter_continuation_messages_python_inline,
+            openrouter_messages_python_file: self.evaluation_openrouter_continuation_messages_python_file,
+            mock_messages_inline: self.evaluation_mock_continuation_messages_inline,
+            mock_messages_python_inline: self.evaluation_mock_continuation_messages_python_inline,
+            mock_messages_python_file: self.evaluation_mock_continuation_messages_python_file,
+            claude_agent_sdk_session_id: self.evaluation_claude_agent_sdk_continuation_session_id,
+        })
+    }
 }

@@ -7,7 +7,6 @@ use crate::swarms;
 use crate::functions;
 use crate::viewer;
 use crate::schemas;
-#[cfg(feature = "laboratory")]
 use crate::laboratories;
 use crate::error;
 
@@ -109,7 +108,6 @@ enum Commands {
         command: schemas::Commands,
     },
     /// Laboratories management
-    #[cfg(feature = "laboratory")]
     Laboratories {
         #[command(subcommand)]
         command: laboratories::Commands,
@@ -125,7 +123,6 @@ impl Commands {
             Commands::Functions { command } => command.handle(cli_config).await,
             Commands::Viewer { command } => command.handle(cli_config),
             Commands::Schemas { command } => command.handle(),
-            #[cfg(feature = "laboratory")]
             Commands::Laboratories { command } => command.handle(cli_config).await,
         }
     }

@@ -1,94 +1,55 @@
-use bollard::exec::CreateExecOptions;
-use bollard::models::ContainerCreateBody;
-use bollard::query_parameters::{CreateContainerOptionsBuilder, UploadToContainerOptionsBuilder};
+use futures::StreamExt;
 
 use super::create_args::CreateArgs;
 
 pub async fn handle(args: CreateArgs) -> Result<crate::Output, crate::error::Error> {
-    let docker = bollard::Docker::connect_with_local_defaults()?;
-    let tar_bytes = mcp_tar(super::mcp_binary::MCP_BINARY);
-
-    let futs: Vec<_> = args
+    let builder_agents = args
         .builder_agent
-        .iter()
-        .enumerate()
-        .map(|(i, _)| spawn_builder(&docker, &args.docker_image, i, &tar_bytes))
-        .collect();
+        .into_iter()
+        .map(|a| a.resolve())
+        .collect::<Result<Vec<_>, _>>()?;
+    let evaluation_agent = args.evaluation_agent.resolve()?;
+    let builder_messages = args.builder_messages.resolve()?;
+    let evaluation_messages = args.evaluation_messages.resolve()?;
+    let evaluation_output_schema = args.evaluation_output_schema.resolve()?;
+    let builder_continuation = args.builder_continuation.resolve()?;
+    let evaluation_continuation = args.evaluation_continuation.resolve()?;
 
-    let results = futures::future::join_all(futs).await;
-    let mut container_ids = Vec::new();
-    for result in results {
-        container_ids.push(result?);
-    }
-
-    // MCP servers are now running in each container.
-    // Next: communicate with them via the attached streams.
-    unimplemented!()
-}
-
-/// Create a tar archive containing the MCP binary at the archive root.
-fn mcp_tar(binary: &[u8]) -> Vec<u8> {
-    let mut ar = tar::Builder::new(Vec::new());
-    let mut header = tar::Header::new_gnu();
-    header.set_size(binary.len() as u64);
-    header.set_mode(0o755);
-    header.set_cksum();
-    ar.append_data(&mut header, "objectiveai-mcp", binary)
-        .expect("failed to build tar archive");
-    ar.into_inner().expect("failed to finalize tar archive")
-}
-
-/// Spawn a single builder container: create, start, upload MCP binary, and start the MCP server.
-/// Returns the container ID.
-async fn spawn_builder(
-    docker: &bollard::Docker,
-    image: &str,
-    index: usize,
-    mcp_tar: &[u8],
-) -> Result<String, crate::error::Error> {
-    // Create container with a keep-alive command
-    let container_name = format!("objectiveai-lab-builder-{index}");
-    let options = CreateContainerOptionsBuilder::default()
-        .name(container_name.as_str())
-        .build();
-
-    let config = ContainerCreateBody {
-        image: Some(image.to_string()),
-        cmd: Some(vec!["sleep".to_string(), "infinity".to_string()]),
-        ..Default::default()
+    let params = objectiveai::laboratories::executions::request::LaboratoryExecutionCreateParams {
+        docker_image: args.docker_image,
+        builder_agents,
+        evaluation_agent,
+        builder_messages,
+        evaluation_messages,
+        evaluation_output_schema,
+        builder_continuation,
+        evaluation_continuation,
+        max_evaluation_retries: args.max_evaluation_retries,
+        provider: None,
+        seed: args.seed,
+        stream: Some(true),
     };
 
-    let container = docker
-        .create_container(Some(options), config)
-        .await?;
+    crate::api::run(|http_client| async move {
+        let stream = objectiveai::laboratories::executions::create_laboratory_execution_streaming(
+            &http_client, params,
+        ).await?;
+        tokio::pin!(stream);
 
-    // Start the container
-    docker.start_container(&container.id, None).await?;
+        let mut accumulated: Option<
+            objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk,
+        > = None;
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk?;
+            match &mut accumulated {
+                Some(agg) => agg.push(&chunk),
+                None => accumulated = Some(chunk),
+            }
+        }
 
-    // Upload the MCP binary to the container root
-    let upload_options = UploadToContainerOptionsBuilder::default()
-        .path("/")
-        .build();
+        let _execution: objectiveai::laboratories::executions::response::unary::LaboratoryExecution =
+            accumulated.ok_or(crate::error::Error::EmptyStream)?.into();
 
-    docker
-        .upload_to_container(
-            &container.id,
-            Some(upload_options),
-            bollard::body_full(mcp_tar.to_vec().into()),
-        )
-        .await?;
-
-    // Start the MCP server inside the container
-    let exec_options = CreateExecOptions {
-        cmd: Some(vec!["/objectiveai-mcp"]),
-        attach_stdin: Some(true),
-        attach_stdout: Some(true),
-        attach_stderr: Some(true),
-        ..Default::default()
-    };
-
-    let exec = docker.create_exec(&container.id, exec_options).await?;
-    let _start_result = docker.start_exec(&exec.id, None).await?;
-
-    Ok(container.id)
+        unimplemented!()
+    }, true).await
 }
