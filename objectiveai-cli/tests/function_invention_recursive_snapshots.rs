@@ -65,8 +65,8 @@ fn assert_invention_snapshot(snapshot_name: &str, cli_result: &serde_json::Value
 fn valid_schema_valid_tasks_scalar_leaf() {
     let result = cli_test_util::run_cli(&[
         "functions", "inventions", "recursive", "create", "remote",
-        "--state-remote", "mock", "--state-name", "inv-good-sl",
-        "--agent-remote", "mock", "--agent-name", "invention",
+        "--state", "remote=mock,name=inv-good-sl",
+        "--agent", "remote=mock,name=invention",
         "--seed", "5300",
     ]);
     assert_invention_snapshot("valid_schema_valid_tasks_scalar_leaf", &result);
@@ -78,8 +78,8 @@ fn valid_schema_valid_tasks_scalar_leaf() {
 fn valid_vector_schema_valid_tasks() {
     let result = cli_test_util::run_cli(&[
         "functions", "inventions", "recursive", "create", "remote",
-        "--state-remote", "mock", "--state-name", "inv-good-vl",
-        "--agent-remote", "mock", "--agent-name", "invention",
+        "--state", "remote=mock,name=inv-good-vl",
+        "--agent", "remote=mock,name=invention",
         "--seed", "5400",
     ]);
     assert_invention_snapshot("valid_vector_schema_valid_tasks", &result);
@@ -91,8 +91,8 @@ fn valid_vector_schema_valid_tasks() {
 fn valid_schema_no_tasks_with_essay() {
     let result = cli_test_util::run_cli(&[
         "functions", "inventions", "recursive", "create", "remote",
-        "--state-remote", "mock", "--state-name", "inv-schema-only",
-        "--agent-remote", "mock", "--agent-name", "invention",
+        "--state", "remote=mock,name=inv-schema-only",
+        "--agent", "remote=mock,name=invention",
         "--seed", "5900",
     ]);
     assert_invention_snapshot("valid_schema_no_tasks_with_essay", &result);

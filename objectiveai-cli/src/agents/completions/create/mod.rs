@@ -33,54 +33,6 @@ impl MessageSource {
     }
 }
 
-/// Agent args — supports mock remote via RemoteWithMock.
-#[derive(Args)]
-pub struct AgentArgs {
-    /// Get agent by favorite name
-    #[arg(long, conflicts_with_all = [
-        "agent_remote", "agent_owner", "agent_repository", "agent_name", "agent_commit"
-    ])]
-    pub agent_favorite: Option<String>,
-    /// Agent remote source (github, filesystem, or mock)
-    #[arg(long, value_enum,
-        requires_if("github", "agent_owner"),
-        requires_if("github", "agent_repository"),
-        requires_if("filesystem", "agent_owner"),
-        requires_if("filesystem", "agent_repository"),
-        requires_if("mock", "agent_name"),
-    )]
-    pub agent_remote: Option<crate::remote::RemoteWithMock>,
-    /// Agent owner (github/filesystem)
-    #[arg(long, conflicts_with = "agent_name")]
-    pub agent_owner: Option<String>,
-    /// Agent repository (github/filesystem)
-    #[arg(long, conflicts_with = "agent_name")]
-    pub agent_repository: Option<String>,
-    /// Agent name (mock only)
-    #[arg(long, conflicts_with_all = ["agent_owner", "agent_repository", "agent_commit"])]
-    pub agent_name: Option<String>,
-    /// Agent commit (optional, github/filesystem only)
-    #[arg(long)]
-    pub agent_commit: Option<String>,
-}
-
-impl AgentArgs {
-    fn resolve(self) -> Result<objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional, crate::error::Error> {
-        if let Some(fav_name) = self.agent_favorite {
-            let (_, mut config) = crate::config::read()?;
-            let favorites = config.agents().get_favorites().to_vec();
-            let fav = favorites.into_iter().find(|f| f.get_name() == fav_name)
-                .ok_or_else(|| crate::error::Error::FavoriteNotFound(fav_name))?;
-            Ok(objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::Remote(fav.path.clone()))
-        } else {
-            let path = self.agent_remote
-                .ok_or(crate::error::Error::MissingArgs("--agent-remote is required (or use --agent-favorite)"))?
-                .into_path(self.agent_owner, self.agent_repository, self.agent_name, self.agent_commit)
-                .ok_or(crate::error::Error::MissingArgs("--agent-owner and --agent-repository are required for github/filesystem, --agent-name for mock"))?;
-            Ok(objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::Remote(path))
-        }
-    }
-}
 
 #[derive(Subcommand)]
 pub enum Commands {
@@ -88,8 +40,9 @@ pub enum Commands {
     Standard {
         #[command(flatten)]
         messages: MessageSource,
-        #[command(flatten)]
-        agent: AgentArgs,
+        /// Agent reference (e.g. favorite=name or remote=github,owner=x,repository=y)
+        #[arg(long)]
+        agent: crate::agent_ref::AgentRef,
         #[command(flatten)]
         continuation: crate::continuation::ContinuationArgs,
         #[command(flatten)]
@@ -102,14 +55,14 @@ pub enum Commands {
 
 impl Commands {
     pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
-        let (message_source, agent_args, continuation_args, response_format_args, seed) = match self {
+        let (message_source, agent_ref, continuation_args, response_format_args, seed) = match self {
             Commands::Standard { messages, agent, continuation, response_format, seed } => {
                 (messages, agent, continuation, response_format, seed)
             }
         };
 
         let messages = message_source.resolve()?;
-        let agent = agent_args.resolve()?;
+        let agent = agent_ref.resolve()?;
         let continuation = continuation_args.resolve()?;
         let response_format = response_format_args.resolve()?
             .map(objectiveai::agent::completions::request::ResponseFormatParam::Single);

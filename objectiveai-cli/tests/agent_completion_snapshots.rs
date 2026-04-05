@@ -47,9 +47,10 @@ macro_rules! snapshot_test {
         #[test]
         fn $name() {
             let seed_str = $seed.to_string();
+            let agent_str = format!("remote=mock,name={}", $agent_name);
             let mut args = vec![
                 "agents", "completions", "create", "standard",
-                "--agent-remote", "mock", "--agent-name", $agent_name,
+                "--agent", &agent_str,
                 "--messages-inline", $messages_json,
                 "--seed", &seed_str,
             ];

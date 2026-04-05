@@ -16,7 +16,7 @@ impl Remote {
 }
 
 /// Remote source including Mock (for executions only).
-#[derive(Clone, clap::ValueEnum)]
+#[derive(Clone, Debug, clap::ValueEnum)]
 pub enum RemoteWithMock {
     Github,
     Filesystem,

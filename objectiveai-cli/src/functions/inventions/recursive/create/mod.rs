@@ -1,54 +1,6 @@
 use clap::{Args, Subcommand};
 use futures::StreamExt;
 
-/// Agent args for inventions — supports mock remote via RemoteWithMock.
-#[derive(Args)]
-pub struct AgentArgs {
-    /// Get agent by favorite name
-    #[arg(long, conflicts_with_all = [
-        "agent_remote", "agent_owner", "agent_repository", "agent_name", "agent_commit"
-    ])]
-    pub agent_favorite: Option<String>,
-    /// Agent remote source (github, filesystem, or mock)
-    #[arg(long, value_enum,
-        requires_if("github", "agent_owner"),
-        requires_if("github", "agent_repository"),
-        requires_if("filesystem", "agent_owner"),
-        requires_if("filesystem", "agent_repository"),
-        requires_if("mock", "agent_name"),
-    )]
-    pub agent_remote: Option<crate::remote::RemoteWithMock>,
-    /// Agent owner (github/filesystem)
-    #[arg(long, conflicts_with = "agent_name")]
-    pub agent_owner: Option<String>,
-    /// Agent repository (github/filesystem)
-    #[arg(long, conflicts_with = "agent_name")]
-    pub agent_repository: Option<String>,
-    /// Agent name (mock only)
-    #[arg(long, conflicts_with_all = ["agent_owner", "agent_repository", "agent_commit"])]
-    pub agent_name: Option<String>,
-    /// Agent commit (optional, github/filesystem only)
-    #[arg(long)]
-    pub agent_commit: Option<String>,
-}
-
-impl AgentArgs {
-    fn resolve(self) -> Result<objectiveai::RemotePathCommitOptional, crate::error::Error> {
-        if let Some(fav_name) = self.agent_favorite {
-            let (_, mut config) = crate::config::read()?;
-            let favorites = config.agents().get_favorites().to_vec();
-            let fav = favorites.into_iter().find(|f| f.get_name() == fav_name)
-                .ok_or_else(|| crate::error::Error::FavoriteNotFound(fav_name))?;
-            Ok(fav.path.clone())
-        } else {
-            self.agent_remote
-                .ok_or(crate::error::Error::MissingArgs("--agent-remote is required (or use --agent-favorite)"))?
-                .into_path(self.agent_owner, self.agent_repository, self.agent_name, self.agent_commit)
-                .ok_or(crate::error::Error::MissingArgs("--agent-owner and --agent-repository are required for github/filesystem, --agent-name for mock"))
-        }
-    }
-}
-
 /// Shared params across all invention state types.
 #[derive(Args)]
 pub struct InventionParams {
@@ -115,8 +67,9 @@ pub enum Commands {
     AlphaScalar {
         #[command(flatten)]
         params: InventionParams,
-        #[command(flatten)]
-        agent: AgentArgs,
+        /// Agent reference (e.g. favorite=name or remote=github,owner=x,repository=y)
+        #[arg(long)]
+        agent: crate::agent_ref::AgentRef,
         #[command(flatten)]
         continuation: crate::continuation::ContinuationArgs,
         /// Seed for deterministic mock responses
@@ -127,8 +80,9 @@ pub enum Commands {
     AlphaVector {
         #[command(flatten)]
         params: InventionParams,
-        #[command(flatten)]
-        agent: AgentArgs,
+        /// Agent reference (e.g. favorite=name or remote=github,owner=x,repository=y)
+        #[arg(long)]
+        agent: crate::agent_ref::AgentRef,
         #[command(flatten)]
         continuation: crate::continuation::ContinuationArgs,
         /// Seed for deterministic mock responses
@@ -137,29 +91,12 @@ pub enum Commands {
     },
     /// Invent from a remote state (previously saved invention state files)
     Remote {
-        /// Remote source for the state (github, filesystem, or mock)
-        #[arg(long, value_enum,
-            requires_if("github", "state_owner"),
-            requires_if("github", "state_repository"),
-            requires_if("filesystem", "state_owner"),
-            requires_if("filesystem", "state_repository"),
-            requires_if("mock", "state_name"),
-        )]
-        state_remote: crate::remote::RemoteWithMock,
-        /// State owner (github/filesystem)
-        #[arg(long, conflicts_with = "state_name")]
-        state_owner: Option<String>,
-        /// State repository (github/filesystem)
-        #[arg(long, conflicts_with = "state_name")]
-        state_repository: Option<String>,
-        /// State name (mock only)
-        #[arg(long, conflicts_with_all = ["state_owner", "state_repository", "state_commit"])]
-        state_name: Option<String>,
-        /// State commit (optional, github/filesystem only)
+        /// State reference (e.g. remote=mock,name=inv-good-sl or remote=github,owner=x,repository=y)
         #[arg(long)]
-        state_commit: Option<String>,
-        #[command(flatten)]
-        agent: AgentArgs,
+        state: crate::path_ref::PathRef,
+        /// Agent reference (e.g. favorite=name or remote=github,owner=x,repository=y)
+        #[arg(long)]
+        agent: crate::agent_ref::AgentRef,
         #[command(flatten)]
         continuation: crate::continuation::ContinuationArgs,
         /// Seed for deterministic mock responses
@@ -170,7 +107,7 @@ pub enum Commands {
 
 impl Commands {
     pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
-        let (agent_args, continuation_args, seed, state) = match self {
+        let (agent_ref, continuation_args, seed, state) = match self {
             Commands::AlphaScalar { params, agent, continuation, seed } => {
                 let p = params.into_params();
                 let state = objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(
@@ -189,15 +126,14 @@ impl Commands {
                 );
                 (agent, continuation, seed, state)
             }
-            Commands::Remote { state_remote, state_owner, state_repository, state_name, state_commit, agent, continuation, seed } => {
-                let remote_path = state_remote.into_path(state_owner, state_repository, state_name, state_commit)
-                    .ok_or(crate::error::Error::MissingArgs("--state-owner and --state-repository are required for github/filesystem, --state-name for mock"))?;
+            Commands::Remote { state, agent, continuation, seed } => {
+                let remote_path = state.resolve()?;
                 let state = objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Remote(remote_path);
                 (agent, continuation, seed, state)
             }
         };
 
-        let agent_path = agent_args.resolve()?;
+        let agent = agent_ref.resolve()?;
         let continuation = continuation_args.resolve()?;
 
         // Read remote from config
@@ -209,7 +145,7 @@ impl Commands {
             overwrite: None,
             state,
             provider: None,
-            agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::Remote(agent_path),
+            agent,
             seed,
             stream: Some(true),
             max_step_retries: None,
