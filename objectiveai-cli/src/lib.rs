@@ -17,6 +17,9 @@ mod schemas;
 #[cfg(test)]
 mod python_tests;
 
+#[cfg(feature = "laboratory")]
+pub mod laboratory;
+
 mod run;
 
 pub use run::*;
