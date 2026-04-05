@@ -256,39 +256,55 @@ where
             .enumerate()
             .map(|(i, _)| spawn_builder(&docker, &request.docker_image, i, &tar_bytes))
             .collect();
-        let resolve_futs: Vec<_> = request
+        let builder_resolve_futs: Vec<_> = request
             .builder_agents
             .iter()
             .map(|agent_ref| self.retrieve_router.get_agent(&ctx, agent_ref.clone()))
             .collect();
-        let (host_ports, resolved_agents) = tokio::try_join!(
+        let eval_resolve_fut = self.retrieve_router.get_agent(&ctx, request.evaluation_agent.clone());
+        let (host_ports, resolved_builder_agents, resolved_eval_agent) = tokio::try_join!(
             futures::future::try_join_all(docker_futs),
             async {
-                futures::future::try_join_all(resolve_futs)
+                futures::future::try_join_all(builder_resolve_futs)
+                    .await
+                    .map_err(|e| super::Error::AgentCompletion(e.to_string()))
+            },
+            async {
+                eval_resolve_fut
                     .await
                     .map_err(|e| super::Error::AgentCompletion(e.to_string()))
             },
         )
         .map_err(&send_err)?;
 
-        let mut inline_agents = Vec::with_capacity(request.builder_agents.len());
-        for (i, agent_wf) in resolved_agents.into_iter().enumerate() {
-            let mut agent_base = agent_wf.inline().inner.clone().into_base();
+        let eval_agent = {
+            let eval_agent_base = resolved_eval_agent.inline().inner.clone().into_base();
+            objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+                objectiveai::agent::InlineAgentBaseWithFallbacks {
+                    inner: eval_agent_base,
+                    fallbacks: None,
+                },
+            )
+        };
+
+        let mut builder_inline_agents = Vec::with_capacity(request.builder_agents.len());
+        for (i, builder_agent_wf) in resolved_builder_agents.into_iter().enumerate() {
+            let mut builder_agent_base = builder_agent_wf.inline().inner.clone().into_base();
 
             let host_port = host_ports[i];
-            inject_mcp_server(&mut agent_base, format!("http://localhost:{host_port}"));
+            inject_mcp_server(&mut builder_agent_base, format!("http://localhost:{host_port}"));
 
-            inline_agents.push(agent_base);
+            builder_inline_agents.push(builder_agent_base);
         }
 
         // Create agent completions for each builder concurrently
         let indexer = Arc::new(ChoiceIndexer::new(0));
         let agent_client = self.agent_client.clone();
 
-        let streams: Vec<_> = inline_agents
+        let streams: Vec<_> = builder_inline_agents
             .into_iter()
             .enumerate()
-            .map(|(native_index, agent_base)| {
+            .map(|(native_index, builder_agent_base)| {
                 let agent_client = agent_client.clone();
                 let ctx = ctx.clone();
                 let request = request.clone();
@@ -296,20 +312,20 @@ where
                 let id = id.clone();
                 let agent_index = native_index as u64;
 
-                let agent_with_fallbacks = objectiveai::agent::InlineAgentBaseWithFallbacks {
-                    inner: agent_base,
+                let builder_agent_with_fallbacks = objectiveai::agent::InlineAgentBaseWithFallbacks {
+                    inner: builder_agent_base,
                     fallbacks: None,
                 };
-                let agent =
+                let builder_agent =
                     objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
-                        agent_with_fallbacks,
+                        builder_agent_with_fallbacks,
                     );
 
                 let params = Arc::new(
                     objectiveai::agent::completions::request::AgentCompletionCreateParams {
                         messages: request.builder_messages.clone(),
                         provider: request.provider.clone(),
-                        agent,
+                        agent: builder_agent,
                         response_format: None,
                         seed: request.seed,
                         stream: Some(true),
@@ -374,15 +390,46 @@ where
 
         let viewer_client = self.viewer.clone();
         let viewer_ctx = ctx.clone();
+        let this = self.clone();
         let mut merged = futures::stream::select_all(streams);
         Ok(async_stream::stream! {
             let mut accumulated_usage = objectiveai::agent::completions::response::Usage::default();
+            let mut errored_agents: std::collections::HashSet<u64> = std::collections::HashSet::new();
+
+            // Phase 1: drain all builder streams
             while let Some(chunk) = merged.next().await {
                 for builder in &chunk.builders {
                     if let Some(u) = &builder.inner.usage {
                         accumulated_usage.push(u);
                     }
+                    if builder.error.is_some() {
+                        errored_agents.insert(builder.agent_index);
+                    }
                 }
+                viewer_client.send_laboratory_execution_continue(viewer_ctx.clone(), chunk.clone());
+                yield chunk;
+            }
+
+            // Phase 2: spawn evaluations for non-errored builders
+            let num_agents = request.builder_agents.len() as u64;
+            let eval_streams: Vec<_> = (0..num_agents)
+                .filter(|i| !errored_agents.contains(i))
+                .map(|agent_index| {
+                    Box::pin(this.clone().create_evaluation_streaming(
+                        ctx.clone(),
+                        request.clone(),
+                        id.clone(),
+                        created,
+                        object,
+                        agent_index,
+                        agent_index,
+                        eval_agent.clone(),
+                    )) as std::pin::Pin<Box<dyn Stream<Item = LaboratoryExecutionChunk> + Send>>
+                })
+                .collect();
+
+            let mut eval_merged = futures::stream::select_all(eval_streams);
+            while let Some(chunk) = eval_merged.next().await {
                 for evaluation in &chunk.evaluations {
                     if let Some(u) = &evaluation.inner.usage {
                         accumulated_usage.push(u);
@@ -391,6 +438,7 @@ where
                 viewer_client.send_laboratory_execution_continue(viewer_ctx.clone(), chunk.clone());
                 yield chunk;
             }
+
             // Final chunk with accumulated usage
             let final_chunk = LaboratoryExecutionChunk {
                 id,
