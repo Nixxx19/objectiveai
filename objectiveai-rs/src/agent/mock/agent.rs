@@ -37,6 +37,11 @@ pub struct AgentBase {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
     pub error_probability: Option<u8>,
+
+    /// MCP servers the agent can connect to.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub mcp_servers: Option<super::super::McpServers>,
 }
 
 impl AgentBase {
@@ -56,6 +61,10 @@ impl AgentBase {
         if self.mode == Some(super::Mode::Default) {
             self.mode = None;
         }
+        self.mcp_servers = match self.mcp_servers.take() {
+            Some(mcp_servers) => super::super::mcp::mcp_servers::prepare(mcp_servers),
+            None => None,
+        };
     }
 
     /// Validates the configuration.
@@ -72,6 +81,9 @@ impl AgentBase {
                 "`mode: invention` is only compatible with `instruction` output mode"
                     .to_string(),
             );
+        }
+        if let Some(mcp_servers) = &self.mcp_servers {
+            super::super::mcp::mcp_servers::validate(mcp_servers)?;
         }
         if let Some(p) = self.error_probability {
             if p > 100 {

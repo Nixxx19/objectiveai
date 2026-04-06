@@ -239,6 +239,7 @@ fn mock_agent(
                     error,
                     error_probability: None,
                     mode: None,
+                    mcp_servers: None,
                 }),
                 fallbacks,
             },
@@ -1929,6 +1930,7 @@ async fn test_logprobs_error_with_fallback_seed_99() {
                         error: None,
                         error_probability: None,
                         mode: None,
+                        mcp_servers: None,
                     }),
                 ]))],
                 weights: Some(objectiveai::Weights::Weights(vec![
@@ -1986,6 +1988,7 @@ async fn test_logprobs_all_errors_seed_42() {
                         error: Some(true),
                         error_probability: None,
                         mode: None,
+                        mcp_servers: None,
                     }),
                 ]))],
                 weights: Some(objectiveai::Weights::Weights(vec![
@@ -2096,6 +2099,7 @@ async fn test_logprobs_mixed_modes_with_fallback_seed_88() {
                             error: None,
                             error_probability: None,
                             mode: None,
+                            mcp_servers: None,
                         }),
                     ])),
                 ],

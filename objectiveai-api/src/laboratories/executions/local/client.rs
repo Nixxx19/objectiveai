@@ -194,7 +194,9 @@ fn inject_mcp_server(agent: &mut objectiveai::agent::InlineAgentBase, mcp_url: S
         objectiveai::agent::InlineAgentBase::ClaudeAgentSdk(b) => {
             b.mcp_servers.get_or_insert_with(Vec::new).push(server);
         }
-        objectiveai::agent::InlineAgentBase::Mock(_) => {}
+        objectiveai::agent::InlineAgentBase::Mock(b) => {
+            b.mcp_servers.get_or_insert_with(Vec::new).push(server);
+        }
     }
 }
 
