@@ -106,7 +106,7 @@ fn make_client() -> Arc<TestClient> {
         Arc::new(crate::mcp::Client::new(
             reqwest::Client::new(),
             String::new(), String::new(), String::new(),
-            Duration::ZERO, Duration::ZERO, Duration::ZERO,
+            Duration::from_millis(1), Duration::ZERO, Duration::ZERO,
             0.0, 1.0, Duration::ZERO, Duration::ZERO, Duration::from_millis(1),
         )),
         None,

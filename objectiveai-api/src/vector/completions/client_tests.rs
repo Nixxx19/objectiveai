@@ -160,7 +160,7 @@ fn make_agent_client(
             String::new(),
             String::new(),
             String::new(),
-            Duration::ZERO,
+            Duration::from_millis(1),
             Duration::ZERO,
             Duration::ZERO,
             0.0,
