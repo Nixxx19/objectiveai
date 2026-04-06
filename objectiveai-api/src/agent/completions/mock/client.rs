@@ -287,6 +287,8 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
                 ).next().unwrap_or(objectiveai::functions::expression::InputValue::String("mock".to_string()));
                 let text = serde_json::to_string(&input_value).unwrap();
                 MockResponse::Content { text, logprobs: None }
+            } else if matches!(mode, objectiveai::agent::mock::Mode::LaboratoryBuilder) && tools_enabled && prior_tool_call_count == 0 {
+                MockResponse::ToolCalls(vec![super::builder::write_tool_call(&mut rng)])
             } else if matches!(mode, objectiveai::agent::mock::Mode::Invention) && tools_enabled {
                 resolve_invention_response(
                     &tool_names,

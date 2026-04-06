@@ -1,3 +1,4 @@
+pub mod builder;
 mod client;
 mod error;
 pub mod invention;
