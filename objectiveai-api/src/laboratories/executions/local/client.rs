@@ -244,6 +244,10 @@ where
             return Err(send_err(super::Error::NoBuilderAgents));
         }
 
+        if request.evaluation_agent.is_some() != request.evaluation_output_schema.is_some() {
+            return Err(send_err(super::Error::EvaluationConfigMismatch));
+        }
+
         // Connect to Docker
         let docker = bollard::Docker::connect_with_local_defaults()
             .map_err(|e| send_err(super::Error::Docker(e.to_string())))?;
@@ -262,7 +266,15 @@ where
             .iter()
             .map(|agent_ref| self.retrieve_router.get_agent(&ctx, agent_ref.clone()))
             .collect();
-        let eval_resolve_fut = self.retrieve_router.get_agent(&ctx, request.evaluation_agent.clone());
+        let eval_resolve_fut = async {
+            match &request.evaluation_agent {
+                Some(eval_ref) => self.retrieve_router.get_agent(&ctx, eval_ref.clone())
+                    .await
+                    .map(Some)
+                    .map_err(|e| super::Error::AgentCompletion(e.to_string())),
+                None => Ok(None),
+            }
+        };
         let (host_ports, resolved_builder_agents, resolved_eval_agent) = tokio::try_join!(
             futures::future::try_join_all(docker_futs),
             async {
@@ -270,23 +282,19 @@ where
                     .await
                     .map_err(|e| super::Error::AgentCompletion(e.to_string()))
             },
-            async {
-                eval_resolve_fut
-                    .await
-                    .map_err(|e| super::Error::AgentCompletion(e.to_string()))
-            },
+            eval_resolve_fut,
         )
         .map_err(&send_err)?;
 
-        let eval_agent = {
-            let eval_agent_base = resolved_eval_agent.inline().inner.clone().into_base();
+        let eval_agent = resolved_eval_agent.map(|wf| {
+            let eval_agent_base = wf.inline().inner.clone().into_base();
             objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
                 objectiveai::agent::InlineAgentBaseWithFallbacks {
                     inner: eval_agent_base,
                     fallbacks: None,
                 },
             )
-        };
+        });
 
         let mut builder_inline_agents = Vec::with_capacity(request.builder_agents.len());
         for (i, builder_agent_wf) in resolved_builder_agents.into_iter().enumerate() {
@@ -411,33 +419,35 @@ where
                 yield chunk;
             }
 
-            // Phase 2: spawn evaluations for non-errored builders
-            let num_agents = request.builder_agents.len() as u64;
-            let eval_streams: Vec<_> = (0..num_agents)
-                .filter(|i| !errored_agents.contains(i))
-                .map(|agent_index| {
-                    Box::pin(this.clone().create_evaluation_streaming(
-                        ctx.clone(),
-                        request.clone(),
-                        id.clone(),
-                        created,
-                        object,
-                        agent_index,
-                        agent_index,
-                        eval_agent.clone(),
-                    )) as std::pin::Pin<Box<dyn Stream<Item = LaboratoryExecutionChunk> + Send>>
-                })
-                .collect();
+            // Phase 2: spawn evaluations for non-errored builders (only if eval agent provided)
+            if let Some(ref eval_agent) = eval_agent {
+                let num_agents = request.builder_agents.len() as u64;
+                let eval_streams: Vec<_> = (0..num_agents)
+                    .filter(|i| !errored_agents.contains(i))
+                    .map(|agent_index| {
+                        Box::pin(this.clone().create_evaluation_streaming(
+                            ctx.clone(),
+                            request.clone(),
+                            id.clone(),
+                            created,
+                            object,
+                            agent_index,
+                            agent_index,
+                            eval_agent.clone(),
+                        )) as std::pin::Pin<Box<dyn Stream<Item = LaboratoryExecutionChunk> + Send>>
+                    })
+                    .collect();
 
-            let mut eval_merged = futures::stream::select_all(eval_streams);
-            while let Some(chunk) = eval_merged.next().await {
-                for evaluation in &chunk.evaluations {
-                    if let Some(u) = &evaluation.inner.usage {
-                        accumulated_usage.push(u);
+                let mut eval_merged = futures::stream::select_all(eval_streams);
+                while let Some(chunk) = eval_merged.next().await {
+                    for evaluation in &chunk.evaluations {
+                        if let Some(u) = &evaluation.inner.usage {
+                            accumulated_usage.push(u);
+                        }
                     }
+                    viewer_client.send_laboratory_execution_continue(viewer_ctx.clone(), chunk.clone());
+                    yield chunk;
                 }
-                viewer_client.send_laboratory_execution_continue(viewer_ctx.clone(), chunk.clone());
-                yield chunk;
             }
 
             // Final chunk with accumulated usage
@@ -453,12 +463,14 @@ where
             viewer_client.send_laboratory_execution_continue(viewer_ctx.clone(), final_chunk.clone());
             yield final_chunk;
 
-            // Cleanup: stop and remove all builder containers
-            let num_builders = request.builder_agents.len();
-            for i in 0..num_builders {
-                let name = format!("objectiveai-{id}-{i}");
-                let _ = docker.stop_container(&name, None).await;
-                let _ = docker.remove_container(&name, None).await;
+            // Cleanup: stop and remove all builder containers (unless persist)
+            if !request.persist.unwrap_or(false) {
+                let num_builders = request.builder_agents.len();
+                for i in 0..num_builders {
+                    let name = format!("objectiveai-{id}-{i}");
+                    let _ = docker.stop_container(&name, None).await;
+                    let _ = docker.remove_container(&name, None).await;
+                }
             }
         })
     }
@@ -485,11 +497,11 @@ where
         // Build the schema prompt suffix
         let schema_text = format!(
             "## evaluation schema\n\n{}",
-            serde_json::to_string_pretty(&request.evaluation_output_schema).unwrap(),
+            serde_json::to_string_pretty(request.evaluation_output_schema.as_ref().unwrap()).unwrap(),
         );
 
         // Inject schema into messages: append to last user message or create one
-        let mut messages = request.evaluation_messages.clone();
+        let mut messages = request.evaluation_messages.clone().unwrap();
         let mut injected = false;
         for msg in messages.iter_mut().rev() {
             if let Message::User(user) = msg {
@@ -631,9 +643,11 @@ where
 
                 match parse_result {
                     Ok(input_value) => {
-                        // Validate against schema
+                        // Validate against schema (if provided)
                         let valid = request
                             .evaluation_output_schema
+                            .as_ref()
+                            .unwrap()
                             .validate_input(&input_value);
 
                         if valid {

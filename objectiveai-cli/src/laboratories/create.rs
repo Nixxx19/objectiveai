@@ -20,7 +20,7 @@ pub async fn handle(args: CreateArgs) -> Result<crate::Output, crate::error::Err
     // Keep original agent refs for the final output (in arg order)
     let original_agents = builder_agents.clone();
 
-    let evaluation_agent = args.evaluation_agent.resolve()?;
+    let evaluation_agent = args.evaluation_agent.map(|a| a.resolve()).transpose()?;
     let builder_messages = args.builder_messages.resolve()?;
     let evaluation_messages = args.evaluation_messages.resolve()?;
     let evaluation_output_schema = args.evaluation_output_schema.resolve()?;
@@ -50,6 +50,7 @@ pub async fn handle(args: CreateArgs) -> Result<crate::Output, crate::error::Err
         builder_continuation,
         evaluation_continuation,
         max_evaluation_retries: args.max_evaluation_retries,
+        persist: None,
         provider: None,
         seed: args.seed,
         stream: Some(true),

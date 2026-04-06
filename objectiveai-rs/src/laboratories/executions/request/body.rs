@@ -10,16 +10,23 @@ pub struct LaboratoryExecutionCreateParams {
     pub docker_image: String,
     /// Builder agents — at least one required.
     pub builder_agents: Vec<agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional>,
-    /// Evaluation agent for evaluating builder outputs.
-    pub evaluation_agent: agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
+    /// Evaluation agent for evaluating builder outputs. If not provided,
+    /// no evaluation is performed.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub evaluation_agent: Option<agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional>,
 
     /// Messages for builder agents.
     pub builder_messages: Vec<agent::completions::message::Message>,
     /// Messages for the evaluation agent.
-    pub evaluation_messages: Vec<agent::completions::message::Message>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub evaluation_messages: Option<Vec<agent::completions::message::Message>>,
 
     /// Output schema for evaluation.
-    pub evaluation_output_schema: crate::functions::expression::InputSchema,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub evaluation_output_schema: Option<crate::functions::expression::InputSchema>,
 
     /// Continuation from a previous builder completion, as a base64-encoded string.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -35,6 +42,11 @@ pub struct LaboratoryExecutionCreateParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
     pub max_evaluation_retries: Option<u32>,
+
+    /// Whether to keep containers after execution. Defaults to false.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub persist: Option<bool>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]

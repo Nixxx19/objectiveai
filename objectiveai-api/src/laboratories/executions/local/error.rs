@@ -19,6 +19,9 @@ pub enum Error {
     /// Evaluation output does not match the expected schema.
     #[error("evaluation output does not match schema")]
     EvaluationOutputSchemaMismatch,
+    /// evaluation_agent and evaluation_output_schema must both be provided or both be omitted.
+    #[error("evaluation_agent and evaluation_output_schema must both be provided or both be omitted")]
+    EvaluationConfigMismatch,
 }
 
 impl objectiveai::error::StatusError for Error {
@@ -30,6 +33,7 @@ impl objectiveai::error::StatusError for Error {
             Error::AgentCompletion(_) => 502,
             Error::EvaluationOutputParse(_) => 400,
             Error::EvaluationOutputSchemaMismatch => 400,
+            Error::EvaluationConfigMismatch => 400,
         }
     }
 
@@ -60,6 +64,10 @@ impl objectiveai::error::StatusError for Error {
                 Error::EvaluationOutputSchemaMismatch => serde_json::json!({
                     "kind": "evaluation_output_schema_mismatch",
                     "error": "evaluation output does not match schema",
+                }),
+                Error::EvaluationConfigMismatch => serde_json::json!({
+                    "kind": "evaluation_config_mismatch",
+                    "error": "evaluation_agent and evaluation_output_schema must both be provided or both be omitted",
                 }),
             }
         }))

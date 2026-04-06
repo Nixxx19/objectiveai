@@ -14,7 +14,7 @@ pub struct CreateArgs {
 
     /// Evaluation agent reference (e.g. favorite=name or remote=github,owner=x,repository=y)
     #[arg(long)]
-    pub evaluation_agent: crate::agent_ref::AgentRef,
+    pub evaluation_agent: Option<crate::agent_ref::AgentRef>,
 
     #[command(flatten)]
     pub builder_messages: BuilderMessageSource,
@@ -88,7 +88,7 @@ impl BuilderMessageSource {
 
 /// Messages for the evaluation agent.
 #[derive(Args)]
-#[group(required = true, multiple = false)]
+#[group(multiple = false)]
 pub struct EvaluationMessageSource {
     #[arg(long)]
     pub evaluation_messages_inline: Option<String>,
@@ -99,25 +99,26 @@ pub struct EvaluationMessageSource {
 }
 
 impl EvaluationMessageSource {
-    pub fn resolve(self) -> Result<Vec<objectiveai::agent::completions::message::Message>, crate::error::Error> {
+    pub fn resolve(self) -> Result<Option<Vec<objectiveai::agent::completions::message::Message>>, crate::error::Error> {
         if let Some(inline) = self.evaluation_messages_inline {
             let mut de = serde_json::Deserializer::from_str(&inline);
             return serde_path_to_error::deserialize(&mut de)
+                .map(Some)
                 .map_err(crate::error::Error::PythonDeserialize);
         }
         if let Some(code) = self.evaluation_messages_python_inline {
-            return crate::python::exec_code(&code);
+            return crate::python::exec_code(&code).map(Some);
         }
         if let Some(path) = self.evaluation_messages_python_file {
-            return crate::python::exec_file(&path);
+            return crate::python::exec_file(&path).map(Some);
         }
-        unreachable!("clap group ensures one is set")
+        Ok(None)
     }
 }
 
 /// Evaluation output schema source (objectiveai-rs InputSchema as JSON).
 #[derive(Args)]
-#[group(required = true, multiple = false)]
+#[group(multiple = false)]
 pub struct EvaluationOutputSchemaSource {
     #[arg(long)]
     pub evaluation_output_schema_inline: Option<String>,
@@ -128,19 +129,20 @@ pub struct EvaluationOutputSchemaSource {
 }
 
 impl EvaluationOutputSchemaSource {
-    pub fn resolve(self) -> Result<objectiveai::functions::expression::InputSchema, crate::error::Error> {
+    pub fn resolve(self) -> Result<Option<objectiveai::functions::expression::InputSchema>, crate::error::Error> {
         if let Some(inline) = self.evaluation_output_schema_inline {
             let mut de = serde_json::Deserializer::from_str(&inline);
             return serde_path_to_error::deserialize(&mut de)
+                .map(Some)
                 .map_err(crate::error::Error::PythonDeserialize);
         }
         if let Some(code) = self.evaluation_output_schema_python_inline {
-            return crate::python::exec_code(&code);
+            return crate::python::exec_code(&code).map(Some);
         }
         if let Some(path) = self.evaluation_output_schema_python_file {
-            return crate::python::exec_file(&path);
+            return crate::python::exec_file(&path).map(Some);
         }
-        unreachable!("clap group ensures one is set")
+        Ok(None)
     }
 }
 
