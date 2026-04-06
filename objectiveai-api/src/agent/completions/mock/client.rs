@@ -82,7 +82,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
     > + Send
     + 'static {
         let tools_enabled = tools_enabled;
-        let invention = agent.base.mode == Some(objectiveai::agent::mock::Mode::Invention);
+        let mode = agent.base.mode.unwrap_or_default();
         let has_invention_tools = invention_tools.is_some_and(|t| !t.is_empty());
         let invention_tools: Vec<objectiveai::functions::inventions::InventionTool> =
             invention_tools.map(|t| t.to_vec()).unwrap_or_default();
@@ -129,7 +129,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
         // Extract the prompt text for invention step discovery.
         // First step: last user message in messages.
         // Subsequent steps: last UserMessage on continuation.
-        let prompt_text = if invention {
+        let prompt_text = if matches!(mode, objectiveai::agent::mock::Mode::Invention) {
             use objectiveai::agent::completions::message::RichContent;
             let extract_text = |c: &RichContent| match c {
                 RichContent::Text(t) => t.clone(),
@@ -203,7 +203,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
                 return Err(super::Error::ExpectedError);
             }
 
-            if invention && !has_invention_tools {
+            if matches!(mode, objectiveai::agent::mock::Mode::Invention) && !has_invention_tools {
                 return Err(super::Error::InventionAgentWithoutInventionTools);
             }
 
@@ -252,7 +252,42 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
                 .collect();
 
             // --- Tool call vs content ---
-            let mock_response = if invention && tools_enabled {
+            let mock_response = if matches!(mode, objectiveai::agent::mock::Mode::LaboratoryEvaluation) {
+                // Extract schema from last user message: "## evaluation schema\n\n{json}"
+                let schema_json = {
+                    use objectiveai::agent::completions::message::RichContent;
+                    let extract = |c: &RichContent| match c {
+                        RichContent::Text(t) => t.clone(),
+                        RichContent::Parts(parts) => parts.iter().filter_map(|p| match p {
+                            objectiveai::agent::completions::message::RichContentPart::Text { text } => Some(text.as_str()),
+                            _ => None,
+                        }).collect::<Vec<_>>().join(""),
+                    };
+                    all_messages.iter().rev().find_map(|m| match m {
+                        objectiveai::agent::completions::message::Message::User(u) => {
+                            let text = extract(&u.content);
+                            text.find("## evaluation schema\n\n").map(|pos| {
+                                text[pos + "## evaluation schema\n\n".len()..].to_string()
+                            })
+                        }
+                        _ => None,
+                    }).unwrap_or_default()
+                };
+                let schema: objectiveai::functions::expression::InputSchema = serde_json::from_str(&schema_json)
+                    .unwrap_or(objectiveai::functions::expression::InputSchema::String(
+                        objectiveai::functions::expression::StringInputSchema {
+                            r#type: objectiveai::functions::expression::StringInputSchemaType::String,
+                            description: None,
+                            r#enum: None,
+                        },
+                    ));
+                let input_value = objectiveai::functions::check::example_inputs::generate_seeded(
+                    &schema,
+                    rng.clone(),
+                ).next().unwrap_or(objectiveai::functions::expression::InputValue::String("mock".to_string()));
+                let text = serde_json::to_string(&input_value).unwrap();
+                MockResponse::Content { text, logprobs: None }
+            } else if matches!(mode, objectiveai::agent::mock::Mode::Invention) && tools_enabled {
                 resolve_invention_response(
                     &tool_names,
                     &tool_map,
