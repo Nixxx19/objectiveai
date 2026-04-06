@@ -48,6 +48,8 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM,
         Arc<crate::retrieval::retrieve::Router<RETRG, RETRF, RETRM, CTXEXT>>,
     pub usage_handler: Arc<LUSG>,
     pub viewer: Arc<crate::viewer::Client<CTXEXT>>,
+    /// Docker API timeout in seconds.
+    pub docker_timeout: u64,
 }
 
 /// Create a tar archive containing the MCP binary at the archive root.
@@ -266,9 +268,14 @@ where
             return Err(send_err(super::Error::EvaluationConfigMismatch));
         }
 
-        // Connect to Docker
-        let docker = bollard::Docker::connect_with_local_defaults()
-            .map_err(|e| send_err(super::Error::Docker(e.to_string())))?;
+        // Connect to Docker (respects DOCKER_HOST env var)
+        let docker_host = std::env::var("DOCKER_HOST").unwrap_or_else(|_| {
+            #[cfg(unix)] { "unix:///var/run/docker.sock".to_string() }
+            #[cfg(windows)] { "npipe:////./pipe/docker_engine".to_string() }
+        });
+        let docker = bollard::Docker::connect_with_local(
+            &docker_host, self.docker_timeout, bollard::API_DEFAULT_VERSION,
+        ).map_err(|e| send_err(super::Error::Docker(e.to_string())))?;
 
         let tar_bytes = mcp_tar(super::mcp_binary::MCP_BINARY);
 

@@ -136,6 +136,7 @@ fn make_client() -> Arc<TestClient> {
             Duration::ZERO, Duration::ZERO, 0.0, 1.0,
             Duration::ZERO, Duration::ZERO,
         )),
+        docker_timeout: 30,
     })
 }
 
