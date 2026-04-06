@@ -213,7 +213,7 @@ fn make_request(state: ParamsState, seed: i64) -> Arc<FunctionInventionCreatePar
         agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
             objectiveai::agent::InlineAgentBaseWithFallbacks {
                 inner: objectiveai::agent::InlineAgentBase::Mock(objectiveai::agent::mock::AgentBase {
-                    invention: Some(true),
+                    mode: Some(objectiveai::agent::mock::Mode::Invention),
                     ..Default::default()
                 }),
                 fallbacks: None,

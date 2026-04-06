@@ -1088,7 +1088,7 @@ async fn test_tools_not_allowed_no_tool_calls_generated() {
 async fn test_invention_agent_without_invention_tools() {
     let client = default_client();
     let agent = Agent::try_from(AgentBase {
-        invention: Some(true),
+        mode: Some(objectiveai::agent::mock::Mode::Invention),
         ..Default::default()
     })
     .unwrap();
@@ -1110,7 +1110,7 @@ async fn test_invention_agent_without_invention_tools() {
 #[tokio::test]
 async fn test_invention_agent_with_invention_tools_ok() {
     let agent = Agent::try_from(AgentBase {
-        invention: Some(true),
+        mode: Some(objectiveai::agent::mock::Mode::Invention),
         ..Default::default()
     })
     .unwrap();
