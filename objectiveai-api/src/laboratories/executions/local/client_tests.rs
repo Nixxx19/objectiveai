@@ -121,7 +121,7 @@ fn make_client() -> Arc<TestClient> {
         Arc::new(crate::viewer::Client::new(
             reqwest::Client::new(), None, None,
             Duration::ZERO, Duration::ZERO, 0.0, 1.0,
-            Duration::ZERO, Duration::ZERO,
+            Duration::ZERO, Duration::from_millis(1),
         )),
         Duration::ZERO, Duration::ZERO, 0.0, 1.0,
         Duration::ZERO, Duration::ZERO,
@@ -134,7 +134,7 @@ fn make_client() -> Arc<TestClient> {
         viewer: Arc::new(crate::viewer::Client::new(
             reqwest::Client::new(), None, None,
             Duration::ZERO, Duration::ZERO, 0.0, 1.0,
-            Duration::ZERO, Duration::ZERO,
+            Duration::ZERO, Duration::from_millis(1),
         )),
         docker_timeout: 30,
     })
