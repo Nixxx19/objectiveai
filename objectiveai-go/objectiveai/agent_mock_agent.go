@@ -16,9 +16,8 @@ type AgentMockAgent struct {
 	ErrorProbability *uint32 `json:"error_probability,omitempty" validate:"omitempty,min=0,max=255"`
 	// The deterministic content-addressed ID (22-character base62 string).
 	ID string `json:"id"`
-	// If true, this mock agent supports invention tool calling.
-	// Incompatible with output modes other than `instruction`.
-	Invention *bool `json:"invention,omitempty"`
+	// Mock agent mode. Defaults to `default`.
+	Mode *AgentMockMode `json:"mode,omitempty"`
 	// The output mode for vector completions. Ignored for agent completions.
 	OutputMode AgentMockOutputMode `json:"output_mode"`
 	// Number of top log probabilities to return (2-20).

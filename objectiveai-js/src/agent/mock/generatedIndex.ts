@@ -3,5 +3,6 @@
 export * from "./agent";
 export * from "./agentBase";
 export * from "./continuation";
+export * from "./mode";
 export * from "./outputMode";
 export * from "./upstream";

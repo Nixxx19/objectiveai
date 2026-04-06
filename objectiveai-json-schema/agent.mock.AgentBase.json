@@ -29,11 +29,11 @@
       ],
       "omitempty": true
     },
-    "invention": {
-      "description": "If true, this mock agent supports invention tool calling.\nIncompatible with output modes other than `instruction`.",
+    "mode": {
+      "description": "Mock agent mode. Defaults to `default`.",
       "anyOf": [
         {
-          "type": "boolean"
+          "$ref": "agent.mock.Mode"
         },
         {
           "type": "null"

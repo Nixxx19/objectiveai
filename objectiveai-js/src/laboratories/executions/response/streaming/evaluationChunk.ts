@@ -9,7 +9,7 @@ import { ErrorResponseErrorSchema } from "../../../../error/responseError";
 import { FunctionsExpressionInputValueSchema } from "../../../../functions/expression/inputValue";
 
 export const LaboratoriesExecutionsResponseStreamingEvaluationChunkSchema = z.object({
-  container_index: z.number().int().min(0).max(18446744073709552000).describe("Container index (0-based)."),
+  agent_index: z.number().int().min(0).max(18446744073709552000).describe("Container index (0-based)."),
   continuation: z.string().nullable().describe("Continuation state for multi-turn conversations (only present in the final chunk).").meta({ omitempty: true }).optional(),
   created: z.number().int().min(0).max(18446744073709552000),
   error: ErrorResponseErrorSchema.nullable().meta({ omitempty: true }).optional(),

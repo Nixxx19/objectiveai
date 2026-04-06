@@ -45,17 +45,13 @@ Requires `error` to be `Some(true)`.
     public string Id { get; set; } = default!;
 
     /// <summary>
-    /// If true, this mock agent supports invention tool calling.
-    /// Incompatible with output modes other than `instruction`.
+    /// Mock agent mode. Defaults to `default`.
     /// </summary>
-    [Description("""
-If true, this mock agent supports invention tool calling.
-Incompatible with output modes other than `instruction`.
-""")]
-    [JsonPropertyName("invention")]
+    [Description("Mock agent mode. Defaults to `default`.")]
+    [JsonPropertyName("mode")]
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
-    public bool? Invention { get; set; } = null;
+    public Mode? Mode { get; set; } = null;
 
     /// <summary>
     /// The output mode for vector completions. Ignored for agent completions.

@@ -14,7 +14,7 @@ class Builder(BaseModel):
     """A single builder agent completion within a laboratory execution (non-streaming)."""
     model_config = ConfigDict(title='laboratories.executions.response.unary.Builder')
 
-    container_index: int = Field(..., description='Container index (0-based).', ge=0, le=18446744073709551615)
+    agent_index: int = Field(..., description='Container index (0-based).', ge=0, le=18446744073709551615)
     continuation: Optional[str] = Field(None, description='Continuation state for multi-turn conversations.')
     created: int = Field(..., ge=0, le=18446744073709551615)
     error: Optional[ResponseError] = None

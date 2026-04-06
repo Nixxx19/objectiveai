@@ -22,9 +22,9 @@ public partial class EvaluationChunk
     /// Container index (0-based).
     /// </summary>
     [Description("Container index (0-based).")]
-    [JsonPropertyName("container_index")]
+    [JsonPropertyName("agent_index")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
-    public ulong ContainerIndex { get; set; } = default!;
+    public ulong AgentIndex { get; set; } = default!;
 
     /// <summary>
     /// Continuation state for multi-turn conversations (only present in the final chunk).

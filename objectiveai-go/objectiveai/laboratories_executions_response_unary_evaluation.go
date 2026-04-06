@@ -10,7 +10,7 @@ import (
 // A single evaluation agent completion within a laboratory execution (non-streaming).
 type LaboratoriesExecutionsResponseUnaryEvaluation struct {
 	// Container index (0-based).
-	ContainerIndex uint64 `json:"container_index" validate:"min=0,max=18446744073709551615"`
+	AgentIndex uint64 `json:"agent_index" validate:"min=0,max=18446744073709551615"`
 	// Continuation state for multi-turn conversations.
 	Continuation *string `json:"continuation"`
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
@@ -37,7 +37,7 @@ func (v *LaboratoriesExecutionsResponseUnaryEvaluation) UnmarshalJSON(data []byt
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	for _, key := range []string{"container_index", "created", "id", "index", "messages", "object", "upstream", "usage"} {
+	for _, key := range []string{"agent_index", "created", "id", "index", "messages", "object", "upstream", "usage"} {
 		if _, ok := raw[key]; !ok {
 			return fmt.Errorf("LaboratoriesExecutionsResponseUnaryEvaluation: missing required field %q", key)
 		}

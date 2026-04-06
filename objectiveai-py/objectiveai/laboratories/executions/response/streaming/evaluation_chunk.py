@@ -15,7 +15,7 @@ class EvaluationChunk(BaseModel):
     """Streaming chunk for a single evaluation agent completion within a laboratory execution."""
     model_config = ConfigDict(title='laboratories.executions.response.streaming.EvaluationChunk')
 
-    container_index: int = Field(..., description='Container index (0-based).', ge=0, le=18446744073709551615)
+    agent_index: int = Field(..., description='Container index (0-based).', ge=0, le=18446744073709551615)
     continuation: Optional[str] = Field(None, description='Continuation state for multi-turn conversations (only present in the final chunk).', json_schema_extra={'omitempty': True})
     created: int = Field(..., ge=0, le=18446744073709551615)
     error: Optional[ResponseError] = Field(None, json_schema_extra={'omitempty': True})

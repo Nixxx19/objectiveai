@@ -2212,7 +2212,12 @@ declare const AgentCompletionsRequestAgentCompletionCreateParamsSchema: z.ZodObj
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -2760,7 +2765,12 @@ declare const AgentCompletionsRequestAgentCompletionCreateParamsSchema: z.ZodObj
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -4782,7 +4792,12 @@ declare const AgentCompletionsRequestAgentCompletionCreateParamsStreamingSchema:
     }, z$1.core.$strip>, z$1.ZodObject<{
         error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
         error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
-        invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+        mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
         top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
         upstream: z$1.ZodLiteral<"mock">;
@@ -5330,7 +5345,12 @@ declare const AgentCompletionsRequestAgentCompletionCreateParamsStreamingSchema:
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
-            invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+            mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
             top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
             upstream: z$1.ZodLiteral<"mock">;
@@ -6092,7 +6112,12 @@ declare const AgentCompletionsRequestAgentCompletionCreateParamsUnarySchema: z$1
     }, z$1.core.$strip>, z$1.ZodObject<{
         error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
         error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
-        invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+        mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
         top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
         upstream: z$1.ZodLiteral<"mock">;
@@ -6640,7 +6665,12 @@ declare const AgentCompletionsRequestAgentCompletionCreateParamsUnarySchema: z$1
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
-            invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+            mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
             top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
             upstream: z$1.ZodLiteral<"mock">;
@@ -6865,7 +6895,12 @@ declare const AgentMockAgentSchema: z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -6875,7 +6910,12 @@ type AgentMockAgent = z.infer<typeof AgentMockAgentSchema>;
 declare const AgentMockAgentBaseSchema: z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -7028,6 +7068,14 @@ declare const AgentMockContinuationSchema: z.ZodObject<{
     upstream: z.ZodLiteral<"mock">;
 }, z.core.$strip>;
 type AgentMockContinuation = z.infer<typeof AgentMockContinuationSchema>;
+
+declare const AgentMockModeSchema: z.ZodEnum<{
+    default: "default";
+    invention: "invention";
+    laboratory_builder: "laboratory_builder";
+    laboratory_evaluation: "laboratory_evaluation";
+}>;
+type AgentMockMode = z.infer<typeof AgentMockModeSchema>;
 
 declare const AgentMockOutputModeSchema: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
 type AgentMockOutputMode = z.infer<typeof AgentMockOutputModeSchema>;
@@ -8694,7 +8742,12 @@ declare const AgentAgentSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodUnio
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -9246,7 +9299,12 @@ declare const AgentAgentSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodUnio
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -9796,7 +9854,12 @@ declare const AgentAgentBaseSchema: z.ZodUnion<readonly [z.ZodIntersection<z.Zod
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -10345,7 +10408,12 @@ declare const AgentAgentBaseSchema: z.ZodUnion<readonly [z.ZodIntersection<z.Zod
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -10898,7 +10966,12 @@ declare const AgentAgentWithFallbacksSchema: z.ZodUnion<readonly [z.ZodIntersect
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -11449,7 +11522,12 @@ declare const AgentAgentWithFallbacksSchema: z.ZodUnion<readonly [z.ZodIntersect
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -12002,7 +12080,12 @@ declare const AgentAgentWithFallbacksSchema: z.ZodUnion<readonly [z.ZodIntersect
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -12553,7 +12636,12 @@ declare const AgentAgentWithFallbacksSchema: z.ZodUnion<readonly [z.ZodIntersect
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -13107,7 +13195,12 @@ declare const AgentAgentWithFallbacksWithCountSchema: z.ZodIntersection<z.ZodUni
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -13658,7 +13751,12 @@ declare const AgentAgentWithFallbacksWithCountSchema: z.ZodIntersection<z.ZodUni
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -14211,7 +14309,12 @@ declare const AgentAgentWithFallbacksWithCountSchema: z.ZodIntersection<z.ZodUni
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -14762,7 +14865,12 @@ declare const AgentAgentWithFallbacksWithCountSchema: z.ZodIntersection<z.ZodUni
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -15629,7 +15737,12 @@ declare const AgentInlineAgentSchema: z.ZodUnion<readonly [z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -16179,7 +16292,12 @@ declare const AgentInlineAgentBaseSchema: z.ZodUnion<readonly [z.ZodObject<{
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -16729,7 +16847,12 @@ declare const AgentInlineAgentBaseWithFallbacksSchema: z.ZodIntersection<z.ZodUn
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -17277,7 +17400,12 @@ declare const AgentInlineAgentBaseWithFallbacksSchema: z.ZodIntersection<z.ZodUn
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -17828,7 +17956,12 @@ declare const AgentInlineAgentBaseWithFallbacksOrRemoteSchema: z.ZodUnion<readon
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -18376,7 +18509,12 @@ declare const AgentInlineAgentBaseWithFallbacksOrRemoteSchema: z.ZodUnion<readon
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -18940,7 +19078,12 @@ declare const AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema: z.Z
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -19488,7 +19631,12 @@ declare const AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema: z.Z
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -20052,7 +20200,12 @@ declare const AgentInlineAgentBaseWithFallbacksOrRemoteWithCountSchema: z.ZodInt
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -20600,7 +20753,12 @@ declare const AgentInlineAgentBaseWithFallbacksOrRemoteWithCountSchema: z.ZodInt
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -21169,7 +21327,12 @@ declare const AgentInlineAgentWithFallbacksSchema: z.ZodIntersection<z.ZodUnion<
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -21720,7 +21883,12 @@ declare const AgentInlineAgentWithFallbacksSchema: z.ZodIntersection<z.ZodUnion<
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -22319,7 +22487,12 @@ declare const AgentRemoteAgentSchema: z.ZodIntersection<z.ZodUnion<readonly [z.Z
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -22871,7 +23044,12 @@ declare const AgentRemoteAgentBaseSchema: z.ZodIntersection<z.ZodUnion<readonly 
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -23423,7 +23601,12 @@ declare const AgentRemoteAgentBaseWithFallbacksSchema: z.ZodIntersection<z.ZodIn
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -23971,7 +24154,12 @@ declare const AgentRemoteAgentBaseWithFallbacksSchema: z.ZodIntersection<z.ZodIn
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -24527,7 +24715,12 @@ declare const AgentRemoteAgentWithFallbacksSchema: z.ZodIntersection<z.ZodInters
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
-    invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+    mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        default: "default";
+        invention: "invention";
+        laboratory_builder: "laboratory_builder";
+        laboratory_evaluation: "laboratory_evaluation";
+    }>>>;
     output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
     top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     upstream: z.ZodLiteral<"mock">;
@@ -25078,7 +25271,12 @@ declare const AgentRemoteAgentWithFallbacksSchema: z.ZodIntersection<z.ZodInters
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -29430,7 +29628,12 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -29978,7 +30181,12 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
             }, z.core.$strip>, z.ZodObject<{
                 error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
                 error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+                mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                    default: "default";
+                    invention: "invention";
+                    laboratory_builder: "laboratory_builder";
+                    laboratory_evaluation: "laboratory_evaluation";
+                }>>>;
                 output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
                 top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
                 upstream: z.ZodLiteral<"mock">;
@@ -30555,7 +30763,12 @@ declare const FunctionsExecutionsRequestReasoningSchema: z.ZodObject<{
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -31103,7 +31316,12 @@ declare const FunctionsExecutionsRequestReasoningSchema: z.ZodObject<{
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -33139,7 +33357,12 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -33687,7 +33910,12 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -43838,7 +44066,12 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
     }, z$1.core.$strip>, z$1.ZodObject<{
         error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
         error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
-        invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+        mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
         top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
         upstream: z$1.ZodLiteral<"mock">;
@@ -44386,7 +44619,12 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
-            invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+            mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
             top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
             upstream: z$1.ZodLiteral<"mock">;
@@ -45347,7 +45585,12 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
     }, z$1.core.$strip>, z$1.ZodObject<{
         error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
         error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
-        invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+        mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
         top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
         upstream: z$1.ZodLiteral<"mock">;
@@ -45895,7 +46138,12 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
-            invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+            mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
             top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
             upstream: z$1.ZodLiteral<"mock">;
@@ -46859,7 +47107,12 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsSchema: z.Z
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -47407,7 +47660,12 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsSchema: z.Z
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -54789,7 +55047,12 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSc
     }, z$1.core.$strip>, z$1.ZodObject<{
         error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
         error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
-        invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+        mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
         top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
         upstream: z$1.ZodLiteral<"mock">;
@@ -55337,7 +55600,12 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSc
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
-            invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+            mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
             top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
             upstream: z$1.ZodLiteral<"mock">;
@@ -56298,7 +56566,12 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema
     }, z$1.core.$strip>, z$1.ZodObject<{
         error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
         error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
-        invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+        mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
         top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
         upstream: z$1.ZodLiteral<"mock">;
@@ -56846,7 +57119,12 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
-            invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+            mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
             top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
             upstream: z$1.ZodLiteral<"mock">;
@@ -59560,7 +59838,12 @@ declare const FunctionsProfilesComputationsRequestFunctionProfileComputationCrea
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -60108,7 +60391,12 @@ declare const FunctionsProfilesComputationsRequestFunctionProfileComputationCrea
             }, z.core.$strip>, z.ZodObject<{
                 error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
                 error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+                mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                    default: "default";
+                    invention: "invention";
+                    laboratory_builder: "laboratory_builder";
+                    laboratory_evaluation: "laboratory_evaluation";
+                }>>>;
                 output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
                 top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
                 upstream: z.ZodLiteral<"mock">;
@@ -60957,7 +61245,12 @@ declare const SwarmInlineSwarmBaseSchema: z.ZodObject<{
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -61505,7 +61798,12 @@ declare const SwarmInlineSwarmBaseSchema: z.ZodObject<{
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -77273,7 +77571,12 @@ declare const FunctionsProfileSchema: z.ZodUnion<readonly [z.ZodUnion<readonly [
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -77821,7 +78124,12 @@ declare const FunctionsProfileSchema: z.ZodUnion<readonly [z.ZodUnion<readonly [
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -79823,7 +80131,12 @@ declare const FunctionsRemoteProfileSchema: z.ZodUnion<readonly [z.ZodIntersecti
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -80371,7 +80684,12 @@ declare const FunctionsRemoteProfileSchema: z.ZodUnion<readonly [z.ZodIntersecti
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -82812,7 +83130,12 @@ declare const LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -83360,7 +83683,12 @@ declare const LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -84065,7 +84393,12 @@ declare const LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -84613,7 +84946,12 @@ declare const LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -84798,7 +85136,7 @@ declare const LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema
 type LaboratoriesExecutionsRequestLaboratoryExecutionCreateParams = z.infer<typeof LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema>;
 
 declare const LaboratoriesExecutionsResponseStreamingBuilderChunkSchema: z.ZodObject<{
-    container_index: z.ZodNumber;
+    agent_index: z.ZodNumber;
     continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     created: z.ZodNumber;
     error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -84978,7 +85316,7 @@ declare const LaboratoriesExecutionsResponseStreamingBuilderChunkSchema: z.ZodOb
 type LaboratoriesExecutionsResponseStreamingBuilderChunk = z.infer<typeof LaboratoriesExecutionsResponseStreamingBuilderChunkSchema>;
 
 declare const LaboratoriesExecutionsResponseStreamingEvaluationChunkSchema: z.ZodObject<{
-    container_index: z.ZodNumber;
+    agent_index: z.ZodNumber;
     continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     created: z.ZodNumber;
     error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -85160,7 +85498,7 @@ type LaboratoriesExecutionsResponseStreamingEvaluationChunk = z.infer<typeof Lab
 
 declare const LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkSchema: z.ZodObject<{
     builders: z.ZodArray<z.ZodObject<{
-        container_index: z.ZodNumber;
+        agent_index: z.ZodNumber;
         continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
         created: z.ZodNumber;
         error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -85343,7 +85681,7 @@ declare const LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkSch
         message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
     }, z.core.$strip>>>;
     evaluations: z.ZodArray<z.ZodObject<{
-        container_index: z.ZodNumber;
+        agent_index: z.ZodNumber;
         continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
         created: z.ZodNumber;
         error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -85553,7 +85891,7 @@ declare const LaboratoriesExecutionsResponseStreamingObjectSchema: z.ZodLiteral<
 type LaboratoriesExecutionsResponseStreamingObject = z.infer<typeof LaboratoriesExecutionsResponseStreamingObjectSchema>;
 
 declare const LaboratoriesExecutionsResponseUnaryBuilderSchema: z.ZodObject<{
-    container_index: z.ZodNumber;
+    agent_index: z.ZodNumber;
     continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     created: z.ZodNumber;
     error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -85732,7 +86070,7 @@ declare const LaboratoriesExecutionsResponseUnaryBuilderSchema: z.ZodObject<{
 type LaboratoriesExecutionsResponseUnaryBuilder = z.infer<typeof LaboratoriesExecutionsResponseUnaryBuilderSchema>;
 
 declare const LaboratoriesExecutionsResponseUnaryEvaluationSchema: z.ZodObject<{
-    container_index: z.ZodNumber;
+    agent_index: z.ZodNumber;
     continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     created: z.ZodNumber;
     error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -85913,7 +86251,7 @@ type LaboratoriesExecutionsResponseUnaryEvaluation = z.infer<typeof Laboratories
 
 declare const LaboratoriesExecutionsResponseUnaryLaboratoryExecutionSchema: z.ZodObject<{
     builders: z.ZodArray<z.ZodObject<{
-        container_index: z.ZodNumber;
+        agent_index: z.ZodNumber;
         continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
         created: z.ZodNumber;
         error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -86095,7 +86433,7 @@ declare const LaboratoriesExecutionsResponseUnaryLaboratoryExecutionSchema: z.Zo
         message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
     }, z.core.$strip>>>;
     evaluations: z.ZodArray<z.ZodObject<{
-        container_index: z.ZodNumber;
+        agent_index: z.ZodNumber;
         continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
         created: z.ZodNumber;
         error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -86866,7 +87204,12 @@ declare const SwarmInlineSwarmSchema: z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -87417,7 +87760,12 @@ declare const SwarmInlineSwarmSchema: z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -87970,7 +88318,12 @@ declare const SwarmInlineSwarmSchema: z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -88521,7 +88874,12 @@ declare const SwarmInlineSwarmSchema: z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -89081,7 +89439,12 @@ declare const SwarmInlineSwarmBaseOrRemoteSchema: z.ZodUnion<readonly [z.ZodObje
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -89629,7 +89992,12 @@ declare const SwarmInlineSwarmBaseOrRemoteSchema: z.ZodUnion<readonly [z.ZodObje
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -90214,7 +90582,12 @@ declare const SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema: z.ZodUnion<reado
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -90762,7 +91135,12 @@ declare const SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema: z.ZodUnion<reado
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -91386,7 +91764,12 @@ declare const SwarmRemoteSwarmSchema: z.ZodIntersection<z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -91937,7 +92320,12 @@ declare const SwarmRemoteSwarmSchema: z.ZodIntersection<z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -92490,7 +92878,12 @@ declare const SwarmRemoteSwarmSchema: z.ZodIntersection<z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -93041,7 +93434,12 @@ declare const SwarmRemoteSwarmSchema: z.ZodIntersection<z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -93603,7 +94001,12 @@ declare const SwarmRemoteSwarmBaseSchema: z.ZodIntersection<z.ZodObject<{
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -94151,7 +94554,12 @@ declare const SwarmRemoteSwarmBaseSchema: z.ZodIntersection<z.ZodObject<{
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -94728,7 +95136,12 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -95279,7 +95692,12 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -95832,7 +96250,12 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -96383,7 +96806,12 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -96945,7 +97373,12 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -97496,7 +97929,12 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -98049,7 +98487,12 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -98600,7 +99043,12 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -99160,7 +99608,12 @@ declare const SwarmSwarmBaseSchema: z.ZodUnion<readonly [z.ZodIntersection<z.Zod
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -99708,7 +100161,12 @@ declare const SwarmSwarmBaseSchema: z.ZodUnion<readonly [z.ZodIntersection<z.Zod
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -100279,7 +100737,12 @@ declare const SwarmSwarmBaseSchema: z.ZodUnion<readonly [z.ZodIntersection<z.Zod
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -100827,7 +101290,12 @@ declare const SwarmSwarmBaseSchema: z.ZodUnion<readonly [z.ZodIntersection<z.Zod
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -101428,7 +101896,12 @@ declare const VectorCompletionsCacheCacheVoteRequestSchema: z.ZodObject<{
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+        mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+            default: "default";
+            invention: "invention";
+            laboratory_builder: "laboratory_builder";
+            laboratory_evaluation: "laboratory_evaluation";
+        }>>>;
         output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
         top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         upstream: z.ZodLiteral<"mock">;
@@ -101976,7 +102449,12 @@ declare const VectorCompletionsCacheCacheVoteRequestSchema: z.ZodObject<{
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -102937,7 +103415,12 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsSchema: z.ZodO
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+            mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
             top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             upstream: z.ZodLiteral<"mock">;
@@ -103485,7 +103968,12 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsSchema: z.ZodO
             }, z.core.$strip>, z.ZodObject<{
                 error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
                 error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                invention: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+                mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+                    default: "default";
+                    invention: "invention";
+                    laboratory_builder: "laboratory_builder";
+                    laboratory_evaluation: "laboratory_evaluation";
+                }>>>;
                 output_mode: z.ZodUnion<readonly [z.ZodLiteral<"instruction">, z.ZodLiteral<"json_schema">, z.ZodLiteral<"tool_call">]>;
                 top_logprobs: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
                 upstream: z.ZodLiteral<"mock">;
@@ -105133,7 +105621,12 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchem
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
-            invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+            mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
             top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
             upstream: z$1.ZodLiteral<"mock">;
@@ -105681,7 +106174,12 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchem
             }, z$1.core.$strip>, z$1.ZodObject<{
                 error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
                 error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
-                invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+                mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
+                    default: "default";
+                    invention: "invention";
+                    laboratory_builder: "laboratory_builder";
+                    laboratory_evaluation: "laboratory_evaluation";
+                }>>>;
                 output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
                 top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
                 upstream: z$1.ZodLiteral<"mock">;
@@ -106463,7 +106961,12 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema: z
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
-            invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+            mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
+                default: "default";
+                invention: "invention";
+                laboratory_builder: "laboratory_builder";
+                laboratory_evaluation: "laboratory_evaluation";
+            }>>>;
             output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
             top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
             upstream: z$1.ZodLiteral<"mock">;
@@ -107011,7 +107514,12 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema: z
             }, z$1.core.$strip>, z$1.ZodObject<{
                 error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
                 error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
-                invention: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
+                mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
+                    default: "default";
+                    invention: "invention";
+                    laboratory_builder: "laboratory_builder";
+                    laboratory_evaluation: "laboratory_evaluation";
+                }>>>;
                 output_mode: z$1.ZodUnion<readonly [z$1.ZodLiteral<"instruction">, z$1.ZodLiteral<"json_schema">, z$1.ZodLiteral<"tool_call">]>;
                 top_logprobs: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
                 upstream: z$1.ZodLiteral<"mock">;
@@ -107115,4 +107623,4 @@ declare function merge<T extends {}>(a: T | null | undefined, b: T | null | unde
 declare function mergedString(a: string, b: string): [string, boolean];
 declare function mergedNumberArray(a: number[], b: number[]): [number[], boolean];
 
-export { type AgentAgent, type AgentAgentBase, AgentAgentBaseSchema, AgentAgentSchema, type AgentAgentWithFallbacks, AgentAgentWithFallbacksSchema, type AgentAgentWithFallbacksWithCount, AgentAgentWithFallbacksWithCountSchema, type AgentClaudeAgentSdkAgent, type AgentClaudeAgentSdkAgentBase, AgentClaudeAgentSdkAgentBaseSchema, AgentClaudeAgentSdkAgentSchema, type AgentClaudeAgentSdkContinuation, AgentClaudeAgentSdkContinuationSchema, type AgentClaudeAgentSdkEffort, AgentClaudeAgentSdkEffortSchema, type AgentClaudeAgentSdkOutputMode, AgentClaudeAgentSdkOutputModeSchema, type AgentClaudeAgentSdkUpstream, AgentClaudeAgentSdkUpstreamSchema, type AgentCompletionsMessageAssistantMessage, type AgentCompletionsMessageAssistantMessageExpression, AgentCompletionsMessageAssistantMessageExpressionSchema, AgentCompletionsMessageAssistantMessageSchema, type AgentCompletionsMessageAssistantToolCall, type AgentCompletionsMessageAssistantToolCallDelta, AgentCompletionsMessageAssistantToolCallDeltaSchema, type AgentCompletionsMessageAssistantToolCallExpression, AgentCompletionsMessageAssistantToolCallExpressionSchema, type AgentCompletionsMessageAssistantToolCallFunction, type AgentCompletionsMessageAssistantToolCallFunctionDelta, AgentCompletionsMessageAssistantToolCallFunctionDeltaSchema, type AgentCompletionsMessageAssistantToolCallFunctionExpression, AgentCompletionsMessageAssistantToolCallFunctionExpressionSchema, AgentCompletionsMessageAssistantToolCallFunctionSchema, AgentCompletionsMessageAssistantToolCallSchema, type AgentCompletionsMessageAssistantToolCallType, AgentCompletionsMessageAssistantToolCallTypeSchema, type AgentCompletionsMessageDeveloperMessage, type AgentCompletionsMessageDeveloperMessageExpression, AgentCompletionsMessageDeveloperMessageExpressionSchema, AgentCompletionsMessageDeveloperMessageSchema, type AgentCompletionsMessageFile, AgentCompletionsMessageFileSchema, type AgentCompletionsMessageImageUrl, type AgentCompletionsMessageImageUrlDetail, AgentCompletionsMessageImageUrlDetailSchema, AgentCompletionsMessageImageUrlSchema, type AgentCompletionsMessageInputAudio, AgentCompletionsMessageInputAudioSchema, type AgentCompletionsMessageMessage, type AgentCompletionsMessageMessageExpression, AgentCompletionsMessageMessageExpressionSchema, AgentCompletionsMessageMessageSchema, type AgentCompletionsMessageRichContent, type AgentCompletionsMessageRichContentExpression, AgentCompletionsMessageRichContentExpressionSchema, type AgentCompletionsMessageRichContentPart, type AgentCompletionsMessageRichContentPartExpression, AgentCompletionsMessageRichContentPartExpressionSchema, AgentCompletionsMessageRichContentPartSchema, AgentCompletionsMessageRichContentSchema, type AgentCompletionsMessageSimpleContent, type AgentCompletionsMessageSimpleContentExpression, AgentCompletionsMessageSimpleContentExpressionSchema, type AgentCompletionsMessageSimpleContentPart, type AgentCompletionsMessageSimpleContentPartExpression, AgentCompletionsMessageSimpleContentPartExpressionSchema, AgentCompletionsMessageSimpleContentPartSchema, AgentCompletionsMessageSimpleContentSchema, type AgentCompletionsMessageSystemMessage, type AgentCompletionsMessageSystemMessageExpression, AgentCompletionsMessageSystemMessageExpressionSchema, AgentCompletionsMessageSystemMessageSchema, type AgentCompletionsMessageToolMessage, type AgentCompletionsMessageToolMessageExpression, AgentCompletionsMessageToolMessageExpressionSchema, AgentCompletionsMessageToolMessageSchema, type AgentCompletionsMessageUserMessage, type AgentCompletionsMessageUserMessageExpression, AgentCompletionsMessageUserMessageExpressionSchema, AgentCompletionsMessageUserMessageSchema, type AgentCompletionsMessageVideoUrl, AgentCompletionsMessageVideoUrlSchema, type AgentCompletionsRequestAgentCompletionCreateParams, AgentCompletionsRequestAgentCompletionCreateParamsSchema, type AgentCompletionsRequestAgentCompletionCreateParamsStreaming, AgentCompletionsRequestAgentCompletionCreateParamsStreamingSchema, type AgentCompletionsRequestAgentCompletionCreateParamsUnary, AgentCompletionsRequestAgentCompletionCreateParamsUnarySchema, type AgentCompletionsRequestProvider, type AgentCompletionsRequestProviderDataCollection, AgentCompletionsRequestProviderDataCollectionSchema, type AgentCompletionsRequestProviderMaxPrice, AgentCompletionsRequestProviderMaxPriceSchema, AgentCompletionsRequestProviderSchema, type AgentCompletionsRequestProviderSort, AgentCompletionsRequestProviderSortSchema, type AgentCompletionsRequestResponseFormat, type AgentCompletionsRequestResponseFormatParam, AgentCompletionsRequestResponseFormatParamSchema, AgentCompletionsRequestResponseFormatSchema, type AgentCompletionsResponseAssistantRole, AgentCompletionsResponseAssistantRoleSchema, type AgentCompletionsResponseCompletionTokensDetails, AgentCompletionsResponseCompletionTokensDetailsSchema, type AgentCompletionsResponseCostDetails, AgentCompletionsResponseCostDetailsSchema, type AgentCompletionsResponseFinishReason, AgentCompletionsResponseFinishReasonSchema, type AgentCompletionsResponseLogprob, AgentCompletionsResponseLogprobSchema, type AgentCompletionsResponseLogprobs, AgentCompletionsResponseLogprobsSchema, type AgentCompletionsResponsePromptTokensDetails, AgentCompletionsResponsePromptTokensDetailsSchema, type AgentCompletionsResponseStreamingAgentCompletionChunk, AgentCompletionsResponseStreamingAgentCompletionChunkSchema, type AgentCompletionsResponseStreamingAssistantResponseChunk, AgentCompletionsResponseStreamingAssistantResponseChunkSchema, type AgentCompletionsResponseStreamingMessageChunk, AgentCompletionsResponseStreamingMessageChunkSchema, type AgentCompletionsResponseStreamingObject, AgentCompletionsResponseStreamingObjectSchema, type AgentCompletionsResponseToolResponse, AgentCompletionsResponseToolResponseSchema, type AgentCompletionsResponseToolRole, AgentCompletionsResponseToolRoleSchema, type AgentCompletionsResponseTopLogprob, AgentCompletionsResponseTopLogprobSchema, type AgentCompletionsResponseUnaryAgentCompletion, AgentCompletionsResponseUnaryAgentCompletionSchema, type AgentCompletionsResponseUnaryAssistantResponse, AgentCompletionsResponseUnaryAssistantResponseSchema, type AgentCompletionsResponseUnaryMessage, AgentCompletionsResponseUnaryMessageSchema, type AgentCompletionsResponseUnaryObject, AgentCompletionsResponseUnaryObjectSchema, type AgentCompletionsResponseUpstreamUsage, AgentCompletionsResponseUpstreamUsageSchema, type AgentCompletionsResponseUsage, AgentCompletionsResponseUsageSchema, type AgentContinuation, AgentContinuationSchema, type AgentGetAgentResponse, AgentGetAgentResponseSchema, type AgentInlineAgent, type AgentInlineAgentBase, AgentInlineAgentBaseSchema, type AgentInlineAgentBaseWithFallbacks, type AgentInlineAgentBaseWithFallbacksOrRemote, type AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional, AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema, AgentInlineAgentBaseWithFallbacksOrRemoteSchema, type AgentInlineAgentBaseWithFallbacksOrRemoteWithCount, AgentInlineAgentBaseWithFallbacksOrRemoteWithCountSchema, AgentInlineAgentBaseWithFallbacksSchema, AgentInlineAgentSchema, type AgentInlineAgentWithFallbacks, AgentInlineAgentWithFallbacksSchema, type AgentListAgentResponse, AgentListAgentResponseSchema, type AgentListAgentsRequest, AgentListAgentsRequestSchema, type AgentListAgentsSource, AgentListAgentsSourceSchema, type AgentMcpServer, AgentMcpServerSchema, type AgentMockAgent, type AgentMockAgentBase, AgentMockAgentBaseSchema, AgentMockAgentSchema, type AgentMockContinuation, AgentMockContinuationSchema, type AgentMockOutputMode, AgentMockOutputModeSchema, type AgentMockUpstream, AgentMockUpstreamSchema, type AgentOpenrouterAgent, type AgentOpenrouterAgentBase, AgentOpenrouterAgentBaseSchema, AgentOpenrouterAgentSchema, type AgentOpenrouterContinuation, AgentOpenrouterContinuationSchema, type AgentOpenrouterOutputMode, AgentOpenrouterOutputModeSchema, type AgentOpenrouterProvider, type AgentOpenrouterProviderQuantization, AgentOpenrouterProviderQuantizationSchema, AgentOpenrouterProviderSchema, type AgentOpenrouterReasoning, type AgentOpenrouterReasoningEffort, AgentOpenrouterReasoningEffortSchema, AgentOpenrouterReasoningSchema, type AgentOpenrouterReasoningSummaryVerbosity, AgentOpenrouterReasoningSummaryVerbositySchema, type AgentOpenrouterStop, AgentOpenrouterStopSchema, type AgentOpenrouterUpstream, AgentOpenrouterUpstreamSchema, type AgentOpenrouterVerbosity, AgentOpenrouterVerbositySchema, type AgentOutputMode, AgentOutputModeSchema, type AgentRemoteAgent, type AgentRemoteAgentBase, AgentRemoteAgentBaseSchema, type AgentRemoteAgentBaseWithFallbacks, AgentRemoteAgentBaseWithFallbacksSchema, AgentRemoteAgentSchema, type AgentRemoteAgentWithFallbacks, AgentRemoteAgentWithFallbacksSchema, type AgentUpstream, AgentUpstreamSchema, type AgentUsageAgentResponse, AgentUsageAgentResponseSchema, type AuthApiKeyWithMetadata, AuthApiKeyWithMetadataSchema, type AuthCreateApiKeyRequest, AuthCreateApiKeyRequestSchema, type AuthCreateOpenRouterByokApiKeyRequest, AuthCreateOpenRouterByokApiKeyRequestSchema, type AuthDisableApiKeyRequest, AuthDisableApiKeyRequestSchema, type AuthGetCreditsResponse, AuthGetCreditsResponseSchema, type AuthGetOpenRouterByokApiKeyResponse, AuthGetOpenRouterByokApiKeyResponseSchema, type AuthListApiKeyItem, AuthListApiKeyItemSchema, type AuthListApiKeyResponse, AuthListApiKeyResponseSchema, type ConfigAgentsConfig, ConfigAgentsConfigSchema, type ConfigApiConfig, ConfigApiConfigSchema, type ConfigApiHeadersConfig, ConfigApiHeadersConfigSchema, type ConfigApiLocalConfig, ConfigApiLocalConfigSchema, type ConfigApiMode, ConfigApiModeSchema, type ConfigApiRemoteConfig, ConfigApiRemoteConfigSchema, type ConfigConfig, ConfigConfigSchema, type ConfigFavorite, ConfigFavoriteSchema, type ConfigFunctionsConfig, ConfigFunctionsConfigSchema, type ConfigFunctionsInventionsConfig, ConfigFunctionsInventionsConfigSchema, type ConfigFunctionsProfilesConfig, ConfigFunctionsProfilesConfigSchema, type ConfigFunctionsProfilesPairsConfig, ConfigFunctionsProfilesPairsConfigSchema, type ConfigPairFavorite, ConfigPairFavoriteSchema, type ConfigSwarmsConfig, ConfigSwarmsConfigSchema, type ConfigViewerConfig, ConfigViewerConfigSchema, type ConfigViewerLocalConfig, ConfigViewerLocalConfigSchema, type ConfigViewerMode, ConfigViewerModeSchema, type ConfigViewerSecretSignaturePair, ConfigViewerSecretSignaturePairSchema, type ErrorErrorCreateParams, ErrorErrorCreateParamsSchema, type ErrorErrorCreateParamsStreaming, ErrorErrorCreateParamsStreamingSchema, type ErrorErrorCreateParamsUnary, ErrorErrorCreateParamsUnarySchema, type ErrorErrorResponse, ErrorErrorResponseSchema, type ErrorResponseError, ErrorResponseErrorSchema, type FunctionsAlphaInlineFunction, FunctionsAlphaInlineFunctionSchema, type FunctionsAlphaRemoteFunction, FunctionsAlphaRemoteFunctionSchema, type FunctionsAlphaScalarBranchTaskExpression, FunctionsAlphaScalarBranchTaskExpressionSchema, type FunctionsAlphaScalarInlineFunction, FunctionsAlphaScalarInlineFunctionSchema, type FunctionsAlphaScalarLeafTaskExpression, FunctionsAlphaScalarLeafTaskExpressionSchema, type FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression, FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionSchema, type FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpression, FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpression, FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarRemoteFunction, FunctionsAlphaScalarRemoteFunctionSchema, type FunctionsAlphaScalarScalarFunctionTaskExpression, FunctionsAlphaScalarScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarVectorCompletionTaskExpression, FunctionsAlphaScalarVectorCompletionTaskExpressionSchema, type FunctionsAlphaVectorBranchTaskExpression, FunctionsAlphaVectorBranchTaskExpressionSchema, type FunctionsAlphaVectorExpressionVectorFunctionInputSchema, FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema, type FunctionsAlphaVectorExpressionVectorFunctionInputValue, type FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression, FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema, FunctionsAlphaVectorExpressionVectorFunctionInputValueSchema, type FunctionsAlphaVectorInlineFunction, FunctionsAlphaVectorInlineFunctionSchema, type FunctionsAlphaVectorLeafTaskExpression, FunctionsAlphaVectorLeafTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression, FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpression, FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression, FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema, type FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpression, FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpression, FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema, type FunctionsAlphaVectorRemoteFunction, FunctionsAlphaVectorRemoteFunctionSchema, type FunctionsAlphaVectorScalarFunctionTaskExpression, FunctionsAlphaVectorScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorVectorCompletionTaskExpression, FunctionsAlphaVectorVectorCompletionTaskExpressionSchema, type FunctionsAlphaVectorVectorFunctionTaskExpression, FunctionsAlphaVectorVectorFunctionTaskExpressionSchema, type FunctionsCheckScalarFieldsValidation, FunctionsCheckScalarFieldsValidationSchema, type FunctionsCheckVectorFieldsValidation, FunctionsCheckVectorFieldsValidationSchema, type FunctionsCompiledTask, FunctionsCompiledTaskSchema, type FunctionsExecutionsRequestFunctionExecutionCreateParams, FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema, type FunctionsExecutionsRequestReasoning, FunctionsExecutionsRequestReasoningSchema, type FunctionsExecutionsRequestStrategy, FunctionsExecutionsRequestStrategySchema, type FunctionsExecutionsResponseOutput, FunctionsExecutionsResponseOutputSchema, type FunctionsExecutionsResponseStreamingFunctionExecutionChunk, FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema, type FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk, FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema, type FunctionsExecutionsResponseStreamingObject, FunctionsExecutionsResponseStreamingObjectSchema, type FunctionsExecutionsResponseStreamingReasoningSummaryChunk, FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema, type FunctionsExecutionsResponseStreamingTaskChunk, FunctionsExecutionsResponseStreamingTaskChunkSchema, type FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk, FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema, type FunctionsExecutionsResponseUnaryFunctionExecution, FunctionsExecutionsResponseUnaryFunctionExecutionSchema, type FunctionsExecutionsResponseUnaryFunctionExecutionTask, FunctionsExecutionsResponseUnaryFunctionExecutionTaskSchema, type FunctionsExecutionsResponseUnaryObject, FunctionsExecutionsResponseUnaryObjectSchema, type FunctionsExecutionsResponseUnaryReasoningSummary, FunctionsExecutionsResponseUnaryReasoningSummarySchema, type FunctionsExecutionsResponseUnaryTask, FunctionsExecutionsResponseUnaryTaskSchema, type FunctionsExecutionsResponseUnaryVectorCompletionTask, FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema, type FunctionsExecutionsRetryToken, FunctionsExecutionsRetryTokenSchema, type FunctionsExpressionAnyOfInputSchema, FunctionsExpressionAnyOfInputSchemaSchema, type FunctionsExpressionArrayInputSchema, FunctionsExpressionArrayInputSchemaSchema, type FunctionsExpressionArrayInputSchemaType, FunctionsExpressionArrayInputSchemaTypeSchema, type FunctionsExpressionAudioInputSchema, FunctionsExpressionAudioInputSchemaSchema, type FunctionsExpressionAudioInputSchemaType, FunctionsExpressionAudioInputSchemaTypeSchema, type FunctionsExpressionBooleanInputSchema, FunctionsExpressionBooleanInputSchemaSchema, type FunctionsExpressionBooleanInputSchemaType, FunctionsExpressionBooleanInputSchemaTypeSchema, type FunctionsExpressionExpression, FunctionsExpressionExpressionSchema, type FunctionsExpressionFileInputSchema, FunctionsExpressionFileInputSchemaSchema, type FunctionsExpressionFileInputSchemaType, FunctionsExpressionFileInputSchemaTypeSchema, type FunctionsExpressionImageInputSchema, FunctionsExpressionImageInputSchemaSchema, type FunctionsExpressionImageInputSchemaType, FunctionsExpressionImageInputSchemaTypeSchema, type FunctionsExpressionInputSchema, FunctionsExpressionInputSchemaSchema, type FunctionsExpressionInputValue, type FunctionsExpressionInputValueExpression, type FunctionsExpressionInputValueExpressionObject, FunctionsExpressionInputValueExpressionSchema, type FunctionsExpressionInputValueObject, FunctionsExpressionInputValueSchema, type FunctionsExpressionIntegerInputSchema, FunctionsExpressionIntegerInputSchemaSchema, type FunctionsExpressionIntegerInputSchemaType, FunctionsExpressionIntegerInputSchemaTypeSchema, type FunctionsExpressionNumberInputSchema, FunctionsExpressionNumberInputSchemaSchema, type FunctionsExpressionNumberInputSchemaType, FunctionsExpressionNumberInputSchemaTypeSchema, type FunctionsExpressionObjectInputSchema, FunctionsExpressionObjectInputSchemaSchema, type FunctionsExpressionObjectInputSchemaType, FunctionsExpressionObjectInputSchemaTypeSchema, type FunctionsExpressionParams, FunctionsExpressionParamsSchema, type FunctionsExpressionSpecial, FunctionsExpressionSpecialSchema, type FunctionsExpressionStringInputSchema, FunctionsExpressionStringInputSchemaSchema, type FunctionsExpressionStringInputSchemaType, FunctionsExpressionStringInputSchemaTypeSchema, type FunctionsExpressionTaskOutput, FunctionsExpressionTaskOutputSchema, type FunctionsExpressionVideoInputSchema, FunctionsExpressionVideoInputSchemaSchema, type FunctionsExpressionVideoInputSchemaType, FunctionsExpressionVideoInputSchemaTypeSchema, type FunctionsFullFunction, FunctionsFullFunctionSchema, type FunctionsFullInlineFunction, type FunctionsFullInlineFunctionOrRemoteCommitOptional, FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema, FunctionsFullInlineFunctionSchema, type FunctionsFullRemoteFunction, FunctionsFullRemoteFunctionSchema, type FunctionsFunction, FunctionsFunctionSchema, type FunctionsFunctionType, FunctionsFunctionTypeSchema, type FunctionsGetFunctionProfilePairResponse, FunctionsGetFunctionProfilePairResponseSchema, type FunctionsGetFunctionProfilePairUsageRequest, FunctionsGetFunctionProfilePairUsageRequestSchema, type FunctionsGetFunctionResponse, FunctionsGetFunctionResponseSchema, type FunctionsInlineFunction, FunctionsInlineFunctionSchema, type FunctionsInlineProfile, type FunctionsInlineProfileOrRemoteCommitOptional, FunctionsInlineProfileOrRemoteCommitOptionalSchema, FunctionsInlineProfileSchema, type FunctionsInlineTasksProfile, FunctionsInlineTasksProfileSchema, type FunctionsInventionsDescriptionObject, FunctionsInventionsDescriptionObjectSchema, type FunctionsInventionsEssayObject, FunctionsInventionsEssayObjectSchema, type FunctionsInventionsEssayTasksObject, FunctionsInventionsEssayTasksObjectSchema, type FunctionsInventionsIndexObject, FunctionsInventionsIndexObjectSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreaming, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreamingSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnary, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnarySchema, type FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema, type FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema, type FunctionsInventionsRecursiveResponseStreamingObject, FunctionsInventionsRecursiveResponseStreamingObjectSchema, type FunctionsInventionsRecursiveResponseUnaryFunctionInvention, type FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive, FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiveSchema, FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema, type FunctionsInventionsRecursiveResponseUnaryObject, FunctionsInventionsRecursiveResponseUnaryObjectSchema, type FunctionsInventionsRequestFunctionInventionCreateParams, FunctionsInventionsRequestFunctionInventionCreateParamsSchema, type FunctionsInventionsRequestFunctionInventionCreateParamsStreaming, FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSchema, type FunctionsInventionsRequestFunctionInventionCreateParamsUnary, FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema, type FunctionsInventionsResponseStreamingAgentCompletionChunk, FunctionsInventionsResponseStreamingAgentCompletionChunkSchema, type FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseStreamingFunctionInventionChunkSchema, type FunctionsInventionsResponseStreamingObject, FunctionsInventionsResponseStreamingObjectSchema, type FunctionsInventionsResponseUnaryAgentCompletion, FunctionsInventionsResponseUnaryAgentCompletionSchema, type FunctionsInventionsResponseUnaryFunctionInvention, FunctionsInventionsResponseUnaryFunctionInventionSchema, type FunctionsInventionsResponseUnaryObject, FunctionsInventionsResponseUnaryObjectSchema, type FunctionsInventionsStateAlphaScalarBranchState, FunctionsInventionsStateAlphaScalarBranchStateSchema, type FunctionsInventionsStateAlphaScalarLeafState, FunctionsInventionsStateAlphaScalarLeafStateSchema, type FunctionsInventionsStateAlphaScalarState, FunctionsInventionsStateAlphaScalarStateSchema, type FunctionsInventionsStateAlphaVectorBranchState, FunctionsInventionsStateAlphaVectorBranchStateSchema, type FunctionsInventionsStateAlphaVectorLeafState, FunctionsInventionsStateAlphaVectorLeafStateSchema, type FunctionsInventionsStateAlphaVectorState, FunctionsInventionsStateAlphaVectorStateSchema, type FunctionsInventionsStateInputSchema, FunctionsInventionsStateInputSchemaSchema, type FunctionsInventionsStateParams, FunctionsInventionsStateParamsSchema, type FunctionsInventionsStateParamsState, type FunctionsInventionsStateParamsStateOrRemoteCommitOptional, FunctionsInventionsStateParamsStateOrRemoteCommitOptionalSchema, FunctionsInventionsStateParamsStateSchema, type FunctionsInventionsStateState, FunctionsInventionsStateStateSchema, type FunctionsInventionsTasksLengthObject, FunctionsInventionsTasksLengthObjectSchema, type FunctionsListFunctionProfilePairItem, FunctionsListFunctionProfilePairItemSchema, type FunctionsListFunctionProfilePairResponse, FunctionsListFunctionProfilePairResponseSchema, type FunctionsListFunctionProfilePairsRequest, FunctionsListFunctionProfilePairsRequestSchema, type FunctionsListFunctionProfilePairsSource, FunctionsListFunctionProfilePairsSourceSchema, type FunctionsListFunctionResponse, FunctionsListFunctionResponseSchema, type FunctionsListFunctionsRequest, FunctionsListFunctionsRequestSchema, type FunctionsListFunctionsSource, FunctionsListFunctionsSourceSchema, type FunctionsPlaceholderScalarFunctionTask, type FunctionsPlaceholderScalarFunctionTaskExpression, FunctionsPlaceholderScalarFunctionTaskExpressionSchema, FunctionsPlaceholderScalarFunctionTaskSchema, type FunctionsPlaceholderVectorFunctionTask, type FunctionsPlaceholderVectorFunctionTaskExpression, FunctionsPlaceholderVectorFunctionTaskExpressionSchema, FunctionsPlaceholderVectorFunctionTaskSchema, type FunctionsProfile, FunctionsProfileSchema, type FunctionsProfilesComputationsRequestDatasetItem, FunctionsProfilesComputationsRequestDatasetItemSchema, type FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParams, FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParamsSchema, type FunctionsProfilesComputationsRequestTarget, FunctionsProfilesComputationsRequestTargetSchema, type FunctionsProfilesComputationsResponseFittingStats, FunctionsProfilesComputationsResponseFittingStatsSchema, type FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk, FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema, type FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema, type FunctionsProfilesComputationsResponseStreamingObject, FunctionsProfilesComputationsResponseStreamingObjectSchema, type FunctionsProfilesComputationsResponseUnaryFunctionExecution, FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema, type FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation, FunctionsProfilesComputationsResponseUnaryFunctionProfileComputationSchema, type FunctionsProfilesComputationsResponseUnaryObject, FunctionsProfilesComputationsResponseUnaryObjectSchema, type FunctionsProfilesComputationsRetryToken, FunctionsProfilesComputationsRetryTokenSchema, type FunctionsProfilesGetProfileResponse, FunctionsProfilesGetProfileResponseSchema, type FunctionsProfilesListProfileResponse, FunctionsProfilesListProfileResponseSchema, type FunctionsProfilesListProfilesRequest, FunctionsProfilesListProfilesRequestSchema, type FunctionsProfilesListProfilesSource, FunctionsProfilesListProfilesSourceSchema, type FunctionsProfilesUsageProfileResponse, FunctionsProfilesUsageProfileResponseSchema, type FunctionsRemoteFunction, FunctionsRemoteFunctionSchema, type FunctionsRemoteProfile, FunctionsRemoteProfileSchema, type FunctionsRemoteTasksProfile, FunctionsRemoteTasksProfileSchema, type FunctionsScalarFunctionTask, type FunctionsScalarFunctionTaskExpression, FunctionsScalarFunctionTaskExpressionSchema, FunctionsScalarFunctionTaskSchema, type FunctionsTask, type FunctionsTaskExpression, FunctionsTaskExpressionSchema, type FunctionsTaskProfile, FunctionsTaskProfileSchema, FunctionsTaskSchema, type FunctionsUsageFunctionProfilePairResponse, FunctionsUsageFunctionProfilePairResponseSchema, type FunctionsUsageFunctionResponse, FunctionsUsageFunctionResponseSchema, type FunctionsVectorCompletionTask, type FunctionsVectorCompletionTaskExpression, FunctionsVectorCompletionTaskExpressionSchema, FunctionsVectorCompletionTaskSchema, type FunctionsVectorFunctionTask, type FunctionsVectorFunctionTaskExpression, FunctionsVectorFunctionTaskExpressionSchema, FunctionsVectorFunctionTaskSchema, type LaboratoriesExecutionsRequestLaboratoryExecutionCreateParams, LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema, type LaboratoriesExecutionsResponseStreamingBuilderChunk, LaboratoriesExecutionsResponseStreamingBuilderChunkSchema, type LaboratoriesExecutionsResponseStreamingEvaluationChunk, LaboratoriesExecutionsResponseStreamingEvaluationChunkSchema, type LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk, LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkSchema, type LaboratoriesExecutionsResponseStreamingObject, LaboratoriesExecutionsResponseStreamingObjectSchema, type LaboratoriesExecutionsResponseUnaryBuilder, LaboratoriesExecutionsResponseUnaryBuilderSchema, type LaboratoriesExecutionsResponseUnaryEvaluation, LaboratoriesExecutionsResponseUnaryEvaluationSchema, type LaboratoriesExecutionsResponseUnaryLaboratoryExecution, LaboratoriesExecutionsResponseUnaryLaboratoryExecutionSchema, type LaboratoriesExecutionsResponseUnaryObject, LaboratoriesExecutionsResponseUnaryObjectSchema, ObjectiveAI, ObjectiveAIFetchError, type ObjectiveAIOptions, ObjectiveAIOptionsSchema, type PrefixedUuid, PrefixedUuidSchema, type Remote, type RemotePath, type RemotePathCommitOptional, RemotePathCommitOptionalSchema, RemotePathSchema, RemoteSchema, type RequestOptions, RequestOptionsSchema, Stream, type SwarmGetSwarmResponse, SwarmGetSwarmResponseSchema, type SwarmInlineSwarm, type SwarmInlineSwarmBase, type SwarmInlineSwarmBaseOrRemote, type SwarmInlineSwarmBaseOrRemoteCommitOptional, SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema, SwarmInlineSwarmBaseOrRemoteSchema, SwarmInlineSwarmBaseSchema, SwarmInlineSwarmSchema, type SwarmListSwarmResponse, SwarmListSwarmResponseSchema, type SwarmListSwarmsRequest, SwarmListSwarmsRequestSchema, type SwarmListSwarmsSource, SwarmListSwarmsSourceSchema, type SwarmRemoteSwarm, type SwarmRemoteSwarmBase, SwarmRemoteSwarmBaseSchema, SwarmRemoteSwarmSchema, type SwarmSwarm, type SwarmSwarmBase, SwarmSwarmBaseSchema, SwarmSwarmSchema, type SwarmUsageSwarmResponse, SwarmUsageSwarmResponseSchema, type VectorCompletionsCacheCacheVote, type VectorCompletionsCacheCacheVoteRequest, VectorCompletionsCacheCacheVoteRequestSchema, VectorCompletionsCacheCacheVoteSchema, type VectorCompletionsCacheCompletionVotes, VectorCompletionsCacheCompletionVotesSchema, type VectorCompletionsCacheGetCompletionVotesRequest, VectorCompletionsCacheGetCompletionVotesRequestSchema, type VectorCompletionsRequestVectorCompletionCreateParams, VectorCompletionsRequestVectorCompletionCreateParamsSchema, type VectorCompletionsRequestVectorCompletionCreateParamsStreaming, VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchema, type VectorCompletionsRequestVectorCompletionCreateParamsUnary, VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema, type VectorCompletionsResponseStreamingAgentCompletionChunk, VectorCompletionsResponseStreamingAgentCompletionChunkSchema, type VectorCompletionsResponseStreamingObject, VectorCompletionsResponseStreamingObjectSchema, type VectorCompletionsResponseStreamingVectorCompletionChunk, VectorCompletionsResponseStreamingVectorCompletionChunkSchema, type VectorCompletionsResponseUnaryAgentCompletion, VectorCompletionsResponseUnaryAgentCompletionSchema, type VectorCompletionsResponseUnaryObject, VectorCompletionsResponseUnaryObjectSchema, type VectorCompletionsResponseUnaryVectorCompletion, VectorCompletionsResponseUnaryVectorCompletionSchema, type VectorCompletionsResponseVote, VectorCompletionsResponseVoteSchema, type VectorCompletionsVectorResponses, VectorCompletionsVectorResponsesSchema, type Weights, type WeightsEntry, WeightsEntrySchema, WeightsSchema, agentCompletionsCreateAgentCompletion, agentCompletionsMessageAssistantToolCallDeltaMerged, agentCompletionsMessageAssistantToolCallDeltaMergedList, agentCompletionsMessageAssistantToolCallFunctionDeltaMerged, agentCompletionsMessageRichContentMerged, agentCompletionsResponseCompletionTokensDetailsMerged, agentCompletionsResponseCostDetailsMerged, agentCompletionsResponseLogprobsMerged, agentCompletionsResponsePromptTokensDetailsMerged, agentCompletionsResponseStreamingAgentCompletionChunkMerged, agentCompletionsResponseStreamingAssistantResponseChunkMerged, agentCompletionsResponseStreamingMessageChunkMerged, agentCompletionsResponseStreamingMessageChunkMergedList, agentCompletionsResponseUpstreamUsageMerged, agentCompletionsResponseUsageMerged, agentGetAgent, agentGetAgentUsage, agentListAgents, authCreateApiKey, authCreateOpenrouterByokApiKey, authDeleteOpenrouterByokApiKey, authDisableApiKey, authGetCredits, authGetOpenrouterByokApiKey, authListApiKeys, errorCreateError, functionsExecutionsCreateFunctionExecution, functionsExecutionsResponseStreamingFunctionExecutionChunkMerged, functionsExecutionsResponseStreamingReasoningSummaryChunkMerged, functionsExecutionsResponseStreamingTaskChunkMerged, functionsExecutionsResponseStreamingTaskChunkMergedList, functionsExecutionsResponseStreamingVectorCompletionTaskChunkMerged, functionsGetFunction, functionsGetFunctionProfilePairUsage, functionsGetFunctionUsage, functionsInventionsCreateFunctionInvention, functionsInventionsRecursiveCreateFunctionInventionRecursive, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMerged, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMergedList, functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMergedList, functionsInventionsResponseStreamingFunctionInventionChunkMerged, functionsListFunctionProfilePairs, functionsListFunctions, functionsProfilesComputationsComputeProfile, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMerged, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMergedList, functionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged, functionsProfilesGetProfile, functionsProfilesGetProfileUsage, functionsProfilesListProfiles, isResponseError, merge, mergedNumberArray, mergedString, numberIsEmpty, swarmGetSwarm, swarmGetSwarmUsage, swarmListSwarms, vectorCompletionsCacheGetCacheVote, vectorCompletionsCacheGetCompletionVotes, vectorCompletionsCreateVectorCompletion, vectorCompletionsResponseStreamingAgentCompletionChunkMerged, vectorCompletionsResponseStreamingAgentCompletionChunkMergedList, vectorCompletionsResponseStreamingVectorCompletionChunkMerged, vectorCompletionsResponseVoteMergedList, wasmAgentCompletionsMessagePromptId, wasmAgentCompletionsResponseStreamingAgentCompletionChunkMerged, wasmAgentCompletionsResponseStreamingAgentCompletionChunkNormalized, wasmAgentCompletionsResponseStreamingAgentCompletionChunkToUnary, wasmAgentCompletionsResponseStreamingGenerateAgentCompletionChunk, wasmAgentCompletionsResponseStreamingNormalizeAgentCompletionForTests, wasmAgentValidateAgent, wasmFunctionsAlphaCheckBranchScalarFunction, wasmFunctionsAlphaCheckBranchVectorFunction, wasmFunctionsAlphaCheckLeafScalarFunction, wasmFunctionsAlphaCheckLeafVectorFunction, wasmFunctionsCheckCheckScalarFields, wasmFunctionsCheckCheckVectorFields, wasmFunctionsCompileFunctionInputMerge, wasmFunctionsCompileFunctionInputSplit, wasmFunctionsCompileFunctionOutputLength, wasmFunctionsCompileFunctionTasks, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkMerged, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkNormalized, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkToUnary, wasmFunctionsExecutionsResponseStreamingGenerateFunctionExecutionChunk, wasmFunctionsExecutionsResponseStreamingNormalizeFunctionExecutionForTests, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkNormalized, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkToUnary, wasmFunctionsInventionsRecursiveResponseStreamingGenerateFunctionInventionRecursiveChunk, wasmFunctionsInventionsRecursiveResponseStreamingNormalizeFunctionInventionRecursiveForTests, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkMerged, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkNormalized, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkToUnary, wasmFunctionsInventionsResponseStreamingGenerateFunctionInventionChunk, wasmFunctionsInventionsResponseStreamingNormalizeFunctionInventionForTests, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkNormalized, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkToUnary, wasmFunctionsProfilesComputationsResponseStreamingGenerateFunctionProfileComputationChunk, wasmFunctionsProfilesComputationsResponseStreamingNormalizeFunctionProfileComputationForTests, wasmFunctionsValidateFunctionInput, wasmSwarmValidateSwarm, wasmVectorCompletionsResponseStreamingGenerateVectorCompletionChunk, wasmVectorCompletionsResponseStreamingNormalizeVectorCompletionForTests, wasmVectorCompletionsResponseStreamingVectorCompletionChunkMerged, wasmVectorCompletionsResponseStreamingVectorCompletionChunkNormalized, wasmVectorCompletionsResponseStreamingVectorCompletionChunkToUnary, wasmVectorCompletionsVectorResponseId };
+export { type AgentAgent, type AgentAgentBase, AgentAgentBaseSchema, AgentAgentSchema, type AgentAgentWithFallbacks, AgentAgentWithFallbacksSchema, type AgentAgentWithFallbacksWithCount, AgentAgentWithFallbacksWithCountSchema, type AgentClaudeAgentSdkAgent, type AgentClaudeAgentSdkAgentBase, AgentClaudeAgentSdkAgentBaseSchema, AgentClaudeAgentSdkAgentSchema, type AgentClaudeAgentSdkContinuation, AgentClaudeAgentSdkContinuationSchema, type AgentClaudeAgentSdkEffort, AgentClaudeAgentSdkEffortSchema, type AgentClaudeAgentSdkOutputMode, AgentClaudeAgentSdkOutputModeSchema, type AgentClaudeAgentSdkUpstream, AgentClaudeAgentSdkUpstreamSchema, type AgentCompletionsMessageAssistantMessage, type AgentCompletionsMessageAssistantMessageExpression, AgentCompletionsMessageAssistantMessageExpressionSchema, AgentCompletionsMessageAssistantMessageSchema, type AgentCompletionsMessageAssistantToolCall, type AgentCompletionsMessageAssistantToolCallDelta, AgentCompletionsMessageAssistantToolCallDeltaSchema, type AgentCompletionsMessageAssistantToolCallExpression, AgentCompletionsMessageAssistantToolCallExpressionSchema, type AgentCompletionsMessageAssistantToolCallFunction, type AgentCompletionsMessageAssistantToolCallFunctionDelta, AgentCompletionsMessageAssistantToolCallFunctionDeltaSchema, type AgentCompletionsMessageAssistantToolCallFunctionExpression, AgentCompletionsMessageAssistantToolCallFunctionExpressionSchema, AgentCompletionsMessageAssistantToolCallFunctionSchema, AgentCompletionsMessageAssistantToolCallSchema, type AgentCompletionsMessageAssistantToolCallType, AgentCompletionsMessageAssistantToolCallTypeSchema, type AgentCompletionsMessageDeveloperMessage, type AgentCompletionsMessageDeveloperMessageExpression, AgentCompletionsMessageDeveloperMessageExpressionSchema, AgentCompletionsMessageDeveloperMessageSchema, type AgentCompletionsMessageFile, AgentCompletionsMessageFileSchema, type AgentCompletionsMessageImageUrl, type AgentCompletionsMessageImageUrlDetail, AgentCompletionsMessageImageUrlDetailSchema, AgentCompletionsMessageImageUrlSchema, type AgentCompletionsMessageInputAudio, AgentCompletionsMessageInputAudioSchema, type AgentCompletionsMessageMessage, type AgentCompletionsMessageMessageExpression, AgentCompletionsMessageMessageExpressionSchema, AgentCompletionsMessageMessageSchema, type AgentCompletionsMessageRichContent, type AgentCompletionsMessageRichContentExpression, AgentCompletionsMessageRichContentExpressionSchema, type AgentCompletionsMessageRichContentPart, type AgentCompletionsMessageRichContentPartExpression, AgentCompletionsMessageRichContentPartExpressionSchema, AgentCompletionsMessageRichContentPartSchema, AgentCompletionsMessageRichContentSchema, type AgentCompletionsMessageSimpleContent, type AgentCompletionsMessageSimpleContentExpression, AgentCompletionsMessageSimpleContentExpressionSchema, type AgentCompletionsMessageSimpleContentPart, type AgentCompletionsMessageSimpleContentPartExpression, AgentCompletionsMessageSimpleContentPartExpressionSchema, AgentCompletionsMessageSimpleContentPartSchema, AgentCompletionsMessageSimpleContentSchema, type AgentCompletionsMessageSystemMessage, type AgentCompletionsMessageSystemMessageExpression, AgentCompletionsMessageSystemMessageExpressionSchema, AgentCompletionsMessageSystemMessageSchema, type AgentCompletionsMessageToolMessage, type AgentCompletionsMessageToolMessageExpression, AgentCompletionsMessageToolMessageExpressionSchema, AgentCompletionsMessageToolMessageSchema, type AgentCompletionsMessageUserMessage, type AgentCompletionsMessageUserMessageExpression, AgentCompletionsMessageUserMessageExpressionSchema, AgentCompletionsMessageUserMessageSchema, type AgentCompletionsMessageVideoUrl, AgentCompletionsMessageVideoUrlSchema, type AgentCompletionsRequestAgentCompletionCreateParams, AgentCompletionsRequestAgentCompletionCreateParamsSchema, type AgentCompletionsRequestAgentCompletionCreateParamsStreaming, AgentCompletionsRequestAgentCompletionCreateParamsStreamingSchema, type AgentCompletionsRequestAgentCompletionCreateParamsUnary, AgentCompletionsRequestAgentCompletionCreateParamsUnarySchema, type AgentCompletionsRequestProvider, type AgentCompletionsRequestProviderDataCollection, AgentCompletionsRequestProviderDataCollectionSchema, type AgentCompletionsRequestProviderMaxPrice, AgentCompletionsRequestProviderMaxPriceSchema, AgentCompletionsRequestProviderSchema, type AgentCompletionsRequestProviderSort, AgentCompletionsRequestProviderSortSchema, type AgentCompletionsRequestResponseFormat, type AgentCompletionsRequestResponseFormatParam, AgentCompletionsRequestResponseFormatParamSchema, AgentCompletionsRequestResponseFormatSchema, type AgentCompletionsResponseAssistantRole, AgentCompletionsResponseAssistantRoleSchema, type AgentCompletionsResponseCompletionTokensDetails, AgentCompletionsResponseCompletionTokensDetailsSchema, type AgentCompletionsResponseCostDetails, AgentCompletionsResponseCostDetailsSchema, type AgentCompletionsResponseFinishReason, AgentCompletionsResponseFinishReasonSchema, type AgentCompletionsResponseLogprob, AgentCompletionsResponseLogprobSchema, type AgentCompletionsResponseLogprobs, AgentCompletionsResponseLogprobsSchema, type AgentCompletionsResponsePromptTokensDetails, AgentCompletionsResponsePromptTokensDetailsSchema, type AgentCompletionsResponseStreamingAgentCompletionChunk, AgentCompletionsResponseStreamingAgentCompletionChunkSchema, type AgentCompletionsResponseStreamingAssistantResponseChunk, AgentCompletionsResponseStreamingAssistantResponseChunkSchema, type AgentCompletionsResponseStreamingMessageChunk, AgentCompletionsResponseStreamingMessageChunkSchema, type AgentCompletionsResponseStreamingObject, AgentCompletionsResponseStreamingObjectSchema, type AgentCompletionsResponseToolResponse, AgentCompletionsResponseToolResponseSchema, type AgentCompletionsResponseToolRole, AgentCompletionsResponseToolRoleSchema, type AgentCompletionsResponseTopLogprob, AgentCompletionsResponseTopLogprobSchema, type AgentCompletionsResponseUnaryAgentCompletion, AgentCompletionsResponseUnaryAgentCompletionSchema, type AgentCompletionsResponseUnaryAssistantResponse, AgentCompletionsResponseUnaryAssistantResponseSchema, type AgentCompletionsResponseUnaryMessage, AgentCompletionsResponseUnaryMessageSchema, type AgentCompletionsResponseUnaryObject, AgentCompletionsResponseUnaryObjectSchema, type AgentCompletionsResponseUpstreamUsage, AgentCompletionsResponseUpstreamUsageSchema, type AgentCompletionsResponseUsage, AgentCompletionsResponseUsageSchema, type AgentContinuation, AgentContinuationSchema, type AgentGetAgentResponse, AgentGetAgentResponseSchema, type AgentInlineAgent, type AgentInlineAgentBase, AgentInlineAgentBaseSchema, type AgentInlineAgentBaseWithFallbacks, type AgentInlineAgentBaseWithFallbacksOrRemote, type AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional, AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema, AgentInlineAgentBaseWithFallbacksOrRemoteSchema, type AgentInlineAgentBaseWithFallbacksOrRemoteWithCount, AgentInlineAgentBaseWithFallbacksOrRemoteWithCountSchema, AgentInlineAgentBaseWithFallbacksSchema, AgentInlineAgentSchema, type AgentInlineAgentWithFallbacks, AgentInlineAgentWithFallbacksSchema, type AgentListAgentResponse, AgentListAgentResponseSchema, type AgentListAgentsRequest, AgentListAgentsRequestSchema, type AgentListAgentsSource, AgentListAgentsSourceSchema, type AgentMcpServer, AgentMcpServerSchema, type AgentMockAgent, type AgentMockAgentBase, AgentMockAgentBaseSchema, AgentMockAgentSchema, type AgentMockContinuation, AgentMockContinuationSchema, type AgentMockMode, AgentMockModeSchema, type AgentMockOutputMode, AgentMockOutputModeSchema, type AgentMockUpstream, AgentMockUpstreamSchema, type AgentOpenrouterAgent, type AgentOpenrouterAgentBase, AgentOpenrouterAgentBaseSchema, AgentOpenrouterAgentSchema, type AgentOpenrouterContinuation, AgentOpenrouterContinuationSchema, type AgentOpenrouterOutputMode, AgentOpenrouterOutputModeSchema, type AgentOpenrouterProvider, type AgentOpenrouterProviderQuantization, AgentOpenrouterProviderQuantizationSchema, AgentOpenrouterProviderSchema, type AgentOpenrouterReasoning, type AgentOpenrouterReasoningEffort, AgentOpenrouterReasoningEffortSchema, AgentOpenrouterReasoningSchema, type AgentOpenrouterReasoningSummaryVerbosity, AgentOpenrouterReasoningSummaryVerbositySchema, type AgentOpenrouterStop, AgentOpenrouterStopSchema, type AgentOpenrouterUpstream, AgentOpenrouterUpstreamSchema, type AgentOpenrouterVerbosity, AgentOpenrouterVerbositySchema, type AgentOutputMode, AgentOutputModeSchema, type AgentRemoteAgent, type AgentRemoteAgentBase, AgentRemoteAgentBaseSchema, type AgentRemoteAgentBaseWithFallbacks, AgentRemoteAgentBaseWithFallbacksSchema, AgentRemoteAgentSchema, type AgentRemoteAgentWithFallbacks, AgentRemoteAgentWithFallbacksSchema, type AgentUpstream, AgentUpstreamSchema, type AgentUsageAgentResponse, AgentUsageAgentResponseSchema, type AuthApiKeyWithMetadata, AuthApiKeyWithMetadataSchema, type AuthCreateApiKeyRequest, AuthCreateApiKeyRequestSchema, type AuthCreateOpenRouterByokApiKeyRequest, AuthCreateOpenRouterByokApiKeyRequestSchema, type AuthDisableApiKeyRequest, AuthDisableApiKeyRequestSchema, type AuthGetCreditsResponse, AuthGetCreditsResponseSchema, type AuthGetOpenRouterByokApiKeyResponse, AuthGetOpenRouterByokApiKeyResponseSchema, type AuthListApiKeyItem, AuthListApiKeyItemSchema, type AuthListApiKeyResponse, AuthListApiKeyResponseSchema, type ConfigAgentsConfig, ConfigAgentsConfigSchema, type ConfigApiConfig, ConfigApiConfigSchema, type ConfigApiHeadersConfig, ConfigApiHeadersConfigSchema, type ConfigApiLocalConfig, ConfigApiLocalConfigSchema, type ConfigApiMode, ConfigApiModeSchema, type ConfigApiRemoteConfig, ConfigApiRemoteConfigSchema, type ConfigConfig, ConfigConfigSchema, type ConfigFavorite, ConfigFavoriteSchema, type ConfigFunctionsConfig, ConfigFunctionsConfigSchema, type ConfigFunctionsInventionsConfig, ConfigFunctionsInventionsConfigSchema, type ConfigFunctionsProfilesConfig, ConfigFunctionsProfilesConfigSchema, type ConfigFunctionsProfilesPairsConfig, ConfigFunctionsProfilesPairsConfigSchema, type ConfigPairFavorite, ConfigPairFavoriteSchema, type ConfigSwarmsConfig, ConfigSwarmsConfigSchema, type ConfigViewerConfig, ConfigViewerConfigSchema, type ConfigViewerLocalConfig, ConfigViewerLocalConfigSchema, type ConfigViewerMode, ConfigViewerModeSchema, type ConfigViewerSecretSignaturePair, ConfigViewerSecretSignaturePairSchema, type ErrorErrorCreateParams, ErrorErrorCreateParamsSchema, type ErrorErrorCreateParamsStreaming, ErrorErrorCreateParamsStreamingSchema, type ErrorErrorCreateParamsUnary, ErrorErrorCreateParamsUnarySchema, type ErrorErrorResponse, ErrorErrorResponseSchema, type ErrorResponseError, ErrorResponseErrorSchema, type FunctionsAlphaInlineFunction, FunctionsAlphaInlineFunctionSchema, type FunctionsAlphaRemoteFunction, FunctionsAlphaRemoteFunctionSchema, type FunctionsAlphaScalarBranchTaskExpression, FunctionsAlphaScalarBranchTaskExpressionSchema, type FunctionsAlphaScalarInlineFunction, FunctionsAlphaScalarInlineFunctionSchema, type FunctionsAlphaScalarLeafTaskExpression, FunctionsAlphaScalarLeafTaskExpressionSchema, type FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression, FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionSchema, type FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpression, FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpression, FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarRemoteFunction, FunctionsAlphaScalarRemoteFunctionSchema, type FunctionsAlphaScalarScalarFunctionTaskExpression, FunctionsAlphaScalarScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarVectorCompletionTaskExpression, FunctionsAlphaScalarVectorCompletionTaskExpressionSchema, type FunctionsAlphaVectorBranchTaskExpression, FunctionsAlphaVectorBranchTaskExpressionSchema, type FunctionsAlphaVectorExpressionVectorFunctionInputSchema, FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema, type FunctionsAlphaVectorExpressionVectorFunctionInputValue, type FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression, FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema, FunctionsAlphaVectorExpressionVectorFunctionInputValueSchema, type FunctionsAlphaVectorInlineFunction, FunctionsAlphaVectorInlineFunctionSchema, type FunctionsAlphaVectorLeafTaskExpression, FunctionsAlphaVectorLeafTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression, FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpression, FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression, FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema, type FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpression, FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpression, FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema, type FunctionsAlphaVectorRemoteFunction, FunctionsAlphaVectorRemoteFunctionSchema, type FunctionsAlphaVectorScalarFunctionTaskExpression, FunctionsAlphaVectorScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorVectorCompletionTaskExpression, FunctionsAlphaVectorVectorCompletionTaskExpressionSchema, type FunctionsAlphaVectorVectorFunctionTaskExpression, FunctionsAlphaVectorVectorFunctionTaskExpressionSchema, type FunctionsCheckScalarFieldsValidation, FunctionsCheckScalarFieldsValidationSchema, type FunctionsCheckVectorFieldsValidation, FunctionsCheckVectorFieldsValidationSchema, type FunctionsCompiledTask, FunctionsCompiledTaskSchema, type FunctionsExecutionsRequestFunctionExecutionCreateParams, FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema, type FunctionsExecutionsRequestReasoning, FunctionsExecutionsRequestReasoningSchema, type FunctionsExecutionsRequestStrategy, FunctionsExecutionsRequestStrategySchema, type FunctionsExecutionsResponseOutput, FunctionsExecutionsResponseOutputSchema, type FunctionsExecutionsResponseStreamingFunctionExecutionChunk, FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema, type FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk, FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema, type FunctionsExecutionsResponseStreamingObject, FunctionsExecutionsResponseStreamingObjectSchema, type FunctionsExecutionsResponseStreamingReasoningSummaryChunk, FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema, type FunctionsExecutionsResponseStreamingTaskChunk, FunctionsExecutionsResponseStreamingTaskChunkSchema, type FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk, FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema, type FunctionsExecutionsResponseUnaryFunctionExecution, FunctionsExecutionsResponseUnaryFunctionExecutionSchema, type FunctionsExecutionsResponseUnaryFunctionExecutionTask, FunctionsExecutionsResponseUnaryFunctionExecutionTaskSchema, type FunctionsExecutionsResponseUnaryObject, FunctionsExecutionsResponseUnaryObjectSchema, type FunctionsExecutionsResponseUnaryReasoningSummary, FunctionsExecutionsResponseUnaryReasoningSummarySchema, type FunctionsExecutionsResponseUnaryTask, FunctionsExecutionsResponseUnaryTaskSchema, type FunctionsExecutionsResponseUnaryVectorCompletionTask, FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema, type FunctionsExecutionsRetryToken, FunctionsExecutionsRetryTokenSchema, type FunctionsExpressionAnyOfInputSchema, FunctionsExpressionAnyOfInputSchemaSchema, type FunctionsExpressionArrayInputSchema, FunctionsExpressionArrayInputSchemaSchema, type FunctionsExpressionArrayInputSchemaType, FunctionsExpressionArrayInputSchemaTypeSchema, type FunctionsExpressionAudioInputSchema, FunctionsExpressionAudioInputSchemaSchema, type FunctionsExpressionAudioInputSchemaType, FunctionsExpressionAudioInputSchemaTypeSchema, type FunctionsExpressionBooleanInputSchema, FunctionsExpressionBooleanInputSchemaSchema, type FunctionsExpressionBooleanInputSchemaType, FunctionsExpressionBooleanInputSchemaTypeSchema, type FunctionsExpressionExpression, FunctionsExpressionExpressionSchema, type FunctionsExpressionFileInputSchema, FunctionsExpressionFileInputSchemaSchema, type FunctionsExpressionFileInputSchemaType, FunctionsExpressionFileInputSchemaTypeSchema, type FunctionsExpressionImageInputSchema, FunctionsExpressionImageInputSchemaSchema, type FunctionsExpressionImageInputSchemaType, FunctionsExpressionImageInputSchemaTypeSchema, type FunctionsExpressionInputSchema, FunctionsExpressionInputSchemaSchema, type FunctionsExpressionInputValue, type FunctionsExpressionInputValueExpression, type FunctionsExpressionInputValueExpressionObject, FunctionsExpressionInputValueExpressionSchema, type FunctionsExpressionInputValueObject, FunctionsExpressionInputValueSchema, type FunctionsExpressionIntegerInputSchema, FunctionsExpressionIntegerInputSchemaSchema, type FunctionsExpressionIntegerInputSchemaType, FunctionsExpressionIntegerInputSchemaTypeSchema, type FunctionsExpressionNumberInputSchema, FunctionsExpressionNumberInputSchemaSchema, type FunctionsExpressionNumberInputSchemaType, FunctionsExpressionNumberInputSchemaTypeSchema, type FunctionsExpressionObjectInputSchema, FunctionsExpressionObjectInputSchemaSchema, type FunctionsExpressionObjectInputSchemaType, FunctionsExpressionObjectInputSchemaTypeSchema, type FunctionsExpressionParams, FunctionsExpressionParamsSchema, type FunctionsExpressionSpecial, FunctionsExpressionSpecialSchema, type FunctionsExpressionStringInputSchema, FunctionsExpressionStringInputSchemaSchema, type FunctionsExpressionStringInputSchemaType, FunctionsExpressionStringInputSchemaTypeSchema, type FunctionsExpressionTaskOutput, FunctionsExpressionTaskOutputSchema, type FunctionsExpressionVideoInputSchema, FunctionsExpressionVideoInputSchemaSchema, type FunctionsExpressionVideoInputSchemaType, FunctionsExpressionVideoInputSchemaTypeSchema, type FunctionsFullFunction, FunctionsFullFunctionSchema, type FunctionsFullInlineFunction, type FunctionsFullInlineFunctionOrRemoteCommitOptional, FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema, FunctionsFullInlineFunctionSchema, type FunctionsFullRemoteFunction, FunctionsFullRemoteFunctionSchema, type FunctionsFunction, FunctionsFunctionSchema, type FunctionsFunctionType, FunctionsFunctionTypeSchema, type FunctionsGetFunctionProfilePairResponse, FunctionsGetFunctionProfilePairResponseSchema, type FunctionsGetFunctionProfilePairUsageRequest, FunctionsGetFunctionProfilePairUsageRequestSchema, type FunctionsGetFunctionResponse, FunctionsGetFunctionResponseSchema, type FunctionsInlineFunction, FunctionsInlineFunctionSchema, type FunctionsInlineProfile, type FunctionsInlineProfileOrRemoteCommitOptional, FunctionsInlineProfileOrRemoteCommitOptionalSchema, FunctionsInlineProfileSchema, type FunctionsInlineTasksProfile, FunctionsInlineTasksProfileSchema, type FunctionsInventionsDescriptionObject, FunctionsInventionsDescriptionObjectSchema, type FunctionsInventionsEssayObject, FunctionsInventionsEssayObjectSchema, type FunctionsInventionsEssayTasksObject, FunctionsInventionsEssayTasksObjectSchema, type FunctionsInventionsIndexObject, FunctionsInventionsIndexObjectSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreaming, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreamingSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnary, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnarySchema, type FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema, type FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema, type FunctionsInventionsRecursiveResponseStreamingObject, FunctionsInventionsRecursiveResponseStreamingObjectSchema, type FunctionsInventionsRecursiveResponseUnaryFunctionInvention, type FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive, FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiveSchema, FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema, type FunctionsInventionsRecursiveResponseUnaryObject, FunctionsInventionsRecursiveResponseUnaryObjectSchema, type FunctionsInventionsRequestFunctionInventionCreateParams, FunctionsInventionsRequestFunctionInventionCreateParamsSchema, type FunctionsInventionsRequestFunctionInventionCreateParamsStreaming, FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSchema, type FunctionsInventionsRequestFunctionInventionCreateParamsUnary, FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema, type FunctionsInventionsResponseStreamingAgentCompletionChunk, FunctionsInventionsResponseStreamingAgentCompletionChunkSchema, type FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseStreamingFunctionInventionChunkSchema, type FunctionsInventionsResponseStreamingObject, FunctionsInventionsResponseStreamingObjectSchema, type FunctionsInventionsResponseUnaryAgentCompletion, FunctionsInventionsResponseUnaryAgentCompletionSchema, type FunctionsInventionsResponseUnaryFunctionInvention, FunctionsInventionsResponseUnaryFunctionInventionSchema, type FunctionsInventionsResponseUnaryObject, FunctionsInventionsResponseUnaryObjectSchema, type FunctionsInventionsStateAlphaScalarBranchState, FunctionsInventionsStateAlphaScalarBranchStateSchema, type FunctionsInventionsStateAlphaScalarLeafState, FunctionsInventionsStateAlphaScalarLeafStateSchema, type FunctionsInventionsStateAlphaScalarState, FunctionsInventionsStateAlphaScalarStateSchema, type FunctionsInventionsStateAlphaVectorBranchState, FunctionsInventionsStateAlphaVectorBranchStateSchema, type FunctionsInventionsStateAlphaVectorLeafState, FunctionsInventionsStateAlphaVectorLeafStateSchema, type FunctionsInventionsStateAlphaVectorState, FunctionsInventionsStateAlphaVectorStateSchema, type FunctionsInventionsStateInputSchema, FunctionsInventionsStateInputSchemaSchema, type FunctionsInventionsStateParams, FunctionsInventionsStateParamsSchema, type FunctionsInventionsStateParamsState, type FunctionsInventionsStateParamsStateOrRemoteCommitOptional, FunctionsInventionsStateParamsStateOrRemoteCommitOptionalSchema, FunctionsInventionsStateParamsStateSchema, type FunctionsInventionsStateState, FunctionsInventionsStateStateSchema, type FunctionsInventionsTasksLengthObject, FunctionsInventionsTasksLengthObjectSchema, type FunctionsListFunctionProfilePairItem, FunctionsListFunctionProfilePairItemSchema, type FunctionsListFunctionProfilePairResponse, FunctionsListFunctionProfilePairResponseSchema, type FunctionsListFunctionProfilePairsRequest, FunctionsListFunctionProfilePairsRequestSchema, type FunctionsListFunctionProfilePairsSource, FunctionsListFunctionProfilePairsSourceSchema, type FunctionsListFunctionResponse, FunctionsListFunctionResponseSchema, type FunctionsListFunctionsRequest, FunctionsListFunctionsRequestSchema, type FunctionsListFunctionsSource, FunctionsListFunctionsSourceSchema, type FunctionsPlaceholderScalarFunctionTask, type FunctionsPlaceholderScalarFunctionTaskExpression, FunctionsPlaceholderScalarFunctionTaskExpressionSchema, FunctionsPlaceholderScalarFunctionTaskSchema, type FunctionsPlaceholderVectorFunctionTask, type FunctionsPlaceholderVectorFunctionTaskExpression, FunctionsPlaceholderVectorFunctionTaskExpressionSchema, FunctionsPlaceholderVectorFunctionTaskSchema, type FunctionsProfile, FunctionsProfileSchema, type FunctionsProfilesComputationsRequestDatasetItem, FunctionsProfilesComputationsRequestDatasetItemSchema, type FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParams, FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParamsSchema, type FunctionsProfilesComputationsRequestTarget, FunctionsProfilesComputationsRequestTargetSchema, type FunctionsProfilesComputationsResponseFittingStats, FunctionsProfilesComputationsResponseFittingStatsSchema, type FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk, FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema, type FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema, type FunctionsProfilesComputationsResponseStreamingObject, FunctionsProfilesComputationsResponseStreamingObjectSchema, type FunctionsProfilesComputationsResponseUnaryFunctionExecution, FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema, type FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation, FunctionsProfilesComputationsResponseUnaryFunctionProfileComputationSchema, type FunctionsProfilesComputationsResponseUnaryObject, FunctionsProfilesComputationsResponseUnaryObjectSchema, type FunctionsProfilesComputationsRetryToken, FunctionsProfilesComputationsRetryTokenSchema, type FunctionsProfilesGetProfileResponse, FunctionsProfilesGetProfileResponseSchema, type FunctionsProfilesListProfileResponse, FunctionsProfilesListProfileResponseSchema, type FunctionsProfilesListProfilesRequest, FunctionsProfilesListProfilesRequestSchema, type FunctionsProfilesListProfilesSource, FunctionsProfilesListProfilesSourceSchema, type FunctionsProfilesUsageProfileResponse, FunctionsProfilesUsageProfileResponseSchema, type FunctionsRemoteFunction, FunctionsRemoteFunctionSchema, type FunctionsRemoteProfile, FunctionsRemoteProfileSchema, type FunctionsRemoteTasksProfile, FunctionsRemoteTasksProfileSchema, type FunctionsScalarFunctionTask, type FunctionsScalarFunctionTaskExpression, FunctionsScalarFunctionTaskExpressionSchema, FunctionsScalarFunctionTaskSchema, type FunctionsTask, type FunctionsTaskExpression, FunctionsTaskExpressionSchema, type FunctionsTaskProfile, FunctionsTaskProfileSchema, FunctionsTaskSchema, type FunctionsUsageFunctionProfilePairResponse, FunctionsUsageFunctionProfilePairResponseSchema, type FunctionsUsageFunctionResponse, FunctionsUsageFunctionResponseSchema, type FunctionsVectorCompletionTask, type FunctionsVectorCompletionTaskExpression, FunctionsVectorCompletionTaskExpressionSchema, FunctionsVectorCompletionTaskSchema, type FunctionsVectorFunctionTask, type FunctionsVectorFunctionTaskExpression, FunctionsVectorFunctionTaskExpressionSchema, FunctionsVectorFunctionTaskSchema, type LaboratoriesExecutionsRequestLaboratoryExecutionCreateParams, LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema, type LaboratoriesExecutionsResponseStreamingBuilderChunk, LaboratoriesExecutionsResponseStreamingBuilderChunkSchema, type LaboratoriesExecutionsResponseStreamingEvaluationChunk, LaboratoriesExecutionsResponseStreamingEvaluationChunkSchema, type LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk, LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkSchema, type LaboratoriesExecutionsResponseStreamingObject, LaboratoriesExecutionsResponseStreamingObjectSchema, type LaboratoriesExecutionsResponseUnaryBuilder, LaboratoriesExecutionsResponseUnaryBuilderSchema, type LaboratoriesExecutionsResponseUnaryEvaluation, LaboratoriesExecutionsResponseUnaryEvaluationSchema, type LaboratoriesExecutionsResponseUnaryLaboratoryExecution, LaboratoriesExecutionsResponseUnaryLaboratoryExecutionSchema, type LaboratoriesExecutionsResponseUnaryObject, LaboratoriesExecutionsResponseUnaryObjectSchema, ObjectiveAI, ObjectiveAIFetchError, type ObjectiveAIOptions, ObjectiveAIOptionsSchema, type PrefixedUuid, PrefixedUuidSchema, type Remote, type RemotePath, type RemotePathCommitOptional, RemotePathCommitOptionalSchema, RemotePathSchema, RemoteSchema, type RequestOptions, RequestOptionsSchema, Stream, type SwarmGetSwarmResponse, SwarmGetSwarmResponseSchema, type SwarmInlineSwarm, type SwarmInlineSwarmBase, type SwarmInlineSwarmBaseOrRemote, type SwarmInlineSwarmBaseOrRemoteCommitOptional, SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema, SwarmInlineSwarmBaseOrRemoteSchema, SwarmInlineSwarmBaseSchema, SwarmInlineSwarmSchema, type SwarmListSwarmResponse, SwarmListSwarmResponseSchema, type SwarmListSwarmsRequest, SwarmListSwarmsRequestSchema, type SwarmListSwarmsSource, SwarmListSwarmsSourceSchema, type SwarmRemoteSwarm, type SwarmRemoteSwarmBase, SwarmRemoteSwarmBaseSchema, SwarmRemoteSwarmSchema, type SwarmSwarm, type SwarmSwarmBase, SwarmSwarmBaseSchema, SwarmSwarmSchema, type SwarmUsageSwarmResponse, SwarmUsageSwarmResponseSchema, type VectorCompletionsCacheCacheVote, type VectorCompletionsCacheCacheVoteRequest, VectorCompletionsCacheCacheVoteRequestSchema, VectorCompletionsCacheCacheVoteSchema, type VectorCompletionsCacheCompletionVotes, VectorCompletionsCacheCompletionVotesSchema, type VectorCompletionsCacheGetCompletionVotesRequest, VectorCompletionsCacheGetCompletionVotesRequestSchema, type VectorCompletionsRequestVectorCompletionCreateParams, VectorCompletionsRequestVectorCompletionCreateParamsSchema, type VectorCompletionsRequestVectorCompletionCreateParamsStreaming, VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchema, type VectorCompletionsRequestVectorCompletionCreateParamsUnary, VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema, type VectorCompletionsResponseStreamingAgentCompletionChunk, VectorCompletionsResponseStreamingAgentCompletionChunkSchema, type VectorCompletionsResponseStreamingObject, VectorCompletionsResponseStreamingObjectSchema, type VectorCompletionsResponseStreamingVectorCompletionChunk, VectorCompletionsResponseStreamingVectorCompletionChunkSchema, type VectorCompletionsResponseUnaryAgentCompletion, VectorCompletionsResponseUnaryAgentCompletionSchema, type VectorCompletionsResponseUnaryObject, VectorCompletionsResponseUnaryObjectSchema, type VectorCompletionsResponseUnaryVectorCompletion, VectorCompletionsResponseUnaryVectorCompletionSchema, type VectorCompletionsResponseVote, VectorCompletionsResponseVoteSchema, type VectorCompletionsVectorResponses, VectorCompletionsVectorResponsesSchema, type Weights, type WeightsEntry, WeightsEntrySchema, WeightsSchema, agentCompletionsCreateAgentCompletion, agentCompletionsMessageAssistantToolCallDeltaMerged, agentCompletionsMessageAssistantToolCallDeltaMergedList, agentCompletionsMessageAssistantToolCallFunctionDeltaMerged, agentCompletionsMessageRichContentMerged, agentCompletionsResponseCompletionTokensDetailsMerged, agentCompletionsResponseCostDetailsMerged, agentCompletionsResponseLogprobsMerged, agentCompletionsResponsePromptTokensDetailsMerged, agentCompletionsResponseStreamingAgentCompletionChunkMerged, agentCompletionsResponseStreamingAssistantResponseChunkMerged, agentCompletionsResponseStreamingMessageChunkMerged, agentCompletionsResponseStreamingMessageChunkMergedList, agentCompletionsResponseUpstreamUsageMerged, agentCompletionsResponseUsageMerged, agentGetAgent, agentGetAgentUsage, agentListAgents, authCreateApiKey, authCreateOpenrouterByokApiKey, authDeleteOpenrouterByokApiKey, authDisableApiKey, authGetCredits, authGetOpenrouterByokApiKey, authListApiKeys, errorCreateError, functionsExecutionsCreateFunctionExecution, functionsExecutionsResponseStreamingFunctionExecutionChunkMerged, functionsExecutionsResponseStreamingReasoningSummaryChunkMerged, functionsExecutionsResponseStreamingTaskChunkMerged, functionsExecutionsResponseStreamingTaskChunkMergedList, functionsExecutionsResponseStreamingVectorCompletionTaskChunkMerged, functionsGetFunction, functionsGetFunctionProfilePairUsage, functionsGetFunctionUsage, functionsInventionsCreateFunctionInvention, functionsInventionsRecursiveCreateFunctionInventionRecursive, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMerged, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMergedList, functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMergedList, functionsInventionsResponseStreamingFunctionInventionChunkMerged, functionsListFunctionProfilePairs, functionsListFunctions, functionsProfilesComputationsComputeProfile, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMerged, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMergedList, functionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged, functionsProfilesGetProfile, functionsProfilesGetProfileUsage, functionsProfilesListProfiles, isResponseError, merge, mergedNumberArray, mergedString, numberIsEmpty, swarmGetSwarm, swarmGetSwarmUsage, swarmListSwarms, vectorCompletionsCacheGetCacheVote, vectorCompletionsCacheGetCompletionVotes, vectorCompletionsCreateVectorCompletion, vectorCompletionsResponseStreamingAgentCompletionChunkMerged, vectorCompletionsResponseStreamingAgentCompletionChunkMergedList, vectorCompletionsResponseStreamingVectorCompletionChunkMerged, vectorCompletionsResponseVoteMergedList, wasmAgentCompletionsMessagePromptId, wasmAgentCompletionsResponseStreamingAgentCompletionChunkMerged, wasmAgentCompletionsResponseStreamingAgentCompletionChunkNormalized, wasmAgentCompletionsResponseStreamingAgentCompletionChunkToUnary, wasmAgentCompletionsResponseStreamingGenerateAgentCompletionChunk, wasmAgentCompletionsResponseStreamingNormalizeAgentCompletionForTests, wasmAgentValidateAgent, wasmFunctionsAlphaCheckBranchScalarFunction, wasmFunctionsAlphaCheckBranchVectorFunction, wasmFunctionsAlphaCheckLeafScalarFunction, wasmFunctionsAlphaCheckLeafVectorFunction, wasmFunctionsCheckCheckScalarFields, wasmFunctionsCheckCheckVectorFields, wasmFunctionsCompileFunctionInputMerge, wasmFunctionsCompileFunctionInputSplit, wasmFunctionsCompileFunctionOutputLength, wasmFunctionsCompileFunctionTasks, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkMerged, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkNormalized, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkToUnary, wasmFunctionsExecutionsResponseStreamingGenerateFunctionExecutionChunk, wasmFunctionsExecutionsResponseStreamingNormalizeFunctionExecutionForTests, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkNormalized, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkToUnary, wasmFunctionsInventionsRecursiveResponseStreamingGenerateFunctionInventionRecursiveChunk, wasmFunctionsInventionsRecursiveResponseStreamingNormalizeFunctionInventionRecursiveForTests, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkMerged, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkNormalized, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkToUnary, wasmFunctionsInventionsResponseStreamingGenerateFunctionInventionChunk, wasmFunctionsInventionsResponseStreamingNormalizeFunctionInventionForTests, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkNormalized, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkToUnary, wasmFunctionsProfilesComputationsResponseStreamingGenerateFunctionProfileComputationChunk, wasmFunctionsProfilesComputationsResponseStreamingNormalizeFunctionProfileComputationForTests, wasmFunctionsValidateFunctionInput, wasmSwarmValidateSwarm, wasmVectorCompletionsResponseStreamingGenerateVectorCompletionChunk, wasmVectorCompletionsResponseStreamingNormalizeVectorCompletionForTests, wasmVectorCompletionsResponseStreamingVectorCompletionChunkMerged, wasmVectorCompletionsResponseStreamingVectorCompletionChunkNormalized, wasmVectorCompletionsResponseStreamingVectorCompletionChunkToUnary, wasmVectorCompletionsVectorResponseId };

@@ -10,7 +10,7 @@ import (
 // Streaming chunk for a single evaluation agent completion within a laboratory execution.
 type LaboratoriesExecutionsResponseStreamingEvaluationChunk struct {
 	// Container index (0-based).
-	ContainerIndex uint64 `json:"container_index" validate:"min=0,max=18446744073709551615"`
+	AgentIndex uint64 `json:"agent_index" validate:"min=0,max=18446744073709551615"`
 	// Continuation state for multi-turn conversations (only present in the final chunk).
 	Continuation *string `json:"continuation,omitempty"`
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
@@ -38,7 +38,7 @@ func (v *LaboratoriesExecutionsResponseStreamingEvaluationChunk) UnmarshalJSON(d
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	for _, key := range []string{"container_index", "created", "id", "index", "messages", "object", "upstream"} {
+	for _, key := range []string{"agent_index", "created", "id", "index", "messages", "object", "upstream"} {
 		if _, ok := raw[key]; !ok {
 			return fmt.Errorf("LaboratoriesExecutionsResponseStreamingEvaluationChunk: missing required field %q", key)
 		}

@@ -87,6 +87,7 @@ MODULES = [
     'objectiveai.agent.mock.agent',
     'objectiveai.agent.mock.agent_base',
     'objectiveai.agent.mock.continuation',
+    'objectiveai.agent.mock.mode',
     'objectiveai.agent.mock.output_mode',
     'objectiveai.agent.mock.upstream',
     'objectiveai.agent.openrouter.agent',

@@ -27,6 +27,10 @@ pub enum Commands {
         #[command(subcommand)]
         command: GetCommand,
     },
+    Mode {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
     OutputMode {
         #[command(subcommand)]
         command: GetCommand,
@@ -40,7 +44,7 @@ pub enum Commands {
 impl Commands {
     pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
         match self {
-            Commands::List => Ok(crate::Output::Schema("[\"Agent\",\"AgentBase\",\"Continuation\",\"OutputMode\",\"Upstream\"]")),
+            Commands::List => Ok(crate::Output::Schema("[\"Agent\",\"AgentBase\",\"Continuation\",\"Mode\",\"OutputMode\",\"Upstream\"]")),
             Commands::Agent { .. } => Ok(crate::Output::Schema(
                 include_str!("../../../../../objectiveai-json-schema/agent.mock.Agent.json"),
             )),
@@ -49,6 +53,9 @@ impl Commands {
             )),
             Commands::Continuation { .. } => Ok(crate::Output::Schema(
                 include_str!("../../../../../objectiveai-json-schema/agent.mock.Continuation.json"),
+            )),
+            Commands::Mode { .. } => Ok(crate::Output::Schema(
+                include_str!("../../../../../objectiveai-json-schema/agent.mock.Mode.json"),
             )),
             Commands::OutputMode { .. } => Ok(crate::Output::Schema(
                 include_str!("../../../../../objectiveai-json-schema/agent.mock.OutputMode.json"),
