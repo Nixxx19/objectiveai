@@ -82,7 +82,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
     > + Send
     + 'static {
         let tools_enabled = tools_enabled;
-        let invention = agent.base.invention == Some(true);
+        let invention = agent.base.mode == Some(objectiveai::agent::mock::Mode::Invention);
         let has_invention_tools = invention_tools.is_some_and(|t| !t.is_empty());
         let invention_tools: Vec<objectiveai::functions::inventions::InventionTool> =
             invention_tools.map(|t| t.to_vec()).unwrap_or_default();

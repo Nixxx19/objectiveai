@@ -27,11 +27,10 @@ pub struct AgentBase {
     #[schemars(extend("omitempty" = true))]
     pub error: Option<bool>,
 
-    /// If true, this mock agent supports invention tool calling.
-    /// Incompatible with output modes other than `instruction`.
+    /// Mock agent mode. Defaults to `default`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
-    pub invention: Option<bool>,
+    pub mode: Option<super::Mode>,
 
     /// Probability (0-100) that the mock returns an error mid-stream.
     /// Requires `error` to be `Some(true)`.
@@ -54,8 +53,8 @@ impl AgentBase {
         if self.error == Some(false) {
             self.error = None;
         }
-        if self.invention == Some(false) {
-            self.invention = None;
+        if self.mode == Some(super::Mode::Default) {
+            self.mode = None;
         }
     }
 
@@ -66,11 +65,11 @@ impl AgentBase {
         {
             return Err("`top_logprobs` must be at most 20".to_string());
         }
-        if self.invention == Some(true)
+        if self.mode == Some(super::Mode::Invention)
             && self.output_mode != super::OutputMode::Instruction
         {
             return Err(
-                "`invention` is only compatible with `instruction` output mode"
+                "`mode: invention` is only compatible with `instruction` output mode"
                     .to_string(),
             );
         }

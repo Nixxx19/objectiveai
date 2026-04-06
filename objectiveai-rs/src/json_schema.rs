@@ -82,6 +82,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(crate::agent::mock::AgentBase),
         schemars::schema_for!(crate::agent::mock::Agent),
         schemars::schema_for!(crate::agent::mock::Continuation),
+        schemars::schema_for!(crate::agent::mock::Mode),
         schemars::schema_for!(crate::agent::mock::OutputMode),
         schemars::schema_for!(crate::agent::mock::Upstream),
         schemars::schema_for!(crate::agent::openrouter::AgentBase),
