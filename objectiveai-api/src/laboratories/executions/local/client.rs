@@ -110,6 +110,40 @@ async fn spawn_builder(
         .await
         .map_err(|e| super::Error::Docker(e.to_string()))?;
 
+    // Poll for port binding with exponential backoff
+    let host_port = {
+        let mut attempt = 0u32;
+        loop {
+            let delay = std::time::Duration::from_millis(10 * (1 << attempt.min(4)));
+            tokio::time::sleep(delay).await;
+
+            let inspect = docker
+                .inspect_container(&container.id, None)
+                .await
+                .map_err(|e| super::Error::Docker(e.to_string()))?;
+
+            let port = inspect
+                .network_settings
+                .and_then(|ns| ns.ports)
+                .and_then(|ports| ports.get(MCP_CONTAINER_PORT).cloned())
+                .flatten()
+                .and_then(|bindings| bindings.into_iter().next())
+                .and_then(|b| b.host_port)
+                .and_then(|p| p.parse::<u16>().ok());
+
+            if let Some(p) = port {
+                break p;
+            }
+
+            attempt += 1;
+            if attempt > 10 {
+                return Err(super::Error::Docker(
+                    format!("timeout after {attempt} attempts: failed to get host port for container {container_name}"),
+                ));
+            }
+        }
+    };
+
     // Upload the MCP binary
     let upload_options = UploadToContainerOptionsBuilder::default()
         .path("/")
@@ -143,24 +177,6 @@ async fn spawn_builder(
         .start_exec(&exec.id, None)
         .await
         .map_err(|e| super::Error::Docker(e.to_string()))?;
-
-    // Inspect container to get the assigned host port
-    let inspect = docker
-        .inspect_container(&container.id, None)
-        .await
-        .map_err(|e| super::Error::Docker(e.to_string()))?;
-
-    let host_port = inspect
-        .network_settings
-        .and_then(|ns| ns.ports)
-        .and_then(|ports| ports.get(MCP_CONTAINER_PORT).cloned())
-        .flatten()
-        .and_then(|bindings| bindings.into_iter().next())
-        .and_then(|b| b.host_port)
-        .and_then(|p| p.parse::<u16>().ok())
-        .ok_or_else(|| super::Error::Docker(
-            format!("failed to get host port for container {container_name}"),
-        ))?;
 
     Ok(host_port)
 }
@@ -360,7 +376,6 @@ where
                                                 index: completion_index,
                                                 agent_index,
                                                 inner: chunk,
-                                                error: None,
                                             }],
                                             evaluations: Vec::new(),
                                             error: None,
@@ -382,8 +397,10 @@ where
                                 builders: vec![BuilderChunk {
                                     index: completion_index,
                                     agent_index,
-                                    inner: Default::default(),
-                                    error: Some(objectiveai::error::ResponseError::from(&e)),
+                                    inner: objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
+                                        error: Some(objectiveai::error::ResponseError::from(&e)),
+                                        ..Default::default()
+                                    },
                                 }],
                                 evaluations: Vec::new(),
                                 error: None,
@@ -411,7 +428,7 @@ where
                     if let Some(u) = &builder.inner.usage {
                         accumulated_usage.push(u);
                     }
-                    if builder.error.is_some() {
+                    if builder.inner.error.is_some() {
                         errored_agents.insert(builder.agent_index);
                     }
                 }
@@ -577,7 +594,6 @@ where
                                             agent_index,
                                             inner: chunk,
                                             output: None,
-                                            error: None,
                                         }],
                                         error: None,
                                         created,
@@ -598,9 +614,11 @@ where
                             evaluations: vec![EvaluationChunk {
                                 index: evaluation_index,
                                 agent_index,
-                                inner: Default::default(),
+                                inner: objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
+                                    error: Some(objectiveai::error::ResponseError::from(&e)),
+                                    ..Default::default()
+                                },
                                 output: None,
-                                error: Some(objectiveai::error::ResponseError::from(&e)),
                             }],
                             error: None,
                             created,
@@ -660,7 +678,6 @@ where
                                     agent_index,
                                     inner: Default::default(),
                                     output: Some(input_value),
-                                    error: None,
                                 }],
                                 error: None,
                                 created,
@@ -679,9 +696,11 @@ where
                                 evaluations: vec![EvaluationChunk {
                                     index: evaluation_index,
                                     agent_index,
-                                    inner: Default::default(),
+                                    inner: objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
+                                        error: Some(objectiveai::error::ResponseError::from(&err)),
+                                        ..Default::default()
+                                    },
                                     output: None,
-                                    error: Some(objectiveai::error::ResponseError::from(&err)),
                                 }],
                                 error: None,
                                 created,
@@ -714,9 +733,11 @@ where
                                 evaluations: vec![EvaluationChunk {
                                     index: evaluation_index,
                                     agent_index,
-                                    inner: Default::default(),
+                                    inner: objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
+                                        error: Some(objectiveai::error::ResponseError::from(&err)),
+                                        ..Default::default()
+                                    },
                                     output: None,
-                                    error: Some(objectiveai::error::ResponseError::from(&err)),
                                 }],
                                 error: None,
                                 created,

@@ -31,6 +31,12 @@ impl LaboratoryExecution {
     pub fn normalize_for_tests(&mut self) {
         self.id = String::new();
         self.created = 0;
+        for builder in &mut self.builders {
+            builder.inner.normalize_for_tests();
+        }
+        for evaluation in &mut self.evaluations {
+            evaluation.inner.normalize_for_tests();
+        }
     }
 }
 

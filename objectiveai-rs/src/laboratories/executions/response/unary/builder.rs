@@ -1,4 +1,4 @@
-use crate::{agent, error, laboratories::executions::response};
+use crate::{agent, laboratories::executions::response};
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
@@ -8,11 +8,10 @@ use schemars::JsonSchema;
 pub struct Builder {
     /// Builder index (0-based).
     pub index: u64,
-    /// Container index (0-based).
+    /// Agent index (0-based).
     pub agent_index: u64,
     #[serde(flatten)]
     pub inner: agent::completions::response::unary::AgentCompletion,
-    pub error: Option<error::ResponseError>,
 }
 
 impl From<response::streaming::BuilderChunk> for Builder {
@@ -21,14 +20,12 @@ impl From<response::streaming::BuilderChunk> for Builder {
             index,
             agent_index,
             inner,
-            error,
         }: response::streaming::BuilderChunk,
     ) -> Self {
         Self {
             index,
             agent_index,
             inner: inner.into(),
-            error,
         }
     }
 }

@@ -1,4 +1,4 @@
-use crate::{agent, error, functions};
+use crate::{agent, functions};
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
@@ -9,7 +9,7 @@ pub struct EvaluationChunk {
     /// Evaluation index (0-based).
     #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub index: u64,
-    /// Container index (0-based).
+    /// Agent index (0-based).
     #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub agent_index: u64,
     #[serde(flatten)]
@@ -17,9 +17,6 @@ pub struct EvaluationChunk {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
     pub output: Option<functions::expression::InputValue>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[schemars(extend("omitempty" = true))]
-    pub error: Option<error::ResponseError>,
 }
 
 impl EvaluationChunk {
@@ -27,9 +24,6 @@ impl EvaluationChunk {
         self.inner.push(&other.inner);
         if let Some(output) = &other.output {
             self.output = Some(output.clone());
-        }
-        if let Some(error) = &other.error {
-            self.error = Some(error.clone());
         }
     }
 }
