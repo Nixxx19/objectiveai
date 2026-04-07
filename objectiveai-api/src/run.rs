@@ -1,0 +1,2182 @@
+//! ObjectiveAI API server.
+//!
+//! REST API server for chat completions, vector completions, Functions,
+//! Profiles, Swarms, and authentication.
+
+use axum::{
+    Json,
+    response::{IntoResponse, Sse, sse::Event},
+};
+use envconfig::Envconfig;
+use objectiveai::error::ResponseError;
+use crate::{
+    agent, auth, ctx,
+    error::ResponseErrorExt,
+    filesystem,
+    functions::{self, profiles::computations::Client},
+    github, mcp, objectiveai_http,
+    retrieval, viewer,
+    util::StreamOnce,
+    vector,
+};
+use std::{convert::Infallible, sync::Arc};
+use tokio_stream::StreamExt;
+
+type ListRouter = retrieval::list::Router<
+    retrieval::list::objectiveai::ObjectiveAiClient,
+    retrieval::list::filesystem::FilesystemClient,
+    retrieval::list::mock::MockClient,
+    ctx::DefaultContextExt,
+>;
+
+type RetrieveRouter = retrieval::retrieve::Router<
+    retrieval::retrieve::github::GithubClient,
+    retrieval::retrieve::filesystem::FilesystemClient,
+    retrieval::retrieve::mock::MockClient,
+    ctx::DefaultContextExt,
+>;
+
+type UsageRouter = retrieval::usage::Router<
+    retrieval::usage::objectiveai::ObjectiveAiClient,
+    ctx::DefaultContextExt,
+>;
+
+#[derive(Envconfig)]
+struct EnvConfigBuilder {
+    // -- HttpClient fields (identical order across all 3 structs) --
+    #[envconfig(from = "OBJECTIVEAI_ADDRESS")]
+    objectiveai_address: Option<String>,
+    #[envconfig(from = "OBJECTIVEAI_AUTHORIZATION")]
+    objectiveai_authorization: Option<String>,
+    #[envconfig(from = "OPENROUTER_ADDRESS")]
+    openrouter_address: Option<String>,
+    #[envconfig(from = "OPENROUTER_AUTHORIZATION")]
+    openrouter_authorization: Option<String>,
+    #[envconfig(from = "GITHUB_AUTHORIZATION")]
+    github_authorization: Option<String>,
+    #[envconfig(from = "MCP_AUTHORIZATION")]
+    mcp_authorization: Option<String>,
+    #[envconfig(from = "VIEWER_ADDRESS")]
+    viewer_address: Option<String>,
+    #[envconfig(from = "VIEWER_SIGNATURE")]
+    viewer_signature: Option<String>,
+    #[envconfig(from = "USER_AGENT")]
+    user_agent: Option<String>,
+    #[envconfig(from = "HTTP_REFERER")]
+    http_referer: Option<String>,
+    #[envconfig(from = "X_TITLE")]
+    x_title: Option<String>,
+    #[envconfig(from = "COMMIT_AUTHOR_NAME")]
+    commit_author_name: Option<String>,
+    #[envconfig(from = "COMMIT_AUTHOR_EMAIL")]
+    commit_author_email: Option<String>,
+    // -- Other fields --
+    #[envconfig(from = "CLAUDE_AGENT_SDK")]
+    claude_agent_sdk: Option<String>,
+    #[envconfig(from = "AGENT_COMPLETIONS_BACKOFF_CURRENT_INTERVAL")]
+    agent_completions_backoff_current_interval: Option<u64>,
+    #[envconfig(from = "AGENT_COMPLETIONS_BACKOFF_INITIAL_INTERVAL")]
+    agent_completions_backoff_initial_interval: Option<u64>,
+    #[envconfig(from = "AGENT_COMPLETIONS_BACKOFF_RANDOMIZATION_FACTOR")]
+    agent_completions_backoff_randomization_factor: Option<f64>,
+    #[envconfig(from = "AGENT_COMPLETIONS_BACKOFF_MULTIPLIER")]
+    agent_completions_backoff_multiplier: Option<f64>,
+    #[envconfig(from = "AGENT_COMPLETIONS_BACKOFF_MAX_INTERVAL")]
+    agent_completions_backoff_max_interval: Option<u64>,
+    #[envconfig(from = "AGENT_COMPLETIONS_BACKOFF_MAX_ELAPSED_TIME")]
+    agent_completions_backoff_max_elapsed_time: Option<u64>,
+    #[envconfig(from = "MCP_BACKOFF_CURRENT_INTERVAL")]
+    mcp_backoff_current_interval: Option<u64>,
+    #[envconfig(from = "MCP_BACKOFF_INITIAL_INTERVAL")]
+    mcp_backoff_initial_interval: Option<u64>,
+    #[envconfig(from = "MCP_BACKOFF_RANDOMIZATION_FACTOR")]
+    mcp_backoff_randomization_factor: Option<f64>,
+    #[envconfig(from = "MCP_BACKOFF_MULTIPLIER")]
+    mcp_backoff_multiplier: Option<f64>,
+    #[envconfig(from = "MCP_BACKOFF_MAX_INTERVAL")]
+    mcp_backoff_max_interval: Option<u64>,
+    #[envconfig(from = "MCP_BACKOFF_MAX_ELAPSED_TIME")]
+    mcp_backoff_max_elapsed_time: Option<u64>,
+    #[envconfig(from = "GITHUB_BACKOFF_CURRENT_INTERVAL")]
+    github_backoff_current_interval: Option<u64>,
+    #[envconfig(from = "GITHUB_BACKOFF_INITIAL_INTERVAL")]
+    github_backoff_initial_interval: Option<u64>,
+    #[envconfig(from = "GITHUB_BACKOFF_RANDOMIZATION_FACTOR")]
+    github_backoff_randomization_factor: Option<f64>,
+    #[envconfig(from = "GITHUB_BACKOFF_MULTIPLIER")]
+    github_backoff_multiplier: Option<f64>,
+    #[envconfig(from = "GITHUB_BACKOFF_MAX_INTERVAL")]
+    github_backoff_max_interval: Option<u64>,
+    #[envconfig(from = "GITHUB_BACKOFF_MAX_ELAPSED_TIME")]
+    github_backoff_max_elapsed_time: Option<u64>,
+    #[envconfig(from = "VIEWER_BACKOFF_CURRENT_INTERVAL")]
+    viewer_backoff_current_interval: Option<u64>,
+    #[envconfig(from = "VIEWER_BACKOFF_INITIAL_INTERVAL")]
+    viewer_backoff_initial_interval: Option<u64>,
+    #[envconfig(from = "VIEWER_BACKOFF_RANDOMIZATION_FACTOR")]
+    viewer_backoff_randomization_factor: Option<f64>,
+    #[envconfig(from = "VIEWER_BACKOFF_MULTIPLIER")]
+    viewer_backoff_multiplier: Option<f64>,
+    #[envconfig(from = "VIEWER_BACKOFF_MAX_INTERVAL")]
+    viewer_backoff_max_interval: Option<u64>,
+    #[envconfig(from = "VIEWER_BACKOFF_MAX_ELAPSED_TIME")]
+    viewer_backoff_max_elapsed_time: Option<u64>,
+    #[envconfig(from = "AGENT_COMPLETIONS_FIRST_CHUNK_TIMEOUT")]
+    agent_completions_first_chunk_timeout: Option<u64>,
+    #[envconfig(from = "AGENT_COMPLETIONS_OTHER_CHUNK_TIMEOUT")]
+    agent_completions_other_chunk_timeout: Option<u64>,
+    #[envconfig(from = "MCP_CONNECT_TIMEOUT")]
+    mcp_connect_timeout: Option<u64>,
+    #[envconfig(from = "MCP_CALL_TIMEOUT")]
+    mcp_call_timeout: Option<u64>,
+    #[envconfig(from = "CONFIG_BASE_DIR")]
+    config_base_dir: Option<String>,
+    #[envconfig(from = "MOCK_DELAY_MS")]
+    mock_delay_ms: Option<u64>,
+    #[envconfig(from = "MOCK_MAX_TOOL_CALLS")]
+    mock_max_tool_calls: Option<u32>,
+    #[envconfig(from = "FUNCTION_INVENTION_FORBID_OVERWRITE")]
+    function_invention_forbid_overwrite: Option<String>,
+    #[envconfig(from = "ADDRESS")]
+    address: Option<String>,
+    #[envconfig(from = "PORT")]
+    port: Option<u16>,
+}
+
+impl EnvConfigBuilder {
+    pub fn build(self) -> ConfigBuilder {
+        fn parse_bool(s: &str) -> bool {
+            let v = s.trim();
+            !v.is_empty() && v != "0" && !v.eq_ignore_ascii_case("false")
+        }
+        ConfigBuilder {
+            // -- HttpClient fields --
+            objectiveai_address: self.objectiveai_address,
+            objectiveai_authorization: self.objectiveai_authorization,
+            openrouter_address: self.openrouter_address,
+            openrouter_authorization: self.openrouter_authorization,
+            github_authorization: self.github_authorization,
+            mcp_authorization: self.mcp_authorization,
+            viewer_address: self.viewer_address,
+            viewer_signature: self.viewer_signature,
+            user_agent: self.user_agent,
+            http_referer: self.http_referer,
+            x_title: self.x_title,
+            commit_author_name: self.commit_author_name,
+            commit_author_email: self.commit_author_email,
+            // -- Other fields --
+            claude_agent_sdk: self.claude_agent_sdk.map(|s| parse_bool(&s)),
+            agent_completions_backoff_current_interval: self.agent_completions_backoff_current_interval,
+            agent_completions_backoff_initial_interval: self.agent_completions_backoff_initial_interval,
+            agent_completions_backoff_randomization_factor: self.agent_completions_backoff_randomization_factor,
+            agent_completions_backoff_multiplier: self.agent_completions_backoff_multiplier,
+            agent_completions_backoff_max_interval: self.agent_completions_backoff_max_interval,
+            agent_completions_backoff_max_elapsed_time: self.agent_completions_backoff_max_elapsed_time,
+            mcp_backoff_current_interval: self.mcp_backoff_current_interval,
+            mcp_backoff_initial_interval: self.mcp_backoff_initial_interval,
+            mcp_backoff_randomization_factor: self.mcp_backoff_randomization_factor,
+            mcp_backoff_multiplier: self.mcp_backoff_multiplier,
+            mcp_backoff_max_interval: self.mcp_backoff_max_interval,
+            mcp_backoff_max_elapsed_time: self.mcp_backoff_max_elapsed_time,
+            github_backoff_current_interval: self.github_backoff_current_interval,
+            github_backoff_initial_interval: self.github_backoff_initial_interval,
+            github_backoff_randomization_factor: self.github_backoff_randomization_factor,
+            github_backoff_multiplier: self.github_backoff_multiplier,
+            github_backoff_max_interval: self.github_backoff_max_interval,
+            github_backoff_max_elapsed_time: self.github_backoff_max_elapsed_time,
+            viewer_backoff_current_interval: self.viewer_backoff_current_interval,
+            viewer_backoff_initial_interval: self.viewer_backoff_initial_interval,
+            viewer_backoff_randomization_factor: self.viewer_backoff_randomization_factor,
+            viewer_backoff_multiplier: self.viewer_backoff_multiplier,
+            viewer_backoff_max_interval: self.viewer_backoff_max_interval,
+            viewer_backoff_max_elapsed_time: self.viewer_backoff_max_elapsed_time,
+            agent_completions_first_chunk_timeout: self.agent_completions_first_chunk_timeout,
+            agent_completions_other_chunk_timeout: self.agent_completions_other_chunk_timeout,
+            mcp_connect_timeout: self.mcp_connect_timeout,
+            mcp_call_timeout: self.mcp_call_timeout,
+            config_base_dir: self.config_base_dir,
+            mock_delay_ms: self.mock_delay_ms,
+            mock_max_tool_calls: self.mock_max_tool_calls,
+            function_invention_forbid_overwrite: self.function_invention_forbid_overwrite.map(|s| parse_bool(&s)),
+            address: self.address,
+            port: self.port,
+            suppress_output: None,
+        }
+    }
+}
+
+#[derive(Default)]
+pub struct ConfigBuilder {
+    // -- HttpClient fields (identical order across all 3 structs) --
+    pub objectiveai_address: Option<String>,
+    pub objectiveai_authorization: Option<String>,
+    pub openrouter_address: Option<String>,
+    pub openrouter_authorization: Option<String>,
+    pub github_authorization: Option<String>,
+    pub mcp_authorization: Option<String>,
+    pub viewer_address: Option<String>,
+    pub viewer_signature: Option<String>,
+    pub user_agent: Option<String>,
+    pub http_referer: Option<String>,
+    pub x_title: Option<String>,
+    pub commit_author_name: Option<String>,
+    pub commit_author_email: Option<String>,
+    // -- Other fields --
+    pub claude_agent_sdk: Option<bool>,
+    pub agent_completions_backoff_current_interval: Option<u64>,
+    pub agent_completions_backoff_initial_interval: Option<u64>,
+    pub agent_completions_backoff_randomization_factor: Option<f64>,
+    pub agent_completions_backoff_multiplier: Option<f64>,
+    pub agent_completions_backoff_max_interval: Option<u64>,
+    pub agent_completions_backoff_max_elapsed_time: Option<u64>,
+    pub mcp_backoff_current_interval: Option<u64>,
+    pub mcp_backoff_initial_interval: Option<u64>,
+    pub mcp_backoff_randomization_factor: Option<f64>,
+    pub mcp_backoff_multiplier: Option<f64>,
+    pub mcp_backoff_max_interval: Option<u64>,
+    pub mcp_backoff_max_elapsed_time: Option<u64>,
+    pub github_backoff_current_interval: Option<u64>,
+    pub github_backoff_initial_interval: Option<u64>,
+    pub github_backoff_randomization_factor: Option<f64>,
+    pub github_backoff_multiplier: Option<f64>,
+    pub github_backoff_max_interval: Option<u64>,
+    pub github_backoff_max_elapsed_time: Option<u64>,
+    pub viewer_backoff_current_interval: Option<u64>,
+    pub viewer_backoff_initial_interval: Option<u64>,
+    pub viewer_backoff_randomization_factor: Option<f64>,
+    pub viewer_backoff_multiplier: Option<f64>,
+    pub viewer_backoff_max_interval: Option<u64>,
+    pub viewer_backoff_max_elapsed_time: Option<u64>,
+    pub agent_completions_first_chunk_timeout: Option<u64>,
+    pub agent_completions_other_chunk_timeout: Option<u64>,
+    pub mcp_connect_timeout: Option<u64>,
+    pub mcp_call_timeout: Option<u64>,
+    pub config_base_dir: Option<String>,
+    pub mock_delay_ms: Option<u64>,
+    pub mock_max_tool_calls: Option<u32>,
+    pub function_invention_forbid_overwrite: Option<bool>,
+    pub address: Option<String>,
+    pub port: Option<u16>,
+    pub suppress_output: Option<bool>,
+}
+
+impl Envconfig for ConfigBuilder {
+    #[allow(deprecated)]
+    fn init() -> Result<Self, envconfig::Error> {
+        EnvConfigBuilder::init().map(|e| e.build())
+    }
+
+    fn init_from_env() -> Result<Self, envconfig::Error> {
+        EnvConfigBuilder::init_from_env().map(|e| e.build())
+    }
+
+    fn init_from_hashmap(hashmap: &std::collections::HashMap<String, String>) -> Result<Self, envconfig::Error> {
+        EnvConfigBuilder::init_from_hashmap(hashmap).map(|e| e.build())
+    }
+}
+
+impl ConfigBuilder {
+    pub fn build(self) -> Config {
+        Config {
+            // -- HttpClient fields --
+            objectiveai_address: self.objectiveai_address.unwrap_or_else(|| "https://api.objective-ai.io".to_string()),
+            objectiveai_authorization: self.objectiveai_authorization,
+            openrouter_address: self.openrouter_address.unwrap_or_else(|| "https://openrouter.ai/api/v1".to_string()),
+            openrouter_authorization: self.openrouter_authorization,
+            github_authorization: self.github_authorization,
+            mcp_authorization: self.mcp_authorization,
+            viewer_address: self.viewer_address,
+            viewer_signature: self.viewer_signature,
+            user_agent: self.user_agent.unwrap_or_else(|| "objectiveai-ai<admin@objectiveai-ai.io>".to_string()),
+            http_referer: self.http_referer.unwrap_or_else(|| "https://objectiveai-ai.io/".to_string()),
+            x_title: self.x_title.unwrap_or_else(|| "ObjectiveAI".to_string()),
+            commit_author_name: self.commit_author_name.unwrap_or_else(|| "ObjectiveAI".to_string()),
+            commit_author_email: self.commit_author_email.unwrap_or_else(|| "admin@objective-ai.io".to_string()),
+            // -- Other fields --
+            claude_agent_sdk: self.claude_agent_sdk.unwrap_or(true),
+            agent_completions_backoff_current_interval: self.agent_completions_backoff_current_interval.unwrap_or(100),
+            agent_completions_backoff_initial_interval: self.agent_completions_backoff_initial_interval.unwrap_or(100),
+            agent_completions_backoff_randomization_factor: self.agent_completions_backoff_randomization_factor.unwrap_or(0.5),
+            agent_completions_backoff_multiplier: self.agent_completions_backoff_multiplier.unwrap_or(1.5),
+            agent_completions_backoff_max_interval: self.agent_completions_backoff_max_interval.unwrap_or(1000),
+            agent_completions_backoff_max_elapsed_time: self.agent_completions_backoff_max_elapsed_time.unwrap_or(40000),
+            mcp_backoff_current_interval: self.mcp_backoff_current_interval.unwrap_or(100),
+            mcp_backoff_initial_interval: self.mcp_backoff_initial_interval.unwrap_or(100),
+            mcp_backoff_randomization_factor: self.mcp_backoff_randomization_factor.unwrap_or(0.5),
+            mcp_backoff_multiplier: self.mcp_backoff_multiplier.unwrap_or(1.5),
+            mcp_backoff_max_interval: self.mcp_backoff_max_interval.unwrap_or(1000),
+            mcp_backoff_max_elapsed_time: self.mcp_backoff_max_elapsed_time.unwrap_or(40000),
+            github_backoff_current_interval: self.github_backoff_current_interval.unwrap_or(100),
+            github_backoff_initial_interval: self.github_backoff_initial_interval.unwrap_or(100),
+            github_backoff_randomization_factor: self.github_backoff_randomization_factor.unwrap_or(0.5),
+            github_backoff_multiplier: self.github_backoff_multiplier.unwrap_or(1.5),
+            github_backoff_max_interval: self.github_backoff_max_interval.unwrap_or(1000),
+            github_backoff_max_elapsed_time: self.github_backoff_max_elapsed_time.unwrap_or(40000),
+            viewer_backoff_current_interval: self.viewer_backoff_current_interval.unwrap_or(100),
+            viewer_backoff_initial_interval: self.viewer_backoff_initial_interval.unwrap_or(100),
+            viewer_backoff_randomization_factor: self.viewer_backoff_randomization_factor.unwrap_or(0.5),
+            viewer_backoff_multiplier: self.viewer_backoff_multiplier.unwrap_or(1.5),
+            viewer_backoff_max_interval: self.viewer_backoff_max_interval.unwrap_or(1000),
+            viewer_backoff_max_elapsed_time: self.viewer_backoff_max_elapsed_time.unwrap_or(40000),
+            agent_completions_first_chunk_timeout: self.agent_completions_first_chunk_timeout.unwrap_or(60000),
+            agent_completions_other_chunk_timeout: self.agent_completions_other_chunk_timeout.unwrap_or(30000),
+            mcp_connect_timeout: self.mcp_connect_timeout.unwrap_or(30000),
+            mcp_call_timeout: self.mcp_call_timeout.unwrap_or(30000),
+            config_base_dir: match self.config_base_dir {
+                Some(dir) => std::path::PathBuf::from(dir),
+                None => dirs::home_dir()
+                    .unwrap_or_else(|| std::path::PathBuf::from("."))
+                    .join(".objectiveai"),
+            },
+            mock_delay_ms: self.mock_delay_ms.unwrap_or(0),
+            mock_max_tool_calls: self.mock_max_tool_calls.unwrap_or(1000),
+            function_invention_forbid_overwrite: self.function_invention_forbid_overwrite.unwrap_or(false),
+            address: self.address.unwrap_or_else(|| "0.0.0.0".to_string()),
+            port: self.port.unwrap_or(5000),
+            suppress_output: self.suppress_output.unwrap_or(false),
+        }
+    }
+}
+
+pub struct Config {
+    // -- HttpClient fields (identical order across all 3 structs) --
+    pub objectiveai_address: String,
+    pub objectiveai_authorization: Option<String>,
+    pub openrouter_address: String,
+    pub openrouter_authorization: Option<String>,
+    pub github_authorization: Option<String>,
+    pub mcp_authorization: Option<String>,
+    pub viewer_address: Option<String>,
+    pub viewer_signature: Option<String>,
+    pub user_agent: String,
+    pub http_referer: String,
+    pub x_title: String,
+    pub commit_author_name: String,
+    pub commit_author_email: String,
+    // -- Other fields --
+    pub claude_agent_sdk: bool,
+    pub agent_completions_backoff_current_interval: u64,
+    pub agent_completions_backoff_initial_interval: u64,
+    pub agent_completions_backoff_randomization_factor: f64,
+    pub agent_completions_backoff_multiplier: f64,
+    pub agent_completions_backoff_max_interval: u64,
+    pub agent_completions_backoff_max_elapsed_time: u64,
+    pub mcp_backoff_current_interval: u64,
+    pub mcp_backoff_initial_interval: u64,
+    pub mcp_backoff_randomization_factor: f64,
+    pub mcp_backoff_multiplier: f64,
+    pub mcp_backoff_max_interval: u64,
+    pub mcp_backoff_max_elapsed_time: u64,
+    pub github_backoff_current_interval: u64,
+    pub github_backoff_initial_interval: u64,
+    pub github_backoff_randomization_factor: f64,
+    pub github_backoff_multiplier: f64,
+    pub github_backoff_max_interval: u64,
+    pub github_backoff_max_elapsed_time: u64,
+    pub viewer_backoff_current_interval: u64,
+    pub viewer_backoff_initial_interval: u64,
+    pub viewer_backoff_randomization_factor: f64,
+    pub viewer_backoff_multiplier: f64,
+    pub viewer_backoff_max_interval: u64,
+    pub viewer_backoff_max_elapsed_time: u64,
+    pub agent_completions_first_chunk_timeout: u64,
+    pub agent_completions_other_chunk_timeout: u64,
+    pub mcp_connect_timeout: u64,
+    pub mcp_call_timeout: u64,
+    pub config_base_dir: std::path::PathBuf,
+    pub mock_delay_ms: u64,
+    pub mock_max_tool_calls: u32,
+    pub function_invention_forbid_overwrite: bool,
+    pub address: String,
+    pub port: u16,
+    pub suppress_output: bool,
+}
+
+pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, axum::Router)> {
+    let Config {
+        // -- HttpClient fields --
+        objectiveai_address,
+        objectiveai_authorization,
+        openrouter_address,
+        openrouter_authorization,
+        github_authorization,
+        mcp_authorization,
+        viewer_address,
+        viewer_signature,
+        user_agent,
+        http_referer,
+        x_title,
+        commit_author_name,
+        commit_author_email,
+        // -- Other fields --
+        claude_agent_sdk,
+        agent_completions_backoff_current_interval,
+        agent_completions_backoff_initial_interval,
+        agent_completions_backoff_randomization_factor,
+        agent_completions_backoff_multiplier,
+        agent_completions_backoff_max_interval,
+        agent_completions_backoff_max_elapsed_time,
+        mcp_backoff_current_interval,
+        mcp_backoff_initial_interval,
+        mcp_backoff_randomization_factor,
+        mcp_backoff_multiplier,
+        mcp_backoff_max_interval,
+        mcp_backoff_max_elapsed_time,
+        github_backoff_current_interval,
+        github_backoff_initial_interval,
+        github_backoff_randomization_factor,
+        github_backoff_multiplier,
+        github_backoff_max_interval,
+        github_backoff_max_elapsed_time,
+        viewer_backoff_current_interval,
+        viewer_backoff_initial_interval,
+        viewer_backoff_randomization_factor,
+        viewer_backoff_multiplier,
+        viewer_backoff_max_interval,
+        viewer_backoff_max_elapsed_time,
+        agent_completions_first_chunk_timeout,
+        agent_completions_other_chunk_timeout,
+        mcp_connect_timeout,
+        mcp_call_timeout,
+        config_base_dir,
+        mock_delay_ms,
+        mock_max_tool_calls,
+        function_invention_forbid_overwrite,
+        address,
+        port,
+        suppress_output,
+    } = config;
+
+    // HTTP Client
+    let http_client = reqwest::Client::new();
+
+    // Viewer Client
+    let viewer_client = Arc::new(viewer::Client::<ctx::DefaultContextExt>::new(
+        http_client.clone(),
+        viewer_address.clone(),
+        viewer_signature.clone(),
+        std::time::Duration::from_millis(viewer_backoff_current_interval),
+        std::time::Duration::from_millis(viewer_backoff_initial_interval),
+        viewer_backoff_randomization_factor,
+        viewer_backoff_multiplier,
+        std::time::Duration::from_millis(viewer_backoff_max_interval),
+        std::time::Duration::from_millis(viewer_backoff_max_elapsed_time),
+    ));
+
+    // Parse MCP authorization (shared between objectiveai_http and agent_completions clients)
+    let mcp_authorization: Option<Arc<std::collections::HashMap<String, String>>> = mcp_authorization
+        .and_then(|s| serde_json::from_str(&s).ok())
+        .map(Arc::new);
+
+    // ObjectiveAI HTTP Client
+    let objectiveai_http_client = Arc::new(objectiveai_http::Client::new(
+        http_client.clone(),
+        objectiveai_address,
+        objectiveai_authorization,
+        user_agent.clone(),
+        x_title.clone(),
+        http_referer.clone(),
+        github_authorization.as_ref().map(|s| Arc::new(s.clone())),
+        openrouter_authorization.as_ref().map(|s| Arc::new(s.clone())),
+        mcp_authorization.clone(),
+        viewer_signature.as_ref().map(|s| Arc::new(s.clone())),
+        viewer_address.as_ref().map(|s| Arc::new(s.clone())),
+        Some(Arc::new(commit_author_name.clone())),
+        Some(Arc::new(commit_author_email.clone())),
+    ));
+
+    // Vector Completion Votes Fetcher
+    let completion_votes_fetcher = Arc::new(
+        vector::completions::completion_votes_fetcher::ObjectiveAiFetcher::new(
+            objectiveai_http_client.clone(),
+        ),
+    );
+
+    // Vector Cache Vote Fetcher
+    let cache_vote_fetcher = Arc::new(
+        vector::completions::cache_vote_fetcher::ObjectiveAiFetcher::new(
+            objectiveai_http_client.clone(),
+        ),
+    );
+
+    // GitHub Client
+    let github_client = Arc::new(github::Client::new(
+        http_client.clone(),
+        github_authorization.clone(),
+        true, // allow_publish_without_byok
+        user_agent.clone(),
+        x_title.clone(),
+        http_referer.clone(),
+        std::time::Duration::from_millis(github_backoff_current_interval),
+        std::time::Duration::from_millis(github_backoff_initial_interval),
+        github_backoff_randomization_factor,
+        github_backoff_multiplier,
+        std::time::Duration::from_millis(github_backoff_max_interval),
+        std::time::Duration::from_millis(github_backoff_max_elapsed_time),
+    ));
+
+    let filesystem_client = Arc::new(filesystem::Client::new(
+        config_base_dir,
+        commit_author_name,
+        commit_author_email,
+    ));
+
+
+    // Retrieval: Retrieve Router
+    let retrieve_router = Arc::new(retrieval::retrieve::Router::new(
+        Arc::new(retrieval::retrieve::github::GithubClient::new(
+            github_client.clone(),
+        )),
+        Arc::new(retrieval::retrieve::filesystem::FilesystemClient::new(
+            filesystem_client.clone(),
+        )),
+        Arc::new(retrieval::retrieve::mock::MockClient),
+    ));
+
+    // MCP Client
+    let mcp_client = Arc::new(mcp::Client::new(
+        http_client.clone(),
+        user_agent.clone(),
+        x_title.clone(),
+        http_referer.clone(),
+        std::time::Duration::from_millis(mcp_connect_timeout),
+        std::time::Duration::from_millis(
+            mcp_backoff_current_interval,
+        ),
+        std::time::Duration::from_millis(
+            mcp_backoff_initial_interval,
+        ),
+        mcp_backoff_randomization_factor,
+        mcp_backoff_multiplier,
+        std::time::Duration::from_millis(mcp_backoff_max_interval),
+        std::time::Duration::from_millis(
+            mcp_backoff_max_elapsed_time,
+        ),
+        std::time::Duration::from_millis(mcp_call_timeout),
+    ));
+
+    // Agent Completions Client
+    let agent_completions_client = Arc::new(agent::completions::Client::new(
+        mcp_client.clone(),
+        mcp_authorization.clone(),
+        retrieve_router.clone(),
+        Arc::new(agent::completions::usage_handler::LogUsageHandler),
+        Arc::new(agent::completions::openrouter::Client::new(
+            http_client,
+            openrouter_address,
+            openrouter_authorization,
+            user_agent.clone(),
+            x_title.clone(),
+            http_referer.clone(),
+        )),
+        Arc::new(agent::completions::claude_agent_sdk::Client::new(user_agent, claude_agent_sdk)),
+        Arc::new(agent::completions::mock::Client {
+            delay: std::time::Duration::from_millis(mock_delay_ms),
+            max_tool_calls: mock_max_tool_calls,
+        }),
+        viewer_client.clone(),
+        std::time::Duration::from_millis(
+            agent_completions_backoff_current_interval,
+        ),
+        std::time::Duration::from_millis(
+            agent_completions_backoff_initial_interval,
+        ),
+        agent_completions_backoff_randomization_factor,
+        agent_completions_backoff_multiplier,
+        std::time::Duration::from_millis(agent_completions_backoff_max_interval),
+        std::time::Duration::from_millis(
+            agent_completions_backoff_max_elapsed_time,
+        ),
+        std::time::Duration::from_millis(agent_completions_first_chunk_timeout),
+        std::time::Duration::from_millis(agent_completions_other_chunk_timeout),
+    ));
+
+    // Vector Completions Client
+    let vector_completions_client = Arc::new(vector::completions::Client::new(
+        agent_completions_client.clone(),
+        retrieve_router.clone(),
+        completion_votes_fetcher.clone(),
+        cache_vote_fetcher.clone(),
+        Arc::new(vector::completions::usage_handler::LogUsageHandler),
+    ));
+
+    // Vector Completions Cache Client
+    let vector_completions_cache_client =
+        Arc::new(vector::completions::cache::Client::new(
+            completion_votes_fetcher.clone(),
+            cache_vote_fetcher.clone(),
+        ));
+
+    // Retrieval: List Router
+    let list_router = Arc::new(retrieval::list::Router::new(
+        Arc::new(retrieval::list::objectiveai::ObjectiveAiClient::new(
+            objectiveai_http_client.clone(),
+        )),
+        Arc::new(retrieval::list::filesystem::FilesystemClient::new(
+            filesystem_client.clone(),
+        )),
+        Arc::new(retrieval::list::mock::MockClient),
+    ));
+
+    // Retrieval: Usage Router
+    let usage_router = Arc::new(retrieval::usage::Router::new(
+        Arc::new(retrieval::usage::objectiveai::ObjectiveAiClient::new(
+            objectiveai_http_client.clone(),
+        )),
+    ));
+
+    // Function Inventions Client
+    let function_inventions_client =
+        Arc::new(functions::inventions::Client::new(
+            agent_completions_client.clone(),
+            github_client.clone(),
+            filesystem_client.clone(),
+            retrieve_router.clone(),
+            Arc::new(functions::inventions::usage_handler::LogUsageHandler),
+            true, // persist
+            function_invention_forbid_overwrite,
+        ));
+
+    // Function Inventions Recursive Client
+    let function_inventions_recursive_client =
+        Arc::new(functions::inventions::recursive::Client::new(
+            function_inventions_client.clone(),
+            viewer_client.clone(),
+            Arc::new(
+                functions::inventions::recursive::usage_handler::LogUsageHandler,
+            ),
+        ));
+
+    // Function Executions Client
+    let function_executions_client =
+        Arc::new(functions::executions::Client::new(
+            agent_completions_client.clone(),
+            vector_completions_client.clone(),
+            viewer_client.clone(),
+            retrieve_router.clone(),
+            Arc::new(functions::executions::usage_handler::LogUsageHandler),
+        ));
+
+    // Laboratory Executions Client
+    #[cfg(feature = "laboratories-local")]
+    let laboratory_executions_client: Arc<
+        crate::laboratories::executions::local::Client<_, _, _, _, _, _, _, _, _>,
+    > = Arc::new(crate::laboratories::executions::local::Client {
+        agent_client: agent_completions_client.clone(),
+        retrieve_router: retrieve_router.clone(),
+        usage_handler: Arc::new(
+            crate::laboratories::executions::usage_handler::LogUsageHandler,
+        ),
+        viewer: viewer_client.clone(),
+    });
+    #[cfg(not(feature = "laboratories-local"))]
+    let laboratory_executions_client =
+        Arc::new(crate::laboratories::executions::UnimplementedClient);
+
+    // Functions Profiles Computations Client
+    let profile_computations_client =
+        Arc::new(functions::profiles::computations::ObjectiveAiClient::new(
+            objectiveai_http_client.clone(),
+        ));
+
+    // Auth Client
+    let auth_client = Arc::new(auth::ObjectiveAiClient::new(
+        objectiveai_http_client.clone(),
+    ));
+
+    // Persistent Cache Client
+    let persistent_cache = Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient);
+
+    // Router
+    let app = axum::Router::new()
+        // Agent Completions - create
+        .route(
+            "/agent/completions",
+            axum::routing::post({
+                let agent_completions_client = agent_completions_client.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(body): Json<
+                    objectiveai::agent::completions::request::AgentCompletionCreateParams,
+                >| {
+                    create_agent_completion(agent_completions_client, headers, persistent_cache, suppress_output, body)
+                }
+            }),
+        )
+        // Vector Completions - create
+        .route(
+            "/vector/completions",
+            axum::routing::post({
+                let vector_completions_client = vector_completions_client.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(body): Json<
+                    objectiveai::vector::completions::request::VectorCompletionCreateParams,
+                >| {
+                    create_vector_completion(vector_completions_client, headers, persistent_cache, suppress_output, body)
+                }
+            }),
+        )
+        // Vector Completions - get completion votes
+        .route(
+            "/vector/completions/votes",
+            axum::routing::get({
+                let vector_completions_cache_client =
+                    vector_completions_cache_client.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(body): Json<
+                    objectiveai::vector::completions::cache::request::GetCompletionVotesRequest,
+                >| {
+                    get_vector_completion_votes(
+                        vector_completions_cache_client,
+                        headers,
+                        persistent_cache,
+                        suppress_output,
+                        body,
+                    )
+                }
+            }),
+        )
+        // Vector Completions - get cache vote
+        .route(
+            "/vector/completions/cache",
+            axum::routing::get({
+                let vector_completions_cache_client =
+                    vector_completions_cache_client.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(body): Json<
+                    objectiveai::vector::completions::cache::request::CacheVoteRequestOwned,
+                >| {
+                    get_vector_cache_vote(
+                        vector_completions_cache_client,
+                        headers,
+                        persistent_cache,
+                        suppress_output,
+                        body,
+                    )
+                }
+            }),
+        )
+        // Functions - list
+        .route(
+            "/functions/list",
+            axum::routing::get({
+                let list_router = list_router.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::functions::request::ListFunctionsRequest,
+                >| {
+                    list_functions(list_router, headers, persistent_cache, suppress_output, params)
+                }
+            }),
+        )
+        // Functions - get
+        .route(
+            "/functions",
+            axum::routing::get({
+                let retrieve_router = retrieve_router.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::RemotePathCommitOptional,
+                >| {
+                    get_function(retrieve_router, headers, persistent_cache, suppress_output, params)
+                }
+            }),
+        )
+        // Functions - get usage
+        .route(
+            "/functions/usage",
+            axum::routing::get({
+                let usage_router = usage_router.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::functions::request::GetFunctionRequest,
+                >| {
+                    get_function_usage(usage_router, headers, persistent_cache, suppress_output, params)
+                }
+            }),
+        )
+        // Function Executions - create
+        .route(
+            "/functions/executions",
+            axum::routing::post({
+                let function_executions_client = function_executions_client.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(body): Json<
+                    objectiveai::functions::executions::request::FunctionExecutionCreateParams,
+                >| {
+                    execute_function(
+                        function_executions_client,
+                        headers,
+                        persistent_cache,
+                        suppress_output,
+                        body,
+                    )
+                }
+            }),
+        )
+        // Function Profiles - list
+        .route(
+            "/functions/profiles/list",
+            axum::routing::get({
+                let list_router = list_router.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::functions::profiles::request::ListProfilesRequest,
+                >| {
+                    list_profiles(list_router, headers, persistent_cache, suppress_output, params)
+                }
+            }),
+        )
+        // Function Profiles - get
+        .route(
+            "/functions/profiles",
+            axum::routing::get({
+                let retrieve_router = retrieve_router.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::RemotePathCommitOptional,
+                >| {
+                    get_profile(retrieve_router, headers, persistent_cache, suppress_output, params)
+                }
+            }),
+        )
+        // Function Profiles - get usage
+        .route(
+            "/functions/profiles/usage",
+            axum::routing::get({
+                let usage_router = usage_router.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::functions::profiles::request::GetProfileRequest,
+                >| {
+                    get_profile_usage(usage_router, headers, persistent_cache, suppress_output, params)
+                }
+            }),
+        )
+        // Function-Profile Pairs - list
+        .route(
+            "/functions/profiles/pairs/list",
+            axum::routing::get({
+                let list_router = list_router.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::functions::request::ListFunctionProfilePairsRequest,
+                >| {
+                    list_function_profile_pairs(list_router, headers, persistent_cache, suppress_output, params)
+                }
+            }),
+        )
+        // Function-Profile Pairs - get usage
+        .route(
+            "/functions/profiles/pairs/usage",
+            axum::routing::get({
+                let usage_router = usage_router.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::functions::request::GetFunctionProfilePairUsageRequest,
+                >| {
+                    get_function_profile_pair_usage(usage_router, headers, persistent_cache, suppress_output, params)
+                }
+            }),
+        )
+        // Function Inventions - create
+        .route(
+            "/functions/inventions",
+            axum::routing::post({
+                let function_inventions_client = function_inventions_client.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(body): Json<
+                    objectiveai::functions::inventions::request::FunctionInventionCreateParams,
+                >| {
+                    create_function_invention(function_inventions_client, headers, persistent_cache, suppress_output, body)
+                }
+            }),
+        )
+        // Function Inventions Recursive - create
+        .route(
+            "/functions/inventions/recursive",
+            axum::routing::post({
+                let function_inventions_recursive_client =
+                    function_inventions_recursive_client.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(body): Json<
+                    objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams,
+                >| {
+                    create_function_invention_recursive(
+                        function_inventions_recursive_client,
+                        headers,
+                        persistent_cache,
+                        suppress_output,
+                        body,
+                    )
+                }
+            }),
+        )
+        // Function Profile Computations - create
+        .route(
+            "/functions/profiles/compute",
+            axum::routing::post({
+                let profile_computations_client =
+                    profile_computations_client.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(body): Json<
+                    objectiveai::functions::profiles::computations::request::FunctionProfileComputationCreateParams,
+                >| {
+                    create_profile_computation(
+                        profile_computations_client,
+                        headers,
+                        persistent_cache,
+                        suppress_output,
+                        body,
+                    )
+                }
+            }),
+        )
+        // Auth - create API key
+        .route(
+            "/auth/keys",
+            axum::routing::post({
+                let auth_client = auth_client.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(body): Json<
+                    objectiveai::auth::request::CreateApiKeyRequest,
+                >| {
+                    create_api_key(auth_client, headers, persistent_cache, suppress_output, body)
+                }
+            }),
+        )
+        // Auth - create OpenRouter BYOK API key
+        .route(
+            "/auth/keys/openrouter",
+            axum::routing::post({
+                let auth_client = auth_client.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(body): Json<
+                    objectiveai::auth::request::CreateOpenRouterByokApiKeyRequest,
+                >| {
+                    create_openrouter_byok_api_key(auth_client, headers, persistent_cache, suppress_output, body)
+                }
+            }),
+        )
+        // Auth - disable API key
+        .route(
+            "/auth/keys",
+            axum::routing::delete({
+                let auth_client = auth_client.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(body): Json<
+                    objectiveai::auth::request::DisableApiKeyRequest,
+                >| {
+                    disable_api_key(auth_client, headers, persistent_cache, suppress_output, body)
+                }
+            }),
+        )
+        // Auth - delete OpenRouter BYOK API key
+        .route(
+            "/auth/keys/openrouter",
+            axum::routing::delete({
+                let auth_client = auth_client.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap| {
+                    delete_openrouter_byok_api_key(auth_client, headers, persistent_cache, suppress_output)
+                }
+            }),
+        )
+        // Auth - list API keys
+        .route(
+            "/auth/keys",
+            axum::routing::get({
+                let auth_client = auth_client.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap| {
+                    list_api_keys(auth_client, headers, persistent_cache, suppress_output)
+                }
+            }),
+        )
+        // Auth - get OpenRouter BYOK API key
+        .route(
+            "/auth/keys/openrouter",
+            axum::routing::get({
+                let auth_client = auth_client.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap| {
+                    get_openrouter_byok_api_key(auth_client, headers, persistent_cache, suppress_output)
+                }
+            }),
+        )
+        // Auth - get credits
+        .route(
+            "/auth/credits",
+            axum::routing::get({
+                let auth_client = auth_client.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap| {
+                    get_credits(auth_client, headers, persistent_cache, suppress_output)
+                }
+            }),
+        )
+        // Swarm - list
+        .route(
+            "/swarms/list",
+            axum::routing::get({
+                let list_router = list_router.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::swarm::request::ListSwarmsRequest,
+                >| {
+                    list_swarms(list_router, headers, persistent_cache, suppress_output, params)
+                }
+            }),
+        )
+        // Swarm - get
+        .route(
+            "/swarms",
+            axum::routing::get({
+                let retrieve_router = retrieve_router.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::RemotePathCommitOptional,
+                >| {
+                    get_swarm(retrieve_router, headers, persistent_cache, suppress_output, params)
+                }
+            }),
+        )
+        // Swarm - get usage
+        .route(
+            "/swarms/usage",
+            axum::routing::get({
+                let usage_router = usage_router.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::swarm::request::GetSwarmRequest,
+                >| {
+                    get_swarm_usage(usage_router, headers, persistent_cache, suppress_output, params)
+                }
+            }),
+        )
+        // Agent - list
+        .route(
+            "/agents/list",
+            axum::routing::get({
+                let list_router = list_router.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::agent::request::ListAgentsRequest,
+                >| {
+                    list_agents(list_router, headers, persistent_cache, suppress_output, params)
+                }
+            }),
+        )
+        // Agent - get
+        .route(
+            "/agents",
+            axum::routing::get({
+                let retrieve_router = retrieve_router.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::RemotePathCommitOptional,
+                >| {
+                    get_agent(retrieve_router, headers, persistent_cache, suppress_output, params)
+                }
+            }),
+        )
+        // Agent - get usage
+        .route(
+            "/agents/usage",
+            axum::routing::get({
+                let usage_router = usage_router.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::agent::request::GetAgentRequest,
+                >| {
+                    get_agent_usage(usage_router, headers, persistent_cache, suppress_output, params)
+                }
+            }),
+        )
+        // Error - create
+        .route(
+            "/error",
+            axum::routing::post({
+                let error_client = Arc::new(crate::error::Client::new());
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(body): Json<
+                    objectiveai::error::request::ErrorCreateParams,
+                >| {
+                    create_error(error_client, headers, persistent_cache, suppress_output, body)
+                }
+            }),
+        )
+        // Laboratory Executions - create
+        .route(
+            "/laboratories/executions",
+            axum::routing::post({
+                let laboratory_executions_client = laboratory_executions_client.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(body): Json<
+                    objectiveai::laboratories::executions::request::LaboratoryExecutionCreateParams,
+                >| {
+                    execute_laboratory(
+                        laboratory_executions_client,
+                        headers,
+                        persistent_cache,
+                        suppress_output,
+                        body,
+                    )
+                }
+            }),
+        )
+        // CORS
+        .layer(
+            tower_http::cors::CorsLayer::new()
+                .allow_origin(tower_http::cors::Any)
+                .allow_methods(tower_http::cors::Any)
+                .allow_headers(tower_http::cors::Any)
+                .expose_headers(tower_http::cors::Any),
+        );
+
+    let listener =
+        tokio::net::TcpListener::bind(format!("{}:{}", address, port))
+            .await?;
+
+    Ok((listener, app))
+}
+
+pub async fn serve(listener: tokio::net::TcpListener, app: axum::Router) -> std::io::Result<()> {
+    axum::serve(listener, app).await
+}
+
+pub async fn run(config: Config) -> std::io::Result<()> {
+    let suppress_output = config.suppress_output;
+    let (listener, app) = setup(config).await?;
+    if !suppress_output {
+        let addr = listener.local_addr()?;
+        eprintln!("listening on {addr}");
+    }
+    serve(listener, app).await
+}
+
+// Create Context
+
+fn context(headers: &axum::http::HeaderMap, persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>, suppress_output: bool) -> ctx::Context<ctx::DefaultContextExt, impl ctx::persistent_cache::PersistentCacheClient> {
+    ctx::Context::new(
+        Arc::new(ctx::DefaultContextExt),
+        persistent_cache,
+        rust_decimal::Decimal::ONE,
+        suppress_output,
+        headers,
+    )
+}
+
+// Agent Completions
+
+async fn create_agent_completion(
+    client: Arc<
+        agent::completions::Client<
+            ctx::DefaultContextExt,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation,
+            > + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl agent::completions::usage_handler::UsageHandler<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+        >,
+    >,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    body: objectiveai::agent::completions::request::AgentCompletionCreateParams,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    if body.stream.unwrap_or(false) {
+        match client
+            .create_streaming_handle_usage(
+                ctx,
+                Arc::new(body),
+                None,
+                None,
+                None,
+                None,
+                true,
+            )
+            .await
+        {
+            Ok(stream) => Sse::new(
+                stream
+                    .filter_map(|item| {
+                        match item {
+                            agent::completions::StreamItem::Chunk(chunk) => {
+                                Some(Ok::<Event, Infallible>(
+                                    Event::default()
+                                        .data(serde_json::to_string(&chunk).unwrap()),
+                                ))
+                            }
+                            agent::completions::StreamItem::State(_) => None,
+                        }
+                    })
+                    .chain(StreamOnce::new(
+                        Ok(Event::default().data("[DONE]")),
+                    )),
+            )
+            .into_response(),
+            Err(e) => ResponseError::from(&e).into_response(),
+        }
+    } else {
+        match client
+            .create_unary_handle_usage(
+                ctx,
+                Arc::new(body),
+                None,
+                None,
+                None,
+                None,
+                true,
+            )
+            .await
+        {
+            Ok(r) => Json(r).into_response(),
+            Err(e) => ResponseError::from(&e).into_response(),
+        }
+    }
+}
+
+// Vector Completions
+
+async fn create_vector_completion(
+    client: Arc<
+        vector::completions::Client<
+            ctx::DefaultContextExt,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation,
+            > + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl agent::completions::usage_handler::UsageHandler<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+            impl vector::completions::completion_votes_fetcher::Fetcher<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+            impl vector::completions::cache_vote_fetcher::Fetcher<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+            impl vector::completions::usage_handler::UsageHandler<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+        >,
+    >,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    body: objectiveai::vector::completions::request::VectorCompletionCreateParams,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    if body.stream.unwrap_or(false) {
+        match client
+            .create_streaming_handle_usage(ctx, Arc::new(body))
+            .await
+        {
+            Ok(stream) => Sse::new(
+                stream
+                    .map(|chunk| {
+                        Ok::<Event, Infallible>(
+                            Event::default()
+                                .data(serde_json::to_string(&chunk).unwrap()),
+                        )
+                    })
+                    .chain(StreamOnce::new(
+                        Ok(Event::default().data("[DONE]")),
+                    )),
+            )
+            .into_response(),
+            Err(e) => ResponseError::from(&e).into_response(),
+        }
+    } else {
+        match client.create_unary_handle_usage(ctx, Arc::new(body)).await {
+            Ok(r) => Json(r).into_response(),
+            Err(e) => ResponseError::from(&e).into_response(),
+        }
+    }
+}
+
+// Functions
+
+async fn list_functions(
+    list_router: Arc<ListRouter>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    params: objectiveai::functions::request::ListFunctionsRequest,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    let source = params.source.map(|s| match s {
+        objectiveai::functions::request::ListFunctionsSource::All => retrieval::list::SourceFilter::All,
+        objectiveai::functions::request::ListFunctionsSource::Mock => retrieval::list::SourceFilter::Mock,
+        objectiveai::functions::request::ListFunctionsSource::Filesystem => retrieval::list::SourceFilter::Filesystem,
+        objectiveai::functions::request::ListFunctionsSource::Objectiveai => retrieval::list::SourceFilter::Objectiveai,
+    });
+    match list_router.list_functions(&ctx, source).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn get_function_usage(
+    usage_router: Arc<UsageRouter>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    params: objectiveai::functions::request::GetFunctionRequest,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match usage_router.get_function_usage(&ctx, &params).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn execute_function(
+    client: Arc<
+        functions::executions::Client<
+            ctx::DefaultContextExt,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::usage_handler::UsageHandler<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+            impl vector::completions::completion_votes_fetcher::Fetcher<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+            impl vector::completions::cache_vote_fetcher::Fetcher<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+            impl vector::completions::usage_handler::UsageHandler<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl functions::executions::usage_handler::UsageHandler<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+        >,
+    >,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    request: objectiveai::functions::executions::request::FunctionExecutionCreateParams,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    if request.stream.unwrap_or(false) {
+        match client
+            .create_streaming_handle_usage(ctx, Arc::new(request))
+            .await
+        {
+            Ok(stream) => Sse::new(
+                stream
+                    .map(|chunk| {
+                        Ok::<Event, Infallible>(
+                            Event::default()
+                                .data(serde_json::to_string(&chunk).unwrap()),
+                        )
+                    })
+                    .chain(StreamOnce::new(
+                        Ok(Event::default().data("[DONE]")),
+                    )),
+            )
+            .into_response(),
+            Err(e) => ResponseError::from(&e).into_response(),
+        }
+    } else {
+        match client
+            .create_unary_handle_usage(ctx, Arc::new(request))
+            .await
+        {
+            Ok(r) => Json(r).into_response(),
+            Err(e) => ResponseError::from(&e).into_response(),
+        }
+    }
+}
+
+// Profiles
+
+async fn list_profiles(
+    list_router: Arc<ListRouter>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    params: objectiveai::functions::profiles::request::ListProfilesRequest,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    let source = params.source.map(|s| match s {
+        objectiveai::functions::profiles::request::ListProfilesSource::All => retrieval::list::SourceFilter::All,
+        objectiveai::functions::profiles::request::ListProfilesSource::Mock => retrieval::list::SourceFilter::Mock,
+        objectiveai::functions::profiles::request::ListProfilesSource::Filesystem => retrieval::list::SourceFilter::Filesystem,
+        objectiveai::functions::profiles::request::ListProfilesSource::Objectiveai => retrieval::list::SourceFilter::Objectiveai,
+    });
+    match list_router.list_profiles(&ctx, source).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn get_profile_usage(
+    usage_router: Arc<UsageRouter>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    params: objectiveai::functions::profiles::request::GetProfileRequest,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match usage_router.get_profile_usage(&ctx, &params).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+// Function-Profile Pairs
+
+async fn list_function_profile_pairs(
+    list_router: Arc<ListRouter>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    _params: objectiveai::functions::request::ListFunctionProfilePairsRequest,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match list_router.list_function_profile_pairs(&ctx).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn get_function_profile_pair_usage(
+    usage_router: Arc<UsageRouter>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    params: objectiveai::functions::request::GetFunctionProfilePairUsageRequest,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match usage_router.get_function_profile_pair_usage(&ctx, &params).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+// Vector Completions Cache
+
+async fn get_vector_completion_votes(
+    client: Arc<
+        vector::completions::cache::Client<
+            ctx::DefaultContextExt,
+            impl vector::completions::completion_votes_fetcher::Fetcher<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+            impl vector::completions::cache_vote_fetcher::Fetcher<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+        >,
+    >,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    body: objectiveai::vector::completions::cache::request::GetCompletionVotesRequest,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match client.fetch_completion_votes(ctx, &body.id).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn get_vector_cache_vote(
+    client: Arc<
+        vector::completions::cache::Client<
+            ctx::DefaultContextExt,
+            impl vector::completions::completion_votes_fetcher::Fetcher<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+            impl vector::completions::cache_vote_fetcher::Fetcher<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+        >,
+    >,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    body: objectiveai::vector::completions::cache::request::CacheVoteRequestOwned,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match client
+        .fetch_cache_vote(
+            ctx,
+            &body.agent,
+            &body.messages,
+            &body.responses,
+        )
+        .await
+    {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+// Functions - get
+
+async fn get_function(
+    retrieve_router: Arc<RetrieveRouter>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    params: objectiveai::RemotePathCommitOptional,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match retrieve_router.endpoint_get_function(&ctx, &params).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+// Profiles - get
+
+async fn get_profile(
+    retrieve_router: Arc<RetrieveRouter>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    params: objectiveai::RemotePathCommitOptional,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match retrieve_router.endpoint_get_profile(&ctx, &params).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+// Profile Computations
+
+async fn create_profile_computation(
+    // client: Arc<
+    //     impl functions::profiles::computations::Client<ctx::DefaultContextExt>
+    //     + Send
+    //     + Sync
+    //     + 'static,
+    // >,
+    // https://github.com/rust-lang/rust/issues/100013
+    // using a concrete type for client instead
+    client: Arc<functions::profiles::computations::ObjectiveAiClient>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    request: objectiveai::functions::profiles::computations::request::FunctionProfileComputationCreateParams,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    if request.stream.unwrap_or(false) {
+        match client.create_streaming(ctx, Arc::new(request)).await {
+            Ok(stream) => Sse::new(
+                stream
+                    .map(|result| {
+                        Ok::<Event, Infallible>(
+                            Event::default().data(
+                                match result {
+                                    Ok(chunk) => serde_json::to_string(&chunk),
+                                    Err(e) => serde_json::to_string(&e),
+                                }
+                                .unwrap(),
+                            ),
+                        )
+                    })
+                    .chain(StreamOnce::new(
+                        Ok(Event::default().data("[DONE]")),
+                    )),
+            )
+            .into_response(),
+            Err(e) => e.into_response(),
+        }
+    } else {
+        match client.create_unary(ctx, Arc::new(request)).await {
+            Ok(r) => Json(r).into_response(),
+            Err(e) => e.into_response(),
+        }
+    }
+}
+
+// Auth
+
+async fn create_api_key(
+    client: Arc<
+        impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
+    >,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    body: objectiveai::auth::request::CreateApiKeyRequest,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match client.create_api_key(ctx, body).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn create_openrouter_byok_api_key(
+    client: Arc<
+        impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
+    >,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    body: objectiveai::auth::request::CreateOpenRouterByokApiKeyRequest,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match client.create_openrouter_byok_api_key(ctx, body).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn disable_api_key(
+    client: Arc<
+        impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
+    >,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    body: objectiveai::auth::request::DisableApiKeyRequest,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match client.disable_api_key(ctx, body).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn delete_openrouter_byok_api_key(
+    client: Arc<
+        impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
+    >,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match client.delete_openrouter_byok_api_key(ctx).await {
+        Ok(()) => axum::http::StatusCode::OK.into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn list_api_keys(
+    client: Arc<
+        impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
+    >,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match client.list_api_keys(ctx).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn get_openrouter_byok_api_key(
+    client: Arc<
+        impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
+    >,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match client.get_openrouter_byok_api_key(ctx).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn get_credits(
+    client: Arc<
+        impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
+    >,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match client.get_credits(ctx).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+// Swarm
+
+async fn list_swarms(
+    list_router: Arc<ListRouter>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    params: objectiveai::swarm::request::ListSwarmsRequest,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    let source = params.source.map(|s| match s {
+        objectiveai::swarm::request::ListSwarmsSource::All => retrieval::list::SourceFilter::All,
+        objectiveai::swarm::request::ListSwarmsSource::Mock => retrieval::list::SourceFilter::Mock,
+        objectiveai::swarm::request::ListSwarmsSource::Filesystem => retrieval::list::SourceFilter::Filesystem,
+        objectiveai::swarm::request::ListSwarmsSource::Objectiveai => retrieval::list::SourceFilter::Objectiveai,
+    });
+    match list_router.list_swarms(&ctx, source).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn get_swarm(
+    retrieve_router: Arc<RetrieveRouter>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    params: objectiveai::RemotePathCommitOptional,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match retrieve_router.endpoint_get_swarm(&ctx, &params).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn get_swarm_usage(
+    usage_router: Arc<UsageRouter>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    params: objectiveai::swarm::request::GetSwarmRequest,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match usage_router.get_swarm_usage(&ctx, &params).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+// Agent
+
+async fn list_agents(
+    list_router: Arc<ListRouter>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    params: objectiveai::agent::request::ListAgentsRequest,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    let source = params.source.map(|s| match s {
+        objectiveai::agent::request::ListAgentsSource::All => retrieval::list::SourceFilter::All,
+        objectiveai::agent::request::ListAgentsSource::Mock => retrieval::list::SourceFilter::Mock,
+        objectiveai::agent::request::ListAgentsSource::Filesystem => retrieval::list::SourceFilter::Filesystem,
+        objectiveai::agent::request::ListAgentsSource::Objectiveai => retrieval::list::SourceFilter::Objectiveai,
+    });
+    match list_router.list_agents(&ctx, source).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn get_agent(
+    retrieve_router: Arc<RetrieveRouter>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    params: objectiveai::RemotePathCommitOptional,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match retrieve_router.endpoint_get_agent(&ctx, &params).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn get_agent_usage(
+    usage_router: Arc<UsageRouter>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    params: objectiveai::agent::request::GetAgentRequest,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match usage_router.get_agent_usage(&ctx, &params).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+// Function Inventions
+
+async fn create_function_invention(
+    client: Arc<
+        functions::inventions::Client<
+            ctx::DefaultContextExt,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation,
+            > + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl agent::completions::usage_handler::UsageHandler<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+            impl functions::inventions::usage_handler::UsageHandler<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+        >,
+    >,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    body: objectiveai::functions::inventions::request::FunctionInventionCreateParams,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    if body.stream.unwrap_or(false) {
+        match client
+            .create_streaming_handle_usage(ctx, Arc::new(body))
+            .await
+        {
+            Ok(stream) => Sse::new(
+                stream
+                    .map(|chunk| {
+                        Ok::<Event, Infallible>(
+                            Event::default()
+                                .data(serde_json::to_string(&chunk).unwrap()),
+                        )
+                    })
+                    .chain(StreamOnce::new(
+                        Ok(Event::default().data("[DONE]")),
+                    )),
+            )
+            .into_response(),
+            Err(e) => ResponseError::from(&e).into_response(),
+        }
+    } else {
+        match client
+            .create_unary_handle_usage(ctx, Arc::new(body))
+            .await
+        {
+            Ok(r) => Json(r).into_response(),
+            Err(e) => ResponseError::from(&e).into_response(),
+        }
+    }
+}
+
+// Function Inventions Recursive
+
+async fn create_function_invention_recursive(
+    client: Arc<
+        functions::inventions::recursive::Client<
+            ctx::DefaultContextExt,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation,
+            > + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl agent::completions::usage_handler::UsageHandler<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+            impl functions::inventions::usage_handler::UsageHandler<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl functions::inventions::recursive::usage_handler::UsageHandler<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+        >,
+    >,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    body: objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    if body.stream.unwrap_or(false) {
+        match client
+            .create_streaming_handle_usage(ctx, Arc::new(body))
+            .await
+        {
+            Ok(stream) => Sse::new(
+                stream
+                    .map(|chunk| {
+                        Ok::<Event, Infallible>(
+                            Event::default()
+                                .data(serde_json::to_string(&chunk).unwrap()),
+                        )
+                    })
+                    .chain(StreamOnce::new(
+                        Ok(Event::default().data("[DONE]")),
+                    )),
+            )
+            .into_response(),
+            Err(e) => ResponseError::from(&e).into_response(),
+        }
+    } else {
+        match client
+            .create_unary_handle_usage(ctx, Arc::new(body))
+            .await
+        {
+            Ok(r) => Json(r).into_response(),
+            Err(e) => ResponseError::from(&e).into_response(),
+        }
+    }
+}
+
+// Error
+
+async fn create_error(
+    client: Arc<crate::error::Client>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    body: objectiveai::error::request::ErrorCreateParams,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    if body.stream.unwrap_or(false) {
+        match client.create_streaming(&ctx, &body) {
+            Ok(stream) => Sse::new(
+                stream
+                    .map(|result| {
+                        Ok::<Event, Infallible>(
+                            Event::default().data(
+                                match result {
+                                    Ok(chunk) => serde_json::to_string(&chunk),
+                                    Err(e) => serde_json::to_string(&e),
+                                }
+                                .unwrap(),
+                            ),
+                        )
+                    })
+                    .chain(StreamOnce::new(
+                        Ok(Event::default().data("[DONE]")),
+                    )),
+            )
+            .into_response(),
+            Err(e) => e.into_response(),
+        }
+    } else {
+        match client.create_unary(&ctx, &body) {
+            Ok(r) => Json(r).into_response(),
+            Err(e) => e.into_response(),
+        }
+    }
+}
+
+// Laboratory Executions
+
+async fn execute_laboratory(
+    client: Arc<
+        impl crate::laboratories::executions::LaboratoryClient<ctx::DefaultContextExt> + 'static,
+    >,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    request: objectiveai::laboratories::executions::request::LaboratoryExecutionCreateParams,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    if request.stream.unwrap_or(false) {
+        match client
+            .create_streaming_handle_usage(ctx, Arc::new(request))
+            .await
+        {
+            Ok(stream) => Sse::new(
+                stream
+                    .map(|chunk| {
+                        Ok::<Event, Infallible>(
+                            Event::default()
+                                .data(serde_json::to_string(&chunk).unwrap()),
+                        )
+                    })
+                    .chain(StreamOnce::new(
+                        Ok(Event::default().data("[DONE]")),
+                    )),
+            )
+            .into_response(),
+            Err(e) => ResponseError::from(&e).into_response(),
+        }
+    } else {
+        match client
+            .create_unary_handle_usage(ctx, Arc::new(request))
+            .await
+        {
+            Ok(r) => Json(r).into_response(),
+            Err(e) => ResponseError::from(&e).into_response(),
+        }
+    }
+}

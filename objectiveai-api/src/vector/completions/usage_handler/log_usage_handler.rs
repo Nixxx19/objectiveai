@@ -11,16 +11,18 @@ impl<CTXEXT> super::UsageHandler<CTXEXT> for LogUsageHandler
 where
     CTXEXT: Send + Sync + 'static,
 {
-    async fn handle_usage(
+    async fn handle_usage<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        _ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, PC>,
         _request: Arc<objectiveai::vector::completions::request::VectorCompletionCreateParams>,
         response: objectiveai::vector::completions::response::unary::VectorCompletion,
     ) {
-        println!(
-            "[{}] cost: {}",
-            response.id.as_str(),
-            response.usage.total_cost,
-        );
+        if !ctx.suppress_output {
+            println!(
+                "[{}] cost: {}",
+                response.id.as_str(),
+                response.usage.total_cost,
+            );
+        }
     }
 }

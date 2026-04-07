@@ -1,10 +1,31 @@
-use crate::chat;
+use crate::agent;
+use objectiveai_macros::schema_override;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
+/// Request body for retrieving completion votes by vector completion ID.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "vector.completions.cache.GetCompletionVotesRequest")]
+pub struct GetCompletionVotesRequest {
+    /// The vector completion ID.
+    pub id: String,
+}
+
+#[schema_override(RefOwnedEnum)]
 #[derive(Debug, Clone, Serialize)]
+#[serde(untagged)]
 pub enum CacheVoteRequest<'a> {
     Ref(CacheVoteRequestRef<'a>),
     Owned(CacheVoteRequestOwned),
+}
+
+impl schemars::JsonSchema for CacheVoteRequest<'static> {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        CacheVoteRequestOwned::schema_name()
+    }
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        CacheVoteRequestOwned::json_schema(generator)
+    }
 }
 
 impl<'de> serde::de::Deserialize<'de> for CacheVoteRequest<'static> {
@@ -17,20 +38,19 @@ impl<'de> serde::de::Deserialize<'de> for CacheVoteRequest<'static> {
     }
 }
 
+#[schema_override(Ref)]
 #[derive(Debug, Clone, Serialize)]
 pub struct CacheVoteRequestRef<'a> {
-    pub model: &'a chat::completions::request::Model,
-    pub models: Option<&'a [chat::completions::request::Model]>,
-    pub messages: &'a [chat::completions::request::Message],
-    pub tools: Option<&'a [chat::completions::request::Tool]>,
-    pub responses: &'a [chat::completions::request::RichContent],
+    pub agent: &'a agent::InlineAgentBaseWithFallbacksOrRemote,
+    pub messages: &'a [agent::completions::message::Message],
+    pub responses: &'a [agent::completions::message::RichContent],
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[schema_override(Owned)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "vector.completions.cache.CacheVoteRequest")]
 pub struct CacheVoteRequestOwned {
-    pub model: chat::completions::request::Model,
-    pub models: Option<Vec<chat::completions::request::Model>>,
-    pub messages: Vec<chat::completions::request::Message>,
-    pub tools: Option<Vec<chat::completions::request::Tool>>,
-    pub responses: Vec<chat::completions::request::RichContent>,
+    pub agent: agent::InlineAgentBaseWithFallbacksOrRemote,
+    pub messages: Vec<agent::completions::message::Message>,
+    pub responses: Vec<agent::completions::message::RichContent>,
 }

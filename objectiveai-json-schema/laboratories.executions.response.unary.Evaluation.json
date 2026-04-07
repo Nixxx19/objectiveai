@@ -1,0 +1,75 @@
+{
+  "title": "laboratories.executions.response.unary.Evaluation",
+  "description": "A single evaluation agent completion within a laboratory execution (non-streaming).",
+  "type": "object",
+  "properties": {
+    "agent_index": {
+      "description": "Container index (0-based).",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "continuation": {
+      "description": "Continuation state for multi-turn conversations.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "created": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "error.ResponseError"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "index": {
+      "description": "Evaluation index (0-based).",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "agent.completions.response.unary.Message"
+      }
+    },
+    "object": {
+      "description": "The object type (always \"agent.completion\").",
+      "$ref": "agent.completions.response.unary.Object"
+    },
+    "output": {
+      "anyOf": [
+        {
+          "$ref": "functions.expression.InputValue"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "upstream": {
+      "description": "Upstream provider",
+      "$ref": "agent.Upstream"
+    },
+    "usage": {
+      "$ref": "agent.completions.response.Usage"
+    }
+  }
+}

@@ -1,13 +1,13 @@
 //! Vector completion client implementation.
 
 use crate::{
-    chat, ctx,
+    agent, ctx,
     util::{ChoiceIndexer, StreamOnce},
 };
 use futures::{FutureExt, Stream, StreamExt, TryStreamExt};
-use rand::Rng;
+use rand::{Rng, SeedableRng};
 use rust_decimal::Decimal;
-use std::{collections::HashMap, sync::Arc, time};
+use std::{collections::HashMap, hash::Hasher, sync::Arc, time};
 
 /// Generates a unique response ID for a vector completion.
 pub fn response_id(created: u64) -> String {
@@ -15,7 +15,7 @@ pub fn response_id(created: u64) -> String {
     format!("vctcpl-{}-{}", uuid.simple(), created)
 }
 
-fn invert_and_l1_normalize(mut xs: Vec<Decimal>) -> Vec<Decimal> {
+pub(super) fn invert_and_l1_normalize(mut xs: Vec<Decimal>) -> Vec<Decimal> {
     if xs.is_empty() {
         return xs;
     }
@@ -35,38 +35,15 @@ fn invert_and_l1_normalize(mut xs: Vec<Decimal>) -> Vec<Decimal> {
     }
     xs
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use rust_decimal::dec;
-
-    #[test]
-    fn invert_and_l1_normalize_example() {
-        let v = vec![dec!(0.75), dec!(0.25), dec!(0.0)];
-        let out = invert_and_l1_normalize(v);
-        assert_eq!(out, vec![dec!(0.125), dec!(0.375), dec!(0.5)]);
-    }
-
-    #[test]
-    fn invert_and_l1_normalize_uniform_when_all_ones() {
-        let v = vec![dec!(1.0), dec!(1.0), dec!(1.0), dec!(1.0)];
-        // invert -> all zeros -> uniform
-        let out = invert_and_l1_normalize(v);
-        assert_eq!(out, vec![dec!(0.25), dec!(0.25), dec!(0.25), dec!(0.25)]);
-    }
-}
-
 /// Client for creating vector completions.
 ///
-/// Orchestrates multiple LLM chat completions to vote on response options,
+/// Orchestrates multiple LLM agent completions to vote on response options,
 /// combining their votes using weights to produce final scores.
-pub struct Client<CTXEXT, FENSLLM, CUSG, FENS, FVVOTE, FCVOTE, VUSG> {
-    /// The underlying chat completion client.
-    pub chat_client: Arc<chat::completions::Client<CTXEXT, FENSLLM, CUSG>>,
-    /// Fetcher for Ensemble definitions.
-    pub ensemble_fetcher:
-        Arc<crate::ensemble::fetcher::CachingFetcher<CTXEXT, FENS>>,
+pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG, FVVOTE, FCVOTE, VUSG> {
+    /// The underlying agent completion client.
+    pub agent_client: Arc<agent::completions::Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG>>,
+    /// Retrieve router for resolving swarms and agents.
+    pub retrieve_router: Arc<crate::retrieval::retrieve::Router<RETRG, RETRF, RETRM, CTXEXT>>,
     /// Fetcher for votes from historical completions.
     pub completion_votes_fetcher: Arc<FVVOTE>,
     /// Fetcher for votes from the global cache.
@@ -75,22 +52,20 @@ pub struct Client<CTXEXT, FENSLLM, CUSG, FENS, FVVOTE, FCVOTE, VUSG> {
     pub usage_handler: Arc<VUSG>,
 }
 
-impl<CTXEXT, FENSLLM, CUSG, FENS, FVVOTE, FCVOTE, VUSG>
-    Client<CTXEXT, FENSLLM, CUSG, FENS, FVVOTE, FCVOTE, VUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG, FVVOTE, FCVOTE, VUSG>
+    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG, FVVOTE, FCVOTE, VUSG>
 {
     /// Creates a new vector completion client.
     pub fn new(
-        chat_client: Arc<chat::completions::Client<CTXEXT, FENSLLM, CUSG>>,
-        ensemble_fetcher: Arc<
-            crate::ensemble::fetcher::CachingFetcher<CTXEXT, FENS>,
-        >,
+        agent_client: Arc<agent::completions::Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG>>,
+        retrieve_router: Arc<crate::retrieval::retrieve::Router<RETRG, RETRF, RETRM, CTXEXT>>,
         completion_votes_fetcher: Arc<FVVOTE>,
         cache_vote_fetcher: Arc<FCVOTE>,
         usage_handler: Arc<VUSG>,
     ) -> Self {
         Self {
-            chat_client,
-            ensemble_fetcher,
+            agent_client,
+            retrieve_router,
             completion_votes_fetcher,
             cache_vote_fetcher,
             usage_handler,
@@ -98,19 +73,17 @@ impl<CTXEXT, FENSLLM, CUSG, FENS, FVVOTE, FCVOTE, VUSG>
     }
 }
 
-impl<CTXEXT, FENSLLM, CUSG, FENS, FVVOTE, FCVOTE, VUSG>
-    Client<CTXEXT, FENSLLM, CUSG, FENS, FVVOTE, FCVOTE, VUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG, FVVOTE, FCVOTE, VUSG>
+    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG, FVVOTE, FCVOTE, VUSG>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
-    FENSLLM: crate::ensemble_llm::fetcher::Fetcher<CTXEXT>
-        + Send
-        + Sync
-        + 'static,
-    CUSG: chat::completions::usage_handler::UsageHandler<CTXEXT>
-        + Send
-        + Sync
-        + 'static,
-    FENS: crate::ensemble::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    OPENROUTER: agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation> + Send + Sync + 'static,
+    CLAUDEAGENTSDK: agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation> + Send + Sync + 'static,
+    MOCK: agent::completions::UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation> + Send + Sync + 'static,
+    RETRG: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRF: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRM: crate::retrieval::retrieve::Client<CTXEXT>,
+    ACUSG: agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
     FVVOTE: super::completion_votes_fetcher::Fetcher<CTXEXT>
         + Send
         + Sync
@@ -123,7 +96,7 @@ where
     /// Collects all streaming chunks into a single response.
     pub async fn create_unary_handle_usage(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::vector::completions::request::VectorCompletionCreateParams>,
     ) -> Result<
         objectiveai::vector::completions::response::unary::VectorCompletion,
@@ -150,7 +123,7 @@ where
     /// Spawns a background task to track usage after the stream completes.
     pub async fn create_streaming_handle_usage(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::vector::completions::request::VectorCompletionCreateParams>,
     ) -> Result<
         impl Stream<Item = objectiveai::vector::completions::response::streaming::VectorCompletionChunk>
@@ -181,20 +154,15 @@ where
                     Some(aggregate) => aggregate.push(&chunk),
                     None => aggregate = Some(chunk.clone()),
                 }
-                let _ = tx.send(Ok(chunk));
+                if tx.send(Ok(chunk)).is_err() {
+                    ctx.cancel();
+                }
             }
             drop(stream);
             drop(tx);
             let response: objectiveai::vector::completions::response::unary::VectorCompletion =
                 aggregate.unwrap().into();
-            let all_retry_or_cached_or_rng = request
-                .retry
-                .as_deref()
-                .is_some_and(|id| id == response.id.as_str())
-                || response.id.is_empty();
-            let any_ok_completions =
-                response.completions.iter().any(|c| c.error.is_none());
-            if any_ok_completions && !all_retry_or_cached_or_rng {
+            if response.usage.any_usage() {
                 self.usage_handler
                     .handle_usage(ctx, request, response)
                     .await;
@@ -212,19 +180,17 @@ where
     }
 }
 
-impl<CTXEXT, FENSLLM, CUSG, FENS, FVVOTE, FCVOTE, VUSG>
-    Client<CTXEXT, FENSLLM, CUSG, FENS, FVVOTE, FCVOTE, VUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG, FVVOTE, FCVOTE, VUSG>
+    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, ACUSG, FVVOTE, FCVOTE, VUSG>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
-    FENSLLM: crate::ensemble_llm::fetcher::Fetcher<CTXEXT>
-        + Send
-        + Sync
-        + 'static,
-    CUSG: chat::completions::usage_handler::UsageHandler<CTXEXT>
-        + Send
-        + Sync
-        + 'static,
-    FENS: crate::ensemble::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    OPENROUTER: agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation> + Send + Sync + 'static,
+    CLAUDEAGENTSDK: agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation> + Send + Sync + 'static,
+    MOCK: agent::completions::UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation> + Send + Sync + 'static,
+    RETRG: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRF: crate::retrieval::retrieve::Client<CTXEXT>,
+    RETRM: crate::retrieval::retrieve::Client<CTXEXT>,
+    ACUSG: agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
     FVVOTE: super::completion_votes_fetcher::Fetcher<CTXEXT>
         + Send
         + Sync
@@ -234,11 +200,11 @@ where
 {
     /// Creates a streaming vector completion.
     ///
-    /// Orchestrates chat completions across all LLMs in the ensemble, extracting
+    /// Orchestrates agent completions across all LLMs in the swarm, extracting
     /// votes from each and combining them with weights to produce scores.
     pub async fn create_streaming(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<objectiveai::vector::completions::request::VectorCompletionCreateParams>,
     ) -> Result<
         impl Stream<Item = objectiveai::vector::completions::response::streaming::VectorCompletionChunk>
@@ -246,6 +212,11 @@ where
         + 'static,
         super::Error,
     >{
+        // Reject conflicting from_cache + continuation.
+        if request.from_cache.is_some_and(|b| b) && request.continuation.is_some() {
+            return Err(super::Error::CacheAndContinuationConflict);
+        }
+
         // timestamp and identify the completion
         let created = time::SystemTime::now()
             .duration_since(time::UNIX_EPOCH)
@@ -261,57 +232,14 @@ where
             ));
         }
 
-        // validate credits + fetch ensemble if needed + fetch retry votes if needed
-        let (ensemble, mut static_votes, profile) = match (
-            &request.ensemble,
-            &request.retry,
-        ) {
-            (
-                objectiveai::vector::completions::request::Ensemble::Id(
-                    ensemble_id,
-                ),
-                Some(retry),
-            ) => {
-                let (ensemble, mut votes) = tokio::try_join!(
-                    self.ensemble_fetcher.fetch(ctx.clone(), ensemble_id).map(
-                        |result| {
-                            match result {
-                                Ok(Some((ensemble, _))) => Ok(ensemble),
-                                Ok(None) => Err(super::Error::EnsembleNotFound),
-                                Err(e) => Err(super::Error::FetchEnsemble(e)),
-                            }
-                        }
-                    ),
-                    self.completion_votes_fetcher
-                        .fetch(ctx.clone(), retry)
-                        .map(|result| {
-                            match result {
-                                Ok(Some(votes)) => Ok(votes),
-                                Ok(None) => Err(super::Error::RetryNotFound),
-                                Err(e) => Err(super::Error::FetchRetry(e)),
-                            }
-                        }),
-                )?;
-                votes.iter_mut().for_each(|vote| {
-                    vote.retry = Some(true);
-                    vote.from_cache = Some(true);
-                    vote.from_rng = None;
-                    vote.completion_index = None;
-                });
-                (ensemble, votes, request.profile.clone())
-            }
-            (
-                objectiveai::vector::completions::request::Ensemble::Provided(
-                    ensemble_base,
-                ),
-                Some(retry),
-            ) => {
-                let (ensemble, aligned_profile) =
-                    objectiveai::ensemble::Ensemble::try_from_with_profile(
-                        ensemble_base.clone(),
-                        request.profile.clone(),
-                    )
-                    .map_err(super::Error::InvalidEnsemble)?;
+        // resolve and convert swarm via retrieve router
+        let swarm = self.retrieve_router.get_swarm(&ctx, request.swarm.clone()).await
+            .map_err(|e| super::Error::InvalidSwarm(e.message.to_string()))?
+            .into_inline();
+
+        // fetch retry votes if needed
+        let mut static_votes = match &request.retry {
+            Some(retry) => {
                 let mut votes = self
                     .completion_votes_fetcher
                     .fetch(ctx.clone(), retry)
@@ -324,88 +252,32 @@ where
                 votes.iter_mut().for_each(|vote| {
                     vote.retry = Some(true);
                     vote.from_cache = Some(true);
-                    vote.from_rng = None;
                     vote.completion_index = None;
                 });
-                (ensemble, votes, aligned_profile)
+                votes
             }
-            (
-                objectiveai::vector::completions::request::Ensemble::Id(
-                    ensemble_id,
-                ),
-                None,
-            ) => {
-                let ensemble = self
-                    .ensemble_fetcher
-                    .fetch(ctx.clone(), ensemble_id)
-                    .map(|result| match result {
-                        Ok(Some((ensemble, _))) => Ok(ensemble),
-                        Ok(None) => Err(super::Error::EnsembleNotFound),
-                        Err(e) => Err(super::Error::FetchEnsemble(e)),
-                    })
-                    .await?;
-                (ensemble, Vec::new(), request.profile.clone())
-            }
-            (
-                objectiveai::vector::completions::request::Ensemble::Provided(
-                    ensemble_base,
-                ),
-                None,
-            ) => {
-                let (ensemble, aligned_profile) =
-                    objectiveai::ensemble::Ensemble::try_from_with_profile(
-                        ensemble_base.clone(),
-                        request.profile.clone(),
-                    )
-                    .map_err(super::Error::InvalidEnsemble)?;
-                (ensemble, Vec::new(), aligned_profile)
-            }
+            None => Vec::new(),
         };
 
         // prune votes that don't match responses length
         static_votes.retain(|vote| vote.vote.len() == request_responses_len);
 
-        // normalize profile into (weight, invert) pairs
-        let profile_pairs: Vec<(Decimal, bool)> =
-            profile.to_weights_and_invert();
-
-        // validate profile
-        if profile_pairs.len() != ensemble.llms.len() {
-            return Err(super::Error::InvalidProfile(
-                "profile length must match ensemble length".to_string(),
+        // extract profile weights from swarm (already validated during conversion)
+        let agent_count = swarm.agents.len();
+        if agent_count == 0 {
+            return Err(super::Error::InvalidSwarm(
+                "swarm must have at least one agent".to_string(),
             ));
         }
-        let mut positive_weight_count = 0;
-        for (weight, _) in &profile_pairs {
-            if *weight > Decimal::ZERO {
-                if *weight > Decimal::ONE || *weight < Decimal::ZERO {
-                    return Err(super::Error::InvalidProfile(
-                        "profile weights must be between 0 and 1".to_string(),
-                    ));
-                } else if *weight > Decimal::ZERO {
-                    positive_weight_count += 1;
-                }
-            }
-        }
-        if positive_weight_count < 1 {
-            return Err(super::Error::InvalidProfile(
-                "profile must have one or more positive weights".to_string(),
-            ));
-        }
+        let profile_pairs: Vec<(Decimal, bool)> = swarm.weights.to_weights_and_invert();
 
         // compute hash IDs
         let prompt_id = {
             let mut prompt = request.messages.clone();
-            objectiveai::chat::completions::request::prompt::prepare(
+            objectiveai::agent::completions::message::prompt::prepare(
                 &mut prompt,
             );
-            objectiveai::chat::completions::request::prompt::id(&prompt)
-        };
-        let tools_id = match &request.tools {
-            Some(tools) if !tools.is_empty() => {
-                Some(objectiveai::chat::completions::request::tools::id(tools))
-            }
-            _ => None,
+            objectiveai::agent::completions::message::prompt::id(&prompt)
         };
         let responses_ids = {
             let mut responses = request.responses.clone();
@@ -419,34 +291,35 @@ where
 
         // create a vector of LLMs with useful info
         // only ones that may stream
-        let mut llms = ensemble
-            .llms
+        let flat_swarm_len = swarm.agents.iter().map(|a| a.count as usize).sum::<usize>();
+        let mut llms = swarm
+            .agents
             .into_iter()
             .enumerate()
-            .flat_map(|(ensemble_index, llm)| {
-                let count = llm.count as usize;
-                let (weight, invert) = profile_pairs[ensemble_index];
+            .flat_map(|(swarm_index, agent)| {
+                let count = agent.count as usize;
+                let (weight, invert) = profile_pairs[swarm_index];
                 std::iter::repeat_n(
-                    (ensemble_index, llm, weight, invert),
+                    (swarm_index, agent, weight, invert),
                     count,
                 )
             })
             .enumerate()
             .filter_map(
-                |(flat_ensemble_index, (ensemble_index, llm, weight, invert))| {
+                |(flat_swarm_index, (swarm_index, agent, weight, invert))| {
                     if weight <= Decimal::ZERO {
-                        // skip LLMs with zero weight
+                        // skip agents with zero weight
                         None
                     } else if static_votes.iter().any(|v| {
-                        v.flat_ensemble_index == flat_ensemble_index as u64
+                        v.flat_swarm_index == flat_swarm_index as u64
                     }) {
-                        // skip LLMs that have votes already
+                        // skip agents that have votes already
                         None
                     } else {
                         Some((
-                            flat_ensemble_index,
-                            ensemble_index,
-                            llm,
+                            flat_swarm_index,
+                            swarm_index,
+                            agent,
                             weight,
                             invert,
                         ))
@@ -457,29 +330,33 @@ where
 
         // fetch from cache if requested
         if request.from_cache.is_some_and(|bool| bool) {
-            // collect model refs so they're owned here
-            let mut model_refs = Vec::with_capacity(llms.len());
-            for (_, _, llm, _, _) in &llms {
-                let model =
-                    objectiveai::chat::completions::request::Model::Provided(
-                        llm.inner.base.clone(),
-                    );
-                let models = llm.fallbacks.as_ref().map(|fallbacks| {
-                    fallbacks
-                        .iter()
-                        .map(|fallback| objectiveai::chat::completions::request::Model::Provided(
-                            fallback.base.clone(),
-                        ))
-                        .collect::<Vec<_>>()
+            // collect agent refs so they're owned here
+            let mut agent_refs: Vec<objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote> =
+                Vec::with_capacity(llms.len());
+            for (_, _, agent, _, _) in &llms {
+                let inline_wf = match &agent.inner {
+                    objectiveai::agent::AgentWithFallbacks::Remote(r) => &r.inner,
+                    objectiveai::agent::AgentWithFallbacks::Inline(i) => i,
+                };
+                let primary_base = inline_wf.inner.base().to_owned();
+                let fallback_bases = inline_wf.fallbacks.as_ref().map(|fbs| {
+                    fbs.iter().map(|fb| fb.base().to_owned()).collect()
                 });
-                model_refs.push((model, models));
+                agent_refs.push(
+                    objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
+                        objectiveai::agent::InlineAgentBaseWithFallbacks {
+                            inner: primary_base,
+                            fallbacks: fallback_bases,
+                        },
+                    ),
+                );
             }
             // execute the futures
             let mut futs = Vec::with_capacity(llms.len());
             for (
-                (flat_ensemble_index, ensemble_index, _, weight, _),
-                (model, models),
-            ) in llms.iter().zip(model_refs.iter())
+                (flat_swarm_index, swarm_index, _, weight, _),
+                agent_ref,
+            ) in llms.iter().zip(agent_refs.iter())
             {
                 let cache_vote_fetcher = self.cache_vote_fetcher.clone();
                 let request = request.clone();
@@ -488,16 +365,14 @@ where
                 futs.push(async move {
                     match cache_vote_fetcher.fetch(
                         ctx,
-                        model,
-                        models.as_deref(),
+                        agent_ref,
                         &request.messages,
-                        request.tools.as_deref(),
                         &request.responses,
                     ).await {
                         Ok(Some(mut vote)) => {
                             // update fields
-                            vote.ensemble_index = *ensemble_index as u64;
-                            vote.flat_ensemble_index = *flat_ensemble_index as u64;
+                            vote.swarm_index = *swarm_index as u64;
+                            vote.flat_swarm_index = *flat_swarm_index as u64;
                             vote.weight = *weight;
                             vote.retry = None;
                             vote.from_cache = Some(true);
@@ -539,69 +414,19 @@ where
         }
 
         // filter LLMs that now have votes from cache
-        llms.retain(|(flat_ensemble_index, _, _, _, _)| {
+        llms.retain(|(flat_swarm_index, _, _, _, _)| {
             !static_votes
                 .iter()
-                .any(|v| v.flat_ensemble_index == *flat_ensemble_index as u64)
+                .any(|v| v.flat_swarm_index == *flat_swarm_index as u64)
         });
 
-        // generate votes with RNG if requested
-        if request.from_rng.is_some_and(|bool| bool) {
-            let mut rng = rand::rng();
-            for (flat_ensemble_index, ensemble_index, llm, weight, invert) in
-                &llms
-            {
-                // initialize the vote vector
-                let mut vote = vec![Decimal::ZERO; request_responses_len];
-                // generate a random value for each entry
-                let mut sum = Decimal::ZERO;
-                for i in 0..request_responses_len {
-                    let v = Decimal::from(rng.random_range(0..=u64::MAX))
-                        / Decimal::from(u64::MAX);
-                    vote[i] = v;
-                    sum += v;
-                }
-                // normalize the vote vector
-                for v in &mut vote {
-                    *v /= sum;
-                }
-                // optionally invert the vote based on the profile
-                if *invert {
-                    vote = invert_and_l1_normalize(vote);
-                }
-                // push the vote
-                static_votes.push(
-                    objectiveai::vector::completions::response::Vote {
-                        model: llm.inner.id.clone(),
-                        ensemble_index: *ensemble_index as u64,
-                        flat_ensemble_index: *flat_ensemble_index as u64,
-                        prompt_id: prompt_id.clone(),
-                        tools_id: tools_id.clone(),
-                        responses_ids: responses_ids.clone(),
-                        vote,
-                        weight: *weight,
-                        retry: None,
-                        from_cache: None,
-                        from_rng: Some(true),
-                        completion_index: None,
-                    },
-                );
-            }
-        }
-
-        // filter LLMs that now have votes from RNG
-        llms.retain(|(flat_ensemble_index, _, _, _, _)| {
-            !static_votes
-                .iter()
-                .any(|v| v.flat_ensemble_index == *flat_ensemble_index as u64)
-        });
 
         // sort retry/cached/rng votes
-        static_votes.sort_by_key(|vote| vote.flat_ensemble_index);
+        static_votes.sort_by_key(|vote| vote.flat_swarm_index);
 
         // track usage
         let mut usage =
-            objectiveai::vector::completions::response::Usage::default();
+            objectiveai::agent::completions::response::Usage::default();
 
         // track scores and weights
         let mut weights = vec![Decimal::ZERO; request_responses_len];
@@ -614,24 +439,24 @@ where
         // completion chunk indices are first come first served
         let indexer = Arc::new(ChoiceIndexer::new(0));
 
-        // stream votes from each LLM in the ensemble
+        // stream votes from each LLM in the swarm
         let mut vote_stream =
             futures::stream::select_all(llms.into_iter().map(
-                |(flat_ensemble_index, ensemble_index, llm, weight, invert)| {
+                |(flat_swarm_index, swarm_index, agent, weight, invert)| {
                     futures::stream::once(self.clone().llm_create_streaming(
                         ctx.clone(),
                         response_id.clone(),
                         created,
-                        ensemble.id.clone(),
+                        swarm.id.clone(),
                         indexer.clone(),
-                        llm,
-                        ensemble_index,
-                        flat_ensemble_index,
+                        agent,
+                        swarm_index,
+                        flat_swarm_index,
+                        flat_swarm_len,
                         weight,
                         invert,
                         request.clone(),
                         prompt_id.clone(),
-                        tools_id.clone(),
                         responses_ids.clone(),
                     ))
                     .flatten()
@@ -664,7 +489,7 @@ where
                         scores,
                         weights,
                         created,
-                        ensemble: ensemble.id,
+                        swarm: swarm.id,
                         object: objectiveai::vector::completions::response::streaming::Object::VectorCompletionChunk,
                         usage: None,
                     }
@@ -701,7 +526,7 @@ where
                 for completion in &chunk.completions
                 {
                     if let Some(completion_usage) = &completion.inner.usage {
-                        usage.push_chat_completion_usage(&completion_usage);
+                        usage.push(&completion_usage);
                     }
                 }
 
@@ -738,261 +563,772 @@ where
         }))
     }
 
-    /// Creates a streaming completion for a single LLM in the ensemble.
+    /// Creates a completion for a single LLM in the swarm, extracting its vote.
     ///
-    /// Generates prefix data for vote extraction, streams the chat completion,
-    /// and extracts votes from the LLM's response.
+    /// Builds an AgentCompletionCreateParams with an inline agent for each LLM,
+    /// sends the request via the agent completions client using per-agent
+    /// transform_messages closures to attach voting instructions, and extracts
+    /// votes from the response.
     async fn llm_create_streaming(
         self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         id: String,
         created: u64,
-        ensemble: String,
+        swarm: String,
         indexer: Arc<ChoiceIndexer>,
-        llm: objectiveai::ensemble_llm::EnsembleLlmWithFallbacksAndCount,
-        ensemble_index: usize,
-        flat_ensemble_index: usize,
+        agent: objectiveai::agent::AgentWithFallbacksWithCount,
+        swarm_index: usize,
+        flat_swarm_index: usize,
+        flat_swarm_len: usize,
         weight: Decimal,
         invert_vote: bool,
         request: Arc<objectiveai::vector::completions::request::VectorCompletionCreateParams>,
         prompt_id: String,
-        tools_id: Option<String>,
         responses_ids: Vec<String>,
     ) -> impl Stream<Item = objectiveai::vector::completions::response::streaming::VectorCompletionChunk> + Send + 'static
     {
+        use objectiveai::agent::completions::message::{
+            Message, UserMessage, RichContent,
+        };
+
         let request_responses_len = request.responses.len();
 
-        // create pfx data for each LLM
-        let (vector_pfx_data, vector_pfx_indices) = {
-            let mut rng = rand::rng();
-            let mut vector_pfx_data = HashMap::with_capacity(
-                1 + llm.fallbacks.as_ref().map(Vec::len).unwrap_or(0),
-            );
-            let mut vector_pfx_indices = Vec::with_capacity(
-                1 + llm.fallbacks.as_ref().map(Vec::len).unwrap_or(0),
-            );
-            for llm in std::iter::once(&llm.inner).chain(
-                llm.fallbacks
-                    .iter()
-                    .map(|fallbacks| fallbacks.iter())
-                    .flatten(),
+        // create pfx data and pfx indices for each agent (primary + fallbacks)
+        let mut vector_pfx_data: HashMap<String, super::PfxData> = HashMap::new();
+        let mut vector_pfx_indices: HashMap<String, Vec<(String, usize)>> = HashMap::new();
+        {
+            for a in std::iter::once(agent.inner.agent()).chain(
+                agent.inner.fallbacks()
+                    .into_iter()
+                    .flat_map(|fallbacks| fallbacks.iter()),
             ) {
-                // create the prefixes
+                let agent_id = a.id().to_string();
+                let mut rng = make_rng(
+                    request.seed.map(|s| per_agent_seed(s, &agent_id, flat_swarm_index, &prompt_id, &responses_ids) as u64),
+                );
+                let top_logprobs = a.top_logprobs();
                 let pfx_tree = super::PfxTree::new(
                     &mut rng,
                     request_responses_len,
-                    match llm.base.top_logprobs {
+                    match top_logprobs {
                         Some(0) | Some(1) | None => 20,
                         Some(top_logprobs) => top_logprobs as usize,
                     },
                 );
-
-                // map prefix to response index
-                let pfx_indices =
-                    pfx_tree.pfx_indices(&mut rng, request_responses_len);
-
-                let (
-                    // regex capture pattern matching response keys as-is
-                    responses_key_pattern,
-                    // regex capture pattern matching response keys stripped of first and last tick
-                    responses_key_pattern_stripped,
-                ) = pfx_tree.regex_patterns(&pfx_indices);
-
+                let pfx_indices = pfx_tree.pfx_indices(&mut rng, request_responses_len);
+                let responses_key_pattern = pfx_tree.regex_pattern(&pfx_indices);
                 vector_pfx_data.insert(
-                    llm.id.clone(),
+                    agent_id.clone(),
                     super::PfxData {
                         pfx_tree,
                         responses_key_pattern,
-                        responses_key_pattern_stripped,
                         invert_vote,
                     },
                 );
-                vector_pfx_indices.push(Arc::new(pfx_indices));
+                vector_pfx_indices.insert(agent_id, pfx_indices);
             }
-            (vector_pfx_data, vector_pfx_indices)
-        };
+        }
 
-        // stream
-        let mut stream = match self
-            .chat_client
-            .clone()
-            .create_streaming_for_vector_handle_usage(
-                ctx,
-                request,
-                vector_pfx_indices,
-                llm,
-            )
-            .await
-        {
-            Ok(stream) => stream,
-            Err(e) => {
-                return futures::future::Either::Left(
-                    Self::llm_create_streaming_vector_error(
-                        id,
-                        indexer.get(flat_ensemble_index),
-                        e,
-                        created,
-                        ensemble,
-                    ),
+        // Determine the output mode
+        let output_mode = agent.inner.base().output_mode();
+
+        // Build per-agent transform_messages closures
+        let transform_messages: agent::completions::TransformMessages = {
+            let mut map: agent::completions::TransformMessages = HashMap::new();
+            for (agent_id, pfx_indices) in &vector_pfx_indices {
+                let responses = request.responses.clone();
+                let pfx_indices = pfx_indices.clone();
+                let output_mode = output_mode;
+
+                map.insert(
+                    agent_id.clone(),
+                    Box::new(move |messages: Vec<Message>| -> Vec<Message> {
+                        transform_messages_for_vector(
+                            messages,
+                            &responses,
+                            &pfx_indices,
+                            output_mode,
+                        )
+                    }),
                 );
             }
+            map
         };
 
-        // only return error if the very first stream item is an error
-        let mut next_chat_chunk = match stream.try_next().await {
-            Ok(Some(chunk)) => Some(chunk),
-            Err(e) => {
-                return futures::future::Either::Left(
-                    Self::llm_create_streaming_vector_error(
-                        id,
-                        indexer.get(flat_ensemble_index),
-                        e,
-                        created,
-                        ensemble,
-                    ),
-                );
-            }
-            Ok(None) => {
-                // chat client will always yield at least 1 item
-                unreachable!()
-            }
+        // Extract synthetic_reasoning from the primary agent
+        let synthetic_reasoning = match agent.inner.agent() {
+            objectiveai::agent::InlineAgent::Openrouter(a) => a.base.synthetic_reasoning.unwrap_or(false),
+            objectiveai::agent::InlineAgent::ClaudeAgentSdk(a) => a.base.synthetic_reasoning.unwrap_or(false),
+            objectiveai::agent::InlineAgent::Mock(_) => false,
         };
 
-        // the aggregate of all chunks
-        let mut aggregate: Option<
-            objectiveai::vector::completions::response::streaming::VectorCompletionChunk,
-        > = None;
+        // Build per-agent response formats for json_schema and tool_call modes
+        let response_format = match output_mode {
+            objectiveai::agent::OutputMode::JsonSchema => {
+                let mut per_agent = indexmap::IndexMap::new();
+                for (agent_id, pfx_indices) in &vector_pfx_indices {
+                    let keys: Vec<String> = pfx_indices.iter().map(|(k, _)| k.clone()).collect();
+                    per_agent.insert(
+                        agent_id.clone(),
+                        super::ResponseKey::response_format(keys, synthetic_reasoning),
+                    );
+                }
+                Some(objectiveai::agent::completions::request::ResponseFormatParam::PerAgent(per_agent))
+            }
+            objectiveai::agent::OutputMode::ToolCall => {
+                let mut per_agent = indexmap::IndexMap::new();
+                for (agent_id, pfx_indices) in &vector_pfx_indices {
+                    let keys: Vec<String> = pfx_indices.iter().map(|(k, _)| k.clone()).collect();
+                    per_agent.insert(
+                        agent_id.clone(),
+                        super::ResponseKey::tool(keys, synthetic_reasoning),
+                    );
+                }
+                Some(objectiveai::agent::completions::request::ResponseFormatParam::PerAgent(per_agent))
+            }
+            objectiveai::agent::OutputMode::Instruction => None,
+        };
 
-        futures::future::Either::Right(async_stream::stream! {
-            while let Some(chat_chunk) = next_chat_chunk.take() {
-                // fetch the next chat chunk or error
-                let error = match stream.next().await {
-                    Some(Ok(ncc)) => {
-                        // set next chat chunk
-                        next_chat_chunk = Some(ncc);
-                        None
-                    }
-                    Some(Err(e)) => {
-                        // end the loop after this iteration
-                        // add error to choices
-                        Some(objectiveai::error::ResponseError::from(&e))
-                    }
-                    None => {
-                        // end the loop after this iteration
-                        None
-                    }
-                };
+        let primary_id = agent.inner.id().to_string();
 
-                // construct the vector completions chunk from the chat completions chunk
-                let mut chunk = objectiveai::vector::completions::response::streaming::VectorCompletionChunk {
+        // Build the AgentCompletionCreateParams (messages are NOT modified here)
+        let inline_wf = agent.inner.inline();
+        let agent_params = Arc::new(objectiveai::agent::completions::request::AgentCompletionCreateParams {
+            messages: request.messages.clone(),
+            provider: request.provider.clone(),
+            agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
+                objectiveai::agent::InlineAgentBaseWithFallbacks {
+                    inner: inline_wf.inner.clone().into_base(),
+                    fallbacks: inline_wf.fallbacks.as_ref().map(|fbs| {
+                        fbs.iter().map(|fb| fb.clone().into_base()).collect()
+                    }),
+                },
+            ),
+            response_format: response_format.clone(),
+            seed: request.seed.map(|s| per_agent_seed(s, &primary_id, flat_swarm_index, &prompt_id, &responses_ids)),
+            stream: Some(false),
+            continuation: request.continuation.clone(),
+        });
+
+        // Call the agent completions client, yielding each chunk immediately
+        let transform_messages = Arc::new(transform_messages);
+
+        // Helper to wrap an agent chunk into a VectorCompletionChunk
+        let wrap_agent_chunk = {
+            let id = id.clone();
+            let swarm = swarm.clone();
+            move |completion_index: u64, inner: objectiveai::agent::completions::response::streaming::AgentCompletionChunk| {
+                objectiveai::vector::completions::response::streaming::VectorCompletionChunk {
                     id: id.clone(),
                     completions: vec![
-                        objectiveai::vector::completions::response::streaming::ChatCompletionChunk {
-                            index: indexer.get(flat_ensemble_index),
-                            inner: chat_chunk,
-                            error,
+                        objectiveai::vector::completions::response::streaming::AgentCompletionChunk {
+                            index: completion_index,
+                            inner,
                         },
                     ],
                     votes: Vec::new(),
                     scores: Vec::new(),
                     weights: Vec::new(),
                     created,
-                    ensemble: ensemble.clone(),
+                    swarm: swarm.clone(),
                     object: objectiveai::vector::completions::response::streaming::Object::VectorCompletionChunk,
                     usage: None,
-                };
+                }
+            }
+        };
 
-                // push the chunk into the aggregate
-                match aggregate {
-                    Some(ref mut aggregate) => {
-                        aggregate.push(&chunk);
+        async_stream::stream! {
+            // Stream the first call, yielding each chunk immediately while also aggregating
+            let first_result = async {
+                let stream = self.agent_client.clone().create_streaming_handle_usage(
+                    ctx.clone(),
+                    agent_params.clone(),
+                    None,
+                    None,
+                    None,
+                    Some(transform_messages.clone()),
+                    false,
+                ).await?;
+                let aggregate: Option<
+                    objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
+                > = None;
+                let continuation = None;
+                Ok::<_, agent::completions::Error>((stream, aggregate, continuation))
+            }.await;
+
+            let (mut stream, mut aggregate, mut continuation) = match first_result {
+                Ok((stream, aggregate, continuation)) => (stream, aggregate, continuation),
+                Err(e) => {
+                    yield Self::llm_create_streaming_vector_error(
+                        id.clone(), indexer.get(flat_swarm_index), e, agent.inner.base().upstream(), created, swarm.clone(),
+                    );
+                    return;
+                }
+            };
+
+            while let Some(item) = stream.next().await {
+                match item {
+                    agent::completions::StreamItem::Chunk(chunk) => {
+                        // Yield immediately
+                        yield wrap_agent_chunk(indexer.get(flat_swarm_index), chunk.clone());
+                        // Also aggregate for vote extraction
+                        match &mut aggregate {
+                            Some(agg) => agg.push(&chunk),
+                            None => aggregate = Some(chunk),
+                        }
                     }
-                    None => {
-                        aggregate = Some(chunk.clone());
+                    agent::completions::StreamItem::State(cont) => {
+                        continuation = Some(cont);
                     }
                 }
+            }
+            drop(stream);
 
-                // if last chunk, add votes
-                if next_chat_chunk.is_none() {
-                    let aggregate = aggregate.take().unwrap();
-                    for completion in aggregate.completions {
-                        // get pfx data for this LLM
-                        let super::PfxData {
-                            pfx_tree,
-                            responses_key_pattern,
-                            responses_key_pattern_stripped,
-                            invert_vote,
-                        } = &vector_pfx_data[&completion.inner.model];
+            // Convert aggregate to unary for vote extraction
+            let response: objectiveai::agent::completions::response::unary::AgentCompletion =
+                match aggregate {
+                    Some(agg) => agg.into(),
+                    None => return,
+                };
 
-                        // try to get votes for each choice
-                        for choice in completion.inner.choices {
-                            if let Some(vote) = super::get_vote(
-                                pfx_tree.clone(),
-                                &responses_key_pattern,
-                                &responses_key_pattern_stripped,
-                                request_responses_len,
-                                &choice,
-                            ) {
-                                let vote = if *invert_vote {
-                                    invert_and_l1_normalize(vote)
-                                } else {
-                                    vote
-                                };
-                                chunk.votes.push(objectiveai::vector::completions::response::Vote {
-                                    model: completion.inner.model.clone(),
-                                    ensemble_index: ensemble_index as u64,
-                                    flat_ensemble_index: flat_ensemble_index as u64,
-                                    prompt_id: prompt_id.clone(),
-                                    tools_id: tools_id.clone(),
-                                    responses_ids: responses_ids.clone(),
-                                    vote,
-                                    weight,
-                                    retry: None,
-                                    from_cache: None,
-                                    from_rng: None,
-                                    completion_index: Some(completion.index),
-                                });
+            // Extract text and logprobs from the last assistant message
+            let (text, logprobs, tool_call_text) = extract_assistant_content(&response);
+
+            // Determine which text to use for vote extraction based on output mode
+            let vote_text = match output_mode {
+                objectiveai::agent::OutputMode::ToolCall => {
+                    tool_call_text.as_deref().unwrap_or(text.as_deref().unwrap_or(""))
+                }
+                _ => {
+                    text.as_deref().unwrap_or("")
+                }
+            };
+
+            // Get the agent ID that was actually used
+            let agent_id = extract_agent_id(&response);
+            drop(response);
+
+            // Look up pfx data for the agent ID
+            let pfx_data = vector_pfx_data.get(&agent_id)
+                .or_else(|| vector_pfx_data.get(&primary_id));
+
+            let mut votes = Vec::new();
+
+            if let Some(pfx_data) = pfx_data {
+                let (match_count, vote) = super::get_vote(
+                    pfx_data.pfx_tree.clone(),
+                    &pfx_data.responses_key_pattern,
+                    request_responses_len,
+                    vote_text,
+                    logprobs.as_ref(),
+                );
+
+                match output_mode {
+                    objectiveai::agent::OutputMode::Instruction => {
+                        if match_count == 1 {
+                            let vote = if invert_vote {
+                                invert_and_l1_normalize(vote)
+                            } else {
+                                vote
+                            };
+                            votes.push(objectiveai::vector::completions::response::Vote {
+                                agent: agent_id.clone(),
+                                swarm_index: swarm_index as u64,
+                                flat_swarm_index: flat_swarm_index as u64,
+                                prompt_id: prompt_id.clone(),
+                                responses_ids: responses_ids.clone(),
+                                vote,
+                                weight,
+                                retry: None,
+                                from_cache: None,
+                                completion_index: Some(indexer.get(flat_swarm_index)),
+                            });
+                        } else if let Some(mut cont) = continuation.take() {
+                            // Retry via continuation — stream chunks immediately
+                            let model_pfx_indices = vector_pfx_indices.get(&agent_id)
+                                .or_else(|| vector_pfx_indices.get(&primary_id))
+                                .unwrap();
+                            let instruction_suffix = {
+                                let mut text = String::from("Output one response key including backticks:\n- ");
+                                text.push_str(
+                                    &model_pfx_indices.iter()
+                                        .map(|(key, _)| key.clone())
+                                        .collect::<Vec<_>>()
+                                        .join("\n- "),
+                                );
+                                text
+                            };
+                            let retry_message = format!(
+                                "Your response included {} response keys.\n\n{}",
+                                match_count,
+                                &instruction_suffix,
+                            );
+
+                            cont.push_user_message(
+                                UserMessage {
+                                    content: RichContent::Text(retry_message),
+                                    name: None,
+                                },
+                            );
+
+                            match self.agent_client.clone().create_streaming_handle_usage(
+                                ctx.clone(),
+                                agent_params.clone(),
+                                Some(cont),
+                                None,
+                                None,
+                                Some(transform_messages.clone()),
+                                false,
+                            ).await {
+                                Ok(mut retry_stream) => {
+                                    let mut retry_agg: Option<
+                                        objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
+                                    > = None;
+                                    while let Some(item) = retry_stream.next().await {
+                                        match item {
+                                            agent::completions::StreamItem::Chunk(chunk) => {
+                                                yield wrap_agent_chunk(indexer.get(flat_swarm_index + flat_swarm_len), chunk.clone());
+                                                match &mut retry_agg {
+                                                    Some(agg) => agg.push(&chunk),
+                                                    None => retry_agg = Some(chunk),
+                                                }
+                                            }
+                                            agent::completions::StreamItem::State(_) => {}
+                                        }
+                                    }
+                                    if let Some(retry_agg) = retry_agg {
+                                        let retry_response: objectiveai::agent::completions::response::unary::AgentCompletion = retry_agg.into();
+                                        let (retry_text, retry_logprobs, _) = extract_assistant_content(&retry_response);
+                                        let retry_vote_text = retry_text.as_deref().unwrap_or("");
+                                        let (retry_count, retry_vote) = super::get_vote(
+                                            pfx_data.pfx_tree.clone(),
+                                            &pfx_data.responses_key_pattern,
+                                            request_responses_len,
+                                            retry_vote_text,
+                                            retry_logprobs.as_ref(),
+                                        );
+                                        if retry_count > 0 {
+                                            let retry_vote = if invert_vote {
+                                                invert_and_l1_normalize(retry_vote)
+                                            } else {
+                                                retry_vote
+                                            };
+                                            votes.push(objectiveai::vector::completions::response::Vote {
+                                                agent: agent_id.clone(),
+                                                swarm_index: swarm_index as u64,
+                                                flat_swarm_index: flat_swarm_index as u64,
+                                                prompt_id: prompt_id.clone(),
+                                                responses_ids: responses_ids.clone(),
+                                                vote: retry_vote,
+                                                weight,
+                                                retry: None,
+                                                from_cache: None,
+                                                completion_index: Some(indexer.get(flat_swarm_index + flat_swarm_len)),
+                                            });
+                                        }
+                                    }
+                                }
+                                Err(_) => {
+                                    // Retry failed, use original vote if we had multi-match
+                                    if match_count > 1 {
+                                        let vote = if invert_vote {
+                                            invert_and_l1_normalize(vote)
+                                        } else {
+                                            vote
+                                        };
+                                        votes.push(objectiveai::vector::completions::response::Vote {
+                                            agent: agent_id.clone(),
+                                            swarm_index: swarm_index as u64,
+                                            flat_swarm_index: flat_swarm_index as u64,
+                                            prompt_id: prompt_id.clone(),
+                                            responses_ids: responses_ids.clone(),
+                                            vote,
+                                            weight,
+                                            retry: None,
+                                            from_cache: None,
+                                            completion_index: Some(indexer.get(flat_swarm_index)),
+                                        });
+                                    }
+                                }
                             }
                         }
                     }
-                }
+                    objectiveai::agent::OutputMode::ToolCall => {
+                        if tool_call_text.is_some() && match_count > 0 {
+                            let vote = if invert_vote {
+                                invert_and_l1_normalize(vote)
+                            } else {
+                                vote
+                            };
+                            votes.push(objectiveai::vector::completions::response::Vote {
+                                agent: agent_id.clone(),
+                                swarm_index: swarm_index as u64,
+                                flat_swarm_index: flat_swarm_index as u64,
+                                prompt_id: prompt_id.clone(),
+                                responses_ids: responses_ids.clone(),
+                                vote,
+                                weight,
+                                retry: None,
+                                from_cache: None,
+                                completion_index: Some(indexer.get(flat_swarm_index)),
+                            });
+                        } else if let Some(mut cont) = continuation.take() {
+                            // Retry with required: true — stream chunks immediately
+                            let mut retry_rf = indexmap::IndexMap::new();
+                            for (agent_id, pfx_indices) in &vector_pfx_indices {
+                                let keys: Vec<String> = pfx_indices.iter().map(|(k, _)| k.clone()).collect();
+                                let think = synthetic_reasoning;
+                                retry_rf.insert(
+                                    agent_id.clone(),
+                                    super::ResponseKey::tool_required(keys, think),
+                                );
+                            }
 
-                // yield chunk
-                yield chunk;
+                            cont.push_user_message(
+                                UserMessage {
+                                    content: RichContent::Text(
+                                        "Use the response_key tool to select a response.".to_string(),
+                                    ),
+                                    name: None,
+                                },
+                            );
+
+                            let retry_params = Arc::new(objectiveai::agent::completions::request::AgentCompletionCreateParams {
+                                response_format: Some(objectiveai::agent::completions::request::ResponseFormatParam::PerAgent(retry_rf)),
+                                ..(*agent_params).clone()
+                            });
+
+                            match self.agent_client.clone().create_streaming_handle_usage(
+                                ctx.clone(),
+                                retry_params,
+                                Some(cont),
+                                None,
+                                None,
+                                Some(transform_messages.clone()),
+                                false,
+                            ).await {
+                                Ok(mut retry_stream) => {
+                                    let mut retry_agg: Option<
+                                        objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
+                                    > = None;
+                                    while let Some(item) = retry_stream.next().await {
+                                        match item {
+                                            agent::completions::StreamItem::Chunk(chunk) => {
+                                                yield wrap_agent_chunk(indexer.get(flat_swarm_index + flat_swarm_len), chunk.clone());
+                                                match &mut retry_agg {
+                                                    Some(agg) => agg.push(&chunk),
+                                                    None => retry_agg = Some(chunk),
+                                                }
+                                            }
+                                            agent::completions::StreamItem::State(_) => {}
+                                        }
+                                    }
+                                    if let Some(retry_agg) = retry_agg {
+                                        let retry_response: objectiveai::agent::completions::response::unary::AgentCompletion = retry_agg.into();
+                                        let (_, retry_logprobs, retry_tc_text) = extract_assistant_content(&retry_response);
+                                        if let Some(tc_text) = retry_tc_text {
+                                            let retry_agent_id = extract_agent_id(&retry_response);
+                                            let retry_pfx = vector_pfx_data.get(&retry_agent_id)
+                                                .or_else(|| vector_pfx_data.get(&primary_id));
+                                            if let Some(retry_pfx) = retry_pfx {
+                                                let (retry_count, retry_vote) = super::get_vote(
+                                                    retry_pfx.pfx_tree.clone(),
+                                                    &retry_pfx.responses_key_pattern,
+                                                    request_responses_len,
+                                                    &tc_text,
+                                                    retry_logprobs.as_ref(),
+                                                );
+                                                if retry_count > 0 {
+                                                    let retry_vote = if invert_vote {
+                                                        invert_and_l1_normalize(retry_vote)
+                                                    } else {
+                                                        retry_vote
+                                                    };
+                                                    votes.push(objectiveai::vector::completions::response::Vote {
+                                                        agent: agent_id.clone(),
+                                                        swarm_index: swarm_index as u64,
+                                                        flat_swarm_index: flat_swarm_index as u64,
+                                                        prompt_id: prompt_id.clone(),
+                                                        responses_ids: responses_ids.clone(),
+                                                        vote: retry_vote,
+                                                        weight,
+                                                        retry: None,
+                                                        from_cache: None,
+                                                        completion_index: Some(indexer.get(flat_swarm_index + flat_swarm_len)),
+                                                    });
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                Err(_) => {
+                                    // No vote for this LLM
+                                }
+                            }
+                        }
+                    }
+                    objectiveai::agent::OutputMode::JsonSchema => {
+                        if match_count > 0 {
+                            let vote = if invert_vote {
+                                invert_and_l1_normalize(vote)
+                            } else {
+                                vote
+                            };
+                            votes.push(objectiveai::vector::completions::response::Vote {
+                                agent: agent_id.clone(),
+                                swarm_index: swarm_index as u64,
+                                flat_swarm_index: flat_swarm_index as u64,
+                                prompt_id: prompt_id.clone(),
+                                responses_ids: responses_ids.clone(),
+                                vote,
+                                weight,
+                                retry: None,
+                                from_cache: None,
+                                completion_index: Some(indexer.get(flat_swarm_index)),
+                            });
+                        }
+                    }
+                }
             }
-        })
+
+            // Yield a final chunk with just the votes (completions already yielded)
+            if !votes.is_empty() {
+                yield objectiveai::vector::completions::response::streaming::VectorCompletionChunk {
+                    id: id.clone(),
+                    completions: Vec::new(),
+                    votes,
+                    scores: Vec::new(),
+                    weights: Vec::new(),
+                    created,
+                    swarm: swarm.clone(),
+                    object: objectiveai::vector::completions::response::streaming::Object::VectorCompletionChunk,
+                    usage: None,
+                };
+            }
+        }.boxed()
     }
 
     /// Creates an error response chunk for a failed LLM completion.
     fn llm_create_streaming_vector_error(
         id: String,
         completion_index: u64,
-        error: chat::completions::Error,
+        error: agent::completions::Error,
+        upstream: objectiveai::agent::Upstream,
         created: u64,
-        ensemble: String,
-    ) -> impl Stream<Item = objectiveai::vector::completions::response::streaming::VectorCompletionChunk>
-    + Send
-    + Unpin
-    + 'static
-    {
-        StreamOnce::new(
-            objectiveai::vector::completions::response::streaming::VectorCompletionChunk {
-                id,
-                completions: vec![
-                    objectiveai::vector::completions::response::streaming::ChatCompletionChunk {
-                        index: completion_index,
-                        inner: objectiveai::chat::completions::response::streaming::ChatCompletionChunk::default(),
+        swarm: String,
+    ) -> objectiveai::vector::completions::response::streaming::VectorCompletionChunk {
+        objectiveai::vector::completions::response::streaming::VectorCompletionChunk {
+            id,
+            completions: vec![
+                objectiveai::vector::completions::response::streaming::AgentCompletionChunk {
+                    index: completion_index,
+                    inner: objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
                         error: Some(objectiveai::error::ResponseError::from(&error)),
+                        upstream,
+                        ..Default::default()
                     },
-                ],
-                votes: Vec::new(),
-                scores: Vec::new(),
-                weights: Vec::new(),
-                created,
-                ensemble,
-                object: objectiveai::vector::completions::response::streaming::Object::VectorCompletionChunk,
-                usage: None,
-            }
-        )
+                },
+            ],
+            votes: Vec::new(),
+            scores: Vec::new(),
+            weights: Vec::new(),
+            created,
+            swarm,
+            object: objectiveai::vector::completions::response::streaming::Object::VectorCompletionChunk,
+            usage: None,
+        }
     }
+}
+
+/// Extracts text content, logprobs, and tool call arguments from the last assistant message.
+fn extract_assistant_content(
+    response: &objectiveai::agent::completions::response::unary::AgentCompletion,
+) -> (Option<String>, Option<objectiveai::agent::completions::response::Logprobs>, Option<String>) {
+    use objectiveai::agent::completions::response::unary::Message;
+
+    let mut text = None;
+    let mut logprobs = None;
+    let mut tool_call_text = None;
+
+    // Find the last assistant message
+    for msg in response.messages.iter().rev() {
+        if let Message::Assistant(assistant) = msg {
+            // Extract text content
+            if let Some(content) = &assistant.content {
+                text = Some(rich_content_to_string(content));
+            }
+
+            // Extract logprobs
+            logprobs = assistant.logprobs.clone();
+
+            // Extract tool call arguments (for the "response_key" tool)
+            if let Some(tool_calls) = &assistant.tool_calls {
+                for tc in tool_calls {
+                    match tc {
+                        objectiveai::agent::completions::message::AssistantToolCall::Function { function, .. } => {
+                            if function.name == "response_key" {
+                                tool_call_text = Some(function.arguments.clone());
+                            }
+                        }
+                    }
+                }
+            }
+
+            break;
+        }
+    }
+
+    (text, logprobs, tool_call_text)
+}
+
+/// Extracts the agent ID from the last assistant message in a response.
+fn extract_agent_id(
+    response: &objectiveai::agent::completions::response::unary::AgentCompletion,
+) -> String {
+    use objectiveai::agent::completions::response::unary::Message;
+
+    for msg in response.messages.iter().rev() {
+        if let Message::Assistant(assistant) = msg {
+            return assistant.agent.clone();
+        }
+    }
+    String::new()
+}
+
+/// Converts RichContent to a plain string.
+fn rich_content_to_string(
+    content: &objectiveai::agent::completions::message::RichContent,
+) -> String {
+    match content {
+        objectiveai::agent::completions::message::RichContent::Text(text) => text.clone(),
+        objectiveai::agent::completions::message::RichContent::Parts(parts) => {
+            let mut result = String::new();
+            for part in parts {
+                if let objectiveai::agent::completions::message::RichContentPart::Text { text } = part {
+                    result.push_str(text);
+                }
+            }
+            result
+        }
+    }
+}
+
+/// Computes a per-agent seed by hashing the base seed with the agent ID,
+/// flat swarm index, prompt ID, and response IDs.
+///
+/// This ensures each agent in an swarm gets a different but deterministic
+/// seed, and different vector completion tasks (with different prompts or
+/// responses) also get different seeds for the same agent.
+fn per_agent_seed(
+    seed: i64,
+    agent_id: &str,
+    flat_swarm_index: usize,
+    prompt_id: &str,
+    responses_ids: &[String],
+) -> i64 {
+    let mut hasher = twox_hash::XxHash3_64::with_seed(seed as u64);
+    hasher.write(agent_id.as_bytes());
+    hasher.write(&(flat_swarm_index as u64).to_le_bytes());
+    hasher.write(prompt_id.as_bytes());
+    for rid in responses_ids {
+        hasher.write(rid.as_bytes());
+    }
+    hasher.finish() as i64
+}
+
+/// Creates an RNG, seeded if a seed is provided (for deterministic results).
+fn make_rng(seed: Option<u64>) -> impl Rng {
+    match seed {
+        Some(seed) => rand::rngs::StdRng::seed_from_u64(seed),
+        None => rand::rngs::StdRng::from_os_rng(),
+    }
+}
+
+/// Transforms messages for vector voting by appending response options to the
+/// last user message using `into_parts_for_prompt`.
+///
+/// For instruction mode, also appends a key listing to the user message.
+fn transform_messages_for_vector(
+    mut messages: Vec<objectiveai::agent::completions::message::Message>,
+    responses: &[objectiveai::agent::completions::message::RichContent],
+    pfx_indices: &[(String, usize)],
+    output_mode: objectiveai::agent::OutputMode,
+) -> Vec<objectiveai::agent::completions::message::Message> {
+    use objectiveai::agent::completions::message::{
+        Message, UserMessage, RichContent, RichContentPart,
+    };
+
+    // Build response parts using into_parts_for_prompt
+    let response_parts = super::vector_responses::into_parts_for_prompt(responses, pfx_indices);
+
+    // Append to the last user message, or create one
+    let mut found_user = false;
+    for msg in messages.iter_mut().rev() {
+        if let Message::User(user_msg) = msg {
+            // Convert Text to Parts if needed, then extend
+            let parts = match &mut user_msg.content {
+                RichContent::Text(text) => {
+                    let mut new_parts = Vec::with_capacity(2 + response_parts.len());
+                    new_parts.push(RichContentPart::Text { text: text.clone() });
+                    user_msg.content = RichContent::Parts(new_parts);
+                    match &mut user_msg.content {
+                        RichContent::Parts(p) => p,
+                        _ => unreachable!(),
+                    }
+                }
+                RichContent::Parts(parts) => parts,
+            };
+            parts.push(RichContentPart::Text {
+                text: if parts.is_empty() {
+                    "Select the response:\n\n".to_string()
+                } else {
+                    "\n\nSelect the response:\n\n".to_string()
+                },
+            });
+            parts.extend(response_parts.clone());
+
+            // For instruction mode, append key listing to the same user message
+            if output_mode == objectiveai::agent::OutputMode::Instruction {
+                parts.push(RichContentPart::Text {
+                    text: format!(
+                        "\n\nOutput one response key including backticks:\n- {}",
+                        pfx_indices
+                            .iter()
+                            .map(|(key, _)| key.clone())
+                            .collect::<Vec<_>>()
+                            .join("\n- "),
+                    ),
+                });
+            }
+
+            found_user = true;
+            break;
+        }
+    }
+
+    if !found_user {
+        let mut parts = Vec::with_capacity(1 + response_parts.len());
+        parts.push(RichContentPart::Text {
+            text: "Select the response:\n\n".to_string(),
+        });
+        parts.extend(response_parts);
+        if output_mode == objectiveai::agent::OutputMode::Instruction {
+            parts.push(RichContentPart::Text {
+                text: format!(
+                    "\n\nOutput one response key including backticks:\n- {}",
+                    pfx_indices
+                        .iter()
+                        .map(|(key, _)| key.clone())
+                        .collect::<Vec<_>>()
+                        .join("\n- "),
+                ),
+            });
+        }
+        messages.push(Message::User(UserMessage {
+            content: RichContent::Parts(parts),
+            name: None,
+        }));
+    }
+
+    messages
 }

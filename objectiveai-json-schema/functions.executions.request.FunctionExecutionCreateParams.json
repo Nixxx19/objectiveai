@@ -1,0 +1,109 @@
+{
+  "title": "functions.executions.request.FunctionExecutionCreateParams",
+  "description": "Parameters for creating a function execution.",
+  "type": "object",
+  "properties": {
+    "continuation": {
+      "description": "Continuation from a previous completion, as a base64-encoded string.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "from_cache": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "function": {
+      "description": "The function to execute (inline definition or remote path).",
+      "$ref": "functions.FullInlineFunctionOrRemoteCommitOptional"
+    },
+    "input": {
+      "$ref": "functions.expression.InputValue"
+    },
+    "profile": {
+      "description": "The profile to use (inline definition or remote path).",
+      "$ref": "functions.InlineProfileOrRemoteCommitOptional"
+    },
+    "provider": {
+      "anyOf": [
+        {
+          "$ref": "agent.completions.request.Provider"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "reasoning": {
+      "anyOf": [
+        {
+          "$ref": "functions.executions.request.Reasoning"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "retry_token": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "seed": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "strategy": {
+      "anyOf": [
+        {
+          "$ref": "functions.executions.request.Strategy"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "stream": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    }
+  }
+}

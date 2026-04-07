@@ -1,0 +1,121 @@
+use clap::{Args, Subcommand};
+use futures::StreamExt;
+
+/// How messages are provided to the agent completion.
+#[derive(Args)]
+#[group(required = true, multiple = false)]
+pub struct MessageSource {
+    /// Inline JSON messages array
+    #[arg(long)]
+    messages_inline: Option<String>,
+    /// Inline Python code that produces the messages array
+    #[arg(long)]
+    messages_python_inline: Option<String>,
+    /// Path to a Python file that produces the messages array
+    #[arg(long)]
+    messages_python_file: Option<std::path::PathBuf>,
+}
+
+impl MessageSource {
+    fn resolve(self) -> Result<Vec<objectiveai::agent::completions::message::Message>, crate::error::Error> {
+        if let Some(inline) = self.messages_inline {
+            let mut de = serde_json::Deserializer::from_str(&inline);
+            return serde_path_to_error::deserialize(&mut de)
+                .map_err(crate::error::Error::PythonDeserialize);
+        }
+        if let Some(code) = self.messages_python_inline {
+            return crate::python::exec_code(&code);
+        }
+        if let Some(path) = self.messages_python_file {
+            return crate::python::exec_file(&path);
+        }
+        unreachable!("clap group ensures one is set")
+    }
+}
+
+
+#[derive(Subcommand)]
+pub enum Commands {
+    /// Standard agent completion
+    Standard {
+        #[command(flatten)]
+        messages: MessageSource,
+        /// Agent reference (e.g. favorite=name or remote=github,owner=x,repository=y)
+        #[arg(long)]
+        agent: crate::agent_ref::AgentRef,
+        #[command(flatten)]
+        continuation: crate::continuation::ContinuationArgs,
+        #[command(flatten)]
+        response_format: crate::response_format::ResponseFormatArgs,
+        /// Seed for deterministic mock responses
+        #[arg(long)]
+        seed: Option<i64>,
+    },
+}
+
+impl Commands {
+    pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
+        let (message_source, agent_ref, continuation_args, response_format_args, seed) = match self {
+            Commands::Standard { messages, agent, continuation, response_format, seed } => {
+                (messages, agent, continuation, response_format, seed)
+            }
+        };
+
+        let messages = message_source.resolve()?;
+        let agent = agent_ref.resolve()?;
+        let continuation = continuation_args.resolve()?;
+        let response_format = response_format_args.resolve()?
+            .map(objectiveai::agent::completions::request::ResponseFormatParam::Single);
+
+        let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
+            messages,
+            provider: None,
+            agent,
+            response_format,
+            seed,
+            stream: Some(true),
+            continuation,
+        };
+
+        crate::api::run(|http_client| async move {
+            let stream = objectiveai::agent::completions::create_agent_completion_streaming(
+                &http_client, params,
+            ).await?;
+            tokio::pin!(stream);
+
+            // Accumulate all chunks
+            let mut accumulated: Option<objectiveai::agent::completions::response::streaming::AgentCompletionChunk> = None;
+            while let Some(chunk) = stream.next().await {
+                let chunk = chunk?;
+                match &mut accumulated {
+                    Some(agg) => agg.push(&chunk),
+                    None => accumulated = Some(chunk),
+                }
+            }
+
+            let completion: objectiveai::agent::completions::response::unary::AgentCompletion =
+                accumulated.ok_or(crate::error::Error::EmptyStream)?.into();
+
+            // Extract the last assistant message content
+            let content = completion.messages.iter().rev()
+                .find_map(|msg| {
+                    if let objectiveai::agent::completions::response::unary::Message::Assistant(asst) = msg {
+                        asst.content.as_ref().map(|c| match c {
+                            objectiveai::agent::completions::message::RichContent::Text(t) => t.clone(),
+                            objectiveai::agent::completions::message::RichContent::Parts(parts) => {
+                                parts.iter().filter_map(|p| match p {
+                                    objectiveai::agent::completions::message::RichContentPart::Text { text } => Some(text.as_str()),
+                                    _ => None,
+                                }).collect::<Vec<_>>().join("")
+                            }
+                        })
+                    } else {
+                        None
+                    }
+                })
+                .unwrap_or_default();
+
+            Ok(content)
+        }, true).await
+    }
+}

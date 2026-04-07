@@ -1,0 +1,20 @@
+{
+  "title": "config.AgentsConfig",
+  "type": "object",
+  "properties": {
+    "favorites": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "config.Favorite"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    }
+  }
+}

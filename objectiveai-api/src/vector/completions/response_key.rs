@@ -66,50 +66,44 @@ impl ResponseKey {
     }
 
     /// Creates a response format for JSON schema output mode.
-    ///
-    /// Constrains the LLM to output a JSON object with the selected response key.
     pub fn response_format(
         vector_response_keys: Vec<String>,
         think: bool,
-    ) -> objectiveai::chat::completions::request::ResponseFormat {
-        objectiveai::chat::completions::request::ResponseFormat::JsonSchema {
-            json_schema: objectiveai::chat::completions::request::JsonSchema {
-                name: "response_key".to_string(),
-                description: None,
-                strict: Some(true),
-                schema: Some(serde_json::Value::Object(Self::schema(
-                    vector_response_keys,
-                    think,
-                ))),
-            },
+    ) -> objectiveai::agent::completions::request::ResponseFormat {
+        let schema: indexmap::IndexMap<String, serde_json::Value> =
+            Self::schema(vector_response_keys, think).into_iter().collect();
+        objectiveai::agent::completions::request::ResponseFormat::JsonSchema {
+            schema,
         }
     }
 
     /// Creates a tool definition for tool call output mode.
-    ///
-    /// The LLM calls this tool with the selected response key as an argument.
     pub fn tool(
         vector_response_keys: Vec<String>,
         think: bool,
-    ) -> objectiveai::chat::completions::request::Tool {
-        objectiveai::chat::completions::request::Tool::Function {
-            function: objectiveai::chat::completions::request::FunctionTool {
-                name: "response_key".to_string(),
-                description: None,
-                strict: Some(true),
-                parameters: Some(Self::schema(vector_response_keys, think)),
-            },
+    ) -> objectiveai::agent::completions::request::ResponseFormat {
+        let schema: indexmap::IndexMap<String, serde_json::Value> =
+            Self::schema(vector_response_keys, think).into_iter().collect();
+        objectiveai::agent::completions::request::ResponseFormat::ToolCall {
+            name: "response_key".to_string(),
+            description: "Select the response key.".to_string(),
+            schema,
+            required: None,
         }
     }
 
-    /// Creates a tool choice that forces the LLM to call the response_key tool.
-    pub fn tool_choice() -> objectiveai::chat::completions::request::ToolChoice {
-        objectiveai::chat::completions::request::ToolChoice::Function(
-            objectiveai::chat::completions::request::ToolChoiceFunction::Function {
-                function: objectiveai::chat::completions::request::ToolChoiceFunctionFunction {
-                    name: "response_key".to_string(),
-                },
-            },
-        )
+    /// Creates a tool call response format with required set.
+    pub fn tool_required(
+        vector_response_keys: Vec<String>,
+        think: bool,
+    ) -> objectiveai::agent::completions::request::ResponseFormat {
+        let schema: indexmap::IndexMap<String, serde_json::Value> =
+            Self::schema(vector_response_keys, think).into_iter().collect();
+        objectiveai::agent::completions::request::ResponseFormat::ToolCall {
+            name: "response_key".to_string(),
+            description: "Select the response key.".to_string(),
+            schema,
+            required: Some(true),
+        }
     }
 }

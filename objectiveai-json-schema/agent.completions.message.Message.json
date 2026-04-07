@@ -1,0 +1,76 @@
+{
+  "title": "agent.completions.message.Message",
+  "description": "A message in the conversation.",
+  "anyOf": [
+    {
+      "title": "Developer",
+      "description": "A developer message (similar to system, but from the developer).",
+      "type": "object",
+      "$ref": "agent.completions.message.DeveloperMessage",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": [
+            "developer"
+          ]
+        }
+      }
+    },
+    {
+      "title": "System",
+      "description": "A system message setting context or instructions.",
+      "type": "object",
+      "$ref": "agent.completions.message.SystemMessage",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": [
+            "system"
+          ]
+        }
+      }
+    },
+    {
+      "title": "User",
+      "description": "A user message from the end user.",
+      "type": "object",
+      "$ref": "agent.completions.message.UserMessage",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": [
+            "user"
+          ]
+        }
+      }
+    },
+    {
+      "title": "Assistant",
+      "description": "An assistant message (model's previous response).",
+      "type": "object",
+      "$ref": "agent.completions.message.AssistantMessage",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": [
+            "assistant"
+          ]
+        }
+      }
+    },
+    {
+      "title": "Tool",
+      "description": "A tool message containing the result of a tool call.",
+      "type": "object",
+      "$ref": "agent.completions.message.ToolMessage",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": [
+            "tool"
+          ]
+        }
+      }
+    }
+  ]
+}

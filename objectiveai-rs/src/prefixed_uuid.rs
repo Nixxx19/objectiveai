@@ -4,12 +4,13 @@
 //! used throughout the ObjectiveAI API for type-safe identifiers.
 //! For example, API keys use the prefix "apk" (e.g., `apk1234...`).
 
+use schemars::JsonSchema;
 use std::str::FromStr;
 
 /// A UUID with a 3-character prefix for type-safe identifiers.
 ///
 /// This struct wraps a standard UUID and adds a compile-time prefix,
-/// ensuring that different types of identifiers (API keys, ensemble IDs, etc.)
+/// ensuring that different types of identifiers (API keys, swarm IDs, etc.)
 /// cannot be confused at the type level.
 ///
 /// The prefix is specified as three `const char` generic parameters.
@@ -32,7 +33,8 @@ use std::str::FromStr;
 /// let key = ApiKey::new();
 /// println!("{}", key); // Outputs: apk<uuid>
 /// ```
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Ord, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Ord, PartialOrd, JsonSchema)]
+#[schemars(rename = "PrefixedUuid")]
 pub struct PrefixedUuid<const PFX_1: char, const PFX_2: char, const PFX_3: char>
 {
     uuid: uuid::Uuid,

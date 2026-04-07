@@ -7,12 +7,12 @@ use std::sync::Arc;
 /// Computes Profiles via the ObjectiveAI API.
 pub struct ObjectiveAiClient {
     /// The HTTP client for API requests.
-    pub client: Arc<objectiveai::HttpClient>,
+    pub client: Arc<crate::objectiveai_http::Client>,
 }
 
 impl ObjectiveAiClient {
     /// Creates a new ObjectiveAI Profile computation client.
-    pub fn new(client: Arc<objectiveai::HttpClient>) -> Self {
+    pub fn new(client: Arc<crate::objectiveai_http::Client>) -> Self {
         Self { client }
     }
 }
@@ -20,31 +20,32 @@ impl ObjectiveAiClient {
 #[async_trait::async_trait]
 impl<CTXEXT> super::Client<CTXEXT> for ObjectiveAiClient
 where
-    CTXEXT: Send + Sync + 'static,
+    CTXEXT: Send + Sync + 'static + ctx::ContextExt,
 {
-    async fn create_unary(
+    async fn create_unary<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        _ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, PC>,
         request: Arc<
-            objectiveai::functions::profiles::computations::request::Request,
+            objectiveai::functions::profiles::computations::request::FunctionProfileComputationCreateParams,
         >,
     ) -> Result<
         objectiveai::functions::profiles::computations::response::unary::FunctionProfileComputation,
         objectiveai::error::ResponseError,
     >{
+        let client = self.client.with_authorization(&ctx).await;
         objectiveai::functions::profiles::computations::compute_profile_unary(
-            &self.client,
+            &client,
             (*request).clone(),
         )
         .await
         .map_err(|e| objectiveai::error::ResponseError::from(&e))
     }
 
-    async fn create_streaming(
+    async fn create_streaming<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        _ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, PC>,
         request: Arc<
-            objectiveai::functions::profiles::computations::request::Request,
+            objectiveai::functions::profiles::computations::request::FunctionProfileComputationCreateParams,
         >,
     ) -> Result<
         impl Stream<Item = Result<
@@ -55,8 +56,9 @@ where
             + 'static,
         objectiveai::error::ResponseError,
     >{
+        let client = self.client.with_authorization(&ctx).await;
         let stream = objectiveai::functions::profiles::computations::compute_profile_streaming(
-            &self.client,
+            &client,
             (*request).clone(),
         )
         .await

@@ -1,10 +1,12 @@
 use crate::{
+    agent,
     functions::{self, profiles::computations::response},
-    vector,
 };
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.profiles.computations.response.unary.FunctionProfileComputation")]
 pub struct FunctionProfileComputation {
     pub id: String,
     pub executions: Vec<super::FunctionExecution>,
@@ -13,15 +15,17 @@ pub struct FunctionProfileComputation {
     pub fitting_stats: response::FittingStats,
     pub retry_token: Option<String>,
     pub created: u64,
-    pub function: Option<String>,
+    pub function: Option<crate::RemotePath>,
     pub object: super::Object,
-    pub usage: vector::completions::response::Usage,
+    pub usage: agent::completions::response::Usage,
 }
 
 impl FunctionProfileComputation {
     pub fn any_usage(&self) -> bool {
         self.usage.any_usage()
     }
+
+    pub fn normalize_for_tests(&mut self) {}
 }
 
 impl From<response::streaming::FunctionProfileComputationChunk>
@@ -50,9 +54,7 @@ impl From<response::streaming::FunctionProfileComputationChunk>
             executions_errors: executions_errors.unwrap_or(false),
             profile: profile.unwrap_or_else(|| functions::InlineTasksProfile {
                 tasks: Vec::new(),
-                profile: crate::vector::completions::request::Profile::Weights(
-                    Vec::new(),
-                ),
+                weights: None,
             }),
             fitting_stats: fitting_stats
                 .unwrap_or(response::FittingStats::default()),

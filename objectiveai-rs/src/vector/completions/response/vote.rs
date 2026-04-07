@@ -4,10 +4,11 @@ use crate::functions::expression::ToStarlarkValue;
 use serde::{Deserialize, Serialize};
 use starlark::values::dict::AllocDict as StarlarkAllocDict;
 use starlark::values::{Heap as StarlarkHeap, Value as StarlarkValue};
+use schemars::JsonSchema;
 
 /// A single LLM's vote in a vector completion.
 ///
-/// Each LLM in the ensemble produces a vote indicating which response(s) it
+/// Each LLM in the swarm produces a vote indicating which response(s) it
 /// selected. Votes are weighted according to the profile and combined to
 /// produce the final scores.
 ///
@@ -17,20 +18,21 @@ use starlark::values::{Heap as StarlarkHeap, Value as StarlarkValue};
 /// in the request. Typically one element is 1.0 and the rest are 0.0 (discrete
 /// selection), but when `top_logprobs` is used, votes may be probability
 /// distributions.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[schemars(rename = "vector.completions.response.Vote")]
 pub struct Vote {
     // --- Identifiers ---
 
-    /// The model that produced this vote (e.g., `"openai/gpt-4o"`).
-    pub model: String,
-    /// Index of the LLM configuration within the ensemble.
-    pub ensemble_index: u64,
-    /// Flattened index accounting for LLM counts in the ensemble.
-    pub flat_ensemble_index: u64,
+    /// The agent that produced this vote (content-addressed ID).
+    pub agent: String,
+    /// Index of the agent configuration within the swarm.
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
+    pub swarm_index: u64,
+    /// Flattened index accounting for agent counts in the swarm.
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
+    pub flat_swarm_index: u64,
     /// Content hash of the request messages (for caching/deduplication).
     pub prompt_id: String,
-    /// Content hash of the request tools, if any.
-    pub tools_id: Option<String>,
     /// Content hashes of each response option in the request.
     pub responses_ids: Vec<String>,
 
@@ -38,9 +40,15 @@ pub struct Vote {
 
     /// The vote distribution. Each index corresponds to a response from the
     /// request. Typically one element is 1.0 (selected) and the rest are 0.0.
+    #[serde(deserialize_with = "crate::serde_util::vec_decimal")]
+    #[schemars(with = "Vec<f64>")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_vec_rust_decimal)]
     pub vote: Vec<rust_decimal::Decimal>,
 
     /// The weight applied to this vote when computing final scores.
+    #[serde(deserialize_with = "crate::serde_util::decimal")]
+    #[schemars(with = "f64")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub weight: rust_decimal::Decimal,
 
     // --- Source flags ---
@@ -48,38 +56,34 @@ pub struct Vote {
     /// If true, this vote was reused from a previous request via the `retry`
     /// parameter. All fields reflect the original request's values.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub retry: Option<bool>,
 
     /// If true, this vote was retrieved from cache rather than generated fresh.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub from_cache: Option<bool>,
-
-    /// If true, this vote was randomly generated (for testing/simulation).
-    /// Mutually exclusive with `from_cache` and `retry`.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub from_rng: Option<bool>,
 
     // --- Internal ---
 
     /// Internal index for correlating with completions. Not serialized.
     #[serde(skip)]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub completion_index: Option<u64>,
 }
 
 impl ToStarlarkValue for Vote {
     fn to_starlark_value<'v>(&self, heap: &'v StarlarkHeap) -> StarlarkValue<'v> {
         heap.alloc(StarlarkAllocDict([
-            ("model", self.model.to_starlark_value(heap)),
-            ("ensemble_index", self.ensemble_index.to_starlark_value(heap)),
-            ("flat_ensemble_index", self.flat_ensemble_index.to_starlark_value(heap)),
+            ("agent", self.agent.to_starlark_value(heap)),
+            ("swarm_index", self.swarm_index.to_starlark_value(heap)),
+            ("flat_swarm_index", self.flat_swarm_index.to_starlark_value(heap)),
             ("prompt_id", self.prompt_id.to_starlark_value(heap)),
-            ("tools_id", self.tools_id.to_starlark_value(heap)),
             ("responses_ids", self.responses_ids.to_starlark_value(heap)),
             ("vote", self.vote.to_starlark_value(heap)),
             ("weight", self.weight.to_starlark_value(heap)),
             ("retry", self.retry.to_starlark_value(heap)),
             ("from_cache", self.from_cache.to_starlark_value(heap)),
-            ("from_rng", self.from_rng.to_starlark_value(heap)),
         ]))
     }
 }

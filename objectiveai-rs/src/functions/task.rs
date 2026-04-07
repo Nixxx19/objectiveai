@@ -7,15 +7,15 @@
 //! # Output Expressions
 //!
 //! Each task has an `output` expression that transforms its raw result into a
-//! [`FunctionOutput`](super::expression::FunctionOutput). The expression receives
+//! [`TaskOutputOwned`](super::expression::TaskOutputOwned). The expression receives
 //! an `output` parameter that is one of four variants:
 //!
-//! - `Function(FunctionOutput)` - for non-mapped function tasks
-//! - `MapFunction(Vec<FunctionOutput>)` - for mapped function tasks
-//! - `VectorCompletion(VectorCompletionOutput)` - for non-mapped vector completion tasks
-//! - `MapVectorCompletion(Vec<VectorCompletionOutput>)` - for mapped vector completion tasks
+//! - `Scalar(Decimal)` - a single score
+//! - `Vector(Vec<Decimal>)` - a vector of scores
+//! - `Vectors(Vec<Vec<Decimal>>)` - multiple vectors (from mapped tasks)
+//! - `Err(Value)` - an error
 //!
-//! The expression must return a `FunctionOutput` valid for the parent function's type:
+//! The expression must return a `TaskOutputOwned` valid for the parent function's type:
 //! - **Scalar functions**: must return `Scalar(value)` where value is in [0, 1]
 //! - **Vector functions**: must return `Vector(values)` where values sum to ~1 and match the expected length
 //!
@@ -25,30 +25,47 @@
 //! using profile weights. If a function has only one task, that task's output becomes
 //! the function's output directly (with weight 1.0).
 
-use crate::chat;
+use crate::agent;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// A task definition with expressions (pre-compilation).
 ///
 /// Task expressions contain dynamic fields (JMESPath or Starlark) that are
 /// resolved against input data during compilation. Use [`compile`](Self::compile)
 /// to produce a concrete [`Task`].
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(tag = "type")]
+#[schemars(rename = "functions.TaskExpression")]
 pub enum TaskExpression {
+    #[schemars(title = "ScalarFunction")]
     #[serde(rename = "scalar.function")]
     ScalarFunction(ScalarFunctionTaskExpression),
+    #[schemars(title = "VectorFunction")]
     #[serde(rename = "vector.function")]
     VectorFunction(VectorFunctionTaskExpression),
+    #[schemars(title = "VectorCompletion")]
     #[serde(rename = "vector.completion")]
     VectorCompletion(VectorCompletionTaskExpression),
+    #[schemars(title = "PlaceholderScalarFunction")]
     #[serde(rename = "placeholder.scalar.function")]
     PlaceholderScalarFunction(PlaceholderScalarFunctionTaskExpression),
+    #[schemars(title = "PlaceholderVectorFunction")]
     #[serde(rename = "placeholder.vector.function")]
     PlaceholderVectorFunction(PlaceholderVectorFunctionTaskExpression),
 }
 
 impl TaskExpression {
+    pub fn url(&self) -> Option<String> {
+        match self {
+            TaskExpression::ScalarFunction(task) => Some(task.url()),
+            TaskExpression::VectorFunction(task) => Some(task.url()),
+            TaskExpression::VectorCompletion(_) => None,
+            TaskExpression::PlaceholderScalarFunction(_) => None,
+            TaskExpression::PlaceholderVectorFunction(_) => None,
+        }
+    }
+
     /// Takes and returns the skip expression, if present.
     pub fn take_skip(&mut self) -> Option<super::expression::Expression> {
         match self {
@@ -60,14 +77,18 @@ impl TaskExpression {
         }
     }
 
-    /// Returns the map index, if this is a mapped task.
-    pub fn input_map(&self) -> Option<u64> {
+    /// Returns the map expression, if this is a mapped task.
+    pub fn map(&self) -> Option<&super::expression::Expression> {
         match self {
-            TaskExpression::ScalarFunction(task) => task.map,
-            TaskExpression::VectorFunction(task) => task.map,
-            TaskExpression::VectorCompletion(task) => task.map,
-            TaskExpression::PlaceholderScalarFunction(task) => task.map,
-            TaskExpression::PlaceholderVectorFunction(task) => task.map,
+            TaskExpression::ScalarFunction(task) => task.map.as_ref(),
+            TaskExpression::VectorFunction(task) => task.map.as_ref(),
+            TaskExpression::VectorCompletion(task) => task.map.as_ref(),
+            TaskExpression::PlaceholderScalarFunction(task) => {
+                task.map.as_ref()
+            }
+            TaskExpression::PlaceholderVectorFunction(task) => {
+                task.map.as_ref()
+            }
         }
     }
 
@@ -100,22 +121,28 @@ impl TaskExpression {
 ///
 /// Produced by compiling a [`TaskExpression`] against input data. All
 /// expressions have been resolved to concrete values.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
+#[schemars(rename = "functions.Task")]
 pub enum Task {
     /// Calls a scalar function (produces a single score).
+    #[schemars(title = "ScalarFunction")]
     #[serde(rename = "scalar.function")]
     ScalarFunction(ScalarFunctionTask),
     /// Calls a vector function (produces a vector of scores).
+    #[schemars(title = "VectorFunction")]
     #[serde(rename = "vector.function")]
     VectorFunction(VectorFunctionTask),
     /// Runs a vector completion.
+    #[schemars(title = "VectorCompletion")]
     #[serde(rename = "vector.completion")]
     VectorCompletion(VectorCompletionTask),
     /// Placeholder scalar function (always outputs 0.5).
+    #[schemars(title = "PlaceholderScalarFunction")]
     #[serde(rename = "placeholder.scalar.function")]
     PlaceholderScalarFunction(PlaceholderScalarFunctionTask),
     /// Placeholder vector function (always outputs equalized vector).
+    #[schemars(title = "PlaceholderVectorFunction")]
     #[serde(rename = "placeholder.vector.function")]
     PlaceholderVectorFunction(PlaceholderVectorFunctionTask),
 }
@@ -123,10 +150,10 @@ pub enum Task {
 impl Task {
     pub fn compile_output(
         &self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
         raw_output: super::expression::TaskOutput,
     ) -> Result<
-        super::expression::FunctionOutput,
+        super::expression::TaskOutputOwned,
         super::expression::ExpressionError,
     > {
         match self {
@@ -150,40 +177,38 @@ impl Task {
 }
 
 /// Expression for a task that calls a scalar function (pre-compilation).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[schemars(rename = "functions.ScalarFunctionTaskExpression")]
 pub struct ScalarFunctionTaskExpression {
-    /// The remote source where the function is hosted.
-    pub remote: super::Remote,
-    /// Repository owner.
-    pub owner: String,
-    /// Repository name.
-    pub repository: String,
-    /// Git commit SHA for the function version.
-    pub commit: String,
+    #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
+    pub path: crate::RemotePath,
 
     /// If this expression evaluates to true, skip the task. Receives: `input`.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub skip: Option<super::expression::Expression>,
 
-    /// Index into `input_maps` for mapped execution. If set, this task is
-    /// expanded into multiple instances.
+    /// Expression that evaluates to the number of mapped task instances.
+    /// Each instance receives `map` as an integer index (0-based).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub map: Option<u64>,
+    #[schemars(extend("omitempty" = true))]
+    pub map: Option<super::expression::Expression>,
 
     /// Expression for the input to pass to the function.
     /// Receives: `input`, `map` (if mapped).
     pub input:
-        super::expression::WithExpression<super::expression::InputExpression>,
+        super::expression::WithExpression<super::expression::InputValueExpression>,
 
     /// Expression to transform the task result into a valid function output.
     ///
-    /// Receives `output` which is one of 4 variants depending on task type:
-    /// - `Function(FunctionOutput)` - for non-mapped function tasks
-    /// - `MapFunction(Vec<FunctionOutput>)` - for mapped function tasks
-    /// - `VectorCompletion(VectorCompletionOutput)` - for non-mapped vector completion tasks
-    /// - `MapVectorCompletion(Vec<VectorCompletionOutput>)` - for mapped vector completion tasks
+    /// Receives `output` which is one of 4 variants:
+    /// - `Scalar(Decimal)` - a single score
+    /// - `Vector(Vec<Decimal>)` - a vector of scores
+    /// - `Vectors(Vec<Vec<Decimal>>)` - multiple vectors (from mapped tasks)
+    /// - `Err(Value)` - an error
     ///
-    /// The expression must return a `FunctionOutput` that is valid for the parent function's type:
+    /// The expression must return a `TaskOutputOwned` that is valid for the parent function's type:
     /// - For scalar functions: must return `Scalar(value)` where value is in [0, 1]
     /// - For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length
     ///
@@ -191,10 +216,13 @@ pub struct ScalarFunctionTaskExpression {
     /// profile weights. If a function has only one task, that task's output becomes the function's
     /// output directly.
     pub output: super::expression::Expression,
-
 }
 
 impl ScalarFunctionTaskExpression {
+    pub fn url(&self) -> String {
+        self.path.url()
+    }
+
     /// Compiles the expression into a concrete [`ScalarFunctionTask`].
     pub fn compile(
         self,
@@ -202,10 +230,7 @@ impl ScalarFunctionTaskExpression {
     ) -> Result<ScalarFunctionTask, super::expression::ExpressionError> {
         let input = self.input.compile_one(params)?.compile(params)?;
         Ok(ScalarFunctionTask {
-            remote: self.remote,
-            owner: self.owner,
-            repository: self.repository,
-            commit: self.commit,
+            path: self.path,
             input,
             output: self.output,
         })
@@ -213,33 +238,33 @@ impl ScalarFunctionTaskExpression {
 }
 
 /// A compiled scalar function task ready for execution.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.ScalarFunctionTask")]
 pub struct ScalarFunctionTask {
-    /// The remote source where the function is hosted.
-    pub remote: super::Remote,
-    /// Repository owner.
-    pub owner: String,
-    /// Repository name.
-    pub repository: String,
-    /// Git commit SHA for the function version.
-    pub commit: String,
+    #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
+    pub path: crate::RemotePath,
     /// The resolved input to pass to the function.
-    pub input: super::expression::Input,
+    pub input: super::expression::InputValue,
     /// Expression to transform the task result into a valid function output.
     ///
-    /// Receives `output` as `Function(FunctionOutput)` containing the nested function's result.
-    /// Must return a `FunctionOutput` valid for the parent function's type (scalar or vector).
+    /// Receives `output` as the nested function's result (Scalar or Vector).
+    /// Must return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).
     /// See [`ScalarFunctionTaskExpression::output`] for full documentation.
     pub output: super::expression::Expression,
 }
 
 impl ScalarFunctionTask {
+    pub fn url(&self) -> String {
+        self.path.url()
+    }
+
     pub fn compile_output(
         &self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
         raw_output: super::expression::TaskOutput,
     ) -> Result<
-        super::expression::FunctionOutput,
+        super::expression::TaskOutputOwned,
         super::expression::ExpressionError,
     > {
         let params =
@@ -254,40 +279,38 @@ impl ScalarFunctionTask {
 }
 
 /// Expression for a task that calls a vector function (pre-compilation).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[schemars(rename = "functions.VectorFunctionTaskExpression")]
 pub struct VectorFunctionTaskExpression {
-    /// The remote source where the function is hosted.
-    pub remote: super::Remote,
-    /// Repository owner.
-    pub owner: String,
-    /// Repository name.
-    pub repository: String,
-    /// Git commit SHA for the function version.
-    pub commit: String,
+    #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
+    pub path: crate::RemotePath,
 
     /// If this expression evaluates to true, skip the task. Receives: `input`.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub skip: Option<super::expression::Expression>,
 
-    /// Index into `input_maps` for mapped execution. If set, this task is
-    /// expanded into multiple instances.
+    /// Expression that evaluates to the number of mapped task instances.
+    /// Each instance receives `map` as an integer index (0-based).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub map: Option<u64>,
+    #[schemars(extend("omitempty" = true))]
+    pub map: Option<super::expression::Expression>,
 
     /// Expression for the input to pass to the function.
     /// Receives: `input`, `map` (if mapped).
     pub input:
-        super::expression::WithExpression<super::expression::InputExpression>,
+        super::expression::WithExpression<super::expression::InputValueExpression>,
 
     /// Expression to transform the task result into a valid function output.
     ///
-    /// Receives `output` which is one of 4 variants depending on task type:
-    /// - `Function(FunctionOutput)` - for non-mapped function tasks
-    /// - `MapFunction(Vec<FunctionOutput>)` - for mapped function tasks
-    /// - `VectorCompletion(VectorCompletionOutput)` - for non-mapped vector completion tasks
-    /// - `MapVectorCompletion(Vec<VectorCompletionOutput>)` - for mapped vector completion tasks
+    /// Receives `output` which is one of 4 variants:
+    /// - `Scalar(Decimal)` - a single score
+    /// - `Vector(Vec<Decimal>)` - a vector of scores
+    /// - `Vectors(Vec<Vec<Decimal>>)` - multiple vectors (from mapped tasks)
+    /// - `Err(Value)` - an error
     ///
-    /// The expression must return a `FunctionOutput` that is valid for the parent function's type:
+    /// The expression must return a `TaskOutputOwned` that is valid for the parent function's type:
     /// - For scalar functions: must return `Scalar(value)` where value is in [0, 1]
     /// - For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length
     ///
@@ -295,10 +318,13 @@ pub struct VectorFunctionTaskExpression {
     /// profile weights. If a function has only one task, that task's output becomes the function's
     /// output directly.
     pub output: super::expression::Expression,
-
 }
 
 impl VectorFunctionTaskExpression {
+    pub fn url(&self) -> String {
+        self.path.url()
+    }
+
     /// Compiles the expression into a concrete [`VectorFunctionTask`].
     pub fn compile(
         self,
@@ -306,10 +332,7 @@ impl VectorFunctionTaskExpression {
     ) -> Result<VectorFunctionTask, super::expression::ExpressionError> {
         let input = self.input.compile_one(params)?.compile(params)?;
         Ok(VectorFunctionTask {
-            remote: self.remote,
-            owner: self.owner,
-            repository: self.repository,
-            commit: self.commit,
+            path: self.path,
             input,
             output: self.output,
         })
@@ -317,33 +340,33 @@ impl VectorFunctionTaskExpression {
 }
 
 /// A compiled vector function task ready for execution.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.VectorFunctionTask")]
 pub struct VectorFunctionTask {
-    /// The remote source where the function is hosted.
-    pub remote: super::Remote,
-    /// Repository owner.
-    pub owner: String,
-    /// Repository name.
-    pub repository: String,
-    /// Git commit SHA for the function version.
-    pub commit: String,
+    #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
+    pub path: crate::RemotePath,
     /// The resolved input to pass to the function.
-    pub input: super::expression::Input,
+    pub input: super::expression::InputValue,
     /// Expression to transform the task result into a valid function output.
     ///
-    /// Receives `output` as `Function(FunctionOutput)` containing the nested function's result.
-    /// Must return a `FunctionOutput` valid for the parent function's type (scalar or vector).
+    /// Receives `output` as the nested function's result (Scalar or Vector).
+    /// Must return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).
     /// See [`VectorFunctionTaskExpression::output`] for full documentation.
     pub output: super::expression::Expression,
 }
 
 impl VectorFunctionTask {
+    pub fn url(&self) -> String {
+        self.path.url()
+    }
+
     pub fn compile_output(
         &self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
         raw_output: super::expression::TaskOutput,
     ) -> Result<
-        super::expression::FunctionOutput,
+        super::expression::TaskOutputOwned,
         super::expression::ExpressionError,
     > {
         let params =
@@ -358,37 +381,26 @@ impl VectorFunctionTask {
 }
 
 /// Expression for a task that runs a vector completion (pre-compilation).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[schemars(rename = "functions.VectorCompletionTaskExpression")]
 pub struct VectorCompletionTaskExpression {
     /// If this expression evaluates to true, skip the task. Receives: `input`.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub skip: Option<super::expression::Expression>,
 
-    /// Index into `input_maps` for mapped execution. If set, this task is
-    /// expanded into multiple instances.
+    /// Expression that evaluates to the number of mapped task instances.
+    /// Each instance receives `map` as an integer index (0-based).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub map: Option<u64>,
+    #[schemars(extend("omitempty" = true))]
+    pub map: Option<super::expression::Expression>,
 
     /// Expression for the conversation messages (the prompt).
     /// Receives: `input`, `map` (if mapped).
     pub messages: super::expression::WithExpression<
         Vec<
             super::expression::WithExpression<
-                chat::completions::request::MessageExpression,
-            >,
-        >,
-    >,
-    /// Expression for tools available to the completion (read-only context).
-    /// Receives: `input`, `map` (if mapped).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub tools: Option<
-        super::expression::WithExpression<
-            Option<
-                Vec<
-                    super::expression::WithExpression<
-                        chat::completions::request::ToolExpression,
-                    >,
-                >,
+                agent::completions::message::MessageExpression,
             >,
         >,
     >,
@@ -397,17 +409,16 @@ pub struct VectorCompletionTaskExpression {
     pub responses: super::expression::WithExpression<
         Vec<
             super::expression::WithExpression<
-                chat::completions::request::RichContentExpression,
+                agent::completions::message::RichContentExpression,
             >,
         >,
     >,
 
     /// Expression to transform the task result into a valid function output.
     ///
-    /// Receives `output` as `VectorCompletion(VectorCompletionOutput)` containing
-    /// the completion result with `votes`, `scores`, and `weights` fields.
+    /// Receives `output` as the task's raw result (typically `Vector(scores)`).
     ///
-    /// The expression must return a `FunctionOutput` that is valid for the parent function's type:
+    /// The expression must return a `TaskOutputOwned` that is valid for the parent function's type:
     /// - For scalar functions: must return `Scalar(value)` where value is in [0, 1]
     /// - For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length
     ///
@@ -415,7 +426,6 @@ pub struct VectorCompletionTaskExpression {
     /// profile weights. If a function has only one task, that task's output becomes the function's
     /// output directly.
     pub output: super::expression::Expression,
-
 }
 
 impl VectorCompletionTaskExpression {
@@ -440,30 +450,6 @@ impl VectorCompletionTaskExpression {
             }
         }
 
-        // compile tools
-        let tools = self
-            .tools
-            .map(|tools| tools.compile_one(params))
-            .transpose()?
-            .flatten()
-            .map(|tools| {
-                let mut compiled_tools = Vec::with_capacity(tools.len());
-                for tool in tools {
-                    match tool.compile_one_or_many(params)? {
-                        super::expression::OneOrMany::One(one_tool) => {
-                            compiled_tools.push(one_tool.compile(params)?);
-                        }
-                        super::expression::OneOrMany::Many(many_tools) => {
-                            for tool in many_tools {
-                                compiled_tools.push(tool.compile(params)?);
-                            }
-                        }
-                    }
-                }
-                Ok::<_, super::expression::ExpressionError>(compiled_tools)
-            })
-            .transpose()?;
-
         // compile responses
         let responses = self.responses.compile_one(params)?;
         let mut compiled_responses = Vec::with_capacity(responses.len());
@@ -482,7 +468,6 @@ impl VectorCompletionTaskExpression {
 
         Ok(VectorCompletionTask {
             messages: compiled_messages,
-            tools,
             responses: compiled_responses,
             output: self.output,
         })
@@ -490,20 +475,17 @@ impl VectorCompletionTaskExpression {
 }
 
 /// A compiled vector completion task ready for execution.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.VectorCompletionTask")]
 pub struct VectorCompletionTask {
     /// The resolved conversation messages.
-    pub messages: Vec<chat::completions::request::Message>,
-    /// The resolved tools (read-only context for the completion).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub tools: Option<Vec<chat::completions::request::Tool>>,
+    pub messages: Vec<agent::completions::message::Message>,
     /// The resolved response options the LLMs can vote for.
-    pub responses: Vec<chat::completions::request::RichContent>,
+    pub responses: Vec<agent::completions::message::RichContent>,
     /// Expression to transform the task result into a valid function output.
     ///
-    /// Receives `output` as `VectorCompletion(VectorCompletionOutput)` containing
-    /// the completion result with `votes`, `scores`, and `weights` fields.
-    /// Must return a `FunctionOutput` valid for the parent function's type (scalar or vector).
+    /// Receives `output` as the task's raw result (typically `Vector(scores)`).
+    /// Must return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).
     /// See [`VectorCompletionTaskExpression::output`] for full documentation.
     pub output: super::expression::Expression,
 }
@@ -511,10 +493,10 @@ pub struct VectorCompletionTask {
 impl VectorCompletionTask {
     pub fn compile_output(
         &self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
         raw_output: super::expression::TaskOutput,
     ) -> Result<
-        super::expression::FunctionOutput,
+        super::expression::TaskOutputOwned,
         super::expression::ExpressionError,
     > {
         let params =
@@ -532,26 +514,30 @@ impl VectorCompletionTask {
 ///
 /// Like [`ScalarFunctionTaskExpression`] but without owner/repository/commit.
 /// Always produces a fixed output of 0.5.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[schemars(rename = "functions.PlaceholderScalarFunctionTaskExpression")]
 pub struct PlaceholderScalarFunctionTaskExpression {
     /// JSON Schema defining the expected input structure.
     pub input_schema: super::expression::InputSchema,
 
     /// If this expression evaluates to true, skip the task. Receives: `input`.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub skip: Option<super::expression::Expression>,
 
-    /// Index into `input_maps` for mapped execution.
+    /// Expression that evaluates to the number of mapped task instances.
+    /// Each instance receives `map` as an integer index (0-based).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub map: Option<u64>,
+    #[schemars(extend("omitempty" = true))]
+    pub map: Option<super::expression::Expression>,
 
     /// Expression for the input to pass to the placeholder function.
     /// Receives: `input`, `map` (if mapped).
     pub input:
-        super::expression::WithExpression<super::expression::InputExpression>,
+        super::expression::WithExpression<super::expression::InputValueExpression>,
 
     /// Expression to transform the fixed 0.5 output.
-    /// Receives: `input`, `output` as `Function(FunctionOutput::Scalar(0.5))`.
+    /// Receives: `input`, `output` as `Scalar(0.5)`.
     pub output: super::expression::Expression,
 }
 
@@ -572,14 +558,15 @@ impl PlaceholderScalarFunctionTaskExpression {
 
 /// A compiled placeholder scalar function task.
 ///
-/// Always produces `FunctionOutput::Scalar(0.5)` before the output expression
+/// Always produces `Scalar(0.5)` before the output expression
 /// is applied.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.PlaceholderScalarFunctionTask")]
 pub struct PlaceholderScalarFunctionTask {
     /// JSON Schema defining the expected input structure.
     pub input_schema: super::expression::InputSchema,
     /// The resolved input.
-    pub input: super::expression::Input,
+    pub input: super::expression::InputValue,
     /// Expression to transform the fixed 0.5 output.
     pub output: super::expression::Expression,
 }
@@ -587,10 +574,10 @@ pub struct PlaceholderScalarFunctionTask {
 impl PlaceholderScalarFunctionTask {
     pub fn compile_output(
         &self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
         raw_output: super::expression::TaskOutput,
     ) -> Result<
-        super::expression::FunctionOutput,
+        super::expression::TaskOutputOwned,
         super::expression::ExpressionError,
     > {
         let params =
@@ -608,40 +595,42 @@ impl PlaceholderScalarFunctionTask {
 ///
 /// Like [`VectorFunctionTaskExpression`] but without owner/repository/commit.
 /// Always produces an equalized vector of length `output_length`.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[schemars(rename = "functions.PlaceholderVectorFunctionTaskExpression")]
 pub struct PlaceholderVectorFunctionTaskExpression {
     /// JSON Schema defining the expected input structure.
     pub input_schema: super::expression::InputSchema,
 
     /// Expression computing the expected output vector length.
     /// Receives: `input`.
-    pub output_length: super::expression::WithExpression<u64>,
+    pub output_length: super::expression::Expression,
 
     /// Expression transforming input into sub-inputs for swiss system.
     /// Receives: `input`.
-    pub input_split:
-        super::expression::WithExpression<Vec<super::expression::Input>>,
+    pub input_split: super::expression::Expression,
 
     /// Expression merging sub-inputs back into one input.
     /// Receives: `input` (as an array).
-    pub input_merge:
-        super::expression::WithExpression<super::expression::Input>,
+    pub input_merge: super::expression::Expression,
 
     /// If this expression evaluates to true, skip the task. Receives: `input`.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub skip: Option<super::expression::Expression>,
 
-    /// Index into `input_maps` for mapped execution.
+    /// Expression that evaluates to the number of mapped task instances.
+    /// Each instance receives `map` as an integer index (0-based).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub map: Option<u64>,
+    #[schemars(extend("omitempty" = true))]
+    pub map: Option<super::expression::Expression>,
 
     /// Expression for the input to pass to the placeholder function.
     /// Receives: `input`, `map` (if mapped).
     pub input:
-        super::expression::WithExpression<super::expression::InputExpression>,
+        super::expression::WithExpression<super::expression::InputValueExpression>,
 
     /// Expression to transform the equalized vector output.
-    /// Receives: `input`, `output` as `Function(FunctionOutput::Vector(equalized))`.
+    /// Receives: `input`, `output` as `Vector(equalized)`.
     pub output: super::expression::Expression,
 }
 
@@ -665,22 +654,21 @@ impl PlaceholderVectorFunctionTaskExpression {
 
 /// A compiled placeholder vector function task.
 ///
-/// Always produces `FunctionOutput::Vector(vec![1/N; output_length])` before
+/// Always produces `Vector(vec![1/N; output_length])` before
 /// the output expression is applied.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.PlaceholderVectorFunctionTask")]
 pub struct PlaceholderVectorFunctionTask {
     /// JSON Schema defining the expected input structure.
     pub input_schema: super::expression::InputSchema,
     /// Expression computing the expected output vector length.
-    pub output_length: super::expression::WithExpression<u64>,
+    pub output_length: super::expression::Expression,
     /// Expression transforming input into sub-inputs for swiss system.
-    pub input_split:
-        super::expression::WithExpression<Vec<super::expression::Input>>,
+    pub input_split: super::expression::Expression,
     /// Expression merging sub-inputs back into one input.
-    pub input_merge:
-        super::expression::WithExpression<super::expression::Input>,
+    pub input_merge: super::expression::Expression,
     /// The resolved input.
-    pub input: super::expression::Input,
+    pub input: super::expression::InputValue,
     /// Expression to transform the equalized vector output.
     pub output: super::expression::Expression,
 }
@@ -688,10 +676,10 @@ pub struct PlaceholderVectorFunctionTask {
 impl PlaceholderVectorFunctionTask {
     pub fn compile_output(
         &self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
         raw_output: super::expression::TaskOutput,
     ) -> Result<
-        super::expression::FunctionOutput,
+        super::expression::TaskOutputOwned,
         super::expression::ExpressionError,
     > {
         let params =
@@ -708,13 +696,16 @@ impl PlaceholderVectorFunctionTask {
 /// The result of compiling a task expression.
 ///
 /// Tasks without a `map` field compile to a single task. Tasks with a `map`
-/// field are expanded into multiple tasks, one per element in the referenced
-/// input map sub-array.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// expression are expanded into multiple tasks, one per integer index from
+/// 0 to the evaluated count.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "functions.CompiledTask")]
 pub enum CompiledTask {
     /// A single task (no mapping).
+    #[schemars(title = "One")]
     One(Task),
     /// Multiple task instances from mapped execution.
+    #[schemars(title = "Many")]
     Many(Vec<Task>),
 }

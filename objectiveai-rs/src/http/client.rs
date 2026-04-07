@@ -4,6 +4,7 @@ use crate::error;
 use eventsource_stream::Event as MessageEvent;
 use futures::{Stream, StreamExt};
 use reqwest_eventsource::{Event, RequestBuilderExt};
+use std::sync::Arc;
 
 /// HTTP client for making requests to the ObjectiveAI API.
 ///
@@ -15,11 +16,18 @@ use reqwest_eventsource::{Event, RequestBuilderExt};
 /// ```ignore
 /// let client = HttpClient::new(
 ///     reqwest::Client::new(),
-///     None, // Use default API base
+///     None, // Use default address
 ///     Some("your-api-key"),
 ///     None, // user_agent
 ///     None, // x_title
-///     None, // referer
+///     None, // http_referer
+///     None, // x_github_authorization
+///     None, // x_openrouter_authorization
+///     None, // x_mcp_authorization
+///     None, // x_viewer_signature
+///     None, // x_viewer_address
+///     None, // x_commit_author_name
+///     None, // x_commit_author_email
 /// );
 /// ```
 #[derive(Debug, Clone)]
@@ -27,15 +35,29 @@ pub struct HttpClient {
     /// The underlying reqwest HTTP client.
     pub http_client: reqwest::Client,
     /// Base URL for API requests. Defaults to `https://api.objective-ai.io`.
-    pub api_base: String,
+    pub address: String,
     /// API key for authentication. Sent as `Bearer` token in `Authorization` header.
-    pub api_key: Option<String>,
+    pub authorization: Option<Arc<String>>,
     /// Value for the `User-Agent` header.
     pub user_agent: Option<String>,
     /// Value for the `X-Title` header.
     pub x_title: Option<String>,
     /// Value for both `Referer` and `HTTP-Referer` headers.
-    pub referer: Option<String>,
+    pub http_referer: Option<String>,
+    /// Value for the `X-GITHUB-AUTHORIZATION` header.
+    pub x_github_authorization: Option<Arc<String>>,
+    /// Value for the `X-OPENROUTER-AUTHORIZATION` header.
+    pub x_openrouter_authorization: Option<Arc<String>>,
+    /// Values for the `X-MCP-AUTHORIZATION` header (JSON-encoded).
+    pub x_mcp_authorization: Option<Arc<std::collections::HashMap<String, String>>>,
+    /// Value for the `X-VIEWER-SIGNATURE` header.
+    pub x_viewer_signature: Option<Arc<String>>,
+    /// Value for the `X-VIEWER-ADDRESS` header.
+    pub x_viewer_address: Option<Arc<String>>,
+    /// Value for the `X-COMMIT-AUTHOR-NAME` header.
+    pub x_commit_author_name: Option<Arc<String>>,
+    /// Value for the `X-COMMIT-AUTHOR-EMAIL` header.
+    pub x_commit_author_email: Option<Arc<String>>,
 }
 
 impl HttpClient {
@@ -44,29 +66,68 @@ impl HttpClient {
     /// # Arguments
     ///
     /// * `http_client` - The reqwest client to use for requests
-    /// * `api_base` - Base URL for API requests (defaults to `https://api.objective-ai.io`)
-    /// * `api_key` - API key for authentication
+    /// * `address` - Base URL for API requests (defaults to `https://api.objective-ai.io`)
+    /// * `authorization` - API key for authentication
     /// * `user_agent` - Optional User-Agent header value
     /// * `x_title` - Optional X-Title header value
-    /// * `referer` - Optional Referer header value
+    /// * `http_referer` - Optional Referer header value
+    /// * `x_github_authorization` - Optional X-GITHUB-AUTHORIZATION header value
+    /// * `x_openrouter_authorization` - Optional X-OPENROUTER-AUTHORIZATION header value
+    /// * `x_mcp_authorization` - Optional X-MCP-AUTHORIZATION header value (HashMap)
+    /// * `x_viewer_signature` - Optional X-VIEWER-SIGNATURE header value
+    /// * `x_viewer_address` - Optional X-VIEWER-ADDRESS header value
+    /// * `x_commit_author_name` - Optional X-COMMIT-AUTHOR-NAME header value
+    /// * `x_commit_author_email` - Optional X-COMMIT-AUTHOR-EMAIL header value
     pub fn new(
         http_client: reqwest::Client,
-        api_base: Option<impl Into<String>>,
-        api_key: Option<impl Into<String>>,
+        address: Option<impl Into<String>>,
+        authorization: Option<impl Into<String>>,
         user_agent: Option<impl Into<String>>,
         x_title: Option<impl Into<String>>,
-        referer: Option<impl Into<String>>,
+        http_referer: Option<impl Into<String>>,
+        x_github_authorization: Option<impl Into<String>>,
+        x_openrouter_authorization: Option<impl Into<String>>,
+        x_mcp_authorization: Option<std::collections::HashMap<String, String>>,
+        x_viewer_signature: Option<impl Into<String>>,
+        x_viewer_address: Option<impl Into<String>>,
+        x_commit_author_name: Option<impl Into<String>>,
+        x_commit_author_email: Option<impl Into<String>>,
     ) -> Self {
+        #[cfg(feature = "env")]
+        let env = |name: &str| -> Option<String> { std::env::var(name).ok() };
+
         Self {
             http_client,
-            api_base: match api_base {
+            address: match address {
                 Some(base) => base.into(),
+                #[cfg(feature = "env")]
+                None => env("OBJECTIVEAI_ADDRESS")
+                    .unwrap_or_else(|| "https://api.objective-ai.io".to_string()),
+                #[cfg(not(feature = "env"))]
                 None => "https://api.objective-ai.io".to_string(),
             },
-            api_key: api_key.map(Into::into),
-            user_agent: user_agent.map(Into::into),
-            x_title: x_title.map(Into::into),
-            referer: referer.map(Into::into),
+            authorization: authorization.map(|k| Arc::new(k.into()))
+                .or_else(|| { #[cfg(feature = "env")] { env("OBJECTIVEAI_AUTHORIZATION").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
+            user_agent: user_agent.map(Into::into)
+                .or_else(|| { #[cfg(feature = "env")] { env("USER_AGENT") } #[cfg(not(feature = "env"))] { None } }),
+            x_title: x_title.map(Into::into)
+                .or_else(|| { #[cfg(feature = "env")] { env("X_TITLE") } #[cfg(not(feature = "env"))] { None } }),
+            http_referer: http_referer.map(Into::into)
+                .or_else(|| { #[cfg(feature = "env")] { env("HTTP_REFERER") } #[cfg(not(feature = "env"))] { None } }),
+            x_github_authorization: x_github_authorization.map(|v| Arc::new(v.into()))
+                .or_else(|| { #[cfg(feature = "env")] { env("GITHUB_AUTHORIZATION").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
+            x_openrouter_authorization: x_openrouter_authorization.map(|v| Arc::new(v.into()))
+                .or_else(|| { #[cfg(feature = "env")] { env("OPENROUTER_AUTHORIZATION").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
+            x_mcp_authorization: x_mcp_authorization.map(Arc::new)
+                .or_else(|| { #[cfg(feature = "env")] { env("MCP_AUTHORIZATION").and_then(|v| serde_json::from_str(&v).ok()).map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
+            x_viewer_signature: x_viewer_signature.map(|v| Arc::new(v.into()))
+                .or_else(|| { #[cfg(feature = "env")] { env("VIEWER_SIGNATURE").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
+            x_viewer_address: x_viewer_address.map(|v| Arc::new(v.into()))
+                .or_else(|| { #[cfg(feature = "env")] { env("VIEWER_ADDRESS").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
+            x_commit_author_name: x_commit_author_name.map(|v| Arc::new(v.into()))
+                .or_else(|| { #[cfg(feature = "env")] { env("COMMIT_AUTHOR_NAME").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
+            x_commit_author_email: x_commit_author_email.map(|v| Arc::new(v.into()))
+                .or_else(|| { #[cfg(feature = "env")] { env("COMMIT_AUTHOR_EMAIL").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
         }
     }
 
@@ -79,13 +140,14 @@ impl HttpClient {
     ) -> reqwest::RequestBuilder {
         let url = format!(
             "{}/{}",
-            self.api_base.trim_end_matches('/'),
+            self.address.trim_end_matches('/'),
             path.trim_start_matches('/')
         );
         let mut request = self.http_client.request(method, &url);
-        if let Some(api_key) = &self.api_key {
+        if let Some(authorization) = &self.authorization {
+            let key = authorization.strip_prefix("Bearer ").unwrap_or(authorization);
             request =
-                request.header("authorization", format!("Bearer {}", api_key));
+                request.header("authorization", format!("Bearer {}", key));
         }
         if let Some(user_agent) = &self.user_agent {
             request = request.header("user-agent", user_agent);
@@ -93,9 +155,32 @@ impl HttpClient {
         if let Some(x_title) = &self.x_title {
             request = request.header("x-title", x_title);
         }
-        if let Some(referer) = &self.referer {
-            request = request.header("referer", referer);
-            request = request.header("http-referer", referer);
+        if let Some(http_referer) = &self.http_referer {
+            request = request.header("referer", http_referer);
+            request = request.header("http-referer", http_referer);
+        }
+        if let Some(token) = &self.x_github_authorization {
+            request = request.header("X-GITHUB-AUTHORIZATION", token.as_str());
+        }
+        if let Some(token) = &self.x_openrouter_authorization {
+            request = request.header("X-OPENROUTER-AUTHORIZATION", token.as_str());
+        }
+        if let Some(headers) = &self.x_mcp_authorization {
+            if let Ok(json) = serde_json::to_string(headers.as_ref()) {
+                request = request.header("X-MCP-AUTHORIZATION", json);
+            }
+        }
+        if let Some(sig) = &self.x_viewer_signature {
+            request = request.header("X-VIEWER-SIGNATURE", sig.as_str());
+        }
+        if let Some(addr) = &self.x_viewer_address {
+            request = request.header("X-VIEWER-ADDRESS", addr.as_str());
+        }
+        if let Some(name) = &self.x_commit_author_name {
+            request = request.header("X-COMMIT-AUTHOR-NAME", name.as_str());
+        }
+        if let Some(email) = &self.x_commit_author_email {
+            request = request.header("X-COMMIT-AUTHOR-EMAIL", email.as_str());
         }
         if let Some(body) = body {
             request = request.json(&body);
@@ -108,12 +193,6 @@ impl HttpClient {
     /// # Type Parameters
     ///
     /// * `T` - The expected response type to deserialize into
-    ///
-    /// # Arguments
-    ///
-    /// * `method` - HTTP method (GET, POST, etc.)
-    /// * `path` - API endpoint path (will be appended to `api_base`)
-    /// * `body` - Optional request body to serialize as JSON
     ///
     /// # Errors
     ///
@@ -164,12 +243,6 @@ impl HttpClient {
     /// Sends a unary API call that expects no response body.
     ///
     /// Useful for DELETE or other operations that only return a status code.
-    ///
-    /// # Arguments
-    ///
-    /// * `method` - HTTP method (GET, POST, DELETE, etc.)
-    /// * `path` - API endpoint path (will be appended to `api_base`)
-    /// * `body` - Optional request body to serialize as JSON
     ///
     /// # Errors
     ///
@@ -222,16 +295,9 @@ impl HttpClient {
     ///
     /// * `T` - The expected chunk type to deserialize each SSE message into
     ///
-    /// # Arguments
-    ///
-    /// * `method` - HTTP method (typically POST for streaming)
-    /// * `path` - API endpoint path (will be appended to `api_base`)
-    /// * `body` - Optional request body to serialize as JSON
-    ///
     /// # Errors
     ///
-    /// Returns [`super::HttpError`] if the stream cannot be established. Individual
-    /// stream items may also contain errors if chunks fail to deserialize.
+    /// Returns [`super::HttpError`] if the stream cannot be established.
     pub async fn send_streaming<
         T: serde::de::DeserializeOwned + Send + 'static,
         P: AsRef<str> + Send,
@@ -248,15 +314,24 @@ impl HttpClient {
         + use<T, P, B>,
         super::HttpError,
     > {
+        // Stop the stream at [DONE] to prevent reqwest_eventsource from
+        // auto-reconnecting. Uses take_while on the raw SSE events, then
+        // maps/filters the remaining events into typed chunks.
         Ok(
             self.request(method, path.as_ref(), body)
                 .eventsource()?
+                .take_while(|result| {
+                    let dominated = matches!(
+                        result,
+                        Ok(Event::Message(MessageEvent { data, .. })) if data == "[DONE]"
+                    );
+                    async move { !dominated }
+                })
                 .then(|result| async {
                     match result {
                         Ok(Event::Open) => None,
                         Ok(Event::Message(MessageEvent { data, .. }))
-                            if data == "[DONE]"
-                                || data.starts_with(":")
+                            if data.starts_with(":")
                                 || data.is_empty() =>
                         {
                             None

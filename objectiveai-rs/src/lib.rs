@@ -2,13 +2,13 @@
 //!
 //! This crate provides data structures, validation, and client-side compilation
 //! for the ObjectiveAI API - a platform for scoring, ranking, and simulating
-//! preferences using ensembles of LLMs.
+//! preferences using swarms of agents.
 //!
 //! # Core Concepts
 //!
-//! - **Ensemble LLM**: A configured instance of a single upstream language model
-//! - **Ensemble**: A collection of Ensemble LLMs used together for voting
-//! - **Vector Completion**: Runs multiple LLMs to vote on responses, producing weighted scores
+//! - **Agent**: A configured instance of a single upstream language model
+//! - **Swarm**: A collection of Agents used together for voting
+//! - **Vector Completion**: Runs multiple agents to vote on responses, producing weighted scores
 //! - **Function**: A composable scoring pipeline built from Vector Completions
 //! - **Profile**: Learned weights for a Function, trained on example data
 //!
@@ -19,9 +19,8 @@
 //! # Modules
 //!
 //! - [`auth`] - API authentication types
-//! - [`chat`] - Chat completion APIs
-//! - [`ensemble`] - Ensemble definitions and validation
-//! - [`ensemble_llm`] - Ensemble LLM configurations
+//! - [`agent`] - Agent definitions, configuration, and completion APIs
+//! - [`swarm`] - Swarm definitions and validation
 //! - [`error`] - Error types
 //! - [`functions`] - Function definitions, execution, and client-side compilation
 //! - [`prefixed_uuid`] - UUID utilities
@@ -31,20 +30,39 @@
 //! - [`HttpClient`] - HTTP client for API requests
 //! - [`HttpError`] - HTTP error types
 
+pub mod agent;
+pub mod arbitrary_util;
 pub mod auth;
-pub mod chat;
-pub mod ensemble;
-pub mod ensemble_llm;
+pub mod swarm;
 pub mod error;
 pub mod functions;
+pub mod laboratories;
+mod json_schema;
+pub use json_schema::*;
 pub mod prefixed_uuid;
+mod remote;
+pub(crate) mod serde_util;
 pub mod vector;
+mod weights;
+mod util;
+
+pub use remote::*;
+pub use weights::*;
 
 #[cfg(test)]
-mod util;
+mod serde_util_tests;
+#[cfg(test)]
+mod tests;
+
+#[cfg(test)]
+mod test_util;
+
+#[cfg(feature = "config")]
+pub mod config;
 
 #[cfg(feature = "http")]
 mod http;
 
 #[cfg(feature = "http")]
 pub use http::*;
+

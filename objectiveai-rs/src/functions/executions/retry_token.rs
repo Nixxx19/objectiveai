@@ -2,13 +2,16 @@
 
 use base64::Engine;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Token that enables reusing votes from a previous function execution.
 ///
 /// Contains identifiers for each task's votes that can be reused in a
 /// subsequent execution. Serialized as base64-encoded JSON.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(transparent)]
+#[schemars(!transparent)]
+#[schemars(rename = "functions.executions.RetryToken")]
 pub struct RetryToken(pub Vec<Option<String>>);
 
 impl RetryToken {

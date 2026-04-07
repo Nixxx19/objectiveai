@@ -1,34 +1,115 @@
+#[cfg(feature = "filesystem")]
+mod filesystem;
+
+#[cfg(feature = "cli")]
+mod cli;
+
 use rmcp::{
     ServerHandler,
-    handler::server::{router::tool::ToolRouter, wrapper::Parameters},
-    model::{ServerCapabilities, ServerInfo},
-    schemars, tool, tool_handler, tool_router,
+    handler::server::router::tool::ToolRouter,
+    handler::server::tool::ToolCallContext,
+    model::{CallToolResult, ServerCapabilities, ServerInfo},
+    tool_handler,
     transport::stdio,
-    ServiceExt,
+    ErrorData, ServiceExt,
 };
-
-#[derive(Debug, serde::Deserialize, schemars::JsonSchema)]
-struct HelloRequest {
-    #[schemars(description = "Name to greet")]
-    name: String,
-}
+use futures::FutureExt;
 
 #[derive(Debug, Clone)]
 struct ObjectiveAiMcp {
     tool_router: ToolRouter<Self>,
+    #[cfg(feature = "filesystem")]
+    filesystem: filesystem::FilesystemTools,
+    #[cfg(feature = "cli")]
+    cli: cli::CliTools,
 }
 
-#[tool_router]
 impl ObjectiveAiMcp {
     fn new() -> Self {
+        let mut tool_router = ToolRouter::<Self>::new();
+
+        #[cfg(feature = "filesystem")]
+        let filesystem = {
+            let fs = filesystem::FilesystemTools::new();
+            for tool_def in fs.tool_router.list_all() {
+                let fs_router = fs.tool_router.clone();
+                let fs_ref = fs.clone();
+                tool_router.add_route(
+                    rmcp::handler::server::router::tool::ToolRoute::new_dyn(
+                        tool_def,
+                        move |ctx: ToolCallContext<'_, ObjectiveAiMcp>| {
+                            let fs_router = fs_router.clone();
+                            let fs_ref = fs_ref.clone();
+                            let params = rmcp::model::CallToolRequestParams {
+                                meta: None,
+                                name: ctx.name.clone(),
+                                arguments: ctx.arguments.clone(),
+                                task: ctx.task.clone(),
+                            };
+                            let request_context = ctx.request_context.clone();
+                            async move {
+                                let sub_ctx = ToolCallContext::new(
+                                    &fs_ref,
+                                    params,
+                                    request_context,
+                                );
+                                fs_router.call(sub_ctx).await
+                            }
+                            .boxed()
+                        },
+                    ),
+                );
+            }
+            fs
+        };
+
+        #[cfg(feature = "cli")]
+        let cli_tools = {
+            let ct = cli::CliTools::new();
+            for tool_def in ct.tool_router.list_all() {
+                let ct_router = ct.tool_router.clone();
+                let ct_ref = ct.clone();
+                tool_router.add_route(
+                    rmcp::handler::server::router::tool::ToolRoute::new_dyn(
+                        tool_def,
+                        move |ctx: ToolCallContext<'_, ObjectiveAiMcp>| {
+                            let ct_router = ct_router.clone();
+                            let ct_ref = ct_ref.clone();
+                            let params = rmcp::model::CallToolRequestParams {
+                                meta: None,
+                                name: ctx.name.clone(),
+                                arguments: ctx.arguments.clone(),
+                                task: ctx.task.clone(),
+                            };
+                            let request_context = ctx.request_context.clone();
+                            async move {
+                                let sub_ctx = ToolCallContext::new(
+                                    &ct_ref,
+                                    params,
+                                    request_context,
+                                );
+                                ct_router.call(sub_ctx).await
+                            }
+                            .boxed()
+                        },
+                    ),
+                );
+            }
+            ct
+        };
+
         Self {
-            tool_router: Self::tool_router(),
+            tool_router,
+            #[cfg(feature = "filesystem")]
+            filesystem,
+            #[cfg(feature = "cli")]
+            cli: cli_tools,
         }
     }
 
-    #[tool(description = "Say hello to someone")]
-    fn hello(&self, Parameters(HelloRequest { name }): Parameters<HelloRequest>) -> String {
-        format!("Hello, {name}! Welcome to ObjectiveAI.")
+    async fn init(&self) {
+        #[cfg(feature = "filesystem")]
+        self.filesystem.init().await;
     }
 }
 
@@ -56,7 +137,10 @@ async fn main() -> anyhow::Result<()> {
 
     tracing::info!("Starting ObjectiveAI MCP server");
 
-    let service = ObjectiveAiMcp::new()
+    let server = ObjectiveAiMcp::new();
+    server.init().await;
+
+    let service = server
         .serve(stdio())
         .await
         .inspect_err(|e| {

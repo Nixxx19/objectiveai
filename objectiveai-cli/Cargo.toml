@@ -1,0 +1,28 @@
+[package]
+name = "objectiveai-cli"
+version = "2.0.0"
+edition = "2024"
+
+[features]
+default = ["viewer", "rustpython", "systempython"]
+viewer = ["dep:objectiveai-viewer"]
+rustpython = ["dep:rustpython"]
+systempython = []
+
+[dependencies]
+objectiveai = { path = "../objectiveai-rs", version = "2.0.0" }
+objectiveai-api = { path = "../objectiveai-api", version = "2.0.0" }
+objectiveai-viewer = { path = "../objectiveai-viewer/src-tauri", version = "2.0.0", optional = true }
+clap = { version = "4.6.0", features = ["derive"] }
+ratatui = "0.30.0"
+tokio = { version = "1.50.0", features = ["full"] }
+serde_json = "1.0.149"
+serde = "1.0.228"
+thiserror = "2.0.18"
+dotenv = "0.15.0"
+envconfig = "0.11.1"
+reqwest = { version = "0.12.28", default-features = false, features = ["charset", "http2", "rustls-tls", "json"] }
+rustpython = { version = "0.4.0", optional = true }
+serde_path_to_error = "0.1.20"
+base64 = "0.22.1"
+futures = "0.3.32"

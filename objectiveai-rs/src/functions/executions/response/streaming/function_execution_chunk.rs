@@ -1,26 +1,35 @@
-use crate::{error, functions, vector};
+use crate::{agent, error, functions};
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[schemars(rename = "functions.executions.response.streaming.FunctionExecutionChunk")]
 pub struct FunctionExecutionChunk {
     pub id: String,
     pub tasks: Vec<super::TaskChunk>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub tasks_errors: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub reasoning: Option<super::ReasoningSummaryChunk>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub output: Option<functions::expression::FunctionOutput>,
+    #[schemars(extend("omitempty" = true))]
+    pub output: Option<super::super::Output>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub error: Option<error::ResponseError>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub retry_token: Option<String>,
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub created: u64,
-    pub function: Option<String>,
-    pub profile: Option<String>,
+    pub function: Option<crate::RemotePath>,
+    pub profile: Option<crate::RemotePath>,
     pub object: super::Object,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub usage: Option<vector::completions::response::Usage>,
+    #[schemars(extend("omitempty" = true))]
+    pub usage: Option<agent::completions::response::Usage>,
 }
 
 impl FunctionExecutionChunk {
@@ -35,7 +44,7 @@ impl FunctionExecutionChunk {
     pub fn any_usage(&self) -> bool {
         self.usage
             .as_ref()
-            .is_some_and(vector::completions::response::Usage::any_usage)
+            .is_some_and(agent::completions::response::Usage::any_usage)
     }
 
     pub fn push(

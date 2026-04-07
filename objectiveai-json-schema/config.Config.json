@@ -1,0 +1,61 @@
+{
+  "title": "config.Config",
+  "type": "object",
+  "properties": {
+    "agents": {
+      "anyOf": [
+        {
+          "$ref": "config.AgentsConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "api": {
+      "anyOf": [
+        {
+          "$ref": "config.ApiConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "functions": {
+      "anyOf": [
+        {
+          "$ref": "config.FunctionsConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "swarms": {
+      "anyOf": [
+        {
+          "$ref": "config.SwarmsConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "viewer": {
+      "anyOf": [
+        {
+          "$ref": "config.ViewerConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    }
+  }
+}

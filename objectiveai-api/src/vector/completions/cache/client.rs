@@ -42,7 +42,7 @@ where
     /// Retrieves all votes from a historical vector completion.
     pub async fn fetch_completion_votes(
         &self,
-        ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         id: &str,
     ) -> Result<
         objectiveai::vector::completions::cache::response::CompletionVotes,
@@ -59,19 +59,17 @@ where
     /// Returns a cached vote if one exists for the given model, messages, tools, and responses.
     pub async fn fetch_cache_vote(
         &self,
-        ctx: ctx::Context<CTXEXT>,
-        model: &objectiveai::chat::completions::request::Model,
-        models: Option<&[objectiveai::chat::completions::request::Model]>,
-        messages: &[objectiveai::chat::completions::request::Message],
-        tools: Option<&[objectiveai::chat::completions::request::Tool]>,
-        responses: &[objectiveai::chat::completions::request::RichContent],
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
+        agent: &objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote,
+        messages: &[objectiveai::agent::completions::message::Message],
+        responses: &[objectiveai::agent::completions::message::RichContent],
     ) -> Result<
         objectiveai::vector::completions::cache::response::CacheVote,
         objectiveai::error::ResponseError,
     > {
         let vote = self
             .cache_vote_fetcher
-            .fetch(ctx, model, models, messages, tools, responses)
+            .fetch(ctx, agent, messages, responses)
             .await?;
         Ok(
             objectiveai::vector::completions::cache::response::CacheVote {

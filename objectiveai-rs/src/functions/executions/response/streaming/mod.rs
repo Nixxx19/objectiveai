@@ -11,3 +11,6 @@ pub use object::*;
 pub use reasoning_summary_chunk::*;
 pub use task_chunk::*;
 pub use vector_completion_task_chunk::*;
+
+#[cfg(test)]
+mod function_execution_chunk_tests;

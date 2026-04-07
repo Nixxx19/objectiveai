@@ -1,0 +1,20 @@
+{
+  "title": "config.SwarmsConfig",
+  "type": "object",
+  "properties": {
+    "favorites": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "config.Favorite"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    }
+  }
+}

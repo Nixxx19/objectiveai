@@ -1,50 +1,40 @@
 //! Vote extraction from LLM responses.
 //!
-//! Extracts votes from LLM chat completion responses by parsing response keys
+//! Extracts votes from LLM agent completion responses by parsing response keys
 //! and computing probability distributions from logprobs when available.
 
 use regex::Regex;
 use rust_decimal::MathematicalOps;
 
-/// Extracts a vote from an LLM choice.
+/// Extracts a vote from text content.
 ///
-/// Parses the response to find selected response keys and converts them into a
+/// Parses the text to find selected response keys and converts them into a
 /// probability distribution. When logprobs are available, uses them to capture
 /// the model's preference distribution (probabilistic voting). Otherwise, falls
-/// back to discrete voting based on the final sampled token.
+/// back to discrete voting based on the matched key.
 ///
-/// Returns None if no response key is found in the content.
+/// Returns `(match_count, vote)`:
+/// - `match_count == 0` → vote is L1-normalized equal distribution
+/// - `match_count == 1` → single match, vote is definitive
+/// - `match_count > 1` → multiple matches, vote equally weighted across matches
 pub fn get_vote(
     mut pfx_tree: super::PfxTree,
     with_ticks_pattern: &str,
-    without_ticks_pattern: &str,
     responses_len: usize,
-    choice: &objectiveai::chat::completions::response::streaming::Choice,
-) -> Option<Vec<rust_decimal::Decimal>> {
-    // extract content, return None if empty
-    let content_owned = match Content::from_choice(choice) {
-        Some(c) => c,
-        None => {
-            return None;
-        }
-    };
-    let content = content_owned.as_str();
-
-    // extract response keys, return if not found
+    content: &str,
+    logprobs: Option<&objectiveai::agent::completions::response::Logprobs>,
+) -> (usize, Vec<rust_decimal::Decimal>) {
+    // extract response keys
     let with_ticks_re = Regex::new(with_ticks_pattern).unwrap();
-    let mut key_matches = with_ticks_re.find_iter(content).collect::<Vec<_>>();
-    let without_ticks_re = match key_matches.len() {
-        0 => Some(Regex::new(without_ticks_pattern).unwrap()),
-        _ => None,
-    };
-    if let Some(without_ticks_re) = without_ticks_re.as_ref() {
-        key_matches = without_ticks_re.find_iter(content).collect::<Vec<_>>();
+    let key_matches = with_ticks_re.find_iter(content).collect::<Vec<_>>();
+
+    // return L1-normalized equal distribution if no keys found
+    if key_matches.is_empty() {
+        let weight = rust_decimal::Decimal::ONE / rust_decimal::Decimal::from(responses_len);
+        return (0, vec![weight; responses_len]);
     }
 
-    // return None if no keys found
-    if key_matches.is_empty() {
-        return None;
-    }
+    let match_count = key_matches.len();
 
     // each match has an equal vote weight
     let key_matches_len_decimal =
@@ -94,10 +84,10 @@ pub fn get_vote(
 
         // try to get probabilities from logprobs
         let mut from_logprobs = false;
-        if let Some(objectiveai::chat::completions::response::Logprobs {
-            content: Some(logprobs),
+        if let Some(objectiveai::agent::completions::response::Logprobs {
+            content: Some(logprob_content),
             ..
-        }) = choice.logprobs.as_ref()
+        }) = logprobs
         {
             // reverse key to check against
             let key_rev = key.chars().rev().collect::<String>();
@@ -110,7 +100,7 @@ pub fn get_vote(
             let mut key_logprob_index = 0;
 
             // find the logprob segment that matches the key
-            'outer: for logprob in logprobs.iter().rev().skip(logprob_i) {
+            'outer: for logprob in logprob_content.iter().rev().skip(logprob_i) {
                 logprob_i += 1;
                 let mut i = logprob.token.len();
                 for c in logprob.token.chars().rev() {
@@ -146,7 +136,7 @@ pub fn get_vote(
                 let mut probabilities =
                     vec![rust_decimal::Decimal::ZERO; responses_len];
                 let mut probabilities_sum = rust_decimal::Decimal::ZERO;
-                for objectiveai::chat::completions::response::TopLogprob {
+                for objectiveai::agent::completions::response::TopLogprob {
                     token,
                     logprob,
                     ..
@@ -190,77 +180,6 @@ pub fn get_vote(
         }
     }
 
-    // return vote
-    Some(vote)
-}
-
-/// Helper for extracting content from choices without unnecessary allocation.
-enum Content<'s> {
-    /// Borrowed content from choice.delta.content.
-    Ref(&'s str),
-    /// Owned content when combining tool call arguments with content.
-    Owned(String),
-}
-
-impl<'s> Content<'s> {
-    /// Returns the content as a string slice.
-    fn as_str(&self) -> &str {
-        match self {
-            Content::Ref(s) => s,
-            Content::Owned(s) => s.as_str(),
-        }
-    }
-
-    /// Extracts content from a choice, combining tool call arguments if present.
-    fn from_choice(
-        choice: &'s objectiveai::chat::completions::response::streaming::Choice,
-    ) -> Option<Self> {
-        match choice.delta.tool_calls.as_ref() {
-            Some(tool_calls) => {
-                let mut len = 0;
-                for tool_call in tool_calls {
-                    if let Some(
-                    objectiveai::chat::completions::response::streaming::ToolCallFunction {
-                        arguments: Some(arguments),
-                        ..
-                    },
-                ) = tool_call.function.as_ref()
-                {
-                    len += arguments.len();
-                }
-                }
-                if let Some(content) = choice.delta.content.as_ref() {
-                    len += content.len();
-                }
-                if len == 0 {
-                    return None;
-                }
-                let mut owned = String::with_capacity(len);
-                for tool_call in tool_calls {
-                    if let Some(
-                    objectiveai::chat::completions::response::streaming::ToolCallFunction {
-                        arguments: Some(arguments),
-                        ..
-                    },
-                ) = tool_call.function.as_ref()
-                {
-                    owned.push_str(arguments);
-                }
-                }
-                if let Some(content) = choice.delta.content.as_ref() {
-                    owned.push_str(content);
-                }
-                Some(Content::Owned(owned))
-            }
-            None => {
-                if let Some(content) = choice.delta.content.as_ref()
-                    && content.len() > 0
-                {
-                    Some(Content::Ref(content.as_str()))
-                } else {
-                    None
-                }
-            }
-        }
-    }
+    // return match count and vote
+    (match_count, vote)
 }

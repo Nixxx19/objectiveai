@@ -1,0 +1,27 @@
+pub mod config;
+pub mod claude_agent_sdk;
+
+use clap::Subcommand;
+
+#[derive(Subcommand)]
+pub enum Commands {
+    /// Local API configuration
+    Config {
+        #[command(subcommand)]
+        command: config::Commands,
+    },
+    /// Claude Agent SDK enabled
+    ClaudeAgentSdk {
+        #[command(subcommand)]
+        command: claude_agent_sdk::Commands,
+    },
+}
+
+impl Commands {
+    pub fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
+        match self {
+            Commands::Config { command } => command.handle(),
+            Commands::ClaudeAgentSdk { command } => command.handle(cli_config),
+        }
+    }
+}

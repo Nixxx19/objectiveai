@@ -1,0 +1,87 @@
+{
+  "title": "laboratories.executions.response.streaming.EvaluationChunk",
+  "description": "Streaming chunk for a single evaluation agent completion within a laboratory execution.",
+  "type": "object",
+  "properties": {
+    "agent_index": {
+      "description": "Container index (0-based).",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "continuation": {
+      "description": "Continuation state for multi-turn conversations (only present in the final chunk).",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "created": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "error.ResponseError"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "id": {
+      "type": "string"
+    },
+    "index": {
+      "description": "Evaluation index (0-based).",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "agent.completions.response.streaming.MessageChunk"
+      }
+    },
+    "object": {
+      "description": "The object type (always \"agent.completion.chunk\").",
+      "$ref": "agent.completions.response.streaming.Object"
+    },
+    "output": {
+      "anyOf": [
+        {
+          "$ref": "functions.expression.InputValue"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "upstream": {
+      "description": "Upstream provider",
+      "$ref": "agent.Upstream"
+    },
+    "usage": {
+      "description": "Token usage (only present in the final chunk).",
+      "anyOf": [
+        {
+          "$ref": "agent.completions.response.Usage"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    }
+  }
+}

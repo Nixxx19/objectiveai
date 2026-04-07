@@ -1,0 +1,60 @@
+{
+  "title": "vector.completions.response.unary.AgentCompletion",
+  "description": "A agent completion from a single agent within a vector completion.\n\nWraps the standard agent completion response with an index to identify\nwhich agent in the swarm produced it.",
+  "type": "object",
+  "properties": {
+    "continuation": {
+      "description": "Continuation state for multi-turn conversations.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "created": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "error": {
+      "description": "Error details if this completion failed.",
+      "anyOf": [
+        {
+          "$ref": "error.ResponseError"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "index": {
+      "description": "Index of this completion within the vector completion.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "agent.completions.response.unary.Message"
+      }
+    },
+    "object": {
+      "description": "The object type (always \"agent.completion\").",
+      "$ref": "agent.completions.response.unary.Object"
+    },
+    "upstream": {
+      "description": "Upstream provider",
+      "$ref": "agent.Upstream"
+    },
+    "usage": {
+      "$ref": "agent.completions.response.Usage"
+    }
+  }
+}

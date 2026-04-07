@@ -5,3 +5,6 @@ mod object;
 pub use function_execution_chunk::*;
 pub use function_profile_computation_chunk::*;
 pub use object::*;
+
+#[cfg(test)]
+mod function_profile_computation_chunk_tests;

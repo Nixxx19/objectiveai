@@ -7,10 +7,10 @@ use std::sync::Arc;
 #[async_trait::async_trait]
 pub trait UsageHandler<CTXEXT> {
     /// Records usage from a completed Function execution.
-    async fn handle_usage(
+    async fn handle_usage<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        ctx: ctx::Context<CTXEXT>,
-        request: Arc<objectiveai::functions::executions::request::Request>,
+        ctx: ctx::Context<CTXEXT, PC>,
+        request: Arc<objectiveai::functions::executions::request::FunctionExecutionCreateParams>,
         response: objectiveai::functions::executions::response::unary::FunctionExecution,
     );
 }

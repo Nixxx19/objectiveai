@@ -1,33 +1,41 @@
 use crate::{
+    agent,
     functions::{self, profiles::computations::response},
-    vector,
 };
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[schemars(rename = "functions.profiles.computations.response.streaming.FunctionProfileComputationChunk")]
 pub struct FunctionProfileComputationChunk {
     pub id: String,
     pub executions: Vec<super::FunctionExecutionChunk>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub executions_errors: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub profile: Option<functions::InlineTasksProfile>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub fitting_stats: Option<response::FittingStats>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub retry_token: Option<String>,
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub created: u64,
-    pub function: Option<String>,
+    pub function: Option<crate::RemotePath>,
     pub object: super::Object,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub usage: Option<vector::completions::response::Usage>,
+    #[schemars(extend("omitempty" = true))]
+    pub usage: Option<agent::completions::response::Usage>,
 }
 
 impl FunctionProfileComputationChunk {
     pub fn any_usage(&self) -> bool {
         self.usage
             .as_ref()
-            .is_some_and(vector::completions::response::Usage::any_usage)
+            .is_some_and(agent::completions::response::Usage::any_usage)
     }
 
     pub fn push(

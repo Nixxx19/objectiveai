@@ -1,0 +1,83 @@
+mod cli_test_util;
+
+use std::path::{Path, PathBuf};
+
+fn snapshots_dir() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../objectiveai-api/assets/functions/executions/client_tests")
+}
+
+fn snapshot_output(snapshot: &serde_json::Value) -> serde_json::Value {
+    snapshot["output"]["output"].clone()
+}
+
+fn snapshot_has_errors(snapshot: &serde_json::Value) -> bool {
+    snapshot["tasks_errors"].as_bool().unwrap_or(false)
+}
+
+macro_rules! snapshot_test {
+    ($name:ident, $snapshot:expr, $function:expr, $profile:expr, $seed:expr, $input:tt) => {
+        #[test]
+        fn $name() {
+            let input = serde_json::to_string(&serde_json::json!($input)).unwrap();
+            let seed_str = $seed.to_string();
+
+            let function_str = format!("remote=mock,name={}", $function);
+            let profile_str = format!("remote=mock,name={}", $profile);
+            let cli_result = cli_test_util::run_cli(&[
+                "functions", "executions", "create", "standard",
+                "--function", &function_str,
+                "--profile", &profile_str,
+                "--input-inline", &input,
+                "--seed", &seed_str,
+            ]);
+
+            let snapshot = cli_test_util::load_snapshot(&snapshots_dir(), $snapshot);
+            let expected_output = cli_test_util::rounded(&snapshot_output(&snapshot));
+            let has_errors = snapshot_has_errors(&snapshot);
+
+            let actual_output = cli_test_util::rounded(&cli_result["output"]);
+            assert_eq!(actual_output, expected_output, "output mismatch for {}", $snapshot);
+
+            if has_errors {
+                assert!(
+                    cli_result.get("errors").is_some_and(|e| e.as_array().is_some_and(|a| !a.is_empty())),
+                    "expected errors for {} but got none", $snapshot
+                );
+            } else {
+                assert!(
+                    cli_result.get("errors").is_none()
+                        || cli_result["errors"].as_array().is_some_and(|a| a.is_empty()),
+                    "expected no errors for {} but got: {:?}", $snapshot, cli_result.get("errors")
+                );
+            }
+        }
+    };
+}
+
+snapshot_test!(
+    mock_1_scalar_leaf_binary_seed_42,
+    "mock_1_scalar_leaf_binary_seed_42",
+    "binary-classifier",
+    "solo-instruction",
+    42,
+    {"text": "Hello world"}
+);
+
+snapshot_test!(
+    mock_7_vector_5_criteria_seed_42,
+    "mock_7_vector_5_criteria_seed_42",
+    "five-criteria-ranker",
+    "schema-heavy-trio",
+    42,
+    {"items": ["Option A", "Option B", "Option C"]}
+);
+
+snapshot_test!(
+    mock_20_vector_super_branch_seed_42,
+    "mock_20_vector_super_branch_seed_42",
+    "nested-vector-super-branch",
+    "nested-vector-inline-remote",
+    42,
+    {"items": ["Alpha", "Beta", "Gamma"]}
+);

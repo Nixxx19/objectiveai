@@ -1,0 +1,30 @@
+{
+  "title": "Remote",
+  "description": "The remote source where a function, profile, or agent is hosted.",
+  "anyOf": [
+    {
+      "title": "Github",
+      "description": "GitHub repository.",
+      "type": "string",
+      "enum": [
+        "github"
+      ]
+    },
+    {
+      "title": "Filesystem",
+      "description": "Local filesystem.",
+      "type": "string",
+      "enum": [
+        "filesystem"
+      ]
+    },
+    {
+      "title": "Mock",
+      "description": "Mock (for testing).",
+      "type": "string",
+      "enum": [
+        "mock"
+      ]
+    }
+  ]
+}

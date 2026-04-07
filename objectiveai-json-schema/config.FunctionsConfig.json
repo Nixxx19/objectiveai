@@ -1,0 +1,42 @@
+{
+  "title": "config.FunctionsConfig",
+  "type": "object",
+  "properties": {
+    "favorites": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "config.Favorite"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "inventions": {
+      "anyOf": [
+        {
+          "$ref": "config.FunctionsInventionsConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "profiles": {
+      "anyOf": [
+        {
+          "$ref": "config.FunctionsProfilesConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    }
+  }
+}

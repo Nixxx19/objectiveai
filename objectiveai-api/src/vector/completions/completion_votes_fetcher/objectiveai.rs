@@ -7,12 +7,12 @@ use std::sync::Arc;
 /// Fetches completion votes from the ObjectiveAI API.
 pub struct ObjectiveAiFetcher {
     /// The HTTP client for API requests.
-    pub client: Arc<objectiveai::HttpClient>,
+    pub client: Arc<crate::objectiveai_http::Client>,
 }
 
 impl ObjectiveAiFetcher {
     /// Creates a new ObjectiveAI completion votes fetcher.
-    pub fn new(client: Arc<objectiveai::HttpClient>) -> Self {
+    pub fn new(client: Arc<crate::objectiveai_http::Client>) -> Self {
         Self { client }
     }
 }
@@ -20,19 +20,23 @@ impl ObjectiveAiFetcher {
 #[async_trait::async_trait]
 impl<CTXEXT> super::Fetcher<CTXEXT> for ObjectiveAiFetcher
 where
-    CTXEXT: Send + Sync + 'static,
+    CTXEXT: Send + Sync + 'static + ctx::ContextExt,
 {
-    async fn fetch(
+    async fn fetch<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
-        _ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT, PC>,
         id: &str,
     ) -> Result<
         Option<Vec<objectiveai::vector::completions::response::Vote>>,
         objectiveai::error::ResponseError,
     > {
+        let client = self.client.with_authorization(&ctx).await;
+        let request = objectiveai::vector::completions::cache::request::GetCompletionVotesRequest {
+            id: id.to_owned(),
+        };
         match objectiveai::vector::completions::cache::get_completion_votes(
-            &self.client,
-            id,
+            &client,
+            &request,
         )
         .await
         {

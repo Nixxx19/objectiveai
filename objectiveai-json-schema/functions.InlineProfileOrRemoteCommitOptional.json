@@ -1,0 +1,14 @@
+{
+  "title": "functions.InlineProfileOrRemoteCommitOptional",
+  "description": "A profile specification that is either an inline profile definition\nor a remote path reference.",
+  "anyOf": [
+    {
+      "title": "Inline",
+      "$ref": "functions.InlineProfile"
+    },
+    {
+      "title": "Remote",
+      "$ref": "RemotePathCommitOptional"
+    }
+  ]
+}

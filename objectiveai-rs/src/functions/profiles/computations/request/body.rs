@@ -1,46 +1,37 @@
-use crate::{chat, functions, vector};
+use crate::{agent, functions};
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct FunctionInlineRequestBody {
-    pub function: functions::InlineFunction,
-    #[serde(flatten)]
-    pub base: FunctionRemoteRequestBody,
-}
+/// Parameters for creating a function profile computation.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.profiles.computations.request.FunctionProfileComputationCreateParams")]
+pub struct FunctionProfileComputationCreateParams {
+    /// The function to compute a profile for (inline definition or remote path).
+    pub function: functions::FullInlineFunctionOrRemoteCommitOptional,
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct FunctionRemoteRequestBody {
-    // if present, retries vector completions from previous request
+    // --- Caching and retry options ---
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub retry_token: Option<String>,
-    // if true, vector completions use cached votes when available
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub from_cache: Option<bool>,
-    // if true, remaining vector completion votes are RNGed
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub from_rng: Option<bool>,
 
-    // core config
-    /// Available upstreams for this request
+    // --- Core configuration ---
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub upstreams: Option<Vec<crate::chat::completions::Upstream>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub max_retries: Option<u64>,
     pub n: u64,
     pub dataset: Vec<super::DatasetItem>,
-    pub ensemble: vector::completions::request::Ensemble,
+    pub swarm: crate::swarm::InlineSwarmBaseOrRemoteCommitOptional,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub provider: Option<chat::completions::request::Provider>,
+    #[schemars(extend("omitempty" = true))]
+    pub provider: Option<agent::completions::request::Provider>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub seed: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub stream: Option<bool>,
 
-    // retry config
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub backoff_max_elapsed_time: Option<u64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub first_chunk_timeout: Option<u64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub other_chunk_timeout: Option<u64>,
 }

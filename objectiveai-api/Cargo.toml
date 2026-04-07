@@ -1,6 +1,6 @@
 [package]
 name = "objectiveai-api"
-version = "0.1.5"
+version = "2.0.0"
 edition = "2024"
 authors = ["ObjectiveAI <admin@objective-ai.io>"]
 description = "ObjectiveAI API Server"
@@ -9,36 +9,53 @@ repository = "https://github.com/ObjectiveAI/objectiveai"
 homepage = "https://objective-ai.io"
 documentation = "https://docs.rs/objectiveai-api"
 readme = "README.md"
-keywords = ["llm", "ai", "ensemble"]
+keywords = ["llm", "ai", "swarm"]
 publish = true
 
+[features]
+default = ["laboratories-local"]
+sqlite-persistent-cache = ["dep:rusqlite"]
+laboratories-local = ["dep:bollard", "dep:tar"]
+
 [dependencies]
-objectiveai = { path = "../objectiveai-rs", version = "0.1.5" }
-serde_json = { version = "1.0.140", features = ["preserve_order"] }
-serde = { version = "1.0.219", features = ["derive"] }
-indexmap = { version = "2.2.3", features = ["serde"] }
+objectiveai = { path = "../objectiveai-rs", version = "2.0.0", default-features = false, features = ["http"] }
+serde_json = { version = "1.0.149", features = ["preserve_order"] }
+serde = { version = "1.0.228", features = ["derive"] }
+indexmap = { version = "2.13.0", features = ["serde"] }
 json-escape = { version = "0.3.1" }
-rust_decimal = { version = "1.39.0", features = ["macros", "serde-float", "rand", "maths"] }
-thiserror = {  version = "2.0.12" }
-serde_path_to_error = { version = "0.1.17" }
-reqwest = { version = "0.12.15", default-features = false, features = ["charset", "http2", "rustls-tls", "json"] }
+rust_decimal = { version = "1.40.0", features = ["macros", "serde-float", "rand", "maths"] }
+thiserror = {  version = "2.0.18" }
+serde_path_to_error = { version = "0.1.20" }
+reqwest = { version = "0.12.28", default-features = false, features = ["charset", "http2", "rustls-tls", "json"] }
 reqwest-eventsource = { version = "0.6.0" }
 eventsource-stream = { version = "0.2.3" }
-futures = { version = "0.3.31" }
+futures = { version = "0.3.32" }
 dashmap = { version = "6.1.0" }
-uuid = { version = "1.16.0", features = ["v4", "serde"] }
+uuid = { version = "1.22.0", features = ["v4", "serde"] }
 async-stream = { version = "0.3.6" }
-async-trait = { version = "0.1.88" }
-tokio = { version = "1.45.0", features = ["rt-multi-thread", "macros", "sync", "process", "io-util", "time"] }
+async-trait = { version = "0.1.89" }
+tokio = { version = "1.50.0", features = ["rt-multi-thread", "macros", "sync", "process", "io-util", "time"] }
 backoff = { version = "0.4.0", features = ["tokio"] }
 rand = { version = "0.9.2" }
-regex = { version = "1.11.1" }
-tokio-stream = { version = "0.1.17", features = ["io-util"] }
+regex = { version = "1.12.3" }
+tokio-stream = { version = "0.1.18", features = ["io-util"] }
 either = { version = "1.15.0" }
 ahash = { version = "0.8.12" }
-envconfig = { version = "0.11.0" }
+envconfig = { version = "0.11.1" }
 dotenv = { version = "0.15.0" }
-axum = { version = "0.8.4" }
-tower-http = { version = "0.6.4", features = ["cors"] }
+axum = { version = "0.8.8" }
+tower-http = { version = "0.6.8", features = ["cors"] }
 git2 = { version = "0.20.4", default-features = false, features = ["vendored-libgit2"] }
 dirs = "6.0.0"
+twox-hash = { version = "2.1.2" }
+base62 = { version = "2.2.4" }
+tokio-util = { version = "0.7.18", features = ["io"] }
+futures-util = { version = "0.3.32" }
+rusqlite = { version = "0.31.0", features = ["bundled"], optional = true }
+bollard = { version = "0.20.2", optional = true }
+tar = { version = "0.4.45", optional = true }
+
+[dev-dependencies]
+dunce = "1.0.5"
+regex = "1.12.3"
+walkdir = "2.5.0"

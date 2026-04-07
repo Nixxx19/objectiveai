@@ -1,0 +1,54 @@
+{
+  "title": "functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression",
+  "type": "object",
+  "properties": {
+    "depth": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "input": {
+      "$ref": "functions.expression.Expression"
+    },
+    "input_schema": {
+      "$ref": "functions.expression.ObjectInputSchema"
+    },
+    "max_branch_width": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "max_leaf_width": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "min_branch_width": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "min_leaf_width": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "name": {
+      "type": "string"
+    },
+    "skip": {
+      "anyOf": [
+        {
+          "$ref": "functions.expression.Expression"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "spec": {
+      "type": "string"
+    }
+  }
+}

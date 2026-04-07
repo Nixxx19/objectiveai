@@ -3,36 +3,40 @@
 //! # Output Computation
 //!
 //! Functions do **not** have a top-level output expression. Instead, each task has its
-//! own `output` expression that transforms its raw result into a [`FunctionOutput`].
+//! own `output` expression that transforms its raw result into a [`TaskOutputOwned`].
 //! The function's final output is computed as a **weighted average** of all task outputs
 //! using profile weights.
 //!
 //! - If a function has only 1 task, that task's output becomes the function's output directly
 //! - If a function has multiple tasks, each task's output is weighted and averaged
 //!
-//! Each task's `output` expression must return a valid `FunctionOutput` for the function's type:
+//! Each task's `output` expression must return a valid `TaskOutputOwned` for the function's type:
 //! - **Scalar functions**: each task must return `Scalar(value)` where value is in [0, 1]
 //! - **Vector functions**: each task must return `Vector(values)` where values sum to ~1
 //!
-//! [`FunctionOutput`]: super::expression::FunctionOutput
+//! [`TaskOutputOwned`]: super::expression::TaskOutputOwned
 
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// A Function definition, either remote or inline.
 ///
 /// Functions are composable scoring pipelines that transform structured input
 /// into scores. Each task has an `output` expression that transforms its raw result
-/// into a `FunctionOutput`. The function's final output is the weighted average of
+/// into a `TaskOutputOwned`. The function's final output is the weighted average of
 /// all task outputs using profile weights.
 ///
 /// Use [`compile_tasks`](Self::compile_tasks) to preview how task expressions resolve
 /// for given inputs.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "functions.Function")]
 pub enum Function {
     /// A remote function with metadata (description, schema, etc.).
+    #[schemars(title = "Remote")]
     Remote(RemoteFunction),
     /// An inline function definition without metadata.
+    #[schemars(title = "Inline")]
     Inline(InlineFunction),
 }
 
@@ -50,67 +54,13 @@ impl Function {
     /// - `None` for inline functions (no schema to validate against)
     pub fn validate_input(
         &self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
     ) -> Option<bool> {
         match self {
             Function::Remote(remote_function) => {
                 Some(remote_function.input_schema().validate_input(input))
             }
             Function::Inline(_) => None,
-        }
-    }
-
-    /// Compiles the `input_maps` expressions to transform input into a 2D array.
-    ///
-    /// Evaluates the `input_maps` expressions to transform the input into a 2D array
-    /// that can be referenced by mapped tasks. Each sub-array can be accessed by
-    /// tasks via their `map` index.
-    ///
-    /// # Arguments
-    ///
-    /// * `input` - The function input to transform
-    ///
-    /// # Returns
-    ///
-    /// - `Ok(Some(Vec<Vec<Input>>))` - The compiled input maps (2D array)
-    /// - `Ok(None)` - If the function has no `input_maps` defined
-    /// - `Err(ExpressionError)` - If the expression fails to compile
-    pub fn compile_input_maps(
-        self,
-        input: &super::expression::Input,
-    ) -> Result<
-        Option<Vec<Vec<super::expression::Input>>>,
-        super::expression::ExpressionError,
-    > {
-        let input_maps_expr = match self {
-            Function::Remote(RemoteFunction::Scalar { input_maps, .. }) => {
-                input_maps
-            }
-            Function::Remote(RemoteFunction::Vector { input_maps, .. }) => {
-                input_maps
-            }
-            Function::Inline(InlineFunction::Scalar { input_maps, .. }) => {
-                input_maps
-            }
-            Function::Inline(InlineFunction::Vector { input_maps, .. }) => {
-                input_maps
-            }
-        };
-        match input_maps_expr {
-            Some(input_maps_expr) => {
-                // prepare params for compiling input_maps expression
-                let params = super::expression::Params::Ref(
-                    super::expression::ParamsRef {
-                        input,
-                        output: None,
-                        map: None,
-                    },
-                );
-                // compile input_maps
-                let input_maps = input_maps_expr.compile(&params)?;
-                Ok(Some(input_maps))
-            }
-            None => Ok(None),
         }
     }
 
@@ -128,33 +78,17 @@ impl Function {
     /// - `Some(CompiledTask::Many(...))` for mapped tasks
     pub fn compile_tasks(
         self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
     ) -> Result<
         Vec<Option<super::CompiledTask>>,
         super::expression::ExpressionError,
     > {
-        // extract input_maps expression and task expressions
-        let (input_maps_expr, task_exprs) = match self {
-            Function::Remote(RemoteFunction::Scalar {
-                input_maps,
-                tasks,
-                ..
-            }) => (input_maps, tasks),
-            Function::Remote(RemoteFunction::Vector {
-                input_maps,
-                tasks,
-                ..
-            }) => (input_maps, tasks),
-            Function::Inline(InlineFunction::Scalar {
-                input_maps,
-                tasks,
-                ..
-            }) => (input_maps, tasks),
-            Function::Inline(InlineFunction::Vector {
-                input_maps,
-                tasks,
-                ..
-            }) => (input_maps, tasks),
+        // extract task expressions
+        let task_exprs = match self {
+            Function::Remote(RemoteFunction::Scalar { tasks, .. }) => tasks,
+            Function::Remote(RemoteFunction::Vector { tasks, .. }) => tasks,
+            Function::Inline(InlineFunction::Scalar { tasks, .. }) => tasks,
+            Function::Inline(InlineFunction::Vector { tasks, .. }) => tasks,
         };
 
         // prepare params for compiling expressions
@@ -165,13 +99,6 @@ impl Function {
                 map: None,
             });
 
-        // compile input_maps
-        let input_maps = if let Some(input_maps_expr) = input_maps_expr {
-            Some(input_maps_expr.compile(&params)?)
-        } else {
-            None
-        };
-
         // compile tasks
         let mut tasks = Vec::with_capacity(task_exprs.len());
         for mut task_expr in task_exprs {
@@ -181,37 +108,30 @@ impl Function {
                 {
                     // None if task is skipped
                     None
-                } else if let Some(input_map_index) = task_expr.input_map() {
-                    // for map tasks, map input to multiple instances of the task
-                    if let Some(input_maps) = &input_maps
-                        && let Some(input_map) =
-                            input_maps.get(input_map_index as usize)
-                    {
-                        // compile task for each map input
-                        let mut map_tasks = Vec::with_capacity(input_map.len());
-                        for input in input_map {
-                            // set map input
-                            match &mut params {
-                                super::expression::Params::Ref(params_ref) => {
-                                    params_ref.map = Some(input);
-                                }
-                                _ => unreachable!(),
+                } else if let Some(map_expr) = task_expr.map() {
+                    // evaluate map expression to get count
+                    let count: u64 = map_expr.compile_one(&params)?;
+                    // compile task for each map index
+                    let mut map_tasks = Vec::with_capacity(count as usize);
+                    for i in 0..count {
+                        // set map index
+                        match &mut params {
+                            super::expression::Params::Ref(params_ref) => {
+                                params_ref.map = Some(i);
                             }
-                            // compile task with map input
-                            map_tasks.push(task_expr.clone().compile(&params)?);
-                            // reset map input
-                            match &mut params {
-                                super::expression::Params::Ref(params_ref) => {
-                                    params_ref.map = None;
-                                }
-                                _ => unreachable!(),
-                            }
+                            _ => unreachable!(),
                         }
-                        Some(super::CompiledTask::Many(map_tasks))
-                    } else {
-                        // no map found is treated as empty map
-                        Some(super::CompiledTask::Many(Vec::new()))
+                        // compile task with map index
+                        map_tasks.push(task_expr.clone().compile(&params)?);
+                        // reset map index
+                        match &mut params {
+                            super::expression::Params::Ref(params_ref) => {
+                                params_ref.map = None;
+                            }
+                            _ => unreachable!(),
+                        }
                     }
+                    Some(super::CompiledTask::Many(map_tasks))
                 } else {
                     // compile single task
                     Some(super::CompiledTask::One(task_expr.compile(&params)?))
@@ -231,7 +151,7 @@ impl Function {
     // /// - Vector functions: output must sum to approximately 1
     // pub fn compile_output(
     //     self,
-    //     input: &super::expression::Input,
+    //     input: &super::expression::InputValue,
     //     task_outputs: &[Option<super::expression::TaskOutput>],
     // ) -> Result<
     //     super::expression::CompiledFunctionOutput,
@@ -338,7 +258,7 @@ impl Function {
     /// - `Err(ExpressionError)` - If the expression fails to compile
     pub fn compile_output_length(
         self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
     ) -> Result<Option<u64>, super::expression::ExpressionError> {
         let output_length_expr = match self {
             Function::Remote(RemoteFunction::Scalar { .. }) => None,
@@ -383,9 +303,9 @@ impl Function {
     /// - `Err(ExpressionError)` - If the expression fails to compile
     pub fn compile_input_split(
         self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
     ) -> Result<
-        Option<Vec<super::expression::Input>>,
+        Option<Vec<super::expression::InputValue>>,
         super::expression::ExpressionError,
     > {
         let input_split_expr = match self {
@@ -433,9 +353,9 @@ impl Function {
     /// - `Err(ExpressionError)` - If the expression fails to compile
     pub fn compile_input_merge(
         self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
     ) -> Result<
-        Option<super::expression::Input>,
+        Option<super::expression::InputValue>,
         super::expression::ExpressionError,
     > {
         let input_merge_expr = match self {
@@ -486,14 +406,6 @@ impl Function {
         }
     }
 
-    /// Returns the function's input maps, if defined.
-    pub fn input_maps(&self) -> Option<&super::expression::InputMaps> {
-        match self {
-            Function::Remote(remote_function) => remote_function.input_maps(),
-            Function::Inline(inline_function) => inline_function.input_maps(),
-        }
-    }
-
     /// Returns the function's tasks.
     pub fn tasks(&self) -> &[super::TaskExpression] {
         match self {
@@ -503,9 +415,7 @@ impl Function {
     }
 
     /// Returns the function's expected output length expression, if defined.
-    pub fn output_length(
-        &self,
-    ) -> Option<&super::expression::WithExpression<u64>> {
+    pub fn output_length(&self) -> Option<&super::expression::Expression> {
         match self {
             Function::Remote(remote_function) => {
                 remote_function.output_length()
@@ -515,10 +425,7 @@ impl Function {
     }
 
     /// Returns the function's input_split expression, if defined.
-    pub fn input_split(
-        &self,
-    ) -> Option<&super::expression::WithExpression<Vec<super::expression::Input>>>
-    {
+    pub fn input_split(&self) -> Option<&super::expression::Expression> {
         match self {
             Function::Remote(remote_function) => remote_function.input_split(),
             Function::Inline(inline_function) => inline_function.input_split(),
@@ -526,10 +433,7 @@ impl Function {
     }
 
     /// Returns the function's input_merge expression, if defined.
-    pub fn input_merge(
-        &self,
-    ) -> Option<&super::expression::WithExpression<super::expression::Input>>
-    {
+    pub fn input_merge(&self) -> Option<&super::expression::Expression> {
         match self {
             Function::Remote(remote_function) => remote_function.input_merge(),
             Function::Inline(inline_function) => inline_function.input_merge(),
@@ -542,58 +446,49 @@ impl Function {
 /// Remote functions are stored as `function.json` in repositories and
 /// referenced by `remote/owner/repository`. They include documentation fields
 /// that inline functions lack.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(tag = "type")]
+#[schemars(rename = "functions.RemoteFunction")]
 pub enum RemoteFunction {
     /// Produces a single score in [0, 1].
+    #[schemars(title = "Scalar")]
     #[serde(rename = "scalar.function")]
     Scalar {
         /// Human-readable description of what the function does.
         description: String,
         /// JSON Schema defining the expected input structure.
         input_schema: super::expression::InputSchema,
-        /// Expressions that transform input into a 2D array for mapped tasks.
-        /// Each sub-array can be referenced by tasks via their `map` index.
-        /// Receives: `input`.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        input_maps: Option<super::expression::InputMaps>,
-        /// The list of tasks to execute. Tasks with a `map` index are expanded
-        /// into multiple instances, one per element in the referenced sub-array.
-        /// Each instance is compiled with `map` set to that element's value.
+        /// The list of tasks to execute. Tasks with a `map` expression are
+        /// expanded into multiple instances. Each instance is compiled with
+        /// `map` set to the current integer index.
         /// Receives: `input`, `map` (if mapped).
         tasks: Vec<super::TaskExpression>,
     },
     /// Produces a vector of scores that sums to 1.
+    #[schemars(title = "Vector")]
     #[serde(rename = "vector.function")]
     Vector {
         /// Human-readable description of what the function does.
         description: String,
         /// JSON Schema defining the expected input structure.
         input_schema: super::expression::InputSchema,
-        /// Expressions that transform input into a 2D array for mapped tasks.
-        /// Each sub-array can be referenced by tasks via their `map` index.
-        /// Receives: `input`.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        input_maps: Option<super::expression::InputMaps>,
-        /// The list of tasks to execute. Tasks with a `map` index are expanded
-        /// into multiple instances, one per element in the referenced sub-array.
-        /// Each instance is compiled with `map` set to that element's value.
+        /// The list of tasks to execute. Tasks with a `map` expression are
+        /// expanded into multiple instances. Each instance is compiled with
+        /// `map` set to the current integer index.
         /// Receives: `input`, `map` (if mapped).
         tasks: Vec<super::TaskExpression>,
         /// Expression computing the expected output vector length for task outputs.
         /// Receives: `input`.
-        output_length: super::expression::WithExpression<u64>,
+        output_length: super::expression::Expression,
         /// Expression transforming input into an input array of the output_length
         /// When the Function is executed with any input from the array,
         /// The output_length should be 1.
         /// Receives: `input`.
-        input_split:
-            super::expression::WithExpression<Vec<super::expression::Input>>,
+        input_split: super::expression::Expression,
         /// Expression transforming an array of inputs computed by `input_split`
         /// into a single Input object for the Function.
         /// Receives: `input` (as an array).
-        input_merge:
-            super::expression::WithExpression<super::expression::Input>,
+        input_merge: super::expression::Expression,
     },
 }
 
@@ -614,14 +509,6 @@ impl RemoteFunction {
         }
     }
 
-    /// Returns the function's input maps, if defined.
-    pub fn input_maps(&self) -> Option<&super::expression::InputMaps> {
-        match self {
-            RemoteFunction::Scalar { input_maps, .. } => input_maps.as_ref(),
-            RemoteFunction::Vector { input_maps, .. } => input_maps.as_ref(),
-        }
-    }
-
     /// Returns the function's tasks.
     pub fn tasks(&self) -> &[super::TaskExpression] {
         match self {
@@ -631,9 +518,7 @@ impl RemoteFunction {
     }
 
     /// Returns the function's expected output length, if defined (vector functions only).
-    pub fn output_length(
-        &self,
-    ) -> Option<&super::expression::WithExpression<u64>> {
+    pub fn output_length(&self) -> Option<&super::expression::Expression> {
         match self {
             RemoteFunction::Scalar { .. } => None,
             RemoteFunction::Vector { output_length, .. } => Some(output_length),
@@ -641,10 +526,7 @@ impl RemoteFunction {
     }
 
     /// Returns the function's input_split expression, if defined (vector functions only).
-    pub fn input_split(
-        &self,
-    ) -> Option<&super::expression::WithExpression<Vec<super::expression::Input>>>
-    {
+    pub fn input_split(&self) -> Option<&super::expression::Expression> {
         match self {
             RemoteFunction::Scalar { .. } => None,
             RemoteFunction::Vector { input_split, .. } => Some(input_split),
@@ -652,14 +534,19 @@ impl RemoteFunction {
     }
 
     /// Returns the function's input_merge expression, if defined (vector functions only).
-    pub fn input_merge(
-        &self,
-    ) -> Option<&super::expression::WithExpression<super::expression::Input>>
-    {
+    pub fn input_merge(&self) -> Option<&super::expression::Expression> {
         match self {
             RemoteFunction::Scalar { .. } => None,
             RemoteFunction::Vector { input_merge, .. } => Some(input_merge),
         }
+    }
+
+    pub fn remotes(&self) -> impl Iterator<Item = &crate::RemotePath> {
+        self.tasks().iter().filter_map(|task| match task {
+            super::TaskExpression::ScalarFunction(t) => Some(&t.path),
+            super::TaskExpression::VectorFunction(t) => Some(&t.path),
+            _ => None,
+        })
     }
 }
 
@@ -668,34 +555,27 @@ impl RemoteFunction {
 /// Used when embedding function logic directly in requests rather than
 /// referencing a remote function. Lacks description and input
 /// schema fields.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
+#[schemars(rename = "functions.InlineFunction")]
 pub enum InlineFunction {
     /// Produces a single score in [0, 1].
+    #[schemars(title = "Scalar")]
     #[serde(rename = "scalar.function")]
     Scalar {
-        /// Expressions that transform input into a 2D array for mapped tasks.
-        /// Each sub-array can be referenced by tasks via their `map` index.
-        /// Receives: `input`.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        input_maps: Option<super::expression::InputMaps>,
-        /// The list of tasks to execute. Tasks with a `map` index are expanded
-        /// into multiple instances, one per element in the referenced sub-array.
-        /// Each instance is compiled with `map` set to that element's value.
+        /// The list of tasks to execute. Tasks with a `map` expression are
+        /// expanded into multiple instances. Each instance is compiled with
+        /// `map` set to the current integer index.
         /// Receives: `input`, `map` (if mapped).
         tasks: Vec<super::TaskExpression>,
     },
     /// Produces a vector of scores that sums to 1.
+    #[schemars(title = "Vector")]
     #[serde(rename = "vector.function")]
     Vector {
-        /// Expressions that transform input into a 2D array for mapped tasks.
-        /// Each sub-array can be referenced by tasks via their `map` index.
-        /// Receives: `input`.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        input_maps: Option<super::expression::InputMaps>,
-        /// The list of tasks to execute. Tasks with a `map` index are expanded
-        /// into multiple instances, one per element in the referenced sub-array.
-        /// Each instance is compiled with `map` set to that element's value.
+        /// The list of tasks to execute. Tasks with a `map` expression are
+        /// expanded into multiple instances. Each instance is compiled with
+        /// `map` set to the current integer index.
         /// Receives: `input`, `map` (if mapped).
         tasks: Vec<super::TaskExpression>,
         /// Expression transforming input into an input array of the output_length
@@ -703,27 +583,16 @@ pub enum InlineFunction {
         /// The output_length should be 1.
         /// Receives: `input`.
         /// Only required if the request uses a strategy that needs input splitting.
-        input_split: Option<
-            super::expression::WithExpression<Vec<super::expression::Input>>,
-        >,
+        input_split: Option<super::expression::Expression>,
         /// Expression transforming an array of inputs computed by `input_split`
         /// into a single Input object for the Function.
         /// Receives: `input` (as an array).
         /// Only required if the request uses a strategy that needs input splitting.
-        input_merge:
-            Option<super::expression::WithExpression<super::expression::Input>>,
+        input_merge: Option<super::expression::Expression>,
     },
 }
 
 impl InlineFunction {
-    /// Returns the function's input maps, if defined.
-    pub fn input_maps(&self) -> Option<&super::expression::InputMaps> {
-        match self {
-            InlineFunction::Scalar { input_maps, .. } => input_maps.as_ref(),
-            InlineFunction::Vector { input_maps, .. } => input_maps.as_ref(),
-        }
-    }
-
     /// Returns the function's tasks.
     pub fn tasks(&self) -> &[super::TaskExpression] {
         match self {
@@ -733,10 +602,7 @@ impl InlineFunction {
     }
 
     /// Returns the function's input_split expression, if defined (vector functions only).
-    pub fn input_split(
-        &self,
-    ) -> Option<&super::expression::WithExpression<Vec<super::expression::Input>>>
-    {
+    pub fn input_split(&self) -> Option<&super::expression::Expression> {
         match self {
             InlineFunction::Scalar { .. } => None,
             InlineFunction::Vector { input_split, .. } => input_split.as_ref(),
@@ -744,13 +610,29 @@ impl InlineFunction {
     }
 
     /// Returns the function's input_merge expression, if defined (vector functions only).
-    pub fn input_merge(
-        &self,
-    ) -> Option<&super::expression::WithExpression<super::expression::Input>>
-    {
+    pub fn input_merge(&self) -> Option<&super::expression::Expression> {
         match self {
             InlineFunction::Scalar { .. } => None,
             InlineFunction::Vector { input_merge, .. } => input_merge.as_ref(),
         }
     }
+
+    pub fn remotes(&self) -> impl Iterator<Item = &crate::RemotePath> {
+        self.tasks().iter().filter_map(|task| match task {
+            super::TaskExpression::ScalarFunction(t) => Some(&t.path),
+            super::TaskExpression::VectorFunction(t) => Some(&t.path),
+            _ => None,
+        })
+    }
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, JsonSchema)]
+#[schemars(rename = "functions.FunctionType")]
+pub enum FunctionType {
+    #[schemars(title = "Scalar")]
+    #[serde(rename = "scalar.function")]
+    Scalar,
+    #[schemars(title = "Vector")]
+    #[serde(rename = "vector.function")]
+    Vector,
 }

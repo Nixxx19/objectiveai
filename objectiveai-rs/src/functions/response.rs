@@ -2,40 +2,34 @@
 
 use crate::functions;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Response from listing functions.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ListFunction {
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.ListFunctionResponse")]
+pub struct ListFunctionResponse {
     /// List of available functions.
     pub data: Vec<ListFunctionItem>,
 }
 
 /// A function in a list response.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ListFunctionItem {
-    /// The remote source where the function is hosted.
-    pub remote: functions::Remote,
-    /// Repository owner.
-    pub owner: String,
-    /// Repository name.
-    pub repository: String,
-    /// Git commit SHA.
-    pub commit: String,
-}
+pub type ListFunctionItem = crate::RemotePath;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct GetFunction {
-    pub remote: functions::Remote,
-    pub owner: String,
-    pub repository: String,
-    pub commit: String,
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.GetFunctionResponse")]
+pub struct GetFunctionResponse {
     #[serde(flatten)]
-    pub inner: functions::RemoteFunction,
+    #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
+    pub path: crate::RemotePath,
+    #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<functions::FullRemoteFunction>")]
+    pub inner: functions::FullRemoteFunction,
 }
 
 /// Usage statistics for a function.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct UsageFunction {
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.UsageFunctionResponse")]
+pub struct UsageFunctionResponse {
     /// Total number of requests made with this function.
     pub requests: u64,
     /// Total completion tokens used.
@@ -43,18 +37,22 @@ pub struct UsageFunction {
     /// Total prompt tokens used.
     pub prompt_tokens: u64,
     /// Total cost incurred.
+    #[serde(deserialize_with = "crate::serde_util::decimal")]
+    #[schemars(with = "f64")]
     pub total_cost: rust_decimal::Decimal,
 }
 
 /// Response from listing function-profile pairs.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ListFunctionProfilePair {
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.ListFunctionProfilePairResponse")]
+pub struct ListFunctionProfilePairResponse {
     /// List of available function-profile pairs.
     pub data: Vec<ListFunctionProfilePairItem>,
 }
 
 /// A function-profile pair in a list response.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.ListFunctionProfilePairItem")]
 pub struct ListFunctionProfilePairItem {
     /// The function.
     pub function: ListFunctionItem,
@@ -63,17 +61,19 @@ pub struct ListFunctionProfilePairItem {
 }
 
 /// Response from getting a function-profile pair.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct GetFunctionProfilePair {
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.GetFunctionProfilePairResponse")]
+pub struct GetFunctionProfilePairResponse {
     /// The function.
-    pub function: GetFunction,
+    pub function: GetFunctionResponse,
     /// The profile.
-    pub profile: functions::profiles::response::GetProfile,
+    pub profile: functions::profiles::response::GetProfileResponse,
 }
 
 /// Usage statistics for a function-profile pair.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct UsageFunctionProfilePair {
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.UsageFunctionProfilePairResponse")]
+pub struct UsageFunctionProfilePairResponse {
     /// Total number of requests made with this function-profile pair.
     pub requests: u64,
     /// Total completion tokens used.
@@ -81,5 +81,7 @@ pub struct UsageFunctionProfilePair {
     /// Total prompt tokens used.
     pub prompt_tokens: u64,
     /// Total cost incurred.
+    #[serde(deserialize_with = "crate::serde_util::decimal")]
+    #[schemars(with = "f64")]
     pub total_cost: rust_decimal::Decimal,
 }

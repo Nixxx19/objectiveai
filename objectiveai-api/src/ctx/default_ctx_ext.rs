@@ -4,10 +4,33 @@ pub struct DefaultContextExt;
 
 #[async_trait::async_trait]
 impl super::ContextExt for DefaultContextExt {
-    async fn get_byok(
+    async fn openrouter_authorization(&self) -> Option<std::sync::Arc<String>> {
+        None
+    }
+
+    async fn github_authorization(&self) -> Option<std::sync::Arc<String>> {
+        None
+    }
+
+    async fn mcp_authorization(
         &self,
-        _upstream: objectiveai::chat::completions::Upstream,
-    ) -> Result<Option<String>, objectiveai::error::ResponseError> {
-        Ok(None)
+    ) -> Option<std::sync::Arc<std::collections::HashMap<String, String>>> {
+        None
+    }
+
+    async fn viewer_signature(&self) -> Option<std::sync::Arc<String>> {
+        None
+    }
+
+    async fn viewer_address(&self) -> Option<std::sync::Arc<String>> {
+        None
+    }
+
+    async fn commit_author_name(&self) -> Option<std::sync::Arc<String>> {
+        None
+    }
+
+    async fn commit_author_email(&self) -> Option<std::sync::Arc<String>> {
+        None
     }
 }

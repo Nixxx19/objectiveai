@@ -1,13 +1,30 @@
 [package]
 name = "objectiveai-mcp"
-version = "0.1.0"
+version = "2.0.0"
 edition = "2024"
+
+[features]
+default = []
+filesystem = ["glob", "regex", "walkdir", "serde_json", "pathdiff", "indexmap", "base64"]
+cli = ["dep:objectiveai-cli", "serde_json"]
+cli-viewer = ["cli", "objectiveai-cli/viewer"]
+cli-rustpython = ["cli", "objectiveai-cli/rustpython"]
+cli-systempython = ["cli", "objectiveai-cli/systempython"]
 
 [dependencies]
 anyhow = "1.0.102"
+base64 = { version = "0.22", optional = true }
+futures = "0.3"
+glob = { version = "0.3", optional = true }
+indexmap = { version = "2", optional = true }
+objectiveai-cli = { path = "../objectiveai-cli", version = "2.0.0", optional = true, default-features = false }
+pathdiff = { version = "0.2", optional = true }
+regex = { version = "1", optional = true }
 rmcp = { version = "0.16.0", features = ["server", "transport-io"] }
 schemars = "1.2.1"
 serde = { version = "1.0.228", features = ["derive"] }
-tokio = { version = "1.49.0", features = ["full"] }
+serde_json = { version = "1", optional = true }
+tokio = { version = "1.50.0", features = ["full"] }
 tracing = "0.1.44"
-tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+walkdir = { version = "2", optional = true }

@@ -6,7 +6,7 @@ WebAssembly bindings for ObjectiveAI, providing JavaScript/TypeScript access to 
 
 This crate compiles Rust code from `objectiveai-rs` to WebAssembly, enabling browser-based applications to:
 
-- Validate Ensemble LLM and Ensemble configurations
+- Validate Swarm LLM and Swarm configurations
 - Compute content-addressed IDs (deterministic hashes using XXHash3-128)
 - Compile Function expressions for previewing during authoring
 - Compute prompt, tools, and response IDs for caching/deduplication
@@ -15,8 +15,8 @@ This crate compiles Rust code from `objectiveai-rs` to WebAssembly, enabling bro
 
 | Function | Description |
 |----------|-------------|
-| `validateEnsembleLlm(llm)` | Validates an Ensemble LLM configuration and computes its content-addressed ID |
-| `validateEnsemble(ensemble)` | Validates an Ensemble configuration and computes its content-addressed ID |
+| `validateSwarmLlm(llm)` | Validates an Swarm LLM configuration and computes its content-addressed ID |
+| `validateSwarm(swarm)` | Validates an Swarm configuration and computes its content-addressed ID |
 | `compileFunctionTasks(function, input)` | Compiles a Function's task expressions for a given input |
 | `compileFunctionOutput(function, input, taskOutputs)` | Computes the final output of a Function given input and task results |
 | `promptId(prompt)` | Computes a content-addressed ID for chat messages |
@@ -28,16 +28,16 @@ This crate compiles Rust code from `objectiveai-rs` to WebAssembly, enabling bro
 This crate is consumed via the `objectiveai` npm package. The TypeScript SDK wraps these functions with proper type definitions.
 
 ```typescript
-import { validateEnsembleLlm, validateEnsemble } from 'objectiveai';
+import { validateSwarmLlm, validateSwarm } from 'objectiveai';
 
-// Validate and get ID for an Ensemble LLM
-const validatedLlm = validateEnsembleLlm({
+// Validate and get ID for an Swarm LLM
+const validatedLlm = validateSwarmLlm({
   model: 'openai/gpt-4o',
   temperature: 0.7,
 });
 
-// Validate and get ID for an Ensemble
-const validatedEnsemble = validateEnsemble({
+// Validate and get ID for an Swarm
+const validatedSwarm = validateSwarm({
   llms: [validatedLlm],
 });
 ```

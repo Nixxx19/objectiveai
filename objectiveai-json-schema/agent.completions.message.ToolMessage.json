@@ -1,0 +1,15 @@
+{
+  "title": "agent.completions.message.ToolMessage",
+  "description": "A tool message containing the result of a tool call.",
+  "type": "object",
+  "properties": {
+    "content": {
+      "description": "The content of the tool response.",
+      "$ref": "agent.completions.message.RichContent"
+    },
+    "tool_call_id": {
+      "description": "The ID of the tool call this message responds to.",
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,212 @@
+use clap::Subcommand;
+use serde::{Serialize, Deserialize};
+
+#[derive(Subcommand)]
+pub enum Source {
+    /// List from the local filesystem
+    Filesystem,
+    /// List from favorites
+    Favorites,
+    /// List from ObjectiveAI
+    Objectiveai,
+    /// List from all sources
+    All,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum ListItem {
+    Favorite(objectiveai::config::Favorite),
+    Item(objectiveai::RemotePath),
+}
+
+fn format_items(items: Vec<ListItem>) -> String {
+    serde_json::to_string(&items).unwrap()
+}
+
+/// Returns true if a favorite matches a remote path.
+fn favorite_matches(fav: &objectiveai::config::Favorite, path: &objectiveai::RemotePath) -> bool {
+    favorite_matches_path(fav.path(), path)
+}
+
+/// Returns favorites only. No API call.
+pub fn favorites(
+    get_favorites: impl FnOnce() -> Vec<objectiveai::config::Favorite>,
+) -> Result<crate::Output, crate::error::Error> {
+    let items: Vec<ListItem> = get_favorites()
+        .into_iter()
+        .map(ListItem::Favorite)
+        .collect();
+    Ok(crate::Output::Api(format_items(items)))
+}
+
+/// Fetches from a single remote source via api::run.
+pub async fn single<F>(
+    list_remote: F,
+) -> Result<crate::Output, crate::error::Error>
+where
+    F: FnOnce(objectiveai::HttpClient) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<objectiveai::RemotePath>, crate::error::Error>> + Send>> + Send + 'static,
+{
+    crate::api::run(|http_client| async move {
+        let items: Vec<ListItem> = list_remote(http_client).await?
+            .into_iter()
+            .map(ListItem::Item)
+            .collect();
+        Ok(format_items(items))
+    }, false).await
+}
+
+/// Fetches from all sources with de-duplication via api::run.
+///
+/// 1. Favorites first
+/// 2. Filesystem items that don't match any favorite
+/// 3. Objectiveai items that don't match any favorite or filesystem item
+pub async fn all<FsF, OaiF>(
+    get_favorites: impl FnOnce() -> Vec<objectiveai::config::Favorite> + Send + 'static,
+    list_filesystem: FsF,
+    list_objectiveai: OaiF,
+) -> Result<crate::Output, crate::error::Error>
+where
+    FsF: FnOnce(objectiveai::HttpClient) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<objectiveai::RemotePath>, crate::error::Error>> + Send>> + Send + 'static,
+    OaiF: FnOnce(objectiveai::HttpClient) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<objectiveai::RemotePath>, crate::error::Error>> + Send>> + Send + 'static,
+{
+    crate::api::run(|http_client| async move {
+        let favorites = get_favorites();
+
+        let (fs_result, oai_result) = tokio::join!(
+            list_filesystem(http_client.clone()),
+            list_objectiveai(http_client),
+        );
+        let fs_items = fs_result?;
+        let oai_items = oai_result?;
+
+        let mut items: Vec<ListItem> = Vec::new();
+
+        // Favorites first
+        for fav in &favorites {
+            items.push(ListItem::Favorite(fav.clone()));
+        }
+
+        // Filesystem items, skipping any that match a favorite
+        for item in fs_items {
+            if !favorites.iter().any(|fav| favorite_matches(fav, &item)) {
+                items.push(ListItem::Item(item));
+            }
+        }
+
+        // Objectiveai items, skipping any that match a favorite or filesystem item
+        for item in oai_items {
+            let dominated = favorites.iter().any(|fav| favorite_matches(fav, &item))
+                || items.iter().any(|existing| match existing {
+                    ListItem::Item(p) => p == &item,
+                    _ => false,
+                });
+            if !dominated {
+                items.push(ListItem::Item(item));
+            }
+        }
+
+        Ok(format_items(items))
+    }, false).await
+}
+
+// -- Pair variants (function-profile pairs) --
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum PairListItem {
+    Favorite(objectiveai::config::PairFavorite),
+    Item(objectiveai::functions::response::ListFunctionProfilePairItem),
+}
+
+fn format_pair_items(items: Vec<PairListItem>) -> String {
+    serde_json::to_string(&items).unwrap()
+}
+
+/// Compares a RemotePathCommitOptional against a RemotePath.
+fn favorite_matches_path(
+    fav_path: &objectiveai::RemotePathCommitOptional,
+    path: &objectiveai::RemotePath,
+) -> bool {
+    match (fav_path, path) {
+        (
+            objectiveai::RemotePathCommitOptional::Github { owner: fo, repository: fr, commit: fc },
+            objectiveai::RemotePath::Github { owner: po, repository: pr, commit: pc },
+        ) => fo == po && fr == pr && fc.as_ref().is_none_or(|c| c == pc),
+        (
+            objectiveai::RemotePathCommitOptional::Filesystem { owner: fo, repository: fr, commit: fc },
+            objectiveai::RemotePath::Filesystem { owner: po, repository: pr, commit: pc },
+        ) => fo == po && fr == pr && fc.as_ref().is_none_or(|c| c == pc),
+        (
+            objectiveai::RemotePathCommitOptional::Mock { name: fn_ },
+            objectiveai::RemotePath::Mock { name: pn },
+        ) => fn_ == pn,
+        _ => false,
+    }
+}
+
+/// Returns true if a pair favorite matches a pair item (both function and profile match).
+fn pair_favorite_matches(
+    fav: &objectiveai::config::PairFavorite,
+    item: &objectiveai::functions::response::ListFunctionProfilePairItem,
+) -> bool {
+    favorite_matches_path(&fav.function, &item.function)
+        && favorite_matches_path(&fav.profile, &item.profile)
+}
+
+/// Returns pair favorites only. No API call.
+pub fn pair_favorites(
+    get_favorites: impl FnOnce() -> Vec<objectiveai::config::PairFavorite>,
+) -> Result<crate::Output, crate::error::Error> {
+    let items: Vec<PairListItem> = get_favorites()
+        .into_iter()
+        .map(PairListItem::Favorite)
+        .collect();
+    Ok(crate::Output::Api(format_pair_items(items)))
+}
+
+/// Fetches pairs from ObjectiveAI via api::run.
+pub async fn pair_single<F>(
+    list_remote: F,
+) -> Result<crate::Output, crate::error::Error>
+where
+    F: FnOnce(objectiveai::HttpClient) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<objectiveai::functions::response::ListFunctionProfilePairItem>, crate::error::Error>> + Send>> + Send + 'static,
+{
+    crate::api::run(|http_client| async move {
+        let items: Vec<PairListItem> = list_remote(http_client).await?
+            .into_iter()
+            .map(PairListItem::Item)
+            .collect();
+        Ok(format_pair_items(items))
+    }, false).await
+}
+
+/// Fetches pairs from all sources with de-duplication via api::run.
+/// Pairs only support ObjectiveAI source (no filesystem), so de-duplication
+/// is: favorites first, then ObjectiveAI items not matching any favorite.
+pub async fn pair_all<F>(
+    get_favorites: impl FnOnce() -> Vec<objectiveai::config::PairFavorite> + Send + 'static,
+    list_objectiveai: F,
+) -> Result<crate::Output, crate::error::Error>
+where
+    F: FnOnce(objectiveai::HttpClient) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<objectiveai::functions::response::ListFunctionProfilePairItem>, crate::error::Error>> + Send>> + Send + 'static,
+{
+    crate::api::run(|http_client| async move {
+        let favorites = get_favorites();
+        let oai_items = list_objectiveai(http_client).await?;
+
+        let mut items: Vec<PairListItem> = Vec::new();
+
+        for fav in &favorites {
+            items.push(PairListItem::Favorite(fav.clone()));
+        }
+
+        for item in oai_items {
+            if !favorites.iter().any(|fav| pair_favorite_matches(fav, &item)) {
+                items.push(PairListItem::Item(item));
+            }
+        }
+
+        Ok(format_pair_items(items))
+    }, false).await
+}
