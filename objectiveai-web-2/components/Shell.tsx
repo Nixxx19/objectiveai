@@ -17,9 +17,9 @@ export function Shell({ children }: { children: ReactNode }) {
         </Link>
         <nav className={styles.nav}>
           <Link
-            href="/"
+            href="/functions"
             className={`${styles.navLink} ${
-              pathname === "/" || pathname.startsWith("/functions") ? styles.navLinkActive : ""
+              pathname.startsWith("/functions") ? styles.navLinkActive : ""
             }`}
           >
             functions

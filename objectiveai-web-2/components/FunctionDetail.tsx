@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import type { FunctionDefinition } from "@/lib/functions/types";
-import { fetchFunctionList, fetchFunctionDefinition } from "@/lib/functions/fetch";
+import { fetchFunctionList, fetchFunctionDefinition, fetchRecursive } from "@/lib/functions/fetch";
 import { apiFetch } from "@/lib/client";
 import { adaptDefinition, adaptSubFunctions } from "@/lib/tree/adapter";
 import { FunctionTree } from "@objectiveai/function-tree";
@@ -16,7 +16,6 @@ interface Props {
   repo: string;
 }
 
-/** Resolved definition keyed by "owner/repository" */
 type DefMap = Map<string, FunctionDefinition>;
 
 export function FunctionDetail({ owner, repo }: Props) {
@@ -194,31 +193,3 @@ function renderSchemaType(prop: Record<string, unknown>): string {
   return (prop.type as string) ?? "object";
 }
 
-/** Recursively fetch a function and all its sub-function definitions */
-async function fetchRecursive(
-  owner: string,
-  repository: string,
-  commit: string,
-  defs: DefMap,
-  commitMap: Map<string, string>
-): Promise<void> {
-  const key = `${owner}/${repository}`;
-  if (defs.has(key)) return;
-
-  try {
-    const def = await fetchFunctionDefinition(owner, repository, commit);
-    defs.set(key, def);
-
-    const subFetches = def.tasks
-      .filter((t) => t.type.includes("function") && t.owner && t.repository)
-      .map((t) => {
-        const subCommit =
-          t.commit ?? commitMap.get(`${t.owner}/${t.repository}`) ?? "main";
-        return fetchRecursive(t.owner!, t.repository!, subCommit, defs, commitMap);
-      });
-
-    await Promise.allSettled(subFetches);
-  } catch {
-    // Silently skip functions we can't fetch
-  }
-}

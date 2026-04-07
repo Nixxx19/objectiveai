@@ -1,5 +1,5 @@
-import { FunctionsBrowse } from "@/components/FunctionsBrowse";
+import { Landing } from "@/components/Landing";
 
 export default function Home() {
-  return <FunctionsBrowse />;
+  return <Landing />;
 }

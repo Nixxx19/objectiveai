@@ -86,6 +86,35 @@ export async function resolveFunctionMeta(
   };
 }
 
+/** Recursively fetch a function and all its sub-function definitions */
+export async function fetchRecursive(
+  owner: string,
+  repository: string,
+  commit: string,
+  defs: Map<string, FunctionDefinition>,
+  commitMap: Map<string, string>
+): Promise<void> {
+  const key = `${owner}/${repository}`;
+  if (defs.has(key)) return;
+
+  try {
+    const def = await fetchFunctionDefinition(owner, repository, commit);
+    defs.set(key, def);
+
+    const subFetches = def.tasks
+      .filter((t) => t.type.includes("function") && t.owner && t.repository)
+      .map((t) => {
+        const subCommit =
+          t.commit ?? commitMap.get(`${t.owner}/${t.repository}`) ?? "main";
+        return fetchRecursive(t.owner!, t.repository!, subCommit, defs, commitMap);
+      });
+
+    await Promise.allSettled(subFetches);
+  } catch {
+    // Silently skip functions we can't fetch
+  }
+}
+
 /** Fetch the full list with resolved metadata (parallel GitHub fetches) */
 export async function fetchAllFunctions(): Promise<FunctionMeta[]> {
   const list = await fetchFunctionList();
