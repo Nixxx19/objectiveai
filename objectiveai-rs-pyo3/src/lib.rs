@@ -347,6 +347,21 @@ fn function_profile_computation_chunk_merged(
     to_py(py, &a)
 }
 
+/// Merges two LaboratoryExecutionChunks via push and returns the merged result.
+#[pyfunction]
+fn laboratory_execution_chunk_merged(
+    py: Python<'_>,
+    a: &Bound<'_, PyAny>,
+    b: &Bound<'_, PyAny>,
+) -> PyResult<Py<PyAny>> {
+    let mut a: objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk =
+        from_py(a)?;
+    let b: objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk =
+        from_py(b)?;
+    a.push(&b);
+    to_py(py, &a)
+}
+
 // ---------------------------------------------------------------------------
 // Streaming Chunk Normalization
 // ---------------------------------------------------------------------------
@@ -413,6 +428,17 @@ fn function_profile_computation_chunk_normalized(
     a: &Bound<'_, PyAny>,
 ) -> PyResult<Py<PyAny>> {
     let a: objectiveai::functions::profiles::computations::response::streaming::FunctionProfileComputationChunk =
+        from_py(a)?;
+    to_py(py, &a)
+}
+
+/// Normalizes a LaboratoryExecutionChunk by round-tripping through serde.
+#[pyfunction]
+fn laboratory_execution_chunk_normalized(
+    py: Python<'_>,
+    a: &Bound<'_, PyAny>,
+) -> PyResult<Py<PyAny>> {
+    let a: objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk =
         from_py(a)?;
     to_py(py, &a)
 }
@@ -493,6 +519,18 @@ fn function_profile_computation_chunk_to_unary(
     to_py(py, &unary)
 }
 
+/// Converts an accumulated LaboratoryExecutionChunk to a LaboratoryExecution (unary).
+#[pyfunction]
+fn laboratory_execution_chunk_to_unary(
+    py: Python<'_>,
+    a: &Bound<'_, PyAny>,
+) -> PyResult<Py<PyAny>> {
+    let a: objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk =
+        from_py(a)?;
+    let unary: objectiveai::laboratories::executions::response::unary::LaboratoryExecution = a.into();
+    to_py(py, &unary)
+}
+
 // ---------------------------------------------------------------------------
 // Normalize for tests
 // ---------------------------------------------------------------------------
@@ -541,6 +579,14 @@ fn normalize_function_invention_recursive_for_tests(py: Python<'_>, a: &Bound<'_
 #[pyfunction]
 fn normalize_function_profile_computation_for_tests(py: Python<'_>, a: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
     let mut a: objectiveai::functions::profiles::computations::response::unary::FunctionProfileComputation = from_py(a)?;
+    a.normalize_for_tests();
+    to_py(py, &a)
+}
+
+/// Normalizes a LaboratoryExecution for test snapshot stability.
+#[pyfunction]
+fn normalize_laboratory_execution_for_tests(py: Python<'_>, a: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    let mut a: objectiveai::laboratories::executions::response::unary::LaboratoryExecution = from_py(a)?;
     a.normalize_for_tests();
     to_py(py, &a)
 }
@@ -633,6 +679,17 @@ fn generate_function_profile_computation_chunk(py: Python<'_>, seed: Option<i64>
     to_py(py, &chunk)
 }
 
+/// Generates a random LaboratoryExecutionChunk. Optional seed for reproducibility.
+#[pyfunction]
+#[pyo3(signature = (seed=None))]
+fn generate_laboratory_execution_chunk(py: Python<'_>, seed: Option<i64>) -> PyResult<Py<PyAny>> {
+    let bytes = seed_to_bytes(seed);
+    let mut u = arbitrary::Unstructured::new(&bytes);
+    let chunk = objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk::arbitrary(&mut u)
+        .map_err(|e| PyValueError::new_err(e.to_string()))?;
+    to_py(py, &chunk)
+}
+
 // ---------------------------------------------------------------------------
 // Module
 // ---------------------------------------------------------------------------
@@ -671,6 +728,7 @@ fn objectiveai_pyo3(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(function_invention_chunk_merged, m)?)?;
     m.add_function(wrap_pyfunction!(function_invention_recursive_chunk_merged, m)?)?;
     m.add_function(wrap_pyfunction!(function_profile_computation_chunk_merged, m)?)?;
+    m.add_function(wrap_pyfunction!(laboratory_execution_chunk_merged, m)?)?;
 
     // Streaming chunk normalization
     m.add_function(wrap_pyfunction!(agent_completion_chunk_normalized, m)?)?;
@@ -679,6 +737,7 @@ fn objectiveai_pyo3(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(function_invention_chunk_normalized, m)?)?;
     m.add_function(wrap_pyfunction!(function_invention_recursive_chunk_normalized, m)?)?;
     m.add_function(wrap_pyfunction!(function_profile_computation_chunk_normalized, m)?)?;
+    m.add_function(wrap_pyfunction!(laboratory_execution_chunk_normalized, m)?)?;
 
     // Streaming chunk to unary conversion
     m.add_function(wrap_pyfunction!(agent_completion_chunk_to_unary, m)?)?;
@@ -687,6 +746,7 @@ fn objectiveai_pyo3(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(function_invention_chunk_to_unary, m)?)?;
     m.add_function(wrap_pyfunction!(function_invention_recursive_chunk_to_unary, m)?)?;
     m.add_function(wrap_pyfunction!(function_profile_computation_chunk_to_unary, m)?)?;
+    m.add_function(wrap_pyfunction!(laboratory_execution_chunk_to_unary, m)?)?;
 
     // Normalize for tests
     m.add_function(wrap_pyfunction!(normalize_agent_completion_for_tests, m)?)?;
@@ -695,6 +755,7 @@ fn objectiveai_pyo3(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(normalize_function_invention_for_tests, m)?)?;
     m.add_function(wrap_pyfunction!(normalize_function_invention_recursive_for_tests, m)?)?;
     m.add_function(wrap_pyfunction!(normalize_function_profile_computation_for_tests, m)?)?;
+    m.add_function(wrap_pyfunction!(normalize_laboratory_execution_for_tests, m)?)?;
 
     // Generate arbitrary chunks
     m.add_function(wrap_pyfunction!(generate_agent_completion_chunk, m)?)?;
@@ -703,6 +764,7 @@ fn objectiveai_pyo3(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(generate_function_invention_chunk, m)?)?;
     m.add_function(wrap_pyfunction!(generate_function_invention_recursive_chunk, m)?)?;
     m.add_function(wrap_pyfunction!(generate_function_profile_computation_chunk, m)?)?;
+    m.add_function(wrap_pyfunction!(generate_laboratory_execution_chunk, m)?)?;
 
     Ok(())
 }

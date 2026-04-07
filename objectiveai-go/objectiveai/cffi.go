@@ -537,6 +537,11 @@ func FunctionProfileComputationChunkMerged(a, b FunctionsProfilesComputationsRes
 	return cffi2[FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk]("objectiveai_function_profile_computation_chunk_merged", a, b)
 }
 
+// LaboratoryExecutionChunkMerged merges two LaboratoryExecutionChunks via push.
+func LaboratoryExecutionChunkMerged(a, b LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk) (*LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk, error) {
+	return cffi2[LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk, LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk, LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk]("objectiveai_laboratory_execution_chunk_merged", a, b)
+}
+
 // ---------------------------------------------------------------------------
 // Streaming Chunk Normalization
 // ---------------------------------------------------------------------------
@@ -569,6 +574,11 @@ func FunctionInventionRecursiveChunkNormalized(chunk FunctionsInventionsRecursiv
 // FunctionProfileComputationChunkNormalized normalizes a FunctionProfileComputationChunk.
 func FunctionProfileComputationChunkNormalized(chunk FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk) (*FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, error) {
 	return cffi1[FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk]("objectiveai_function_profile_computation_chunk_normalized", chunk)
+}
+
+// LaboratoryExecutionChunkNormalized normalizes a LaboratoryExecutionChunk.
+func LaboratoryExecutionChunkNormalized(chunk LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk) (*LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk, error) {
+	return cffi1[LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk, LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk]("objectiveai_laboratory_execution_chunk_normalized", chunk)
 }
 
 // ---------------------------------------------------------------------------
@@ -605,6 +615,11 @@ func FunctionProfileComputationChunkToUnary(chunk FunctionsProfilesComputationsR
 	return cffi1[FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation]("objectiveai_function_profile_computation_chunk_to_unary", chunk)
 }
 
+// LaboratoryExecutionChunkToUnary converts an accumulated chunk to a unary LaboratoryExecution.
+func LaboratoryExecutionChunkToUnary(chunk LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk) (*LaboratoriesExecutionsResponseUnaryLaboratoryExecution, error) {
+	return cffi1[LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk, LaboratoriesExecutionsResponseUnaryLaboratoryExecution]("objectiveai_laboratory_execution_chunk_to_unary", chunk)
+}
+
 // ---------------------------------------------------------------------------
 // Normalize Unary Responses (for tests)
 // ---------------------------------------------------------------------------
@@ -639,6 +654,11 @@ func NormalizeFunctionProfileComputationForTests(v FunctionsProfilesComputations
 	return cffi1[FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation, FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation]("objectiveai_normalize_function_profile_computation_for_tests", v)
 }
 
+// NormalizeLaboratoryExecutionForTests normalizes a LaboratoryExecution by round-tripping through serde.
+func NormalizeLaboratoryExecutionForTests(v LaboratoriesExecutionsResponseUnaryLaboratoryExecution) (*LaboratoriesExecutionsResponseUnaryLaboratoryExecution, error) {
+	return cffi1[LaboratoriesExecutionsResponseUnaryLaboratoryExecution, LaboratoriesExecutionsResponseUnaryLaboratoryExecution]("objectiveai_normalize_laboratory_execution_for_tests", v)
+}
+
 // ---------------------------------------------------------------------------
 // Generate Arbitrary Chunks
 // ---------------------------------------------------------------------------
@@ -671,4 +691,9 @@ func GenerateFunctionInventionRecursiveChunk(hasSeed bool, seed int64) (*Functio
 // GenerateFunctionProfileComputationChunk generates a random FunctionProfileComputationChunk from a seed.
 func GenerateFunctionProfileComputationChunk(hasSeed bool, seed int64) (*FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, error) {
 	return cffiGenerate[FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk]("objectiveai_generate_function_profile_computation_chunk", hasSeed, seed)
+}
+
+// GenerateLaboratoryExecutionChunk generates a random LaboratoryExecutionChunk from a seed.
+func GenerateLaboratoryExecutionChunk(hasSeed bool, seed int64) (*LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk, error) {
+	return cffiGenerate[LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk]("objectiveai_generate_laboratory_execution_chunk", hasSeed, seed)
 }
