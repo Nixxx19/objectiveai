@@ -221,7 +221,7 @@ fn make_ctx() -> ctx::Context<ctx::DefaultContextExt, ctx::persistent_cache::def
     )
 }
 
-fn run_execution(client: &Arc<TestClient>, request: Arc<Params>) -> LaboratoryExecution {
+fn run_execution(request: Arc<Params>) -> LaboratoryExecution {
     let rt = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
@@ -230,6 +230,7 @@ fn run_execution(client: &Arc<TestClient>, request: Arc<Params>) -> LaboratoryEx
     let result = rt.block_on(async {
         use futures::StreamExt;
 
+        let client = make_client();
         let mut stream = client
             .clone()
             .create_streaming(make_ctx(), request)
@@ -280,9 +281,8 @@ fn assert_snapshot(json: &str, path: &str, expected: &str) {
 /// Single builder, no evaluation.
 #[test]
 fn single_builder_no_eval_seed_42() {
-    let client = make_client();
     let request = make_request(vec![builder_agent(false, None)], false, 42);
-    let result = normalize(run_execution(&client, request));
+    let result = normalize(run_execution(request));
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
@@ -294,9 +294,8 @@ fn single_builder_no_eval_seed_42() {
 /// Single builder + evaluation.
 #[test]
 fn single_builder_with_eval_seed_42() {
-    let client = make_client();
     let request = make_request(vec![builder_agent(false, None)], true, 42);
-    let result = normalize(run_execution(&client, request));
+    let result = normalize(run_execution(request));
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
@@ -308,13 +307,12 @@ fn single_builder_with_eval_seed_42() {
 /// Two builders + evaluation.
 #[test]
 fn two_builders_with_eval_seed_99() {
-    let client = make_client();
     let request = make_request(
         vec![builder_agent(false, None), builder_agent(false, None)],
         true,
         99,
     );
-    let result = normalize(run_execution(&client, request));
+    let result = normalize(run_execution(request));
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
@@ -326,9 +324,8 @@ fn two_builders_with_eval_seed_99() {
 /// Builder with 50% error probability + evaluation.
 #[test]
 fn builder_error_50_with_eval_seed_10() {
-    let client = make_client();
     let request = make_request(vec![builder_agent(true, Some(50))], true, 10);
-    let result = normalize(run_execution(&client, request));
+    let result = normalize(run_execution(request));
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
@@ -340,13 +337,12 @@ fn builder_error_50_with_eval_seed_10() {
 /// Two builders, one with 50% error probability, no evaluation.
 #[test]
 fn two_builders_one_error_50_no_eval_seed_7() {
-    let client = make_client();
     let request = make_request(
         vec![builder_agent(false, None), builder_agent(true, Some(50))],
         false,
         7,
     );
-    let result = normalize(run_execution(&client, request));
+    let result = normalize(run_execution(request));
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
