@@ -160,13 +160,10 @@ async fn spawn_builder(
         .await
         .map_err(|e| super::Error::Docker(e.to_string()))?;
 
-    // Start the MCP server with PORT env var
+    // Start the MCP server (HTTP streamable transport on PORT 3000)
     let exec_options = CreateExecOptions {
         cmd: Some(vec!["/objectiveai-mcp"]),
         env: Some(vec!["PORT=3000"]),
-        attach_stdin: Some(true),
-        attach_stdout: Some(true),
-        attach_stderr: Some(true),
         ..Default::default()
     };
 
@@ -176,7 +173,10 @@ async fn spawn_builder(
         .map_err(|e| super::Error::Docker(e.to_string()))?;
 
     let _start_result = docker
-        .start_exec(&exec.id, None)
+        .start_exec(
+            &exec.id,
+            Some(bollard::exec::StartExecOptions { detach: true, ..Default::default() }),
+        )
         .await
         .map_err(|e| super::Error::Docker(e.to_string()))?;
 
