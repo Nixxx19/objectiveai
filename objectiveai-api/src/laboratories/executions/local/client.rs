@@ -183,6 +183,18 @@ async fn spawn_builder(
     Ok(host_port)
 }
 
+/// Spawn a background task to stop and remove builder containers.
+fn cleanup_containers(docker: bollard::Docker, execution_id: &str, num_builders: usize) {
+    let id = execution_id.to_string();
+    tokio::spawn(async move {
+        for i in 0..num_builders {
+            let name = format!("objectiveai-{id}-{i}");
+            let _ = docker.stop_container(&name, None).await;
+            let _ = docker.remove_container(&name, None).await;
+        }
+    });
+}
+
 /// Add an MCP server address to an inline agent base.
 fn inject_mcp_server(agent: &mut objectiveai::agent::InlineAgentBase, mcp_url: String) {
     let server = objectiveai::agent::McpServer {
@@ -228,6 +240,50 @@ where
     LUSG: crate::laboratories::executions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
 {
     pub async fn create_streaming(
+        self: Arc<Self>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
+        request: Arc<Params>,
+    ) -> Result<
+        impl Stream<Item = LaboratoryExecutionChunk> + Send + 'static,
+        super::Error,
+    > {
+        use std::pin::Pin;
+        use std::task::{Context, Poll};
+
+        struct UsageTerminatedStream {
+            // TODO: could avoid Box::pin if inner type is named
+            inner: Option<Pin<Box<dyn Stream<Item = LaboratoryExecutionChunk> + Send>>>,
+        }
+
+        impl Stream for UsageTerminatedStream {
+            type Item = LaboratoryExecutionChunk;
+
+            fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+                let inner = match &mut self.inner {
+                    Some(inner) => inner,
+                    None => return Poll::Ready(None),
+                };
+                match inner.as_mut().poll_next(cx) {
+                    Poll::Ready(Some(chunk)) => {
+                        if chunk.usage.is_some() {
+                            if let Some(inner) = self.inner.take() {
+                                std::thread::spawn(move || drop(inner));
+                            }
+                        }
+                        Poll::Ready(Some(chunk))
+                    }
+                    other => other,
+                }
+            }
+        }
+
+        let inner = self.create_streaming_internal(ctx, request).await?;
+        Ok(UsageTerminatedStream {
+            inner: Some(Box::pin(inner)),
+        })
+    }
+
+    async fn create_streaming_internal(
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<Params>,
@@ -445,8 +501,8 @@ where
                 yield chunk;
             }
 
-            // Phase 2: spawn evaluations for non-errored builders (only if eval agent provided)
-            if let Some(ref eval_agent) = eval_agent {
+            // Phase 2: spawn evaluations for non-errored builders (only if eval agent provided and not all builders errored)
+            if let Some(ref eval_agent) = eval_agent && errored_agents.len() < request.builder_agents.len() {
                 let num_agents = request.builder_agents.len() as u64;
                 let eval_streams: Vec<_> = (0..num_agents)
                     .filter(|i| !errored_agents.contains(i))
@@ -476,7 +532,6 @@ where
                 }
             }
 
-            // Final chunk with accumulated usage
             let final_chunk = LaboratoryExecutionChunk {
                 id: id.clone(),
                 builders: Vec::new(),
@@ -486,18 +541,11 @@ where
                 object,
                 usage: Some(accumulated_usage),
             };
+            if !request.persist.unwrap_or(false) {
+                cleanup_containers(docker, &id, request.builder_agents.len());
+            }
             viewer_client.send_laboratory_execution_continue(viewer_ctx.clone(), final_chunk.clone());
             yield final_chunk;
-
-            // Cleanup: stop and remove all builder containers (unless persist)
-            if !request.persist.unwrap_or(false) {
-                let num_builders = request.builder_agents.len();
-                for i in 0..num_builders {
-                    let name = format!("objectiveai-{id}-{i}");
-                    let _ = docker.stop_container(&name, None).await;
-                    let _ = docker.remove_container(&name, None).await;
-                }
-            }
         })
     }
 
