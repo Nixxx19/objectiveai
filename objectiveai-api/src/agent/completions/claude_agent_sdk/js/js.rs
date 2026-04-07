@@ -51,6 +51,24 @@ const {{ query }} = require(process.env.CLAUDE_AGENT_SDK_PATH || "@anthropic-ai/
 
     const stream = query({{ prompt: messages(), options: opts }});
 
+    // Wait for all MCP servers to be connected.
+    var delay = 1;
+    while (true) {{
+      var statuses = await stream.mcpServerStatus();
+      var pending = false;
+      for (var s of statuses) {{
+        if (s.status === "failed" || s.status === "needs-auth") {{
+          throw new Error("MCP server " + s.name + ": " + s.status + (s.error ? " - " + s.error : ""));
+        }}
+        if (s.status === "pending") {{
+          pending = true;
+        }}
+      }}
+      if (!pending) break;
+      await new Promise(r => setTimeout(r, delay));
+      if (delay < 100) delay *= 2;
+    }}
+
     for await (const event of stream) {{
       process.stdout.write(JSON.stringify(event) + "\n");
     }}
