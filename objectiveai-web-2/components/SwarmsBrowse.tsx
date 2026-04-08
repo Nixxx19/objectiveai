@@ -44,7 +44,17 @@ export function SwarmsBrowse() {
   }
 
   if (error) {
-    return <div className={styles.error} role="alert">{error}</div>;
+    return (
+      <div className={styles.error} role="alert">
+        <span>unable to load swarms</span>
+        <button
+          onClick={() => window.location.reload()}
+          className={styles.retryBtn}
+        >
+          try again
+        </button>
+      </div>
+    );
   }
 
   return (

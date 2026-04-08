@@ -75,6 +75,8 @@ export function Landing() {
         </div>
       </section>
 
+      <p className={styles.bridging}>lorem ipsum — collective satisficing across model boundaries</p>
+
       {/* Execution comparison */}
       <section className={styles.execution}>
         <div className={styles.executionHeader}>

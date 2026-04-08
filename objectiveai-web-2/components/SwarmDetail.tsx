@@ -53,7 +53,20 @@ export function SwarmDetail({ id }: Props) {
   }
 
   if (error || !data) {
-    return <div className={styles.error} role="alert">{error ?? "Not found"}</div>;
+    const msg = error?.includes("fetch") || error?.includes("network")
+      ? "unable to reach api"
+      : "unable to load swarm";
+    return (
+      <div className={styles.error} role="alert">
+        <span>{msg}</span>
+        <button
+          onClick={() => window.location.reload()}
+          className={styles.retryBtn}
+        >
+          try again
+        </button>
+      </div>
+    );
   }
 
   const totalCount = data.llms.reduce((s, l) => s + (l.count ?? 1), 0);
