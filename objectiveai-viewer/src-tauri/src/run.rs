@@ -157,7 +157,7 @@ pub fn serve(
             }
             tauri::async_runtime::spawn(async move {
                 while let Some(event) = rx.recv().await {
-                    handle.emit(event.name(), &event).ok();
+                    let result = handle.emit(event.name(), &event);
                 }
             });
             Ok(())
@@ -181,11 +181,13 @@ pub async fn run(config: Config) -> std::io::Result<i32> {
 
 async fn signature_middleware(
     State(secret): State<Option<Arc<String>>>,
-    headers: HeaderMap,
-    body: Bytes,
+    request: axum::extract::Request,
     next: Next,
 ) -> Result<axum::response::Response, StatusCode> {
     if let Some(secret) = &secret {
+        let (parts, body) = request.into_parts();
+        let bytes = axum::body::to_bytes(body, usize::MAX).await.map_err(|_| StatusCode::BAD_REQUEST)?;
+        let headers = &parts.headers;
         let signature = headers
             .get("X-VIEWER-SIGNATURE")
             .or_else(|| headers.get("VIEWER-SIGNATURE"))
@@ -193,14 +195,14 @@ async fn signature_middleware(
             .or_else(|| headers.get("OBJECTIVEAI-SIGNATURE"))
             .and_then(|v| v.to_str().ok())
             .ok_or(StatusCode::UNAUTHORIZED)?;
-        if !verify_signature(secret, &body, signature) {
+        if !verify_signature(secret, &bytes, signature) {
             return Err(StatusCode::UNAUTHORIZED);
         }
+        let rebuilt = axum::http::Request::from_parts(parts, axum::body::Body::from(bytes));
+        Ok(next.run(rebuilt).await)
+    } else {
+        Ok(next.run(request).await)
     }
-    let request = axum::http::Request::builder()
-        .body(axum::body::Body::from(body))
-        .unwrap();
-    Ok(next.run(request).await)
 }
 
 fn verify_signature(secret: &str, _body: &[u8], signature_header: &str) -> bool {

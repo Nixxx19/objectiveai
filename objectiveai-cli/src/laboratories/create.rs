@@ -84,7 +84,7 @@ pub async fn handle(args: CreateArgs) -> Result<crate::Output, crate::error::Err
             let mut eval_map: std::collections::HashMap<u64, (Option<&objectiveai::functions::expression::InputValue>, Option<&objectiveai::error::ResponseError>)> =
                 std::collections::HashMap::new();
             for eval in &execution.evaluations {
-                eval_map.insert(eval.agent_index, (eval.output.as_ref(), eval.error.as_ref()));
+                eval_map.insert(eval.agent_index, (eval.output.as_ref(), eval.inner.error.as_ref()));
             }
 
             // Collect non-None outputs in agent_index order, tracking which indices have outputs

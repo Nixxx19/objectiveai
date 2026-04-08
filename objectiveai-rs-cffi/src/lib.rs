@@ -653,6 +653,28 @@ pub unsafe extern "C" fn objectiveai_function_profile_computation_chunk_merged(
     }
 }
 
+/// Merges two LaboratoryExecutionChunks via push and returns the merged result.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn objectiveai_laboratory_execution_chunk_merged(
+    a_in: *const u8,
+    a_in_len: usize,
+    b_in: *const u8,
+    b_in_len: usize,
+    json_out: *mut *mut u8,
+    json_out_len: *mut usize,
+) -> i32 {
+    unsafe {
+        run(json_out, json_out_len, || {
+            let mut a: objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk =
+                from_json(a_in, a_in_len)?;
+            let b: objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk =
+                from_json(b_in, b_in_len)?;
+            a.push(&b);
+            to_json(&a)
+        })
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Streaming Chunk Normalization
 // ---------------------------------------------------------------------------
@@ -753,6 +775,23 @@ pub unsafe extern "C" fn objectiveai_function_profile_computation_chunk_normaliz
     unsafe {
         run(json_out, json_out_len, || {
             let a: objectiveai::functions::profiles::computations::response::streaming::FunctionProfileComputationChunk =
+                from_json(json_in, json_in_len)?;
+            to_json(&a)
+        })
+    }
+}
+
+/// Normalizes a LaboratoryExecutionChunk by round-tripping through serde.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn objectiveai_laboratory_execution_chunk_normalized(
+    json_in: *const u8,
+    json_in_len: usize,
+    json_out: *mut *mut u8,
+    json_out_len: *mut usize,
+) -> i32 {
+    unsafe {
+        run(json_out, json_out_len, || {
+            let a: objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk =
                 from_json(json_in, json_in_len)?;
             to_json(&a)
         })
@@ -876,6 +915,25 @@ pub unsafe extern "C" fn objectiveai_function_profile_computation_chunk_to_unary
     }
 }
 
+/// Converts an accumulated LaboratoryExecutionChunk to a LaboratoryExecution (unary).
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn objectiveai_laboratory_execution_chunk_to_unary(
+    json_in: *const u8,
+    json_in_len: usize,
+    json_out: *mut *mut u8,
+    json_out_len: *mut usize,
+) -> i32 {
+    unsafe {
+        run(json_out, json_out_len, || {
+            let a: objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk =
+                from_json(json_in, json_in_len)?;
+            let unary: objectiveai::laboratories::executions::response::unary::LaboratoryExecution =
+                a.into();
+            to_json(&unary)
+        })
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Normalize for tests
 // ---------------------------------------------------------------------------
@@ -981,6 +1039,24 @@ pub unsafe extern "C" fn objectiveai_normalize_function_profile_computation_for_
     unsafe {
         run(json_out, json_out_len, || {
             let mut a: objectiveai::functions::profiles::computations::response::unary::FunctionProfileComputation =
+                from_json(json_in, json_in_len)?;
+            a.normalize_for_tests();
+            to_json(&a)
+        })
+    }
+}
+
+/// Normalizes a LaboratoryExecution for test snapshot stability.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn objectiveai_normalize_laboratory_execution_for_tests(
+    json_in: *const u8,
+    json_in_len: usize,
+    json_out: *mut *mut u8,
+    json_out_len: *mut usize,
+) -> i32 {
+    unsafe {
+        run(json_out, json_out_len, || {
+            let mut a: objectiveai::laboratories::executions::response::unary::LaboratoryExecution =
                 from_json(json_in, json_in_len)?;
             a.normalize_for_tests();
             to_json(&a)
@@ -1119,6 +1195,25 @@ pub unsafe extern "C" fn objectiveai_generate_function_profile_computation_chunk
             let bytes = seed_to_bytes(has_seed, seed);
             let mut u = arbitrary::Unstructured::new(&bytes);
             let chunk = objectiveai::functions::profiles::computations::response::streaming::FunctionProfileComputationChunk::arbitrary(&mut u)
+                .map_err(|e| e.to_string())?;
+            to_json(&chunk)
+        })
+    }
+}
+
+/// Generates a random LaboratoryExecutionChunk from a seed.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn objectiveai_generate_laboratory_execution_chunk(
+    has_seed: i32,
+    seed: i64,
+    json_out: *mut *mut u8,
+    json_out_len: *mut usize,
+) -> i32 {
+    unsafe {
+        run(json_out, json_out_len, || {
+            let bytes = seed_to_bytes(has_seed, seed);
+            let mut u = arbitrary::Unstructured::new(&bytes);
+            let chunk = objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk::arbitrary(&mut u)
                 .map_err(|e| e.to_string())?;
             to_json(&chunk)
         })

@@ -48,6 +48,8 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM,
         Arc<crate::retrieval::retrieve::Router<RETRG, RETRF, RETRM, CTXEXT>>,
     pub usage_handler: Arc<LUSG>,
     pub viewer: Arc<crate::viewer::Client<CTXEXT>>,
+    /// Docker API timeout in seconds.
+    pub docker_timeout: u64,
 }
 
 /// Create a tar archive containing the MCP binary at the archive root.
@@ -158,13 +160,10 @@ async fn spawn_builder(
         .await
         .map_err(|e| super::Error::Docker(e.to_string()))?;
 
-    // Start the MCP server with PORT env var
+    // Start the MCP server (HTTP streamable transport on PORT 3000)
     let exec_options = CreateExecOptions {
         cmd: Some(vec!["/objectiveai-mcp"]),
         env: Some(vec!["PORT=3000"]),
-        attach_stdin: Some(true),
-        attach_stdout: Some(true),
-        attach_stderr: Some(true),
         ..Default::default()
     };
 
@@ -174,11 +173,26 @@ async fn spawn_builder(
         .map_err(|e| super::Error::Docker(e.to_string()))?;
 
     let _start_result = docker
-        .start_exec(&exec.id, None)
+        .start_exec(
+            &exec.id,
+            Some(bollard::exec::StartExecOptions { detach: true, ..Default::default() }),
+        )
         .await
         .map_err(|e| super::Error::Docker(e.to_string()))?;
 
     Ok(host_port)
+}
+
+/// Spawn a background task to stop and remove builder containers.
+fn cleanup_containers(docker: bollard::Docker, execution_id: &str, num_builders: usize) {
+    let id = execution_id.to_string();
+    tokio::spawn(async move {
+        for i in 0..num_builders {
+            let name = format!("objectiveai-{id}-{i}");
+            let _ = docker.stop_container(&name, None).await;
+            let _ = docker.remove_container(&name, None).await;
+        }
+    });
 }
 
 /// Add an MCP server address to an inline agent base.
@@ -194,7 +208,9 @@ fn inject_mcp_server(agent: &mut objectiveai::agent::InlineAgentBase, mcp_url: S
         objectiveai::agent::InlineAgentBase::ClaudeAgentSdk(b) => {
             b.mcp_servers.get_or_insert_with(Vec::new).push(server);
         }
-        objectiveai::agent::InlineAgentBase::Mock(_) => {}
+        objectiveai::agent::InlineAgentBase::Mock(b) => {
+            b.mcp_servers.get_or_insert_with(Vec::new).push(server);
+        }
     }
 }
 
@@ -224,6 +240,50 @@ where
     LUSG: crate::laboratories::executions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
 {
     pub async fn create_streaming(
+        self: Arc<Self>,
+        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
+        request: Arc<Params>,
+    ) -> Result<
+        impl Stream<Item = LaboratoryExecutionChunk> + Send + 'static,
+        super::Error,
+    > {
+        use std::pin::Pin;
+        use std::task::{Context, Poll};
+
+        struct UsageTerminatedStream {
+            // TODO: could avoid Box::pin if inner type is named
+            inner: Option<Pin<Box<dyn Stream<Item = LaboratoryExecutionChunk> + Send>>>,
+        }
+
+        impl Stream for UsageTerminatedStream {
+            type Item = LaboratoryExecutionChunk;
+
+            fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+                let inner = match &mut self.inner {
+                    Some(inner) => inner,
+                    None => return Poll::Ready(None),
+                };
+                match inner.as_mut().poll_next(cx) {
+                    Poll::Ready(Some(chunk)) => {
+                        if chunk.usage.is_some() {
+                            if let Some(inner) = self.inner.take() {
+                                std::thread::spawn(move || drop(inner));
+                            }
+                        }
+                        Poll::Ready(Some(chunk))
+                    }
+                    other => other,
+                }
+            }
+        }
+
+        let inner = self.create_streaming_internal(ctx, request).await?;
+        Ok(UsageTerminatedStream {
+            inner: Some(Box::pin(inner)),
+        })
+    }
+
+    async fn create_streaming_internal(
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
         request: Arc<Params>,
@@ -264,9 +324,14 @@ where
             return Err(send_err(super::Error::EvaluationConfigMismatch));
         }
 
-        // Connect to Docker
-        let docker = bollard::Docker::connect_with_local_defaults()
-            .map_err(|e| send_err(super::Error::Docker(e.to_string())))?;
+        // Connect to Docker (respects DOCKER_HOST env var)
+        let docker_host = std::env::var("DOCKER_HOST").unwrap_or_else(|_| {
+            #[cfg(unix)] { "unix:///var/run/docker.sock".to_string() }
+            #[cfg(windows)] { "npipe:////./pipe/docker_engine".to_string() }
+        });
+        let docker = bollard::Docker::connect_with_local(
+            &docker_host, self.docker_timeout, bollard::API_DEFAULT_VERSION,
+        ).map_err(|e| send_err(super::Error::Docker(e.to_string())))?;
 
         let tar_bytes = mcp_tar(super::mcp_binary::MCP_BINARY);
 
@@ -436,8 +501,8 @@ where
                 yield chunk;
             }
 
-            // Phase 2: spawn evaluations for non-errored builders (only if eval agent provided)
-            if let Some(ref eval_agent) = eval_agent {
+            // Phase 2: spawn evaluations for non-errored builders (only if eval agent provided and not all builders errored)
+            if let Some(ref eval_agent) = eval_agent && errored_agents.len() < request.builder_agents.len() {
                 let num_agents = request.builder_agents.len() as u64;
                 let eval_streams: Vec<_> = (0..num_agents)
                     .filter(|i| !errored_agents.contains(i))
@@ -467,7 +532,6 @@ where
                 }
             }
 
-            // Final chunk with accumulated usage
             let final_chunk = LaboratoryExecutionChunk {
                 id: id.clone(),
                 builders: Vec::new(),
@@ -477,18 +541,11 @@ where
                 object,
                 usage: Some(accumulated_usage),
             };
+            if !request.persist.unwrap_or(false) {
+                cleanup_containers(docker, &id, request.builder_agents.len());
+            }
             viewer_client.send_laboratory_execution_continue(viewer_ctx.clone(), final_chunk.clone());
             yield final_chunk;
-
-            // Cleanup: stop and remove all builder containers (unless persist)
-            if !request.persist.unwrap_or(false) {
-                let num_builders = request.builder_agents.len();
-                for i in 0..num_builders {
-                    let name = format!("objectiveai-{id}-{i}");
-                    let _ = docker.stop_container(&name, None).await;
-                    let _ = docker.remove_container(&name, None).await;
-                }
-            }
         })
     }
 

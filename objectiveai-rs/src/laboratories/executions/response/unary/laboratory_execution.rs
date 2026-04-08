@@ -33,9 +33,29 @@ impl LaboratoryExecution {
         self.created = 0;
         for builder in &mut self.builders {
             builder.inner.normalize_for_tests();
+            normalize_error(&mut builder.inner.error);
         }
         for evaluation in &mut self.evaluations {
             evaluation.inner.normalize_for_tests();
+            normalize_error(&mut evaluation.inner.error);
+        }
+    }
+}
+
+/// Replace dynamic port numbers in error messages with a placeholder.
+fn normalize_error(error: &mut Option<crate::error::ResponseError>) {
+    if let Some(e) = error {
+        if let serde_json::Value::String(s) = &mut e.message {
+            // Replace localhost:<port> with localhost:0
+            while let Some(start) = s.find("localhost:") {
+                let after = start + "localhost:".len();
+                let end = s[after..].find(|c: char| !c.is_ascii_digit()).map(|i| after + i).unwrap_or(s.len());
+                if end > after {
+                    s.replace_range(after..end, "0");
+                } else {
+                    break;
+                }
+            }
         }
     }
 }

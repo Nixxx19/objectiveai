@@ -137,7 +137,7 @@ fn make_client() -> Arc<TestClient> {
             String::new(),
             String::new(),
             String::new(),
-            Duration::ZERO,
+            Duration::from_millis(1),
             Duration::ZERO,
             Duration::ZERO,
             0.0,
@@ -158,7 +158,7 @@ fn make_client() -> Arc<TestClient> {
         Arc::new(crate::viewer::Client::new(
             reqwest::Client::new(), None, None,
             std::time::Duration::ZERO, std::time::Duration::ZERO, 0.0, 1.0,
-            std::time::Duration::ZERO, std::time::Duration::ZERO,
+            std::time::Duration::ZERO, std::time::Duration::from_millis(1),
         )),
         Duration::ZERO,
         Duration::ZERO,

@@ -262,7 +262,7 @@ impl<'a> InlineAgentRef<'a> {
         match self {
             InlineAgentRef::Openrouter(b) => b.mcp_servers.as_ref(),
             InlineAgentRef::ClaudeAgentSdk(b) => b.mcp_servers.as_ref(),
-            InlineAgentRef::Mock(_) => None,
+            InlineAgentRef::Mock(b) => b.mcp_servers.as_ref(),
         }
     }
 

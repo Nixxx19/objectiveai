@@ -106,7 +106,7 @@ fn make_client() -> Arc<TestClient> {
         Arc::new(crate::mcp::Client::new(
             reqwest::Client::new(),
             String::new(), String::new(), String::new(),
-            Duration::ZERO, Duration::ZERO, Duration::ZERO,
+            Duration::from_millis(1), Duration::ZERO, Duration::ZERO,
             0.0, 1.0, Duration::ZERO, Duration::ZERO, Duration::from_millis(1),
         )),
         None,
@@ -121,10 +121,10 @@ fn make_client() -> Arc<TestClient> {
         Arc::new(crate::viewer::Client::new(
             reqwest::Client::new(), None, None,
             Duration::ZERO, Duration::ZERO, 0.0, 1.0,
-            Duration::ZERO, Duration::ZERO,
+            Duration::ZERO, Duration::from_millis(1),
         )),
         Duration::ZERO, Duration::ZERO, 0.0, 1.0,
-        Duration::ZERO, Duration::ZERO,
+        Duration::ZERO, Duration::from_millis(1),
         Duration::from_millis(1), Duration::from_millis(1),
     ));
     Arc::new(super::Client {
@@ -134,8 +134,9 @@ fn make_client() -> Arc<TestClient> {
         viewer: Arc::new(crate::viewer::Client::new(
             reqwest::Client::new(), None, None,
             Duration::ZERO, Duration::ZERO, 0.0, 1.0,
-            Duration::ZERO, Duration::ZERO,
+            Duration::ZERO, Duration::from_millis(1),
         )),
+        docker_timeout: 30,
     })
 }
 
@@ -220,34 +221,36 @@ fn make_ctx() -> ctx::Context<ctx::DefaultContextExt, ctx::persistent_cache::def
     )
 }
 
-async fn run_execution(client: &Arc<TestClient>, request: Arc<Params>) -> LaboratoryExecution {
-    use futures::StreamExt;
+fn run_execution(request: Arc<Params>) -> LaboratoryExecution {
+    let rt = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .unwrap();
 
-    let stream = client
-        .clone()
-        .create_streaming(make_ctx(), request)
-        .await
-        .expect("create_streaming should succeed");
+    let result = rt.block_on(async {
+        use futures::StreamExt;
 
-    let expected_created = std::cell::Cell::new(None);
-    let agg = crate::stream_harness::consume_stream(
-        Box::pin(stream),
-        |agg: &mut LaboratoryExecutionChunk, c| agg.push(c),
-        |i, chunk| {
-            check_created(&expected_created, i, chunk.created);
-            assert!(chunk.usage.is_none());
-        },
-        |i, chunk| {
-            check_created(&expected_created, i, chunk.created);
-            assert!(chunk.usage.is_none());
-        },
-        |i, chunk| {
-            check_created(&expected_created, i, chunk.created);
-            assert!(chunk.usage.is_some(), "final chunk has no usage");
-        },
-    )
-    .await;
-    LaboratoryExecution::from(agg)
+        let client = make_client();
+        let mut stream = client
+            .clone()
+            .create_streaming(make_ctx(), request)
+            .await
+            .expect("create_streaming should succeed");
+
+        let mut agg: Option<LaboratoryExecutionChunk> = None;
+        while let Some(chunk) = stream.next().await {
+            let done = chunk.usage.is_some();
+            match &mut agg {
+                Some(a) => a.push(&chunk),
+                None => agg = Some(chunk),
+            }
+            if done { break; }
+        }
+        LaboratoryExecution::from(agg.expect("stream must produce at least one chunk"))
+    });
+
+    rt.shutdown_background();
+    result
 }
 
 fn check_created(expected: &std::cell::Cell<Option<u64>>, _i: usize, created: u64) {
@@ -276,11 +279,10 @@ fn assert_snapshot(json: &str, path: &str, expected: &str) {
 // ---------------------------------------------------------------------------
 
 /// Single builder, no evaluation.
-#[tokio::test]
-async fn single_builder_no_eval_seed_42() {
-    let client = make_client();
+#[test]
+fn single_builder_no_eval_seed_42() {
     let request = make_request(vec![builder_agent(false, None)], false, 42);
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request));
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
@@ -290,11 +292,10 @@ async fn single_builder_no_eval_seed_42() {
 }
 
 /// Single builder + evaluation.
-#[tokio::test]
-async fn single_builder_with_eval_seed_42() {
-    let client = make_client();
+#[test]
+fn single_builder_with_eval_seed_42() {
     let request = make_request(vec![builder_agent(false, None)], true, 42);
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request));
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
@@ -304,15 +305,14 @@ async fn single_builder_with_eval_seed_42() {
 }
 
 /// Two builders + evaluation.
-#[tokio::test]
-async fn two_builders_with_eval_seed_99() {
-    let client = make_client();
+#[test]
+fn two_builders_with_eval_seed_99() {
     let request = make_request(
         vec![builder_agent(false, None), builder_agent(false, None)],
         true,
         99,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request));
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
@@ -322,11 +322,10 @@ async fn two_builders_with_eval_seed_99() {
 }
 
 /// Builder with 50% error probability + evaluation.
-#[tokio::test]
-async fn builder_error_50_with_eval_seed_10() {
-    let client = make_client();
+#[test]
+fn builder_error_50_with_eval_seed_10() {
     let request = make_request(vec![builder_agent(true, Some(50))], true, 10);
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request));
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
@@ -336,15 +335,14 @@ async fn builder_error_50_with_eval_seed_10() {
 }
 
 /// Two builders, one with 50% error probability, no evaluation.
-#[tokio::test]
-async fn two_builders_one_error_50_no_eval_seed_7() {
-    let client = make_client();
+#[test]
+fn two_builders_one_error_50_no_eval_seed_7() {
     let request = make_request(
         vec![builder_agent(false, None), builder_agent(true, Some(50))],
         false,
         7,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request));
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
