@@ -1,9 +1,10 @@
 mod client;
-mod unimplemented;
+mod error;
+mod mcp_binary;
 pub mod usage_handler;
 
-#[cfg(feature = "laboratories-local")]
-pub mod local;
-
 pub use client::*;
-pub use unimplemented::*;
+pub use error::*;
+
+#[cfg(test)]
+mod client_tests;

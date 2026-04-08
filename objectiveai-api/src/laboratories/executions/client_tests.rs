@@ -283,7 +283,7 @@ async fn single_builder_no_eval_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/laboratories/executions/local/client_tests/single_builder_no_eval_seed_42.json"),
-        include_str!("../../../../assets/laboratories/executions/local/client_tests/single_builder_no_eval_seed_42.json"),
+        include_str!("../../../assets/laboratories/executions/local/client_tests/single_builder_no_eval_seed_42.json"),
     );
 }
 
@@ -297,7 +297,7 @@ async fn single_builder_with_eval_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/laboratories/executions/local/client_tests/single_builder_with_eval_seed_42.json"),
-        include_str!("../../../../assets/laboratories/executions/local/client_tests/single_builder_with_eval_seed_42.json"),
+        include_str!("../../../assets/laboratories/executions/local/client_tests/single_builder_with_eval_seed_42.json"),
     );
 }
 
@@ -315,7 +315,7 @@ async fn two_builders_with_eval_seed_99() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/laboratories/executions/local/client_tests/two_builders_with_eval_seed_99.json"),
-        include_str!("../../../../assets/laboratories/executions/local/client_tests/two_builders_with_eval_seed_99.json"),
+        include_str!("../../../assets/laboratories/executions/local/client_tests/two_builders_with_eval_seed_99.json"),
     );
 }
 
@@ -329,7 +329,7 @@ async fn builder_error_50_with_eval_seed_10() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/laboratories/executions/local/client_tests/builder_error_50_with_eval_seed_10.json"),
-        include_str!("../../../../assets/laboratories/executions/local/client_tests/builder_error_50_with_eval_seed_10.json"),
+        include_str!("../../../assets/laboratories/executions/local/client_tests/builder_error_50_with_eval_seed_10.json"),
     );
 }
 
@@ -347,6 +347,6 @@ async fn two_builders_one_error_50_no_eval_seed_7() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/laboratories/executions/local/client_tests/two_builders_one_error_50_no_eval_seed_7.json"),
-        include_str!("../../../../assets/laboratories/executions/local/client_tests/two_builders_one_error_50_no_eval_seed_7.json"),
+        include_str!("../../../assets/laboratories/executions/local/client_tests/two_builders_one_error_50_no_eval_seed_7.json"),
     );
 }
