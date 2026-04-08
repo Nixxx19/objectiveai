@@ -247,50 +247,6 @@ where
         impl Stream<Item = LaboratoryExecutionChunk> + Send + 'static,
         super::Error,
     > {
-        use std::pin::Pin;
-        use std::task::{Context, Poll};
-
-        struct UsageTerminatedStream {
-            // TODO: could avoid Box::pin if inner type is named
-            inner: Option<Pin<Box<dyn Stream<Item = LaboratoryExecutionChunk> + Send>>>,
-        }
-
-        impl Stream for UsageTerminatedStream {
-            type Item = LaboratoryExecutionChunk;
-
-            fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-                let inner = match &mut self.inner {
-                    Some(inner) => inner,
-                    None => return Poll::Ready(None),
-                };
-                match inner.as_mut().poll_next(cx) {
-                    Poll::Ready(Some(chunk)) => {
-                        if chunk.usage.is_some() {
-                            if let Some(inner) = self.inner.take() {
-                                std::thread::spawn(move || drop(inner));
-                            }
-                        }
-                        Poll::Ready(Some(chunk))
-                    }
-                    other => other,
-                }
-            }
-        }
-
-        let inner = self.create_streaming_internal(ctx, request).await?;
-        Ok(UsageTerminatedStream {
-            inner: Some(Box::pin(inner)),
-        })
-    }
-
-    async fn create_streaming_internal(
-        self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
-        request: Arc<Params>,
-    ) -> Result<
-        impl Stream<Item = LaboratoryExecutionChunk> + Send + 'static,
-        super::Error,
-    > {
         // Timestamp and identify the execution — before any awaits
         let created = time::SystemTime::now()
             .duration_since(time::UNIX_EPOCH)
