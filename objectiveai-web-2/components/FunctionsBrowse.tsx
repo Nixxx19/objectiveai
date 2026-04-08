@@ -49,7 +49,7 @@ export function FunctionsBrowse() {
   }
 
   if (error) {
-    return <div className={styles.error} role="alert">{error}</div>;
+    return <div className={styles.error} role="alert">unable to reach api</div>;
   }
 
   return (

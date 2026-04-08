@@ -31,21 +31,22 @@ export function Landing() {
   const [swarms, setSwarms] = useState<SwarmMeta[]>([]);
   const [profiles, setProfiles] = useState<ProfileMeta[]>([]);
   const [loaded, setLoaded] = useState({ fn: false, sw: false, pr: false });
+  const [errors, setErrors] = useState({ fn: false, sw: false, pr: false });
 
   useEffect(() => {
     let cancelled = false;
 
     fetchAllFunctions()
       .then((fns) => { if (!cancelled) { setFunctions(fns); setLoaded((p) => ({ ...p, fn: true })); } })
-      .catch(() => { if (!cancelled) setLoaded((p) => ({ ...p, fn: true })); });
+      .catch(() => { if (!cancelled) { setErrors((p) => ({ ...p, fn: true })); setLoaded((p) => ({ ...p, fn: true })); } });
 
     fetchAllSwarms()
       .then((s) => { if (!cancelled) { setSwarms(s); setLoaded((p) => ({ ...p, sw: true })); } })
-      .catch(() => { if (!cancelled) setLoaded((p) => ({ ...p, sw: true })); });
+      .catch(() => { if (!cancelled) { setErrors((p) => ({ ...p, sw: true })); setLoaded((p) => ({ ...p, sw: true })); } });
 
     fetchDefaultProfiles()
       .then((p) => { if (!cancelled) { setProfiles(p); setLoaded((prev) => ({ ...prev, pr: true })); } })
-      .catch(() => { if (!cancelled) setLoaded((p) => ({ ...p, pr: true })); });
+      .catch(() => { if (!cancelled) { setErrors((p) => ({ ...p, pr: true })); setLoaded((p) => ({ ...p, pr: true })); } });
 
     return () => { cancelled = true; };
   }, []);
@@ -166,7 +167,9 @@ export function Landing() {
             <h2 className={styles.sectionTitle}>functions</h2>
             <Link href="/functions" className={styles.sectionLink}>browse all</Link>
           </div>
-          {!loaded.fn ? <SectionLoader /> : (
+          {!loaded.fn ? <SectionLoader /> : sortedFunctions.length === 0 ? (
+            <div className={styles.sectionEmpty}>unable to load</div>
+          ) : (
             <div className={styles.directoryList}>
               {sortedFunctions.slice(0, 6).map((fn) => (
                 <Link
@@ -192,7 +195,9 @@ export function Landing() {
             <h2 className={styles.sectionTitle}>swarms</h2>
             <Link href="/swarms" className={styles.sectionLink}>browse all</Link>
           </div>
-          {!loaded.sw ? <SectionLoader /> : (
+          {!loaded.sw ? <SectionLoader /> : sortedSwarms.length === 0 ? (
+            <div className={styles.sectionEmpty}>unable to load</div>
+          ) : (
             <div className={styles.directoryList}>
               {sortedSwarms.slice(0, 4).map((s) => (
                 <Link
@@ -214,7 +219,9 @@ export function Landing() {
             <h2 className={styles.sectionTitle}>profiles</h2>
             <Link href="/profiles" className={styles.sectionLink}>browse all</Link>
           </div>
-          {!loaded.pr ? <SectionLoader /> : (
+          {!loaded.pr ? <SectionLoader /> : profiles.length === 0 ? (
+            <div className={styles.sectionEmpty}>unable to load</div>
+          ) : (
             <div className={styles.directoryList}>
               {profiles.map((p) => (
                 <div key={p.name} className={styles.directoryRow}>

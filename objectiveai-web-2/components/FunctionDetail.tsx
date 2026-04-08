@@ -92,7 +92,7 @@ export function FunctionDetail({ owner, repo }: Props) {
   }
 
   if (error) {
-    return <div className={styles.error} role="alert">{error}</div>;
+    return <div className={styles.error} role="alert">unable to load function</div>;
   }
 
   if (!rootDef || !definition) return null;

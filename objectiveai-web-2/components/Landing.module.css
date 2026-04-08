@@ -123,7 +123,7 @@
 }
 
 .panel:first-child {
-  justify-content: center;
+  align-self: start;
 }
 
 .panelHeader {
@@ -216,6 +216,9 @@
   color: var(--info-mid);
   min-width: 140px;
   flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .agentVoteBar {
@@ -371,6 +374,17 @@
   color: var(--info-dim);
 }
 
+/* ── Empty State ── */
+
+.sectionEmpty {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--info-dim);
+  opacity: 0.6;
+  padding: 12px 0;
+  border-top: 1px solid var(--node-border);
+}
+
 /* ── Loading ── */
 
 .sectionLoading {
@@ -412,17 +426,22 @@
     grid-template-columns: 1fr;
   }
 
-  .panel:first-child {
-    justify-content: flex-start;
-  }
-
   .agentModel {
-    min-width: 100px;
+    min-width: 80px;
+    max-width: 100px;
     font-size: 8px;
   }
 
   .voteTableCol {
-    min-width: 100px;
+    min-width: 80px;
+  }
+
+  .agentWeight {
+    font-size: 7px;
+  }
+
+  .scoresValue {
+    font-size: 9px;
   }
 
   .directoryName {
