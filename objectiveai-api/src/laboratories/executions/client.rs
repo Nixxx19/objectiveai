@@ -1,8 +1,5 @@
 use std::sync::Arc;
 use std::time;
-use bollard::exec::CreateExecOptions;
-use bollard::models::ContainerCreateBody;
-use bollard::query_parameters::{CreateContainerOptionsBuilder, UploadToContainerOptionsBuilder};
 use futures::{Stream, StreamExt};
 use crate::ctx;
 use crate::util::{ChoiceIndexer, StreamOnce};
@@ -36,9 +33,9 @@ pub fn response_id(created: u64) -> String {
     format!("lbexec-{}-{created}", uuid.simple())
 }
 
-/// Laboratory client that runs builder agents in local Docker containers
-/// with the embedded objectiveai-mcp binary.
-pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, LUSG> {
+/// Laboratory client that runs builder agents in orchestrated environments
+/// (Docker containers, GCP instances, etc.) with the embedded objectiveai-mcp binary.
+pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, LUSG, ORCH> {
     pub agent_client: Arc<
         crate::agent::completions::Client<
             CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG,
@@ -48,151 +45,7 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM,
         Arc<crate::retrieval::retrieve::Router<RETRG, RETRF, RETRM, CTXEXT>>,
     pub usage_handler: Arc<LUSG>,
     pub viewer: Arc<crate::viewer::Client<CTXEXT>>,
-    /// Docker API timeout in seconds.
-    pub docker_timeout: u64,
-}
-
-/// Create a tar archive containing the MCP binary at the archive root.
-fn mcp_tar(binary: &[u8]) -> Vec<u8> {
-    let mut ar = tar::Builder::new(Vec::new());
-    let mut header = tar::Header::new_gnu();
-    header.set_size(binary.len() as u64);
-    header.set_mode(0o755);
-    header.set_cksum();
-    ar.append_data(&mut header, "objectiveai-mcp", binary)
-        .expect("failed to build tar archive");
-    ar.into_inner().expect("failed to finalize tar archive")
-}
-
-const MCP_CONTAINER_PORT: &str = "3000/tcp";
-
-/// Spawn a single builder container: create, start, upload MCP binary, and start the MCP server.
-/// Returns the host port that the MCP server is exposed on.
-async fn spawn_builder(
-    docker: &bollard::Docker,
-    image: &str,
-    index: usize,
-    execution_id: &str,
-    mcp_tar: &[u8],
-) -> Result<u16, super::Error> {
-    use bollard::models::{HostConfig, PortBinding, PortMap};
-
-    let container_name = format!("objectiveai-{execution_id}-{index}");
-    let options = CreateContainerOptionsBuilder::default()
-        .name(container_name.as_str())
-        .build();
-
-    let mut port_bindings = PortMap::new();
-    port_bindings.insert(
-        MCP_CONTAINER_PORT.to_string(),
-        Some(vec![PortBinding {
-            host_ip: Some("0.0.0.0".to_string()),
-            host_port: Some(String::new()), // Docker assigns a free port
-        }]),
-    );
-
-    let config = ContainerCreateBody {
-        image: Some(image.to_string()),
-        cmd: Some(vec!["sleep".to_string(), "infinity".to_string()]),
-        exposed_ports: Some(vec![MCP_CONTAINER_PORT.to_string()]),
-        host_config: Some(HostConfig {
-            port_bindings: Some(port_bindings),
-            ..Default::default()
-        }),
-        ..Default::default()
-    };
-
-    let container = docker
-        .create_container(Some(options), config)
-        .await
-        .map_err(|e| super::Error::Docker(e.to_string()))?;
-
-    docker
-        .start_container(&container.id, None)
-        .await
-        .map_err(|e| super::Error::Docker(e.to_string()))?;
-
-    // Poll for port binding with exponential backoff
-    let host_port = {
-        let mut attempt = 0u32;
-        loop {
-            let delay = std::time::Duration::from_millis(10 * (1 << attempt.min(4)));
-            tokio::time::sleep(delay).await;
-
-            let inspect = docker
-                .inspect_container(&container.id, None)
-                .await
-                .map_err(|e| super::Error::Docker(e.to_string()))?;
-
-            let port = inspect
-                .network_settings
-                .and_then(|ns| ns.ports)
-                .and_then(|ports| ports.get(MCP_CONTAINER_PORT).cloned())
-                .flatten()
-                .and_then(|bindings| bindings.into_iter().next())
-                .and_then(|b| b.host_port)
-                .and_then(|p| p.parse::<u16>().ok());
-
-            if let Some(p) = port {
-                break p;
-            }
-
-            attempt += 1;
-            if attempt > 10 {
-                return Err(super::Error::Docker(
-                    format!("timeout after {attempt} attempts: failed to get host port for container {container_name}"),
-                ));
-            }
-        }
-    };
-
-    // Upload the MCP binary
-    let upload_options = UploadToContainerOptionsBuilder::default()
-        .path("/")
-        .build();
-
-    docker
-        .upload_to_container(
-            &container.id,
-            Some(upload_options),
-            bollard::body_full(mcp_tar.to_vec().into()),
-        )
-        .await
-        .map_err(|e| super::Error::Docker(e.to_string()))?;
-
-    // Start the MCP server (HTTP streamable transport on PORT 3000)
-    let exec_options = CreateExecOptions {
-        cmd: Some(vec!["/objectiveai-mcp"]),
-        env: Some(vec!["PORT=3000"]),
-        ..Default::default()
-    };
-
-    let exec = docker
-        .create_exec(&container.id, exec_options)
-        .await
-        .map_err(|e| super::Error::Docker(e.to_string()))?;
-
-    let _start_result = docker
-        .start_exec(
-            &exec.id,
-            Some(bollard::exec::StartExecOptions { detach: true, ..Default::default() }),
-        )
-        .await
-        .map_err(|e| super::Error::Docker(e.to_string()))?;
-
-    Ok(host_port)
-}
-
-/// Spawn a background task to stop and remove builder containers.
-fn cleanup_containers(docker: bollard::Docker, execution_id: &str, num_builders: usize) {
-    let id = execution_id.to_string();
-    tokio::spawn(async move {
-        for i in 0..num_builders {
-            let name = format!("objectiveai-{id}-{i}");
-            let _ = docker.stop_container(&name, None).await;
-            let _ = docker.remove_container(&name, None).await;
-        }
-    });
+    pub orchestrator: Arc<ORCH>,
 }
 
 /// Add an MCP server address to an inline agent base.
@@ -214,8 +67,8 @@ fn inject_mcp_server(agent: &mut objectiveai::agent::InlineAgentBase, mcp_url: S
     }
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, LUSG>
-    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, LUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, LUSG, ORCH>
+    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, LUSG, ORCH>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
     OPENROUTER: crate::agent::completions::UpstreamClient<
@@ -238,6 +91,7 @@ where
     RETRM: crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
     CUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
     LUSG: crate::laboratories::executions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
+    ORCH: super::orchestrator::Orchestrator<CTXEXT>,
 {
     pub async fn create_streaming(
         self: Arc<Self>,
@@ -280,24 +134,15 @@ where
             return Err(send_err(super::Error::EvaluationConfigMismatch));
         }
 
-        // Connect to Docker (respects DOCKER_HOST env var)
-        let docker_host = std::env::var("DOCKER_HOST").unwrap_or_else(|_| {
-            #[cfg(unix)] { "unix:///var/run/docker.sock".to_string() }
-            #[cfg(windows)] { "npipe:////./pipe/docker_engine".to_string() }
-        });
-        let docker = bollard::Docker::connect_with_local(
-            &docker_host, self.docker_timeout, bollard::API_DEFAULT_VERSION,
-        ).map_err(|e| send_err(super::Error::Docker(e.to_string())))?;
-
-        let tar_bytes = mcp_tar(super::mcp_binary::MCP_BINARY);
-
-        // Spawn containers and resolve agents concurrently — single await
-        let docker_futs: Vec<_> = request
-            .builder_agents
-            .iter()
-            .enumerate()
-            .map(|(i, _)| spawn_builder(&docker, &request.docker_image, i, &id, &tar_bytes))
-            .collect();
+        // Spawn builder environments and resolve agents concurrently
+        let orchestrator_fut = self.orchestrator.spawn_builders(
+            &ctx,
+            &request.docker_image,
+            request.builder_agents.len(),
+            &id,
+            &[("objectiveai-mcp", super::mcp_binary::MCP_BINARY)],
+            &[("PORT", "3000")],
+        );
         let builder_resolve_futs: Vec<_> = request
             .builder_agents
             .iter()
@@ -312,8 +157,8 @@ where
                 None => Ok(None),
             }
         };
-        let (host_ports, resolved_builder_agents, resolved_eval_agent) = tokio::try_join!(
-            futures::future::try_join_all(docker_futs),
+        let (mcp_urls, resolved_builder_agents, resolved_eval_agent) = tokio::try_join!(
+            async { orchestrator_fut.await.map_err(|e| super::Error::Orchestrator(objectiveai::error::ResponseError::from(&e))) },
             async {
                 futures::future::try_join_all(builder_resolve_futs)
                     .await
@@ -336,10 +181,7 @@ where
         let mut builder_inline_agents = Vec::with_capacity(request.builder_agents.len());
         for (i, builder_agent_wf) in resolved_builder_agents.into_iter().enumerate() {
             let mut builder_agent_base = builder_agent_wf.inline().inner.clone().into_base();
-
-            let host_port = host_ports[i];
-            inject_mcp_server(&mut builder_agent_base, format!("http://localhost:{host_port}"));
-
+            inject_mcp_server(&mut builder_agent_base, mcp_urls[i].clone());
             builder_inline_agents.push(builder_agent_base);
         }
 
@@ -437,6 +279,8 @@ where
 
         let viewer_client = self.viewer.clone();
         let viewer_ctx = ctx.clone();
+        let orchestrator = self.orchestrator.clone();
+        let cleanup_ctx = ctx.clone();
         let this = self.clone();
         let mut merged = futures::stream::select_all(streams);
         Ok(async_stream::stream! {
@@ -498,7 +342,11 @@ where
                 usage: Some(accumulated_usage),
             };
             if !request.persist.unwrap_or(false) {
-                cleanup_containers(docker, &id, request.builder_agents.len());
+                let orch = orchestrator.clone();
+                let cctx = cleanup_ctx.clone();
+                let eid = id.clone();
+                let num = request.builder_agents.len();
+                tokio::spawn(async move { orch.cleanup(&cctx, &eid, num).await });
             }
             viewer_client.send_laboratory_execution_continue(viewer_ctx.clone(), final_chunk.clone());
             yield final_chunk;

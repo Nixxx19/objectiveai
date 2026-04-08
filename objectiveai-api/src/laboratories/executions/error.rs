@@ -1,9 +1,9 @@
 /// Errors that can occur during laboratory execution.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    /// Docker operation failed.
-    #[error("docker error: {0}")]
-    Docker(String),
+    /// Orchestrator operation failed.
+    #[error("orchestrator error: {}", serde_json::to_string(.0).unwrap_or_default())]
+    Orchestrator(objectiveai::error::ResponseError),
     /// MCP communication error.
     #[error("mcp error: {0}")]
     Mcp(String),
@@ -27,7 +27,7 @@ pub enum Error {
 impl objectiveai::error::StatusError for Error {
     fn status(&self) -> u16 {
         match self {
-            Error::Docker(_) => 500,
+            Error::Orchestrator(_) => 500,
             Error::Mcp(_) => 500,
             Error::NoBuilderAgents => 400,
             Error::AgentCompletion(_) => 502,
@@ -41,9 +41,9 @@ impl objectiveai::error::StatusError for Error {
         Some(serde_json::json!({
             "kind": "laboratory",
             "error": match self {
-                Error::Docker(msg) => serde_json::json!({
-                    "kind": "docker",
-                    "error": msg,
+                Error::Orchestrator(e) => serde_json::json!({
+                    "kind": "orchestrator",
+                    "error": e.message,
                 }),
                 Error::Mcp(msg) => serde_json::json!({
                     "kind": "mcp",

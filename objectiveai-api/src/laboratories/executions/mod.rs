@@ -1,6 +1,7 @@
 mod client;
 mod error;
 mod mcp_binary;
+pub mod orchestrator;
 pub mod usage_handler;
 
 pub use client::*;

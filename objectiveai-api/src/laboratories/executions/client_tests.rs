@@ -94,6 +94,7 @@ type TestClient = super::Client<
     crate::retrieval::retrieve::mock::MockClient,
     StubAgentUsageHandler,
     StubLabUsageHandler,
+    super::orchestrator::mock::Orchestrator,
 >;
 
 fn make_client() -> Arc<TestClient> {
@@ -136,7 +137,7 @@ fn make_client() -> Arc<TestClient> {
             Duration::ZERO, Duration::ZERO, 0.0, 1.0,
             Duration::ZERO, Duration::from_millis(1),
         )),
-        docker_timeout: 30,
+        orchestrator: Arc::new(super::orchestrator::mock::Orchestrator),
     })
 }
 
