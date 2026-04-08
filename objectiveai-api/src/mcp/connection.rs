@@ -35,6 +35,9 @@ pub struct Connection {
     /// The server's capabilities and info from the initialize response.
     pub initialize_result: super::initialize_result::InitializeResult,
 
+    /// If true, all RPC/notify calls are no-ops. Used for mock orchestrator URLs.
+    mock: bool,
+
     /// Auto-incrementing request ID (starts at 2; 1 was used for initialize).
     next_id: AtomicU64,
 
@@ -46,6 +49,54 @@ pub struct Connection {
 }
 
 impl Connection {
+    /// Creates a minimal connection for unit testing.
+    /// Creates a mock connection that never makes network requests.
+    /// All RPC calls return empty/default results.
+    pub(super) fn new_mock(url: String) -> Arc<Self> {
+        Arc::new(Self {
+            http_client: reqwest::Client::new(),
+            url,
+            session_id: String::new(),
+            authorization: None,
+            user_agent: String::new(),
+            x_title: String::new(),
+            http_referer: String::new(),
+            backoff_current_interval: Duration::ZERO,
+            backoff_initial_interval: Duration::ZERO,
+            backoff_randomization_factor: 0.0,
+            backoff_multiplier: 1.0,
+            backoff_max_interval: Duration::ZERO,
+            backoff_max_elapsed_time: Duration::ZERO,
+            call_timeout: Duration::ZERO,
+            initialize_result: super::initialize_result::InitializeResult {
+                protocol_version: "2025-03-26".into(),
+                capabilities: super::initialize_result::ServerCapabilities {
+                    experimental: None,
+                    logging: None,
+                    completions: None,
+                    prompts: None,
+                    resources: None,
+                    tools: None,
+                    tasks: None,
+                },
+                server_info: super::initialize_result::Implementation {
+                    name: "mock".into(),
+                    title: None,
+                    version: "0.0.0".into(),
+                    website_url: None,
+                    description: None,
+                    icons: None,
+                },
+                instructions: None,
+                _meta: None,
+            },
+            mock: true,
+            next_id: AtomicU64::new(2),
+            tools: RwLock::new(Ok(Arc::new(Vec::new()))),
+            resources: RwLock::new(Ok(Arc::new(Vec::new()))),
+        })
+    }
+
     /// Creates a minimal connection for unit testing.
     #[cfg(test)]
     pub(crate) fn new_for_test(name: String, url: String) -> Arc<Self> {
@@ -87,6 +138,7 @@ impl Connection {
                 instructions: None,
                 _meta: None,
             },
+            mock: false,
             next_id: AtomicU64::new(2),
             tools: RwLock::new(Ok(Arc::new(Vec::new()))),
             resources: RwLock::new(Ok(Arc::new(Vec::new()))),
@@ -129,6 +181,7 @@ impl Connection {
             backoff_max_elapsed_time,
             call_timeout,
             initialize_result,
+            mock: false,
             next_id: AtomicU64::new(2),
             tools: RwLock::new(Ok(Arc::new(Vec::new()))),
             resources: RwLock::new(Ok(Arc::new(Vec::new()))),
@@ -275,6 +328,7 @@ impl Connection {
         method: &str,
         params: &P,
     ) -> Result<(), super::Error> {
+        if self.mock { return Ok(()); }
         let body = serde_json::json!({
             "jsonrpc": "2.0",
             "method": method,
@@ -339,6 +393,18 @@ impl Connection {
         &self,
         params: &super::tool::CallToolRequestParams,
     ) -> Result<super::tool::CallToolResult, super::Error> {
+        if self.mock {
+            return Ok(super::tool::CallToolResult {
+                content: vec![super::tool::ContentBlock::Text(super::tool::TextContent {
+                    text: "mock".to_string(),
+                    annotations: None,
+                    _meta: None,
+                })],
+                structured_content: None,
+                is_error: None,
+                _meta: None,
+            });
+        }
         self.rpc("tools/call", params).await
     }
 
