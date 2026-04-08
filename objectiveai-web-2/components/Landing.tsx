@@ -74,49 +74,87 @@ export function Landing() {
         </div>
       </section>
 
-      {/* Execution example */}
+      {/* Execution comparison */}
       <section className={styles.execution}>
         <div className={styles.executionHeader}>
+          <span className={styles.executionLabel}>example execution</span>
           <span className={styles.executionFunction}>startup-idea-ranker</span>
-          <span className={styles.executionProfile}>profile-giga · 12 agents</span>
         </div>
         <div className={styles.responseOptions}>
-          <span className={styles.responseOption}>A: AI tutoring platform</span>
-          <span className={styles.responseOption}>B: blockchain pet insurance</span>
+          <span className={styles.responseOption}>
+            <span className={styles.responseMarker} data-option="a" />A: AI tutoring platform
+          </span>
+          <span className={styles.responseOption}>
+            <span className={styles.responseMarker} data-option="b" />B: blockchain pet insurance
+          </span>
         </div>
 
-        <div className={styles.voteTable}>
-          <div className={styles.voteTableHeader}>
-            <span className={styles.voteTableCol}>agent</span>
-            <span className={styles.voteTableColBar}>vote distribution</span>
-            <span className={styles.voteTableCol}>weight</span>
-          </div>
-          {EXAMPLE_VOTES.map((v, i) => (
-            <div
-              key={i}
-              className={`${styles.agentRow} ${i === 0 ? styles.agentHighlight : ""}`}
-            >
-              <span className={styles.agentModel}>{v.model}</span>
-              <div className={styles.agentVoteBar}>
-                <div className={styles.voteSegment} style={{ flex: Math.max(v.vote[0], 0.02), opacity: 0.3 + v.vote[0] * 0.7 }} />
-                <div className={styles.voteSegment} style={{ flex: Math.max(v.vote[1], 0.02), opacity: 0.3 + v.vote[1] * 0.7 }} />
-              </div>
-              <span className={styles.agentWeight}>{v.weight.toFixed(1)}</span>
+        <div className={styles.comparisonPanels}>
+          {/* Left — single agent */}
+          <div className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <span className={styles.panelTitle}>one agent</span>
             </div>
-          ))}
-        </div>
-
-        <div className={styles.scoresRow}>
-          <span className={styles.scoresLabel}>scores</span>
-          <div className={styles.scoreBar}>
-            <div className={styles.scoreSegment} style={{ flex: 0.62 }} />
-            <div className={styles.scoreSegment} style={{ flex: 0.38, opacity: 0.5 }} />
+            <div className={styles.voteTable}>
+              <div className={styles.voteTableHeader}>
+                <span className={styles.voteTableCol}>agent</span>
+                <span className={styles.voteTableColBar}>vote</span>
+                <span className={styles.voteTableCol}>weight</span>
+              </div>
+              <div className={styles.agentRow}>
+                <span className={styles.agentModel}>{EXAMPLE_VOTES[0].model}</span>
+                <div className={styles.agentVoteBar}>
+                  <div className={styles.voteSegmentA} style={{ flex: Math.max(EXAMPLE_VOTES[0].vote[0], 0.02) }} />
+                  <div className={styles.voteSegmentB} style={{ flex: Math.max(EXAMPLE_VOTES[0].vote[1], 0.02) }} />
+                </div>
+                <span className={styles.agentWeight}>{EXAMPLE_VOTES[0].weight.toFixed(1)}</span>
+              </div>
+            </div>
+            <div className={styles.scoresRow}>
+              <span className={styles.scoresLabel}>scores</span>
+              <div className={styles.scoreBar}>
+                <div className={styles.scoreSegmentA} style={{ flex: 0.02 }} />
+                <div className={styles.scoreSegmentB} style={{ flex: 0.98 }} />
+              </div>
+              <span className={styles.scoresValue}>[0.00, 1.00]</span>
+            </div>
           </div>
-          <span className={styles.scoresValue}>[0.62, 0.38]</span>
-        </div>
 
-        <div className={styles.executionCallout}>
-          claude-haiku-4.5 alone → [0.00, 1.00] · the swarm → [0.62, 0.38]
+          {/* Right — full swarm */}
+          <div className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <span className={styles.panelTitle}>the swarm</span>
+              <span className={styles.panelMeta}>profile-giga · 12 agents</span>
+            </div>
+            <div className={styles.voteTable}>
+              <div className={styles.voteTableHeader}>
+                <span className={styles.voteTableCol}>agent</span>
+                <span className={styles.voteTableColBar}>vote distribution</span>
+                <span className={styles.voteTableCol}>weight</span>
+              </div>
+              {EXAMPLE_VOTES.map((v, i) => (
+                <div
+                  key={i}
+                  className={`${styles.agentRow} ${i === 0 ? styles.agentHighlight : ""}`}
+                >
+                  <span className={styles.agentModel}>{v.model}</span>
+                  <div className={styles.agentVoteBar}>
+                    <div className={styles.voteSegmentA} style={{ flex: Math.max(v.vote[0], 0.02) }} />
+                    <div className={styles.voteSegmentB} style={{ flex: Math.max(v.vote[1], 0.02) }} />
+                  </div>
+                  <span className={styles.agentWeight}>{v.weight.toFixed(1)}</span>
+                </div>
+              ))}
+            </div>
+            <div className={styles.scoresRow}>
+              <span className={styles.scoresLabel}>scores</span>
+              <div className={styles.scoreBar}>
+                <div className={styles.scoreSegmentA} style={{ flex: 0.62 }} />
+                <div className={styles.scoreSegmentB} style={{ flex: 0.38 }} />
+              </div>
+              <span className={styles.scoresValue}>[0.62, 0.38]</span>
+            </div>
+          </div>
         </div>
       </section>
 
