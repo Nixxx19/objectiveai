@@ -84,6 +84,13 @@ FUNCTION_TO_MODULE: dict[str, str] = {
     "normalize_function_invention_recursive_for_tests": "functions.inventions.recursive.response.streaming",
     "generate_function_invention_recursive_chunk": "functions.inventions.recursive.response.streaming",
 
+    # Laboratory execution chunk operations
+    "laboratory_execution_chunk_merged": "laboratories.executions.response.streaming",
+    "laboratory_execution_chunk_normalized": "laboratories.executions.response.streaming",
+    "laboratory_execution_chunk_to_unary": "laboratories.executions.response.streaming",
+    "normalize_laboratory_execution_for_tests": "laboratories.executions.response.streaming",
+    "generate_laboratory_execution_chunk": "laboratories.executions.response.streaming",
+
     # Function profile computation chunk operations
     "function_profile_computation_chunk_merged": "functions.profiles.computations.response.streaming",
     "function_profile_computation_chunk_normalized": "functions.profiles.computations.response.streaming",
