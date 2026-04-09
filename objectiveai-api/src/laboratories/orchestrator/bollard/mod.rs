@@ -37,7 +37,7 @@ impl objectiveai::error::StatusError for Error {
 impl<CTXEXT: Send + Sync + 'static> super::Orchestrator<CTXEXT> for Orchestrator {
     type Error = Error;
 
-    fn spawn_builders(
+    fn spawn_containers(
         &self,
         _ctx: &ctx::Context<CTXEXT, impl ctx::persistent_cache::PersistentCacheClient>,
         image: &str,
@@ -75,7 +75,7 @@ impl<CTXEXT: Send + Sync + 'static> super::Orchestrator<CTXEXT> for Orchestrator
         }
     }
 
-    fn cleanup(
+    fn cleanup_containers(
         &self,
         _ctx: &ctx::Context<CTXEXT, impl ctx::persistent_cache::PersistentCacheClient>,
         execution_id: &str,

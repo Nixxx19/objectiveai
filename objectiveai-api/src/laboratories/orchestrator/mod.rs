@@ -19,7 +19,7 @@ pub trait Orchestrator<CTXEXT>: Send + Sync + 'static {
     /// Each binary in `binaries` is uploaded and executed inside every builder
     /// with the given `env` environment variables. Returns one MCP server URL
     /// per builder, in order.
-    fn spawn_builders(
+    fn spawn_containers(
         &self,
         ctx: &ctx::Context<CTXEXT, impl ctx::persistent_cache::PersistentCacheClient>,
         image: &str,
@@ -32,7 +32,7 @@ pub trait Orchestrator<CTXEXT>: Send + Sync + 'static {
     /// Clean up all builder environments for the given execution.
     ///
     /// Implementations should be idempotent (safe to call multiple times).
-    fn cleanup(
+    fn cleanup_containers(
         &self,
         ctx: &ctx::Context<CTXEXT, impl ctx::persistent_cache::PersistentCacheClient>,
         execution_id: &str,

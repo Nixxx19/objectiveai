@@ -139,7 +139,7 @@ where
         let binaries: &[(&str, &[u8])] = &[("objectiveai-mcp", super::mcp_binary::MCP_BINARY)];
         #[cfg(not(feature = "orchestrator-bollard"))]
         let binaries: &[(&str, &[u8])] = &[];
-        let orchestrator_fut = self.orchestrator.spawn_builders(
+        let orchestrator_fut = self.orchestrator.spawn_containers(
             &ctx,
             &request.docker_image,
             request.builder_agents.len(),
@@ -350,7 +350,7 @@ where
                 let cctx = cleanup_ctx.clone();
                 let eid = id.clone();
                 let num = request.builder_agents.len();
-                tokio::spawn(async move { orch.cleanup(&cctx, &eid, num).await });
+                tokio::spawn(async move { orch.cleanup_containers(&cctx, &eid, num).await });
             }
             viewer_client.send_laboratory_execution_continue(viewer_ctx.clone(), final_chunk.clone());
             yield final_chunk;
