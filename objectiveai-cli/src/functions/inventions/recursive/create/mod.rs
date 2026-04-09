@@ -158,7 +158,7 @@ impl Commands {
         let log_writer = objectiveai::filesystem::logs::LogsClient::new(cli_config.config_base_dir.as_deref())
             .write_function_invention_recursive();
 
-        crate::api::run(|http_client| async move {
+        crate::api::run(Box::new(|http_client| Box::pin(async move {
             let stream = objectiveai::functions::inventions::recursive::create_function_invention_recursive_streaming(
                 &http_client, request,
             ).await?;
@@ -199,6 +199,6 @@ impl Commands {
                 .collect();
 
             Ok(serde_json::to_string(&results).unwrap())
-        }, true).await
+        })), true).await
     }
 }

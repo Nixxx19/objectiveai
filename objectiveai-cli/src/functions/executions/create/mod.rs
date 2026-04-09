@@ -199,7 +199,7 @@ impl Commands {
         let log_writer = objectiveai::filesystem::logs::LogsClient::new(cli_config.config_base_dir.as_deref())
             .write_function_execution();
 
-        crate::api::run(|http_client| async move {
+        crate::api::run(Box::new(|http_client| Box::pin(async move {
             let stream = objectiveai::functions::executions::create_function_execution_streaming(
                 &http_client, params,
             ).await?;
@@ -238,6 +238,6 @@ impl Commands {
 
             let result = ExecutionResult { output, errors };
             Ok(serde_json::to_string(&result).unwrap())
-        }, true).await
+        })), true).await
     }
 }

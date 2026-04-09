@@ -68,7 +68,7 @@ pub async fn handle(args: CreateArgs, cli_config: &crate::Config) -> Result<crat
         .write_laboratory_execution();
 
     crate::api::run(
-        move |http_client| async move {
+        Box::new(move |http_client| Box::pin(async move {
             let stream =
                 objectiveai::laboratories::executions::create_laboratory_execution_streaming(
                     &http_client, params,
@@ -166,7 +166,7 @@ pub async fn handle(args: CreateArgs, cli_config: &crate::Config) -> Result<crat
                 .collect();
 
             Ok(serde_json::to_string(&results).unwrap())
-        },
+        })),
         true,
     )
     .await

@@ -83,7 +83,7 @@ impl Commands {
         let log_writer = objectiveai::filesystem::logs::LogsClient::new(cli_config.config_base_dir.as_deref())
             .write_agent_completion();
 
-        crate::api::run(|http_client| async move {
+        crate::api::run(Box::new(|http_client| Box::pin(async move {
             let stream = objectiveai::agent::completions::create_agent_completion_streaming(
                 &http_client, params,
             ).await?;
@@ -132,6 +132,6 @@ impl Commands {
                 .unwrap_or_default();
 
             Ok(content)
-        }, true).await
+        })), true).await
     }
 }
