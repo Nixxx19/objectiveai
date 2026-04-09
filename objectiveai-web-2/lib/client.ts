@@ -1,4 +1,5 @@
-const API_BASE = "https://api.objective-ai.io";
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE ?? "https://api.objective-ai.io";
 
 /** Fetch JSON from the ObjectiveAI API */
 export async function apiFetch<T>(path: string): Promise<T> {

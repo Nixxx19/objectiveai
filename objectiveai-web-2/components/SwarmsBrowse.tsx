@@ -43,16 +43,15 @@ export function SwarmsBrowse() {
     );
   }
 
-  if (error) {
+  if (error || swarms.length === 0) {
     return (
-      <div className={styles.error} role="alert">
-        <span>unable to load swarms</span>
-        <button
-          onClick={() => window.location.reload()}
-          className={styles.retryBtn}
-        >
-          try again
-        </button>
+      <div className={styles.browse}>
+        <div className={styles.pageHeader}>
+          <h2 className={styles.pageTitle}>swarms</h2>
+        </div>
+        <div className={styles.loading}>
+          swarms are created at execution time
+        </div>
       </div>
     );
   }

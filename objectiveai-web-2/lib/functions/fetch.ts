@@ -12,14 +12,20 @@ const LIST_TTL = 60_000; // 1 minute
 /** Immutable cache for GitHub definitions (keyed by commit SHA) */
 const defCache = new Map<string, FunctionDefinition>();
 
-/** Fetch the function list from the ObjectiveAI API (cached) */
+/** Fetch the function list from the API (cached). Returns empty on failure. */
 export async function fetchFunctionList(): Promise<FunctionListItem[]> {
   if (listCache && Date.now() - listCache.ts < LIST_TTL) {
     return listCache.data;
   }
-  const data = await apiFetch<{ data: FunctionListItem[] }>("/functions");
-  listCache = { data: data.data, ts: Date.now() };
-  return listCache.data;
+  try {
+    const data = await apiFetch<{ data: FunctionListItem[] }>("/functions");
+    listCache = { data: data.data, ts: Date.now() };
+    return listCache.data;
+  } catch {
+    // API unreachable — return empty, don't show error
+    listCache = { data: [], ts: Date.now() };
+    return [];
+  }
 }
 
 /** Fetch a function.json definition directly from GitHub (cached by commit) */

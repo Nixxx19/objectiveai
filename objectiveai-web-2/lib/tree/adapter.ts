@@ -1,7 +1,10 @@
 import type { FunctionDefinition, TaskDefinition } from "@/lib/functions/types";
+import type { ProfileMeta } from "@/lib/profiles/types";
 import type {
   InputFunctionDefinition,
   InputTaskDefinition,
+  InputProfile,
+  InputProfileTask,
 } from "@objectiveai/function-tree";
 
 /** Normalize type strings like "alpha.scalar.function" → "scalar.function" */
@@ -52,4 +55,49 @@ export function adaptSubFunctions(
     out.set(key, adaptDefinition(def));
   }
   return out;
+}
+
+/** Convert a ProfileMeta to InputProfile, replicating ensemble for each task (auto profiles) */
+export function adaptProfile(meta: ProfileMeta, taskCount: number): InputProfile {
+  if (meta.kind === "tasks" && meta.taskConfigs.length > 0) {
+    return {
+      description: meta.description,
+      profile: meta.taskWeights,
+      tasks: meta.taskConfigs.map((tc): InputProfileTask => ({
+        ensemble: {
+          llms: tc.llms.map((l) => ({
+            model: l.model,
+            output_mode: l.outputMode,
+            top_logprobs: l.topLogprobs ?? undefined,
+            count: l.count,
+          })),
+        },
+        profile: tc.weights,
+      })),
+    };
+  }
+
+  // Auto profile: same ensemble replicated for each task
+  const ensembleLlms = meta.llms.map((l) => ({
+    model: l.model,
+    output_mode: l.outputMode,
+    top_logprobs: l.topLogprobs ?? undefined,
+    count: l.count,
+  }));
+
+  const taskEntry: InputProfileTask = {
+    ensemble: { llms: ensembleLlms },
+    profile: meta.weights,
+  };
+
+  // Equal task weights if not specified
+  const taskWeights = taskCount > 0
+    ? Array.from({ length: taskCount }, () => 1 / taskCount)
+    : [];
+
+  return {
+    description: meta.description,
+    profile: taskWeights,
+    tasks: Array.from({ length: taskCount }, () => taskEntry),
+  };
 }

@@ -51,7 +51,25 @@ const DEFAULT_PROFILE_SLUGS = [
 let defaultCache: { data: ProfileMeta[]; ts: number } | null = null;
 const CACHE_TTL = 60_000;
 
-/** Fetch the 5 official default profiles directly by URL */
+/** Fetch a profile directly from GitHub (raw.githubusercontent.com) */
+async function fetchProfileFromGitHub(owner: string, repo: string): Promise<RawAutoProfile> {
+  const url = `https://raw.githubusercontent.com/${owner}/${repo}/main/profile.json`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`GitHub ${url}: ${res.status}`);
+  const data = await res.json();
+  return { ...data, remote: "github", owner, repository: repo, commit: "main" };
+}
+
+/** Fetch a raw profile, trying API first then falling back to GitHub */
+async function fetchRawProfile(owner: string, repo: string): Promise<RawProfile> {
+  try {
+    return await apiFetch<RawProfile>(`/functions/profiles/github/${owner}/${repo}`);
+  } catch {
+    return fetchProfileFromGitHub(owner, repo);
+  }
+}
+
+/** Fetch the 5 official default profiles */
 export async function fetchDefaultProfiles(): Promise<ProfileMeta[]> {
   if (defaultCache && Date.now() - defaultCache.ts < CACHE_TTL) {
     return defaultCache.data;
@@ -59,7 +77,7 @@ export async function fetchDefaultProfiles(): Promise<ProfileMeta[]> {
 
   const results = await Promise.allSettled(
     DEFAULT_PROFILE_SLUGS.map((slug) =>
-      apiFetch<RawProfile>(`/functions/profiles/github/ObjectiveAI/${slug}`)
+      fetchRawProfile("ObjectiveAI", slug)
         .then((raw) => parseAutoProfile(raw as RawAutoProfile, slug))
     )
   );
@@ -114,6 +132,12 @@ function buildTiers(llms: ProfileLlm[], weights: number[]): TierBreakdown {
   }
 
   return tiers;
+}
+
+/** Fetch a single profile by owner/repository slug */
+export async function fetchProfileBySlug(owner: string, repository: string): Promise<ProfileMeta> {
+  const raw = await fetchRawProfile(owner, repository);
+  return parseAutoProfile(raw as RawAutoProfile, repository.replace("profile-", ""));
 }
 
 function parseAutoProfile(raw: RawAutoProfile, slug: string): ProfileMeta {

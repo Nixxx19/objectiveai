@@ -48,8 +48,17 @@ export function FunctionsBrowse() {
     );
   }
 
-  if (error) {
-    return <div className={styles.error} role="alert">unable to reach api</div>;
+  if (error || functions.length === 0) {
+    return (
+      <div className={styles.browse}>
+        <div className={styles.pageHeader}>
+          <h1 className={styles.pageTitle}>functions</h1>
+        </div>
+        <div className={styles.loading}>
+          functions are registered via the api and loaded from github
+        </div>
+      </div>
+    );
   }
 
   return (

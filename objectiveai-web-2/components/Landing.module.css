@@ -263,6 +263,32 @@
   flex-shrink: 0;
 }
 
+.weightFader {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 36px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.weightFaderTrack {
+  width: 3px;
+  height: 16px;
+  background: var(--node-border);
+  border-radius: 1px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.weightFaderFill {
+  width: 100%;
+  border-radius: 1px;
+  transition: height 0.3s ease;
+}
+
 /* ── Scores ── */
 
 .scoresRow {

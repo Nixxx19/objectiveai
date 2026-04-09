@@ -31,20 +31,26 @@ export async function fetchAllSwarms(): Promise<SwarmMeta[]> {
     return swarmCache.data;
   }
 
-  const list = await apiFetch<EnsembleListResponse>("/ensembles");
+  try {
+    const list = await apiFetch<EnsembleListResponse>("/ensembles");
 
-  const results = await Promise.allSettled(
-    list.data.map((item) => resolveSwarm(item.id))
-  );
+    const results = await Promise.allSettled(
+      list.data.map((item) => resolveSwarm(item.id))
+    );
 
-  const swarms = results
-    .filter(
-      (r): r is PromiseFulfilledResult<SwarmMeta> => r.status === "fulfilled"
-    )
-    .map((r) => r.value);
+    const swarms = results
+      .filter(
+        (r): r is PromiseFulfilledResult<SwarmMeta> => r.status === "fulfilled"
+      )
+      .map((r) => r.value);
 
-  swarmCache = { data: swarms, ts: Date.now() };
-  return swarms;
+    swarmCache = { data: swarms, ts: Date.now() };
+    return swarms;
+  } catch {
+    // API unreachable — swarms require the API, return empty
+    swarmCache = { data: [], ts: Date.now() };
+    return [];
+  }
 }
 
 function parseAgent(llm: EnsembleLlmResponse): Agent {

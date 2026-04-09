@@ -75,7 +75,7 @@ export function Landing() {
         </div>
       </section>
 
-      <p className={styles.bridging}>lorem ipsum — collective satisficing across model boundaries</p>
+      <p className={styles.bridging}>your agent doesn't have to decide alone</p>
 
       {/* Execution comparison */}
       <section className={styles.execution}>
@@ -135,19 +135,34 @@ export function Landing() {
                 <span className={styles.voteTableColBar}>vote distribution</span>
                 <span className={styles.voteTableCol}>weight</span>
               </div>
-              {EXAMPLE_VOTES.map((v, i) => (
-                <div
-                  key={i}
-                  className={`${styles.agentRow} ${i === 0 ? styles.agentHighlight : ""}`}
-                >
-                  <span className={styles.agentModel}>{v.model}</span>
-                  <div className={styles.agentVoteBar}>
-                    <div className={styles.voteSegmentA} style={{ flex: Math.max(v.vote[0], 0.02) }} />
-                    <div className={styles.voteSegmentB} style={{ flex: Math.max(v.vote[1], 0.02) }} />
+              {EXAMPLE_VOTES.map((v, i) => {
+                const relWeight = v.weight; // max weight is 1.0
+                return (
+                  <div
+                    key={i}
+                    className={`${styles.agentRow} ${i === 0 ? styles.agentHighlight : ""}`}
+                    style={relWeight >= 0.8 ? { background: `rgba(217, 119, 6, ${relWeight * 0.04})` } : undefined}
+                  >
+                    <span className={styles.agentModel}>{v.model}</span>
+                    <div className={styles.agentVoteBar}>
+                      <div className={styles.voteSegmentA} style={{ flex: Math.max(v.vote[0], 0.02) }} />
+                      <div className={styles.voteSegmentB} style={{ flex: Math.max(v.vote[1], 0.02) }} />
+                    </div>
+                    <div className={styles.weightFader}>
+                      <div className={styles.weightFaderTrack}>
+                        <div
+                          className={styles.weightFaderFill}
+                          style={{
+                            height: `${relWeight * 100}%`,
+                            background: `rgba(217, 119, 6, ${0.3 + relWeight * 0.5})`,
+                          }}
+                        />
+                      </div>
+                      <span className={styles.agentWeight}>{v.weight.toFixed(1)}</span>
+                    </div>
                   </div>
-                  <span className={styles.agentWeight}>{v.weight.toFixed(1)}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
             <div className={styles.scoresRow}>
               <span className={styles.scoresLabel}>scores</span>
@@ -170,7 +185,7 @@ export function Landing() {
             <Link href="/functions" className={styles.sectionLink}>browse all</Link>
           </div>
           {!loaded.fn ? <SectionLoader /> : sortedFunctions.length === 0 ? (
-            <div className={styles.sectionEmpty}>unable to load</div>
+            <div className={styles.sectionEmpty}>functions are registered via the api — check github for examples</div>
           ) : (
             <div className={styles.directoryList}>
               {sortedFunctions.slice(0, 6).map((fn) => (
@@ -198,7 +213,7 @@ export function Landing() {
             <Link href="/swarms" className={styles.sectionLink}>browse all</Link>
           </div>
           {!loaded.sw ? <SectionLoader /> : sortedSwarms.length === 0 ? (
-            <div className={styles.sectionEmpty}>unable to load</div>
+            <div className={styles.sectionEmpty}>swarms are created at execution time</div>
           ) : (
             <div className={styles.directoryList}>
               {sortedSwarms.slice(0, 4).map((s) => (
@@ -222,7 +237,7 @@ export function Landing() {
             <Link href="/profiles" className={styles.sectionLink}>browse all</Link>
           </div>
           {!loaded.pr ? <SectionLoader /> : profiles.length === 0 ? (
-            <div className={styles.sectionEmpty}>unable to load</div>
+            <div className={styles.sectionEmpty}>profiles are loaded from github</div>
           ) : (
             <div className={styles.directoryList}>
               {profiles.map((p) => (

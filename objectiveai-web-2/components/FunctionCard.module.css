@@ -166,6 +166,97 @@
   margin-top: 8px;
 }
 
+/* ── Profile Info Card ── */
+
+.profileCard {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--node-border);
+  border-radius: var(--radius);
+  background: var(--ground-raised);
+}
+
+.profileCardHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.profileCardName {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--copper-mid);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.profileCardName:hover {
+  color: var(--copper-hot);
+}
+
+.profileCardBadge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--info-dim);
+}
+
+.profileCardDesc {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--info-dim);
+  margin: 0 0 6px;
+  line-height: 1.4;
+}
+
+.profileCardWeightBar {
+  display: flex;
+  height: 4px;
+  gap: 1px;
+  border-radius: 1px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.profileCardWeightSeg {
+  background: var(--copper-mid);
+  border-radius: 1px;
+  min-width: 2px;
+}
+
+.profileCardTiers {
+  display: flex;
+  gap: 10px;
+}
+
+.profileCardTier {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--info-dim);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.profileCardTierDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  background: var(--info-dim);
+}
+
+.profileCardTierDot[data-tier="frontier"] {
+  background: var(--copper-hot);
+}
+
+.profileCardTierDot[data-tier="mid"] {
+  background: var(--copper-mid);
+}
+
+.profileCardTierDot[data-tier="budget"] {
+  background: var(--copper-dim);
+}
+
 /* ── Input Schema ── */
 
 .schema {
