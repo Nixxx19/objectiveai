@@ -188,7 +188,7 @@ function processStructuralVCTask(
     y: 0,
     width: SIZES["vector-completion"].width,
     // Taller when prompt preview is present
-    height: hasPrompt ? 85 : SIZES["vector-completion"].height,
+    height: hasPrompt ? SIZES["vector-completion"].height + 15 : SIZES["vector-completion"].height,
     state: "pending",
     edgeWeight: null,
     data: {

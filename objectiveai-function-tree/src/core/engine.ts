@@ -6,6 +6,7 @@ import type {
   InputFunctionDefinition,
   InputProfile,
   VectorCompletionNodeData,
+  EnsembleLlmNodeData,
 } from "../types";
 import { DEFAULT_CONFIG } from "../types";
 import { buildTree, applyProfileWeights } from "./tree-data";
@@ -101,12 +102,20 @@ export class FunctionTreeEngine {
     // Apply profile weights to edges (normalizes LLM weights + adds task weights)
     if (newTree) {
       applyProfileWeights(newTree, profile);
+
+      // Enrich LLM nodes with profile metadata (outputMode, topLogprobs)
+      if (profile?.tasks) {
+        this.enrichLlmNodesFromProfile(newTree, profile);
+      }
     }
 
     if (!newTree) {
-      this.treeData = null;
-      this.prevNodes = null;
-      this.requestRender();
+      // Don't clear structural tree when execution data is null
+      if (this.treeData?.mode !== "structural") {
+        this.treeData = null;
+        this.prevNodes = null;
+        this.requestRender();
+      }
       return;
     }
 
@@ -121,8 +130,8 @@ export class FunctionTreeEngine {
           const execData = node.data as VectorCompletionNodeData;
           execData.promptPreview = prevData.promptPreview;
           execData.promptMessages = prevData.promptMessages;
-          // Increase height to match structural node
-          if (node.height < 85) node.height = 85;
+          // Increase height to accommodate prompt (add 15px for prompt line)
+          node.height += 15;
         }
       }
     }
@@ -257,6 +266,35 @@ export class FunctionTreeEngine {
     }
     this.interaction.destroy();
     this.animation.reset();
+  }
+
+  /** Enrich ensemble-llm nodes with metadata from profile (outputMode, topLogprobs). */
+  private enrichLlmNodesFromProfile(tree: TreeData, profile: InputProfile): void {
+    const root = tree.nodes.get(tree.rootId);
+    if (!root) return;
+
+    for (let ti = 0; ti < root.children.length && ti < (profile.tasks?.length ?? 0); ti++) {
+      const taskNode = tree.nodes.get(root.children[ti]);
+      if (!taskNode) continue;
+
+      const profileTask = profile.tasks[ti];
+      if (!profileTask?.ensemble?.llms) continue;
+
+      // Find LLM children of this task node
+      let llmIdx = 0;
+      for (const childId of taskNode.children) {
+        const child = tree.nodes.get(childId);
+        if (!child || child.kind !== "ensemble-llm") continue;
+
+        const llmDef = profileTask.ensemble.llms[llmIdx];
+        if (llmDef) {
+          const llmData = child.data as EnsembleLlmNodeData;
+          if (llmDef.output_mode) llmData.outputMode = llmDef.output_mode;
+          if (llmDef.top_logprobs) llmData.topLogprobs = llmDef.top_logprobs;
+        }
+        llmIdx++;
+      }
+    }
   }
 
   // -- Internal -------------------------------------------------------------

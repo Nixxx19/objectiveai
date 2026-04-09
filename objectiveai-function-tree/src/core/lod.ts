@@ -21,6 +21,8 @@ export interface LodParams {
   showStreamingText: boolean;
   /** Whether to render score bars. */
   showScoreBars: boolean;
+  /** Whether to render per-response detail bars and sparklines (full LOD only). */
+  showDetailBars: boolean;
   /** Maximum label length (chars). 0 = full label. */
   maxLabelLength: number;
   /** Node corner radius. */
@@ -39,6 +41,7 @@ export function getLodParams(level: LodLevel): LodParams {
         showLabels: true,
         showStreamingText: true,
         showScoreBars: true,
+        showDetailBars: true,
         maxLabelLength: 0,
         cornerRadius: 4,
         showEdges: true,
@@ -50,6 +53,7 @@ export function getLodParams(level: LodLevel): LodParams {
         showLabels: true,
         showStreamingText: false,
         showScoreBars: false,
+        showDetailBars: false,
         maxLabelLength: 12,
         cornerRadius: 3,
         showEdges: true,
@@ -61,6 +65,7 @@ export function getLodParams(level: LodLevel): LodParams {
         showLabels: false,
         showStreamingText: false,
         showScoreBars: false,
+        showDetailBars: false,
         maxLabelLength: 0,
         cornerRadius: 0,
         showEdges: false,

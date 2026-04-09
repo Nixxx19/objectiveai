@@ -27,14 +27,14 @@ export interface RenderTheme {
 const MONO_FONT = '"JetBrains Mono", "Fira Code", "SF Mono", "Cascadia Code", "Consolas", monospace';
 
 const LIGHT_THEME: RenderTheme = {
-  bg: "#EDEDF2",
-  text: "#1B1B1B",
-  textSecondary: "#6B6B7B",
-  accent: "#6B5CFF",
-  nodeBg: "#F8F8FA",
-  nodeBorder: "#D1D1D9",
-  nodeSelectedBorder: "#6B5CFF",
-  edgeColor: "#B0B0BE",
+  bg: "#faf8f5",
+  text: "#1c1917",
+  textSecondary: "#78716c",  // --copper-dim
+  accent: "#d97706",          // --copper-mid
+  nodeBg: "#f5f0eb",
+  nodeBorder: "#d6d3d1",
+  nodeSelectedBorder: "#d97706",
+  edgeColor: "#a8a29e",       // --info-mid
   edgeWidth: 1,
   font: `13px ${MONO_FONT}`,
   fontSmall: `11px ${MONO_FONT}`,
@@ -42,14 +42,14 @@ const LIGHT_THEME: RenderTheme = {
 };
 
 const DARK_THEME: RenderTheme = {
-  bg: "#1B1B1B",
-  text: "#EDEDF2",
-  textSecondary: "#9B9BAB",
-  accent: "#6B5CFF",
-  nodeBg: "#232326",
-  nodeBorder: "#3A3A42",
-  nodeSelectedBorder: "#6B5CFF",
-  edgeColor: "#4A4A56",
+  bg: "#1c1917",           // --ground-surface (warm stone)
+  text: "#d6d3d1",          // --info-bright
+  textSecondary: "#78716c", // --copper-dim (brighter than info-dim for canvas readability)
+  accent: "#d97706",        // --copper-mid
+  nodeBg: "#141210",        // --ground-raised
+  nodeBorder: "#292524",    // --node-border
+  nodeSelectedBorder: "#d97706", // --copper-mid
+  edgeColor: "#78716c",     // --copper-dim
   edgeWidth: 1,
   font: `13px ${MONO_FONT}`,
   fontSmall: `11px ${MONO_FONT}`,
@@ -154,16 +154,16 @@ export class TreeRenderer {
       if (node.children.length === 0) continue;
 
       const parentState = animation?.getInterpolated(node.id, now);
-      const px = (parentState?.x ?? node.x) + node.width / 2;
-      const py = (parentState?.y ?? node.y) + node.height;
+      const px = Math.round((parentState?.x ?? node.x) + node.width / 2) + 0.5;
+      const py = Math.round((parentState?.y ?? node.y) + node.height) + 0.5;
 
       for (const childId of node.children) {
         const child = nodes.get(childId);
         if (!child) continue;
 
         const childState = animation?.getInterpolated(childId, now);
-        const cx = (childState?.x ?? child.x) + child.width / 2;
-        const cy = childState?.y ?? child.y;
+        const cx = Math.round((childState?.x ?? child.x) + child.width / 2) + 0.5;
+        const cy = Math.round(childState?.y ?? child.y) + 0.5;
 
         // Viewport culling: skip if both endpoints are off-screen
         if (!this.edgeVisible(px, py, cx, cy, viewport, canvasWidth, canvasHeight)) {
@@ -254,8 +254,8 @@ export class TreeRenderer {
 
     for (const node of nodes.values()) {
       const state = animation?.getInterpolated(node.id, now);
-      const x = state?.x ?? node.x;
-      const y = state?.y ?? node.y;
+      const x = Math.round(state?.x ?? node.x);
+      const y = Math.round(state?.y ?? node.y);
       const opacity = state?.opacity ?? 1;
 
       if (!viewport.isVisible(x, y, node.width, node.height, canvasWidth, canvasHeight)) {
@@ -294,8 +294,9 @@ export class TreeRenderer {
 
     for (const node of nodes.values()) {
       const state = animation?.getInterpolated(node.id, now);
-      const x = state?.x ?? node.x;
-      const y = state?.y ?? node.y;
+      // Round to integer pixels for crisp text and shape edges
+      const x = Math.round(state?.x ?? node.x);
+      const y = Math.round(state?.y ?? node.y);
       const opacity = state?.opacity ?? 1;
 
       if (!viewport.isVisible(x, y, node.width, node.height, canvasWidth, canvasHeight)) {
@@ -374,6 +375,9 @@ export class TreeRenderer {
       ctx.fillText(label, x + padding, y + 22, node.width - padding * 2);
     }
 
+    const maxW = node.width - padding * 2;
+    let cursorY = y + 30; // after label
+
     // Root node with output: prominent score display
     if (isRoot && data.output !== null && params.showScoreBars) {
       if (typeof data.output === "number") {
@@ -383,26 +387,27 @@ export class TreeRenderer {
         // Large score text
         ctx.font = `bold 22px ${MONO_FONT}`;
         ctx.fillStyle = color;
-        ctx.fillText(`${pct.toFixed(1)}%`, x + padding, y + 52, node.width - padding * 2);
+        ctx.fillText(`${pct.toFixed(1)}%`, x + padding, cursorY + 18, maxW);
+        cursorY += 26;
 
         // Score bar
-        const barY = y + 62;
-        const barWidth = node.width - padding * 2;
         const barHeight = 5;
         ctx.fillStyle = theme.nodeBorder;
-        this.drawRoundedRectFill(x + padding, barY, barWidth, barHeight, 2.5);
+        this.drawRoundedRectFill(x + padding, cursorY, maxW, barHeight, 2.5);
         ctx.fillStyle = color;
-        this.drawRoundedRectFill(x + padding, barY, barWidth * data.output, barHeight, 2.5);
+        this.drawRoundedRectFill(x + padding, cursorY, maxW * data.output, barHeight, 2.5);
+        cursorY += barHeight + 6;
 
-        // Task count below bar
+        // Task count
         if (params.showLabels) {
           ctx.font = theme.fontSmall;
           ctx.fillStyle = theme.textSecondary;
           const typeLabel = data.functionType ? `${data.functionType} · ` : "";
-          ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding, y + 82, node.width - padding * 2);
+          ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding, cursorY + 8, maxW);
+          cursorY += 14;
         }
       } else {
-        // Vector output — show top scores
+        // Vector output — show ALL scores as mini bars (not just top 3)
         const scores = data.output as number[];
         const maxIdx = scores.indexOf(Math.max(...scores));
         const topScore = scores[maxIdx];
@@ -410,57 +415,93 @@ export class TreeRenderer {
 
         ctx.font = `bold 18px ${MONO_FONT}`;
         ctx.fillStyle = color;
-        ctx.fillText(`#${maxIdx + 1} · ${(topScore * 100).toFixed(1)}%`, x + padding, y + 48, node.width - padding * 2);
+        ctx.fillText(`#${maxIdx + 1} · ${(topScore * 100).toFixed(1)}%`, x + padding, cursorY + 14, maxW);
+        cursorY += 22;
 
-        // Show up to 3 scores as mini bars
-        const sorted = scores.map((s, i) => ({ s, i })).sort((a, b) => b.s - a.s).slice(0, 3);
-        const barWidth = node.width - padding * 2;
-        sorted.forEach((item, rank) => {
-          const barY = y + 56 + rank * 12;
+        // Show all scores as mini bars (cap at 6 for space)
+        const visibleCount = Math.min(scores.length, 6);
+        const sorted = scores.map((s, i) => ({ s, i })).sort((a, b) => b.s - a.s).slice(0, visibleCount);
+        for (let si = 0; si < sorted.length; si++) {
           const barHeight = 4;
           ctx.fillStyle = theme.nodeBorder;
-          this.drawRoundedRectFill(x + padding, barY, barWidth, barHeight, 2);
-          ctx.fillStyle = scoreColor(item.s);
-          this.drawRoundedRectFill(x + padding, barY, barWidth * item.s, barHeight, 2);
-        });
+          this.drawRoundedRectFill(x + padding, cursorY, maxW, barHeight, 2);
+          ctx.fillStyle = scoreColor(sorted[si].s);
+          this.drawRoundedRectFill(x + padding, cursorY, maxW * sorted[si].s, barHeight, 2);
+          cursorY += barHeight + 4;
+        }
       }
-    } else if (data.output !== null && params.showScoreBars) {
-      // Non-root: compact output
-      const outputStr = typeof data.output === "number"
-        ? `${(data.output * 100).toFixed(1)}%`
-        : `[${(data.output as number[]).map(v => v.toFixed(2)).join(", ")}]`;
 
-      ctx.font = theme.font;
-      ctx.fillStyle = typeof data.output === "number"
-        ? scoreColor(data.output)
-        : theme.textSecondary;
-      ctx.fillText(outputStr, x + padding, y + 42, node.width - padding * 2);
+      // Reasoning indicator (root only)
+      if (data.reasoning && params.showLabels) {
+        ctx.font = `bold 9px ${MONO_FONT}`;
+        ctx.fillStyle = theme.accent;
+        ctx.fillText("R", x + padding, cursorY + 8);
+        ctx.font = `9px ${MONO_FONT}`;
+        ctx.fillStyle = theme.textSecondary;
+        ctx.fillText(truncate(data.reasoning, 28), x + padding + 12, cursorY + 8, maxW - 12);
+        cursorY += 12;
+      }
+
+      // Execution ID (root only)
+      if (data.executionId && params.showDetailBars) {
+        ctx.font = `9px ${MONO_FONT}`;
+        ctx.fillStyle = theme.textSecondary;
+        ctx.fillText(`id:${truncate(data.executionId, 18)}`, x + padding, cursorY + 8, maxW);
+      }
+
+    } else if (data.output !== null && params.showScoreBars) {
+      // Non-root with output
+      if (typeof data.output === "number") {
+        ctx.font = theme.font;
+        ctx.fillStyle = scoreColor(data.output);
+        ctx.fillText(`${(data.output * 100).toFixed(1)}%`, x + padding, cursorY + 10, maxW);
+        cursorY += 16;
+
+        // Mini score bar
+        const barHeight = 4;
+        ctx.fillStyle = theme.nodeBorder;
+        this.drawRoundedRectFill(x + padding, cursorY, maxW, barHeight, 2);
+        ctx.fillStyle = scoreColor(data.output);
+        this.drawRoundedRectFill(x + padding, cursorY, maxW * data.output, barHeight, 2);
+        cursorY += barHeight + 6;
+      } else {
+        // Non-root vector: show all mini bars
+        const scores = data.output as number[];
+        const visibleCount = Math.min(scores.length, 4);
+        const sorted = scores.map((s, i) => ({ s, i })).sort((a, b) => b.s - a.s).slice(0, visibleCount);
+        for (let si = 0; si < sorted.length; si++) {
+          const barHeight = 4;
+          ctx.fillStyle = theme.nodeBorder;
+          this.drawRoundedRectFill(x + padding, cursorY, maxW, barHeight, 2);
+          ctx.fillStyle = scoreColor(sorted[si].s);
+          this.drawRoundedRectFill(x + padding, cursorY, maxW * sorted[si].s, barHeight, 2);
+          cursorY += barHeight + 3;
+        }
+        cursorY += 3;
+      }
 
       // Task count + function type
       if (params.showLabels) {
         ctx.font = theme.fontSmall;
         ctx.fillStyle = theme.textSecondary;
         const typeLabel = data.functionType ? `${data.functionType} · ` : "";
-        ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding, y + 60, node.width - padding * 2);
+        ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding, cursorY + 8, maxW);
       }
     } else if (data.ownerRepo && params.showLabels) {
       ctx.font = theme.fontSmall;
       ctx.fillStyle = theme.textSecondary;
-      ctx.fillText(data.ownerRepo, x + padding, y + 42, node.width - padding * 2);
+      ctx.fillText(data.ownerRepo, x + padding, cursorY + 10, maxW);
+      cursorY += 16;
 
-      // Task count + function type
-      if (params.showLabels) {
-        ctx.font = theme.fontSmall;
-        ctx.fillStyle = theme.textSecondary;
-        const typeLabel = data.functionType ? `${data.functionType} · ` : "";
-        ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding, y + 60, node.width - padding * 2);
-      }
-    } else if (params.showLabels) {
-      // No output, no ownerRepo: show task count
       ctx.font = theme.fontSmall;
       ctx.fillStyle = theme.textSecondary;
       const typeLabel = data.functionType ? `${data.functionType} · ` : "";
-      ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding, y + 42, node.width - padding * 2);
+      ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding, cursorY + 8, maxW);
+    } else if (params.showLabels) {
+      ctx.font = theme.fontSmall;
+      ctx.fillStyle = theme.textSecondary;
+      const typeLabel = data.functionType ? `${data.functionType} · ` : "";
+      ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding, cursorY + 10, maxW);
     }
   }
 
@@ -473,9 +514,9 @@ export class TreeRenderer {
     const ctx = this.ctx;
     const data = node.data as VectorCompletionNodeData;
     const padding = 10;
-    const hasPrompt = !!data.promptPreview;
-    // Vertical offset when prompt preview is shown (shifts score bar + status down)
-    const promptOffset = hasPrompt ? 15 : 0;
+    const maxW = node.width - padding * 2;
+    const bottom = y + node.height; // overflow guard
+    let cy = y + 8; // cursorY — tracks vertical position
 
     // Label
     if (params.showLabels) {
@@ -484,59 +525,97 @@ export class TreeRenderer {
       const label = params.maxLabelLength > 0
         ? truncate(node.label, params.maxLabelLength)
         : node.label;
-      ctx.fillText(label, x + padding, y + 20, node.width - padding * 2);
+      ctx.fillText(label, x + padding, cy + 12, maxW);
+      cy += 18;
     }
 
-    // Prompt preview (below label, small muted italic text)
-    if (hasPrompt && params.showLabels) {
+    // Prompt preview
+    if (data.promptPreview && params.showLabels) {
       ctx.font = `italic 10px ${MONO_FONT}`;
       ctx.fillStyle = theme.textSecondary;
-      const maxW = node.width - padding * 2;
-      const preview = truncate(data.promptPreview!, 50);
-      ctx.fillText(preview, x + padding, y + 33, maxW);
+      ctx.fillText(truncate(data.promptPreview, 60), x + padding, cy + 10, maxW);
+      cy += 15;
     }
 
-    // Score bar
-    if (data.scores && data.scores.length > 0 && params.showScoreBars) {
+    // Score bars
+    if (data.scores && data.scores.length > 0 && params.showDetailBars) {
+      // Full LOD: per-response bars with labels
+      const barH = 8;
+      const barGap = 4;
+      const barW = maxW * 0.55;
+      const labelX = x + padding + barW + 6;
+      const labelW = maxW * 0.45 - 6;
+      const count = Math.min(data.scores.length, 4);
+
+      ctx.font = `10px ${MONO_FONT}`;
+      cy += 4;
+
+      for (let i = 0; i < count; i++) {
+        if (cy + barH > bottom - 16) break; // leave room for status
+        const score = data.scores[i];
+
+        ctx.fillStyle = theme.nodeBorder;
+        this.drawRoundedRectFill(x + padding, cy, barW, barH, 3);
+        ctx.fillStyle = scoreColor(score);
+        this.drawRoundedRectFill(x + padding, cy, barW * score, barH, 3);
+
+        const lbl = data.responses?.[i] ? truncate(data.responses[i], 10) : `#${i + 1}`;
+        ctx.fillStyle = theme.textSecondary;
+        ctx.fillText(`${lbl} ${(score * 100).toFixed(1)}%`, labelX, cy + barH - 1, labelW);
+        cy += barH + barGap;
+      }
+
+      if (data.scores.length > 4 && cy + 10 < bottom - 16) {
+        ctx.fillStyle = theme.textSecondary;
+        ctx.fillText(`+${data.scores.length - 4} more`, x + padding, cy + 8, maxW);
+        cy += 12;
+      }
+    } else if (data.scores && data.scores.length > 0 && params.showScoreBars) {
+      // Simplified LOD: single max-score bar
       const maxScore = Math.max(...data.scores);
-      const barY = y + 32 + promptOffset;
-      const barWidth = node.width - padding * 2;
-      const barHeight = 6;
-
-      // Background
+      cy += 4;
       ctx.fillStyle = theme.nodeBorder;
-      this.drawRoundedRectFill(x + padding, barY, barWidth, barHeight, 3);
-
-      // Fill
+      this.drawRoundedRectFill(x + padding, cy, maxW, 6, 3);
       ctx.fillStyle = scoreColor(maxScore);
-      this.drawRoundedRectFill(x + padding, barY, barWidth * maxScore, barHeight, 3);
+      this.drawRoundedRectFill(x + padding, cy, maxW * maxScore, 6, 3);
+      cy += 10;
     }
 
-    // Vote count / status / structural info
-    if (params.showLabels) {
+    // Status line
+    if (params.showLabels && cy + 12 <= bottom) {
       ctx.font = theme.fontSmall;
-      const statusY = y + 56 + promptOffset;
+      cy += 6;
+
       if (data.voteCount > 0) {
         ctx.fillStyle = theme.textSecondary;
-        ctx.fillText(`${data.voteCount} LLMs`, x + padding, statusY, node.width - padding * 2);
+        ctx.fillText(`${data.voteCount} LLMs`, x + padding, cy + 4, maxW);
       } else if (data.responseCount != null && data.responseCount > 0) {
-        // Structural mode: show response count
         ctx.fillStyle = theme.textSecondary;
-        ctx.fillText(`${data.responseCount} responses`, x + padding, statusY, node.width - padding * 2);
+        ctx.fillText(`${data.responseCount} responses`, x + padding, cy + 4, maxW);
+      } else if (node.state === "streaming") {
+        const text = this.extractStreamingText(data);
+        ctx.fillStyle = theme.accent;
+        ctx.fillText(text ? truncate(text, 30) + "\u258C" : "Running\u2026", x + padding, cy + 4, maxW);
+      } else if (node.state === "error") {
+        ctx.fillStyle = SCORE_COLORS.error;
+        ctx.fillText("Error", x + padding, cy + 4, maxW);
       } else if (node.state === "pending") {
         ctx.fillStyle = theme.nodeBorder;
-        ctx.fillText("Pending", x + padding, statusY, node.width - padding * 2);
-      } else if (node.state === "streaming") {
-        ctx.fillStyle = theme.accent;
-        ctx.fillText("Running\u2026", x + padding, statusY, node.width - padding * 2);
-      } else if (node.state === "error") {
-        ctx.fillStyle = SCORE_COLORS.red;
-        ctx.fillText("Error", x + padding, statusY, node.width - padding * 2);
+        ctx.fillText("Pending", x + padding, cy + 4, maxW);
       } else {
         ctx.fillStyle = theme.textSecondary;
-        ctx.fillText("No votes", x + padding, statusY, node.width - padding * 2);
+        ctx.fillText("No votes", x + padding, cy + 4, maxW);
       }
     }
+  }
+
+  /** Extract latest streaming text from completions array. */
+  private extractStreamingText(data: VectorCompletionNodeData): string | null {
+    if (!data.completions || data.completions.length === 0) return null;
+    const last = data.completions[data.completions.length - 1];
+    return last?.choices?.[0]?.delta?.content
+      || last?.choices?.[0]?.message?.content
+      || null;
   }
 
   private drawEnsembleLlmNode(
@@ -548,27 +627,58 @@ export class TreeRenderer {
     const ctx = this.ctx;
     const data = node.data as EnsembleLlmNodeData;
     const padding = 8;
+    const maxW = node.width - padding * 2;
 
-    // Model name (short label)
+    // Model name
     if (params.showLabels) {
       ctx.font = theme.fontSmall;
       ctx.fillStyle = theme.text;
       const label = params.maxLabelLength > 0
         ? truncate(node.label, params.maxLabelLength)
         : node.label;
-      ctx.fillText(label, x + padding, y + 15, node.width - padding * 2);
+      ctx.fillText(label, x + padding, y + 15, maxW);
     }
 
-    // Weight + source badge line
+    // Weight + source badge
     if (params.showLabels) {
       ctx.font = theme.fontSmall;
-      const weightStr = `w=${data.weight.toFixed(2)}`;
-      let badge = "";
-      if (data.fromRng) badge = " RNG";
-      else if (data.fromCache) badge = " CACHE";
+      let info = `w=${data.weight.toFixed(2)}`;
+      if (data.fromRng) info += " RNG";
+      else if (data.fromCache) info += " CACHE";
 
       ctx.fillStyle = theme.textSecondary;
-      ctx.fillText(weightStr + badge, x + padding, y + 29, node.width - padding * 2);
+      ctx.fillText(info, x + padding, y + 27, maxW);
+
+      // Output mode + logprobs on a separate compact line
+      if (data.outputMode || data.topLogprobs) {
+        let meta = "";
+        if (data.outputMode) meta += data.outputMode.replace(/_/g, " ");
+        if (data.topLogprobs) meta += meta ? ` · top${data.topLogprobs}` : `top${data.topLogprobs}`;
+        ctx.font = `9px ${MONO_FONT}`;
+        ctx.fillStyle = theme.textSecondary;
+        ctx.fillText(meta, x + padding, y + 37, maxW);
+      }
+    }
+
+    // Vote distribution sparkline (full LOD only)
+    if (data.voteDistribution && data.voteDistribution.length > 0 && params.showDetailBars) {
+      const hasMeta = !!(data.outputMode || data.topLogprobs);
+      const sparkY = hasMeta ? y + 40 : y + 34;
+      const sparkH = 16;
+      const bw = 5;
+      const gap = 1;
+
+      // Baseline
+      ctx.fillStyle = theme.nodeBorder;
+      const totalBarW = data.voteDistribution.length * (bw + gap) - gap;
+      ctx.fillRect(x + padding, sparkY + sparkH - 1, Math.min(totalBarW, maxW), 1);
+
+      for (let i = 0; i < data.voteDistribution.length; i++) {
+        const val = data.voteDistribution[i];
+        const h = Math.max(2, val * sparkH);
+        ctx.fillStyle = scoreColor(val);
+        ctx.fillRect(x + padding + i * (bw + gap), sparkY + sparkH - h, bw, h);
+      }
     }
   }
 
@@ -585,9 +695,9 @@ export class TreeRenderer {
 
     let color: string;
     switch (state) {
-      case "complete": color = SCORE_COLORS.green; break;
+      case "complete": color = SCORE_COLORS.high; break;
       case "streaming": color = theme.accent; break;
-      case "error": color = SCORE_COLORS.red; break;
+      case "error": color = SCORE_COLORS.error; break;
       default: color = theme.nodeBorder; break;
     }
 
@@ -646,8 +756,8 @@ export class TreeRenderer {
 
   private nodeColor(node: TreeNode, theme: RenderTheme): string {
     switch (node.kind) {
-      case "function": return theme.accent;
-      case "vector-completion": return SCORE_COLORS.green;
+      case "function": return theme.accent;  // copper-mid
+      case "vector-completion": return "#b45309"; // copper-warm
       case "ensemble-llm": return theme.textSecondary;
     }
   }

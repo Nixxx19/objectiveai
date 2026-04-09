@@ -24,6 +24,10 @@ export interface FunctionNodeData {
   ownerRepo?: string | null;
   /** Structural mode: function type ("scalar" or "vector"). */
   functionType?: "scalar" | "vector" | null;
+  /** Truncated reasoning content from execution (root only). */
+  reasoning?: string | null;
+  /** Execution ID (root only). */
+  executionId?: string | null;
 }
 
 /** Data payload for a vector completion task node. */
@@ -284,9 +288,9 @@ export const DEFAULT_CONFIG: FunctionTreeConfig = {
 // -- Node Dimensions --------------------------------------------------------
 
 export const NODE_SIZES: Record<TreeNodeKind, { width: number; height: number }> = {
-  function: { width: 200, height: 80 },
-  "vector-completion": { width: 180, height: 70 },
-  "ensemble-llm": { width: 140, height: 36 },
+  function: { width: 220, height: 90 },
+  "vector-completion": { width: 220, height: 70 },
+  "ensemble-llm": { width: 160, height: 36 },
 };
 
 // -- React Component Props --------------------------------------------------
@@ -323,15 +327,16 @@ export interface FunctionTreeProps {
 // -- Score Colors -----------------------------------------------------------
 
 export const SCORE_COLORS = {
-  green: "rgb(34, 197, 94)",
-  yellow: "rgb(234, 179, 8)",
-  orange: "rgb(249, 115, 22)",
-  red: "rgb(239, 68, 68)",
+  high: "#f59e0b",     // bright amber — strong
+  midHigh: "#d97706",  // copper — moderate-strong
+  midLow: "#b45309",   // warm stone — moderate-weak
+  low: "#92400e",      // dark amber — weak
+  error: "#b91c1c",    // warm brick — errors only
 } as const;
 
 export function scoreColor(score: number): string {
-  if (score >= 0.66) return SCORE_COLORS.green;
-  if (score >= 0.33) return SCORE_COLORS.yellow;
-  if (score >= 0.15) return SCORE_COLORS.orange;
-  return SCORE_COLORS.red;
+  if (score >= 0.5) return SCORE_COLORS.high;
+  if (score >= 0.3) return SCORE_COLORS.midHigh;
+  if (score >= 0.15) return SCORE_COLORS.midLow;
+  return SCORE_COLORS.low;
 }

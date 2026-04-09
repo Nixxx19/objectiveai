@@ -70,6 +70,17 @@ export function buildTree(
   const nodes = new Map<string, TreeNode>();
   const rootId = "root";
 
+  // Extract reasoning content
+  const reasoningContent = execution.reasoning?.choices?.[0]?.message?.content ?? null;
+  const reasoningPreview = reasoningContent
+    ? (reasoningContent.length > 60 ? reasoningContent.slice(0, 57) + "…" : reasoningContent)
+    : null;
+
+  // Root node height: taller when it has output or reasoning
+  let rootHeight = execution.output !== undefined ? 106 : SIZES.function.height;
+  if (reasoningPreview) rootHeight += 14;
+  if (execution.id) rootHeight += 12;
+
   // Create root function node
   const rootNode: TreeNode = {
     id: rootId,
@@ -82,8 +93,7 @@ export function buildTree(
     x: 0,
     y: 0,
     width: SIZES.function.width,
-    // Root node is taller when it has output to display the score prominently
-    height: execution.output !== undefined ? 96 : SIZES.function.height,
+    height: rootHeight,
     state: functionState(execution),
     edgeWeight: null,
     data: {
@@ -98,6 +108,8 @@ export function buildTree(
       error: execution.error?.message ?? null,
       swissRound: null,
       swissPoolIndex: null,
+      reasoning: reasoningPreview,
+      executionId: execution.id ?? null,
     },
   };
   nodes.set(rootId, rootNode);
@@ -212,6 +224,15 @@ function processVectorCompletionTask(
   const pathKey = path.join(",");
   const labels = responseLabels?.[pathKey] ?? null;
 
+  // Dynamic height based on data density
+  let vcHeight = SIZES["vector-completion"].height; // base 70
+  const scores = task.scores ?? null;
+  if (scores && scores.length > 0) {
+    const barCount = Math.min(scores.length, 4);
+    vcHeight += barCount * 12; // 8px bar + 4px gap each
+    if (scores.length > 4) vcHeight += 12; // "+N more" line
+  }
+
   const node: TreeNode = {
     id,
     kind: "vector-completion",
@@ -221,14 +242,14 @@ function processVectorCompletionTask(
     x: 0,
     y: 0,
     width: SIZES["vector-completion"].width,
-    height: SIZES["vector-completion"].height,
+    height: vcHeight,
     state: taskState(task),
     edgeWeight: null,
     data: {
       kind: "vector-completion",
       taskIndex: task.task_index ?? idx,
       taskPath: path,
-      scores: task.scores ?? null,
+      scores,
       responses: labels,
       voteCount: task.votes?.length ?? 0,
       votes: task.votes ?? null,
@@ -255,6 +276,9 @@ function processVectorCompletionTask(
         ? modelNames[vote.model]
         : vote.model;
 
+      const hasDistribution = vote.vote.length > 0;
+      const llmHeight = hasDistribution ? 58 : SIZES["ensemble-llm"].height;
+
       const llmNode: TreeNode = {
         id: llmId,
         kind: "ensemble-llm",
@@ -268,7 +292,7 @@ function processVectorCompletionTask(
         x: 0,
         y: 0,
         width: SIZES["ensemble-llm"].width,
-        height: SIZES["ensemble-llm"].height,
+        height: llmHeight,
         state: "complete",
         edgeWeight: maxWeight > 0 ? vote.weight / maxWeight : null,
         data: {
@@ -278,7 +302,7 @@ function processVectorCompletionTask(
           weight: vote.weight,
           fromCache: vote.from_cache ?? false,
           fromRng: vote.from_rng ?? false,
-          voteDistribution: vote.vote.length > 0 ? vote.vote : null,
+          voteDistribution: hasDistribution ? vote.vote : null,
         } satisfies EnsembleLlmNodeData,
       };
 
