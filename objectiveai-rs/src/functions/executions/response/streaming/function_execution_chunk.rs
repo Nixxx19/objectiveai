@@ -119,4 +119,71 @@ impl FunctionExecutionChunk {
             push_task(&mut self.tasks, other_task);
         }
     }
+
+    /// Produces the `(path, file_bytes)` pairs for the log file structure.
+    ///
+    /// Returns `(reference, files)`. All paths relative to `logs/`.
+    #[cfg(feature = "filesystem")]
+    pub fn produce_files(&self) -> Option<(serde_json::Value, Vec<(String, Vec<u8>)>)> {
+        const PREFIX: &str = "functions/executions/";
+
+        let id = &self.id;
+        if id.is_empty() {
+            return None;
+        }
+
+        let path = format!("{PREFIX}{id}.json");
+        let mut files: Vec<(String, Vec<u8>)> = Vec::new();
+        let mut task_refs: Vec<serde_json::Value> = Vec::new();
+
+        for task in &self.tasks {
+            let (reference, task_files) = task.produce_files();
+            task_refs.push(reference);
+            files.extend(task_files);
+        }
+
+        // Extract reasoning summary
+        let reasoning_ref = self.reasoning.as_ref().map(|r| {
+            let (reference, reasoning_files) = r.produce_files();
+            files.extend(reasoning_files);
+            reference
+        });
+
+        // Serialize a shell without tasks/reasoning to avoid double-serialization
+        let shell = FunctionExecutionChunk {
+            id: self.id.clone(),
+            tasks: Vec::new(),
+            tasks_errors: self.tasks_errors,
+            reasoning: None,
+            output: self.output.clone(),
+            error: self.error.clone(),
+            retry_token: Some(String::new()),
+            created: self.created,
+            function: self.function.clone(),
+            profile: self.profile.clone(),
+            object: self.object,
+            usage: self.usage.clone(),
+        };
+        let mut root = serde_json::to_value(&shell).unwrap();
+        root["tasks"] = serde_json::Value::Array(task_refs);
+        if let Some(reasoning_ref) = reasoning_ref {
+            root["reasoning"] = reasoning_ref;
+        }
+
+        // Extract retry token to a separate file, or remove placeholder
+        if let Some(retry_token) = &self.retry_token {
+            let rt_path = format!("{PREFIX}retry_token/{id}.json");
+            files.push((rt_path.clone(), serde_json::to_vec_pretty(retry_token).unwrap()));
+            root["retry_token"] = serde_json::json!({
+                "type": "reference",
+                "path": rt_path,
+            });
+        } else if let Some(map) = root.as_object_mut() {
+            map.remove("retry_token");
+        }
+
+        files.push((path.clone(), serde_json::to_vec_pretty(&root).unwrap()));
+
+        Some((serde_json::json!({ "type": "reference", "path": path }), files))
+    }
 }
