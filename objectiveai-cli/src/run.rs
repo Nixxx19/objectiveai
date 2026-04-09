@@ -8,6 +8,7 @@ use crate::functions;
 use crate::viewer;
 use crate::schemas;
 use crate::laboratories;
+use crate::logs;
 use crate::error;
 
 #[derive(Envconfig)]
@@ -79,6 +80,7 @@ pub enum Output {
     ConfigSet,
     Api(String),
     Schema(&'static str),
+    LogsGet(objectiveai::filesystem::logs::LogContent),
 }
 
 #[derive(Subcommand)]
@@ -118,6 +120,11 @@ enum Commands {
         #[command(subcommand)]
         command: laboratories::Commands,
     },
+    /// Browse and read logs
+    Logs {
+        #[command(subcommand)]
+        command: logs::Commands,
+    },
 }
 
 impl Commands {
@@ -130,6 +137,7 @@ impl Commands {
             Commands::Viewer { command } => command.handle(cli_config).await,
             Commands::Schemas { command } => command.handle(),
             Commands::Laboratories { command } => command.handle(cli_config).await,
+            Commands::Logs { command } => command.handle(cli_config).await,
         }
     }
 }
@@ -149,6 +157,10 @@ where
         Ok(Output::ConfigSet) => Ok("ok".into()),
         Ok(Output::Api(output)) => Ok(output),
         Ok(Output::Schema(output)) => Ok(output.to_string()),
+        Ok(Output::LogsGet(content)) => Ok(match content {
+            objectiveai::filesystem::logs::LogContent::Json(v) => serde_json::to_string(&v).unwrap(),
+            objectiveai::filesystem::logs::LogContent::DataUrl(s) => s,
+        }),
         Err(e) => Err(format!("{e}")),
     }
 }

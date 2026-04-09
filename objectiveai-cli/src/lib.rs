@@ -17,6 +17,7 @@ mod functions;
 mod viewer;
 mod schemas;
 mod laboratories;
+mod logs;
 
 #[cfg(test)]
 mod python_tests;

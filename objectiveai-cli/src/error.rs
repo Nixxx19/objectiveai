@@ -2,6 +2,8 @@
 pub enum Error {
     #[error("{0}")]
     Config(#[from] objectiveai::filesystem::config::ConfigError),
+    #[error("{0}")]
+    Logs(#[from] objectiveai::filesystem::logs::LogsError),
     #[error("viewer setup failed: {0}")]
     ViewerSetup(std::io::Error),
     #[error("api setup failed: {0}")]
