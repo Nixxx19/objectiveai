@@ -117,6 +117,64 @@ impl RichContent {
         }
     }
 
+    /// Extracts media files from this content.
+    ///
+    /// Returns `(content_json, files)` where `content_json` is the content
+    /// with extractable media replaced by `{"type": "reference", "path": ...}`
+    /// references, and `files` is the list of `(path, bytes)` pairs.
+    ///
+    /// `prefix` is the full path prefix (e.g. `"agent/completions/"`).
+    /// `stem` is the file stem (e.g. `"{id}_{index}"`).
+    #[cfg(feature = "filesystem")]
+    pub fn extract_media(
+        self,
+        prefix: &str,
+        stem: &str,
+    ) -> (serde_json::Value, Vec<(String, Vec<u8>)>) {
+        let parts = match self {
+            RichContent::Text(_) => return (serde_json::to_value(&self).unwrap(), Vec::new()),
+            RichContent::Parts(parts) => parts,
+        };
+
+        let mut json_parts = Vec::with_capacity(parts.len());
+        let mut files = Vec::new();
+
+        for (part_idx, part) in parts.iter().enumerate() {
+            let fc_and_type: Option<(super::FileContent, &str)> = match part {
+                RichContentPart::ImageUrl { image_url } => {
+                    image_url.file_content().map(|fc| (fc, "image"))
+                }
+                RichContentPart::InputAudio { input_audio } => {
+                    input_audio.file_content().map(|fc| (fc, "audio"))
+                }
+                RichContentPart::InputVideo { video_url }
+                | RichContentPart::VideoUrl { video_url } => {
+                    video_url.file_content().map(|fc| (fc, "video"))
+                }
+                RichContentPart::File { file } => {
+                    file.file_content().map(|fc| (fc, "file"))
+                }
+                _ => None,
+            };
+
+            if let Some((fc, media_type)) = fc_and_type {
+                let basename = format!("{stem}_{part_idx}.{ext}", ext = fc.extension);
+                let filepath = format!("{prefix}messages/{media_type}/{basename}");
+                if let Ok(decoded) = fc.decode() {
+                    files.push((filepath.clone(), decoded));
+                }
+                json_parts.push(serde_json::json!({
+                    "type": "reference",
+                    "path": filepath,
+                }));
+            } else {
+                json_parts.push(serde_json::to_value(part).unwrap());
+            }
+        }
+
+        (serde_json::Value::Array(json_parts), files)
+    }
+
     /// Computes a content-addressed ID for this content.
     pub fn id(&self) -> String {
         let mut hasher = twox_hash::XxHash3_128::with_seed(0);

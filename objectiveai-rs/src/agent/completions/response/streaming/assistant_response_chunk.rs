@@ -156,4 +156,44 @@ impl AssistantResponseChunk {
             _ => {}
         }
     }
+
+    /// Produces log files for this assistant message.
+    ///
+    /// Returns `(reference, files)` where `reference` is a
+    /// `{"type": "reference", "path": ...}` JSON value pointing to this
+    /// message's file, and `files` contains all produced files including
+    /// the message itself, logprobs, and extracted media.
+    #[cfg(feature = "filesystem")]
+    pub fn produce_files(&self, id: &str, prefix: &str) -> (serde_json::Value, Vec<(String, Vec<u8>)>) {
+        let stem = format!("{id}_{}", self.index);
+        let path = format!("{prefix}messages/{stem}.json");
+        let mut msg_json = serde_json::to_value(self).unwrap();
+        let mut files = Vec::new();
+
+        // Extract logprobs to a separate file
+        if let Some(logprobs) = &self.logprobs {
+            let logprobs_path = format!("{prefix}messages/logprobs/{stem}.json");
+            files.push((logprobs_path.clone(), serde_json::to_vec_pretty(logprobs).unwrap()));
+            if let Some(map) = msg_json.as_object_mut() {
+                map.insert("logprobs".to_string(), serde_json::json!({
+                    "type": "reference",
+                    "path": logprobs_path,
+                }));
+            }
+        }
+
+        // Extract media from content
+        if let Some(mut content) = self.content.clone() {
+            content.prepare();
+            let (content_json, media_files) = content.extract_media(prefix, &stem);
+            if let Some(map) = msg_json.as_object_mut() {
+                map.insert("content".to_string(), content_json);
+            }
+            files.extend(media_files);
+        }
+
+        files.push((path.clone(), serde_json::to_vec_pretty(&msg_json).unwrap()));
+
+        (serde_json::json!({ "type": "reference", "path": path }), files)
+    }
 }

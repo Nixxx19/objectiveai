@@ -8,20 +8,23 @@ pub struct FileContent<'s> {
 }
 
 impl FileContent<'_> {
+    /// Decodes the base64 content into raw bytes.
+    pub fn decode(&self) -> std::io::Result<Vec<u8>> {
+        use base64::Engine;
+        base64::engine::general_purpose::STANDARD
+            .decode(self.content)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
+    }
+
     /// Writes the decoded content to `path` with the extension appended.
     ///
-    /// The base64-encoded `content` is decoded before writing.
     /// Parent directories are created if they don't exist.
     pub fn write(&self, path: &std::path::Path) -> std::io::Result<()> {
-        use base64::Engine;
         let path = path.with_extension(self.extension);
         if let Some(parent) = path.parent() {
             std::fs::create_dir_all(parent)?;
         }
-        let decoded = base64::engine::general_purpose::STANDARD
-            .decode(self.content)
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
-        std::fs::write(&path, decoded)
+        std::fs::write(&path, self.decode()?)
     }
 }
 

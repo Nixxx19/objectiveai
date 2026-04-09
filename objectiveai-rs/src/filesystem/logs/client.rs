@@ -91,9 +91,9 @@ impl LogsClient {
         self.list_endpoint("functions/inventions/recursive")
     }
 
-    pub fn list_function_profile_computations(&self) -> Result<Vec<ListItem>, LogsError> {
-        self.list_endpoint("functions/profiles/computations")
-    }
+    // pub fn list_function_profile_computations(&self) -> Result<Vec<ListItem>, LogsError> {
+    //     self.list_endpoint("functions/profiles/computations")
+    // }
 
     pub fn list_laboratory_executions(&self) -> Result<Vec<ListItem>, LogsError> {
         self.list_endpoint("laboratories/executions")

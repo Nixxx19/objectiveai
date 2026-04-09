@@ -62,6 +62,37 @@ impl AgentCompletionChunk {
         }
     }
 
+    /// Produces the `(path, file_bytes)` pairs for the log file structure.
+    ///
+    /// All paths are relative to the `logs/` root directory.
+    #[cfg(feature = "filesystem")]
+    pub fn produce_files(&self) -> Option<Vec<(String, Vec<u8>)>> {
+        const PREFIX: &str = "agent/completions/";
+
+        let id = &self.id;
+        if id.is_empty() {
+            return None;
+        }
+
+        let mut files: Vec<(String, Vec<u8>)> = Vec::new();
+        let mut message_refs: Vec<serde_json::Value> = Vec::new();
+
+        for msg in &self.messages {
+            let (reference, msg_files) = msg.produce_files(id, PREFIX);
+            message_refs.push(reference);
+            files.extend(msg_files);
+        }
+
+        // Build the main completion JSON with message refs instead of full messages
+        let mut root = serde_json::to_value(self).unwrap();
+        if let Some(map) = root.as_object_mut() {
+            map.insert("messages".to_string(), serde_json::Value::Array(message_refs));
+        }
+        files.push((format!("{PREFIX}{id}.json"), serde_json::to_vec_pretty(&root).unwrap()));
+
+        Some(files)
+    }
+
     fn push_messages(&mut self, other_choices: &[super::MessageChunk]) {
         fn push_message(
             messages: &mut Vec<super::MessageChunk>,
