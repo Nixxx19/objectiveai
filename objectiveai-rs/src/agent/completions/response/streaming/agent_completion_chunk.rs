@@ -83,11 +83,19 @@ impl AgentCompletionChunk {
             files.extend(msg_files);
         }
 
-        // Build the main completion JSON with message refs instead of full messages
-        let mut root = serde_json::to_value(self).unwrap();
-        if let Some(map) = root.as_object_mut() {
-            map.insert("messages".to_string(), serde_json::Value::Array(message_refs));
-        }
+        // Serialize a shell without messages to avoid double-serialization
+        let shell = AgentCompletionChunk {
+            id: self.id.clone(),
+            created: self.created,
+            messages: Vec::new(),
+            object: self.object,
+            usage: self.usage.clone(),
+            upstream: self.upstream,
+            error: self.error.clone(),
+            continuation: self.continuation.clone(),
+        };
+        let mut root = serde_json::to_value(&shell).unwrap();
+        root["messages"] = serde_json::Value::Array(message_refs);
         files.push((format!("{PREFIX}{id}.json"), serde_json::to_vec_pretty(&root).unwrap()));
 
         Some(files)

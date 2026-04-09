@@ -23,16 +23,24 @@ impl ToolResponse {
     pub fn produce_files(&self, id: &str, prefix: &str) -> (serde_json::Value, Vec<(String, Vec<u8>)>) {
         let stem = format!("{id}_{}", self.index);
         let path = format!("{prefix}messages/{stem}.json");
-        let mut msg_json = serde_json::to_value(self).unwrap();
         let mut files = Vec::new();
+
+        // Serialize a shell without content to avoid double-serialization
+        let shell = ToolResponse {
+            role: self.role,
+            index: self.index,
+            inner: agent::completions::message::ToolMessage {
+                content: agent::completions::message::RichContent::Text(String::new()),
+                tool_call_id: self.inner.tool_call_id.clone(),
+            },
+        };
+        let mut msg_json = serde_json::to_value(&shell).unwrap();
 
         // Extract media from content (flattened, so "content" is at root)
         let mut content = self.inner.content.clone();
         content.prepare();
         let (content_json, media_files) = content.extract_media(prefix, &stem);
-        if let Some(map) = msg_json.as_object_mut() {
-            map.insert("content".to_string(), content_json);
-        }
+        msg_json["content"] = content_json;
         files.extend(media_files);
 
         files.push((path.clone(), serde_json::to_vec_pretty(&msg_json).unwrap()));

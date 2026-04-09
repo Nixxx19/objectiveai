@@ -132,15 +132,15 @@ impl RichContent {
         stem: &str,
     ) -> (serde_json::Value, Vec<(String, Vec<u8>)>) {
         let parts = match self {
-            RichContent::Text(_) => return (serde_json::to_value(&self).unwrap(), Vec::new()),
+            RichContent::Text(text) => return (serde_json::Value::String(text), Vec::new()),
             RichContent::Parts(parts) => parts,
         };
 
         let mut json_parts = Vec::with_capacity(parts.len());
         let mut files = Vec::new();
 
-        for (part_idx, part) in parts.iter().enumerate() {
-            let fc_and_type: Option<(super::FileContent, &str)> = match part {
+        for (part_idx, part) in parts.into_iter().enumerate() {
+            let fc_and_type: Option<(super::FileContent, &str)> = match &part {
                 RichContentPart::ImageUrl { image_url } => {
                     image_url.file_content().map(|fc| (fc, "image"))
                 }
@@ -168,7 +168,7 @@ impl RichContent {
                     "path": filepath,
                 }));
             } else {
-                json_parts.push(serde_json::to_value(part).unwrap());
+                json_parts.push(serde_json::to_value(&part).unwrap());
             }
         }
 
