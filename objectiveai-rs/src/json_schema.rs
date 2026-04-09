@@ -344,27 +344,27 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(crate::functions::expression::WithExpression<Vec<crate::functions::expression::WithExpression<crate::agent::completions::message::MessageExpression>>>),
         schemars::schema_for!(crate::functions::expression::WithExpression<Vec<crate::functions::expression::WithExpression<crate::agent::completions::message::RichContentExpression>>>),
     ];
-    #[cfg(feature = "config")]
+    #[cfg(feature = "filesystem")]
     {
         schemas.extend([
-            schemars::schema_for!(crate::config::AgentsConfig),
-            schemars::schema_for!(crate::config::ApiConfig),
-            schemars::schema_for!(crate::config::ApiMode),
-            schemars::schema_for!(crate::config::ApiRemoteConfig),
-            schemars::schema_for!(crate::config::ApiLocalConfig),
-            schemars::schema_for!(crate::config::ApiHeadersConfig),
-            schemars::schema_for!(crate::config::Config),
-            schemars::schema_for!(crate::config::Favorite),
-            schemars::schema_for!(crate::config::PairFavorite),
-            schemars::schema_for!(crate::config::FunctionsConfig),
-            schemars::schema_for!(crate::config::FunctionsInventionsConfig),
-            schemars::schema_for!(crate::config::FunctionsProfilesConfig),
-            schemars::schema_for!(crate::config::FunctionsProfilesPairsConfig),
-            schemars::schema_for!(crate::config::SwarmsConfig),
-            schemars::schema_for!(crate::config::ViewerSecretSignaturePair),
-            schemars::schema_for!(crate::config::ViewerMode),
-            schemars::schema_for!(crate::config::ViewerConfig),
-            schemars::schema_for!(crate::config::ViewerLocalConfig),
+            schemars::schema_for!(crate::filesystem::config::AgentsConfig),
+            schemars::schema_for!(crate::filesystem::config::ApiConfig),
+            schemars::schema_for!(crate::filesystem::config::ApiMode),
+            schemars::schema_for!(crate::filesystem::config::ApiRemoteConfig),
+            schemars::schema_for!(crate::filesystem::config::ApiLocalConfig),
+            schemars::schema_for!(crate::filesystem::config::ApiHeadersConfig),
+            schemars::schema_for!(crate::filesystem::config::Config),
+            schemars::schema_for!(crate::filesystem::config::Favorite),
+            schemars::schema_for!(crate::filesystem::config::PairFavorite),
+            schemars::schema_for!(crate::filesystem::config::FunctionsConfig),
+            schemars::schema_for!(crate::filesystem::config::FunctionsInventionsConfig),
+            schemars::schema_for!(crate::filesystem::config::FunctionsProfilesConfig),
+            schemars::schema_for!(crate::filesystem::config::FunctionsProfilesPairsConfig),
+            schemars::schema_for!(crate::filesystem::config::SwarmsConfig),
+            schemars::schema_for!(crate::filesystem::config::ViewerSecretSignaturePair),
+            schemars::schema_for!(crate::filesystem::config::ViewerMode),
+            schemars::schema_for!(crate::filesystem::config::ViewerConfig),
+            schemars::schema_for!(crate::filesystem::config::ViewerLocalConfig),
         ]);
     }
     schemas

@@ -1,14 +1,14 @@
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "config.SwarmsConfig")]
-pub struct SwarmsConfig {
+#[schemars(rename = "filesystem.config.AgentsConfig")]
+pub struct AgentsConfig {
     #[serde(skip_serializing_if = "crate::util::vec_is_none_or_empty")]
     #[schemars(extend("omitempty" = true))]
     pub favorites: Option<Vec<super::Favorite>>,
 }
 
-impl SwarmsConfig {
+impl AgentsConfig {
     pub fn is_empty(&self) -> bool {
         crate::util::vec_is_none_or_empty(&self.favorites)
     }

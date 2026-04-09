@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "config.FunctionsConfig")]
+#[schemars(rename = "filesystem.config.FunctionsConfig")]
 pub struct FunctionsConfig {
     #[serde(skip_serializing_if = "FunctionsInventionsConfig::is_none")]
     #[schemars(extend("omitempty" = true))]
@@ -59,7 +59,7 @@ impl FunctionsConfig {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "config.FunctionsInventionsConfig")]
+#[schemars(rename = "filesystem.config.FunctionsInventionsConfig")]
 pub struct FunctionsInventionsConfig {
     #[serde(default = "FunctionsInventionsConfig::default_remote")]
     pub remote: crate::Remote,
@@ -102,7 +102,7 @@ impl FunctionsInventionsConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "config.FunctionsProfilesConfig")]
+#[schemars(rename = "filesystem.config.FunctionsProfilesConfig")]
 pub struct FunctionsProfilesConfig {
     #[serde(skip_serializing_if = "FunctionsProfilesPairsConfig::is_none")]
     #[schemars(extend("omitempty" = true))]
@@ -154,7 +154,7 @@ impl FunctionsProfilesConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "config.FunctionsProfilesPairsConfig")]
+#[schemars(rename = "filesystem.config.FunctionsProfilesPairsConfig")]
 pub struct FunctionsProfilesPairsConfig {
     #[serde(skip_serializing_if = "crate::util::vec_is_none_or_empty")]
     #[schemars(extend("omitempty" = true))]

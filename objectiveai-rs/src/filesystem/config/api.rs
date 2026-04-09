@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "config.ApiConfig")]
+#[schemars(rename = "filesystem.config.ApiConfig")]
 pub struct ApiConfig {
     #[serde(default)]
     pub mode: ApiMode,
@@ -51,7 +51,7 @@ impl ApiConfig {
 }
 
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "config.ApiMode")]
+#[schemars(rename = "filesystem.config.ApiMode")]
 #[serde(rename_all = "snake_case")]
 pub enum ApiMode {
     Remote,
@@ -60,7 +60,7 @@ pub enum ApiMode {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "config.ApiRemoteConfig")]
+#[schemars(rename = "filesystem.config.ApiRemoteConfig")]
 pub struct ApiRemoteConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
@@ -90,7 +90,7 @@ impl ApiRemoteConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "config.ApiLocalConfig")]
+#[schemars(rename = "filesystem.config.ApiLocalConfig")]
 pub struct ApiLocalConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
@@ -120,7 +120,7 @@ impl ApiLocalConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "config.ApiHeadersConfig")]
+#[schemars(rename = "filesystem.config.ApiHeadersConfig")]
 pub struct ApiHeadersConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]

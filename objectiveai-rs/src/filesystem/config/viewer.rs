@@ -7,7 +7,7 @@ use serde::{Serialize, Deserialize};
 /// by computing SHA256(secret) and comparing against the incoming header value.
 /// Knowing the signature does not reveal the secret (preimage resistance).
 #[derive(Debug, Clone, Serialize, Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "config.ViewerSecretSignaturePair")]
+#[schemars(rename = "filesystem.config.ViewerSecretSignaturePair")]
 pub struct ViewerSecretSignaturePair {
     /// The secret for the viewer server.
     pub secret: String,
@@ -33,7 +33,7 @@ pub fn generate_viewer_secret_signature_pair() -> ViewerSecretSignaturePair {
 }
 
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "config.ViewerMode")]
+#[schemars(rename = "filesystem.config.ViewerMode")]
 #[serde(rename_all = "snake_case")]
 pub enum ViewerMode {
     Remote,
@@ -42,7 +42,7 @@ pub enum ViewerMode {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "config.ViewerConfig")]
+#[schemars(rename = "filesystem.config.ViewerConfig")]
 pub struct ViewerConfig {
     #[serde(default)]
     pub mode: ViewerMode,
@@ -79,7 +79,7 @@ impl ViewerConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "config.ViewerLocalConfig")]
+#[schemars(rename = "filesystem.config.ViewerLocalConfig")]
 pub struct ViewerLocalConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
