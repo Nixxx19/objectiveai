@@ -16,6 +16,8 @@ type AgentMockAgent struct {
 	ErrorProbability *uint32 `json:"error_probability,omitempty" validate:"omitempty,min=0,max=255"`
 	// The deterministic content-addressed ID (22-character base62 string).
 	ID string `json:"id"`
+	// MCP servers the agent can connect to.
+	MCPServers *[]AgentMcpServer `json:"mcp_servers,omitempty"`
 	// Mock agent mode. Defaults to `default`.
 	Mode *AgentMockMode `json:"mode,omitempty"`
 	// The output mode for vector completions. Ignored for agent completions.

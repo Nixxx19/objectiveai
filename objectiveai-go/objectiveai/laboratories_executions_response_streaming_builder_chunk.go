@@ -9,11 +9,12 @@ import (
 
 // Streaming chunk for a single builder agent completion within a laboratory execution.
 type LaboratoriesExecutionsResponseStreamingBuilderChunk struct {
-	// Container index (0-based).
+	// Agent index (0-based).
 	AgentIndex uint64 `json:"agent_index" validate:"min=0,max=18446744073709551615"`
 	// Continuation state for multi-turn conversations (only present in the final chunk).
 	Continuation *string `json:"continuation,omitempty"`
 	Created uint64 `json:"created" validate:"min=0,max=18446744073709551615"`
+	// Error details if this completion failed.
 	Error *ErrorResponseError `json:"error,omitempty"`
 	ID string `json:"id"`
 	// Builder index (0-based).

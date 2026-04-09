@@ -6,7 +6,7 @@ from objectiveai.functions.inventions.recursive.http import create_function_inve
 from objectiveai.functions.inventions.recursive.response.streaming import FunctionInventionRecursiveChunk
 from tests.http_test_util import HttpTestCase, http_test_suite, ASSETS_DIR
 
-MOCK_INVENTION_AGENT = {"upstream": "mock", "output_mode": "instruction", "invention": True}
+MOCK_INVENTION_AGENT = {"upstream": "mock", "output_mode": "instruction", "mode": "invention"}
 
 globals().update(http_test_suite(
     name="recursive function inventions http",

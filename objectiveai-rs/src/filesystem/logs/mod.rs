@@ -1,9 +1,7 @@
 mod client;
 mod error;
-mod mcp_binary;
+mod list;
 
 pub use client::*;
 pub use error::*;
-
-#[cfg(test)]
-mod client_tests;
+pub use list::*;

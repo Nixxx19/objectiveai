@@ -1,5 +1,7 @@
 # ObjectiveAI .NET SDK
 
+**This SDK is not yet usable.**
+
 SDK for the [ObjectiveAI](https://objective-ai.io) API.
 
 ## Installation

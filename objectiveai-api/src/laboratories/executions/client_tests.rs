@@ -94,6 +94,7 @@ type TestClient = super::Client<
     crate::retrieval::retrieve::mock::MockClient,
     StubAgentUsageHandler,
     StubLabUsageHandler,
+    crate::laboratories::orchestrator::mock::Orchestrator,
 >;
 
 fn make_client() -> Arc<TestClient> {
@@ -136,7 +137,7 @@ fn make_client() -> Arc<TestClient> {
             Duration::ZERO, Duration::ZERO, 0.0, 1.0,
             Duration::ZERO, Duration::from_millis(1),
         )),
-        docker_timeout: 30,
+        orchestrator: Arc::new(crate::laboratories::orchestrator::mock::Orchestrator),
     })
 }
 
@@ -221,36 +222,31 @@ fn make_ctx() -> ctx::Context<ctx::DefaultContextExt, ctx::persistent_cache::def
     )
 }
 
-fn run_execution(request: Arc<Params>) -> LaboratoryExecution {
-    let rt = tokio::runtime::Builder::new_multi_thread()
-        .enable_all()
-        .build()
-        .unwrap();
-
-    let result = rt.block_on(async {
-        use futures::StreamExt;
-
-        let client = make_client();
-        let mut stream = client
-            .clone()
-            .create_streaming(make_ctx(), request)
-            .await
-            .expect("create_streaming should succeed");
-
-        let mut agg: Option<LaboratoryExecutionChunk> = None;
-        while let Some(chunk) = stream.next().await {
-            let done = chunk.usage.is_some();
-            match &mut agg {
-                Some(a) => a.push(&chunk),
-                None => agg = Some(chunk),
-            }
-            if done { break; }
-        }
-        LaboratoryExecution::from(agg.expect("stream must produce at least one chunk"))
-    });
-
-    rt.shutdown_background();
-    result
+async fn run_execution(client: &Arc<TestClient>, request: Arc<Params>) -> LaboratoryExecution {
+    let ctx = make_ctx();
+    let stream = client
+        .clone()
+        .create_streaming(ctx, request)
+        .await
+        .expect("create_streaming should succeed");
+    let expected_created = std::cell::Cell::new(None);
+    let agg = crate::stream_harness::consume_stream(
+        Box::pin(stream),
+        |agg, c| agg.push(c),
+        |i, chunk| {
+            check_created(&expected_created, i, chunk.created);
+            assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
+        },
+        |i, chunk| {
+            check_created(&expected_created, i, chunk.created);
+            assert!(chunk.usage.is_none(), "chunk {i} (second-to-last) has usage, expected None");
+        },
+        |i, chunk| {
+            check_created(&expected_created, i, chunk.created);
+            assert!(chunk.usage.is_some(), "final chunk {i} has no usage, expected Some");
+        },
+    ).await;
+    LaboratoryExecution::from(agg)
 }
 
 fn check_created(expected: &std::cell::Cell<Option<u64>>, _i: usize, created: u64) {
@@ -279,74 +275,79 @@ fn assert_snapshot(json: &str, path: &str, expected: &str) {
 // ---------------------------------------------------------------------------
 
 /// Single builder, no evaluation.
-#[test]
-fn single_builder_no_eval_seed_42() {
+#[tokio::test]
+async fn single_builder_no_eval_seed_42() {
+    let client = make_client();
     let request = make_request(vec![builder_agent(false, None)], false, 42);
-    let result = normalize(run_execution(request));
+    let result = normalize(run_execution(&client, request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/laboratories/executions/local/client_tests/single_builder_no_eval_seed_42.json"),
-        include_str!("../../../../assets/laboratories/executions/local/client_tests/single_builder_no_eval_seed_42.json"),
+        include_str!("../../../assets/laboratories/executions/local/client_tests/single_builder_no_eval_seed_42.json"),
     );
 }
 
 /// Single builder + evaluation.
-#[test]
-fn single_builder_with_eval_seed_42() {
+#[tokio::test]
+async fn single_builder_with_eval_seed_42() {
+    let client = make_client();
     let request = make_request(vec![builder_agent(false, None)], true, 42);
-    let result = normalize(run_execution(request));
+    let result = normalize(run_execution(&client, request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/laboratories/executions/local/client_tests/single_builder_with_eval_seed_42.json"),
-        include_str!("../../../../assets/laboratories/executions/local/client_tests/single_builder_with_eval_seed_42.json"),
+        include_str!("../../../assets/laboratories/executions/local/client_tests/single_builder_with_eval_seed_42.json"),
     );
 }
 
 /// Two builders + evaluation.
-#[test]
-fn two_builders_with_eval_seed_99() {
+#[tokio::test]
+async fn two_builders_with_eval_seed_99() {
+    let client = make_client();
     let request = make_request(
         vec![builder_agent(false, None), builder_agent(false, None)],
         true,
         99,
     );
-    let result = normalize(run_execution(request));
+    let result = normalize(run_execution(&client, request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/laboratories/executions/local/client_tests/two_builders_with_eval_seed_99.json"),
-        include_str!("../../../../assets/laboratories/executions/local/client_tests/two_builders_with_eval_seed_99.json"),
+        include_str!("../../../assets/laboratories/executions/local/client_tests/two_builders_with_eval_seed_99.json"),
     );
 }
 
 /// Builder with 50% error probability + evaluation.
-#[test]
-fn builder_error_50_with_eval_seed_10() {
+#[tokio::test]
+async fn builder_error_50_with_eval_seed_10() {
+    let client = make_client();
     let request = make_request(vec![builder_agent(true, Some(50))], true, 10);
-    let result = normalize(run_execution(request));
+    let result = normalize(run_execution(&client, request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/laboratories/executions/local/client_tests/builder_error_50_with_eval_seed_10.json"),
-        include_str!("../../../../assets/laboratories/executions/local/client_tests/builder_error_50_with_eval_seed_10.json"),
+        include_str!("../../../assets/laboratories/executions/local/client_tests/builder_error_50_with_eval_seed_10.json"),
     );
 }
 
 /// Two builders, one with 50% error probability, no evaluation.
-#[test]
-fn two_builders_one_error_50_no_eval_seed_7() {
+#[tokio::test]
+async fn two_builders_one_error_50_no_eval_seed_7() {
+    let client = make_client();
     let request = make_request(
         vec![builder_agent(false, None), builder_agent(true, Some(50))],
         false,
         7,
     );
-    let result = normalize(run_execution(request));
+    let result = normalize(run_execution(&client, request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/laboratories/executions/local/client_tests/two_builders_one_error_50_no_eval_seed_7.json"),
-        include_str!("../../../../assets/laboratories/executions/local/client_tests/two_builders_one_error_50_no_eval_seed_7.json"),
+        include_str!("../../../assets/laboratories/executions/local/client_tests/two_builders_one_error_50_no_eval_seed_7.json"),
     );
 }

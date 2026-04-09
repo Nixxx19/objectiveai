@@ -79,7 +79,7 @@ impl InventionStep {
         // Step 2: InputSchema — WriteInputSchema present
         if has("WriteInputSchema") {
             return Some(
-                if has("Readfunctions.alpha_vector.expression.VectorFunctionInputSchemaSchema") {
+                if has("Readfunctions_alpha_vector_expression_VectorFunctionInputSchemaSchema") {
                     Self::InputSchemaVector
                 } else {
                     Self::InputSchemaScalar
@@ -96,16 +96,16 @@ impl InventionStep {
 
         // Step 4: Tasks — AppendTask present
         if has("AppendTask") {
-            return Some(if has("Readagent.completions.message.MessageExpressionSchema") {
+            return Some(if has("Readagent_completions_message_MessageExpressionSchema") {
                 // Leaf
                 if tool_names.iter().any(|t| t.contains("alpha_scalar")) {
                     Self::TasksScalarLeaf
                 } else {
                     Self::TasksVectorLeaf
                 }
-            } else if has("Readfunctions.expression.InputValueSchema") {
+            } else if has("Readfunctions_expression_InputValueSchema") {
                 // Branch
-                if tool_names.iter().any(|t| t.contains("alpha_scalar.Placeholder")) {
+                if tool_names.iter().any(|t| t.contains("alpha_scalar_Placeholder")) {
                     Self::TasksScalarBranch
                 } else {
                     Self::TasksVectorBranch

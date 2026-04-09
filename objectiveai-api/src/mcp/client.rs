@@ -80,6 +80,10 @@ impl Client {
         authorization: Option<String>,
         session_id: Option<String>,
     ) -> Result<Arc<super::Connection>, super::Error> {
+        if url == "mock" {
+            return Ok(super::Connection::new_mock(url));
+        }
+
         let init_request = serde_json::json!({
             "jsonrpc": "2.0",
             "id": 1,

@@ -63,6 +63,8 @@ where
     F: FnOnce(objectiveai::HttpClient) -> Fut + Send + 'static,
     Fut: Future<Output = Result<String, crate::error::Error>> + Send + 'static,
 {
+    let _stderr_guard = suppress_stderr();
+
     let (viewer_config, secret_from_env, config_signature) = build_viewer_config(&mut config)?;
 
     // ENV mismatch check: VIEWER_SECRET and VIEWER_SIGNATURE must both or neither come from ENV
@@ -160,6 +162,8 @@ where
     F: FnOnce(objectiveai::HttpClient) -> Fut + Send + 'static,
     Fut: Future<Output = Result<String, crate::error::Error>> + Send + 'static,
 {
+    let _stderr_guard = suppress_stderr();
+
     let (viewer_config, _, config_signature) = build_viewer_config(&mut config)?;
 
     let (viewer_listener, viewer_app, viewer_rx) = objectiveai_viewer::setup(viewer_config).await
@@ -209,6 +213,110 @@ where
 }
 
 // -- Shared helpers --
+
+/// Redirects file descriptor 2 (stderr) to /dev/null or NUL to suppress
+/// Chromium/WebView2 noise during viewer startup and teardown.
+/// Returns a guard that restores stderr on drop.
+/// CLI output goes through stdout (println in main.rs), so this is safe.
+#[cfg(feature = "viewer")]
+fn suppress_stderr() -> Option<StderrGuard> {
+    StderrGuard::new()
+}
+
+#[cfg(feature = "viewer")]
+struct StderrGuard {
+    saved_fd: i32,
+}
+
+#[cfg(all(feature = "viewer", windows))]
+impl StderrGuard {
+    fn new() -> Option<Self> {
+        use std::os::windows::io::AsRawHandle;
+        unsafe extern "C" {
+            fn _dup(fd: i32) -> i32;
+            fn _dup2(fd: i32, fd2: i32) -> i32;
+            fn _open(path: *const u8, flags: i32) -> i32;
+            fn _close(fd: i32) -> i32;
+        }
+        unsafe extern "system" {
+            fn SetStdHandle(nStdHandle: u32, hHandle: *mut std::ffi::c_void) -> i32;
+        }
+        const STD_ERROR_HANDLE: u32 = 0xFFFF_FFF4; // -12 as u32
+        unsafe {
+            // Save CRT fd 2
+            let saved_fd = _dup(2);
+            if saved_fd == -1 { return None; }
+            // Open NUL and redirect both CRT fd 2 and Win32 STD_ERROR_HANDLE
+            let nul = _open(b"NUL\0".as_ptr(), 1); // _O_WRONLY
+            if nul == -1 { _close(saved_fd); return None; }
+            _dup2(nul, 2);
+            // Also redirect the Win32 handle (Chromium uses this directly)
+            let nul_file = std::fs::OpenOptions::new().write(true).open("NUL").ok()?;
+            SetStdHandle(STD_ERROR_HANDLE, nul_file.as_raw_handle() as *mut _);
+            std::mem::forget(nul_file);
+            _close(nul);
+            Some(StderrGuard { saved_fd })
+        }
+    }
+}
+
+#[cfg(all(feature = "viewer", windows))]
+impl Drop for StderrGuard {
+    fn drop(&mut self) {
+        use std::os::windows::io::FromRawHandle;
+        unsafe extern "C" {
+            fn _dup2(fd: i32, fd2: i32) -> i32;
+            fn _close(fd: i32) -> i32;
+            fn _get_osfhandle(fd: i32) -> isize;
+        }
+        unsafe extern "system" {
+            fn SetStdHandle(nStdHandle: u32, hHandle: *mut std::ffi::c_void) -> i32;
+        }
+        const STD_ERROR_HANDLE: u32 = 0xFFFF_FFF4;
+        unsafe {
+            _dup2(self.saved_fd, 2);
+            _close(self.saved_fd);
+            // Restore the Win32 handle to match the restored CRT fd
+            let handle = _get_osfhandle(2);
+            SetStdHandle(STD_ERROR_HANDLE, handle as *mut _);
+        }
+    }
+}
+
+#[cfg(all(feature = "viewer", not(windows)))]
+impl StderrGuard {
+    fn new() -> Option<Self> {
+        unsafe extern "C" {
+            fn dup(fd: i32) -> i32;
+            fn dup2(fd: i32, fd2: i32) -> i32;
+            fn open(path: *const u8, flags: i32) -> i32;
+            fn close(fd: i32) -> i32;
+        }
+        unsafe {
+            let saved_fd = dup(2);
+            if saved_fd == -1 { return None; }
+            let nul = open(b"/dev/null\0".as_ptr(), 1); // O_WRONLY
+            if nul == -1 { close(saved_fd); return None; }
+            dup2(nul, 2);
+            close(nul);
+            Some(StderrGuard { saved_fd })
+        }
+    }
+}
+
+#[cfg(all(feature = "viewer", not(windows)))]
+impl Drop for StderrGuard {
+    fn drop(&mut self) {
+        unsafe extern "C" {
+            fn dup2(fd: i32, fd2: i32) -> i32;
+            fn close(fd: i32) -> i32;
+        }
+        unsafe {
+            dup2(self.saved_fd, 2);
+            close(self.saved_fd);
+        }
+    }
+}
 
 /// Builds the local viewer config. Priority: ENV → config file → defaults.
 ///

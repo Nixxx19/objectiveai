@@ -13,9 +13,9 @@ keywords = ["llm", "ai", "swarm"]
 publish = true
 
 [features]
-default = ["laboratories-local"]
+default = ["orchestrator-bollard"]
 sqlite-persistent-cache = ["dep:rusqlite"]
-laboratories-local = ["dep:bollard", "dep:tar"]
+orchestrator-bollard = ["dep:bollard", "dep:tar"]
 
 [dependencies]
 objectiveai = { path = "../objectiveai-rs", version = "2.0.0", default-features = false, features = ["http"] }

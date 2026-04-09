@@ -33,7 +33,7 @@ where
     C: Clone,
     S: futures::Stream<Item = C> + Unpin,
 {
-    futures::pin_mut!(stream);
+    let mut stream = stream;
 
     let mut agg: Option<C> = None;
     // 2-behind buffer: (prev_prev, prev).  Indices track the chunk number.
@@ -92,7 +92,7 @@ where
     C: Clone,
     S: futures::Stream<Item = I> + Unpin,
 {
-    futures::pin_mut!(stream);
+    let mut stream = stream;
 
     let mut agg: Option<C> = None;
     let mut buf: (Option<(usize, C)>, Option<(usize, C)>) = (None, None);
@@ -157,7 +157,7 @@ where
     C: Clone,
     S: futures::Stream<Item = C> + Unpin,
 {
-    futures::pin_mut!(stream);
+    let mut stream = stream;
 
     let mut agg: Option<C> = None;
     let mut buf: (Option<(usize, C)>, Option<(usize, C)>) = (None, None);

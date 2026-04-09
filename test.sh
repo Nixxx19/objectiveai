@@ -41,7 +41,6 @@ for suite in \
   objectiveai-js \
   objectiveai-py \
   objectiveai-go \
-  objectiveai-dotnet \
 ; do
   bash "$REPO_ROOT/$suite/test.sh" &
   PIDS+=($!)

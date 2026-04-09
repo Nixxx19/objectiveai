@@ -17,17 +17,20 @@ type LaboratoriesExecutionsRequestLaboratoryExecutionCreateParams struct {
 	BuilderMessages []AgentCompletionsMessageMessage `json:"builder_messages"`
 	// Docker image to use for builder containers.
 	DockerImage string `json:"docker_image"`
-	// Evaluation agent for evaluating builder outputs.
-	EvaluationAgent AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional `json:"evaluation_agent"`
+	// Evaluation agent for evaluating builder outputs. If not provided,
+	// no evaluation is performed.
+	EvaluationAgent *AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional `json:"evaluation_agent,omitempty"`
 	// Continuation from a previous evaluation completion, as a base64-encoded string.
 	EvaluationContinuation *string `json:"evaluation_continuation,omitempty"`
 	// Messages for the evaluation agent.
-	EvaluationMessages []AgentCompletionsMessageMessage `json:"evaluation_messages"`
+	EvaluationMessages *[]AgentCompletionsMessageMessage `json:"evaluation_messages,omitempty"`
 	// Output schema for evaluation.
-	EvaluationOutputSchema FunctionsExpressionInputSchema `json:"evaluation_output_schema"`
+	EvaluationOutputSchema *FunctionsExpressionInputSchema `json:"evaluation_output_schema,omitempty"`
 	// Maximum number of evaluation retries if validation fails.
 	// Defaults to 3 if not specified.
 	MaxEvaluationRetries *uint32 `json:"max_evaluation_retries,omitempty" validate:"omitempty,min=0,max=4294967295"`
+	// Whether to keep containers after execution. Defaults to false.
+	Persist *bool `json:"persist,omitempty"`
 	Provider *AgentCompletionsRequestProvider `json:"provider,omitempty"`
 	Seed *int64 `json:"seed,omitempty" validate:"omitempty,min=-9223372036854775808,max=9223372036854775807"`
 	Stream *bool `json:"stream,omitempty"`
@@ -43,7 +46,7 @@ func (v *LaboratoriesExecutionsRequestLaboratoryExecutionCreateParams) Unmarshal
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	for _, key := range []string{"builder_agents", "builder_messages", "docker_image", "evaluation_agent", "evaluation_messages", "evaluation_output_schema"} {
+	for _, key := range []string{"builder_agents", "builder_messages", "docker_image"} {
 		if _, ok := raw[key]; !ok {
 			return fmt.Errorf("LaboratoriesExecutionsRequestLaboratoryExecutionCreateParams: missing required field %q", key)
 		}

@@ -15,10 +15,10 @@ class Evaluation(BaseModel):
     """A single evaluation agent completion within a laboratory execution (non-streaming)."""
     model_config = ConfigDict(title='laboratories.executions.response.unary.Evaluation')
 
-    agent_index: int = Field(..., description='Container index (0-based).', ge=0, le=18446744073709551615)
+    agent_index: int = Field(..., description='Agent index (0-based).', ge=0, le=18446744073709551615)
     continuation: Optional[str] = Field(None, description='Continuation state for multi-turn conversations.')
     created: int = Field(..., ge=0, le=18446744073709551615)
-    error: Optional[ResponseError] = None
+    error: Optional[ResponseError] = Field(None, description='Error details if this completion failed.')
     id: str
     index: int = Field(..., description='Evaluation index (0-based).', ge=0, le=18446744073709551615)
     messages: list[Message]

@@ -57,8 +57,8 @@ mod tests;
 #[cfg(test)]
 mod test_util;
 
-#[cfg(feature = "config")]
-pub mod config;
+#[cfg(feature = "filesystem")]
+pub mod filesystem;
 
 #[cfg(feature = "http")]
 mod http;

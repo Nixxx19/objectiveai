@@ -3,6 +3,7 @@
 from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
+from objectiveai.agent.mcp_server import McpServer
 from objectiveai.agent.mock.mode import Mode
 from objectiveai.agent.mock.output_mode import OutputMode
 from objectiveai.agent.mock.upstream import Upstream
@@ -14,6 +15,7 @@ class AgentBase(BaseModel):
 
     error: Optional[bool] = Field(None, description='If true, the mock client will return an error instead of a response.', json_schema_extra={'omitempty': True})
     error_probability: Optional[Annotated[int, Field(ge=0, le=255)]] = Field(None, description='Probability (0-100) that the mock returns an error mid-stream.\nRequires `error` to be `Some(true)`.', json_schema_extra={'omitempty': True})
+    mcp_servers: Optional[list[McpServer]] = Field(None, description='MCP servers the agent can connect to.', json_schema_extra={'omitempty': True})
     mode: Optional[Mode] = Field(None, description='Mock agent mode. Defaults to `default`.', json_schema_extra={'omitempty': True})
     output_mode: OutputMode = Field(..., description='The output mode for vector completions. Ignored for agent completions.')
     top_logprobs: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.', json_schema_extra={'omitempty': True})

@@ -665,21 +665,25 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         ));
 
     // Laboratory Executions Client
-    #[cfg(feature = "laboratories-local")]
-    let laboratory_executions_client: Arc<
-        crate::laboratories::executions::local::Client<_, _, _, _, _, _, _, _, _>,
-    > = Arc::new(crate::laboratories::executions::local::Client {
+    #[cfg(feature = "orchestrator-bollard")]
+    let laboratory_orchestrator = Arc::new(
+        crate::laboratories::orchestrator::bollard::Orchestrator {
+            docker_timeout,
+        },
+    );
+    #[cfg(not(feature = "orchestrator-bollard"))]
+    let laboratory_orchestrator = Arc::new(
+        crate::laboratories::orchestrator::unimplemented::Orchestrator,
+    );
+    let laboratory_executions_client = Arc::new(crate::laboratories::executions::Client {
         agent_client: agent_completions_client.clone(),
         retrieve_router: retrieve_router.clone(),
         usage_handler: Arc::new(
             crate::laboratories::executions::usage_handler::LogUsageHandler,
         ),
         viewer: viewer_client.clone(),
-        docker_timeout,
+        orchestrator: laboratory_orchestrator,
     });
-    #[cfg(not(feature = "laboratories-local"))]
-    let laboratory_executions_client =
-        Arc::new(crate::laboratories::executions::UnimplementedClient);
 
     // Functions Profiles Computations Client
     let profile_computations_client =
@@ -2150,7 +2154,24 @@ async fn create_error(
 
 async fn execute_laboratory(
     client: Arc<
-        impl crate::laboratories::executions::LaboratoryClient<ctx::DefaultContextExt> + 'static,
+        crate::laboratories::executions::Client<
+            ctx::DefaultContextExt,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation,
+            > + Send + Sync + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
+            > + Send + Sync + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation,
+            > + Send + Sync + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
+            impl retrieval::retrieve::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
+            impl agent::completions::usage_handler::UsageHandler<ctx::DefaultContextExt> + Send + Sync + 'static,
+            impl crate::laboratories::executions::usage_handler::UsageHandler<ctx::DefaultContextExt> + Send + Sync + 'static,
+            impl crate::laboratories::orchestrator::Orchestrator<ctx::DefaultContextExt> + Send + Sync + 'static,
+        >,
     >,
     headers: axum::http::HeaderMap,
     persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,

@@ -46,11 +46,17 @@ public partial class LaboratoryExecutionCreateParams
     public string DockerImage { get; set; } = default!;
 
     /// <summary>
-    /// Evaluation agent for evaluating builder outputs.
+    /// Evaluation agent for evaluating builder outputs. If not provided,
+    /// no evaluation is performed.
     /// </summary>
-    [Description("Evaluation agent for evaluating builder outputs.")]
+    [Description("""
+Evaluation agent for evaluating builder outputs. If not provided,
+no evaluation is performed.
+""")]
     [JsonPropertyName("evaluation_agent")]
-    public InlineAgentBaseWithFallbacksOrRemoteCommitOptional EvaluationAgent { get; set; } = default!;
+    [JsonSchemaOmitEmpty]
+    [JsonSchemaNullable]
+    public InlineAgentBaseWithFallbacksOrRemoteCommitOptional? EvaluationAgent { get; set; } = null;
 
     /// <summary>
     /// Continuation from a previous evaluation completion, as a base64-encoded string.
@@ -66,14 +72,18 @@ public partial class LaboratoryExecutionCreateParams
     /// </summary>
     [Description("Messages for the evaluation agent.")]
     [JsonPropertyName("evaluation_messages")]
-    public List<ObjectiveAI.Agent.Completions.Message.Message> EvaluationMessages { get; set; } = default!;
+    [JsonSchemaOmitEmpty]
+    [JsonSchemaNullable]
+    public List<ObjectiveAI.Agent.Completions.Message.Message>? EvaluationMessages { get; set; } = null;
 
     /// <summary>
     /// Output schema for evaluation.
     /// </summary>
     [Description("Output schema for evaluation.")]
     [JsonPropertyName("evaluation_output_schema")]
-    public ObjectiveAI.Functions.Expression.InputSchema EvaluationOutputSchema { get; set; } = default!;
+    [JsonSchemaOmitEmpty]
+    [JsonSchemaNullable]
+    public ObjectiveAI.Functions.Expression.InputSchema? EvaluationOutputSchema { get; set; } = null;
 
     /// <summary>
     /// Maximum number of evaluation retries if validation fails.
@@ -88,6 +98,15 @@ Defaults to 3 if not specified.
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
     public long? MaxEvaluationRetries { get; set; } = null;
+
+    /// <summary>
+    /// Whether to keep containers after execution. Defaults to false.
+    /// </summary>
+    [Description("Whether to keep containers after execution. Defaults to false.")]
+    [JsonPropertyName("persist")]
+    [JsonSchemaOmitEmpty]
+    [JsonSchemaNullable]
+    public bool? Persist { get; set; } = null;
 
     [JsonPropertyName("provider")]
     [JsonSchemaOmitEmpty]

@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "config.Config")]
+#[schemars(rename = "filesystem.config.Config")]
 pub struct Config {
     #[serde(skip_serializing_if = "super::ApiConfig::is_none")]
     #[schemars(extend("omitempty" = true))]

@@ -34,8 +34,16 @@
       "type": "string"
     },
     "evaluation_agent": {
-      "description": "Evaluation agent for evaluating builder outputs.",
-      "$ref": "agent.InlineAgentBaseWithFallbacksOrRemoteCommitOptional"
+      "description": "Evaluation agent for evaluating builder outputs. If not provided,\nno evaluation is performed.",
+      "anyOf": [
+        {
+          "$ref": "agent.InlineAgentBaseWithFallbacksOrRemoteCommitOptional"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
     },
     "evaluation_continuation": {
       "description": "Continuation from a previous evaluation completion, as a base64-encoded string.",
@@ -51,14 +59,30 @@
     },
     "evaluation_messages": {
       "description": "Messages for the evaluation agent.",
-      "type": "array",
-      "items": {
-        "$ref": "agent.completions.message.Message"
-      }
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "agent.completions.message.Message"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
     },
     "evaluation_output_schema": {
       "description": "Output schema for evaluation.",
-      "$ref": "functions.expression.InputSchema"
+      "anyOf": [
+        {
+          "$ref": "functions.expression.InputSchema"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
     },
     "max_evaluation_retries": {
       "description": "Maximum number of evaluation retries if validation fails.\nDefaults to 3 if not specified.",
@@ -67,6 +91,18 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 4294967295
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "persist": {
+      "description": "Whether to keep containers after execution. Defaults to false.",
+      "anyOf": [
+        {
+          "type": "boolean"
         },
         {
           "type": "null"
