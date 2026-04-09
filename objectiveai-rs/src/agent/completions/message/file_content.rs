@@ -7,6 +7,24 @@ pub struct FileContent<'s> {
     pub extension: &'s str,
 }
 
+impl FileContent<'_> {
+    /// Writes the decoded content to `path` with the extension appended.
+    ///
+    /// The base64-encoded `content` is decoded before writing.
+    /// Parent directories are created if they don't exist.
+    pub fn write(&self, path: &std::path::Path) -> std::io::Result<()> {
+        use base64::Engine;
+        let path = path.with_extension(self.extension);
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+        let decoded = base64::engine::general_purpose::STANDARD
+            .decode(self.content)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
+        std::fs::write(&path, decoded)
+    }
+}
+
 /// Parses a data URL, returning `(full_mime, base64_payload)`.
 ///
 /// Expects the format `data:{type}/{subtype};base64,{payload}`.
