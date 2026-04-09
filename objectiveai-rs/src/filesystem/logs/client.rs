@@ -44,7 +44,7 @@ impl LogsClient {
         dir
     }
 
-    fn list_endpoint(&self, endpoint: &str) -> Result<Vec<ListItem>, LogsError> {
+    fn list_endpoint(&self, endpoint: &str, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
         let dir = self.endpoint_dir(endpoint);
         if !dir.exists() {
             return Ok(Vec::new());
@@ -72,6 +72,9 @@ impl LogsClient {
             items.push(ListItem { id: stem, created });
         }
         items.sort_by(|a, b| b.created.cmp(&a.created));
+        if offset > 0 || limit < usize::MAX {
+            items = items.into_iter().skip(offset).take(limit).collect();
+        }
         Ok(items)
     }
 
@@ -79,32 +82,32 @@ impl LogsClient {
     // List methods
     // -----------------------------------------------------------------------
 
-    pub fn list_agent_completions(&self) -> Result<Vec<ListItem>, LogsError> {
-        self.list_endpoint("agent/completions")
+    pub fn list_agent_completions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
+        self.list_endpoint("agent/completions", offset, limit)
     }
 
-    pub fn list_vector_completions(&self) -> Result<Vec<ListItem>, LogsError> {
-        self.list_endpoint("vector/completions")
+    pub fn list_vector_completions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
+        self.list_endpoint("vector/completions", offset, limit)
     }
 
-    pub fn list_function_executions(&self) -> Result<Vec<ListItem>, LogsError> {
-        self.list_endpoint("functions/executions")
+    pub fn list_function_executions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
+        self.list_endpoint("functions/executions", offset, limit)
     }
 
-    pub fn list_function_inventions(&self) -> Result<Vec<ListItem>, LogsError> {
-        self.list_endpoint("functions/inventions")
+    pub fn list_function_inventions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
+        self.list_endpoint("functions/inventions", offset, limit)
     }
 
-    pub fn list_function_inventions_recursive(&self) -> Result<Vec<ListItem>, LogsError> {
-        self.list_endpoint("functions/inventions/recursive")
+    pub fn list_function_inventions_recursive(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
+        self.list_endpoint("functions/inventions/recursive", offset, limit)
     }
 
-    // pub fn list_function_profile_computations(&self) -> Result<Vec<ListItem>, LogsError> {
-    //     self.list_endpoint("functions/profiles/computations")
+    // pub fn list_function_profile_computations(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
+    //     self.list_endpoint("functions/profiles/computations", offset, limit)
     // }
 
-    pub fn list_laboratory_executions(&self) -> Result<Vec<ListItem>, LogsError> {
-        self.list_endpoint("laboratories/executions")
+    pub fn list_laboratory_executions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
+        self.list_endpoint("laboratories/executions", offset, limit)
     }
 
     // -----------------------------------------------------------------------
