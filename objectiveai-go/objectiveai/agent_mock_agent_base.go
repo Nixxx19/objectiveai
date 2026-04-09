@@ -14,6 +14,8 @@ type AgentMockAgentBase struct {
 	// Probability (0-100) that the mock returns an error mid-stream.
 	// Requires `error` to be `Some(true)`.
 	ErrorProbability *uint32 `json:"error_probability,omitempty" validate:"omitempty,min=0,max=255"`
+	// MCP servers the agent can connect to.
+	MCPServers *[]AgentMcpServer `json:"mcp_servers,omitempty"`
 	// Mock agent mode. Defaults to `default`.
 	Mode *AgentMockMode `json:"mode,omitempty"`
 	// The output mode for vector completions. Ignored for agent completions.

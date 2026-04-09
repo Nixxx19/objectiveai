@@ -33,7 +33,7 @@ func TestFunctionsInventionsRecursiveHTTP(t *testing.T) {
 				Agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional{AgentBase: &AgentInlineAgentBaseWithFallbacks{AgentInlineAgentBase: AgentInlineAgentBase{Mock: &AgentMockAgentBase{
 					Upstream:   AgentMockUpstream{Mock: "mock"},
 					OutputMode: AgentMockOutputMode{Instruction: ptr(AgentMockOutputModeInstruction("instruction"))},
-					Invention:  ptr(true),
+					Mode:       &AgentMockMode{Invention: ptr("invention")},
 				}}}},
 				State: FunctionsInventionsStateParamsStateOrRemoteCommitOptional{ParamsState: &FunctionsInventionsStateParamsState{
 					AlphaScalarLeaf: &FunctionsInventionsStateParamsStateAlphaScalarLeaf{
@@ -69,7 +69,7 @@ func TestFunctionsInventionsRecursiveHTTP(t *testing.T) {
 				Agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional{AgentBase: &AgentInlineAgentBaseWithFallbacks{AgentInlineAgentBase: AgentInlineAgentBase{Mock: &AgentMockAgentBase{
 					Upstream:   AgentMockUpstream{Mock: "mock"},
 					OutputMode: AgentMockOutputMode{Instruction: ptr(AgentMockOutputModeInstruction("instruction"))},
-					Invention:  ptr(true),
+					Mode:       &AgentMockMode{Invention: ptr("invention")},
 				}}}},
 				State: FunctionsInventionsStateParamsStateOrRemoteCommitOptional{ParamsState: &FunctionsInventionsStateParamsState{
 					AlphaVectorLeaf: &FunctionsInventionsStateParamsStateAlphaVectorLeaf{
@@ -106,7 +106,7 @@ func TestFunctionsInventionsRecursiveHTTP(t *testing.T) {
 				Agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional{AgentBase: &AgentInlineAgentBaseWithFallbacks{AgentInlineAgentBase: AgentInlineAgentBase{Mock: &AgentMockAgentBase{
 					Upstream:   AgentMockUpstream{Mock: "mock"},
 					OutputMode: AgentMockOutputMode{Instruction: ptr(AgentMockOutputModeInstruction("instruction"))},
-					Invention:  ptr(true),
+					Mode:       &AgentMockMode{Invention: ptr("invention")},
 				}}}},
 				State: FunctionsInventionsStateParamsStateOrRemoteCommitOptional{ParamsState: &FunctionsInventionsStateParamsState{
 					AlphaScalarLeaf: &FunctionsInventionsStateParamsStateAlphaScalarLeaf{
