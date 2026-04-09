@@ -1,9 +1,9 @@
 fn main() {
-    #[cfg(feature = "laboratories-local")]
+    #[cfg(feature = "orchestrator-bollard")]
     laboratories_local();
 }
 
-#[cfg(feature = "laboratories-local")]
+#[cfg(feature = "orchestrator-bollard")]
 fn laboratories_local() {
     let arch = std::env::var("CARGO_CFG_TARGET_ARCH").unwrap();
     let musl_target = format!("{arch}-unknown-linux-musl");

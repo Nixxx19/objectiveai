@@ -1,7 +1,7 @@
 mod client;
 mod error;
+#[cfg(feature = "orchestrator-bollard")]
 mod mcp_binary;
-pub mod orchestrator;
 pub mod usage_handler;
 
 pub use client::*;

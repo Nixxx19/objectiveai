@@ -91,7 +91,7 @@ where
     RETRM: crate::retrieval::retrieve::Client<CTXEXT> + Send + Sync + 'static,
     CUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
     LUSG: crate::laboratories::executions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
-    ORCH: super::orchestrator::Orchestrator<CTXEXT>,
+    ORCH: crate::laboratories::orchestrator::Orchestrator<CTXEXT>,
 {
     pub async fn create_streaming(
         self: Arc<Self>,
@@ -135,12 +135,16 @@ where
         }
 
         // Spawn builder environments and resolve agents concurrently
+        #[cfg(feature = "orchestrator-bollard")]
+        let binaries: &[(&str, &[u8])] = &[("objectiveai-mcp", super::mcp_binary::MCP_BINARY)];
+        #[cfg(not(feature = "orchestrator-bollard"))]
+        let binaries: &[(&str, &[u8])] = &[];
         let orchestrator_fut = self.orchestrator.spawn_builders(
             &ctx,
             &request.docker_image,
             request.builder_agents.len(),
             &id,
-            &[("objectiveai-mcp", super::mcp_binary::MCP_BINARY)],
+            binaries,
             &[("PORT", "3000")],
         );
         let builder_resolve_futs: Vec<_> = request
