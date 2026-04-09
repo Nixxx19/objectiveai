@@ -29,6 +29,21 @@
       ],
       "omitempty": true
     },
+    "mcp_servers": {
+      "description": "MCP servers the agent can connect to.",
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "agent.McpServer"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
     "mode": {
       "description": "Mock agent mode. Defaults to `default`.",
       "anyOf": [

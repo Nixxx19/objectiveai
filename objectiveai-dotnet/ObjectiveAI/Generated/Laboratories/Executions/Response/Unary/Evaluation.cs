@@ -18,9 +18,9 @@ namespace ObjectiveAI.Laboratories.Executions.Response.Unary;
 public partial class Evaluation
 {
     /// <summary>
-    /// Container index (0-based).
+    /// Agent index (0-based).
     /// </summary>
-    [Description("Container index (0-based).")]
+    [Description("Agent index (0-based).")]
     [JsonPropertyName("agent_index")]
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
     public ulong AgentIndex { get; set; } = default!;
@@ -37,6 +37,10 @@ public partial class Evaluation
     [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
     public ulong Created { get; set; } = default!;
 
+    /// <summary>
+    /// Error details if this completion failed.
+    /// </summary>
+    [Description("Error details if this completion failed.")]
     [JsonPropertyName("error")]
     [JsonSchemaNullable]
     public ResponseError? Error { get; set; } = null;
