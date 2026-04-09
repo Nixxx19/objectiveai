@@ -196,6 +196,9 @@ impl Commands {
             continuation,
         };
 
+        let log_writer = objectiveai::filesystem::logs::LogsClient::new(cli_config.config_base_dir.as_deref())
+            .write_function_execution();
+
         crate::api::run(|http_client| async move {
             let stream = objectiveai::functions::executions::create_function_execution_streaming(
                 &http_client, params,
@@ -209,6 +212,9 @@ impl Commands {
                 match &mut aggregated {
                     Some(agg) => agg.push(&chunk),
                     None => aggregated = Some(chunk),
+                }
+                if let Some(agg) = &aggregated {
+                    let _ = log_writer.write(agg).await;
                 }
             }
 

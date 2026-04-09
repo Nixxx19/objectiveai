@@ -155,6 +155,9 @@ impl Commands {
             continuation,
         };
 
+        let log_writer = objectiveai::filesystem::logs::LogsClient::new(cli_config.config_base_dir.as_deref())
+            .write_function_invention_recursive();
+
         crate::api::run(|http_client| async move {
             let stream = objectiveai::functions::inventions::recursive::create_function_invention_recursive_streaming(
                 &http_client, request,
@@ -168,6 +171,9 @@ impl Commands {
                 match &mut aggregated {
                     Some(agg) => agg.push(&chunk),
                     None => aggregated = Some(chunk),
+                }
+                if let Some(agg) = &aggregated {
+                    let _ = log_writer.write(agg).await;
                 }
             }
 

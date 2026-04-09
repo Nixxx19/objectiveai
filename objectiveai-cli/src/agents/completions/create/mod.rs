@@ -80,6 +80,9 @@ impl Commands {
             continuation,
         };
 
+        let log_writer = objectiveai::filesystem::logs::LogsClient::new(cli_config.config_base_dir.as_deref())
+            .write_agent_completion();
+
         crate::api::run(|http_client| async move {
             let stream = objectiveai::agent::completions::create_agent_completion_streaming(
                 &http_client, params,
@@ -93,6 +96,9 @@ impl Commands {
                 match &mut accumulated {
                     Some(agg) => agg.push(&chunk),
                     None => accumulated = Some(chunk),
+                }
+                if let Some(agg) = &accumulated {
+                    let _ = log_writer.write(agg).await;
                 }
             }
 

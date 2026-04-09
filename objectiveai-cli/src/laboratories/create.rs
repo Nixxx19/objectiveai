@@ -64,6 +64,9 @@ pub async fn handle(args: CreateArgs, cli_config: &crate::Config) -> Result<crat
         stream: Some(true),
     };
 
+    let log_writer = objectiveai::filesystem::logs::LogsClient::new(cli_config.config_base_dir.as_deref())
+        .write_laboratory_execution();
+
     crate::api::run(
         move |http_client| async move {
             let stream =
@@ -81,6 +84,9 @@ pub async fn handle(args: CreateArgs, cli_config: &crate::Config) -> Result<crat
                 match &mut accumulated {
                     Some(agg) => agg.push(&chunk),
                     None => accumulated = Some(chunk),
+                }
+                if let Some(agg) = &accumulated {
+                    let _ = log_writer.write(agg).await;
                 }
             }
 
