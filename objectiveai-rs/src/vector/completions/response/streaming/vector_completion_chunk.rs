@@ -127,9 +127,11 @@ impl VectorCompletionChunk {
 
     /// Produces the `(path, file_bytes)` pairs for the log file structure.
     ///
+    /// Returns `(reference, files)` where `reference` is a
+    /// `{"type": "reference", "path": ...}` JSON value.
     /// All paths are relative to the `logs/` root directory.
     #[cfg(feature = "filesystem")]
-    pub fn produce_files(&self) -> Option<Vec<(String, Vec<u8>)>> {
+    pub fn produce_files(&self) -> Option<(serde_json::Value, Vec<(String, Vec<u8>)>)> {
         const PREFIX: &str = "vector/completions/";
 
         let id = &self.id;
@@ -161,8 +163,8 @@ impl VectorCompletionChunk {
         };
         let mut root = serde_json::to_value(&shell).unwrap();
         root["completions"] = serde_json::Value::Array(completion_refs);
-        files.push((path, serde_json::to_vec_pretty(&root).unwrap()));
+        files.push((path.clone(), serde_json::to_vec_pretty(&root).unwrap()));
 
-        Some(files)
+        Some((serde_json::json!({ "type": "reference", "path": path }), files))
     }
 }
