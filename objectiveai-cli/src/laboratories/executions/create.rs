@@ -79,6 +79,7 @@ pub async fn handle(args: CreateArgs, cli_config: &crate::Config) -> Result<crat
             let mut accumulated: Option<
                 objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk,
             > = None;
+            let mut logged_path = false;
             while let Some(chunk) = stream.next().await {
                 let chunk = chunk?;
                 match &mut accumulated {
@@ -87,6 +88,12 @@ pub async fn handle(args: CreateArgs, cli_config: &crate::Config) -> Result<crat
                 }
                 if let Some(agg) = &accumulated {
                     let _ = log_writer.write(agg).await;
+                }
+                if !logged_path {
+                    if let Some(path) = log_writer.primary_path() {
+                        eprintln!("In progress. Logs available at {path}.");
+                        logged_path = true;
+                    }
                 }
             }
 

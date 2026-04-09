@@ -91,6 +91,7 @@ impl Commands {
 
             // Accumulate all chunks
             let mut accumulated: Option<objectiveai::agent::completions::response::streaming::AgentCompletionChunk> = None;
+            let mut logged_path = false;
             while let Some(chunk) = stream.next().await {
                 let chunk = chunk?;
                 match &mut accumulated {
@@ -99,6 +100,12 @@ impl Commands {
                 }
                 if let Some(agg) = &accumulated {
                     let _ = log_writer.write(agg).await;
+                }
+                if !logged_path {
+                    if let Some(path) = log_writer.primary_path() {
+                        eprintln!("In progress. Logs available at {path}.");
+                        logged_path = true;
+                    }
                 }
             }
 

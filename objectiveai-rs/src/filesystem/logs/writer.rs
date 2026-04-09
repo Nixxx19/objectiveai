@@ -9,6 +9,7 @@ use super::LogsError;
 pub struct LogWriter<C> {
     logs_dir: PathBuf,
     produce: fn(&C) -> Option<Vec<(String, Vec<u8>)>>,
+    primary_path: std::sync::OnceLock<String>,
 }
 
 impl<C> LogWriter<C> {
@@ -16,7 +17,14 @@ impl<C> LogWriter<C> {
         logs_dir: PathBuf,
         produce: fn(&C) -> Option<Vec<(String, Vec<u8>)>>,
     ) -> Self {
-        Self { logs_dir, produce }
+        Self { logs_dir, produce, primary_path: std::sync::OnceLock::new() }
+    }
+
+    /// The path of the primary (root) log file, relative to the logs directory.
+    ///
+    /// Returns `None` until at least one chunk has been written.
+    pub fn primary_path(&self) -> Option<&str> {
+        self.primary_path.get().map(|s| s.as_str())
     }
 
     /// Write a chunk to disk. All files are written concurrently.
@@ -25,6 +33,11 @@ impl<C> LogWriter<C> {
             Some(files) => files,
             None => return Ok(()),
         };
+
+        // The last file is always the root — capture its path on first write
+        if let Some((path, _)) = files.last() {
+            let _ = self.primary_path.set(path.clone());
+        }
 
         futures::future::try_join_all(files.into_iter().map(|(path, bytes)| {
             let full_path = self.logs_dir.join(path);

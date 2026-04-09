@@ -166,6 +166,7 @@ impl Commands {
 
             // Aggregate all chunks
             let mut aggregated: Option<objectiveai::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk> = None;
+            let mut logged_path = false;
             while let Some(chunk) = stream.next().await {
                 let chunk = chunk?;
                 match &mut aggregated {
@@ -174,6 +175,12 @@ impl Commands {
                 }
                 if let Some(agg) = &aggregated {
                     let _ = log_writer.write(agg).await;
+                }
+                if !logged_path {
+                    if let Some(path) = log_writer.primary_path() {
+                        eprintln!("In progress. Logs available at {path}.");
+                        logged_path = true;
+                    }
                 }
             }
 
