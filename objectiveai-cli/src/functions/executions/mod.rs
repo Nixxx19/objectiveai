@@ -1,4 +1,6 @@
 pub mod create;
+pub mod logs;
+pub mod retry_tokens;
 
 use clap::Subcommand;
 
@@ -9,12 +11,24 @@ pub enum Commands {
         #[command(subcommand)]
         command: create::Commands,
     },
+    /// Function execution logs
+    Logs {
+        #[command(subcommand)]
+        command: logs::Commands,
+    },
+    /// Retry tokens
+    RetryTokens {
+        #[command(subcommand)]
+        command: retry_tokens::Commands,
+    },
 }
 
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         match self {
             Commands::Create { command } => command.handle(cli_config).await,
+            Commands::Logs { command } => command.handle(cli_config).await,
+            Commands::RetryTokens { command } => command.handle(cli_config).await,
         }
     }
 }

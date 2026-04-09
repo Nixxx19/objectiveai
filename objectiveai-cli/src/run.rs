@@ -9,6 +9,7 @@ use crate::viewer;
 use crate::schemas;
 use crate::laboratories;
 use crate::logs;
+use crate::vector;
 use crate::error;
 
 #[derive(Envconfig)]
@@ -120,6 +121,11 @@ enum Commands {
         #[command(subcommand)]
         command: laboratories::Commands,
     },
+    /// Vector completions
+    Vector {
+        #[command(subcommand)]
+        command: vector::Commands,
+    },
     /// Browse and read logs
     Logs {
         #[command(subcommand)]
@@ -137,6 +143,7 @@ impl Commands {
             Commands::Viewer { command } => command.handle(cli_config).await,
             Commands::Schemas { command } => command.handle(),
             Commands::Laboratories { command } => command.handle(cli_config).await,
+            Commands::Vector { command } => command.handle(cli_config).await,
             Commands::Logs { command } => command.handle(cli_config).await,
         }
     }

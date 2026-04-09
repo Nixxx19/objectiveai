@@ -1,4 +1,5 @@
 pub mod config;
+pub mod logs;
 pub mod remote;
 pub mod recursive;
 
@@ -16,6 +17,11 @@ pub enum Commands {
         #[command(subcommand)]
         command: config::Commands,
     },
+    /// Read invention logs
+    Logs {
+        #[command(subcommand)]
+        command: logs::Commands,
+    },
     /// Inventions remote
     Remote {
         #[command(subcommand)]
@@ -28,6 +34,7 @@ impl Commands {
         match self {
             Commands::Recursive { command } => command.handle(cli_config).await,
             Commands::Config { command } => command.handle(cli_config).await,
+            Commands::Logs { command } => command.handle(cli_config).await,
             Commands::Remote { command } => command.handle(cli_config).await,
         }
     }
