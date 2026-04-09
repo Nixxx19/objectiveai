@@ -27,9 +27,9 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         match self {
-            Commands::Config { command } => command.handle(cli_config),
+            Commands::Config { command } => command.handle(cli_config).await,
         }
     }
 }

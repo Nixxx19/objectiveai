@@ -106,7 +106,7 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         let (agent_ref, continuation_args, seed, state) = match self {
             Commands::AlphaScalar { params, agent, continuation, seed } => {
                 let p = params.into_params();
@@ -133,11 +133,14 @@ impl Commands {
             }
         };
 
-        let agent = agent_ref.resolve()?;
+        let agent = agent_ref.resolve(|| async {
+            let (_, mut c) = crate::config::read(cli_config).await.unwrap();
+            c.agents().get_favorites().to_vec()
+        }).await?;
         let continuation = continuation_args.resolve()?;
 
         // Read remote from config
-        let (_, mut config) = crate::config::read()?;
+        let (_, mut config) = crate::config::read(cli_config).await?;
         let remote = config.functions().inventions().get_remote();
 
         let request = objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams {

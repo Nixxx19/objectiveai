@@ -33,8 +33,8 @@ pub enum Commands {
     },
 }
 
-fn get_favorites() -> Vec<objectiveai::config::Favorite> {
-    let (_, mut config) = crate::config::read().unwrap();
+async fn get_favorites(cli_config: &crate::Config) -> Vec<objectiveai::filesystem::config::Favorite> {
+    let (_, mut config) = crate::config::read(cli_config).await.unwrap();
     config.agents().get_favorites().to_vec()
 }
 
@@ -53,7 +53,7 @@ impl Commands {
     pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         match self {
             Commands::Get { args } => {
-                let path = args.resolve(get_favorites)?;
+                let path = args.resolve(|| get_favorites(cli_config)).await?;
                 crate::api::run(|http_client| async move {
                     let response = objectiveai::agent::get_agent(&http_client, path).await?;
                     Ok(serde_json::to_string(&response).unwrap())
@@ -62,19 +62,19 @@ impl Commands {
             Commands::List { source } => {
                 use objectiveai::agent::request::ListAgentsSource;
                 match source {
-                    crate::list::Source::Favorites => crate::list::favorites(get_favorites),
+                    crate::list::Source::Favorites => crate::list::favorites(|| get_favorites(cli_config)).await,
                     crate::list::Source::Filesystem => crate::list::single(|c| Box::pin(list_source(c, ListAgentsSource::Filesystem))).await,
                     crate::list::Source::Objectiveai => crate::list::single(|c| Box::pin(list_source(c, ListAgentsSource::Objectiveai))).await,
                     crate::list::Source::All => crate::list::all(
-                        get_favorites,
+                        || get_favorites(cli_config),
                         |c| Box::pin(list_source(c, ListAgentsSource::Filesystem)),
                         |c| Box::pin(list_source(c, ListAgentsSource::Objectiveai)),
                     ).await,
                 }
             }
-            Commands::Completions { command } => command.handle().await,
-            Commands::Config { command } => command.handle(),
-            Commands::Favorites { command } => command.handle(cli_config),
+            Commands::Completions { command } => command.handle(cli_config).await,
+            Commands::Config { command } => command.handle(cli_config).await,
+            Commands::Favorites { command } => command.handle(cli_config).await,
         }
     }
 }

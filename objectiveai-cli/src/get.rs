@@ -9,11 +9,15 @@ pub struct GetArgs {
 }
 
 impl GetArgs {
-    pub fn resolve(
+    pub async fn resolve<F, Fut>(
         self,
-        get_favorites: impl FnOnce() -> Vec<objectiveai::config::Favorite>,
-    ) -> Result<objectiveai::RemotePathCommitOptional, crate::error::Error> {
-        self.path.resolve(get_favorites)
+        get_favorites: F,
+    ) -> Result<objectiveai::RemotePathCommitOptional, crate::error::Error>
+    where
+        F: FnOnce() -> Fut,
+        Fut: std::future::Future<Output = Vec<objectiveai::filesystem::config::Favorite>>,
+    {
+        self.path.resolve(get_favorites).await
     }
 }
 
@@ -32,12 +36,16 @@ pub struct GetPairArgs {
 }
 
 impl GetPairArgs {
-    pub fn resolve(
+    pub async fn resolve<F, Fut>(
         self,
-        get_favorites: impl FnOnce() -> Vec<objectiveai::config::PairFavorite>,
-    ) -> Result<(objectiveai::RemotePathCommitOptional, objectiveai::RemotePathCommitOptional), crate::error::Error> {
+        get_favorites: F,
+    ) -> Result<(objectiveai::RemotePathCommitOptional, objectiveai::RemotePathCommitOptional), crate::error::Error>
+    where
+        F: FnOnce() -> Fut,
+        Fut: std::future::Future<Output = Vec<objectiveai::filesystem::config::PairFavorite>>,
+    {
         if let Some(name) = self.favorite {
-            let favorites = get_favorites();
+            let favorites = get_favorites().await;
             let fav = favorites.into_iter().find(|f| f.get_name() == name)
                 .ok_or_else(|| crate::error::Error::FavoriteNotFound(name))?;
             Ok((fav.function.clone(), fav.profile.clone()))

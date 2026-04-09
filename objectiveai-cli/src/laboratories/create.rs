@@ -10,17 +10,25 @@ struct ResultItem {
     error: Option<objectiveai::error::ResponseError>,
 }
 
-pub async fn handle(args: CreateArgs) -> Result<crate::Output, crate::error::Error> {
-    let builder_agents: Vec<_> = args
-        .builder_agent
-        .iter()
-        .map(|a| a.clone().resolve())
-        .collect::<Result<Vec<_>, _>>()?;
+pub async fn handle(args: CreateArgs, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
+    let mut builder_agents = Vec::with_capacity(args.builder_agent.len());
+    for a in &args.builder_agent {
+        builder_agents.push(a.clone().resolve(|| async {
+            let (_, mut c) = crate::config::read(cli_config).await.unwrap();
+            c.agents().get_favorites().to_vec()
+        }).await?);
+    }
 
     // Keep original agent refs for the final output (in arg order)
     let original_agents = builder_agents.clone();
 
-    let evaluation_agent = args.evaluation_agent.map(|a| a.resolve()).transpose()?;
+    let evaluation_agent = match args.evaluation_agent {
+        Some(a) => Some(a.resolve(|| async {
+            let (_, mut c) = crate::config::read(cli_config).await.unwrap();
+            c.agents().get_favorites().to_vec()
+        }).await?),
+        None => None,
+    };
     let builder_messages = args.builder_messages.resolve()?;
     let evaluation_messages = args.evaluation_messages.resolve()?;
     let evaluation_output_schema = args.evaluation_output_schema.resolve()?;

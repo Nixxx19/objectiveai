@@ -54,7 +54,7 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         let (message_source, agent_ref, continuation_args, response_format_args, seed) = match self {
             Commands::Standard { messages, agent, continuation, response_format, seed } => {
                 (messages, agent, continuation, response_format, seed)
@@ -62,7 +62,10 @@ impl Commands {
         };
 
         let messages = message_source.resolve()?;
-        let agent = agent_ref.resolve()?;
+        let agent = agent_ref.resolve(|| async {
+            let (_, mut c) = crate::config::read(cli_config).await.unwrap();
+            c.agents().get_favorites().to_vec()
+        }).await?;
         let continuation = continuation_args.resolve()?;
         let response_format = response_format_args.resolve()?
             .map(objectiveai::agent::completions::request::ResponseFormatParam::Single);

@@ -153,27 +153,27 @@ pub enum Commands {
     },
 }
 
-fn fn_favorites() -> Vec<objectiveai::config::Favorite> {
-    let (_, mut config) = crate::config::read().unwrap();
+async fn fn_favorites(cli_config: &crate::Config) -> Vec<objectiveai::filesystem::config::Favorite> {
+    let (_, mut config) = crate::config::read(cli_config).await.unwrap();
     config.functions().get_favorites().to_vec()
 }
 
-fn profile_favorites() -> Vec<objectiveai::config::Favorite> {
-    let (_, mut config) = crate::config::read().unwrap();
+async fn profile_favorites(cli_config: &crate::Config) -> Vec<objectiveai::filesystem::config::Favorite> {
+    let (_, mut config) = crate::config::read(cli_config).await.unwrap();
     config.functions().profiles().get_favorites().to_vec()
 }
 
 impl Commands {
-    pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         let (function_path, profile_path, input_source, continuation_args, retry_token, seed, strategy) = match self {
             Commands::Standard { function, profile, input, continuation, retry_token, seed } => {
-                let fp = function.resolve(fn_favorites)?;
-                let pp = profile.resolve(profile_favorites)?;
+                let fp = function.resolve(|| fn_favorites(cli_config)).await?;
+                let pp = profile.resolve(|| profile_favorites(cli_config)).await?;
                 (fp, pp, input, continuation, retry_token, seed, objectiveai::functions::executions::request::Strategy::Default)
             }
             Commands::SwissSystem { function, profile, input, continuation, retry_token, seed, pool, rounds } => {
-                let fp = function.resolve(fn_favorites)?;
-                let pp = profile.resolve(profile_favorites)?;
+                let fp = function.resolve(|| fn_favorites(cli_config)).await?;
+                let pp = profile.resolve(|| profile_favorites(cli_config)).await?;
                 let strategy = objectiveai::functions::executions::request::Strategy::SwissSystem { pool, rounds };
                 (fp, pp, input, continuation, retry_token, seed, strategy)
             }

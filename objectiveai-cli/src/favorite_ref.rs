@@ -31,12 +31,16 @@ impl std::fmt::Display for FavoriteRef {
 
 impl FavoriteRef {
     /// Resolve to a remote path. If `favorite=` is set, looks up the name in the provided favorites list.
-    pub fn resolve(
+    pub async fn resolve<F, Fut>(
         self,
-        get_favorites: impl FnOnce() -> Vec<objectiveai::config::Favorite>,
-    ) -> Result<objectiveai::RemotePathCommitOptional, crate::error::Error> {
+        get_favorites: F,
+    ) -> Result<objectiveai::RemotePathCommitOptional, crate::error::Error>
+    where
+        F: FnOnce() -> Fut,
+        Fut: std::future::Future<Output = Vec<objectiveai::filesystem::config::Favorite>>,
+    {
         if let Some(fav_name) = self.0.favorite {
-            let favorites = get_favorites();
+            let favorites = get_favorites().await;
             let fav = favorites
                 .into_iter()
                 .find(|f| f.get_name() == fav_name)

@@ -21,16 +21,18 @@ impl std::fmt::Display for AgentRef {
 }
 
 impl AgentRef {
-    pub fn resolve(
+    pub async fn resolve<F, Fut>(
         self,
+        get_favorites: F,
     ) -> Result<
         objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
         crate::error::Error,
-    > {
-        let path = self.0.resolve(|| {
-            let (_, mut config) = crate::config::read().unwrap();
-            config.agents().get_favorites().to_vec()
-        })?;
+    >
+    where
+        F: FnOnce() -> Fut,
+        Fut: std::future::Future<Output = Vec<objectiveai::filesystem::config::Favorite>>,
+    {
+        let path = self.0.resolve(get_favorites).await?;
         Ok(
             objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::Remote(path),
         )

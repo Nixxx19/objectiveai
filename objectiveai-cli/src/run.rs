@@ -14,6 +14,8 @@ use crate::error;
 struct EnvConfigBuilder {
     #[envconfig(from = "CONFIG_SET_FORBIDDEN")]
     config_set_forbidden: Option<String>,
+    #[envconfig(from = "CONFIG_BASE_DIR")]
+    config_base_dir: Option<String>,
 }
 
 impl EnvConfigBuilder {
@@ -24,6 +26,7 @@ impl EnvConfigBuilder {
         }
         ConfigBuilder {
             config_set_forbidden: self.config_set_forbidden.map(|s| parse_bool(&s)),
+            config_base_dir: self.config_base_dir,
         }
     }
 }
@@ -31,6 +34,7 @@ impl EnvConfigBuilder {
 #[derive(Default)]
 pub struct ConfigBuilder {
     pub config_set_forbidden: Option<bool>,
+    pub config_base_dir: Option<String>,
 }
 
 impl Envconfig for ConfigBuilder {
@@ -52,12 +56,14 @@ impl ConfigBuilder {
     pub fn build(self) -> Config {
         Config {
             config_set_forbidden: self.config_set_forbidden.unwrap_or(false),
+            config_base_dir: self.config_base_dir,
         }
     }
 }
 
 pub struct Config {
     pub config_set_forbidden: bool,
+    pub config_base_dir: Option<String>,
 }
 
 #[derive(Parser)]
@@ -117,11 +123,11 @@ enum Commands {
 impl Commands {
     pub async fn handle(self, cli_config: &Config) -> Result<Output, error::Error> {
         match self {
-            Commands::Api { command } => command.handle(cli_config),
+            Commands::Api { command } => command.handle(cli_config).await,
             Commands::Agents { command } => command.handle(cli_config).await,
             Commands::Swarms { command } => command.handle(cli_config).await,
             Commands::Functions { command } => command.handle(cli_config).await,
-            Commands::Viewer { command } => command.handle(cli_config),
+            Commands::Viewer { command } => command.handle(cli_config).await,
             Commands::Schemas { command } => command.handle(),
             Commands::Laboratories { command } => command.handle(cli_config).await,
         }
