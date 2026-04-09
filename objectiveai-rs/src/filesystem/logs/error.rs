@@ -12,4 +12,6 @@ pub enum LogsError {
     Write(std::path::PathBuf, std::io::Error),
     #[error("log not found: {0}")]
     NotFound(String),
+    #[error("invalid path: {0}")]
+    InvalidPath(String),
 }

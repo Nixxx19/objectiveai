@@ -2,6 +2,14 @@ use std::path::PathBuf;
 
 use super::{ListItem, LogsError};
 
+/// Result of reading a log file — either parsed JSON or a data URL.
+#[derive(Debug)]
+pub enum LogContent {
+    Json(serde_json::Value),
+    /// A `data:{mime};base64,{payload}` string.
+    DataUrl(String),
+}
+
 #[derive(Debug, Clone)]
 pub struct LogsClient {
     base_dir: PathBuf,
@@ -129,5 +137,140 @@ impl LogsClient {
 
     pub fn write_laboratory_execution(&self) -> super::LogWriter<crate::laboratories::executions::response::streaming::LaboratoryExecutionChunk> {
         super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
+    }
+
+    // -----------------------------------------------------------------------
+    // Read helpers
+    // -----------------------------------------------------------------------
+
+    async fn read_json(&self, path: &str, filename: &str) -> Result<serde_json::Value, LogsError> {
+        let full = self.logs_dir().join(path).join(format!("{filename}.json"));
+        let bytes = tokio::fs::read(&full).await
+            .map_err(|e| LogsError::Read(full.clone(), e))?;
+        serde_json::from_slice(&bytes)
+            .map_err(|e| LogsError::Parse(full, e))
+    }
+
+    async fn read_data_url(&self, path: &str, filename: &str) -> Result<String, LogsError> {
+        use base64::Engine;
+        let full = self.logs_dir().join(path).join(filename);
+        let bytes = tokio::fs::read(&full).await
+            .map_err(|e| LogsError::Read(full.clone(), e))?;
+        let mime = mime_guess::from_path(&full)
+            .first_or_octet_stream()
+            .to_string();
+        let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
+        Ok(format!("data:{mime};base64,{b64}"))
+    }
+
+    // -----------------------------------------------------------------------
+    // Read methods — agent completions
+    // -----------------------------------------------------------------------
+
+    pub async fn read_agent_completion(&self, filename: &str) -> Result<serde_json::Value, LogsError> {
+        self.read_json("agent/completions", filename).await
+    }
+
+    pub async fn read_agent_completion_continuation(&self, filename: &str) -> Result<serde_json::Value, LogsError> {
+        self.read_json("agent/completions/continuation", filename).await
+    }
+
+    pub async fn read_agent_completion_message(&self, filename: &str) -> Result<serde_json::Value, LogsError> {
+        self.read_json("agent/completions/messages", filename).await
+    }
+
+    pub async fn read_agent_completion_message_logprobs(&self, filename: &str) -> Result<serde_json::Value, LogsError> {
+        self.read_json("agent/completions/messages/logprobs", filename).await
+    }
+
+    pub async fn read_agent_completion_message_image(&self, filename: &str) -> Result<String, LogsError> {
+        self.read_data_url("agent/completions/messages/image", filename).await
+    }
+
+    pub async fn read_agent_completion_message_audio(&self, filename: &str) -> Result<String, LogsError> {
+        self.read_data_url("agent/completions/messages/audio", filename).await
+    }
+
+    pub async fn read_agent_completion_message_video(&self, filename: &str) -> Result<String, LogsError> {
+        self.read_data_url("agent/completions/messages/video", filename).await
+    }
+
+    pub async fn read_agent_completion_message_file(&self, filename: &str) -> Result<String, LogsError> {
+        self.read_data_url("agent/completions/messages/file", filename).await
+    }
+
+    // -----------------------------------------------------------------------
+    // Read methods — vector completions
+    // -----------------------------------------------------------------------
+
+    pub async fn read_vector_completion(&self, filename: &str) -> Result<serde_json::Value, LogsError> {
+        self.read_json("vector/completions", filename).await
+    }
+
+    // -----------------------------------------------------------------------
+    // Read methods — function executions
+    // -----------------------------------------------------------------------
+
+    pub async fn read_function_execution(&self, filename: &str) -> Result<serde_json::Value, LogsError> {
+        self.read_json("functions/executions", filename).await
+    }
+
+    pub async fn read_function_execution_retry_token(&self, filename: &str) -> Result<serde_json::Value, LogsError> {
+        self.read_json("functions/executions/retry_token", filename).await
+    }
+
+    // -----------------------------------------------------------------------
+    // Read methods — function inventions
+    // -----------------------------------------------------------------------
+
+    pub async fn read_function_invention(&self, filename: &str) -> Result<serde_json::Value, LogsError> {
+        self.read_json("functions/inventions", filename).await
+    }
+
+    // -----------------------------------------------------------------------
+    // Read methods — function inventions recursive
+    // -----------------------------------------------------------------------
+
+    pub async fn read_function_invention_recursive(&self, filename: &str) -> Result<serde_json::Value, LogsError> {
+        self.read_json("functions/inventions/recursive", filename).await
+    }
+
+    // -----------------------------------------------------------------------
+    // Read methods — laboratory executions
+    // -----------------------------------------------------------------------
+
+    pub async fn read_laboratory_execution(&self, filename: &str) -> Result<serde_json::Value, LogsError> {
+        self.read_json("laboratories/executions", filename).await
+    }
+
+    // -----------------------------------------------------------------------
+    // Generic read
+    // -----------------------------------------------------------------------
+
+    /// Read any log file by its full path (relative to `logs/`).
+    ///
+    /// The path is split into the directory portion and filename.
+    /// Returns `LogContent::Json` for JSON files, `LogContent::Bytes` for media.
+    pub async fn read(&self, path: &str) -> Result<LogContent, LogsError> {
+        let (dir, filename) = path.rsplit_once('/')
+            .ok_or_else(|| LogsError::InvalidPath(path.to_string()))?;
+
+        match dir {
+            "agent/completions" => self.read_agent_completion(filename).await.map(LogContent::Json),
+            "agent/completions/continuation" => self.read_agent_completion_continuation(filename).await.map(LogContent::Json),
+            "agent/completions/messages" => self.read_agent_completion_message(filename).await.map(LogContent::Json),
+            "agent/completions/messages/logprobs" => self.read_agent_completion_message_logprobs(filename).await.map(LogContent::Json),
+            "agent/completions/messages/image" => self.read_agent_completion_message_image(filename).await.map(LogContent::DataUrl),
+            "agent/completions/messages/audio" => self.read_agent_completion_message_audio(filename).await.map(LogContent::DataUrl),
+            "agent/completions/messages/video" => self.read_agent_completion_message_video(filename).await.map(LogContent::DataUrl),
+            "agent/completions/messages/file" => self.read_agent_completion_message_file(filename).await.map(LogContent::DataUrl),
+            "vector/completions" => self.read_vector_completion(filename).await.map(LogContent::Json),
+            "functions/executions" => self.read_function_execution(filename).await.map(LogContent::Json),
+            "functions/executions/retry_token" => self.read_function_execution_retry_token(filename).await.map(LogContent::Json),
+            "functions/inventions" => self.read_function_invention(filename).await.map(LogContent::Json),
+            "functions/inventions/recursive" => self.read_function_invention_recursive(filename).await.map(LogContent::Json),
+            "laboratories/executions" => self.read_laboratory_execution(filename).await.map(LogContent::Json),
+            _ => Err(LogsError::InvalidPath(path.to_string())),
+        }
     }
 }
