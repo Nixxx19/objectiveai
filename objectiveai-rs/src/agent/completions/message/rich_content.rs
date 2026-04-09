@@ -556,6 +556,17 @@ impl ImageUrl {
     pub fn is_empty(&self) -> bool {
         self.url.is_empty() && self.detail.is_none()
     }
+
+    /// Returns extractable file content if this is a base64 data URL.
+    ///
+    /// HTTP/HTTPS URLs return `None` (kept inline).
+    pub fn file_content(&self) -> Option<super::FileContent<'_>> {
+        let (mime, payload) = super::file_content::parse_data_url(&self.url)?;
+        Some(super::FileContent {
+            content: payload,
+            extension: super::file_content::mime_to_ext(mime),
+        })
+    }
 }
 
 impl ToStarlarkValue for ImageUrl {
@@ -684,6 +695,20 @@ impl InputAudio {
     pub fn is_empty(&self) -> bool {
         self.data.is_empty() && self.format.is_empty()
     }
+
+    /// Returns extractable file content if audio data is present.
+    ///
+    /// Audio is always base64-encoded inline, so this returns `Some`
+    /// whenever `data` is non-empty.
+    pub fn file_content(&self) -> Option<super::FileContent<'_>> {
+        if self.data.is_empty() {
+            return None;
+        }
+        Some(super::FileContent {
+            content: &self.data,
+            extension: if self.format.is_empty() { "bin" } else { &self.format },
+        })
+    }
 }
 
 impl ToStarlarkValue for InputAudio {
@@ -747,6 +772,17 @@ impl VideoUrl {
     /// Returns `true` if the URL is empty.
     pub fn is_empty(&self) -> bool {
         self.url.is_empty()
+    }
+
+    /// Returns extractable file content if this is a base64 data URL.
+    ///
+    /// HTTP/HTTPS URLs return `None` (kept inline).
+    pub fn file_content(&self) -> Option<super::FileContent<'_>> {
+        let (mime, payload) = super::file_content::parse_data_url(&self.url)?;
+        Some(super::FileContent {
+            content: payload,
+            extension: super::file_content::mime_to_ext(mime),
+        })
     }
 }
 
@@ -841,6 +877,24 @@ impl File {
             && self.file_id.is_none()
             && self.filename.is_none()
             && self.file_url.is_none()
+    }
+
+    /// Returns extractable file content if inline file data is present.
+    ///
+    /// Files referenced only by URL or ID return `None` (kept inline).
+    pub fn file_content(&self) -> Option<super::FileContent<'_>> {
+        let data = self.file_data.as_deref()?;
+        if data.is_empty() {
+            return None;
+        }
+        let ext = self.filename.as_deref()
+            .and_then(|name| name.rsplit_once('.'))
+            .map(|(_, ext)| ext)
+            .unwrap_or("bin");
+        Some(super::FileContent {
+            content: data,
+            extension: ext,
+        })
     }
 }
 
