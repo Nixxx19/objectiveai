@@ -21,7 +21,7 @@ impl Commands {
                 let content = client.read_function_invention_recursive(&filename).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
                 Ok(crate::Output::LogsGet(content))
             }
-            Commands::List { offset, limit } => Ok(crate::Output::LogsList(client.list_function_inventions_recursive(offset, limit)?)),
+            Commands::List { offset, limit } => Ok(crate::Output::LogsList(client.list_function_inventions_recursive(offset, limit).await?)),
         }
     }
 }

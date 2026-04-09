@@ -44,16 +44,19 @@ impl LogsClient {
         dir
     }
 
-    fn list_endpoint(&self, endpoint: &str, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
+    async fn list_endpoint(&self, endpoint: &str, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
         let dir = self.endpoint_dir(endpoint);
-        if !dir.exists() {
-            return Ok(Vec::new());
+        match tokio::fs::metadata(&dir).await {
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(Vec::new()),
+            Err(e) => return Err(LogsError::ReadDir(dir, e)),
+            Ok(_) => {}
         }
+        let mut read_dir = tokio::fs::read_dir(&dir).await
+            .map_err(|e| LogsError::ReadDir(dir.clone(), e))?;
         let mut items = Vec::new();
-        for entry in std::fs::read_dir(&dir)
+        while let Some(entry) = read_dir.next_entry().await
             .map_err(|e| LogsError::ReadDir(dir.clone(), e))?
         {
-            let entry = entry.map_err(|e| LogsError::ReadDir(dir.clone(), e))?;
             let path = entry.path();
             if path.extension().and_then(|e| e.to_str()) != Some("json") {
                 continue;
@@ -62,7 +65,7 @@ impl LogsClient {
                 Some(s) => s.to_string(),
                 None => continue,
             };
-            let metadata = std::fs::metadata(&path)
+            let metadata = tokio::fs::metadata(&path).await
                 .map_err(|e| LogsError::Read(path.clone(), e))?;
             let created = metadata.modified()
                 .unwrap_or(std::time::SystemTime::UNIX_EPOCH)
@@ -82,32 +85,32 @@ impl LogsClient {
     // List methods
     // -----------------------------------------------------------------------
 
-    pub fn list_agent_completions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
-        self.list_endpoint("agent/completions", offset, limit)
+    pub async fn list_agent_completions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
+        self.list_endpoint("agent/completions", offset, limit).await
     }
 
-    pub fn list_vector_completions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
-        self.list_endpoint("vector/completions", offset, limit)
+    pub async fn list_vector_completions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
+        self.list_endpoint("vector/completions", offset, limit).await
     }
 
-    pub fn list_function_executions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
-        self.list_endpoint("functions/executions", offset, limit)
+    pub async fn list_function_executions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
+        self.list_endpoint("functions/executions", offset, limit).await
     }
 
-    pub fn list_function_inventions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
-        self.list_endpoint("functions/inventions", offset, limit)
+    pub async fn list_function_inventions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
+        self.list_endpoint("functions/inventions", offset, limit).await
     }
 
-    pub fn list_function_inventions_recursive(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
-        self.list_endpoint("functions/inventions/recursive", offset, limit)
+    pub async fn list_function_inventions_recursive(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
+        self.list_endpoint("functions/inventions/recursive", offset, limit).await
     }
 
-    // pub fn list_function_profile_computations(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
-    //     self.list_endpoint("functions/profiles/computations", offset, limit)
+    // pub async fn list_function_profile_computations(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
+    //     self.list_endpoint("functions/profiles/computations", offset, limit).await
     // }
 
-    pub fn list_laboratory_executions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
-        self.list_endpoint("laboratories/executions", offset, limit)
+    pub async fn list_laboratory_executions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, LogsError> {
+        self.list_endpoint("laboratories/executions", offset, limit).await
     }
 
     // -----------------------------------------------------------------------

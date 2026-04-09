@@ -22,7 +22,7 @@ impl Commands {
                 Ok(crate::Output::LogsGet(content))
             }
             Commands::List { offset, limit } => {
-                Ok(crate::Output::LogsList(client.list_agent_completions(offset, limit)?))
+                Ok(crate::Output::LogsList(client.list_agent_completions(offset, limit).await?))
             }
         }
     }

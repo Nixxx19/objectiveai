@@ -21,7 +21,7 @@ impl Commands {
                 let content = client.read_vector_completion(&filename).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
                 Ok(crate::Output::LogsGet(content))
             }
-            Commands::List { offset, limit } => Ok(crate::Output::LogsList(client.list_vector_completions(offset, limit)?)),
+            Commands::List { offset, limit } => Ok(crate::Output::LogsList(client.list_vector_completions(offset, limit).await?)),
         }
     }
 }

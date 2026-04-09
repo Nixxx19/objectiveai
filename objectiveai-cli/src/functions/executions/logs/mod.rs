@@ -21,7 +21,7 @@ impl Commands {
                 let content = client.read_function_execution(&filename).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
                 Ok(crate::Output::LogsGet(content))
             }
-            Commands::List { offset, limit } => Ok(crate::Output::LogsList(client.list_function_executions(offset, limit)?)),
+            Commands::List { offset, limit } => Ok(crate::Output::LogsList(client.list_function_executions(offset, limit).await?)),
         }
     }
 }
