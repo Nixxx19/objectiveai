@@ -365,6 +365,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::filesystem::config::ViewerMode),
             schemars::schema_for!(crate::filesystem::config::ViewerConfig),
             schemars::schema_for!(crate::filesystem::config::ViewerLocalConfig),
+            schemars::schema_for!(crate::filesystem::logs::ListItem),
         ]);
     }
     schemas
