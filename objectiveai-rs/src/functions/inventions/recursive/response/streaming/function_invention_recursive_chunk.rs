@@ -72,4 +72,42 @@ impl FunctionInventionRecursiveChunk {
             push_invention(&mut self.inventions, other);
         }
     }
+
+    /// Produces the `(path, file_bytes)` pairs for the log file structure.
+    ///
+    /// Returns `(reference, files)`. All paths relative to `logs/`.
+    #[cfg(feature = "filesystem")]
+    pub fn produce_files(&self) -> Option<(serde_json::Value, Vec<(String, Vec<u8>)>)> {
+        const PREFIX: &str = "functions/inventions/recursive/";
+
+        let id = &self.id;
+        if id.is_empty() {
+            return None;
+        }
+
+        let path = format!("{PREFIX}{id}.json");
+        let mut files: Vec<(String, Vec<u8>)> = Vec::new();
+        let mut invention_refs: Vec<serde_json::Value> = Vec::new();
+
+        for invention in &self.inventions {
+            let (reference, invention_files) = invention.produce_files();
+            invention_refs.push(reference);
+            files.extend(invention_files);
+        }
+
+        // Serialize a shell without inventions to avoid double-serialization
+        let shell = FunctionInventionRecursiveChunk {
+            id: self.id.clone(),
+            inventions: Vec::new(),
+            inventions_errors: self.inventions_errors,
+            created: self.created,
+            object: self.object,
+            usage: self.usage.clone(),
+        };
+        let mut root = serde_json::to_value(&shell).unwrap();
+        root["inventions"] = serde_json::Value::Array(invention_refs);
+        files.push((path.clone(), serde_json::to_vec_pretty(&root).unwrap()));
+
+        Some((serde_json::json!({ "type": "reference", "path": path }), files))
+    }
 }
