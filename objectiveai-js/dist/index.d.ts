@@ -2212,6 +2212,10 @@ declare const AgentCompletionsRequestAgentCompletionCreateParamsSchema: z.ZodObj
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -2765,6 +2769,10 @@ declare const AgentCompletionsRequestAgentCompletionCreateParamsSchema: z.ZodObj
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -4792,6 +4800,10 @@ declare const AgentCompletionsRequestAgentCompletionCreateParamsStreamingSchema:
     }, z$1.core.$strip>, z$1.ZodObject<{
         error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
         error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
+        mcp_servers: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodArray<z$1.ZodObject<{
+            authorization: z$1.ZodDefault<z$1.ZodBoolean>;
+            url: z$1.ZodString;
+        }, z$1.core.$strip>>>>;
         mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -5345,6 +5357,10 @@ declare const AgentCompletionsRequestAgentCompletionCreateParamsStreamingSchema:
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
+            mcp_servers: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodArray<z$1.ZodObject<{
+                authorization: z$1.ZodDefault<z$1.ZodBoolean>;
+                url: z$1.ZodString;
+            }, z$1.core.$strip>>>>;
             mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -6112,6 +6128,10 @@ declare const AgentCompletionsRequestAgentCompletionCreateParamsUnarySchema: z$1
     }, z$1.core.$strip>, z$1.ZodObject<{
         error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
         error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
+        mcp_servers: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodArray<z$1.ZodObject<{
+            authorization: z$1.ZodDefault<z$1.ZodBoolean>;
+            url: z$1.ZodString;
+        }, z$1.core.$strip>>>>;
         mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -6665,6 +6685,10 @@ declare const AgentCompletionsRequestAgentCompletionCreateParamsUnarySchema: z$1
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
+            mcp_servers: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodArray<z$1.ZodObject<{
+                authorization: z$1.ZodDefault<z$1.ZodBoolean>;
+                url: z$1.ZodString;
+            }, z$1.core.$strip>>>>;
             mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -6895,6 +6919,10 @@ declare const AgentMockAgentSchema: z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -6910,6 +6938,10 @@ type AgentMockAgent = z.infer<typeof AgentMockAgentSchema>;
 declare const AgentMockAgentBaseSchema: z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -8742,6 +8774,10 @@ declare const AgentAgentSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodUnio
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -9299,6 +9335,10 @@ declare const AgentAgentSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodUnio
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -9854,6 +9894,10 @@ declare const AgentAgentBaseSchema: z.ZodUnion<readonly [z.ZodIntersection<z.Zod
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -10408,6 +10452,10 @@ declare const AgentAgentBaseSchema: z.ZodUnion<readonly [z.ZodIntersection<z.Zod
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -10966,6 +11014,10 @@ declare const AgentAgentWithFallbacksSchema: z.ZodUnion<readonly [z.ZodIntersect
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -11522,6 +11574,10 @@ declare const AgentAgentWithFallbacksSchema: z.ZodUnion<readonly [z.ZodIntersect
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -12080,6 +12136,10 @@ declare const AgentAgentWithFallbacksSchema: z.ZodUnion<readonly [z.ZodIntersect
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -12636,6 +12696,10 @@ declare const AgentAgentWithFallbacksSchema: z.ZodUnion<readonly [z.ZodIntersect
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -13195,6 +13259,10 @@ declare const AgentAgentWithFallbacksWithCountSchema: z.ZodIntersection<z.ZodUni
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -13751,6 +13819,10 @@ declare const AgentAgentWithFallbacksWithCountSchema: z.ZodIntersection<z.ZodUni
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -14309,6 +14381,10 @@ declare const AgentAgentWithFallbacksWithCountSchema: z.ZodIntersection<z.ZodUni
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -14865,6 +14941,10 @@ declare const AgentAgentWithFallbacksWithCountSchema: z.ZodIntersection<z.ZodUni
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -15737,6 +15817,10 @@ declare const AgentInlineAgentSchema: z.ZodUnion<readonly [z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -16292,6 +16376,10 @@ declare const AgentInlineAgentBaseSchema: z.ZodUnion<readonly [z.ZodObject<{
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -16847,6 +16935,10 @@ declare const AgentInlineAgentBaseWithFallbacksSchema: z.ZodIntersection<z.ZodUn
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -17400,6 +17492,10 @@ declare const AgentInlineAgentBaseWithFallbacksSchema: z.ZodIntersection<z.ZodUn
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -17956,6 +18052,10 @@ declare const AgentInlineAgentBaseWithFallbacksOrRemoteSchema: z.ZodUnion<readon
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -18509,6 +18609,10 @@ declare const AgentInlineAgentBaseWithFallbacksOrRemoteSchema: z.ZodUnion<readon
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -19078,6 +19182,10 @@ declare const AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema: z.Z
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -19631,6 +19739,10 @@ declare const AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema: z.Z
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -20200,6 +20312,10 @@ declare const AgentInlineAgentBaseWithFallbacksOrRemoteWithCountSchema: z.ZodInt
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -20753,6 +20869,10 @@ declare const AgentInlineAgentBaseWithFallbacksOrRemoteWithCountSchema: z.ZodInt
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -21327,6 +21447,10 @@ declare const AgentInlineAgentWithFallbacksSchema: z.ZodIntersection<z.ZodUnion<
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -21883,6 +22007,10 @@ declare const AgentInlineAgentWithFallbacksSchema: z.ZodIntersection<z.ZodUnion<
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -22487,6 +22615,10 @@ declare const AgentRemoteAgentSchema: z.ZodIntersection<z.ZodUnion<readonly [z.Z
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -23044,6 +23176,10 @@ declare const AgentRemoteAgentBaseSchema: z.ZodIntersection<z.ZodUnion<readonly 
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -23601,6 +23737,10 @@ declare const AgentRemoteAgentBaseWithFallbacksSchema: z.ZodIntersection<z.ZodIn
 }, z.core.$strip>, z.ZodObject<{
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -24154,6 +24294,10 @@ declare const AgentRemoteAgentBaseWithFallbacksSchema: z.ZodIntersection<z.ZodIn
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -24715,6 +24859,10 @@ declare const AgentRemoteAgentWithFallbacksSchema: z.ZodIntersection<z.ZodInters
     error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     id: z.ZodString;
+    mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+        authorization: z.ZodDefault<z.ZodBoolean>;
+        url: z.ZodString;
+    }, z.core.$strip>>>>;
     mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         default: "default";
         invention: "invention";
@@ -25271,6 +25419,10 @@ declare const AgentRemoteAgentWithFallbacksSchema: z.ZodIntersection<z.ZodInters
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -29628,6 +29780,10 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -30181,6 +30337,10 @@ declare const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema: z.Z
             }, z.core.$strip>, z.ZodObject<{
                 error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
                 error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    authorization: z.ZodDefault<z.ZodBoolean>;
+                    url: z.ZodString;
+                }, z.core.$strip>>>>;
                 mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                     default: "default";
                     invention: "invention";
@@ -30763,6 +30923,10 @@ declare const FunctionsExecutionsRequestReasoningSchema: z.ZodObject<{
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -31316,6 +31480,10 @@ declare const FunctionsExecutionsRequestReasoningSchema: z.ZodObject<{
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -33357,6 +33525,10 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -33910,6 +34082,10 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -44066,6 +44242,10 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
     }, z$1.core.$strip>, z$1.ZodObject<{
         error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
         error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
+        mcp_servers: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodArray<z$1.ZodObject<{
+            authorization: z$1.ZodDefault<z$1.ZodBoolean>;
+            url: z$1.ZodString;
+        }, z$1.core.$strip>>>>;
         mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -44619,6 +44799,10 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
+            mcp_servers: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodArray<z$1.ZodObject<{
+                authorization: z$1.ZodDefault<z$1.ZodBoolean>;
+                url: z$1.ZodString;
+            }, z$1.core.$strip>>>>;
             mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -45585,6 +45769,10 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
     }, z$1.core.$strip>, z$1.ZodObject<{
         error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
         error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
+        mcp_servers: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodArray<z$1.ZodObject<{
+            authorization: z$1.ZodDefault<z$1.ZodBoolean>;
+            url: z$1.ZodString;
+        }, z$1.core.$strip>>>>;
         mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -46138,6 +46326,10 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
+            mcp_servers: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodArray<z$1.ZodObject<{
+                authorization: z$1.ZodDefault<z$1.ZodBoolean>;
+                url: z$1.ZodString;
+            }, z$1.core.$strip>>>>;
             mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -47107,6 +47299,10 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsSchema: z.Z
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -47660,6 +47856,10 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsSchema: z.Z
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -55047,6 +55247,10 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSc
     }, z$1.core.$strip>, z$1.ZodObject<{
         error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
         error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
+        mcp_servers: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodArray<z$1.ZodObject<{
+            authorization: z$1.ZodDefault<z$1.ZodBoolean>;
+            url: z$1.ZodString;
+        }, z$1.core.$strip>>>>;
         mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -55600,6 +55804,10 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSc
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
+            mcp_servers: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodArray<z$1.ZodObject<{
+                authorization: z$1.ZodDefault<z$1.ZodBoolean>;
+                url: z$1.ZodString;
+            }, z$1.core.$strip>>>>;
             mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -56566,6 +56774,10 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema
     }, z$1.core.$strip>, z$1.ZodObject<{
         error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
         error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
+        mcp_servers: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodArray<z$1.ZodObject<{
+            authorization: z$1.ZodDefault<z$1.ZodBoolean>;
+            url: z$1.ZodString;
+        }, z$1.core.$strip>>>>;
         mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -57119,6 +57331,10 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
+            mcp_servers: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodArray<z$1.ZodObject<{
+                authorization: z$1.ZodDefault<z$1.ZodBoolean>;
+                url: z$1.ZodString;
+            }, z$1.core.$strip>>>>;
             mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -59838,6 +60054,10 @@ declare const FunctionsProfilesComputationsRequestFunctionProfileComputationCrea
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -60391,6 +60611,10 @@ declare const FunctionsProfilesComputationsRequestFunctionProfileComputationCrea
             }, z.core.$strip>, z.ZodObject<{
                 error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
                 error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    authorization: z.ZodDefault<z.ZodBoolean>;
+                    url: z.ZodString;
+                }, z.core.$strip>>>>;
                 mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                     default: "default";
                     invention: "invention";
@@ -61245,6 +61469,10 @@ declare const SwarmInlineSwarmBaseSchema: z.ZodObject<{
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -61798,6 +62026,10 @@ declare const SwarmInlineSwarmBaseSchema: z.ZodObject<{
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -77571,6 +77803,10 @@ declare const FunctionsProfileSchema: z.ZodUnion<readonly [z.ZodUnion<readonly [
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -78124,6 +78360,10 @@ declare const FunctionsProfileSchema: z.ZodUnion<readonly [z.ZodUnion<readonly [
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -80131,6 +80371,10 @@ declare const FunctionsRemoteProfileSchema: z.ZodUnion<readonly [z.ZodIntersecti
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -80684,6 +80928,10 @@ declare const FunctionsRemoteProfileSchema: z.ZodUnion<readonly [z.ZodIntersecti
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -83130,6 +83378,10 @@ declare const LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -83683,6 +83935,10 @@ declare const LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -83850,7 +84106,7 @@ declare const LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema
         role: z.ZodLiteral<"tool">;
     }, z.core.$strip>>]>>;
     docker_image: z.ZodString;
-    evaluation_agent: z.ZodUnion<readonly [z.ZodIntersection<z.ZodUnion<readonly [z.ZodObject<{
+    evaluation_agent: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodIntersection<z.ZodUnion<readonly [z.ZodObject<{
         frequency_penalty: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         logit_bias: z.ZodOptional<z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodNumber>>>;
         max_completion_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -84393,6 +84649,10 @@ declare const LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -84946,6 +85206,10 @@ declare const LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -84969,9 +85233,9 @@ declare const LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema
     }, z.core.$strip>, z.ZodObject<{
         name: z.ZodString;
         remote: z.ZodLiteral<"mock">;
-    }, z.core.$strip>]>]>;
+    }, z.core.$strip>]>]>>>;
     evaluation_continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    evaluation_messages: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+    evaluation_messages: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
         content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
             text: z.ZodString;
             type: z.ZodLiteral<"text">;
@@ -85111,9 +85375,10 @@ declare const LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema
         tool_call_id: z.ZodString;
     }, z.core.$strip>, z.ZodObject<{
         role: z.ZodLiteral<"tool">;
-    }, z.core.$strip>>]>>;
-    evaluation_output_schema: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
+    }, z.core.$strip>>]>>>>;
+    evaluation_output_schema: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>>>;
     max_evaluation_retries: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    persist: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     provider: z.ZodOptional<z.ZodNullable<z.ZodObject<{
         data_collection: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"deny">, z.ZodLiteral<"allow">]>>>;
         max_latency: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -87204,6 +87469,10 @@ declare const SwarmInlineSwarmSchema: z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -87760,6 +88029,10 @@ declare const SwarmInlineSwarmSchema: z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -88318,6 +88591,10 @@ declare const SwarmInlineSwarmSchema: z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -88874,6 +89151,10 @@ declare const SwarmInlineSwarmSchema: z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -89439,6 +89720,10 @@ declare const SwarmInlineSwarmBaseOrRemoteSchema: z.ZodUnion<readonly [z.ZodObje
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -89992,6 +90277,10 @@ declare const SwarmInlineSwarmBaseOrRemoteSchema: z.ZodUnion<readonly [z.ZodObje
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -90582,6 +90871,10 @@ declare const SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema: z.ZodUnion<reado
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -91135,6 +91428,10 @@ declare const SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema: z.ZodUnion<reado
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -91764,6 +92061,10 @@ declare const SwarmRemoteSwarmSchema: z.ZodIntersection<z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -92320,6 +92621,10 @@ declare const SwarmRemoteSwarmSchema: z.ZodIntersection<z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -92878,6 +93183,10 @@ declare const SwarmRemoteSwarmSchema: z.ZodIntersection<z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -93434,6 +93743,10 @@ declare const SwarmRemoteSwarmSchema: z.ZodIntersection<z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -94001,6 +94314,10 @@ declare const SwarmRemoteSwarmBaseSchema: z.ZodIntersection<z.ZodObject<{
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -94554,6 +94871,10 @@ declare const SwarmRemoteSwarmBaseSchema: z.ZodIntersection<z.ZodObject<{
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -95136,6 +95457,10 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -95692,6 +96017,10 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -96250,6 +96579,10 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -96806,6 +97139,10 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -97373,6 +97710,10 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -97929,6 +98270,10 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -98487,6 +98832,10 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         id: z.ZodString;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -99043,6 +99392,10 @@ declare const SwarmSwarmSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObje
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             id: z.ZodString;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -99608,6 +99961,10 @@ declare const SwarmSwarmBaseSchema: z.ZodUnion<readonly [z.ZodIntersection<z.Zod
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -100161,6 +100518,10 @@ declare const SwarmSwarmBaseSchema: z.ZodUnion<readonly [z.ZodIntersection<z.Zod
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -100737,6 +101098,10 @@ declare const SwarmSwarmBaseSchema: z.ZodUnion<readonly [z.ZodIntersection<z.Zod
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -101290,6 +101655,10 @@ declare const SwarmSwarmBaseSchema: z.ZodUnion<readonly [z.ZodIntersection<z.Zod
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -101896,6 +102265,10 @@ declare const VectorCompletionsCacheCacheVoteRequestSchema: z.ZodObject<{
     }, z.core.$strip>, z.ZodObject<{
         error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            authorization: z.ZodDefault<z.ZodBoolean>;
+            url: z.ZodString;
+        }, z.core.$strip>>>>;
         mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
             default: "default";
             invention: "invention";
@@ -102449,6 +102822,10 @@ declare const VectorCompletionsCacheCacheVoteRequestSchema: z.ZodObject<{
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -103415,6 +103792,10 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsSchema: z.ZodO
         }, z.core.$strip>, z.ZodObject<{
             error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                authorization: z.ZodDefault<z.ZodBoolean>;
+                url: z.ZodString;
+            }, z.core.$strip>>>>;
             mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -103968,6 +104349,10 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsSchema: z.ZodO
             }, z.core.$strip>, z.ZodObject<{
                 error: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
                 error_probability: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                mcp_servers: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    authorization: z.ZodDefault<z.ZodBoolean>;
+                    url: z.ZodString;
+                }, z.core.$strip>>>>;
                 mode: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
                     default: "default";
                     invention: "invention";
@@ -105621,6 +106006,10 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchem
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
+            mcp_servers: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodArray<z$1.ZodObject<{
+                authorization: z$1.ZodDefault<z$1.ZodBoolean>;
+                url: z$1.ZodString;
+            }, z$1.core.$strip>>>>;
             mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -106174,6 +106563,10 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchem
             }, z$1.core.$strip>, z$1.ZodObject<{
                 error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
                 error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
+                mcp_servers: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodArray<z$1.ZodObject<{
+                    authorization: z$1.ZodDefault<z$1.ZodBoolean>;
+                    url: z$1.ZodString;
+                }, z$1.core.$strip>>>>;
                 mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
                     default: "default";
                     invention: "invention";
@@ -106961,6 +107354,10 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema: z
         }, z$1.core.$strip>, z$1.ZodObject<{
             error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
             error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
+            mcp_servers: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodArray<z$1.ZodObject<{
+                authorization: z$1.ZodDefault<z$1.ZodBoolean>;
+                url: z$1.ZodString;
+            }, z$1.core.$strip>>>>;
             mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
                 default: "default";
                 invention: "invention";
@@ -107514,6 +107911,10 @@ declare const VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema: z
             }, z$1.core.$strip>, z$1.ZodObject<{
                 error: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
                 error_probability: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
+                mcp_servers: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodArray<z$1.ZodObject<{
+                    authorization: z$1.ZodDefault<z$1.ZodBoolean>;
+                    url: z$1.ZodString;
+                }, z$1.core.$strip>>>>;
                 mode: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodEnum<{
                     default: "default";
                     invention: "invention";

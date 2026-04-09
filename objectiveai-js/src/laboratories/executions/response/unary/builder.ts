@@ -8,10 +8,10 @@ import { AgentUpstreamSchema } from "../../../../agent/upstream";
 import { ErrorResponseErrorSchema } from "../../../../error/responseError";
 
 export const LaboratoriesExecutionsResponseUnaryBuilderSchema = z.object({
-  agent_index: z.number().int().min(0).max(18446744073709552000).describe("Container index (0-based)."),
+  agent_index: z.number().int().min(0).max(18446744073709552000).describe("Agent index (0-based)."),
   continuation: z.string().nullable().describe("Continuation state for multi-turn conversations.").optional(),
   created: z.number().int().min(0).max(18446744073709552000),
-  error: ErrorResponseErrorSchema.nullable().optional(),
+  error: ErrorResponseErrorSchema.nullable().describe("Error details if this completion failed.").optional(),
   id: z.string(),
   index: z.number().int().min(0).max(18446744073709552000).describe("Builder index (0-based)."),
   messages: z.array(AgentCompletionsResponseUnaryMessageSchema),
