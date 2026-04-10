@@ -103,7 +103,7 @@ impl Commands {
                 }
                 if !logged_path {
                     if let Some(path) = log_writer.primary_path() {
-                        eprintln!("In progress. Logs available at {path}.");
+                        println!("In progress. Logs available at {path}.");
                         logged_path = true;
                     }
                 }
