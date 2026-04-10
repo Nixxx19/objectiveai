@@ -8,12 +8,16 @@ use crate::functions;
 use crate::viewer;
 use crate::schemas;
 use crate::laboratories;
+use crate::logs;
+use crate::vector;
 use crate::error;
 
 #[derive(Envconfig)]
 struct EnvConfigBuilder {
     #[envconfig(from = "CONFIG_SET_FORBIDDEN")]
     config_set_forbidden: Option<String>,
+    #[envconfig(from = "CONFIG_BASE_DIR")]
+    config_base_dir: Option<String>,
 }
 
 impl EnvConfigBuilder {
@@ -24,6 +28,7 @@ impl EnvConfigBuilder {
         }
         ConfigBuilder {
             config_set_forbidden: self.config_set_forbidden.map(|s| parse_bool(&s)),
+            config_base_dir: self.config_base_dir,
         }
     }
 }
@@ -31,6 +36,7 @@ impl EnvConfigBuilder {
 #[derive(Default)]
 pub struct ConfigBuilder {
     pub config_set_forbidden: Option<bool>,
+    pub config_base_dir: Option<String>,
 }
 
 impl Envconfig for ConfigBuilder {
@@ -52,12 +58,14 @@ impl ConfigBuilder {
     pub fn build(self) -> Config {
         Config {
             config_set_forbidden: self.config_set_forbidden.unwrap_or(false),
+            config_base_dir: self.config_base_dir,
         }
     }
 }
 
 pub struct Config {
     pub config_set_forbidden: bool,
+    pub config_base_dir: Option<String>,
 }
 
 #[derive(Parser)]
@@ -73,6 +81,8 @@ pub enum Output {
     ConfigSet,
     Api(String),
     Schema(&'static str),
+    LogsGet(objectiveai::filesystem::logs::LogContent),
+    LogsList(Vec<objectiveai::filesystem::logs::ListItem>),
 }
 
 #[derive(Subcommand)]
@@ -112,18 +122,30 @@ enum Commands {
         #[command(subcommand)]
         command: laboratories::Commands,
     },
+    /// Vector completions
+    Vector {
+        #[command(subcommand)]
+        command: vector::Commands,
+    },
+    /// Browse and read logs
+    Logs {
+        #[command(subcommand)]
+        command: logs::Commands,
+    },
 }
 
 impl Commands {
     pub async fn handle(self, cli_config: &Config) -> Result<Output, error::Error> {
         match self {
-            Commands::Api { command } => command.handle(cli_config),
+            Commands::Api { command } => command.handle(cli_config).await,
             Commands::Agents { command } => command.handle(cli_config).await,
             Commands::Swarms { command } => command.handle(cli_config).await,
             Commands::Functions { command } => command.handle(cli_config).await,
-            Commands::Viewer { command } => command.handle(cli_config),
+            Commands::Viewer { command } => command.handle(cli_config).await,
             Commands::Schemas { command } => command.handle(),
             Commands::Laboratories { command } => command.handle(cli_config).await,
+            Commands::Vector { command } => command.handle(cli_config).await,
+            Commands::Logs { command } => command.handle(cli_config).await,
         }
     }
 }
@@ -143,6 +165,11 @@ where
         Ok(Output::ConfigSet) => Ok("ok".into()),
         Ok(Output::Api(output)) => Ok(output),
         Ok(Output::Schema(output)) => Ok(output.to_string()),
+        Ok(Output::LogsGet(content)) => Ok(match content {
+            objectiveai::filesystem::logs::LogContent::Json(v) => serde_json::to_string(&v).unwrap(),
+            objectiveai::filesystem::logs::LogContent::DataUrl(s) => s,
+        }),
+        Ok(Output::LogsList(items)) => Ok(serde_json::to_string(&items).unwrap()),
         Err(e) => Err(format!("{e}")),
     }
 }

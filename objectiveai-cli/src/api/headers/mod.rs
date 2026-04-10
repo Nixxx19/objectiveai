@@ -42,20 +42,20 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         match self {
-            Commands::Config { command } => command.handle(),
-            Commands::XObjectiveaiAuthorization { command } => command.handle(cli_config),
-            Commands::XOpenrouterAuthorization { command } => command.handle(cli_config),
-            Commands::XGithubAuthorization { command } => command.handle(cli_config),
-            Commands::XMcpAuthorization { command } => command.handle(cli_config),
-            Commands::XViewerSignature { command } => command.handle(cli_config),
-            Commands::XViewerAddress { command } => command.handle(cli_config),
-            Commands::UserAgent { command } => command.handle(cli_config),
-            Commands::HttpReferer { command } => command.handle(cli_config),
-            Commands::XTitle { command } => command.handle(cli_config),
-            Commands::XCommitAuthorName { command } => command.handle(cli_config),
-            Commands::XCommitAuthorEmail { command } => command.handle(cli_config),
+            Commands::Config { command } => command.handle(cli_config).await,
+            Commands::XObjectiveaiAuthorization { command } => command.handle(cli_config).await,
+            Commands::XOpenrouterAuthorization { command } => command.handle(cli_config).await,
+            Commands::XGithubAuthorization { command } => command.handle(cli_config).await,
+            Commands::XMcpAuthorization { command } => command.handle(cli_config).await,
+            Commands::XViewerSignature { command } => command.handle(cli_config).await,
+            Commands::XViewerAddress { command } => command.handle(cli_config).await,
+            Commands::UserAgent { command } => command.handle(cli_config).await,
+            Commands::HttpReferer { command } => command.handle(cli_config).await,
+            Commands::XTitle { command } => command.handle(cli_config).await,
+            Commands::XCommitAuthorName { command } => command.handle(cli_config).await,
+            Commands::XCommitAuthorEmail { command } => command.handle(cli_config).await,
         }
     }
 }

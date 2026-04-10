@@ -34,8 +34,8 @@ pub enum Commands {
     },
 }
 
-fn get_favorites() -> Vec<objectiveai::config::PairFavorite> {
-    let (_, mut config) = crate::config::read().unwrap();
+async fn get_favorites(cli_config: &crate::Config) -> Vec<objectiveai::filesystem::config::PairFavorite> {
+    let (_, mut config) = crate::config::read(cli_config).await.unwrap();
     config.functions().profiles().pairs().get_favorites().to_vec()
 }
 
@@ -55,7 +55,7 @@ impl Commands {
     pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         match self {
             Commands::Get { args } => {
-                let (function_path, profile_path) = args.resolve(get_favorites)?;
+                let (function_path, profile_path) = args.resolve(|| get_favorites(cli_config)).await?;
                 crate::api::run(|http_client| async move {
                     let (function, profile) = tokio::join!(
                         objectiveai::functions::get_function(&http_client, function_path),
@@ -70,17 +70,17 @@ impl Commands {
             }
             Commands::List { source } => {
                 match source {
-                    crate::list::Source::Favorites => crate::list::pair_favorites(get_favorites),
+                    crate::list::Source::Favorites => crate::list::pair_favorites(|| get_favorites(cli_config)).await,
                     crate::list::Source::Filesystem => Err(crate::error::Error::PairsFilesystemNotSupported),
                     crate::list::Source::Objectiveai => crate::list::pair_single(|c| Box::pin(list_objectiveai(c))).await,
                     crate::list::Source::All => crate::list::pair_all(
-                        get_favorites,
+                        || get_favorites(cli_config),
                         |c| Box::pin(list_objectiveai(c)),
                     ).await,
                 }
             }
-            Commands::Config { command } => command.handle(),
-            Commands::Favorites { command } => command.handle(cli_config),
+            Commands::Config { command } => command.handle(cli_config).await,
+            Commands::Favorites { command } => command.handle(cli_config).await,
         }
     }
 }

@@ -26,27 +26,28 @@ impl ConfigClient {
         self.base_dir.join("config.json")
     }
 
-    pub fn read(&self) -> Result<super::Config, super::ConfigError> {
+    pub async fn read(&self) -> Result<super::Config, super::ConfigError> {
         let path = self.config_path();
-        if !path.exists() {
-            return Ok(super::Config::default());
+        match tokio::fs::read(&path).await {
+            Ok(bytes) => serde_json::from_slice(&bytes)
+                .map_err(|e| super::ConfigError::Parse(path, e)),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+                Ok(super::Config::default())
+            }
+            Err(e) => Err(super::ConfigError::Read(path, e)),
         }
-        let file = std::fs::File::open(&path)
-            .map_err(|e| super::ConfigError::Read(path.clone(), e))?;
-        serde_json::from_reader(file)
-            .map_err(|e| super::ConfigError::Parse(path, e))
     }
 
-    pub fn write(&self, config: &super::Config) -> Result<(), super::ConfigError> {
+    pub async fn write(&self, config: &super::Config) -> Result<(), super::ConfigError> {
         let path = self.config_path();
         if let Some(parent) = path.parent() {
-            std::fs::create_dir_all(parent)
+            tokio::fs::create_dir_all(parent).await
                 .map_err(|e| super::ConfigError::Write(parent.to_path_buf(), e))?;
         }
-        let file = std::fs::File::create(&path)
-            .map_err(|e| super::ConfigError::Write(path.clone(), e))?;
-        serde_json::to_writer_pretty(file, config)
+        let bytes = serde_json::to_vec_pretty(config)
             .map_err(super::ConfigError::Serialize)?;
+        tokio::fs::write(&path, bytes).await
+            .map_err(|e| super::ConfigError::Write(path, e))?;
         Ok(())
     }
 }

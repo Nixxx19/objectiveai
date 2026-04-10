@@ -153,27 +153,27 @@ pub enum Commands {
     },
 }
 
-fn fn_favorites() -> Vec<objectiveai::config::Favorite> {
-    let (_, mut config) = crate::config::read().unwrap();
+async fn fn_favorites(cli_config: &crate::Config) -> Vec<objectiveai::filesystem::config::Favorite> {
+    let (_, mut config) = crate::config::read(cli_config).await.unwrap();
     config.functions().get_favorites().to_vec()
 }
 
-fn profile_favorites() -> Vec<objectiveai::config::Favorite> {
-    let (_, mut config) = crate::config::read().unwrap();
+async fn profile_favorites(cli_config: &crate::Config) -> Vec<objectiveai::filesystem::config::Favorite> {
+    let (_, mut config) = crate::config::read(cli_config).await.unwrap();
     config.functions().profiles().get_favorites().to_vec()
 }
 
 impl Commands {
-    pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         let (function_path, profile_path, input_source, continuation_args, retry_token, seed, strategy) = match self {
             Commands::Standard { function, profile, input, continuation, retry_token, seed } => {
-                let fp = function.resolve(fn_favorites)?;
-                let pp = profile.resolve(profile_favorites)?;
+                let fp = function.resolve(|| fn_favorites(cli_config)).await?;
+                let pp = profile.resolve(|| profile_favorites(cli_config)).await?;
                 (fp, pp, input, continuation, retry_token, seed, objectiveai::functions::executions::request::Strategy::Default)
             }
             Commands::SwissSystem { function, profile, input, continuation, retry_token, seed, pool, rounds } => {
-                let fp = function.resolve(fn_favorites)?;
-                let pp = profile.resolve(profile_favorites)?;
+                let fp = function.resolve(|| fn_favorites(cli_config)).await?;
+                let pp = profile.resolve(|| profile_favorites(cli_config)).await?;
                 let strategy = objectiveai::functions::executions::request::Strategy::SwissSystem { pool, rounds };
                 (fp, pp, input, continuation, retry_token, seed, strategy)
             }
@@ -196,7 +196,10 @@ impl Commands {
             continuation,
         };
 
-        crate::api::run(|http_client| async move {
+        let log_writer = objectiveai::filesystem::logs::LogsClient::new(cli_config.config_base_dir.as_deref())
+            .write_function_execution();
+
+        crate::api::run(Box::new(|http_client| Box::pin(async move {
             let stream = objectiveai::functions::executions::create_function_execution_streaming(
                 &http_client, params,
             ).await?;
@@ -204,11 +207,21 @@ impl Commands {
 
             // Aggregate all chunks into one
             let mut aggregated: Option<objectiveai::functions::executions::response::streaming::FunctionExecutionChunk> = None;
+            let mut logged_path = false;
             while let Some(chunk) = stream.next().await {
                 let chunk = chunk?;
                 match &mut aggregated {
                     Some(agg) => agg.push(&chunk),
                     None => aggregated = Some(chunk),
+                }
+                if let Some(agg) = &aggregated {
+                    let _ = log_writer.write(agg).await;
+                }
+                if !logged_path {
+                    if let Some(path) = log_writer.primary_path() {
+                        eprintln!("In progress. Logs available at {path}.");
+                        logged_path = true;
+                    }
                 }
             }
 
@@ -225,6 +238,6 @@ impl Commands {
 
             let result = ExecutionResult { output, errors };
             Ok(serde_json::to_string(&result).unwrap())
-        }, true).await
+        })), true).await
     }
 }

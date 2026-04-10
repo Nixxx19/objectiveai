@@ -106,7 +106,7 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         let (agent_ref, continuation_args, seed, state) = match self {
             Commands::AlphaScalar { params, agent, continuation, seed } => {
                 let p = params.into_params();
@@ -133,11 +133,14 @@ impl Commands {
             }
         };
 
-        let agent = agent_ref.resolve()?;
+        let agent = agent_ref.resolve(|| async {
+            let (_, mut c) = crate::config::read(cli_config).await.unwrap();
+            c.agents().get_favorites().to_vec()
+        }).await?;
         let continuation = continuation_args.resolve()?;
 
         // Read remote from config
-        let (_, mut config) = crate::config::read()?;
+        let (_, mut config) = crate::config::read(cli_config).await?;
         let remote = config.functions().inventions().get_remote();
 
         let request = objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams {
@@ -152,7 +155,10 @@ impl Commands {
             continuation,
         };
 
-        crate::api::run(|http_client| async move {
+        let log_writer = objectiveai::filesystem::logs::LogsClient::new(cli_config.config_base_dir.as_deref())
+            .write_function_invention_recursive();
+
+        crate::api::run(Box::new(|http_client| Box::pin(async move {
             let stream = objectiveai::functions::inventions::recursive::create_function_invention_recursive_streaming(
                 &http_client, request,
             ).await?;
@@ -160,11 +166,21 @@ impl Commands {
 
             // Aggregate all chunks
             let mut aggregated: Option<objectiveai::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk> = None;
+            let mut logged_path = false;
             while let Some(chunk) = stream.next().await {
                 let chunk = chunk?;
                 match &mut aggregated {
                     Some(agg) => agg.push(&chunk),
                     None => aggregated = Some(chunk),
+                }
+                if let Some(agg) = &aggregated {
+                    let _ = log_writer.write(agg).await;
+                }
+                if !logged_path {
+                    if let Some(path) = log_writer.primary_path() {
+                        eprintln!("In progress. Logs available at {path}.");
+                        logged_path = true;
+                    }
                 }
             }
 
@@ -183,6 +199,6 @@ impl Commands {
                 .collect();
 
             Ok(serde_json::to_string(&results).unwrap())
-        }, true).await
+        })), true).await
     }
 }

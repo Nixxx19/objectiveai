@@ -1,20 +1,20 @@
-use objectiveai::config::{Config, ConfigClient, ConfigError};
+use objectiveai::filesystem::config::{Config, ConfigClient, ConfigError};
 
 pub fn filter(f: Option<String>) -> String {
     f.unwrap_or_else(|| ".".to_string())
 }
 
-pub fn read() -> Result<(ConfigClient, Config), crate::error::Error> {
-    let client = ConfigClient::new(None::<String>);
-    let config = client.read()?;
+pub async fn read(cli_config: &super::Config) -> Result<(ConfigClient, Config), crate::error::Error> {
+    let client = ConfigClient::new(cli_config.config_base_dir.as_deref());
+    let config = client.read().await?;
     Ok((client, config))
 }
 
-pub fn write(client: &ConfigClient, config: &Config, cli_config: &super::Config) -> Result<(), crate::error::Error> {
+pub async fn write(client: &ConfigClient, config: &Config, cli_config: &super::Config) -> Result<(), crate::error::Error> {
     if cli_config.config_set_forbidden {
         return Err(crate::error::Error::ConfigSetForbidden);
     }
-    client.write(config)?;
+    client.write(config).await?;
     Ok(())
 }
 

@@ -117,6 +117,64 @@ impl RichContent {
         }
     }
 
+    /// Extracts media files from this content.
+    ///
+    /// Returns `(content_json, files)` where `content_json` is the content
+    /// with extractable media replaced by `{"type": "reference", "path": ...}`
+    /// references, and `files` is the list of `(path, bytes)` pairs.
+    ///
+    /// `prefix` is the full path prefix (e.g. `"agent/completions/"`).
+    /// `stem` is the file stem (e.g. `"{id}_{index}"`).
+    #[cfg(feature = "filesystem")]
+    pub fn extract_media(
+        self,
+        prefix: &str,
+        stem: &str,
+    ) -> (serde_json::Value, Vec<(String, Vec<u8>)>) {
+        let parts = match self {
+            RichContent::Text(text) => return (serde_json::Value::String(text), Vec::new()),
+            RichContent::Parts(parts) => parts,
+        };
+
+        let mut json_parts = Vec::with_capacity(parts.len());
+        let mut files = Vec::new();
+
+        for (part_idx, part) in parts.into_iter().enumerate() {
+            let fc_and_type: Option<(super::FileContent, &str)> = match &part {
+                RichContentPart::ImageUrl { image_url } => {
+                    image_url.file_content().map(|fc| (fc, "image"))
+                }
+                RichContentPart::InputAudio { input_audio } => {
+                    input_audio.file_content().map(|fc| (fc, "audio"))
+                }
+                RichContentPart::InputVideo { video_url }
+                | RichContentPart::VideoUrl { video_url } => {
+                    video_url.file_content().map(|fc| (fc, "video"))
+                }
+                RichContentPart::File { file } => {
+                    file.file_content().map(|fc| (fc, "file"))
+                }
+                _ => None,
+            };
+
+            if let Some((fc, media_type)) = fc_and_type {
+                let basename = format!("{stem}_{part_idx}.{ext}", ext = fc.extension);
+                let filepath = format!("{prefix}messages/{media_type}/{basename}");
+                if let Ok(decoded) = fc.decode() {
+                    files.push((filepath.clone(), decoded));
+                }
+                json_parts.push(serde_json::json!({
+                    "type": "reference",
+                    "path": filepath,
+                }));
+            } else {
+                json_parts.push(serde_json::to_value(&part).unwrap());
+            }
+        }
+
+        (serde_json::Value::Array(json_parts), files)
+    }
+
     /// Computes a content-addressed ID for this content.
     pub fn id(&self) -> String {
         let mut hasher = twox_hash::XxHash3_128::with_seed(0);
@@ -556,6 +614,17 @@ impl ImageUrl {
     pub fn is_empty(&self) -> bool {
         self.url.is_empty() && self.detail.is_none()
     }
+
+    /// Returns extractable file content if this is a base64 data URL.
+    ///
+    /// HTTP/HTTPS URLs return `None` (kept inline).
+    pub fn file_content(&self) -> Option<super::FileContent<'_>> {
+        let (mime, payload) = super::file_content::parse_data_url(&self.url)?;
+        Some(super::FileContent {
+            content: payload,
+            extension: super::file_content::mime_to_ext(mime),
+        })
+    }
 }
 
 impl ToStarlarkValue for ImageUrl {
@@ -684,6 +753,20 @@ impl InputAudio {
     pub fn is_empty(&self) -> bool {
         self.data.is_empty() && self.format.is_empty()
     }
+
+    /// Returns extractable file content if audio data is present.
+    ///
+    /// Audio is always base64-encoded inline, so this returns `Some`
+    /// whenever `data` is non-empty.
+    pub fn file_content(&self) -> Option<super::FileContent<'_>> {
+        if self.data.is_empty() {
+            return None;
+        }
+        Some(super::FileContent {
+            content: &self.data,
+            extension: if self.format.is_empty() { "bin" } else { &self.format },
+        })
+    }
 }
 
 impl ToStarlarkValue for InputAudio {
@@ -747,6 +830,17 @@ impl VideoUrl {
     /// Returns `true` if the URL is empty.
     pub fn is_empty(&self) -> bool {
         self.url.is_empty()
+    }
+
+    /// Returns extractable file content if this is a base64 data URL.
+    ///
+    /// HTTP/HTTPS URLs return `None` (kept inline).
+    pub fn file_content(&self) -> Option<super::FileContent<'_>> {
+        let (mime, payload) = super::file_content::parse_data_url(&self.url)?;
+        Some(super::FileContent {
+            content: payload,
+            extension: super::file_content::mime_to_ext(mime),
+        })
     }
 }
 
@@ -841,6 +935,24 @@ impl File {
             && self.file_id.is_none()
             && self.filename.is_none()
             && self.file_url.is_none()
+    }
+
+    /// Returns extractable file content if inline file data is present.
+    ///
+    /// Files referenced only by URL or ID return `None` (kept inline).
+    pub fn file_content(&self) -> Option<super::FileContent<'_>> {
+        let data = self.file_data.as_deref()?;
+        if data.is_empty() {
+            return None;
+        }
+        let ext = self.filename.as_deref()
+            .and_then(|name| name.rsplit_once('.'))
+            .map(|(_, ext)| ext)
+            .unwrap_or("bin");
+        Some(super::FileContent {
+            content: data,
+            extension: ext,
+        })
     }
 }
 

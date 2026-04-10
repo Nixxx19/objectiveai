@@ -6,11 +6,11 @@ pub enum Mode {
     Local,
 }
 
-impl From<Mode> for objectiveai::config::ApiMode {
+impl From<Mode> for objectiveai::filesystem::config::ApiMode {
     fn from(m: Mode) -> Self {
         match m {
-            Mode::Remote => objectiveai::config::ApiMode::Remote,
-            Mode::Local => objectiveai::config::ApiMode::Local,
+            Mode::Remote => objectiveai::filesystem::config::ApiMode::Remote,
+            Mode::Local => objectiveai::filesystem::config::ApiMode::Local,
         }
     }
 }
@@ -27,13 +27,13 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
-        let (client, mut config) = crate::config::read()?;
+    pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
+        let (client, mut config) = crate::config::read(cli_config).await?;
         match self {
             Commands::Get => Ok(crate::Output::ConfigGet(crate::config::format_value(&config.api().get_mode()))),
             Commands::Set { value } => {
                 config.api().set_mode(value.into());
-                crate::config::write(&client, &config, cli_config)?;
+                crate::config::write(&client, &config, cli_config).await?;
                 Ok(crate::Output::ConfigSet)
             }
         }

@@ -19,4 +19,21 @@ impl ReasoningSummaryChunk {
             self.error = Some(error.clone());
         }
     }
+
+    /// Produces log files for this reasoning summary.
+    ///
+    /// Returns `(reference, files)`. Files under `agent/completions/`.
+    #[cfg(feature = "filesystem")]
+    pub fn produce_files(&self) -> (serde_json::Value, Vec<(String, Vec<u8>)>) {
+        let (mut reference, files) = match self.inner.produce_files() {
+            Some((reference, files)) => (reference, files),
+            None => return (serde_json::json!({ "type": "reference" }), Vec::new()),
+        };
+        if let Some(error) = &self.error {
+            if let Some(map) = reference.as_object_mut() {
+                map.insert("error".to_string(), serde_json::to_value(error).unwrap());
+            }
+        }
+        (reference, files)
+    }
 }

@@ -156,4 +156,64 @@ impl AssistantResponseChunk {
             _ => {}
         }
     }
+
+    /// Produces log files for this assistant message.
+    ///
+    /// Returns `(reference, files)` where `reference` is a
+    /// `{"type": "reference", "path": ...}` JSON value pointing to this
+    /// message's file, and `files` contains all produced files including
+    /// the message itself, logprobs, and extracted media.
+    #[cfg(feature = "filesystem")]
+    pub fn produce_files(&self, id: &str, prefix: &str) -> (serde_json::Value, Vec<(String, Vec<u8>)>) {
+        let stem = format!("{id}_{}", self.index);
+        let path = format!("{prefix}messages/{stem}.json");
+        let mut files = Vec::new();
+
+        // Serialize a shell without content/logprobs to avoid double-serialization
+        let shell = AssistantResponseChunk {
+            role: self.role,
+            index: self.index,
+            created: self.created,
+            agent: self.agent.clone(),
+            model: self.model.clone(),
+            upstream_id: self.upstream_id.clone(),
+            reasoning: self.reasoning.clone(),
+            tool_calls: self.tool_calls.clone(),
+            content: Some(message::RichContent::Text(String::new())),
+            refusal: self.refusal.clone(),
+            finish_reason: self.finish_reason.clone(),
+            logprobs: Some(response::Logprobs::default()),
+            service_tier: self.service_tier.clone(),
+            system_fingerprint: self.system_fingerprint.clone(),
+            provider: self.provider.clone(),
+            usage: self.usage.clone(),
+        };
+        let mut msg_json = serde_json::to_value(&shell).unwrap();
+
+        // Extract logprobs to a separate file, or remove placeholder
+        if let Some(logprobs) = &self.logprobs {
+            let logprobs_path = format!("{prefix}messages/logprobs/{stem}.json");
+            files.push((logprobs_path.clone(), serde_json::to_vec_pretty(logprobs).unwrap()));
+            msg_json["logprobs"] = serde_json::json!({
+                "type": "reference",
+                "path": logprobs_path,
+            });
+        } else if let Some(map) = msg_json.as_object_mut() {
+            map.remove("logprobs");
+        }
+
+        // Extract media from content, or remove placeholder
+        if let Some(mut content) = self.content.clone() {
+            content.prepare();
+            let (content_json, media_files) = content.extract_media(prefix, &stem);
+            msg_json["content"] = content_json;
+            files.extend(media_files);
+        } else if let Some(map) = msg_json.as_object_mut() {
+            map.remove("content");
+        }
+
+        files.push((path.clone(), serde_json::to_vec_pretty(&msg_json).unwrap()));
+
+        (serde_json::json!({ "type": "reference", "path": path }), files)
+    }
 }

@@ -54,7 +54,7 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         let (message_source, agent_ref, continuation_args, response_format_args, seed) = match self {
             Commands::Standard { messages, agent, continuation, response_format, seed } => {
                 (messages, agent, continuation, response_format, seed)
@@ -62,7 +62,10 @@ impl Commands {
         };
 
         let messages = message_source.resolve()?;
-        let agent = agent_ref.resolve()?;
+        let agent = agent_ref.resolve(|| async {
+            let (_, mut c) = crate::config::read(cli_config).await.unwrap();
+            c.agents().get_favorites().to_vec()
+        }).await?;
         let continuation = continuation_args.resolve()?;
         let response_format = response_format_args.resolve()?
             .map(objectiveai::agent::completions::request::ResponseFormatParam::Single);
@@ -77,7 +80,10 @@ impl Commands {
             continuation,
         };
 
-        crate::api::run(|http_client| async move {
+        let log_writer = objectiveai::filesystem::logs::LogsClient::new(cli_config.config_base_dir.as_deref())
+            .write_agent_completion();
+
+        crate::api::run(Box::new(|http_client| Box::pin(async move {
             let stream = objectiveai::agent::completions::create_agent_completion_streaming(
                 &http_client, params,
             ).await?;
@@ -85,11 +91,21 @@ impl Commands {
 
             // Accumulate all chunks
             let mut accumulated: Option<objectiveai::agent::completions::response::streaming::AgentCompletionChunk> = None;
+            let mut logged_path = false;
             while let Some(chunk) = stream.next().await {
                 let chunk = chunk?;
                 match &mut accumulated {
                     Some(agg) => agg.push(&chunk),
                     None => accumulated = Some(chunk),
+                }
+                if let Some(agg) = &accumulated {
+                    let _ = log_writer.write(agg).await;
+                }
+                if !logged_path {
+                    if let Some(path) = log_writer.primary_path() {
+                        eprintln!("In progress. Logs available at {path}.");
+                        logged_path = true;
+                    }
                 }
             }
 
@@ -116,6 +132,6 @@ impl Commands {
                 .unwrap_or_default();
 
             Ok(content)
-        }, true).await
+        })), true).await
     }
 }

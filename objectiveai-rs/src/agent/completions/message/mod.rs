@@ -5,6 +5,7 @@
 
 mod assistant_message;
 mod developer_message;
+mod file_content;
 mod rich_content;
 mod simple_content;
 mod system_message;
@@ -13,6 +14,7 @@ mod user_message;
 
 pub use assistant_message::*;
 pub use developer_message::*;
+pub use file_content::*;
 pub use rich_content::*;
 pub use simple_content::*;
 pub use system_message::*;

@@ -1,4 +1,5 @@
 pub mod create;
+pub mod logs;
 
 use clap::Subcommand;
 
@@ -9,12 +10,18 @@ pub enum Commands {
         #[command(subcommand)]
         command: create::Commands,
     },
+    /// Read recursive invention logs
+    Logs {
+        #[command(subcommand)]
+        command: logs::Commands,
+    },
 }
 
 impl Commands {
-    pub async fn handle(self) -> Result<crate::Output, crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         match self {
-            Commands::Create { command } => command.handle().await,
+            Commands::Create { command } => command.handle(cli_config).await,
+            Commands::Logs { command } => command.handle(cli_config).await,
         }
     }
 }

@@ -62,6 +62,60 @@ impl AgentCompletionChunk {
         }
     }
 
+    /// Produces the `(path, file_bytes)` pairs for the log file structure.
+    ///
+    /// Returns `None` if the chunk has no ID yet. All paths are relative
+    /// to the `logs/` root directory, under `agent/completions/`.
+    #[cfg(feature = "filesystem")]
+    pub fn produce_files(&self) -> Option<(serde_json::Value, Vec<(String, Vec<u8>)>)> {
+        const PREFIX: &str = "agent/completions/";
+
+        let id = &self.id;
+        if id.is_empty() {
+            return None;
+        }
+
+        let path = format!("{PREFIX}{id}.json");
+        let mut files: Vec<(String, Vec<u8>)> = Vec::new();
+        let mut message_refs: Vec<serde_json::Value> = Vec::new();
+
+        for msg in &self.messages {
+            let (reference, msg_files) = msg.produce_files(id, PREFIX);
+            message_refs.push(reference);
+            files.extend(msg_files);
+        }
+
+        // Serialize a shell without messages/continuation to avoid double-serialization
+        let shell = AgentCompletionChunk {
+            id: self.id.clone(),
+            created: self.created,
+            messages: Vec::new(),
+            object: self.object,
+            usage: self.usage.clone(),
+            upstream: self.upstream,
+            error: self.error.clone(),
+            continuation: Some(String::new()),
+        };
+        let mut root = serde_json::to_value(&shell).unwrap();
+        root["messages"] = serde_json::Value::Array(message_refs);
+
+        // Extract continuation to a separate file, or remove placeholder
+        if let Some(continuation) = &self.continuation {
+            let cont_path = format!("{PREFIX}continuation/{id}.json");
+            files.push((cont_path.clone(), serde_json::to_vec_pretty(continuation).unwrap()));
+            root["continuation"] = serde_json::json!({
+                "type": "reference",
+                "path": cont_path,
+            });
+        } else if let Some(map) = root.as_object_mut() {
+            map.remove("continuation");
+        }
+
+        files.push((path.clone(), serde_json::to_vec_pretty(&root).unwrap()));
+
+        Some((serde_json::json!({ "type": "reference", "path": path }), files))
+    }
+
     fn push_messages(&mut self, other_choices: &[super::MessageChunk]) {
         fn push_message(
             messages: &mut Vec<super::MessageChunk>,

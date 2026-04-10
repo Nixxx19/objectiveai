@@ -10,17 +10,25 @@ struct ResultItem {
     error: Option<objectiveai::error::ResponseError>,
 }
 
-pub async fn handle(args: CreateArgs) -> Result<crate::Output, crate::error::Error> {
-    let builder_agents: Vec<_> = args
-        .builder_agent
-        .iter()
-        .map(|a| a.clone().resolve())
-        .collect::<Result<Vec<_>, _>>()?;
+pub async fn handle(args: CreateArgs, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
+    let mut builder_agents = Vec::with_capacity(args.builder_agent.len());
+    for a in &args.builder_agent {
+        builder_agents.push(a.clone().resolve(|| async {
+            let (_, mut c) = crate::config::read(cli_config).await.unwrap();
+            c.agents().get_favorites().to_vec()
+        }).await?);
+    }
 
     // Keep original agent refs for the final output (in arg order)
     let original_agents = builder_agents.clone();
 
-    let evaluation_agent = args.evaluation_agent.map(|a| a.resolve()).transpose()?;
+    let evaluation_agent = match args.evaluation_agent {
+        Some(a) => Some(a.resolve(|| async {
+            let (_, mut c) = crate::config::read(cli_config).await.unwrap();
+            c.agents().get_favorites().to_vec()
+        }).await?),
+        None => None,
+    };
     let builder_messages = args.builder_messages.resolve()?;
     let evaluation_messages = args.evaluation_messages.resolve()?;
     let evaluation_output_schema = args.evaluation_output_schema.resolve()?;
@@ -56,8 +64,11 @@ pub async fn handle(args: CreateArgs) -> Result<crate::Output, crate::error::Err
         stream: Some(true),
     };
 
+    let log_writer = objectiveai::filesystem::logs::LogsClient::new(cli_config.config_base_dir.as_deref())
+        .write_laboratory_execution();
+
     crate::api::run(
-        move |http_client| async move {
+        Box::new(move |http_client| Box::pin(async move {
             let stream =
                 objectiveai::laboratories::executions::create_laboratory_execution_streaming(
                     &http_client, params,
@@ -68,11 +79,21 @@ pub async fn handle(args: CreateArgs) -> Result<crate::Output, crate::error::Err
             let mut accumulated: Option<
                 objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk,
             > = None;
+            let mut logged_path = false;
             while let Some(chunk) = stream.next().await {
                 let chunk = chunk?;
                 match &mut accumulated {
                     Some(agg) => agg.push(&chunk),
                     None => accumulated = Some(chunk),
+                }
+                if let Some(agg) = &accumulated {
+                    let _ = log_writer.write(agg).await;
+                }
+                if !logged_path {
+                    if let Some(path) = log_writer.primary_path() {
+                        eprintln!("In progress. Logs available at {path}.");
+                        logged_path = true;
+                    }
                 }
             }
 
@@ -145,7 +166,7 @@ pub async fn handle(args: CreateArgs) -> Result<crate::Output, crate::error::Err
                 .collect();
 
             Ok(serde_json::to_string(&results).unwrap())
-        },
+        })),
         true,
     )
     .await

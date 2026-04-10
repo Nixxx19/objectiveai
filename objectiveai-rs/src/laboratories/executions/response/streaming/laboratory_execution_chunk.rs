@@ -70,4 +70,51 @@ impl LaboratoryExecutionChunk {
             }
         }
     }
+
+    /// Produces the `(path, file_bytes)` pairs for the log file structure.
+    ///
+    /// Returns `(reference, files)`. All paths relative to `logs/`.
+    #[cfg(feature = "filesystem")]
+    pub fn produce_files(&self) -> Option<(serde_json::Value, Vec<(String, Vec<u8>)>)> {
+        const PREFIX: &str = "laboratories/executions/";
+
+        let id = &self.id;
+        if id.is_empty() {
+            return None;
+        }
+
+        let path = format!("{PREFIX}{id}.json");
+        let mut files: Vec<(String, Vec<u8>)> = Vec::new();
+        let mut builder_refs: Vec<serde_json::Value> = Vec::new();
+        let mut evaluation_refs: Vec<serde_json::Value> = Vec::new();
+
+        for builder in &self.builders {
+            let (reference, builder_files) = builder.produce_files();
+            builder_refs.push(reference);
+            files.extend(builder_files);
+        }
+
+        for evaluation in &self.evaluations {
+            let (reference, eval_files) = evaluation.produce_files();
+            evaluation_refs.push(reference);
+            files.extend(eval_files);
+        }
+
+        // Serialize a shell without builders/evaluations to avoid double-serialization
+        let shell = LaboratoryExecutionChunk {
+            id: self.id.clone(),
+            builders: Vec::new(),
+            evaluations: Vec::new(),
+            error: self.error.clone(),
+            created: self.created,
+            object: self.object,
+            usage: self.usage.clone(),
+        };
+        let mut root = serde_json::to_value(&shell).unwrap();
+        root["builders"] = serde_json::Value::Array(builder_refs);
+        root["evaluations"] = serde_json::Value::Array(evaluation_refs);
+        files.push((path.clone(), serde_json::to_vec_pretty(&root).unwrap()));
+
+        Some((serde_json::json!({ "type": "reference", "path": path }), files))
+    }
 }
