@@ -72,7 +72,7 @@ pub fn build_options(
     let mut fields = Vec::new();
     fields.push("      tools: []".to_string());
     fields.push("      includePartialMessages: true".to_string());
-    fields.push("      permissionMode: \"dontAsk\"".to_string());
+    fields.push("      permissionMode: \"bypassPermissions\"".to_string());
     fields.push(format!("      model: \"{model}\""));
     fields.push(format!("      mcpServers: {mcp_servers_json}"));
 

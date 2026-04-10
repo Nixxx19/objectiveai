@@ -1,37 +1,133 @@
+use std::borrow::Cow;
 use std::sync::Arc;
 
-use axum::http::StatusCode;
-use axum::response::IntoResponse;
-use axum::routing::post;
-use axum::{Json, Router};
-use serde_json::{json, Value};
+use futures::FutureExt;
+use rmcp::{
+    ServerHandler,
+    handler::server::router::tool::{ToolRouter, ToolRoute},
+    handler::server::tool::ToolCallContext,
+    model::{
+        CallToolRequestParams, CallToolResult, Content,
+        ServerCapabilities, ServerInfo, Tool,
+    },
+    transport::streamable_http_server::{
+        StreamableHttpServerConfig, StreamableHttpService,
+        session::local::LocalSessionManager,
+    },
+};
+use serde_json::Value;
 use tokio::net::TcpListener;
+use tokio_util::sync::CancellationToken;
 
 use super::mcp_server_config::{McpHttpServerConfig, McpHttpServerConfigType};
 use objectiveai::functions::inventions::InventionTool;
 
 pub struct InventionServer {
     pub(super) port: u16,
+    _cancel: CancellationToken,
     server_handle: tokio::task::AbortHandle,
+}
+
+#[derive(Clone)]
+struct InventionMcp {
+    tool_router: ToolRouter<Self>,
+}
+
+impl InventionMcp {
+    fn new(tools: Vec<InventionTool>) -> Self {
+        let mut tool_router = ToolRouter::<Self>::new();
+
+        for t in tools {
+            let input_schema: serde_json::Map<String, Value> = t.parameters.into_iter().collect();
+
+            let tool_def = Tool {
+                name: Cow::Owned(t.name.to_string()),
+                title: None,
+                description: Some(Cow::Owned(t.description.to_string())),
+                input_schema: Arc::new(input_schema),
+                output_schema: None,
+                annotations: None,
+                execution: None,
+                icons: None,
+                meta: None,
+            };
+
+            let call_fn = t.call.clone();
+            tool_router.add_route(ToolRoute::new_dyn(
+                tool_def,
+                move |ctx: ToolCallContext<'_, InventionMcp>| {
+                    let call_fn = call_fn.clone();
+                    let arguments = ctx.arguments.clone().map(Value::Object).unwrap_or(Value::Object(Default::default()));
+                    async move {
+                        let result = call_fn(arguments).await;
+                        match result {
+                            Ok(text) => Ok(CallToolResult::success(vec![Content::text(text)])),
+                            Err(text) => Ok(CallToolResult::error(vec![Content::text(text)])),
+                        }
+                    }.boxed()
+                },
+            ));
+        }
+
+        Self { tool_router }
+    }
+}
+
+#[rmcp::tool_handler]
+impl ServerHandler for InventionMcp {
+    fn get_info(&self) -> ServerInfo {
+        ServerInfo {
+            instructions: Some("ObjectiveAI invention tool server".into()),
+            capabilities: ServerCapabilities::builder().enable_tools().build(),
+            ..Default::default()
+        }
+    }
+}
+
+/// Separate function to prevent rmcp generics from inflating the caller.
+#[inline(never)]
+fn build_and_spawn_server(
+    tools: Vec<InventionTool>,
+    ct: CancellationToken,
+) -> (tokio::sync::oneshot::Receiver<u16>, tokio::task::AbortHandle) {
+    let (port_tx, port_rx) = tokio::sync::oneshot::channel();
+    let ct_child = ct.child_token();
+
+    let handle = tokio::spawn(async move {
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let port = listener.local_addr().unwrap().port();
+        let _ = port_tx.send(port);
+
+        let mcp = InventionMcp::new(tools);
+        let service: StreamableHttpService<InventionMcp, LocalSessionManager> =
+            StreamableHttpService::new(
+                move || Ok(mcp.clone()),
+                Default::default(),
+                StreamableHttpServerConfig {
+                    stateful_mode: true,
+                    sse_keep_alive: None,
+                    cancellation_token: ct_child,
+                    ..Default::default()
+                },
+            );
+
+        let router = axum::Router::new().fallback_service(service);
+        axum::serve(listener, router).await.ok();
+    })
+    .abort_handle();
+
+    (port_rx, handle)
 }
 
 impl InventionServer {
     pub async fn new(tools: Vec<InventionTool>) -> Self {
-        let tools = Arc::new(tools);
-        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
-        let port = listener.local_addr().unwrap().port();
-
-        let router = Router::new()
-            .route("/mcp", post(handle_jsonrpc))
-            .with_state(tools);
-
-        let server_handle = tokio::spawn(async move {
-            axum::serve(listener, router).await.ok();
-        })
-        .abort_handle();
+        let ct = CancellationToken::new();
+        let (port_rx, server_handle) = build_and_spawn_server(tools, ct.clone());
+        let port = port_rx.await.unwrap();
 
         Self {
             port,
+            _cancel: ct,
             server_handle,
         }
     }
@@ -49,115 +145,6 @@ impl Drop for InventionServer {
     fn drop(&mut self) {
         self.server_handle.abort();
     }
-}
-
-pub(super) async fn handle_jsonrpc(
-    axum::extract::State(tools): axum::extract::State<Arc<Vec<InventionTool>>>,
-    Json(body): Json<Value>,
-) -> impl IntoResponse {
-    let method = body.get("method").and_then(|m| m.as_str()).unwrap_or("");
-    let id = body.get("id").cloned();
-
-    match method {
-        "initialize" => Json(jsonrpc_response(
-            id,
-            json!({
-                "protocolVersion": "2025-03-26",
-                "capabilities": { "tools": {} },
-                "serverInfo": {
-                    "name": "objectiveai-invention",
-                    "version": "0.1.0"
-                }
-            }),
-        ))
-        .into_response(),
-
-        "notifications/initialized" => StatusCode::ACCEPTED.into_response(),
-
-        "tools/list" => {
-            let tool_list: Vec<Value> = tools
-                .iter()
-                .map(|t| {
-                    json!({
-                        "name": t.name,
-                        "description": t.description,
-                        "inputSchema": {
-                            "type": "object",
-                            "properties": t.parameters,
-                        }
-                    })
-                })
-                .collect();
-
-            Json(jsonrpc_response(id, json!({ "tools": tool_list }))).into_response()
-        }
-
-        "tools/call" => {
-            let params = body.get("params").cloned().unwrap_or(json!({}));
-            let name = params
-                .get("name")
-                .and_then(|n| n.as_str())
-                .unwrap_or("");
-            let arguments = params
-                .get("arguments")
-                .cloned()
-                .unwrap_or(json!({}));
-
-            let tool = tools.iter().find(|t| t.name == name);
-
-            match tool {
-                Some(tool) => {
-                    let result = (tool.call)(arguments).await;
-                    match result {
-                        Ok(text) => Json(jsonrpc_response(
-                            id,
-                            json!({
-                                "content": [{ "type": "text", "text": text }],
-                                "isError": false
-                            }),
-                        ))
-                        .into_response(),
-                        Err(text) => Json(jsonrpc_response(
-                            id,
-                            json!({
-                                "content": [{ "type": "text", "text": text }],
-                                "isError": true
-                            }),
-                        ))
-                        .into_response(),
-                    }
-                }
-                None => Json(jsonrpc_error(
-                    id,
-                    -32601,
-                    &format!("tool not found: {name}"),
-                ))
-                .into_response(),
-            }
-        }
-
-        _ => Json(jsonrpc_error(id, -32601, &format!("unknown method: {method}")))
-            .into_response(),
-    }
-}
-
-fn jsonrpc_response(id: Option<Value>, result: Value) -> Value {
-    json!({
-        "jsonrpc": "2.0",
-        "id": id,
-        "result": result
-    })
-}
-
-fn jsonrpc_error(id: Option<Value>, code: i32, message: &str) -> Value {
-    json!({
-        "jsonrpc": "2.0",
-        "id": id,
-        "error": {
-            "code": code,
-            "message": message
-        }
-    })
 }
 
 #[cfg(test)]

@@ -4,7 +4,7 @@ async fn main() {
     match objectiveai_cli::run(std::env::args_os()).await {
         Ok(output) => println!("{output}"),
         Err(e) => {
-            eprintln!("error: {e}");
+            println!("error: {e}");
             std::process::exit(1);
         }
     }
