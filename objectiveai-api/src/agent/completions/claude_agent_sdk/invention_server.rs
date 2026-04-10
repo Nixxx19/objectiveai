@@ -1,17 +1,19 @@
 use std::borrow::Cow;
 use std::sync::Arc;
 
+use futures::FutureExt;
 use rmcp::{
     ServerHandler,
+    handler::server::router::tool::{ToolRouter, ToolRoute},
+    handler::server::tool::ToolCallContext,
     model::{
-        CallToolRequestParams, CallToolResult, Content, ListToolsResult,
+        CallToolRequestParams, CallToolResult, Content,
         ServerCapabilities, ServerInfo, Tool,
     },
     transport::streamable_http_server::{
         StreamableHttpServerConfig, StreamableHttpService,
         session::local::LocalSessionManager,
     },
-    ServiceExt,
 };
 use serde_json::Value;
 use tokio::net::TcpListener;
@@ -28,28 +30,17 @@ pub struct InventionServer {
 
 #[derive(Clone)]
 struct InventionMcp {
-    tools: Arc<Vec<InventionTool>>,
+    tool_router: ToolRouter<Self>,
 }
 
-impl ServerHandler for InventionMcp {
-    fn get_info(&self) -> ServerInfo {
-        ServerInfo {
-            instructions: Some("ObjectiveAI invention tool server".into()),
-            capabilities: ServerCapabilities::builder().enable_tools().build(),
-            ..Default::default()
-        }
-    }
+impl InventionMcp {
+    fn new(tools: Vec<InventionTool>) -> Self {
+        let mut tool_router = ToolRouter::<Self>::new();
 
-    fn list_tools(
-        &self,
-        _request: Option<rmcp::model::PaginatedRequestParams>,
-        _context: rmcp::service::RequestContext<rmcp::RoleServer>,
-    ) -> impl std::future::Future<Output = Result<ListToolsResult, rmcp::ErrorData>> + Send + '_ {
-        let tools: Vec<Tool> = self.tools.iter().map(|t| {
-            let mut input_schema = serde_json::Map::new();
-            input_schema.insert("type".to_string(), Value::String("object".to_string()));
-            input_schema.insert("properties".to_string(), serde_json::to_value(&t.parameters).unwrap());
-            Tool {
+        for t in tools {
+            let input_schema: serde_json::Map<String, Value> = t.parameters.into_iter().collect();
+
+            let tool_def = Tool {
                 name: Cow::Owned(t.name.to_string()),
                 title: None,
                 description: Some(Cow::Owned(t.description.to_string())),
@@ -59,50 +50,55 @@ impl ServerHandler for InventionMcp {
                 execution: None,
                 icons: None,
                 meta: None,
-            }
-        }).collect();
-        std::future::ready(Ok(ListToolsResult {
-            tools,
-            next_cursor: None,
-            meta: None,
-        }))
+            };
+
+            let call_fn = t.call.clone();
+            tool_router.add_route(ToolRoute::new_dyn(
+                tool_def,
+                move |ctx: ToolCallContext<'_, InventionMcp>| {
+                    let call_fn = call_fn.clone();
+                    let arguments = ctx.arguments.clone().map(Value::Object).unwrap_or(Value::Object(Default::default()));
+                    async move {
+                        let result = call_fn(arguments).await;
+                        match result {
+                            Ok(text) => Ok(CallToolResult::success(vec![Content::text(text)])),
+                            Err(text) => Ok(CallToolResult::error(vec![Content::text(text)])),
+                        }
+                    }.boxed()
+                },
+            ));
+        }
+
+        Self { tool_router }
     }
+}
 
-    fn call_tool(
-        &self,
-        request: CallToolRequestParams,
-        _context: rmcp::service::RequestContext<rmcp::RoleServer>,
-    ) -> impl std::future::Future<Output = Result<CallToolResult, rmcp::ErrorData>> + Send + '_ {
-        let tools = self.tools.clone();
-        async move {
-            let name = request.name.as_ref();
-            let arguments = request.arguments.map(|m| Value::Object(m)).unwrap_or(Value::Object(Default::default()));
-
-            let tool = tools.iter().find(|t| t.name == name);
-            match tool {
-                Some(tool) => {
-                    let result = (tool.call)(arguments).await;
-                    match result {
-                        Ok(text) => Ok(CallToolResult::success(vec![Content::text(text)])),
-                        Err(text) => Ok(CallToolResult::error(vec![Content::text(text)])),
-                    }
-                }
-                None => Err(rmcp::ErrorData::method_not_found::<rmcp::model::CallToolRequestMethod>()),
-            }
+#[rmcp::tool_handler]
+impl ServerHandler for InventionMcp {
+    fn get_info(&self) -> ServerInfo {
+        ServerInfo {
+            instructions: Some("ObjectiveAI invention tool server".into()),
+            capabilities: ServerCapabilities::builder().enable_tools().build(),
+            ..Default::default()
         }
     }
 }
 
-impl InventionServer {
-    pub async fn new(tools: Vec<InventionTool>) -> Self {
-        let tools = Arc::new(tools);
+/// Separate function to prevent rmcp generics from inflating the caller.
+#[inline(never)]
+fn build_and_spawn_server(
+    tools: Vec<InventionTool>,
+    ct: CancellationToken,
+) -> (tokio::sync::oneshot::Receiver<u16>, tokio::task::AbortHandle) {
+    let (port_tx, port_rx) = tokio::sync::oneshot::channel();
+    let ct_child = ct.child_token();
+
+    let handle = tokio::spawn(async move {
         let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
         let port = listener.local_addr().unwrap().port();
+        let _ = port_tx.send(port);
 
-        let ct = CancellationToken::new();
-        let ct_child = ct.child_token();
-
-        let mcp = InventionMcp { tools };
+        let mcp = InventionMcp::new(tools);
         let service: StreamableHttpService<InventionMcp, LocalSessionManager> =
             StreamableHttpService::new(
                 move || Ok(mcp.clone()),
@@ -115,12 +111,19 @@ impl InventionServer {
                 },
             );
 
-        let router = axum::Router::new().nest_service("/mcp", service);
+        let router = axum::Router::new().fallback_service(service);
+        axum::serve(listener, router).await.ok();
+    })
+    .abort_handle();
 
-        let server_handle = tokio::spawn(async move {
-            axum::serve(listener, router).await.ok();
-        })
-        .abort_handle();
+    (port_rx, handle)
+}
+
+impl InventionServer {
+    pub async fn new(tools: Vec<InventionTool>) -> Self {
+        let ct = CancellationToken::new();
+        let (port_rx, server_handle) = build_and_spawn_server(tools, ct.clone());
+        let port = port_rx.await.unwrap();
 
         Self {
             port,
