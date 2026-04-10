@@ -52,11 +52,23 @@ const {{ query }} = require(process.env.CLAUDE_AGENT_SDK_PATH || "@anthropic-ai/
     const stream = query({{ prompt: messages(), options: opts }});
 
     // Wait for all MCP servers to be connected.
+    var ourServers = new Set(Object.keys(opts.mcpServers || {{}}));
+    var first = true;
     var delay = 1;
     while (true) {{
       var statuses = await stream.mcpServerStatus();
+      if (first) {{
+        var statusNames = new Set(statuses.map(s => s.name));
+        var missing = [...ourServers].filter(n => !statusNames.has(n));
+        if (missing.length > 0) {{
+          throw new Error("MCP servers not found in status list: " + missing.join(", ") +
+            ". Available: " + [...statusNames].join(", "));
+        }}
+        first = false;
+      }}
       var pending = false;
       for (var s of statuses) {{
+        if (!ourServers.has(s.name)) continue;
         if (s.status === "failed" || s.status === "needs-auth") {{
           throw new Error("MCP server " + s.name + ": " + s.status + (s.error ? " - " + s.error : ""));
         }}
