@@ -906,12 +906,15 @@ where
         let (path, publish_error) = if function.is_some() {
             if let Some(remote) = &request.remote {
                 let publish_files = final_state.serialize_into_files();
-                let name = &T::params(&state).name;
+                let repo_name = &T::params(&state).name;
+                let owner = ctx.commit_author_name().await
+                    .unwrap_or_else(|| std::sync::Arc::new(filesystem_client.commit_author_name.clone()));
+                let name = format!("{}/{}", owner, repo_name);
                 let description = extract_description(&final_state);
                 match remote {
                     objectiveai::Remote::Filesystem => {
                         match publish_filesystem(
-                            &filesystem_client, &ctx, name, &publish_files,
+                            &filesystem_client, &ctx, &name, &publish_files,
                         ).await {
                             Ok(path) => (Some(path), None),
                             Err(e) => (None, Some(e)),
@@ -920,7 +923,7 @@ where
                     objectiveai::Remote::Github => {
                         match publish_github(
                             &github_client, &filesystem_client,
-                            &ctx, name, &description, &publish_files,
+                            &ctx, &name, &description, &publish_files,
                         ).await {
                             Ok(path) => (Some(path), None),
                             Err(e) => (None, Some(e)),
