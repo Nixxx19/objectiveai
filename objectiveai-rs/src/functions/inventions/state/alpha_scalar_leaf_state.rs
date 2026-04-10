@@ -183,22 +183,15 @@ impl AlphaScalarLeafState {
     pub fn write_input_schema_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::AnyObjectJsonSchema>(
+        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::ScalarInputSchemaObject>(
             "WriteInputSchema",
             "Write Input Schema",
             {
                 let state = Arc::clone(this);
                 move |args| {
-                    let args_str = match serde_json::to_string(&args) {
-                        Ok(s) => s,
-                        Err(e) => {
-                            return Err(format!(
-                                "Invalid argument, expected object: {}",
-                                e
-                            ));
-                        }
-                    };
-                    let mut de = serde_json::Deserializer::from_str(&args_str);
+                    let wrapper: crate::functions::inventions::ScalarInputSchemaObject =
+                        serde_json::from_value(args).map_err(|e| format!("Invalid argument: {}", e))?;
+                    let mut de = serde_json::Deserializer::from_str(&wrapper.schema);
                     let input_schema = match serde_path_to_error::deserialize::<
                         _,
                         functions::alpha_scalar::expression::ScalarFunctionInputSchema,
@@ -453,26 +446,19 @@ impl AlphaScalarLeafState {
     pub fn append_task_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::AnyObjectJsonSchema>(
+        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::ScalarLeafTaskObject>(
             "AppendTask",
             "Append Task",
             {
                 let state = Arc::clone(this);
                 move |args| {
-                    let args_str = match serde_json::to_string(&args) {
-                        Ok(s) => s,
-                        Err(e) => {
-                            return Err(format!(
-                                "Invalid argument, expected object: {}",
-                                e
-                            ));
-                        }
-                    };
+                    let wrapper: crate::functions::inventions::ScalarLeafTaskObject =
+                        serde_json::from_value(args).map_err(|e| format!("Invalid argument: {}", e))?;
                     let task = match serde_path_to_error::deserialize::<
                         _,
                         functions::alpha_scalar::LeafTaskExpression,
                     >(
-                        &mut serde_json::Deserializer::from_str(&args_str),
+                        &mut serde_json::Deserializer::from_str(&wrapper.task),
                     ) {
                         Ok(t) => t,
                         Err(e) => {

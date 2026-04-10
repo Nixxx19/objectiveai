@@ -38,6 +38,101 @@ impl JsonSchema for AnyObjectJsonSchema {
     }
 }
 
+/// Helper to build a single-string-property schema with a description.
+fn string_property_schema(prop_name: &str, description: &str) -> serde_json::Map<String, serde_json::Value> {
+    let mut prop = serde_json::Map::with_capacity(2);
+    prop.insert("type".to_string(), serde_json::Value::String("string".to_string()));
+    prop.insert("description".to_string(), serde_json::Value::String(description.to_string()));
+
+    let mut properties = serde_json::Map::with_capacity(1);
+    properties.insert(prop_name.to_string(), serde_json::Value::Object(prop));
+
+    let mut map = serde_json::Map::with_capacity(4);
+    map.insert("type".to_string(), serde_json::Value::String("object".to_string()));
+    map.insert("properties".to_string(), serde_json::Value::Object(properties));
+    map.insert("required".to_string(), serde_json::Value::Array(vec![serde_json::Value::String(prop_name.to_string())]));
+    map.insert("additionalProperties".to_string(), serde_json::Value::Bool(false));
+    map
+}
+
+/// Schema for WriteInputSchema on scalar functions.
+/// Takes a `schema` property: a JSON string conforming to `functions.expression.ObjectInputSchema`.
+#[derive(Deserialize)]
+pub struct ScalarInputSchemaObject {
+    pub schema: String,
+}
+
+impl JsonSchema for ScalarInputSchemaObject {
+    fn json_schema() -> serde_json::Map<String, serde_json::Value> {
+        string_property_schema("schema", "A JSON string conforming to the functions.expression.ObjectInputSchema schema. Use the ReadObjectInputSchemaSchema tool to see the schema definition.")
+    }
+}
+
+/// Schema for WriteInputSchema on vector functions.
+/// Takes a `schema` property: a JSON string conforming to `functions.alpha_vector.expression.VectorFunctionInputSchema`.
+#[derive(Deserialize)]
+pub struct VectorInputSchemaObject {
+    pub schema: String,
+}
+
+impl JsonSchema for VectorInputSchemaObject {
+    fn json_schema() -> serde_json::Map<String, serde_json::Value> {
+        string_property_schema("schema", "A JSON string conforming to the functions.alpha_vector.expression.VectorFunctionInputSchema schema. Use the Readfunctions_alpha_vector_expression_VectorFunctionInputSchemaSchema tool to see the schema definition.")
+    }
+}
+
+/// Schema for AppendTask on scalar leaf functions.
+/// Takes a `task` property: a JSON string conforming to `functions.alpha_scalar.LeafTaskExpression`.
+#[derive(Deserialize)]
+pub struct ScalarLeafTaskObject {
+    pub task: String,
+}
+
+impl JsonSchema for ScalarLeafTaskObject {
+    fn json_schema() -> serde_json::Map<String, serde_json::Value> {
+        string_property_schema("task", "A JSON string conforming to the functions.alpha_scalar.LeafTaskExpression schema. Use the Readfunctions_alpha_scalar_LeafTaskExpressionSchema tool to see the schema definition.")
+    }
+}
+
+/// Schema for AppendTask on scalar branch functions.
+/// Takes a `task` property: a JSON string conforming to `functions.alpha_scalar.PartialPlaceholderBranchTaskExpression`.
+#[derive(Deserialize)]
+pub struct ScalarBranchTaskObject {
+    pub task: String,
+}
+
+impl JsonSchema for ScalarBranchTaskObject {
+    fn json_schema() -> serde_json::Map<String, serde_json::Value> {
+        string_property_schema("task", "A JSON string conforming to the functions.alpha_scalar.PartialPlaceholderBranchTaskExpression schema. Use the Readfunctions_alpha_scalar_PartialPlaceholderBranchTaskExpressionSchema tool to see the schema definition.")
+    }
+}
+
+/// Schema for AppendTask on vector leaf functions.
+/// Takes a `task` property: a JSON string conforming to `functions.alpha_vector.LeafTaskExpression`.
+#[derive(Deserialize)]
+pub struct VectorLeafTaskObject {
+    pub task: String,
+}
+
+impl JsonSchema for VectorLeafTaskObject {
+    fn json_schema() -> serde_json::Map<String, serde_json::Value> {
+        string_property_schema("task", "A JSON string conforming to the functions.alpha_vector.LeafTaskExpression schema. Use the Readfunctions_alpha_vector_LeafTaskExpressionSchema tool to see the schema definition.")
+    }
+}
+
+/// Schema for AppendTask on vector branch functions.
+/// Takes a `task` property: a JSON string conforming to `functions.alpha_vector.PartialPlaceholderBranchTaskExpression`.
+#[derive(Deserialize)]
+pub struct VectorBranchTaskObject {
+    pub task: String,
+}
+
+impl JsonSchema for VectorBranchTaskObject {
+    fn json_schema() -> serde_json::Map<String, serde_json::Value> {
+        string_property_schema("task", "A JSON string conforming to the functions.alpha_vector.PartialPlaceholderBranchTaskExpression schema. Use the Readfunctions_alpha_vector_PartialPlaceholderBranchTaskExpressionSchema tool to see the schema definition.")
+    }
+}
+
 #[derive(Deserialize, schemars::JsonSchema)]
 #[schemars(rename = "functions.inventions.IndexObject")]
 pub struct IndexObject {
