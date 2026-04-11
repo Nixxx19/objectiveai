@@ -84,6 +84,7 @@ pub enum Output {
     LogsGet(objectiveai::filesystem::logs::LogContent),
     LogsList(Vec<objectiveai::filesystem::logs::ListItem>),
     LogsClear(u64),
+    LogsSubscribe(Option<objectiveai::filesystem::logs::LogContent>),
 }
 
 #[derive(Subcommand)]
@@ -172,6 +173,11 @@ where
         }),
         Ok(Output::LogsList(items)) => Ok(serde_json::to_string(&items).unwrap()),
         Ok(Output::LogsClear(count)) => Ok(format!("cleared {count} log files")),
+        Ok(Output::LogsSubscribe(Some(content))) => Ok(match content {
+            objectiveai::filesystem::logs::LogContent::Json(v) => serde_json::to_string(&v).unwrap(),
+            objectiveai::filesystem::logs::LogContent::DataUrl(s) => s,
+        }),
+        Ok(Output::LogsSubscribe(None)) => Err("subscribe timed out".into()),
         Err(e) => Err(format!("{e}")),
     }
 }

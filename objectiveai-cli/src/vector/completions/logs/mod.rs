@@ -4,6 +4,8 @@ use clap::Subcommand;
 pub enum Commands {
     /// Get a vector completion log
     Get { id: String },
+    /// Subscribe to changes (wait for create/modify)
+    Subscribe { id: String, timeout_ms: u64 },
     /// List vector completion logs
     List {
         #[arg(long, default_value_t = 0)]
@@ -22,6 +24,10 @@ impl Commands {
             Commands::Get { id } => {
                 let content = client.read_vector_completion(&id).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
                 Ok(crate::Output::LogsGet(content))
+            }
+            Commands::Subscribe { id, timeout_ms } => {
+                let result = client.subscribe_vector_completion(&id, std::time::Duration::from_millis(timeout_ms)).await;
+                Ok(crate::Output::LogsSubscribe(result.map(objectiveai::filesystem::logs::LogContent::Json)))
             }
             Commands::List { offset, limit } => Ok(crate::Output::LogsList(client.list_vector_completions(offset, limit).await?)),
             Commands::Clear => Ok(crate::Output::LogsClear(client.clear_vector_completions().await?)),
