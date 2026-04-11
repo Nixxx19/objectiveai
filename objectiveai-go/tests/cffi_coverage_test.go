@@ -38,7 +38,7 @@ func TestCFFICoverage(t *testing.T) {
 	}
 
 	// Read Go cffi.go
-	goPath := filepath.Join(repoRoot, "objectiveai-go", "objectiveai", "cffi.go")
+	goPath := filepath.Join(repoRoot, "objectiveai-go", "cffi.go")
 	goBytes, err := os.ReadFile(goPath)
 	if err != nil {
 		t.Fatalf("Failed to read %s: %v", goPath, err)

@@ -11,7 +11,7 @@ import (
 )
 
 // TestHTTPCoverage asserts that every Rust http.rs file has a corresponding
-// Go file in objectiveai-go/objectiveai/, and that every pub async fn in
+// Go file in objectiveai-go/, and that every pub async fn in
 // Rust has a corresponding exported Go function.
 //
 // Naming convention:

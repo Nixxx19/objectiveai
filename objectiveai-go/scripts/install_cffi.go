@@ -1,7 +1,7 @@
 // install_cffi.go
 //
 // Validates objectiveai-rs-cffi dist/ and copies the WASM binary
-// into objectiveai-go/objectiveai/lib/ for Go embed.
+// into objectiveai-go/lib/ for Go embed.
 //
 // Delegates the fingerprint check to objectiveai-rs-cffi/validate.sh.
 // If dist/ is missing or stale, exits with an error — run build.sh first.
@@ -28,7 +28,7 @@ func main() {
 	cffiDir := filepath.Join(repoRoot, "objectiveai-rs-cffi")
 	wasmSrc := filepath.Join(cffiDir, "dist", "objectiveai_cffi.wasm")
 	validateScript := filepath.Join(cffiDir, "validate.sh")
-	libDir := filepath.Join(goRoot, "objectiveai", "lib")
+	libDir := filepath.Join(goRoot, "lib")
 	wasmDst := filepath.Join(libDir, "objectiveai_cffi.wasm")
 
 	// 1. Validate dist/ is up to date
