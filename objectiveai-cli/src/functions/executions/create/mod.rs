@@ -125,6 +125,9 @@ pub enum Commands {
         /// Seed for deterministic mock responses
         #[arg(long)]
         seed: Option<i64>,
+        /// Run in the background: print PID and log path, then exit
+        #[arg(long)]
+        detach: bool,
     },
     /// Swiss System tournament strategy (vector only)
     SwissSystem {
@@ -150,6 +153,9 @@ pub enum Commands {
         /// How many sequential rounds of comparison (default 3)
         #[arg(long)]
         rounds: Option<usize>,
+        /// Run in the background: print PID and log path, then exit
+        #[arg(long)]
+        detach: bool,
     },
 }
 
@@ -165,19 +171,23 @@ async fn profile_favorites(cli_config: &crate::Config) -> Vec<objectiveai::files
 
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
-        let (function_path, profile_path, input_source, continuation_args, retry_token, seed, strategy) = match self {
-            Commands::Standard { function, profile, input, continuation, retry_token, seed } => {
+        let (function_path, profile_path, input_source, continuation_args, retry_token, seed, strategy, detach) = match self {
+            Commands::Standard { function, profile, input, continuation, retry_token, seed, detach } => {
                 let fp = function.resolve(|| fn_favorites(cli_config)).await?;
                 let pp = profile.resolve(|| profile_favorites(cli_config)).await?;
-                (fp, pp, input, continuation, retry_token, seed, objectiveai::functions::executions::request::Strategy::Default)
+                (fp, pp, input, continuation, retry_token, seed, objectiveai::functions::executions::request::Strategy::Default, detach)
             }
-            Commands::SwissSystem { function, profile, input, continuation, retry_token, seed, pool, rounds } => {
+            Commands::SwissSystem { function, profile, input, continuation, retry_token, seed, pool, rounds, detach } => {
                 let fp = function.resolve(|| fn_favorites(cli_config)).await?;
                 let pp = profile.resolve(|| profile_favorites(cli_config)).await?;
                 let strategy = objectiveai::functions::executions::request::Strategy::SwissSystem { pool, rounds };
-                (fp, pp, input, continuation, retry_token, seed, strategy)
+                (fp, pp, input, continuation, retry_token, seed, strategy, detach)
             }
         };
+
+        if detach {
+            crate::api::detach::detach().await;
+        }
 
         let input_value = input_source.resolve()?;
         let continuation = continuation_args.resolve()?;

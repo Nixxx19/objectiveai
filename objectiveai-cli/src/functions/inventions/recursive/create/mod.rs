@@ -75,6 +75,9 @@ pub enum Commands {
         /// Seed for deterministic mock responses
         #[arg(long)]
         seed: Option<i64>,
+        /// Run in the background: print PID and log path, then exit
+        #[arg(long)]
+        detach: bool,
     },
     /// Invent a vector function
     AlphaVector {
@@ -88,6 +91,9 @@ pub enum Commands {
         /// Seed for deterministic mock responses
         #[arg(long)]
         seed: Option<i64>,
+        /// Run in the background: print PID and log path, then exit
+        #[arg(long)]
+        detach: bool,
     },
     /// Invent from a remote state (previously saved invention state files)
     Remote {
@@ -102,36 +108,43 @@ pub enum Commands {
         /// Seed for deterministic mock responses
         #[arg(long)]
         seed: Option<i64>,
+        /// Run in the background: print PID and log path, then exit
+        #[arg(long)]
+        detach: bool,
     },
 }
 
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
-        let (agent_ref, continuation_args, seed, state) = match self {
-            Commands::AlphaScalar { params, agent, continuation, seed } => {
+        let (agent_ref, continuation_args, seed, state, detach) = match self {
+            Commands::AlphaScalar { params, agent, continuation, seed, detach } => {
                 let p = params.into_params();
                 let state = objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(
                     objectiveai::functions::inventions::ParamsState::AlphaScalar(
                         objectiveai::functions::inventions::state::AlphaScalarState { params: p, input_schema: None },
                     ),
                 );
-                (agent, continuation, seed, state)
+                (agent, continuation, seed, state, detach)
             }
-            Commands::AlphaVector { params, agent, continuation, seed } => {
+            Commands::AlphaVector { params, agent, continuation, seed, detach } => {
                 let p = params.into_params();
                 let state = objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(
                     objectiveai::functions::inventions::ParamsState::AlphaVector(
                         objectiveai::functions::inventions::state::AlphaVectorState { params: p, input_schema: None },
                     ),
                 );
-                (agent, continuation, seed, state)
+                (agent, continuation, seed, state, detach)
             }
-            Commands::Remote { state, agent, continuation, seed } => {
+            Commands::Remote { state, agent, continuation, seed, detach } => {
                 let remote_path = state.resolve()?;
                 let state = objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Remote(remote_path);
-                (agent, continuation, seed, state)
+                (agent, continuation, seed, state, detach)
             }
         };
+
+        if detach {
+            crate::api::detach::detach().await;
+        }
 
         let agent = agent_ref.resolve(|| async {
             let (_, mut c) = crate::config::read(cli_config).await.unwrap();
