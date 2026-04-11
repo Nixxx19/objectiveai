@@ -87,7 +87,7 @@ impl Commands {
             continuation,
         };
 
-        let log_writer = objectiveai::filesystem::logs::LogsClient::new(cli_config.config_base_dir.as_deref())
+        let mut log_writer = objectiveai::filesystem::logs::LogsClient::new(cli_config.config_base_dir.as_deref())
             .write_agent_completion();
 
         crate::api::run(Box::new(|http_client| Box::pin(async move {
