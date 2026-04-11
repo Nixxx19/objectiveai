@@ -26,7 +26,7 @@ impl BuilderChunk {
     /// Returns `(reference, files)` where `reference` includes `"index"` and `"agent_index"`.
     /// Files are written under `agent/completions/`.
     #[cfg(feature = "filesystem")]
-    pub fn produce_files(&self) -> (serde_json::Value, Vec<(String, Vec<u8>)>) {
+    pub fn produce_files(&self) -> (serde_json::Value, Vec<crate::filesystem::logs::LogFile>) {
         let (mut reference, files) = match self.inner.produce_files() {
             Some((reference, files)) => (reference, files),
             None => return (serde_json::json!({ "type": "reference", "index": self.index, "agent_index": self.agent_index }), Vec::new()),

@@ -38,7 +38,7 @@ pub async fn detach() -> ! {
                     stdout_done = true;
                 } else {
                     print!("{stdout_line}");
-                    if stdout_line.contains("Logs available at") {
+                    if crate::log_line::is_log_id_line(&stdout_line) {
                         std::process::exit(0);
                     }
                     stdout_line.clear();

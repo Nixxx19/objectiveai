@@ -71,20 +71,20 @@ impl LaboratoryExecutionChunk {
         }
     }
 
-    /// Produces the `(path, file_bytes)` pairs for the log file structure.
+    /// Produces the [`LogFile`]s for the log file structure.
     ///
     /// Returns `(reference, files)`. All paths relative to `logs/`.
     #[cfg(feature = "filesystem")]
-    pub fn produce_files(&self) -> Option<(serde_json::Value, Vec<(String, Vec<u8>)>)> {
-        const PREFIX: &str = "laboratories/executions/";
+    pub fn produce_files(&self) -> Option<(serde_json::Value, Vec<crate::filesystem::logs::LogFile>)> {
+        use crate::filesystem::logs::LogFile;
+        const ROUTE: &str = "laboratories/executions";
 
         let id = &self.id;
         if id.is_empty() {
             return None;
         }
 
-        let path = format!("{PREFIX}{id}.json");
-        let mut files: Vec<(String, Vec<u8>)> = Vec::new();
+        let mut files: Vec<LogFile> = Vec::new();
         let mut builder_refs: Vec<serde_json::Value> = Vec::new();
         let mut evaluation_refs: Vec<serde_json::Value> = Vec::new();
 
@@ -113,8 +113,18 @@ impl LaboratoryExecutionChunk {
         let mut root = serde_json::to_value(&shell).unwrap();
         root["builders"] = serde_json::Value::Array(builder_refs);
         root["evaluations"] = serde_json::Value::Array(evaluation_refs);
-        files.push((path.clone(), serde_json::to_vec_pretty(&root).unwrap()));
 
-        Some((serde_json::json!({ "type": "reference", "path": path }), files))
+        let root_file = LogFile {
+            route: ROUTE.to_string(),
+            id: id.clone(),
+            message_index: None,
+            media_index: None,
+            extension: "json".to_string(),
+            content: serde_json::to_vec_pretty(&root).unwrap(),
+        };
+        let reference = serde_json::json!({ "type": "reference", "path": root_file.path() });
+        files.push(root_file);
+
+        Some((reference, files))
     }
 }

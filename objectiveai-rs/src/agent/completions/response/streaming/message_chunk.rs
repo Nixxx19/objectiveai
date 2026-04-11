@@ -38,10 +38,10 @@ impl MessageChunk {
     /// `{"type": "reference", "path": ...}` JSON value, and `files`
     /// contains all produced files.
     #[cfg(feature = "filesystem")]
-    pub fn produce_files(&self, id: &str, prefix: &str) -> (serde_json::Value, Vec<(String, Vec<u8>)>) {
+    pub fn produce_files(&self, id: &str, route_base: &str) -> (serde_json::Value, Vec<crate::filesystem::logs::LogFile>) {
         match self {
-            MessageChunk::Assistant(chunk) => chunk.produce_files(id, prefix),
-            MessageChunk::Tool(chunk) => chunk.produce_files(id, prefix),
+            MessageChunk::Assistant(chunk) => chunk.produce_files(id, route_base),
+            MessageChunk::Tool(chunk) => chunk.produce_files(id, route_base),
         }
     }
 }

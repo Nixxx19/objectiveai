@@ -1,4 +1,4 @@
-use crate::{agent, error, functions};
+use crate::{agent, error};
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
@@ -120,20 +120,20 @@ impl FunctionExecutionChunk {
         }
     }
 
-    /// Produces the `(path, file_bytes)` pairs for the log file structure.
+    /// Produces the [`LogFile`]s for the log file structure.
     ///
     /// Returns `(reference, files)`. All paths relative to `logs/`.
     #[cfg(feature = "filesystem")]
-    pub fn produce_files(&self) -> Option<(serde_json::Value, Vec<(String, Vec<u8>)>)> {
-        const PREFIX: &str = "functions/executions/";
+    pub fn produce_files(&self) -> Option<(serde_json::Value, Vec<crate::filesystem::logs::LogFile>)> {
+        use crate::filesystem::logs::LogFile;
+        const ROUTE: &str = "functions/executions";
 
         let id = &self.id;
         if id.is_empty() {
             return None;
         }
 
-        let path = format!("{PREFIX}{id}.json");
-        let mut files: Vec<(String, Vec<u8>)> = Vec::new();
+        let mut files: Vec<LogFile> = Vec::new();
         let mut task_refs: Vec<serde_json::Value> = Vec::new();
 
         for task in &self.tasks {
@@ -172,18 +172,34 @@ impl FunctionExecutionChunk {
 
         // Extract retry token to a separate file, or remove placeholder
         if let Some(retry_token) = &self.retry_token {
-            let rt_path = format!("{PREFIX}retry_token/{id}.json");
-            files.push((rt_path.clone(), serde_json::to_vec_pretty(retry_token).unwrap()));
+            let rt_file = LogFile {
+                route: format!("{ROUTE}/retry_token"),
+                id: id.clone(),
+                message_index: None,
+                media_index: None,
+                extension: "json".to_string(),
+                content: serde_json::to_vec_pretty(retry_token).unwrap(),
+            };
             root["retry_token"] = serde_json::json!({
                 "type": "reference",
-                "path": rt_path,
+                "path": rt_file.path(),
             });
+            files.push(rt_file);
         } else if let Some(map) = root.as_object_mut() {
             map.remove("retry_token");
         }
 
-        files.push((path.clone(), serde_json::to_vec_pretty(&root).unwrap()));
+        let root_file = LogFile {
+            route: ROUTE.to_string(),
+            id: id.clone(),
+            message_index: None,
+            media_index: None,
+            extension: "json".to_string(),
+            content: serde_json::to_vec_pretty(&root).unwrap(),
+        };
+        let reference = serde_json::json!({ "type": "reference", "path": root_file.path() });
+        files.push(root_file);
 
-        Some((serde_json::json!({ "type": "reference", "path": path }), files))
+        Some((reference, files))
     }
 }
