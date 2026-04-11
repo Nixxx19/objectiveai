@@ -11,6 +11,8 @@ pub enum Commands {
         #[arg(long, default_value_t = 100)]
         limit: usize,
     },
+    /// Clear all function execution logs
+    Clear,
 }
 
 impl Commands {
@@ -22,6 +24,7 @@ impl Commands {
                 Ok(crate::Output::LogsGet(content))
             }
             Commands::List { offset, limit } => Ok(crate::Output::LogsList(client.list_function_executions(offset, limit).await?)),
+            Commands::Clear => Ok(crate::Output::LogsClear(client.clear_function_executions().await?)),
         }
     }
 }

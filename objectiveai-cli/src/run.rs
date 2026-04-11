@@ -83,6 +83,7 @@ pub enum Output {
     Schema(&'static str),
     LogsGet(objectiveai::filesystem::logs::LogContent),
     LogsList(Vec<objectiveai::filesystem::logs::ListItem>),
+    LogsClear(u64),
 }
 
 #[derive(Subcommand)]
@@ -170,6 +171,7 @@ where
             objectiveai::filesystem::logs::LogContent::DataUrl(s) => s,
         }),
         Ok(Output::LogsList(items)) => Ok(serde_json::to_string(&items).unwrap()),
+        Ok(Output::LogsClear(count)) => Ok(format!("cleared {count} log files")),
         Err(e) => Err(format!("{e}")),
     }
 }

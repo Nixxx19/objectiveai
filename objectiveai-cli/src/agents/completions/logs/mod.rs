@@ -11,6 +11,8 @@ pub enum Commands {
         #[arg(long, default_value_t = 100)]
         limit: usize,
     },
+    /// Clear all agent completion logs
+    Clear,
 }
 
 impl Commands {
@@ -23,6 +25,9 @@ impl Commands {
             }
             Commands::List { offset, limit } => {
                 Ok(crate::Output::LogsList(client.list_agent_completions(offset, limit).await?))
+            }
+            Commands::Clear => {
+                Ok(crate::Output::LogsClear(client.clear_agent_completions().await?))
             }
         }
     }

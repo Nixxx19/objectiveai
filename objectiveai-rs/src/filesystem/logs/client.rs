@@ -114,6 +114,57 @@ impl LogsClient {
     }
 
     // -----------------------------------------------------------------------
+    // Clear methods
+    // -----------------------------------------------------------------------
+
+    async fn clear_endpoint(&self, endpoint: &str) -> Result<u64, LogsError> {
+        let dir = self.endpoint_dir(endpoint);
+        match tokio::fs::metadata(&dir).await {
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(0),
+            Err(e) => return Err(LogsError::ReadDir(dir, e)),
+            Ok(_) => {}
+        }
+        let mut read_dir = tokio::fs::read_dir(&dir).await
+            .map_err(|e| LogsError::ReadDir(dir.clone(), e))?;
+        let mut count = 0u64;
+        while let Some(entry) = read_dir.next_entry().await
+            .map_err(|e| LogsError::ReadDir(dir.clone(), e))?
+        {
+            let path = entry.path();
+            if path.is_file() {
+                tokio::fs::remove_file(&path).await
+                    .map_err(|e| LogsError::Read(path, e))?;
+                count += 1;
+            }
+        }
+        Ok(count)
+    }
+
+    pub async fn clear_agent_completions(&self) -> Result<u64, LogsError> {
+        self.clear_endpoint("agent/completions").await
+    }
+
+    pub async fn clear_vector_completions(&self) -> Result<u64, LogsError> {
+        self.clear_endpoint("vector/completions").await
+    }
+
+    pub async fn clear_function_executions(&self) -> Result<u64, LogsError> {
+        self.clear_endpoint("functions/executions").await
+    }
+
+    pub async fn clear_function_inventions(&self) -> Result<u64, LogsError> {
+        self.clear_endpoint("functions/inventions").await
+    }
+
+    pub async fn clear_function_inventions_recursive(&self) -> Result<u64, LogsError> {
+        self.clear_endpoint("functions/inventions/recursive").await
+    }
+
+    pub async fn clear_laboratory_executions(&self) -> Result<u64, LogsError> {
+        self.clear_endpoint("laboratories/executions").await
+    }
+
+    // -----------------------------------------------------------------------
     // Write methods
     // -----------------------------------------------------------------------
 
