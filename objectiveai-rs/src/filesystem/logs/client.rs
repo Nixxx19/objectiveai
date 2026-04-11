@@ -117,6 +117,7 @@ impl LogsClient {
     // Clear methods
     // -----------------------------------------------------------------------
 
+    /// Deletes all files (not subdirectories) in the given endpoint directory.
     async fn clear_endpoint(&self, endpoint: &str) -> Result<u64, LogsError> {
         let dir = self.endpoint_dir(endpoint);
         match tokio::fs::metadata(&dir).await {
@@ -144,12 +145,44 @@ impl LogsClient {
         self.clear_endpoint("agent/completions").await
     }
 
+    pub async fn clear_agent_completion_continuations(&self) -> Result<u64, LogsError> {
+        self.clear_endpoint("agent/completions/continuation").await
+    }
+
+    pub async fn clear_agent_completion_messages(&self) -> Result<u64, LogsError> {
+        self.clear_endpoint("agent/completions/messages").await
+    }
+
+    pub async fn clear_agent_completion_message_logprobs(&self) -> Result<u64, LogsError> {
+        self.clear_endpoint("agent/completions/messages/logprobs").await
+    }
+
+    pub async fn clear_agent_completion_message_images(&self) -> Result<u64, LogsError> {
+        self.clear_endpoint("agent/completions/messages/image").await
+    }
+
+    pub async fn clear_agent_completion_message_audio(&self) -> Result<u64, LogsError> {
+        self.clear_endpoint("agent/completions/messages/audio").await
+    }
+
+    pub async fn clear_agent_completion_message_video(&self) -> Result<u64, LogsError> {
+        self.clear_endpoint("agent/completions/messages/video").await
+    }
+
+    pub async fn clear_agent_completion_message_files(&self) -> Result<u64, LogsError> {
+        self.clear_endpoint("agent/completions/messages/file").await
+    }
+
     pub async fn clear_vector_completions(&self) -> Result<u64, LogsError> {
         self.clear_endpoint("vector/completions").await
     }
 
     pub async fn clear_function_executions(&self) -> Result<u64, LogsError> {
         self.clear_endpoint("functions/executions").await
+    }
+
+    pub async fn clear_function_execution_retry_tokens(&self) -> Result<u64, LogsError> {
+        self.clear_endpoint("functions/executions/retry_token").await
     }
 
     pub async fn clear_function_inventions(&self) -> Result<u64, LogsError> {

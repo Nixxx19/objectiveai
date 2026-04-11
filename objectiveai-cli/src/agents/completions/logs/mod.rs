@@ -11,8 +11,12 @@ pub enum Commands {
         #[arg(long, default_value_t = 100)]
         limit: usize,
     },
-    /// Clear all agent completion logs
-    Clear,
+    /// Clear agent completion logs
+    Clear {
+        /// Also clear nested endpoints (continuations, messages, etc.)
+        #[arg(long)]
+        nested: bool,
+    },
 }
 
 impl Commands {
@@ -26,8 +30,22 @@ impl Commands {
             Commands::List { offset, limit } => {
                 Ok(crate::Output::LogsList(client.list_agent_completions(offset, limit).await?))
             }
-            Commands::Clear => {
-                Ok(crate::Output::LogsClear(client.clear_agent_completions().await?))
+            Commands::Clear { nested } => {
+                if nested {
+                    let counts = futures::future::try_join_all([
+                        client.clear_agent_completions(),
+                        client.clear_agent_completion_continuations(),
+                        client.clear_agent_completion_messages(),
+                        client.clear_agent_completion_message_logprobs(),
+                        client.clear_agent_completion_message_images(),
+                        client.clear_agent_completion_message_audio(),
+                        client.clear_agent_completion_message_video(),
+                        client.clear_agent_completion_message_files(),
+                    ]).await?;
+                    Ok(crate::Output::LogsClear(counts.into_iter().sum()))
+                } else {
+                    Ok(crate::Output::LogsClear(client.clear_agent_completions().await?))
+                }
             }
         }
     }
