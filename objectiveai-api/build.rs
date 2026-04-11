@@ -23,8 +23,31 @@ fn set_stack_size() {
     println!("cargo:rustc-link-arg={flag}");
 }
 
+/// Runs a bash script cross-platform.
+/// On Windows, uses `cmd /c bash` so that cmd.exe resolves bash from PATH
+/// (finding Git bash instead of WSL bash).
+#[cfg(feature = "orchestrator-bollard")]
+fn run_bash(script: &std::path::Path, args: &[&str]) -> std::process::Output {
+    if cfg!(windows) {
+        let mut cmd_args = vec!["/c", "bash", script.to_str().unwrap()];
+        cmd_args.extend(args);
+        std::process::Command::new("cmd")
+            .args(&cmd_args)
+            .output()
+            .expect("Failed to run bash script")
+    } else {
+        std::process::Command::new("bash")
+            .arg(script)
+            .args(args)
+            .output()
+            .expect("Failed to run bash script")
+    }
+}
+
 #[cfg(feature = "orchestrator-bollard")]
 fn laboratories_local() {
+    // The MCP binary is always linux-musl (for Docker container injection),
+    // regardless of the platform the API is built on.
     let arch = std::env::var("CARGO_CFG_TARGET_ARCH").unwrap();
     let musl_target = format!("{arch}-unknown-linux-musl");
     let profile = std::env::var("PROFILE").unwrap();
@@ -32,21 +55,18 @@ fn laboratories_local() {
     let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
     let workspace_dir = std::path::Path::new(&manifest_dir).parent().unwrap();
 
-    // Run validate.sh with matching target and profile
-    let validate_script = workspace_dir.join("objectiveai-mcp/validate.sh");
-    let mut cmd = std::process::Command::new("bash");
-    cmd.arg(&validate_script)
-        .arg("--target")
-        .arg(&musl_target)
-        .current_dir(workspace_dir);
+    let validate_script = workspace_dir.join("objectiveai-mcp").join("validate.sh");
+    let mut args: Vec<&str> = vec!["--target", &musl_target];
     if profile == "release" {
-        cmd.arg("--release");
+        args.push("--release");
     }
-    let status = cmd.status().expect("Failed to run objectiveai-mcp/validate.sh");
+    let output = run_bash(&validate_script, &args);
 
     assert!(
-        status.success(),
-        "objectiveai-mcp/validate.sh failed. Run: bash objectiveai-mcp/build.sh --target {musl_target}{}",
+        output.status.success(),
+        "objectiveai-mcp/validate.sh failed:\n{}\n{}Run: bash objectiveai-mcp/build.sh --target {musl_target}{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr),
         if profile == "release" { " --release" } else { "" }
     );
 

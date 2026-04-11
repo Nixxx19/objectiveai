@@ -10,12 +10,21 @@ pub async fn detach() -> ! {
         .filter(|a| a != "--detach")
         .collect();
 
-    let mut child = tokio::process::Command::new(exe)
-        .args(&args)
+    let mut cmd = tokio::process::Command::new(exe);
+    cmd.args(&args)
         .stdout(std::process::Stdio::piped())
-        .stderr(std::process::Stdio::piped())
-        .spawn()
-        .expect("failed to spawn detached process");
+        .stderr(std::process::Stdio::piped());
+
+    // On Windows, create the child in a new process group and detach it from
+    // the parent's job object so it survives when the parent exits.
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NEW_PROCESS_GROUP: u32 = 0x00000200;
+        cmd.creation_flags(CREATE_NEW_PROCESS_GROUP);
+    }
+
+    let mut child = cmd.spawn().expect("failed to spawn detached process");
 
     let pid = child.id().expect("failed to get child PID");
     println!("PID: {pid}");
