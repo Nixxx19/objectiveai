@@ -19,17 +19,17 @@ pub enum Commands {
 
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
-        let client = objectiveai::filesystem::logs::client::LogsClient::new(cli_config.config_base_dir.as_deref());
+        let client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
         match self {
             Commands::Get { id, message_index, media_index } => {
-                let content = client.read_agent_completion_message_audio(&id, message_index, media_index).await.map(objectiveai::filesystem::logs::LogContent::DataUrl)?;
+                let content = objectiveai::filesystem::logs::client::read_agent_completion_message_audio(&client, &id, message_index, media_index).await.map(objectiveai::filesystem::logs::LogContent::DataUrl)?;
                 Ok(crate::Output::LogsGet(content))
             }
             Commands::Subscribe { id, message_index, media_index, timeout_ms, require_modification } => {
-                let result = client.subscribe_agent_completion_message_audio(&id, message_index, media_index, std::time::Duration::from_millis(timeout_ms), require_modification).await;
+                let result = objectiveai::filesystem::logs::client::subscribe_agent_completion_message_audio(&client, &id, message_index, media_index, std::time::Duration::from_millis(timeout_ms), require_modification).await;
                 Ok(crate::Output::LogsSubscribe(result.map(objectiveai::filesystem::logs::LogContent::DataUrl)))
             }
-            Commands::Clear => Ok(crate::Output::LogsClear(client.clear_agent_completion_message_audio().await?)),
+            Commands::Clear => Ok(crate::Output::LogsClear(objectiveai::filesystem::logs::client::clear_agent_completion_message_audio(&client).await?)),
         }
     }
 }

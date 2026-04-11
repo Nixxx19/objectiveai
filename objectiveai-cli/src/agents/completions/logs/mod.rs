@@ -28,34 +28,34 @@ pub enum Commands {
 
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
-        let client = objectiveai::filesystem::logs::client::LogsClient::new(cli_config.config_base_dir.as_deref());
+        let client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
         match self {
             Commands::Get { id } => {
-                let content = client.read_agent_completion(&id).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
+                let content = objectiveai::filesystem::logs::client::read_agent_completion(&client, &id).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
                 Ok(crate::Output::LogsGet(content))
             }
             Commands::Subscribe { id, timeout_ms, require_modification } => {
-                let result = client.subscribe_agent_completion(&id, std::time::Duration::from_millis(timeout_ms), require_modification).await;
+                let result = objectiveai::filesystem::logs::client::subscribe_agent_completion(&client, &id, std::time::Duration::from_millis(timeout_ms), require_modification).await;
                 Ok(crate::Output::LogsSubscribe(result.map(objectiveai::filesystem::logs::LogContent::Json)))
             }
             Commands::List { offset, limit } => {
-                Ok(crate::Output::LogsList(client.list_agent_completions(offset, limit).await?))
+                Ok(crate::Output::LogsList(objectiveai::filesystem::logs::client::list_agent_completions(&client, offset, limit).await?))
             }
             Commands::Clear { nested } => {
                 if nested {
                     let counts = futures::future::try_join_all(vec![
-                        Box::pin(client.clear_agent_completions()) as std::pin::Pin<Box<dyn std::future::Future<Output = _>>>,
-                        Box::pin(client.clear_agent_completion_continuations()),
-                        Box::pin(client.clear_agent_completion_messages()),
-                        Box::pin(client.clear_agent_completion_message_logprobs()),
-                        Box::pin(client.clear_agent_completion_message_images()),
-                        Box::pin(client.clear_agent_completion_message_audio()),
-                        Box::pin(client.clear_agent_completion_message_video()),
-                        Box::pin(client.clear_agent_completion_message_files()),
+                        Box::pin(objectiveai::filesystem::logs::client::clear_agent_completions(&client)) as std::pin::Pin<Box<dyn std::future::Future<Output = _>>>,
+                        Box::pin(objectiveai::filesystem::logs::client::clear_agent_completion_continuations(&client)),
+                        Box::pin(objectiveai::filesystem::logs::client::clear_agent_completion_messages(&client)),
+                        Box::pin(objectiveai::filesystem::logs::client::clear_agent_completion_message_logprobs(&client)),
+                        Box::pin(objectiveai::filesystem::logs::client::clear_agent_completion_message_images(&client)),
+                        Box::pin(objectiveai::filesystem::logs::client::clear_agent_completion_message_audio(&client)),
+                        Box::pin(objectiveai::filesystem::logs::client::clear_agent_completion_message_video(&client)),
+                        Box::pin(objectiveai::filesystem::logs::client::clear_agent_completion_message_files(&client)),
                     ]).await?;
                     Ok(crate::Output::LogsClear(counts.into_iter().sum()))
                 } else {
-                    Ok(crate::Output::LogsClear(client.clear_agent_completions().await?))
+                    Ok(crate::Output::LogsClear(objectiveai::filesystem::logs::client::clear_agent_completions(&client).await?))
                 }
             }
         }

@@ -87,8 +87,8 @@ impl Commands {
             continuation,
         };
 
-        let mut log_writer = objectiveai::filesystem::logs::client::LogsClient::new(cli_config.config_base_dir.as_deref())
-            .write_agent_completion();
+        let fs_client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
+        let mut log_writer = objectiveai::filesystem::logs::client::write_agent_completion(&fs_client);
 
         crate::api::run(Box::new(|http_client| Box::pin(async move {
             let stream = objectiveai::agent::completions::create_agent_completion_streaming(

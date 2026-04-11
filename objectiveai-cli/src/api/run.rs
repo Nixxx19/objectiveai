@@ -13,6 +13,8 @@ where
     Fut: Future<Output = Result<String, crate::error::Error>> + Send + 'static,
 {
     let client = objectiveai::filesystem::Client::new(None::<String>, None::<String>, None::<String>);
+    // Note: api::run creates its own Client without cli_config context.
+    // Commit author fields fall back to env vars or defaults.
     let mut config = objectiveai::filesystem::config::client::read(&client).await?;
 
     let api_mode = config.api().get_mode();

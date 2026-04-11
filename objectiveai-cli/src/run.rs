@@ -18,6 +18,10 @@ struct EnvConfigBuilder {
     config_set_forbidden: Option<String>,
     #[envconfig(from = "CONFIG_BASE_DIR")]
     config_base_dir: Option<String>,
+    #[envconfig(from = "COMMIT_AUTHOR_NAME")]
+    commit_author_name: Option<String>,
+    #[envconfig(from = "COMMIT_AUTHOR_EMAIL")]
+    commit_author_email: Option<String>,
 }
 
 impl EnvConfigBuilder {
@@ -29,6 +33,8 @@ impl EnvConfigBuilder {
         ConfigBuilder {
             config_set_forbidden: self.config_set_forbidden.map(|s| parse_bool(&s)),
             config_base_dir: self.config_base_dir,
+            commit_author_name: self.commit_author_name,
+            commit_author_email: self.commit_author_email,
         }
     }
 }
@@ -37,6 +43,8 @@ impl EnvConfigBuilder {
 pub struct ConfigBuilder {
     pub config_set_forbidden: Option<bool>,
     pub config_base_dir: Option<String>,
+    pub commit_author_name: Option<String>,
+    pub commit_author_email: Option<String>,
 }
 
 impl Envconfig for ConfigBuilder {
@@ -59,6 +67,8 @@ impl ConfigBuilder {
         Config {
             config_set_forbidden: self.config_set_forbidden.unwrap_or(false),
             config_base_dir: self.config_base_dir,
+            commit_author_name: self.commit_author_name,
+            commit_author_email: self.commit_author_email,
         }
     }
 }
@@ -66,6 +76,8 @@ impl ConfigBuilder {
 pub struct Config {
     pub config_set_forbidden: bool,
     pub config_base_dir: Option<String>,
+    pub commit_author_name: Option<String>,
+    pub commit_author_email: Option<String>,
 }
 
 #[derive(Parser)]

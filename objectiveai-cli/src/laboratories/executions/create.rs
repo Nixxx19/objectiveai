@@ -64,8 +64,8 @@ pub async fn handle(args: CreateArgs, cli_config: &crate::Config) -> Result<crat
         stream: Some(true),
     };
 
-    let mut log_writer = objectiveai::filesystem::logs::client::LogsClient::new(cli_config.config_base_dir.as_deref())
-        .write_laboratory_execution();
+    let fs_client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
+    let mut log_writer = objectiveai::filesystem::logs::client::write_laboratory_execution(&fs_client);
 
     crate::api::run(
         Box::new(move |http_client| Box::pin(async move {

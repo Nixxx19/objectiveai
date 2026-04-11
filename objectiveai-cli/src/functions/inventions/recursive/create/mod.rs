@@ -168,8 +168,8 @@ impl Commands {
             continuation,
         };
 
-        let mut log_writer = objectiveai::filesystem::logs::client::LogsClient::new(cli_config.config_base_dir.as_deref())
-            .write_function_invention_recursive();
+        let fs_client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
+        let mut log_writer = objectiveai::filesystem::logs::client::write_function_invention_recursive(&fs_client);
 
         crate::api::run(Box::new(|http_client| Box::pin(async move {
             let stream = objectiveai::functions::inventions::recursive::create_function_invention_recursive_streaming(

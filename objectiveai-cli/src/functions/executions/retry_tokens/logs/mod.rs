@@ -17,17 +17,17 @@ pub enum Commands {
 
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
-        let client = objectiveai::filesystem::logs::client::LogsClient::new(cli_config.config_base_dir.as_deref());
+        let client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
         match self {
             Commands::Get { id } => {
-                let content = client.read_function_execution_retry_token(&id).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
+                let content = objectiveai::filesystem::logs::client::read_function_execution_retry_token(&client, &id).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
                 Ok(crate::Output::LogsGet(content))
             }
             Commands::Subscribe { id, timeout_ms, require_modification } => {
-                let result = client.subscribe_function_execution_retry_token(&id, std::time::Duration::from_millis(timeout_ms), require_modification).await;
+                let result = objectiveai::filesystem::logs::client::subscribe_function_execution_retry_token(&client, &id, std::time::Duration::from_millis(timeout_ms), require_modification).await;
                 Ok(crate::Output::LogsSubscribe(result.map(objectiveai::filesystem::logs::LogContent::Json)))
             }
-            Commands::Clear => Ok(crate::Output::LogsClear(client.clear_function_execution_retry_tokens().await?)),
+            Commands::Clear => Ok(crate::Output::LogsClear(objectiveai::filesystem::logs::client::clear_function_execution_retry_tokens(&client).await?)),
         }
     }
 }

@@ -6,7 +6,11 @@ pub fn filter(f: Option<String>) -> String {
 }
 
 pub async fn read(cli_config: &super::Config) -> Result<(Client, Config), crate::error::Error> {
-    let client = Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
+    let client = Client::new(
+        cli_config.config_base_dir.as_deref(),
+        cli_config.commit_author_name.as_deref(),
+        cli_config.commit_author_email.as_deref(),
+    );
     let config = objectiveai::filesystem::config::client::read(&client).await?;
     Ok((client, config))
 }

@@ -24,18 +24,18 @@ pub enum Commands {
 
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
-        let client = objectiveai::filesystem::logs::client::LogsClient::new(cli_config.config_base_dir.as_deref());
+        let client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
         match self {
             Commands::Get { id } => {
-                let content = client.read_vector_completion(&id).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
+                let content = objectiveai::filesystem::logs::client::read_vector_completion(&client, &id).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
                 Ok(crate::Output::LogsGet(content))
             }
             Commands::Subscribe { id, timeout_ms, require_modification } => {
-                let result = client.subscribe_vector_completion(&id, std::time::Duration::from_millis(timeout_ms), require_modification).await;
+                let result = objectiveai::filesystem::logs::client::subscribe_vector_completion(&client, &id, std::time::Duration::from_millis(timeout_ms), require_modification).await;
                 Ok(crate::Output::LogsSubscribe(result.map(objectiveai::filesystem::logs::LogContent::Json)))
             }
-            Commands::List { offset, limit } => Ok(crate::Output::LogsList(client.list_vector_completions(offset, limit).await?)),
-            Commands::Clear => Ok(crate::Output::LogsClear(client.clear_vector_completions().await?)),
+            Commands::List { offset, limit } => Ok(crate::Output::LogsList(objectiveai::filesystem::logs::client::list_vector_completions(&client, offset, limit).await?)),
+            Commands::Clear => Ok(crate::Output::LogsClear(objectiveai::filesystem::logs::client::clear_vector_completions(&client).await?)),
         }
     }
 }
