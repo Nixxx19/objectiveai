@@ -36,7 +36,7 @@ pub struct EditFavorite {
 }
 
 impl EditFavorite {
-    pub fn apply(self, favorite: &mut objectiveai::filesystem::config::Favorite) -> Result<(), objectiveai::filesystem::config::ConfigError> {
+    pub fn apply(self, favorite: &mut objectiveai::filesystem::config::Favorite) -> Result<(), objectiveai::filesystem::Error> {
         if let Some(note) = self.note {
             favorite.set_note(note)?;
         }
@@ -103,7 +103,7 @@ pub struct EditPairFavorite {
 }
 
 impl EditPairFavorite {
-    pub fn apply(self, favorite: &mut objectiveai::filesystem::config::PairFavorite) -> Result<(), objectiveai::filesystem::config::ConfigError> {
+    pub fn apply(self, favorite: &mut objectiveai::filesystem::config::PairFavorite) -> Result<(), objectiveai::filesystem::Error> {
         if let Some(note) = self.note {
             favorite.set_note(note)?;
         }

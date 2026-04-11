@@ -12,7 +12,8 @@ where
     F: FnOnce(objectiveai::HttpClient) -> Fut + Send + 'static,
     Fut: Future<Output = Result<String, crate::error::Error>> + Send + 'static,
 {
-    let mut config = objectiveai::filesystem::config::ConfigClient::new(None::<String>).read().await?;
+    let client = objectiveai::filesystem::Client::new(None::<String>);
+    let mut config = objectiveai::filesystem::config::client::read(&client).await?;
 
     let api_mode = config.api().get_mode();
     let viewer_mode = if viewer {

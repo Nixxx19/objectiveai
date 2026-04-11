@@ -1,9 +1,7 @@
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("{0}")]
-    Config(#[from] objectiveai::filesystem::config::ConfigError),
-    #[error("{0}")]
-    Logs(#[from] objectiveai::filesystem::logs::LogsError),
+    Filesystem(#[from] objectiveai::filesystem::Error),
     #[error("viewer subprocess failed to start: {0}")]
     ViewerSpawn(std::io::Error),
     #[error("viewer subprocess did not report its bound address")]

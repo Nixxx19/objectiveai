@@ -45,7 +45,7 @@ impl ApiConfig {
         self.mode = mode;
     }
 
-    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
+    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::super::Error> {
         super::jq::run_jq(self, filter)
     }
 }
@@ -84,7 +84,7 @@ impl ApiRemoteConfig {
         self.objectiveai_address = Some(value.into());
     }
 
-    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
+    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::super::Error> {
         super::jq::run_jq(self, filter)
     }
 }
@@ -114,7 +114,7 @@ impl ApiLocalConfig {
         self.claude_agent_sdk = Some(value);
     }
 
-    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
+    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::super::Error> {
         super::jq::run_jq(self, filter)
     }
 }
@@ -210,7 +210,7 @@ impl ApiHeadersConfig {
     pub fn get_x_commit_author_email(&self) -> Option<&str> { self.x_commit_author_email.as_deref() }
     pub fn set_x_commit_author_email(&mut self, value: impl Into<String>) { self.x_commit_author_email = Some(value.into()); }
 
-    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
+    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::super::Error> {
         super::jq::run_jq(self, filter)
     }
 }

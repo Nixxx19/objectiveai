@@ -15,7 +15,7 @@ impl Favorite {
         name: String,
         path: crate::RemotePathCommitOptional,
         note: String,
-    ) -> Result<Self, super::ConfigError> {
+    ) -> Result<Self, super::super::Error> {
         validate_favorite_name(&name)?;
         validate_favorite_note(&note)?;
         Ok(Self { name, path, note })
@@ -25,7 +25,7 @@ impl Favorite {
         &self.name
     }
 
-    pub fn set_name(&mut self, name: String) -> Result<(), super::ConfigError> {
+    pub fn set_name(&mut self, name: String) -> Result<(), super::super::Error> {
         validate_favorite_name(&name)?;
         self.name = name;
         Ok(())
@@ -35,7 +35,7 @@ impl Favorite {
         &self.note
     }
 
-    pub fn set_note(&mut self, note: String) -> Result<(), super::ConfigError> {
+    pub fn set_note(&mut self, note: String) -> Result<(), super::super::Error> {
         validate_favorite_note(&note)?;
         self.note = note;
         Ok(())
@@ -61,7 +61,7 @@ impl PairFavorite {
         function: crate::RemotePathCommitOptional,
         profile: crate::RemotePathCommitOptional,
         note: String,
-    ) -> Result<Self, super::ConfigError> {
+    ) -> Result<Self, super::super::Error> {
         validate_favorite_name(&name)?;
         validate_favorite_note(&note)?;
         Ok(Self { name, function, profile, note })
@@ -71,7 +71,7 @@ impl PairFavorite {
         &self.name
     }
 
-    pub fn set_name(&mut self, name: String) -> Result<(), super::ConfigError> {
+    pub fn set_name(&mut self, name: String) -> Result<(), super::super::Error> {
         validate_favorite_name(&name)?;
         self.name = name;
         Ok(())
@@ -81,7 +81,7 @@ impl PairFavorite {
         &self.note
     }
 
-    pub fn set_note(&mut self, note: String) -> Result<(), super::ConfigError> {
+    pub fn set_note(&mut self, note: String) -> Result<(), super::super::Error> {
         validate_favorite_note(&note)?;
         self.note = note;
         Ok(())
@@ -89,20 +89,20 @@ impl PairFavorite {
 }
 
 /// Validates a favorite name: alphanumeric and dashes only, max 64 characters.
-pub fn validate_favorite_name(name: &str) -> Result<(), super::ConfigError> {
+pub fn validate_favorite_name(name: &str) -> Result<(), super::super::Error> {
     if name.is_empty() || name.len() > 64 {
-        return Err(super::ConfigError::InvalidFavoriteName(name.to_string()));
+        return Err(super::super::Error::InvalidFavoriteName(name.to_string()));
     }
     if !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') {
-        return Err(super::ConfigError::InvalidFavoriteName(name.to_string()));
+        return Err(super::super::Error::InvalidFavoriteName(name.to_string()));
     }
     Ok(())
 }
 
 /// Validates a favorite note: max 512 characters.
-pub fn validate_favorite_note(note: &str) -> Result<(), super::ConfigError> {
+pub fn validate_favorite_note(note: &str) -> Result<(), super::super::Error> {
     if note.len() > 512 {
-        return Err(super::ConfigError::InvalidFavoriteNote(note.to_string()));
+        return Err(super::super::Error::InvalidFavoriteNote(note.to_string()));
     }
     Ok(())
 }

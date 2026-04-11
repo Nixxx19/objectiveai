@@ -25,21 +25,21 @@ impl SwarmsConfig {
         self.favorites.get_or_insert_with(Vec::new).push(favorite);
     }
 
-    pub fn del_favorite(&mut self, name: &str) -> Result<(), super::ConfigError> {
-        let favorites = self.favorites.as_mut().ok_or_else(|| super::ConfigError::FavoriteNotFound(name.to_string()))?;
+    pub fn del_favorite(&mut self, name: &str) -> Result<(), super::super::Error> {
+        let favorites = self.favorites.as_mut().ok_or_else(|| super::super::Error::FavoriteNotFound(name.to_string()))?;
         let pos = favorites.iter().position(|f| f.get_name() == name)
-            .ok_or_else(|| super::ConfigError::FavoriteNotFound(name.to_string()))?;
+            .ok_or_else(|| super::super::Error::FavoriteNotFound(name.to_string()))?;
         favorites.remove(pos);
         Ok(())
     }
 
-    pub fn edit_favorite(&mut self, name: &str) -> Result<&mut super::Favorite, super::ConfigError> {
-        let favorites = self.favorites.as_mut().ok_or_else(|| super::ConfigError::FavoriteNotFound(name.to_string()))?;
+    pub fn edit_favorite(&mut self, name: &str) -> Result<&mut super::Favorite, super::super::Error> {
+        let favorites = self.favorites.as_mut().ok_or_else(|| super::super::Error::FavoriteNotFound(name.to_string()))?;
         favorites.iter_mut().find(|f| f.get_name() == name)
-            .ok_or_else(|| super::ConfigError::FavoriteNotFound(name.to_string()))
+            .ok_or_else(|| super::super::Error::FavoriteNotFound(name.to_string()))
     }
 
-    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
+    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::super::Error> {
         super::jq::run_jq(self, filter)
     }
 }

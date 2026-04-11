@@ -1,5 +1,19 @@
 #[derive(Debug, thiserror::Error)]
-pub enum ConfigError {
+pub enum Error {
+    #[error("failed to read directory {0}: {1}")]
+    ReadDir(std::path::PathBuf, std::io::Error),
+    #[error("failed to read file {0}: {1}")]
+    Read(std::path::PathBuf, std::io::Error),
+    #[error("failed to parse file {0}: {1}")]
+    Parse(std::path::PathBuf, serde_json::Error),
+    #[error("failed to serialize: {0}")]
+    Serialize(serde_json::Error),
+    #[error("failed to write file {0}: {1}")]
+    Write(std::path::PathBuf, std::io::Error),
+    #[error("not found: {0}")]
+    NotFound(String),
+    #[error("invalid path: {0}")]
+    InvalidPath(String),
     #[error("index {0} out of bounds (len {1})")]
     IndexOutOfBounds(usize, usize),
     #[error("favorite not found: {0}")]
@@ -10,14 +24,6 @@ pub enum ConfigError {
     InvalidFavoriteNote(String),
     #[error("remote {0:?} is not valid for configuration")]
     InvalidRemote(crate::Remote),
-    #[error("failed to read config file {0}: {1}")]
-    Read(std::path::PathBuf, std::io::Error),
-    #[error("failed to parse config file {0}: {1}")]
-    Parse(std::path::PathBuf, serde_json::Error),
-    #[error("failed to serialize config: {0}")]
-    Serialize(serde_json::Error),
-    #[error("failed to write config file {0}: {1}")]
-    Write(std::path::PathBuf, std::io::Error),
     #[error("jq parse error: {0}")]
     JqParse(String),
     #[error("jq compile error: {0}")]

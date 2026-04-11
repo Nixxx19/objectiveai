@@ -64,7 +64,7 @@ pub async fn handle(args: CreateArgs, cli_config: &crate::Config) -> Result<crat
         stream: Some(true),
     };
 
-    let mut log_writer = objectiveai::filesystem::logs::LogsClient::new(cli_config.config_base_dir.as_deref())
+    let mut log_writer = objectiveai::filesystem::logs::client::LogsClient::new(cli_config.config_base_dir.as_deref())
         .write_laboratory_execution();
 
     crate::api::run(

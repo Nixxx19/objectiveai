@@ -41,7 +41,7 @@ impl Config {
         self.viewer.get_or_insert_with(super::ViewerConfig::default)
     }
 
-    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
+    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::super::Error> {
         super::jq::run_jq(self, filter)
     }
 }

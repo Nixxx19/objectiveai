@@ -19,7 +19,7 @@ pub enum Commands {
 
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
-        let client = objectiveai::filesystem::logs::LogsClient::new(cli_config.config_base_dir.as_deref());
+        let client = objectiveai::filesystem::logs::client::LogsClient::new(cli_config.config_base_dir.as_deref());
         match self {
             Commands::Get { id } => {
                 let content = client.read_vector_completion(&id).await.map(objectiveai::filesystem::logs::LogContent::Json)?;

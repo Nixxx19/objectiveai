@@ -73,7 +73,7 @@ impl ViewerConfig {
         self.mode = mode;
     }
 
-    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
+    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::super::Error> {
         super::jq::run_jq(self, filter)
     }
 }
@@ -114,7 +114,7 @@ impl ViewerLocalConfig {
         self.signature = Some(value.into());
     }
 
-    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::ConfigError> {
+    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::super::Error> {
         super::jq::run_jq(self, filter)
     }
 }

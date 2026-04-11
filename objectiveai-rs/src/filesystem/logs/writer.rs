@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-use super::{LogFile, LogsError};
+use super::LogFile;
 
 /// Writes streaming chunks to the log file structure on disk.
 ///
@@ -39,7 +39,7 @@ impl<C> LogWriter<C> {
 
     /// Write a chunk to disk. Files whose content hasn't changed since the
     /// last write are skipped.
-    pub async fn write(&mut self, chunk: &C) -> Result<(), LogsError> {
+    pub async fn write(&mut self, chunk: &C) -> Result<(), super::super::Error> {
         let files = match (self.produce)(chunk) {
             Some(files) => files,
             None => return Ok(()),
@@ -67,10 +67,10 @@ impl<C> LogWriter<C> {
             async move {
                 if let Some(parent) = full_path.parent() {
                     tokio::fs::create_dir_all(parent).await
-                        .map_err(|e| LogsError::Write(parent.to_path_buf(), e))?;
+                        .map_err(|e| super::super::Error::Write(parent.to_path_buf(), e))?;
                 }
                 tokio::fs::write(&full_path, file.content).await
-                    .map_err(|e| LogsError::Write(full_path, e))
+                    .map_err(|e| super::super::Error::Write(full_path, e))
             }
         })).await?;
 
