@@ -1,2 +1,2 @@
-export * from "./generatedIndex";
+export * as Computations from "./computations";
 export * from "./http";

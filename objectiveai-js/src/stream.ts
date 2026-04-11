@@ -1,4 +1,4 @@
-import { ObjectiveAIFetchError, isResponseError } from "./error";
+import { ObjectiveAIFetchError, isObjectiveAIError } from "./error";
 
 /**
  * A readable stream wrapper for Server-Sent Events (SSE).
@@ -114,8 +114,8 @@ export class Stream<T> implements AsyncIterable<T> {
 
         const parsed = JSON.parse(data);
 
-        // Check if this is a ResponseError
-        if (isResponseError(parsed)) {
+        // Check if this is an ObjectiveAI error response
+        if (isObjectiveAIError(parsed)) {
           throw new ObjectiveAIFetchError(parsed);
         }
 

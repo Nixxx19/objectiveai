@@ -39,16 +39,6 @@ export function merge<T extends {}>(
 export function mergedString(a: string, b: string): [string, boolean] {
   return b === "" ? [a, false] : [a + b, true];
 }
-
-export function mergedNumberArray(
-  a: number[],
-  b: number[],
-): [number[], boolean] {
-  if (a.length === b.length) {
-    for (let i = 0; i < a.length; i++) {
-      if (a[i] !== b[i]) return [b, true];
-    }
-    return [a, false];
-  }
-  return [b, true];
-}
+// export function mergedNumber(a: number, b: number): [number, boolean] {
+//   return b === 0 ? [a, false] : [a + b, true];
+// }

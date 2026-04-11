@@ -1,28 +1,16 @@
-import { ObjectiveAI, type RequestOptions } from "../../../client";
-import type { VectorCompletionsCacheCompletionVotes } from "./completionVotes";
-import type { VectorCompletionsCacheCacheVote } from "./cacheVote";
-import type { VectorCompletionsCacheCacheVoteRequest } from "./cacheVoteRequest";
+import { ObjectiveAI, RequestOptions } from "../../../client";
+import { CacheVoteRequest } from "./request";
+import { CacheVote } from "./response";
 
-export function vectorCompletionsCacheGetCompletionVotes(
+export function retrieve(
   client: ObjectiveAI,
-  id: string,
+  request: CacheVoteRequest,
   options?: RequestOptions,
-): Promise<VectorCompletionsCacheCompletionVotes> {
-  return client.get_unary<VectorCompletionsCacheCompletionVotes>(
-    "vector/completions/votes",
-    { id },
-    options,
-  );
-}
-
-export function vectorCompletionsCacheGetCacheVote(
-  client: ObjectiveAI,
-  body: VectorCompletionsCacheCacheVoteRequest,
-  options?: RequestOptions,
-): Promise<VectorCompletionsCacheCacheVote> {
-  return client.get_unary<VectorCompletionsCacheCacheVote>(
-    "vector/completions/cache",
-    body,
+): Promise<CacheVote> {
+  // Using POST to match backend implementation
+  return client.post_unary<CacheVote>(
+    "/vector/completions/cache",
+    request,
     options,
   );
 }

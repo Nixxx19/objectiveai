@@ -1,4 +1,3 @@
-export * from "./generatedIndex";
-export * from "./functionExecutionChunkMerged";
-export * from "./functionProfileComputationChunkMerged";
-export * from "./wasm";
+export * from "./function_execution_chunk";
+export * from "./function_profile_computation_chunk";
+export * from "./response_object";

@@ -1,5 +1,7 @@
 import { defineConfig, Options } from "tsup";
 import path from "path";
+import { inlineConvertPlugin } from "./scripts/esbuild-inline-convert";
+
 // Base configuration shared between formats
 const baseConfig: Options = {
   entry: ["src/index.ts"],
@@ -12,6 +14,7 @@ const baseConfig: Options = {
       src: path.resolve(__dirname, "src"),
     };
   },
+  esbuildPlugins: [inlineConvertPlugin()],
 };
 
 export default defineConfig([
