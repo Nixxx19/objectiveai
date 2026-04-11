@@ -5,14 +5,13 @@ edition = "2024"
 
 [features]
 default = ["viewer", "rustpython", "systempython"]
-viewer = ["dep:objectiveai-viewer"]
+viewer = []
 rustpython = ["dep:rustpython"]
 systempython = []
 
 [dependencies]
 objectiveai = { path = "../objectiveai-rs", version = "2.0.0" }
 objectiveai-api = { path = "../objectiveai-api", version = "2.0.0" }
-objectiveai-viewer = { path = "../objectiveai-viewer/src-tauri", version = "2.0.0", optional = true }
 clap = { version = "4.6.0", features = ["derive"] }
 ratatui = "0.30.0"
 tokio = { version = "1.50.0", features = ["full"] }
@@ -26,6 +25,3 @@ rustpython = { version = "0.4.0", optional = true }
 serde_path_to_error = "0.1.20"
 base64 = "0.22.1"
 futures = "0.3.32"
-
-[target.'cfg(windows)'.build-dependencies]
-tauri-winres = "0.3"

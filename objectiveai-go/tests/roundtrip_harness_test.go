@@ -183,10 +183,10 @@ func AssertSchemaMatches(t *testing.T, title string, converted map[string]any) {
 	}
 }
 
-// SourceDir returns the path to the objectiveai-go/objectiveai/ source directory.
+// SourceDir returns the path to the objectiveai-go/ source directory.
 func SourceDir() string {
 	_, filename, _, _ := runtime.Caller(0)
-	return filepath.Join(filepath.Dir(filename), "..", "objectiveai")
+	return filepath.Join(filepath.Dir(filename), "..")
 }
 
 // RepoRoot returns the path to the repository root.

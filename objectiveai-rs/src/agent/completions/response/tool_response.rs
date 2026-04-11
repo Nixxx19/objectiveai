@@ -17,12 +17,12 @@ impl ToolResponse {
     ///
     /// Returns `(reference, files)` where `reference` is a
     /// `{"type": "reference", "path": ...}` JSON value, and `files`
-    /// contains all produced files including the message itself and
+    /// contains all produced [`LogFile`]s including the message itself and
     /// extracted media.
     #[cfg(feature = "filesystem")]
-    pub fn produce_files(&self, id: &str, prefix: &str) -> (serde_json::Value, Vec<(String, Vec<u8>)>) {
-        let stem = format!("{id}_{}", self.index);
-        let path = format!("{prefix}messages/{stem}.json");
+    pub fn produce_files(&self, id: &str, route_base: &str) -> (serde_json::Value, Vec<crate::filesystem::logs::LogFile>) {
+        use crate::filesystem::logs::LogFile;
+
         let mut files = Vec::new();
 
         // Serialize a shell without content to avoid double-serialization
@@ -39,13 +39,22 @@ impl ToolResponse {
         // Extract media from content (flattened, so "content" is at root)
         let mut content = self.inner.content.clone();
         content.prepare();
-        let (content_json, media_files) = content.extract_media(prefix, &stem);
+        let (content_json, media_files) = content.extract_media(route_base, id, self.index);
         msg_json["content"] = content_json;
         files.extend(media_files);
 
-        files.push((path.clone(), serde_json::to_vec_pretty(&msg_json).unwrap()));
+        let msg_file = LogFile {
+            route: format!("{route_base}/messages"),
+            id: id.to_string(),
+            message_index: Some(self.index),
+            media_index: None,
+            extension: "json".to_string(),
+            content: serde_json::to_vec_pretty(&msg_json).unwrap(),
+        };
+        let reference = serde_json::json!({ "type": "reference", "path": msg_file.path() });
+        files.push(msg_file);
 
-        (serde_json::json!({ "type": "reference", "path": path }), files)
+        (reference, files)
     }
 }
 

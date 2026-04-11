@@ -2,19 +2,33 @@ use clap::Subcommand;
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Get a log file by path
-    Get {
-        /// Log file path (relative to logs/, e.g. "agent/completions/ac1-abc123.json")
-        path: String,
-    },
+    /// Clear all logs across all endpoints
+    Clear,
 }
 
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
         let client = objectiveai::filesystem::logs::LogsClient::new(cli_config.config_base_dir.as_deref());
-        let content = match self {
-            Commands::Get { path } => client.read(&path).await?,
-        };
-        Ok(crate::Output::LogsGet(content))
+        match self {
+            Commands::Clear => {
+                let counts = futures::future::try_join_all(vec![
+                    Box::pin(client.clear_agent_completions()) as std::pin::Pin<Box<dyn std::future::Future<Output = _>>>,
+                    Box::pin(client.clear_agent_completion_continuations()),
+                    Box::pin(client.clear_agent_completion_messages()),
+                    Box::pin(client.clear_agent_completion_message_logprobs()),
+                    Box::pin(client.clear_agent_completion_message_images()),
+                    Box::pin(client.clear_agent_completion_message_audio()),
+                    Box::pin(client.clear_agent_completion_message_video()),
+                    Box::pin(client.clear_agent_completion_message_files()),
+                    Box::pin(client.clear_vector_completions()),
+                    Box::pin(client.clear_function_executions()),
+                    Box::pin(client.clear_function_execution_retry_tokens()),
+                    Box::pin(client.clear_function_inventions()),
+                    Box::pin(client.clear_function_inventions_recursive()),
+                    Box::pin(client.clear_laboratory_executions()),
+                ]).await?;
+                Ok(crate::Output::LogsClear(counts.into_iter().sum()))
+            }
+        }
     }
 }

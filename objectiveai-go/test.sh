@@ -44,7 +44,7 @@ parse_summary() {
 }
 
 # Run tests across both packages, capture all output
-if (cd "$SCRIPT_DIR" && go test ./tests/ ./objectiveai/ -v -count=1 "${GO_TEST_ARGS[@]}") >> "$LOG_FILE" 2>&1; then
+if (cd "$SCRIPT_DIR" && go test ./tests/ ./ -v -count=1 "${GO_TEST_ARGS[@]}") >> "$LOG_FILE" 2>&1; then
   parse_summary
   if [ "$TOTAL" -gt 0 ]; then
     echo "$MODULE: PASS $PASSED/$TOTAL"

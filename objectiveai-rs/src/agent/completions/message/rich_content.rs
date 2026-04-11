@@ -121,16 +121,17 @@ impl RichContent {
     ///
     /// Returns `(content_json, files)` where `content_json` is the content
     /// with extractable media replaced by `{"type": "reference", "path": ...}`
-    /// references, and `files` is the list of `(path, bytes)` pairs.
+    /// references, and `files` is the list of [`LogFile`]s.
     ///
-    /// `prefix` is the full path prefix (e.g. `"agent/completions/"`).
-    /// `stem` is the file stem (e.g. `"{id}_{index}"`).
+    /// `route_base` is the route prefix (e.g. `"agents/completions"`).
+    /// `id` and `message_index` identify the parent message.
     #[cfg(feature = "filesystem")]
     pub fn extract_media(
         self,
-        prefix: &str,
-        stem: &str,
-    ) -> (serde_json::Value, Vec<(String, Vec<u8>)>) {
+        route_base: &str,
+        id: &str,
+        message_index: u64,
+    ) -> (serde_json::Value, Vec<crate::filesystem::logs::LogFile>) {
         let parts = match self {
             RichContent::Text(text) => return (serde_json::Value::String(text), Vec::new()),
             RichContent::Parts(parts) => parts,
@@ -158,15 +159,23 @@ impl RichContent {
             };
 
             if let Some((fc, media_type)) = fc_and_type {
-                let basename = format!("{stem}_{part_idx}.{ext}", ext = fc.extension);
-                let filepath = format!("{prefix}messages/{media_type}/{basename}");
                 if let Ok(decoded) = fc.decode() {
-                    files.push((filepath.clone(), decoded));
+                    let log_file = crate::filesystem::logs::LogFile {
+                        route: format!("{route_base}/messages/{media_type}"),
+                        id: id.to_string(),
+                        message_index: Some(message_index),
+                        media_index: Some(part_idx as u64),
+                        extension: fc.extension.to_string(),
+                        content: decoded,
+                    };
+                    json_parts.push(serde_json::json!({
+                        "type": "reference",
+                        "path": log_file.path(),
+                    }));
+                    files.push(log_file);
+                } else {
+                    json_parts.push(serde_json::to_value(&part).unwrap());
                 }
-                json_parts.push(serde_json::json!({
-                    "type": "reference",
-                    "path": filepath,
-                }));
             } else {
                 json_parts.push(serde_json::to_value(&part).unwrap());
             }

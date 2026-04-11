@@ -4,8 +4,10 @@ pub enum Error {
     Config(#[from] objectiveai::filesystem::config::ConfigError),
     #[error("{0}")]
     Logs(#[from] objectiveai::filesystem::logs::LogsError),
-    #[error("viewer setup failed: {0}")]
-    ViewerSetup(std::io::Error),
+    #[error("viewer subprocess failed to start: {0}")]
+    ViewerSpawn(std::io::Error),
+    #[error("viewer subprocess did not report its bound address")]
+    ViewerProtocol,
     #[error("api setup failed: {0}")]
     ApiSetup(std::io::Error),
     #[error("viewer config has secret but no signature, or signature but no secret")]

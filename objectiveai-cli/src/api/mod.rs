@@ -4,6 +4,7 @@ pub mod remote;
 pub mod local;
 pub mod headers;
 mod run;
+pub mod detach;
 
 pub use run::*;
 

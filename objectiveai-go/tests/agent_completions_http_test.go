@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	. "github.com/objective-ai/objectiveai-go/objectiveai"
+	. "github.com/ObjectiveAI/objectiveai/objectiveai-go"
 )
 
 func ptr[T any](v T) *T { return &v }

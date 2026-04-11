@@ -50,16 +50,23 @@ pub enum Commands {
         /// Seed for deterministic mock responses
         #[arg(long)]
         seed: Option<i64>,
+        /// Run in the background: print PID and log path, then exit
+        #[arg(long)]
+        detach: bool,
     },
 }
 
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
-        let (message_source, agent_ref, continuation_args, response_format_args, seed) = match self {
-            Commands::Standard { messages, agent, continuation, response_format, seed } => {
-                (messages, agent, continuation, response_format, seed)
+        let (message_source, agent_ref, continuation_args, response_format_args, seed, detach) = match self {
+            Commands::Standard { messages, agent, continuation, response_format, seed, detach } => {
+                (messages, agent, continuation, response_format, seed, detach)
             }
         };
+
+        if detach {
+            crate::api::detach::detach().await;
+        }
 
         let messages = message_source.resolve()?;
         let agent = agent_ref.resolve(|| async {
@@ -80,7 +87,7 @@ impl Commands {
             continuation,
         };
 
-        let log_writer = objectiveai::filesystem::logs::LogsClient::new(cli_config.config_base_dir.as_deref())
+        let mut log_writer = objectiveai::filesystem::logs::LogsClient::new(cli_config.config_base_dir.as_deref())
             .write_agent_completion();
 
         crate::api::run(Box::new(|http_client| Box::pin(async move {
@@ -91,7 +98,7 @@ impl Commands {
 
             // Accumulate all chunks
             let mut accumulated: Option<objectiveai::agent::completions::response::streaming::AgentCompletionChunk> = None;
-            let mut logged_path = false;
+            let mut logged_id = false;
             while let Some(chunk) = stream.next().await {
                 let chunk = chunk?;
                 match &mut accumulated {
@@ -101,10 +108,10 @@ impl Commands {
                 if let Some(agg) = &accumulated {
                     let _ = log_writer.write(agg).await;
                 }
-                if !logged_path {
-                    if let Some(path) = log_writer.primary_path() {
-                        println!("In progress. Logs available at {path}.");
-                        logged_path = true;
+                if !logged_id {
+                    if let Some(id) = log_writer.primary_id() {
+                        crate::log_line::print_log_id(id);
+                        logged_id = true;
                     }
                 }
             }

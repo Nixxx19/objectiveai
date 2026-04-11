@@ -50,10 +50,9 @@ where
 
 // -- Variants --
 
-/// Spawns both a local API server and a local Tauri viewer window.
-/// The API's viewer client is pointed at the local viewer's bound address.
-/// Viewer serve blocks the main thread; the task runs on a spawned tokio task
-/// and kills the viewer via the exiter when it completes.
+/// Spawns both a local API server and a local viewer subprocess.
+/// The API's viewer client is pointed at the viewer's bound address.
+/// The viewer subprocess is killed when the task completes.
 #[cfg(feature = "viewer")]
 async fn run_local_api_local_viewer<F, Fut>(
     mut config: objectiveai::filesystem::config::Config,
@@ -63,9 +62,7 @@ where
     F: FnOnce(objectiveai::HttpClient) -> Fut + Send + 'static,
     Fut: Future<Output = Result<String, crate::error::Error>> + Send + 'static,
 {
-    let _stderr_guard = suppress_stderr();
-
-    let (viewer_config, secret_from_env, config_signature) = build_viewer_config(&mut config)?;
+    let (secret, secret_from_env, config_signature) = resolve_viewer_secret(&mut config)?;
 
     // ENV mismatch check: VIEWER_SECRET and VIEWER_SIGNATURE must both or neither come from ENV
     let api_builder_peek = objectiveai_api::ConfigBuilder::init_from_env().unwrap_or_default();
@@ -73,12 +70,8 @@ where
         return Err(crate::error::Error::ViewerSecretSignatureEnvMismatch);
     }
 
-    // Setup viewer first — we need its bound port for the API config
-    let (viewer_listener, viewer_app, viewer_rx) = objectiveai_viewer::setup(viewer_config).await
-        .map_err(crate::error::Error::ViewerSetup)?;
-    let viewer_addr = viewer_listener.local_addr()
-        .map_err(crate::error::Error::ViewerSetup)?;
-    let viewer_addr_str = format!("http://127.0.0.1:{}", viewer_addr.port());
+    // Spawn viewer subprocess and wait for it to report its bound address
+    let (mut viewer_child, viewer_addr_str) = spawn_viewer(secret.as_deref()).await?;
 
     // Setup API with viewer address + signature so its viewer client can POST events
     let api_config = build_api_config(&mut config, Some(viewer_addr_str.clone()), config_signature.clone());
@@ -99,23 +92,9 @@ where
         config_signature,
     );
 
-    // Exiter pattern: task runs on a spawned task, kills the viewer when done
-    let (exiter_tx, exiter_rx) = tokio::sync::oneshot::channel::<objectiveai_viewer::Exiter>();
-    let (result_tx, result_rx) = tokio::sync::oneshot::channel();
-
-    tokio::spawn(async move {
-        let result = task(http_client).await;
-        result_tx.send(result).ok();
-        let exiter = exiter_rx.await.unwrap();
-        exiter(0);
-    });
-
-    // Blocks the main thread until the exiter is called
-    let _ = objectiveai_viewer::serve(
-        viewer_listener, viewer_app, viewer_rx, Some(exiter_tx),
-    );
-
-    result_rx.await.unwrap()
+    let result = task(http_client).await;
+    let _ = viewer_child.kill().await;
+    result
 }
 
 /// Spawns a local API server only. No viewer window — viewer address and
@@ -150,7 +129,7 @@ where
     task(http_client).await
 }
 
-/// Spawns a local Tauri viewer window only. The API is remote — the task's
+/// Spawns a local viewer subprocess only. The API is remote — the task's
 /// HttpClient sends viewer headers so the remote API can forward events
 /// to our local viewer.
 #[cfg(feature = "viewer")]
@@ -162,40 +141,22 @@ where
     F: FnOnce(objectiveai::HttpClient) -> Fut + Send + 'static,
     Fut: Future<Output = Result<String, crate::error::Error>> + Send + 'static,
 {
-    let _stderr_guard = suppress_stderr();
+    let (secret, _, config_signature) = resolve_viewer_secret(&mut config)?;
 
-    let (viewer_config, _, config_signature) = build_viewer_config(&mut config)?;
-
-    let (viewer_listener, viewer_app, viewer_rx) = objectiveai_viewer::setup(viewer_config).await
-        .map_err(crate::error::Error::ViewerSetup)?;
-    let viewer_addr = viewer_listener.local_addr()
-        .map_err(crate::error::Error::ViewerSetup)?;
+    // Spawn viewer subprocess and wait for it to report its bound address
+    let (mut viewer_child, viewer_addr_str) = spawn_viewer(secret.as_deref()).await?;
 
     // HttpClient points at the remote API, with local viewer address + signature
     let http_client = build_http_client(
         &mut config,
         None,
-        Some(format!("http://127.0.0.1:{}", viewer_addr.port())),
+        Some(viewer_addr_str),
         config_signature,
     );
 
-    // Exiter pattern: task runs on a spawned task, kills the viewer when done
-    let (exiter_tx, exiter_rx) = tokio::sync::oneshot::channel::<objectiveai_viewer::Exiter>();
-    let (result_tx, result_rx) = tokio::sync::oneshot::channel();
-
-    tokio::spawn(async move {
-        let result = task(http_client).await;
-        result_tx.send(result).ok();
-        let exiter = exiter_rx.await.unwrap();
-        exiter(0);
-    });
-
-    // Blocks the main thread until the exiter is called
-    let _ = objectiveai_viewer::serve(
-        viewer_listener, viewer_app, viewer_rx, Some(exiter_tx),
-    );
-
-    result_rx.await.unwrap()
+    let result = task(http_client).await;
+    let _ = viewer_child.kill().await;
+    result
 }
 
 /// No local spawning. The API and viewer are both remote.
@@ -212,126 +173,73 @@ where
     task(http_client).await
 }
 
-// -- Shared helpers --
+// -- Viewer subprocess --
 
-/// Redirects file descriptor 2 (stderr) to /dev/null or NUL to suppress
-/// Chromium/WebView2 noise during viewer startup and teardown.
-/// Returns a guard that restores stderr on drop.
-/// CLI output goes through stdout (println in main.rs), so this is safe.
+/// Pre-built viewer binary, embedded at compile time by build.rs.
 #[cfg(feature = "viewer")]
-fn suppress_stderr() -> Option<StderrGuard> {
-    StderrGuard::new()
-}
+const VIEWER_BINARY: &[u8] = include_bytes!(env!("OBJECTIVEAI_VIEWER_BINARY_PATH"));
 
+/// Extracts the embedded viewer binary to a temp file and returns its path.
 #[cfg(feature = "viewer")]
-struct StderrGuard {
-    saved_fd: i32,
-}
-
-#[cfg(all(feature = "viewer", windows))]
-impl StderrGuard {
-    fn new() -> Option<Self> {
-        use std::os::windows::io::AsRawHandle;
-        unsafe extern "C" {
-            fn _dup(fd: i32) -> i32;
-            fn _dup2(fd: i32, fd2: i32) -> i32;
-            fn _open(path: *const u8, flags: i32) -> i32;
-            fn _close(fd: i32) -> i32;
-        }
-        unsafe extern "system" {
-            fn SetStdHandle(nStdHandle: u32, hHandle: *mut std::ffi::c_void) -> i32;
-        }
-        const STD_ERROR_HANDLE: u32 = 0xFFFF_FFF4; // -12 as u32
-        unsafe {
-            // Save CRT fd 2
-            let saved_fd = _dup(2);
-            if saved_fd == -1 { return None; }
-            // Open NUL and redirect both CRT fd 2 and Win32 STD_ERROR_HANDLE
-            let nul = _open(b"NUL\0".as_ptr(), 1); // _O_WRONLY
-            if nul == -1 { _close(saved_fd); return None; }
-            _dup2(nul, 2);
-            // Also redirect the Win32 handle (Chromium uses this directly)
-            let nul_file = std::fs::OpenOptions::new().write(true).open("NUL").ok()?;
-            SetStdHandle(STD_ERROR_HANDLE, nul_file.as_raw_handle() as *mut _);
-            std::mem::forget(nul_file);
-            _close(nul);
-            Some(StderrGuard { saved_fd })
-        }
+fn extract_viewer_binary() -> Result<std::path::PathBuf, crate::error::Error> {
+    let name = if cfg!(windows) { "objectiveai-viewer.exe" } else { "objectiveai-viewer" };
+    let path = std::env::temp_dir().join(name);
+    std::fs::write(&path, VIEWER_BINARY).map_err(crate::error::Error::ViewerSpawn)?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o755))
+            .map_err(crate::error::Error::ViewerSpawn)?;
     }
+    Ok(path)
 }
 
-#[cfg(all(feature = "viewer", windows))]
-impl Drop for StderrGuard {
-    fn drop(&mut self) {
-        use std::os::windows::io::FromRawHandle;
-        unsafe extern "C" {
-            fn _dup2(fd: i32, fd2: i32) -> i32;
-            fn _close(fd: i32) -> i32;
-            fn _get_osfhandle(fd: i32) -> isize;
-        }
-        unsafe extern "system" {
-            fn SetStdHandle(nStdHandle: u32, hHandle: *mut std::ffi::c_void) -> i32;
-        }
-        const STD_ERROR_HANDLE: u32 = 0xFFFF_FFF4;
-        unsafe {
-            _dup2(self.saved_fd, 2);
-            _close(self.saved_fd);
-            // Restore the Win32 handle to match the restored CRT fd
-            let handle = _get_osfhandle(2);
-            SetStdHandle(STD_ERROR_HANDLE, handle as *mut _);
-        }
-    }
-}
-
-#[cfg(all(feature = "viewer", not(windows)))]
-impl StderrGuard {
-    fn new() -> Option<Self> {
-        unsafe extern "C" {
-            fn dup(fd: i32) -> i32;
-            fn dup2(fd: i32, fd2: i32) -> i32;
-            fn open(path: *const u8, flags: i32) -> i32;
-            fn close(fd: i32) -> i32;
-        }
-        unsafe {
-            let saved_fd = dup(2);
-            if saved_fd == -1 { return None; }
-            let nul = open(b"/dev/null\0".as_ptr(), 1); // O_WRONLY
-            if nul == -1 { close(saved_fd); return None; }
-            dup2(nul, 2);
-            close(nul);
-            Some(StderrGuard { saved_fd })
-        }
-    }
-}
-
-#[cfg(all(feature = "viewer", not(windows)))]
-impl Drop for StderrGuard {
-    fn drop(&mut self) {
-        unsafe extern "C" {
-            fn dup2(fd: i32, fd2: i32) -> i32;
-            fn close(fd: i32) -> i32;
-        }
-        unsafe {
-            dup2(self.saved_fd, 2);
-            close(self.saved_fd);
-        }
-    }
-}
-
-/// Builds the local viewer config. Priority: ENV → config file → defaults.
+/// Spawns the viewer as a subprocess and reads its bound address from stderr.
 ///
-/// Reads the secret/signature pair from `ViewerLocalConfig`. Errors if one is
-/// set without the other. The secret goes to the viewer; the signature is
-/// returned so the caller can forward it to the API and HttpClient.
-///
-/// Returns `(viewer_config, secret_from_env, config_signature)`.
-/// `secret_from_env` lets the caller perform the ENV mismatch check against
-/// the API builder's `VIEWER_SIGNATURE`.
+/// The viewer prints `listening on <addr>` to stderr after binding its HTTP server.
+/// Returns the child process handle and the viewer's HTTP address.
 #[cfg(feature = "viewer")]
-fn build_viewer_config(
+async fn spawn_viewer(
+    secret: Option<&str>,
+) -> Result<(tokio::process::Child, String), crate::error::Error> {
+    let viewer_path = extract_viewer_binary()?;
+
+    let mut cmd = tokio::process::Command::new(&viewer_path);
+    cmd.env("ADDRESS", "127.0.0.1");
+    cmd.env("PORT", "0");
+    if let Some(s) = secret {
+        cmd.env("VIEWER_SECRET", s);
+    }
+    cmd.stdout(std::process::Stdio::null());
+    cmd.stderr(std::process::Stdio::piped());
+
+    let mut child = cmd.spawn().map_err(crate::error::Error::ViewerSpawn)?;
+
+    let stderr = child.stderr.take().unwrap();
+    let mut reader = tokio::io::BufReader::new(stderr);
+
+    let mut line = String::new();
+    tokio::time::timeout(
+        std::time::Duration::from_secs(30),
+        tokio::io::AsyncBufReadExt::read_line(&mut reader, &mut line),
+    )
+    .await
+    .map_err(|_| crate::error::Error::ViewerProtocol)?
+    .map_err(crate::error::Error::ViewerSpawn)?;
+
+    // Parse "listening on <addr>" from the viewer's stderr
+    let addr = line.trim().strip_prefix("listening on ").ok_or(crate::error::Error::ViewerProtocol)?;
+    let viewer_addr = format!("http://{addr}");
+
+    Ok((child, viewer_addr))
+}
+
+/// Resolves the viewer secret/signature pair from config.
+/// Both must be present, or both absent. Returns `(secret, secret_from_env, signature)`.
+#[cfg(feature = "viewer")]
+fn resolve_viewer_secret(
     config: &mut objectiveai::filesystem::config::Config,
-) -> Result<(objectiveai_viewer::Config, bool, Option<String>), crate::error::Error> {
-    // Config file: both secret and signature must be present, or both absent
+) -> Result<(Option<String>, bool, Option<String>), crate::error::Error> {
     let viewer_local = config.viewer().local();
     let (config_secret, config_signature) = match (viewer_local.get_secret(), viewer_local.get_signature()) {
         (Some(s), Some(sig)) => (Some(String::from(s)), Some(String::from(sig))),
@@ -339,21 +247,15 @@ fn build_viewer_config(
         _ => return Err(crate::error::Error::ViewerSecretSignatureConfigMismatch),
     };
 
-    let mut builder = objectiveai_viewer::ConfigBuilder::init_from_env().unwrap_or_default();
-    let secret_from_env = builder.secret.is_some();
+    // Check if ENV provides a secret (takes priority over config)
+    let env_secret = std::env::var("VIEWER_SECRET").ok();
+    let secret_from_env = env_secret.is_some();
+    let secret = env_secret.or(config_secret);
 
-    // Config file overlay: only fills if ENV didn't provide a secret
-    if builder.secret.is_none() {
-        builder.secret = config_secret;
-    }
-
-    // Force overrides: local viewer always binds to localhost on a system-assigned port
-    builder.address = Some("127.0.0.1".to_string());
-    builder.port = Some(0);
-    builder.suppress_output = Some(true);
-
-    Ok((builder.build(), secret_from_env, config_signature))
+    Ok((secret, secret_from_env, config_signature))
 }
+
+// -- Shared helpers --
 
 /// Builds the local API server config. Priority: ENV → config file → defaults.
 ///

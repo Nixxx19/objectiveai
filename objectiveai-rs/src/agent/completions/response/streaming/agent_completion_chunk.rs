@@ -62,25 +62,25 @@ impl AgentCompletionChunk {
         }
     }
 
-    /// Produces the `(path, file_bytes)` pairs for the log file structure.
+    /// Produces the [`LogFile`]s for the log file structure.
     ///
     /// Returns `None` if the chunk has no ID yet. All paths are relative
-    /// to the `logs/` root directory, under `agent/completions/`.
+    /// to the `logs/` root directory, under `agents/completions/`.
     #[cfg(feature = "filesystem")]
-    pub fn produce_files(&self) -> Option<(serde_json::Value, Vec<(String, Vec<u8>)>)> {
-        const PREFIX: &str = "agent/completions/";
+    pub fn produce_files(&self) -> Option<(serde_json::Value, Vec<crate::filesystem::logs::LogFile>)> {
+        use crate::filesystem::logs::LogFile;
+        const ROUTE: &str = "agents/completions";
 
         let id = &self.id;
         if id.is_empty() {
             return None;
         }
 
-        let path = format!("{PREFIX}{id}.json");
-        let mut files: Vec<(String, Vec<u8>)> = Vec::new();
+        let mut files: Vec<LogFile> = Vec::new();
         let mut message_refs: Vec<serde_json::Value> = Vec::new();
 
         for msg in &self.messages {
-            let (reference, msg_files) = msg.produce_files(id, PREFIX);
+            let (reference, msg_files) = msg.produce_files(id, ROUTE);
             message_refs.push(reference);
             files.extend(msg_files);
         }
@@ -101,19 +101,35 @@ impl AgentCompletionChunk {
 
         // Extract continuation to a separate file, or remove placeholder
         if let Some(continuation) = &self.continuation {
-            let cont_path = format!("{PREFIX}continuation/{id}.json");
-            files.push((cont_path.clone(), serde_json::to_vec_pretty(continuation).unwrap()));
+            let cont_file = LogFile {
+                route: format!("{ROUTE}/continuation"),
+                id: id.clone(),
+                message_index: None,
+                media_index: None,
+                extension: "json".to_string(),
+                content: serde_json::to_vec_pretty(continuation).unwrap(),
+            };
             root["continuation"] = serde_json::json!({
                 "type": "reference",
-                "path": cont_path,
+                "path": cont_file.path(),
             });
+            files.push(cont_file);
         } else if let Some(map) = root.as_object_mut() {
             map.remove("continuation");
         }
 
-        files.push((path.clone(), serde_json::to_vec_pretty(&root).unwrap()));
+        let root_file = LogFile {
+            route: ROUTE.to_string(),
+            id: id.clone(),
+            message_index: None,
+            media_index: None,
+            extension: "json".to_string(),
+            content: serde_json::to_vec_pretty(&root).unwrap(),
+        };
+        let reference = serde_json::json!({ "type": "reference", "path": root_file.path() });
+        files.push(root_file);
 
-        Some((serde_json::json!({ "type": "reference", "path": path }), files))
+        Some((reference, files))
     }
 
     fn push_messages(&mut self, other_choices: &[super::MessageChunk]) {
