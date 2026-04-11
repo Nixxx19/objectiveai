@@ -352,27 +352,32 @@ impl LogsClient {
     // Subscribe helpers
     // -----------------------------------------------------------------------
 
-    /// Polls for a JSON file to be created or modified. Returns `Some(value)`
-    /// on change, `None` on deletion or timeout.
+    /// Polls for a JSON file. If `require_modification` is false, returns
+    /// immediately when the file exists. If true, waits for creation or
+    /// modification. Returns `None` on deletion or timeout.
     async fn subscribe_json(
         &self,
         dir: &str,
         stem: &str,
         timeout: std::time::Duration,
+        require_modification: bool,
     ) -> Option<serde_json::Value> {
         let full = self.logs_dir().join(dir).join(format!("{stem}.json"));
-        self.poll_file(&full, timeout).await?;
+        self.poll_file(&full, timeout, require_modification).await?;
         let bytes = tokio::fs::read(&full).await.ok()?;
         serde_json::from_slice(&bytes).ok()
     }
 
-    /// Polls for a media file (any extension matching `stem.`) to be created
-    /// or modified. Returns `Some(data_url)` on change, `None` on deletion or timeout.
+    /// Polls for a media file (any extension matching `stem.`). If
+    /// `require_modification` is false, returns immediately when the file
+    /// exists. If true, waits for creation or modification. Returns `None`
+    /// on deletion or timeout.
     async fn subscribe_data_url_by_stem(
         &self,
         dir: &str,
         stem: &str,
         timeout: std::time::Duration,
+        require_modification: bool,
     ) -> Option<String> {
         use base64::Engine;
         let dir_path = self.logs_dir().join(dir);
@@ -380,6 +385,16 @@ impl LogsClient {
 
         let deadline = tokio::time::Instant::now() + timeout;
         let initial_mtime = self.find_file_mtime_by_prefix(&dir_path, &prefix).await;
+
+        // If file exists and we don't require modification, return immediately
+        if !require_modification {
+            if let Some((path, _)) = &initial_mtime {
+                let bytes = tokio::fs::read(path).await.ok()?;
+                let mime = mime_guess::from_path(path).first_or_octet_stream().to_string();
+                let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
+                return Some(format!("data:{mime};base64,{b64}"));
+            }
+        }
 
         loop {
             tokio::time::sleep(std::time::Duration::from_millis(100)).await;
@@ -411,15 +426,22 @@ impl LogsClient {
         }
     }
 
-    /// Polls a specific file path for creation, modification, or deletion.
-    /// Returns `Some(())` on create/modify, `None` on deletion or timeout.
+    /// Polls a specific file path. If `require_modification` is false,
+    /// returns immediately when the file exists. If true, waits for
+    /// creation or modification. Returns `None` on deletion or timeout.
     async fn poll_file(
         &self,
         path: &std::path::Path,
         timeout: std::time::Duration,
+        require_modification: bool,
     ) -> Option<()> {
         let deadline = tokio::time::Instant::now() + timeout;
         let initial_mtime = Self::file_mtime(path).await;
+
+        // If file exists and we don't require modification, return immediately
+        if !require_modification && initial_mtime.is_some() {
+            return Some(());
+        }
 
         loop {
             tokio::time::sleep(std::time::Duration::from_millis(100)).await;
@@ -463,79 +485,79 @@ impl LogsClient {
     // Subscribe methods — agent completions
     // -----------------------------------------------------------------------
 
-    pub async fn subscribe_agent_completion(&self, id: &str, timeout: std::time::Duration) -> Option<serde_json::Value> {
-        self.subscribe_json("agents/completions", id, timeout).await
+    pub async fn subscribe_agent_completion(&self, id: &str, timeout: std::time::Duration, require_modification: bool) -> Option<serde_json::Value> {
+        self.subscribe_json("agents/completions", id, timeout, require_modification).await
     }
 
-    pub async fn subscribe_agent_completion_continuation(&self, id: &str, timeout: std::time::Duration) -> Option<serde_json::Value> {
-        self.subscribe_json("agents/completions/continuation", id, timeout).await
+    pub async fn subscribe_agent_completion_continuation(&self, id: &str, timeout: std::time::Duration, require_modification: bool) -> Option<serde_json::Value> {
+        self.subscribe_json("agents/completions/continuation", id, timeout, require_modification).await
     }
 
-    pub async fn subscribe_agent_completion_message(&self, id: &str, message_index: u64, timeout: std::time::Duration) -> Option<serde_json::Value> {
-        self.subscribe_json("agents/completions/messages", &format!("{id}_{message_index}"), timeout).await
+    pub async fn subscribe_agent_completion_message(&self, id: &str, message_index: u64, timeout: std::time::Duration, require_modification: bool) -> Option<serde_json::Value> {
+        self.subscribe_json("agents/completions/messages", &format!("{id}_{message_index}"), timeout, require_modification).await
     }
 
-    pub async fn subscribe_agent_completion_message_logprobs(&self, id: &str, message_index: u64, timeout: std::time::Duration) -> Option<serde_json::Value> {
-        self.subscribe_json("agents/completions/messages/logprobs", &format!("{id}_{message_index}"), timeout).await
+    pub async fn subscribe_agent_completion_message_logprobs(&self, id: &str, message_index: u64, timeout: std::time::Duration, require_modification: bool) -> Option<serde_json::Value> {
+        self.subscribe_json("agents/completions/messages/logprobs", &format!("{id}_{message_index}"), timeout, require_modification).await
     }
 
-    pub async fn subscribe_agent_completion_message_image(&self, id: &str, message_index: u64, media_index: u64, timeout: std::time::Duration) -> Option<String> {
-        self.subscribe_data_url_by_stem("agents/completions/messages/image", &format!("{id}_{message_index}_{media_index}"), timeout).await
+    pub async fn subscribe_agent_completion_message_image(&self, id: &str, message_index: u64, media_index: u64, timeout: std::time::Duration, require_modification: bool) -> Option<String> {
+        self.subscribe_data_url_by_stem("agents/completions/messages/image", &format!("{id}_{message_index}_{media_index}"), timeout, require_modification).await
     }
 
-    pub async fn subscribe_agent_completion_message_audio(&self, id: &str, message_index: u64, media_index: u64, timeout: std::time::Duration) -> Option<String> {
-        self.subscribe_data_url_by_stem("agents/completions/messages/audio", &format!("{id}_{message_index}_{media_index}"), timeout).await
+    pub async fn subscribe_agent_completion_message_audio(&self, id: &str, message_index: u64, media_index: u64, timeout: std::time::Duration, require_modification: bool) -> Option<String> {
+        self.subscribe_data_url_by_stem("agents/completions/messages/audio", &format!("{id}_{message_index}_{media_index}"), timeout, require_modification).await
     }
 
-    pub async fn subscribe_agent_completion_message_video(&self, id: &str, message_index: u64, media_index: u64, timeout: std::time::Duration) -> Option<String> {
-        self.subscribe_data_url_by_stem("agents/completions/messages/video", &format!("{id}_{message_index}_{media_index}"), timeout).await
+    pub async fn subscribe_agent_completion_message_video(&self, id: &str, message_index: u64, media_index: u64, timeout: std::time::Duration, require_modification: bool) -> Option<String> {
+        self.subscribe_data_url_by_stem("agents/completions/messages/video", &format!("{id}_{message_index}_{media_index}"), timeout, require_modification).await
     }
 
-    pub async fn subscribe_agent_completion_message_file(&self, id: &str, message_index: u64, media_index: u64, timeout: std::time::Duration) -> Option<String> {
-        self.subscribe_data_url_by_stem("agents/completions/messages/file", &format!("{id}_{message_index}_{media_index}"), timeout).await
+    pub async fn subscribe_agent_completion_message_file(&self, id: &str, message_index: u64, media_index: u64, timeout: std::time::Duration, require_modification: bool) -> Option<String> {
+        self.subscribe_data_url_by_stem("agents/completions/messages/file", &format!("{id}_{message_index}_{media_index}"), timeout, require_modification).await
     }
 
     // -----------------------------------------------------------------------
     // Subscribe methods — vector completions
     // -----------------------------------------------------------------------
 
-    pub async fn subscribe_vector_completion(&self, id: &str, timeout: std::time::Duration) -> Option<serde_json::Value> {
-        self.subscribe_json("vector/completions", id, timeout).await
+    pub async fn subscribe_vector_completion(&self, id: &str, timeout: std::time::Duration, require_modification: bool) -> Option<serde_json::Value> {
+        self.subscribe_json("vector/completions", id, timeout, require_modification).await
     }
 
     // -----------------------------------------------------------------------
     // Subscribe methods — function executions
     // -----------------------------------------------------------------------
 
-    pub async fn subscribe_function_execution(&self, id: &str, timeout: std::time::Duration) -> Option<serde_json::Value> {
-        self.subscribe_json("functions/executions", id, timeout).await
+    pub async fn subscribe_function_execution(&self, id: &str, timeout: std::time::Duration, require_modification: bool) -> Option<serde_json::Value> {
+        self.subscribe_json("functions/executions", id, timeout, require_modification).await
     }
 
-    pub async fn subscribe_function_execution_retry_token(&self, id: &str, timeout: std::time::Duration) -> Option<serde_json::Value> {
-        self.subscribe_json("functions/executions/retry_token", id, timeout).await
+    pub async fn subscribe_function_execution_retry_token(&self, id: &str, timeout: std::time::Duration, require_modification: bool) -> Option<serde_json::Value> {
+        self.subscribe_json("functions/executions/retry_token", id, timeout, require_modification).await
     }
 
     // -----------------------------------------------------------------------
     // Subscribe methods — function inventions
     // -----------------------------------------------------------------------
 
-    pub async fn subscribe_function_invention(&self, id: &str, timeout: std::time::Duration) -> Option<serde_json::Value> {
-        self.subscribe_json("functions/inventions", id, timeout).await
+    pub async fn subscribe_function_invention(&self, id: &str, timeout: std::time::Duration, require_modification: bool) -> Option<serde_json::Value> {
+        self.subscribe_json("functions/inventions", id, timeout, require_modification).await
     }
 
     // -----------------------------------------------------------------------
     // Subscribe methods — function inventions recursive
     // -----------------------------------------------------------------------
 
-    pub async fn subscribe_function_invention_recursive(&self, id: &str, timeout: std::time::Duration) -> Option<serde_json::Value> {
-        self.subscribe_json("functions/inventions/recursive", id, timeout).await
+    pub async fn subscribe_function_invention_recursive(&self, id: &str, timeout: std::time::Duration, require_modification: bool) -> Option<serde_json::Value> {
+        self.subscribe_json("functions/inventions/recursive", id, timeout, require_modification).await
     }
 
     // -----------------------------------------------------------------------
     // Subscribe methods — laboratory executions
     // -----------------------------------------------------------------------
 
-    pub async fn subscribe_laboratory_execution(&self, id: &str, timeout: std::time::Duration) -> Option<serde_json::Value> {
-        self.subscribe_json("laboratories/executions", id, timeout).await
+    pub async fn subscribe_laboratory_execution(&self, id: &str, timeout: std::time::Duration, require_modification: bool) -> Option<serde_json::Value> {
+        self.subscribe_json("laboratories/executions", id, timeout, require_modification).await
     }
 }
