@@ -10,7 +10,7 @@ import type { FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
 import type { FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive } from "./response/unary/functionInventionRecursive";
 
 const mockInventionAgent = { upstream: "mock", output_mode: "instruction", mode: "invention" };
-const mockPrompt = { type: "mock", name: "default" };
+const mockPrompt = { remote: "mock", name: "default" };
 
 httpTestSuite<FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive>({
   name: "functions inventions recursive http",

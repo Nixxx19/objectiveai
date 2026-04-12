@@ -10,7 +10,7 @@ import type { FunctionsInventionsResponseStreamingFunctionInventionChunk } from 
 import type { FunctionsInventionsResponseUnaryFunctionInvention } from "./response/unary/functionInvention";
 
 const mockInventionAgent = { upstream: "mock", output_mode: "instruction", mode: "invention" };
-const mockPrompt = { type: "mock", name: "default" };
+const mockPrompt = { remote: "mock", name: "default" };
 
 httpTestSuite<FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseUnaryFunctionInvention>({
   name: "functions inventions http",
