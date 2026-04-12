@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 /// The type of invention state a prompt applies to.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "functions.inventions.prompt.StepPromptType")]
+#[schemars(rename = "functions.inventions.prompts.StepPromptType")]
 pub enum StepPromptType {
     #[serde(rename = "alpha.scalar.branch.function")]
     AlphaScalarBranchFunction,
@@ -19,7 +19,7 @@ pub enum StepPromptType {
 
 /// A prompt for a single invention step, applicable to one or more state types.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "functions.inventions.prompt.StepPromptExpression")]
+#[schemars(rename = "functions.inventions.prompts.StepPromptExpression")]
 pub struct StepPromptExpression {
     pub r#type: Vec<StepPromptType>,
     pub value: WithExpression<String>,
@@ -38,7 +38,7 @@ impl StepPromptExpression {
 /// or a remote path reference.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "functions.inventions.prompt.InlinePromptOrRemoteCommitOptional")]
+#[schemars(rename = "functions.inventions.prompts.InlinePromptOrRemoteCommitOptional")]
 pub enum InlinePromptOrRemoteCommitOptional {
     #[schemars(title = "Inline")]
     Inline(InlinePrompt),
@@ -49,7 +49,7 @@ pub enum InlinePromptOrRemoteCommitOptional {
 /// A Prompt definition, either remote or inline.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "functions.inventions.prompt.Prompt")]
+#[schemars(rename = "functions.inventions.prompts.Prompt")]
 pub enum Prompt {
     /// A remote prompt with metadata.
     #[schemars(title = "Remote")]
@@ -130,7 +130,7 @@ impl Prompt {
 
 /// A remote prompt with description and inline prompt fields.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.inventions.prompt.RemotePrompt")]
+#[schemars(rename = "functions.inventions.prompts.RemotePrompt")]
 pub struct RemotePrompt {
     /// Human-readable description of the prompt.
     pub description: String,
@@ -155,7 +155,7 @@ impl RemotePrompt {
 
 /// Inline invention prompt configuration for all steps.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "functions.inventions.prompt.InlinePrompt")]
+#[schemars(rename = "functions.inventions.prompts.InlinePrompt")]
 pub struct InlinePrompt {
     pub essay: Vec<StepPromptExpression>,
     pub input_schema: Vec<StepPromptExpression>,

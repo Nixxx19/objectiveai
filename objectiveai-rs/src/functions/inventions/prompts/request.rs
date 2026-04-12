@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 /// Query parameters for the list prompts endpoint.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.inventions.prompt.ListPromptsRequest")]
+#[schemars(rename = "functions.inventions.prompts.ListPromptsRequest")]
 pub struct ListPromptsRequest {
     /// Optional source filter for listing prompts.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -15,7 +15,7 @@ pub struct ListPromptsRequest {
 
 /// Source filter for listing prompts.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.inventions.prompt.ListPromptsSource")]
+#[schemars(rename = "functions.inventions.prompts.ListPromptsSource")]
 #[serde(rename_all = "snake_case")]
 pub enum ListPromptsSource {
     All,

@@ -1,5 +1,5 @@
 pub mod path;
-pub mod prompt;
+pub mod prompts;
 pub mod recursive;
 pub mod request;
 pub mod response;

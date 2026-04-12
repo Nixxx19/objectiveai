@@ -5,7 +5,7 @@ use schemars::JsonSchema;
 
 /// Response from listing prompts.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.inventions.prompt.ListPromptResponse")]
+#[schemars(rename = "functions.inventions.prompts.ListPromptResponse")]
 pub struct ListPromptResponse {
     /// List of available prompts.
     pub data: Vec<ListPromptItem>,
@@ -15,7 +15,7 @@ pub struct ListPromptResponse {
 pub type ListPromptItem = crate::RemotePath;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.inventions.prompt.GetPromptResponse")]
+#[schemars(rename = "functions.inventions.prompts.GetPromptResponse")]
 pub struct GetPromptResponse {
     #[serde(flatten)]
     #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
@@ -27,7 +27,7 @@ pub struct GetPromptResponse {
 
 /// Usage statistics for a prompt.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.inventions.prompt.UsagePromptResponse")]
+#[schemars(rename = "functions.inventions.prompts.UsagePromptResponse")]
 pub struct UsagePromptResponse {
     /// Total number of requests made with this prompt.
     pub requests: u64,
