@@ -8,7 +8,7 @@ pub async fn list_agents(
     params: super::request::ListAgentsRequest,
 ) -> Result<super::response::ListAgentResponse, HttpError> {
     client
-        .send_unary(reqwest::Method::GET, "agents/list", Some(params))
+        .send_unary(reqwest::Method::POST, "agents/list", Some(params))
         .await
 }
 
@@ -18,7 +18,7 @@ pub async fn get_agent(
     params: super::request::GetAgentRequest,
 ) -> Result<super::response::GetAgentResponse, HttpError> {
     client
-        .send_unary(reqwest::Method::GET, "agents", Some(params))
+        .send_unary(reqwest::Method::POST, "agents", Some(params))
         .await
 }
 
@@ -28,6 +28,6 @@ pub async fn get_agent_usage(
     params: super::request::GetAgentRequest,
 ) -> Result<super::response::UsageAgentResponse, HttpError> {
     client
-        .send_unary(reqwest::Method::GET, "agents/usage", Some(params))
+        .send_unary(reqwest::Method::POST, "agents/usage", Some(params))
         .await
 }

@@ -10,7 +10,7 @@ export function swarmListSwarms(
   params: SwarmListSwarmsRequest,
   options?: RequestOptions,
 ): Promise<SwarmListSwarmResponse> {
-  return client.get_unary<SwarmListSwarmResponse>("swarms/list", params, options);
+  return client.post_unary<SwarmListSwarmResponse>("swarms/list", params, options);
 }
 
 export function swarmGetSwarm(
@@ -18,7 +18,7 @@ export function swarmGetSwarm(
   params: RemotePathCommitOptional,
   options?: RequestOptions,
 ): Promise<SwarmGetSwarmResponse> {
-  return client.get_unary<SwarmGetSwarmResponse>("swarms", params, options);
+  return client.post_unary<SwarmGetSwarmResponse>("swarms", params, options);
 }
 
 export function swarmGetSwarmUsage(
@@ -26,5 +26,5 @@ export function swarmGetSwarmUsage(
   params: RemotePathCommitOptional,
   options?: RequestOptions,
 ): Promise<SwarmUsageSwarmResponse> {
-  return client.get_unary<SwarmUsageSwarmResponse>("swarms/usage", params, options);
+  return client.post_unary<SwarmUsageSwarmResponse>("swarms/usage", params, options);
 }

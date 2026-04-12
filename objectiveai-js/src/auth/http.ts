@@ -46,7 +46,7 @@ export function authListApiKeys(
   client: ObjectiveAI,
   options?: RequestOptions,
 ): Promise<AuthListApiKeyResponse> {
-  return client.get_unary<AuthListApiKeyResponse>("/auth/keys", undefined, options);
+  return client.get_unary<AuthListApiKeyResponse>("/auth/keys", options);
 }
 
 export function authGetOpenrouterByokApiKey(
@@ -55,7 +55,6 @@ export function authGetOpenrouterByokApiKey(
 ): Promise<AuthGetOpenRouterByokApiKeyResponse> {
   return client.get_unary<AuthGetOpenRouterByokApiKeyResponse>(
     "/auth/keys/openrouter",
-    undefined,
     options,
   );
 }
@@ -64,5 +63,5 @@ export function authGetCredits(
   client: ObjectiveAI,
   options?: RequestOptions,
 ): Promise<AuthGetCreditsResponse> {
-  return client.get_unary<AuthGetCreditsResponse>("/auth/credits", undefined, options);
+  return client.get_unary<AuthGetCreditsResponse>("/auth/credits", options);
 }

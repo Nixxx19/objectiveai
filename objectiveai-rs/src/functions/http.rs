@@ -8,7 +8,7 @@ pub async fn list_functions(
     params: super::request::ListFunctionsRequest,
 ) -> Result<super::response::ListFunctionResponse, HttpError> {
     client
-        .send_unary(reqwest::Method::GET, "functions/list", Some(params))
+        .send_unary(reqwest::Method::POST, "functions/list", Some(params))
         .await
 }
 
@@ -18,7 +18,7 @@ pub async fn get_function(
     params: super::request::GetFunctionRequest,
 ) -> Result<super::response::GetFunctionResponse, HttpError> {
     client
-        .send_unary(reqwest::Method::GET, "functions", Some(params))
+        .send_unary(reqwest::Method::POST, "functions", Some(params))
         .await
 }
 
@@ -28,7 +28,7 @@ pub async fn get_function_usage(
     params: super::request::GetFunctionRequest,
 ) -> Result<super::response::UsageFunctionResponse, HttpError> {
     client
-        .send_unary(reqwest::Method::GET, "functions/usage", Some(params))
+        .send_unary(reqwest::Method::POST, "functions/usage", Some(params))
         .await
 }
 
@@ -38,7 +38,7 @@ pub async fn list_function_profile_pairs(
     params: super::request::ListFunctionProfilePairsRequest,
 ) -> Result<super::response::ListFunctionProfilePairResponse, HttpError> {
     client
-        .send_unary(reqwest::Method::GET, "functions/profiles/pairs/list", Some(params))
+        .send_unary(reqwest::Method::POST, "functions/profiles/pairs/list", Some(params))
         .await
 }
 
@@ -48,6 +48,6 @@ pub async fn get_function_profile_pair_usage(
     params: super::request::GetFunctionProfilePairUsageRequest,
 ) -> Result<super::response::UsageFunctionProfilePairResponse, HttpError> {
     client
-        .send_unary(reqwest::Method::GET, "functions/profiles/pairs/usage", Some(params))
+        .send_unary(reqwest::Method::POST, "functions/profiles/pairs/usage", Some(params))
         .await
 }

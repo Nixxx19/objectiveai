@@ -8,7 +8,7 @@ export function vectorCompletionsCacheGetCompletionVotes(
   id: string,
   options?: RequestOptions,
 ): Promise<VectorCompletionsCacheCompletionVotes> {
-  return client.get_unary<VectorCompletionsCacheCompletionVotes>(
+  return client.post_unary<VectorCompletionsCacheCompletionVotes>(
     "vector/completions/votes",
     { id },
     options,
@@ -20,7 +20,7 @@ export function vectorCompletionsCacheGetCacheVote(
   body: VectorCompletionsCacheCacheVoteRequest,
   options?: RequestOptions,
 ): Promise<VectorCompletionsCacheCacheVote> {
-  return client.get_unary<VectorCompletionsCacheCacheVote>(
+  return client.post_unary<VectorCompletionsCacheCacheVote>(
     "vector/completions/cache",
     body,
     options,

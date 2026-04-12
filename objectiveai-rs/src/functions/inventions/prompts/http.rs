@@ -8,7 +8,7 @@ pub async fn list_prompts(
     params: super::request::ListPromptsRequest,
 ) -> Result<super::response::ListPromptResponse, HttpError> {
     client
-        .send_unary(reqwest::Method::GET, "functions/inventions/prompts/list", Some(params))
+        .send_unary(reqwest::Method::POST, "functions/inventions/prompts/list", Some(params))
         .await
 }
 
@@ -18,7 +18,7 @@ pub async fn get_prompt(
     params: super::request::GetPromptRequest,
 ) -> Result<super::response::GetPromptResponse, HttpError> {
     client
-        .send_unary(reqwest::Method::GET, "functions/inventions/prompts", Some(params))
+        .send_unary(reqwest::Method::POST, "functions/inventions/prompts", Some(params))
         .await
 }
 
@@ -28,6 +28,6 @@ pub async fn get_prompt_usage(
     params: super::request::GetPromptRequest,
 ) -> Result<super::response::UsagePromptResponse, HttpError> {
     client
-        .send_unary(reqwest::Method::GET, "functions/inventions/prompts/usage", Some(params))
+        .send_unary(reqwest::Method::POST, "functions/inventions/prompts/usage", Some(params))
         .await
 }

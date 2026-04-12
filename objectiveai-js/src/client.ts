@@ -242,13 +242,11 @@ export class ObjectiveAI {
    */
   async get_unary<T>(
     path: string,
-    body?: unknown,
     options?: RequestOptions | null,
   ): Promise<T> {
     const response = await fetch(this.buildUrl(path), {
       method: "GET",
       headers: this.buildHeaders(options),
-      body: body !== undefined ? JSON.stringify(body) : undefined,
       signal: options?.signal ?? undefined,
     });
 
@@ -308,7 +306,6 @@ export class ObjectiveAI {
    */
   async get_streaming<T>(
     path: string,
-    body?: unknown,
     options?: RequestOptions | null,
   ): Promise<Stream<T>> {
     const headers = this.buildHeaders(options);
@@ -325,7 +322,6 @@ export class ObjectiveAI {
     const response = await fetch(this.buildUrl(path), {
       method: "GET",
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
       signal: controller.signal,
     });
 

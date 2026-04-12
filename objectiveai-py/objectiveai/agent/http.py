@@ -19,18 +19,18 @@ async def list_agents(
     client: ObjectiveAI, params: ListAgentsRequest,
 ) -> ListAgentResponse:
     """List all agents that have been used."""
-    return await client.get_unary("agents/list", params)
+    return await client.post_unary("agents/list", params)
 
 
 async def get_agent(
     client: ObjectiveAI, params: GetAgentRequest,
 ) -> GetAgentResponse:
     """Retrieve a specific agent."""
-    return await client.get_unary("agents", params)
+    return await client.post_unary("agents", params)
 
 
 async def get_agent_usage(
     client: ObjectiveAI, params: GetAgentRequest,
 ) -> UsageAgentResponse:
     """Retrieve usage statistics for a specific agent."""
-    return await client.get_unary("agents/usage", params)
+    return await client.post_unary("agents/usage", params)

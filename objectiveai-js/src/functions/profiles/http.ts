@@ -10,7 +10,7 @@ export function functionsProfilesListProfiles(
   params: FunctionsProfilesListProfilesRequest,
   options?: RequestOptions,
 ): Promise<FunctionsProfilesListProfileResponse> {
-  return client.get_unary<FunctionsProfilesListProfileResponse>("functions/profiles/list", params, options);
+  return client.post_unary<FunctionsProfilesListProfileResponse>("functions/profiles/list", params, options);
 }
 
 export function functionsProfilesGetProfile(
@@ -18,7 +18,7 @@ export function functionsProfilesGetProfile(
   params: RemotePathCommitOptional,
   options?: RequestOptions,
 ): Promise<FunctionsProfilesGetProfileResponse> {
-  return client.get_unary<FunctionsProfilesGetProfileResponse>("functions/profiles", params, options);
+  return client.post_unary<FunctionsProfilesGetProfileResponse>("functions/profiles", params, options);
 }
 
 export function functionsProfilesGetProfileUsage(
@@ -26,5 +26,5 @@ export function functionsProfilesGetProfileUsage(
   params: RemotePathCommitOptional,
   options?: RequestOptions,
 ): Promise<FunctionsProfilesUsageProfileResponse> {
-  return client.get_unary<FunctionsProfilesUsageProfileResponse>("functions/profiles/usage", params, options);
+  return client.post_unary<FunctionsProfilesUsageProfileResponse>("functions/profiles/usage", params, options);
 }

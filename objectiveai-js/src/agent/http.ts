@@ -10,7 +10,7 @@ export function agentListAgents(
   params: AgentListAgentsRequest,
   options?: RequestOptions,
 ): Promise<AgentListAgentResponse> {
-  return client.get_unary<AgentListAgentResponse>("agents/list", params, options);
+  return client.post_unary<AgentListAgentResponse>("agents/list", params, options);
 }
 
 export function agentGetAgent(
@@ -18,7 +18,7 @@ export function agentGetAgent(
   params: RemotePathCommitOptional,
   options?: RequestOptions,
 ): Promise<AgentGetAgentResponse> {
-  return client.get_unary<AgentGetAgentResponse>("agents", params, options);
+  return client.post_unary<AgentGetAgentResponse>("agents", params, options);
 }
 
 export function agentGetAgentUsage(
@@ -26,5 +26,5 @@ export function agentGetAgentUsage(
   params: RemotePathCommitOptional,
   options?: RequestOptions,
 ): Promise<AgentUsageAgentResponse> {
-  return client.get_unary<AgentUsageAgentResponse>("agents/usage", params, options);
+  return client.post_unary<AgentUsageAgentResponse>("agents/usage", params, options);
 }

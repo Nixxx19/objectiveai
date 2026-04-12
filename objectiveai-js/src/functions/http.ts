@@ -14,7 +14,7 @@ export function functionsListFunctions(
   params: FunctionsListFunctionsRequest,
   options?: RequestOptions,
 ): Promise<FunctionsListFunctionResponse> {
-  return client.get_unary<FunctionsListFunctionResponse>("functions/list", params, options);
+  return client.post_unary<FunctionsListFunctionResponse>("functions/list", params, options);
 }
 
 export function functionsGetFunction(
@@ -22,7 +22,7 @@ export function functionsGetFunction(
   params: RemotePathCommitOptional,
   options?: RequestOptions,
 ): Promise<FunctionsGetFunctionResponse> {
-  return client.get_unary<FunctionsGetFunctionResponse>("functions", params, options);
+  return client.post_unary<FunctionsGetFunctionResponse>("functions", params, options);
 }
 
 export function functionsGetFunctionUsage(
@@ -30,7 +30,7 @@ export function functionsGetFunctionUsage(
   params: RemotePathCommitOptional,
   options?: RequestOptions,
 ): Promise<FunctionsUsageFunctionResponse> {
-  return client.get_unary<FunctionsUsageFunctionResponse>("functions/usage", params, options);
+  return client.post_unary<FunctionsUsageFunctionResponse>("functions/usage", params, options);
 }
 
 export function functionsListFunctionProfilePairs(
@@ -38,7 +38,7 @@ export function functionsListFunctionProfilePairs(
   params: FunctionsListFunctionProfilePairsRequest,
   options?: RequestOptions,
 ): Promise<FunctionsListFunctionProfilePairResponse> {
-  return client.get_unary<FunctionsListFunctionProfilePairResponse>("functions/profiles/pairs/list", params, options);
+  return client.post_unary<FunctionsListFunctionProfilePairResponse>("functions/profiles/pairs/list", params, options);
 }
 
 export function functionsGetFunctionProfilePairUsage(
@@ -46,5 +46,5 @@ export function functionsGetFunctionProfilePairUsage(
   params: FunctionsGetFunctionProfilePairUsageRequest,
   options?: RequestOptions,
 ): Promise<FunctionsUsageFunctionProfilePairResponse> {
-  return client.get_unary<FunctionsUsageFunctionProfilePairResponse>("functions/profiles/pairs/usage", params, options);
+  return client.post_unary<FunctionsUsageFunctionProfilePairResponse>("functions/profiles/pairs/usage", params, options);
 }

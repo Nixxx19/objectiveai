@@ -730,7 +730,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Vector Completions - get completion votes
         .route(
             "/vector/completions/votes",
-            axum::routing::get({
+            axum::routing::post({
                 let vector_completions_cache_client =
                     vector_completions_cache_client.clone();
                 let persistent_cache = persistent_cache.clone();
@@ -750,7 +750,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Vector Completions - get cache vote
         .route(
             "/vector/completions/cache",
-            axum::routing::get({
+            axum::routing::post({
                 let vector_completions_cache_client =
                     vector_completions_cache_client.clone();
                 let persistent_cache = persistent_cache.clone();
@@ -770,7 +770,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Functions - list
         .route(
             "/functions/list",
-            axum::routing::get({
+            axum::routing::post({
                 let list_router = list_router.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |headers: axum::http::HeaderMap, Json(params): Json<
@@ -783,7 +783,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Functions - get
         .route(
             "/functions",
-            axum::routing::get({
+            axum::routing::post({
                 let retrieve_router = retrieve_router.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |headers: axum::http::HeaderMap, Json(params): Json<
@@ -796,7 +796,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Functions - get usage
         .route(
             "/functions/usage",
-            axum::routing::get({
+            axum::routing::post({
                 let usage_router = usage_router.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |headers: axum::http::HeaderMap, Json(params): Json<
@@ -828,7 +828,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Function Profiles - list
         .route(
             "/functions/profiles/list",
-            axum::routing::get({
+            axum::routing::post({
                 let list_router = list_router.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |headers: axum::http::HeaderMap, Json(params): Json<
@@ -841,7 +841,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Function Profiles - get
         .route(
             "/functions/profiles",
-            axum::routing::get({
+            axum::routing::post({
                 let retrieve_router = retrieve_router.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |headers: axum::http::HeaderMap, Json(params): Json<
@@ -854,7 +854,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Function Profiles - get usage
         .route(
             "/functions/profiles/usage",
-            axum::routing::get({
+            axum::routing::post({
                 let usage_router = usage_router.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |headers: axum::http::HeaderMap, Json(params): Json<
@@ -867,7 +867,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Function-Profile Pairs - list
         .route(
             "/functions/profiles/pairs/list",
-            axum::routing::get({
+            axum::routing::post({
                 let list_router = list_router.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |headers: axum::http::HeaderMap, Json(params): Json<
@@ -880,7 +880,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Function-Profile Pairs - get usage
         .route(
             "/functions/profiles/pairs/usage",
-            axum::routing::get({
+            axum::routing::post({
                 let usage_router = usage_router.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |headers: axum::http::HeaderMap, Json(params): Json<
@@ -926,7 +926,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Function Invention Prompts - list
         .route(
             "/functions/inventions/prompts/list",
-            axum::routing::get({
+            axum::routing::post({
                 let list_router = list_router.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |headers: axum::http::HeaderMap, Json(params): Json<
@@ -939,7 +939,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Function Invention Prompts - get
         .route(
             "/functions/inventions/prompts",
-            axum::routing::get({
+            axum::routing::post({
                 let retrieve_router = retrieve_router.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |headers: axum::http::HeaderMap, Json(params): Json<
@@ -952,7 +952,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Function Invention Prompts - get usage
         .route(
             "/functions/inventions/prompts/usage",
-            axum::routing::get({
+            axum::routing::post({
                 let usage_router = usage_router.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |headers: axum::http::HeaderMap, Json(params): Json<
@@ -1068,7 +1068,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Swarm - list
         .route(
             "/swarms/list",
-            axum::routing::get({
+            axum::routing::post({
                 let list_router = list_router.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |headers: axum::http::HeaderMap, Json(params): Json<
@@ -1081,7 +1081,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Swarm - get
         .route(
             "/swarms",
-            axum::routing::get({
+            axum::routing::post({
                 let retrieve_router = retrieve_router.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |headers: axum::http::HeaderMap, Json(params): Json<
@@ -1094,7 +1094,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Swarm - get usage
         .route(
             "/swarms/usage",
-            axum::routing::get({
+            axum::routing::post({
                 let usage_router = usage_router.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |headers: axum::http::HeaderMap, Json(params): Json<
@@ -1107,7 +1107,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Agent - list
         .route(
             "/agents/list",
-            axum::routing::get({
+            axum::routing::post({
                 let list_router = list_router.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |headers: axum::http::HeaderMap, Json(params): Json<
@@ -1120,7 +1120,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Agent - get
         .route(
             "/agents",
-            axum::routing::get({
+            axum::routing::post({
                 let retrieve_router = retrieve_router.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |headers: axum::http::HeaderMap, Json(params): Json<
@@ -1133,7 +1133,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // Agent - get usage
         .route(
             "/agents/usage",
-            axum::routing::get({
+            axum::routing::post({
                 let usage_router = usage_router.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |headers: axum::http::HeaderMap, Json(params): Json<

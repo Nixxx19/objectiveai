@@ -18,11 +18,11 @@ async def get_completion_votes(
     client: ObjectiveAI, params: GetCompletionVotesRequest,
 ) -> CompletionVotes:
     """Retrieve votes for a specific vector completion."""
-    return await client.get_unary("vector/completions/votes", params)
+    return await client.post_unary("vector/completions/votes", params)
 
 
 async def get_cache_vote(
     client: ObjectiveAI, params: CacheVoteRequest,
 ) -> CacheVote:
     """Retrieve a cached vote."""
-    return await client.get_unary("vector/completions/cache", params)
+    return await client.post_unary("vector/completions/cache", params)

@@ -6,7 +6,7 @@ pub async fn get_completion_votes(
 ) -> Result<super::response::CompletionVotes, HttpError> {
     client
         .send_unary(
-            reqwest::Method::GET,
+            reqwest::Method::POST,
             "vector/completions/votes",
             Some(request),
         )
@@ -19,7 +19,7 @@ pub async fn get_cache_vote(
 ) -> Result<super::response::CacheVote, HttpError> {
     client
         .send_unary(
-            reqwest::Method::GET,
+            reqwest::Method::POST,
             "vector/completions/cache",
             Some(request),
         )

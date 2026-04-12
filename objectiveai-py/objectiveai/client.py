@@ -162,7 +162,6 @@ class ObjectiveAI:
     async def get_unary(
         self,
         path: str,
-        body: Any = None,
         *,
         headers: dict[str, str] | None = None,
     ) -> Any:
@@ -172,7 +171,6 @@ class ObjectiveAI:
                 "GET",
                 self._build_url(path),
                 headers=self._build_headers(headers),
-                content=_json_body(body),
             )
         if not response.is_success:
             raise await self._handle_error_response(response)
@@ -223,7 +221,6 @@ class ObjectiveAI:
     async def get_streaming(
         self,
         path: str,
-        body: Any = None,
         *,
         headers: dict[str, str] | None = None,
     ) -> Stream[Any]:
@@ -237,7 +234,6 @@ class ObjectiveAI:
                 "GET",
                 self._build_url(path),
                 headers=h,
-                content=_json_body(body),
             ),
             stream=True,
         )

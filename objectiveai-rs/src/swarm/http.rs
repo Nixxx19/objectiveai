@@ -8,7 +8,7 @@ pub async fn list_swarms(
     params: super::request::ListSwarmsRequest,
 ) -> Result<super::response::ListSwarmResponse, HttpError> {
     client
-        .send_unary(reqwest::Method::GET, "swarms/list", Some(params))
+        .send_unary(reqwest::Method::POST, "swarms/list", Some(params))
         .await
 }
 
@@ -18,7 +18,7 @@ pub async fn get_swarm(
     params: super::request::GetSwarmRequest,
 ) -> Result<super::response::GetSwarmResponse, HttpError> {
     client
-        .send_unary(reqwest::Method::GET, "swarms", Some(params))
+        .send_unary(reqwest::Method::POST, "swarms", Some(params))
         .await
 }
 
@@ -28,6 +28,6 @@ pub async fn get_swarm_usage(
     params: super::request::GetSwarmRequest,
 ) -> Result<super::response::UsageSwarmResponse, HttpError> {
     client
-        .send_unary(reqwest::Method::GET, "swarms/usage", Some(params))
+        .send_unary(reqwest::Method::POST, "swarms/usage", Some(params))
         .await
 }

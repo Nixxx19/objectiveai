@@ -8,7 +8,7 @@ pub async fn list_profiles(
     params: super::request::ListProfilesRequest,
 ) -> Result<super::response::ListProfileResponse, HttpError> {
     client
-        .send_unary(reqwest::Method::GET, "functions/profiles/list", Some(params))
+        .send_unary(reqwest::Method::POST, "functions/profiles/list", Some(params))
         .await
 }
 
@@ -18,7 +18,7 @@ pub async fn get_profile(
     params: super::request::GetProfileRequest,
 ) -> Result<super::response::GetProfileResponse, HttpError> {
     client
-        .send_unary(reqwest::Method::GET, "functions/profiles", Some(params))
+        .send_unary(reqwest::Method::POST, "functions/profiles", Some(params))
         .await
 }
 
@@ -28,6 +28,6 @@ pub async fn get_profile_usage(
     params: super::request::GetProfileRequest,
 ) -> Result<super::response::UsageProfileResponse, HttpError> {
     client
-        .send_unary(reqwest::Method::GET, "functions/profiles/usage", Some(params))
+        .send_unary(reqwest::Method::POST, "functions/profiles/usage", Some(params))
         .await
 }
