@@ -3652,6 +3652,17 @@ var FunctionsInventionsPromptsUsagePromptResponseSchema = z361.z.object({
   requests: z361.z.number().int().min(0).max(18446744073709552e3).describe("Total number of requests made with this prompt."),
   total_cost: z361.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Total cost incurred.")
 }).describe("Usage statistics for a prompt.").meta({ title: "functions.inventions.prompts.UsagePromptResponse" });
+
+// src/functions/inventions/prompts/http.ts
+function functionsInventionsPromptsListPrompts(client, params, options) {
+  return client.post_unary("functions/inventions/prompts/list", params, options);
+}
+function functionsInventionsPromptsGetPrompt(client, params, options) {
+  return client.post_unary("functions/inventions/prompts", params, options);
+}
+function functionsInventionsPromptsGetPromptUsage(client, params, options) {
+  return client.post_unary("functions/inventions/prompts/usage", params, options);
+}
 var FunctionsInventionsStateAlphaScalarBranchStateSchema = z361.z.object({
   depth: z361.z.number().int().min(0).max(18446744073709552e3),
   description: z361.z.string().nullable().meta({ omitempty: true }).optional(),
@@ -5945,6 +5956,9 @@ exports.functionsGetFunction = functionsGetFunction;
 exports.functionsGetFunctionProfilePairUsage = functionsGetFunctionProfilePairUsage;
 exports.functionsGetFunctionUsage = functionsGetFunctionUsage;
 exports.functionsInventionsCreateFunctionInvention = functionsInventionsCreateFunctionInvention;
+exports.functionsInventionsPromptsGetPrompt = functionsInventionsPromptsGetPrompt;
+exports.functionsInventionsPromptsGetPromptUsage = functionsInventionsPromptsGetPromptUsage;
+exports.functionsInventionsPromptsListPrompts = functionsInventionsPromptsListPrompts;
 exports.functionsInventionsRecursiveCreateFunctionInventionRecursive = functionsInventionsRecursiveCreateFunctionInventionRecursive;
 exports.functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMerged = functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMerged;
 exports.functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMergedList = functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMergedList;
