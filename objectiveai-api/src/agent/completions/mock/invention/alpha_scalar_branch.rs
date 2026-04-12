@@ -24,7 +24,7 @@ pub fn tasks_tool_call(
         "AppendTask" => {
             let field_schemas = super::extract_input_field_schemas(input_schema_json);
             let task = random_placeholder_scalar_task(&field_schemas, rng);
-            task.to_string()
+            serde_json::json!({"task": task.to_string()}).to_string()
         }
         "DeleteTask" | "ReadTask" => {
             serde_json::json!({ "index": rng.random_range(0u32..5) }).to_string()

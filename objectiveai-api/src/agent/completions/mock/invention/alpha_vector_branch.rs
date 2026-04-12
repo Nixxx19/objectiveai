@@ -39,11 +39,12 @@ pub fn tasks_tool_call(
                 && (scalar_count as f64 / (total_count + 1) as f64) < 0.5;
             let use_scalar = scalar_allowed && rng.random_range(0u32..3) == 0; // ~33% chance
 
-            if use_scalar {
-                random_placeholder_scalar_task(&parsed, rng).to_string()
+            let task = if use_scalar {
+                random_placeholder_scalar_task(&parsed, rng)
             } else {
-                random_placeholder_vector_task(&parsed, rng).to_string()
-            }
+                random_placeholder_vector_task(&parsed, rng)
+            };
+            serde_json::json!({"task": task.to_string()}).to_string()
         }
         "DeleteTask" | "ReadTask" => {
             serde_json::json!({ "index": rng.random_range(0u32..5) }).to_string()

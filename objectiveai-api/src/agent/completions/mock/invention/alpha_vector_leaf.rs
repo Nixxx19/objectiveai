@@ -35,11 +35,12 @@ pub fn tasks_tool_call(
             // Responses: use items modalities
             let responses_expr = super::build_responses_expr(&items_modalities);
 
-            serde_json::json!({
+            let task_json = serde_json::json!({
                 "type": "vector.completion",
                 "messages": { "$starlark": messages_expr },
                 "responses": { "$starlark": responses_expr },
-            }).to_string()
+            }).to_string();
+            serde_json::json!({"task": task_json}).to_string()
         }
         "DeleteTask" | "ReadTask" => {
             serde_json::json!({ "index": rng.random_range(0u32..5) }).to_string()

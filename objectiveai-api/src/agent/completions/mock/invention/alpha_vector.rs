@@ -39,7 +39,8 @@ pub fn input_schema_tool_call(
     let tool_name = super::pick_invention_tool("WriteInputSchema", tool_names, tool_map, rng);
     let arguments = match tool_name {
         "WriteInputSchema" => {
-            super::schema_gen::random_vector_input_schema(rng)
+            let schema_json = super::schema_gen::random_vector_input_schema(rng);
+            serde_json::json!({"schema": schema_json}).to_string()
         }
         "ReadSpec" | "ReadEssay" | "ReadInputSchema" => "{}".to_string(),
         _ => "{}".to_string(),
