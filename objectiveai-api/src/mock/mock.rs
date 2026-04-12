@@ -8,6 +8,7 @@ pub fn exists(name: &str) -> bool {
         || SWARM_REPOSITORIES.contains(&name)
         || FUNCTION_REPOSITORIES.contains(&name)
         || PROFILE_REPOSITORIES.contains(&name)
+        || PROMPT_REPOSITORIES.contains(&name)
 }
 
 /// Returns a mock Agent by name.
@@ -265,6 +266,36 @@ const PROFILE_REPOSITORIES: &[&str] = &[
 pub fn list_profiles() -> objectiveai::functions::profiles::response::ListProfileResponse {
     objectiveai::functions::profiles::response::ListProfileResponse {
         data: PROFILE_REPOSITORIES
+            .iter()
+            .map(|repo| objectiveai::RemotePath::Mock {
+                name: repo.to_string(),
+            })
+            .collect(),
+    }
+}
+
+/// Returns a mock Prompt by name.
+pub fn get_prompt(
+    name: &str,
+) -> Option<objectiveai::functions::inventions::prompts::RemotePrompt> {
+    let json = get_prompt_json(name)?;
+    Some(serde_json::from_str(json).expect("invalid mock prompt JSON"))
+}
+
+/// Returns mock Prompt JSON by repository name.
+fn get_prompt_json(repository: &str) -> Option<&'static str> {
+    match repository {
+        _ => None,
+    }
+}
+
+/// All mock Prompt repository names.
+const PROMPT_REPOSITORIES: &[&str] = &[];
+
+/// Lists all mock Prompts.
+pub fn list_prompts() -> objectiveai::functions::inventions::prompts::response::ListPromptResponse {
+    objectiveai::functions::inventions::prompts::response::ListPromptResponse {
+        data: PROMPT_REPOSITORIES
             .iter()
             .map(|repo| objectiveai::RemotePath::Mock {
                 name: repo.to_string(),

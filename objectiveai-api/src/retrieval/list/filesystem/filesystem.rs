@@ -47,6 +47,13 @@ where
         Ok(objectiveai::functions::profiles::response::ListProfileResponse { data: vec![] })
     }
 
+    async fn list_prompts<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
+        &self,
+        _ctx: &ctx::Context<CTXEXT, PC>,
+    ) -> Result<objectiveai::functions::inventions::prompts::response::ListPromptResponse, ResponseError> {
+        Ok(objectiveai::functions::inventions::prompts::response::ListPromptResponse { data: vec![] })
+    }
+
     async fn list_function_profile_pairs<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
         _ctx: &ctx::Context<CTXEXT, PC>,

@@ -98,6 +98,19 @@ where
         }
     }
 
+    async fn dispatch_get_prompt<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
+        &self,
+        remote: Remote,
+        ctx: &ctx::Context<CTXEXT, PC>,
+        path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::functions::inventions::prompts::RemotePrompt>, ResponseError> {
+        match remote {
+            Remote::Github => self.github.get_prompt(ctx, path).await,
+            Remote::Filesystem => self.filesystem.get_prompt(ctx, path).await,
+            Remote::Mock => self.mock.get_prompt(ctx, path).await,
+        }
+    }
+
     /// Resolves a `RemotePathCommitOptional` to a `RemotePath`.
     pub async fn resolve_path<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         self: &Arc<Self>,
@@ -503,6 +516,58 @@ where
             objectiveai::functions::Profile::Inline(_) => unreachable!(),
         };
         Ok(objectiveai::functions::profiles::response::GetProfileResponse { path, inner })
+    }
+
+    // ── Prompt ─────────────────────────────────────────────────────
+
+    /// Resolve a prompt: inline returns directly, remote fetches with caching.
+    pub async fn get_prompt<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
+        self: &Arc<Self>,
+        ctx: &ctx::Context<CTXEXT, PC>,
+        params: objectiveai::functions::inventions::prompts::InlinePromptOrRemoteCommitOptional,
+    ) -> Result<objectiveai::functions::inventions::prompts::Prompt, ResponseError> {
+        match params {
+            objectiveai::functions::inventions::prompts::InlinePromptOrRemoteCommitOptional::Inline(inline) => {
+                Ok(objectiveai::functions::inventions::prompts::Prompt::Inline(inline))
+            }
+            objectiveai::functions::inventions::prompts::InlinePromptOrRemoteCommitOptional::Remote(remote) => {
+                let fetched = self.fetch_prompt(ctx, &remote).await?
+                    .ok_or_else(|| not_found("prompt"))?;
+                Ok(objectiveai::functions::inventions::prompts::Prompt::Remote(fetched))
+            }
+        }
+    }
+
+    /// Fetch a raw `RemotePrompt` from a source.
+    async fn fetch_prompt<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
+        self: &Arc<Self>,
+        ctx: &ctx::Context<CTXEXT, PC>,
+        params: &objectiveai::RemotePathCommitOptional,
+    ) -> Result<Option<objectiveai::functions::inventions::prompts::RemotePrompt>, ResponseError> {
+        let Some(path) = self.resolve_path(ctx, crate::retrieval::Kind::Prompts, params).await? else {
+            return Ok(None);
+        };
+        let remote = path.remote();
+        self.dispatch_get_prompt(remote, ctx, &path).await
+    }
+
+    /// API endpoint: fetch a remote prompt, wrap in response.
+    pub async fn endpoint_get_prompt<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
+        self: &Arc<Self>,
+        ctx: &ctx::Context<CTXEXT, PC>,
+        params: &objectiveai::RemotePathCommitOptional,
+    ) -> Result<objectiveai::functions::inventions::prompts::response::GetPromptResponse, ResponseError> {
+        let path = self.resolve_path(ctx, crate::retrieval::Kind::Prompts, params).await?
+            .ok_or_else(|| not_found("prompt"))?;
+        let result = self.get_prompt(
+            ctx,
+            objectiveai::functions::inventions::prompts::InlinePromptOrRemoteCommitOptional::Remote(params.clone()),
+        ).await?;
+        let inner = match result {
+            objectiveai::functions::inventions::prompts::Prompt::Remote(r) => r,
+            objectiveai::functions::inventions::prompts::Prompt::Inline(_) => unreachable!(),
+        };
+        Ok(objectiveai::functions::inventions::prompts::response::GetPromptResponse { path, inner })
     }
 }
 

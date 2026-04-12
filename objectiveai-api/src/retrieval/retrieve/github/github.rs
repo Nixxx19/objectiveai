@@ -81,6 +81,18 @@ where
             .map_err(|e| ResponseError::from(&e))
     }
 
+    async fn get_prompt<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
+        &self,
+        ctx: &ctx::Context<CTXEXT, PC>,
+        path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::functions::inventions::prompts::RemotePrompt>, ResponseError> {
+        let (owner, repository, commit) = github_fields(path);
+        self.client
+            .read_json(ctx, owner, repository, commit, "prompt.json")
+            .await
+            .map_err(|e| ResponseError::from(&e))
+    }
+
     async fn get_function_invention_state_file<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
         ctx: &ctx::Context<CTXEXT, PC>,

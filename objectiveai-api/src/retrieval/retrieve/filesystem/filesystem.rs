@@ -125,6 +125,29 @@ where
         }
     }
 
+    async fn get_prompt<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
+        &self,
+        _ctx: &ctx::Context<CTXEXT, PC>,
+        path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::functions::inventions::prompts::RemotePrompt>, ResponseError> {
+        let (owner, repository, commit) = fs_fields(path);
+        match self
+            .client
+            .read_json::<objectiveai::functions::inventions::prompts::RemotePrompt>(
+                crate::retrieval::Kind::Prompts,
+                owner,
+                repository,
+                Some(commit),
+                "prompt.json",
+            )
+            .await
+        {
+            Ok(Some((prompt, _resolved_commit))) => Ok(Some(prompt)),
+            Ok(None) => Ok(None),
+            Err(e) => Err(ResponseError::from(&e)),
+        }
+    }
+
     async fn get_function_invention_state_file<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
         _ctx: &ctx::Context<CTXEXT, PC>,

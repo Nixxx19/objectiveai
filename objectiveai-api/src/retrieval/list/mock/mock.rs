@@ -38,6 +38,13 @@ where
         Ok(crate::mock::list_profiles())
     }
 
+    async fn list_prompts<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
+        &self,
+        _ctx: &ctx::Context<CTXEXT, PC>,
+    ) -> Result<objectiveai::functions::inventions::prompts::response::ListPromptResponse, ResponseError> {
+        Ok(crate::mock::list_prompts())
+    }
+
     async fn list_function_profile_pairs<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
         _ctx: &ctx::Context<CTXEXT, PC>,

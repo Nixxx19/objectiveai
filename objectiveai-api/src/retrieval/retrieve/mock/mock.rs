@@ -58,6 +58,18 @@ where
         Ok(crate::mock::get_profile(name))
     }
 
+    async fn get_prompt<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
+        &self,
+        _ctx: &ctx::Context<CTXEXT, PC>,
+        path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::functions::inventions::prompts::RemotePrompt>, ResponseError> {
+        let name = match path {
+            objectiveai::RemotePath::Mock { name } => name,
+            _ => return Ok(None),
+        };
+        Ok(crate::mock::get_prompt(name))
+    }
+
     async fn get_function_invention_state_file<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
         _ctx: &ctx::Context<CTXEXT, PC>,

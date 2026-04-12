@@ -923,6 +923,45 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                 }
             }),
         )
+        // Function Invention Prompts - list
+        .route(
+            "/functions/inventions/prompts/list",
+            axum::routing::get({
+                let list_router = list_router.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::functions::inventions::prompts::request::ListPromptsRequest,
+                >| {
+                    list_prompts(list_router, headers, persistent_cache, suppress_output, params)
+                }
+            }),
+        )
+        // Function Invention Prompts - get
+        .route(
+            "/functions/inventions/prompts",
+            axum::routing::get({
+                let retrieve_router = retrieve_router.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::RemotePathCommitOptional,
+                >| {
+                    get_prompt(retrieve_router, headers, persistent_cache, suppress_output, params)
+                }
+            }),
+        )
+        // Function Invention Prompts - get usage
+        .route(
+            "/functions/inventions/prompts/usage",
+            axum::routing::get({
+                let usage_router = usage_router.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::functions::inventions::prompts::request::GetPromptRequest,
+                >| {
+                    get_prompt_usage(usage_router, headers, persistent_cache, suppress_output, params)
+                }
+            }),
+        )
         // Function Profile Computations - create
         .route(
             "/functions/profiles/compute",
@@ -1527,6 +1566,56 @@ async fn get_profile_usage(
 ) -> axum::response::Response {
     let ctx = context(&headers, persistent_cache, suppress_output);
     match usage_router.get_profile_usage(&ctx, &params).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+// Invention Prompts
+
+async fn list_prompts(
+    list_router: Arc<ListRouter>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    params: objectiveai::functions::inventions::prompts::request::ListPromptsRequest,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    let source = params.source.map(|s| match s {
+        objectiveai::functions::inventions::prompts::request::ListPromptsSource::All => retrieval::list::SourceFilter::All,
+        objectiveai::functions::inventions::prompts::request::ListPromptsSource::Mock => retrieval::list::SourceFilter::Mock,
+        objectiveai::functions::inventions::prompts::request::ListPromptsSource::Filesystem => retrieval::list::SourceFilter::Filesystem,
+        objectiveai::functions::inventions::prompts::request::ListPromptsSource::Objectiveai => retrieval::list::SourceFilter::Objectiveai,
+    });
+    match list_router.list_prompts(&ctx, source).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn get_prompt(
+    retrieve_router: Arc<RetrieveRouter>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    params: objectiveai::RemotePathCommitOptional,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match retrieve_router.endpoint_get_prompt(&ctx, &params).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn get_prompt_usage(
+    usage_router: Arc<UsageRouter>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    params: objectiveai::functions::inventions::prompts::request::GetPromptRequest,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match usage_router.get_prompt_usage(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
     }
