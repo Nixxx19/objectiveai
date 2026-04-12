@@ -2,7 +2,7 @@ import { defineConfig, Options } from "tsup";
 import path from "path";
 
 const baseConfig: Options = {
-  entry: ["src/index.ts"],
+  entry: ["src/index.ts", "src/core.ts"],
   dts: true,
   outDir: "dist",
   treeshake: true,

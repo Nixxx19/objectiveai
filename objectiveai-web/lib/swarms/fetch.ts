@@ -1,0 +1,83 @@
+import { apiFetch } from "../client";
+import type { SwarmMeta, Agent } from "./types";
+
+interface EnsembleListResponse {
+  data: Array<{ id: string }>;
+}
+
+interface EnsembleLlmResponse {
+  id: string;
+  model: string;
+  output_mode: string;
+  top_logprobs?: number | null;
+  temperature?: number | null;
+  count?: number | null;
+  fallbacks?: Array<{ id: string; model: string }> | null;
+}
+
+interface EnsembleRetrieveResponse {
+  id: string;
+  created: number;
+  llms: EnsembleLlmResponse[];
+}
+
+/** Cache for the swarm list + details */
+let swarmCache: { data: SwarmMeta[]; ts: number } | null = null;
+const CACHE_TTL = 60_000;
+
+/** Fetch all swarms with resolved agent details */
+export async function fetchAllSwarms(): Promise<SwarmMeta[]> {
+  if (swarmCache && Date.now() - swarmCache.ts < CACHE_TTL) {
+    return swarmCache.data;
+  }
+
+  try {
+    const list = await apiFetch<EnsembleListResponse>("/ensembles");
+
+    const results = await Promise.allSettled(
+      list.data.map((item) => resolveSwarm(item.id))
+    );
+
+    const swarms = results
+      .filter(
+        (r): r is PromiseFulfilledResult<SwarmMeta> => r.status === "fulfilled"
+      )
+      .map((r) => r.value);
+
+    swarmCache = { data: swarms, ts: Date.now() };
+    return swarms;
+  } catch {
+    // API unreachable — swarms require the API, return empty
+    swarmCache = { data: [], ts: Date.now() };
+    return [];
+  }
+}
+
+function parseAgent(llm: EnsembleLlmResponse): Agent {
+  const fallbacks = llm.fallbacks ?? [];
+  return {
+    id: llm.id,
+    model: llm.model,
+    outputMode: llm.output_mode,
+    topLogprobs: llm.top_logprobs ?? null,
+    temperature: llm.temperature ?? null,
+    count: llm.count ?? 1,
+    hasFallbacks: fallbacks.length > 0,
+    fallbackCount: fallbacks.length,
+  };
+}
+
+/** Resolve a single swarm by ID */
+async function resolveSwarm(id: string): Promise<SwarmMeta> {
+  const detail = await apiFetch<EnsembleRetrieveResponse>(`/ensembles/${id}`);
+
+  const agents = detail.llms.map(parseAgent);
+  const totalAgentCount = agents.reduce((sum, a) => sum + a.count, 0);
+
+  return {
+    id,
+    created: detail.created,
+    agents,
+    totalAgentCount,
+  };
+}

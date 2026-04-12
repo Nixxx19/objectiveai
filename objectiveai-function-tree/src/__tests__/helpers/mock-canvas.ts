@@ -28,6 +28,7 @@ export function createMockCanvas(width = 800, height = 600) {
     restore: vi.fn(),
     clip: vi.fn(),
     roundRect: vi.fn(),
+    setLineDash: vi.fn(),
     createLinearGradient: vi.fn(() => ({
       addColorStop: vi.fn(),
     })),
@@ -38,6 +39,8 @@ export function createMockCanvas(width = 800, height = 600) {
     textAlign: "left" as CanvasTextAlign,
     textBaseline: "top" as CanvasTextBaseline,
     globalAlpha: 1,
+    lineCap: "butt" as CanvasLineCap,
+    lineJoin: "miter" as CanvasLineJoin,
   };
 
   const canvas = {

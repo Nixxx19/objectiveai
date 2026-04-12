@@ -9,7 +9,8 @@ export { FunctionTree } from "./react/FunctionTree";
 export { FunctionTreeEngine } from "./core/engine";
 
 // Data transformation
-export { buildTree } from "./core/tree-data";
+export { buildTree, applyProfileWeights } from "./core/tree-data";
+export { buildStructuralTree, extractPromptPreview } from "./core/structural-tree-data";
 
 // Layout
 export { layoutTree, treeBounds } from "./core/layout";
@@ -24,16 +25,23 @@ export type {
   TreeNodeState,
   TreeNodeData,
   TreeData,
+  TreeMode,
   FunctionNodeData,
   VectorCompletionNodeData,
+  EnsembleLlmNodeData,
   FunctionTreeConfig,
   FunctionTreeProps,
   InputFunctionExecution,
+  InputFunctionDefinition,
+  InputTaskDefinition,
   InputTask,
   InputVectorCompletionTask,
   InputFunctionExecutionTask,
   InputVote,
   InputCompletion,
+  InputProfile,
+  InputProfileTask,
+  InputProfileEnsembleLlm,
 } from "./types";
 
 export { DEFAULT_CONFIG, NODE_SIZES, SCORE_COLORS, scoreColor } from "./types";

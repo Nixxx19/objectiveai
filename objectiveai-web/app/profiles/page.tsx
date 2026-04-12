@@ -1,9 +1,9 @@
-"use client";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { ProfilesBrowse } from "@/components/ProfilesBrowse";
 
-export default function DormantPage() {
-  const router = useRouter();
-  useEffect(() => { router.replace("/functions"); }, [router]);
-  return null;
+export const metadata = {
+  title: "profiles — objectiveai",
+};
+
+export default function ProfilesPage() {
+  return <ProfilesBrowse />;
 }

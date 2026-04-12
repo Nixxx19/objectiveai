@@ -1,6 +1,12 @@
 import type { TreeNode, TreeData, FunctionTreeConfig } from "../types";
 import { NODE_SIZES } from "../types";
 
+// Tighter gaps for ensemble-llm nodes (compact cluster below VC nodes)
+const LLM_GAP_X = 8;
+const LLM_GAP_Y = 32;
+// Lower grid threshold for LLM nodes (they cluster quickly)
+const LLM_GRID_THRESHOLD = 8;
+
 // ---------------------------------------------------------------------------
 // Reingold-Tilford-inspired tree layout
 // ---------------------------------------------------------------------------
@@ -66,8 +72,14 @@ function computeSubtreeSize(
     childInfos.push(computeSubtreeSize(child.id, nodes, config, infos));
   }
 
+  // Use tighter gaps when children are LLM nodes
+  const childrenAreLlm = children.length > 0 && children[0].kind === "ensemble-llm";
+  const gapX = childrenAreLlm ? LLM_GAP_X : config.nodeGapX;
+  const gapY = childrenAreLlm ? LLM_GAP_Y : config.nodeGapY;
+  const gridThreshold = childrenAreLlm ? LLM_GRID_THRESHOLD : config.gridThreshold;
+
   const useGrid =
-    children.length > config.gridThreshold &&
+    children.length > gridThreshold &&
     children.every((c) => c.children.length === 0);
 
   let childrenWidth: number;
@@ -79,17 +91,17 @@ function computeSubtreeSize(
     const rows = Math.ceil(children.length / cols);
     const cellWidth = children[0].width;
     const cellHeight = children[0].height;
-    childrenWidth = cols * cellWidth + (cols - 1) * config.nodeGapX;
-    childrenHeight = rows * cellHeight + (rows - 1) * (config.nodeGapX * 0.5);
+    childrenWidth = cols * cellWidth + (cols - 1) * gapX;
+    childrenHeight = rows * cellHeight + (rows - 1) * (gapX * 0.5);
   } else {
     // Row layout: sum of children widths + gaps
     childrenWidth = childInfos.reduce((sum, ci) => sum + ci.width, 0) +
-      (childInfos.length - 1) * config.nodeGapX;
+      (childInfos.length - 1) * gapX;
     childrenHeight = Math.max(...childInfos.map((ci) => ci.height));
   }
 
   const totalWidth = Math.max(node.width, childrenWidth);
-  const totalHeight = node.height + config.nodeGapY + childrenHeight;
+  const totalHeight = node.height + gapY + childrenHeight;
 
   const info: SubtreeInfo = { width: totalWidth, height: totalHeight };
   infos.set(nodeId, info);
@@ -117,10 +129,16 @@ function assignPositions(
 
   if (children.length === 0) return;
 
-  const childY = cy + node.height + config.nodeGapY;
+  // Use tighter gaps when children are LLM nodes
+  const childrenAreLlm = children.length > 0 && children[0].kind === "ensemble-llm";
+  const gapX = childrenAreLlm ? LLM_GAP_X : config.nodeGapX;
+  const gapY = childrenAreLlm ? LLM_GAP_Y : config.nodeGapY;
+  const gridThreshold = childrenAreLlm ? LLM_GRID_THRESHOLD : config.gridThreshold;
+
+  const childY = cy + node.height + gapY;
 
   const useGrid =
-    children.length > config.gridThreshold &&
+    children.length > gridThreshold &&
     children.every((c) => c.children.length === 0);
 
   if (useGrid) {
@@ -128,14 +146,14 @@ function assignPositions(
     const cols = Math.ceil(Math.sqrt(children.length));
     const cellWidth = children[0].width;
     const cellHeight = children[0].height;
-    const gridWidth = cols * cellWidth + (cols - 1) * config.nodeGapX;
-    const gridGapY = config.nodeGapX * 0.5;
+    const gridWidth = cols * cellWidth + (cols - 1) * gapX;
+    const gridGapY = gapX * 0.5;
     const startX = cx - gridWidth / 2;
 
     for (let i = 0; i < children.length; i++) {
       const col = i % cols;
       const row = Math.floor(i / cols);
-      const childCx = startX + col * (cellWidth + config.nodeGapX) + cellWidth / 2;
+      const childCx = startX + col * (cellWidth + gapX) + cellWidth / 2;
       const childCy = childY + row * (cellHeight + gridGapY);
 
       children[i].x = childCx - children[i].width / 2;
@@ -146,7 +164,7 @@ function assignPositions(
     const childInfos = children.map((c) => infos.get(c.id)!);
     const totalChildrenWidth =
       childInfos.reduce((sum, ci) => sum + ci.width, 0) +
-      (childInfos.length - 1) * config.nodeGapX;
+      (childInfos.length - 1) * gapX;
 
     let currentX = cx - totalChildrenWidth / 2;
 
@@ -156,7 +174,7 @@ function assignPositions(
       const childCx = currentX + childInfo.width / 2;
 
       assignPositions(child.id, childCx, childY, nodes, config, infos);
-      currentX += childInfo.width + config.nodeGapX;
+      currentX += childInfo.width + gapX;
     }
   }
 }
