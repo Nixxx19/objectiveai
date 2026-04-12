@@ -238,12 +238,34 @@ where
         impl Stream<Item = FunctionInventionChunk> + Send + 'static,
         super::Error,
     > {
-        // Resolve state (inline or from remote files).
-        let resolved_state = self.retrieve_router
-            .get_function_invention_state(&ctx, request.state.clone())
-            .await
+        // Resolve state and prompt concurrently.
+        let state_fut = self.retrieve_router
+            .get_function_invention_state(&ctx, request.state.clone());
+        let prompt_fut = async {
+            match &request.prompt {
+                Some(p) => self.retrieve_router
+                    .get_prompt(&ctx, p.clone())
+                    .await
+                    .map(Some),
+                None => {
+                    // Default: use the "default" mock prompt.
+                    let default = objectiveai::functions::inventions::prompts::InlinePromptOrRemoteCommitOptional::Remote(
+                        objectiveai::RemotePathCommitOptional::Mock { name: "default".to_string() },
+                    );
+                    self.retrieve_router
+                        .get_prompt(&ctx, default)
+                        .await
+                        .map(Some)
+                }
+            }
+        };
+        let (resolved_state, resolved_prompt) = tokio::join!(state_fut, prompt_fut);
+        let resolved_state = resolved_state
             .map_err(|e| super::Error::InvalidState(e.to_string()))?
             .ok_or(super::Error::StateNotFound)?;
+        let resolved_prompt = resolved_prompt
+            .map_err(super::Error::PromptFetch)?
+            .unwrap();
 
         // Validate params before starting.
         let params = match &resolved_state {
@@ -321,6 +343,43 @@ where
         state
             .validate_initial_state(children.as_ref())
             .map_err(super::Error::InvalidState)?;
+
+        // Validate prompt supports this state type and compile step prompts.
+        let prompt_type = state.prompt_type();
+        if !resolved_prompt.supports_type(prompt_type) {
+            return Err(super::Error::PromptUnsupportedType(
+                format!("prompt does not have entries for type {:?}", prompt_type),
+            ));
+        }
+        let p = state.params();
+        let (tasks_min, tasks_max) = match &state {
+            State::AlphaScalarBranch(_) | State::AlphaVectorBranch(_) => {
+                (p.min_branch_width, p.max_branch_width)
+            }
+            State::AlphaScalarLeaf(_) | State::AlphaVectorLeaf(_) => {
+                (p.min_leaf_width, p.max_leaf_width)
+            }
+        };
+        let prompt_params = objectiveai::functions::expression::Params::Owned(
+            objectiveai::functions::expression::ParamsOwned {
+                input: objectiveai::functions::expression::InputValue::Object(Default::default()),
+                output: None,
+                map: None,
+                tasks_min: Some(tasks_min),
+                tasks_max: Some(tasks_max),
+                depth: Some(p.depth),
+                name: Some(p.name.clone()),
+                spec: Some(p.spec.clone()),
+            },
+        );
+        let compiled_prompts = CompiledPrompts {
+            essay: resolved_prompt.essay_for_type(prompt_type).unwrap().clone().compile(&prompt_params).unwrap(),
+            input_schema: resolved_prompt.input_schema_for_type(prompt_type).unwrap().clone().compile(&prompt_params).unwrap(),
+            essay_tasks: resolved_prompt.essay_tasks_for_type(prompt_type).unwrap().clone().compile(&prompt_params).unwrap(),
+            tasks: resolved_prompt.tasks_for_type(prompt_type).unwrap().clone().compile(&prompt_params).unwrap(),
+            description: resolved_prompt.description_for_type(prompt_type).unwrap().clone().compile(&prompt_params).unwrap(),
+        };
+
         let agent_client = self.agent_client.clone();
         let github_client = self.github_client.clone();
         let filesystem_client = self.filesystem_client.clone();
@@ -329,16 +388,16 @@ where
         let stream: Pin<Box<dyn Stream<Item = FunctionInventionChunk> + Send>> =
             match state {
                 State::AlphaScalarBranch(s) => {
-                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist, compiled_prompts)
                 }
                 State::AlphaScalarLeaf(s) => {
-                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist, compiled_prompts)
                 }
                 State::AlphaVectorBranch(s) => {
-                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist, compiled_prompts)
                 }
                 State::AlphaVectorLeaf(s) => {
-                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist, compiled_prompts)
                 }
             };
 
@@ -426,6 +485,15 @@ where
 // Step orchestration
 // ---------------------------------------------------------------------------
 
+/// Pre-compiled prompt strings for each invention step.
+struct CompiledPrompts {
+    essay: String,
+    input_schema: String,
+    essay_tasks: String,
+    tasks: String,
+    description: String,
+}
+
 fn run_all_steps<T, CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG>(
     state_val: T,
     agent_client: Arc<
@@ -440,6 +508,7 @@ fn run_all_steps<T, CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETR
     id: String,
     created: u64,
     persist: bool,
+    prompts: CompiledPrompts,
 ) -> Pin<Box<dyn Stream<Item = FunctionInventionChunk> + Send>>
 where
     T: InventionState,
@@ -465,9 +534,7 @@ where
     Box::pin(async_stream::stream! {
         let state = Arc::new(Mutex::new(state_val));
         let params = T::params(&state);
-        let is_scalar = T::is_scalar();
         let object = T::object();
-        let tasks_str = tasks_str(&params);
 
         let state_chunk = |state: &Arc<Mutex<T>>, id: &str, created, object| {
             FunctionInventionChunk {
@@ -501,31 +568,9 @@ where
         let essay_validate = Arc::new({ let s = state.clone(); move || T::validate_essay(&s) });
         if essay_validate().is_err() {
         errored = false;
-        let essay_prompt = if is_scalar {
-            format!(
-                "You are an inventor creating a new ObjectiveAI Function. \
-                Write a non-technical essay describing the Scalar Function you are building. \
-                Explore the purpose, input, and use-cases of the function in detail. \
-                Explore the qualities and values that must be evaluated for the input. \
-                There should be {tasks_str} qualities or values. \
-                This essay will guide the development of the Scalar Function and underpins its philosophy. \
-                Read the Spec first.",
-            )
-        } else {
-            format!(
-                "You are an inventor creating a new ObjectiveAI Function. \
-                Write a non-technical essay describing the Vector Function you are building. \
-                Explore the purpose, inputs, and use-cases of the function in detail. \
-                Explore the qualities and values that must be evaluated in order to \
-                properly rank items relative to one another. \
-                There should be {tasks_str} qualities or values. \
-                This essay will guide the development of the Vector Function and underpins its philosophy. \
-                Read the Spec first.",
-            )
-        };
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
-            essay_prompt, T::essay_tools(&state),
+            prompts.essay.clone(), T::essay_tools(&state),
             essay_validate,
             id.clone(), created, object, continuation.take(), completion_index,
         );
@@ -558,23 +603,10 @@ where
         // Step 2: Input Schema
         let input_schema_validate = Arc::new({ let s = state.clone(); move || T::validate_input_schema(&s) });
         if input_schema_validate().is_err() {
-        let input_schema_prompt = if is_scalar {
-            "Create the InputSchema for your Scalar Function. \
-            Ensure that it adheres to the specifications outlined in your Spec \
-            and is consistent with the essay you wrote describing your function. \
-            If handling multimodal content, use `type`: `image`, `audio`, `video`, or `file` depending. \
-            Multimodal types exist in addition to common primitives (e.g. `string`, `array`, etc)".to_string()
-        } else {
-            "Create the InputSchema for your Vector Function. \
-            Ensure that it adheres to the specifications outlined in your Spec \
-            and is consistent with the essay you wrote describing your function. \
-            If handling multimodal content, use `type`: `image`, `audio`, `video`, or `file` depending. \
-            Multimodal types exist in addition to common primitives (e.g. `string`, `array`, etc)".to_string()
-        };
         errored = false;
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
-            input_schema_prompt, T::input_schema_tools(&state),
+            prompts.input_schema.clone(), T::input_schema_tools(&state),
             input_schema_validate,
             id.clone(), created, object, continuation.take(), completion_index,
         );
@@ -607,17 +639,10 @@ where
         // Step 3: Essay Tasks
         let essay_tasks_validate = Arc::new({ let s = state.clone(); move || T::validate_essay_tasks(&s) });
         if essay_tasks_validate().is_err() {
-        let essay_tasks_prompt = format!(
-            "Write EssayTasks listing and describing the key tasks the Function must \
-            perform in order to fulfill the quality and value evaluations defined within \
-            the essay. Each task is a non-technical plain language description of a task \
-            which will go into the function's `tasks` array. There should be {tasks_str} tasks. \
-            Read the Spec and Essay first.",
-        );
         errored = false;
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
-            essay_tasks_prompt, T::essay_tasks_tools(&state),
+            prompts.essay_tasks.clone(), T::essay_tasks_tools(&state),
             essay_tasks_validate,
             id.clone(), created, object, continuation.take(), completion_index,
         );
@@ -648,176 +673,12 @@ where
         yield state_chunk(&state, &id, created, object);
 
         // Step 4: Tasks (Body)
-        let depth_propagation = if params.depth > 1 {
-            " The sub-function will also have its own sub-functions. \
-            The spec should include any instructions that should also be \
-            propagated down to the child agent's own child agents, if any are needed."
-        } else {
-            ""
-        };
-        let tasks_prompt = if is_scalar {
-            if params.depth > 0 {
-                format!(
-                    "Create the Tasks for your Scalar Function.\n\n\
-                    ## Task Structure\n\n\
-                    Create {tasks_str} placeholder tasks based on your EssayTasks. \
-                    Each task defines a sub-function which will be automatically invented \
-                    after you finish. Some tasks may have the same `input_schema` as the \
-                    parent, and some may contain only a subset so as to evaluate a specific \
-                    aspect of the input.\n\n\
-                    **TaskSpec:**\n\
-                    First, write a detailed `spec` for the task, describing what the \
-                    sub-function should evaluate. This is a plain language description \
-                    that will guide the child agent inventing the sub-function.{depth_propagation}\n\n\
-                    **Task Fields:**\n\
-                    - `name` — the sub-function's name\n\
-                    - `spec` — detailed description of what the sub-function should evaluate\n\
-                    - `input_schema` — the sub-function's input schema\n\
-                    - `skip` — optional conditional skip expression, typically used to skip \
-                    tasks which evaluate some optional field on the parent input\n\
-                    - `input` — expression deriving the task input from the parent input\n\n\
-                    ## Expression Context\n\n\
-                    - `input` — the parent function's input\n\n\
-                    ## Finishing\n\n\
-                    1. Use CheckFunction to validate — fix any errors and retry until it passes\n\
-                    2. Re-read the Spec. It is the universal source of truth — never contradict it.",
-                )
-            } else {
-                format!(
-                    "Create the Tasks for your Scalar Function.\n\n\
-                    ## Task Structure\n\n\
-                    Create {tasks_str} vector completion tasks based on your EssayTasks. \
-                    Each task defines a prompt for an LLM as well as possible responses \
-                    for the assistant to reply with. The ObjectiveAI system will return a \
-                    vector of scores evaluating which response the LLM is most likely to \
-                    reply with. These probabilities form the fundamental basis for how the \
-                    Function scores the input.\n\n\
-                    ### Messages\n\n\
-                    `messages` is a Starlark expression producing the conversation prompt. \
-                    Each message contains a role and an array of content parts. Typically, \
-                    messages will be a single user message containing context from the input.\n\n\
-                    ### Responses\n\n\
-                    `responses` is an array of potential responses the LLM could reply with. \
-                    Each response is an array of content parts. The responses are \
-                    fixed potential replies. Each response automatically corresponds to a score \
-                    with earlier responses being a low score, and later responses being a high \
-                    score.\n\n\
-                    ## Structure\n\n\
-                    Be clever in how you structure `messages` and `responses`. Do not ask \
-                    the LLM to directly score the input. Instead, make `responses` into real \
-                    responses that an assistant would actually reply with in a conversation. \
-                    For example, if asking for the quality of a joke, the message could be \
-                    'How funny is this joke: {{joke}}?' and the responses could be 'not funny at all', \
-                    'pretty funny', and 'hilarious'.\n\n\
-                    ### Multimodal Content\n\n\
-                    Multimodal content parts can be used in `messages` and are derived from the input. \
-                    Never use `str()` on multimodal content — this breaks the system and makes \
-                    it unintelligible to the LLM, ruining the scores.\n\n\
-                    ### Key Design Principles\n\n\
-                    - Some tasks may score a subset of the parent input. Other tasks may score \
-                    the entire parent input. Some tasks may contain partial context, and others \
-                    may contain full context.\n\
-                    - Tasks should not be identical to each other. They should vary — be creative \
-                    in how they vary, feel free to use multiple messages in some cases.\n\
-                    - `skip` expressions conditionally skip tasks. This is typically used to skip \
-                    tasks which use some optional field(s) on the parent input.\n\n\
-                    ## Expression Context\n\n\
-                    - `input` — the function's input\n\n\
-                    ## Finishing\n\n\
-                    1. Use CheckFunction to validate — fix any errors and retry until it passes\n\
-                    2. Re-read the Spec. It is the universal source of truth — never contradict it.",
-                )
-            }
-        } else if params.depth > 0 {
-            format!(
-                "Create the Tasks for your Vector Function.\n\n\
-                ## Task Structure\n\n\
-                Create {tasks_str} placeholder tasks based on your EssayTasks. \
-                Each task defines a sub-function which will be automatically invented \
-                after you finish. Some tasks may have the same `input_schema` as the \
-                parent, and some may contain only a subset so as to evaluate a specific \
-                aspect of the input.\n\
-                You can mix two types of placeholder tasks:\n\
-                - **Vector sub-functions** (`placeholder.alpha.vector.function`): Rank the \
-                input items provided to the task relative to each other.\n\
-                - **Scalar sub-functions** (`placeholder.alpha.scalar.function`): Score \
-                individual items.\n\n\
-                **TaskSpec:**\n\
-                First, write a detailed `spec` for the task, describing what the \
-                sub-function should evaluate. This is a plain language description \
-                that will guide the child agent inventing the sub-function.{depth_propagation}\n\n\
-                **Task Fields:**\n\
-                - `name` — the sub-function's name\n\
-                - `spec` — detailed description of what the sub-function should evaluate\n\
-                - `input_schema` — the sub-function's input schema\n\
-                - `skip` — optional conditional skip expression, typically used to skip \
-                tasks which evaluate some optional field on the parent input\n\
-                - `input` — expression deriving the task input from the parent input\n\n\
-                ## Expression Context\n\n\
-                - `input` — the parent function's input\n
-                - `map` - only present in scalar sub-functions, the index of the item being scored\n\n\
-                ## Finishing\n\n\
-                1. Use CheckFunction to validate — fix any errors and retry until it passes\n\
-                2. Re-read the Spec. It is the universal source of truth — never contradict it.",
-            )
-        } else {
-            format!(
-                "Create the Tasks for your Vector Function.\n\n\
-                ## Task Structure\n\n\
-                Create {tasks_str} vector completion tasks based on your EssayTasks. \
-                Each task defines a prompt for an LLM as well as possible responses \
-                for the assistant to reply with. The ObjectiveAI system will return a \
-                vector of scores evaluating which response the LLM is most likely to \
-                reply with. These probabilities form the fundamental basis for how the \
-                Function ranks items.\n\n\
-                ### Messages\n\n\
-                `messages` is a Starlark expression producing the conversation prompt. \
-                Each message contains a role and an array of content parts. Typically, \
-                messages will be a single user message. Sometimes it is a fixed message. \
-                Other times, it contains context from the input. But it never contains \
-                the items to be ranked.\n\n\
-                ### Responses\n\n\
-                `responses` is a Starlark expression producing an array of potential \
-                responses the LLM could reply with. Each response is an array of content parts.\n\n\
-                ## Structure\n\n\
-                Be clever in how you structure `messages` and `responses`. Do not ask \
-                the LLM to directly evaluate items. Instead, make the items into real \
-                responses that an assistant would actually reply with in a conversation. \
-                For messages, do not structure it like 'Which item is best?' Instead, \
-                structure it like 'What would a good item look like?' and make the \
-                responses the items being ranked. If ranking search results, for example, \
-                the message would be the search query, and the responses would be the \
-                search results as-is.\n\n\
-                ### Multimodal Content\n\n\
-                Multimodal content parts can be used in both `messages` and `responses`. \
-                Put contextual multimodal content in `messages`, and put multimodal \
-                content which is being ranked into `responses`. Never use `str()` on \
-                multimodal content — this breaks the system and makes it unintelligible \
-                to the LLM, ruining the rankings.\n\n\
-                ### Key Design Principles\n\n\
-                - Some tasks may rank a subset of the parent input. Other tasks may rank \
-                the entire parent input. Some tasks may contain partial context, and others \
-                may contain full context. Tasks should not be identical to each other. They \
-                should vary — be creative in how they vary, feel free to use multiple messages \
-                in some cases.\n\
-                - `skip` expressions conditionally skip tasks. This is typically used to skip \
-                tasks which use some optional field(s) on the parent input.\n\
-                - Ensure that each task ranks items in the same order. This is critical for \
-                the ObjectiveAI system to be able to combine the rankings from different tasks \
-                together into a single ranking.\n\n\
-                ## Expression Context\n\n\
-                - `input` — the function's input\n\n\
-                ## Finishing\n\n\
-                1. Use CheckFunction to validate — fix any errors and retry until it passes\n\
-                2. Re-read the Spec. It is the universal source of truth — never contradict it.",
-            )
-        };
         let tasks_validate = Arc::new({ let s = state.clone(); move || T::validate_function(&s) });
         if tasks_validate().is_err() {
         errored = false;
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
-            tasks_prompt, T::tasks_tools(&state),
+            prompts.tasks.clone(), T::tasks_tools(&state),
             tasks_validate,
             id.clone(), created, object, continuation.take(), completion_index,
         );
@@ -850,14 +711,10 @@ where
         // Step 5: Description
         let description_validate = Arc::new({ let s = state.clone(); move || T::validate_description(&s) });
         if description_validate().is_err() {
-        let description_prompt =
-            "Create a 1-paragraph description of the Function you've invented. \
-            The description should be concise (max 350 bytes) and summarize the \
-            function's purpose. Read the Spec, Essay, and Tasks first.".to_string();
         errored = false;
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
-            description_prompt, T::description_tools(&state),
+            prompts.description.clone(), T::description_tools(&state),
             description_validate,
             id.clone(), created, object, continuation.take(), completion_index,
         );
@@ -1306,18 +1163,4 @@ where
         }
         yield StepOutput::CompletionIndex(completion_index + 1);
     })
-}
-
-/// Computes the task count string for prompts based on params.
-fn tasks_str(params: &Params) -> String {
-    let (min, max) = if params.depth > 0 {
-        (params.min_branch_width, params.max_branch_width)
-    } else {
-        (params.min_leaf_width, params.max_leaf_width)
-    };
-    if min == max {
-        format!("{min}")
-    } else {
-        format!("between {min} and {max}")
-    }
 }

@@ -160,6 +160,16 @@ impl State {
         }
     }
 
+    /// Returns the prompt type for this state variant.
+    pub fn prompt_type(&self) -> super::prompts::StepPromptType {
+        match self {
+            State::AlphaScalarBranch(_) => super::prompts::StepPromptType::AlphaScalarBranchFunction,
+            State::AlphaScalarLeaf(_) => super::prompts::StepPromptType::AlphaScalarLeafFunction,
+            State::AlphaVectorBranch(_) => super::prompts::StepPromptType::AlphaVectorBranchFunction,
+            State::AlphaVectorLeaf(_) => super::prompts::StepPromptType::AlphaVectorLeafFunction,
+        }
+    }
+
     /// Returns a reference to the params name.
     pub fn name(&self) -> &str {
         match self {
@@ -292,6 +302,31 @@ pub enum ParamsState {
 }
 
 impl ParamsState {
+    /// Returns the prompt type for this state variant.
+    /// For unrouted `AlphaScalar`/`AlphaVector`, routes based on depth.
+    pub fn prompt_type(&self) -> super::prompts::StepPromptType {
+        match self {
+            ParamsState::AlphaScalarBranch(_) => super::prompts::StepPromptType::AlphaScalarBranchFunction,
+            ParamsState::AlphaScalarLeaf(_) => super::prompts::StepPromptType::AlphaScalarLeafFunction,
+            ParamsState::AlphaVectorBranch(_) => super::prompts::StepPromptType::AlphaVectorBranchFunction,
+            ParamsState::AlphaVectorLeaf(_) => super::prompts::StepPromptType::AlphaVectorLeafFunction,
+            ParamsState::AlphaScalar(s) => {
+                if s.params.depth == 0 {
+                    super::prompts::StepPromptType::AlphaScalarLeafFunction
+                } else {
+                    super::prompts::StepPromptType::AlphaScalarBranchFunction
+                }
+            }
+            ParamsState::AlphaVector(s) => {
+                if s.params.depth == 0 {
+                    super::prompts::StepPromptType::AlphaVectorLeafFunction
+                } else {
+                    super::prompts::StepPromptType::AlphaVectorBranchFunction
+                }
+            }
+        }
+    }
+
     pub fn route(self) -> State {
         match self {
             ParamsState::AlphaScalarBranch(s) => State::AlphaScalarBranch(s),

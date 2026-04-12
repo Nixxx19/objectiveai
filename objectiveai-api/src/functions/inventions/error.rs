@@ -33,6 +33,12 @@ pub enum Error {
     /// Error fetching a child function referenced by a branch task.
     #[error("function fetch error: {0}")]
     FunctionFetch(objectiveai::error::ResponseError),
+    /// The prompt does not support the required type.
+    #[error("prompt does not support type: {0}")]
+    PromptUnsupportedType(String),
+    /// Error fetching the prompt.
+    #[error("prompt fetch error: {0}")]
+    PromptFetch(objectiveai::error::ResponseError),
 }
 
 impl StatusError for Error {
@@ -48,6 +54,8 @@ impl StatusError for Error {
             Error::InvalidName(_) => 400,
             Error::Filesystem(e) => e.status(),
             Error::FunctionFetch(e) => e.code,
+            Error::PromptUnsupportedType(_) => 400,
+            Error::PromptFetch(e) => e.code,
         }
     }
 
@@ -91,6 +99,14 @@ impl StatusError for Error {
             }),
             Error::FunctionFetch(e) => serde_json::json!({
                 "kind": "function_fetch",
+                "error": e.message,
+            }),
+            Error::PromptUnsupportedType(msg) => serde_json::json!({
+                "kind": "prompt_unsupported_type",
+                "error": msg,
+            }),
+            Error::PromptFetch(e) => serde_json::json!({
+                "kind": "prompt_fetch",
                 "error": e.message,
             }),
         };
