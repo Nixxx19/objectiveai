@@ -5,7 +5,7 @@ pub(super) mod alpha_vector;
 pub(super) mod alpha_vector_branch;
 pub(super) mod alpha_vector_leaf;
 mod route;
-mod schema_gen;
+pub(super) mod schema_gen;
 
 pub use route::*;
 

@@ -864,6 +864,7 @@ impl super::InventionState for AlphaVectorBranchState {
         this.lock().unwrap().params.clone()
     }
     fn is_scalar() -> bool { false }
+    fn prompt_type() -> crate::functions::inventions::prompts::StepPromptType { crate::functions::inventions::prompts::StepPromptType::AlphaVectorBranchFunction }
     fn object() -> crate::functions::inventions::response::streaming::Object {
         crate::functions::inventions::response::streaming::Object::AlphaVectorFunctionInventionChunk
     }

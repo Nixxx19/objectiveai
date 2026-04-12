@@ -200,6 +200,9 @@ where
         invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         transform_messages: Option<Arc<TransformMessages>>,
         viewer: bool,
+        invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
+        invention_step: Option<usize>,
+        invention_tasks_min: Option<u64>,
     ) -> Result<
         objectiveai::agent::completions::response::unary::AgentCompletion,
         super::Error,
@@ -208,7 +211,7 @@ where
             objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
         > = None;
         let mut stream = self
-            .create_streaming_handle_usage(ctx, params, continuation, invention_tools, invention_done, transform_messages, viewer)
+            .create_streaming_handle_usage(ctx, params, continuation, invention_tools, invention_done, transform_messages, viewer, invention_type, invention_step, invention_tasks_min)
             .await?;
         while let Some(item) = stream.next().await {
             match item {
@@ -238,6 +241,9 @@ where
         invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         transform_messages: Option<Arc<TransformMessages>>,
         viewer: bool,
+        invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
+        invention_step: Option<usize>,
+        invention_tasks_min: Option<u64>,
     ) -> Result<
         impl futures::Stream<
             Item = super::StreamItem<
@@ -255,7 +261,7 @@ where
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
         let _ = tokio::spawn(async move {
             let stream = match self
-                .create_streaming(ctx.clone(), params.clone(), continuation, invention_tools, invention_done, transform_messages, viewer)
+                .create_streaming(ctx.clone(), params.clone(), continuation, invention_tools, invention_done, transform_messages, viewer, invention_type, invention_step, invention_tasks_min)
                 .await
             {
                 Ok(stream) => stream,
@@ -319,6 +325,9 @@ where
         invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         transform_messages: Option<Arc<TransformMessages>>,
         viewer: bool,
+        invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
+        invention_step: Option<usize>,
+        invention_tasks_min: Option<u64>,
     ) -> Result<
         impl futures::Stream<
             Item = super::StreamItem<
@@ -534,6 +543,9 @@ where
                                 invention_done.clone(),
                                 agent_transform,
                                 make_is_cancelled(),
+                                invention_type,
+                                invention_step,
+                                invention_tasks_min,
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -567,6 +579,9 @@ where
                                 invention_done.clone(),
                                 agent_transform,
                                 make_is_cancelled(),
+                                invention_type,
+                                invention_step,
+                                invention_tasks_min,
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -600,6 +615,9 @@ where
                                 invention_done.clone(),
                                 agent_transform,
                                 make_is_cancelled(),
+                                invention_type,
+                                invention_step,
+                                invention_tasks_min,
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -668,6 +686,9 @@ where
         invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         transform_messages: Option<&(dyn Fn(Vec<objectiveai::agent::completions::message::Message>) -> Vec<objectiveai::agent::completions::message::Message> + Send + Sync)>,
         is_cancelled: impl Fn() -> bool + Send + Sync + 'static,
+        invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
+        invention_step: Option<usize>,
+        invention_tasks_min: Option<u64>,
     ) -> Result<
         Pin<Box<dyn futures::Stream<Item = super::StreamItem<CONT>> + Send>>,
         super::Error,
@@ -707,6 +728,9 @@ where
             byok,
             cost_multiplier,
             true,
+            invention_type,
+            invention_step,
+            invention_tasks_min,
         );
         let initial_stream =
             tokio::time::timeout(self.first_chunk_timeout, create_fut)
@@ -902,6 +926,9 @@ where
                         byok.as_deref(),
                         cost_multiplier,
                         tools_enabled,
+                        invention_type,
+                        invention_step,
+                        invention_tasks_min,
                     )
                     .await
                 {

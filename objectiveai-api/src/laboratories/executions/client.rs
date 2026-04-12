@@ -227,7 +227,7 @@ where
 
                 Box::pin(async_stream::stream! {
                     let stream_result = agent_client
-                        .create_streaming(ctx, params, None, None, None, None, false)
+                        .create_streaming(ctx, params, None, None, None, None, false, None, None, None)
                         .await;
 
                     match stream_result {
@@ -436,6 +436,9 @@ where
                         None,
                         None,
                         false,
+                        None,
+                        None,
+                        None,
                     )
                     .await;
 

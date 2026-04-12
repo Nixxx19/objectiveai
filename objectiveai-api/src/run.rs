@@ -1273,6 +1273,9 @@ async fn create_agent_completion(
                 None,
                 None,
                 true,
+                None,
+                None,
+                None,
             )
             .await
         {
@@ -1306,6 +1309,9 @@ async fn create_agent_completion(
                 None,
                 None,
                 true,
+                None,
+                None,
+                None,
             )
             .await
         {

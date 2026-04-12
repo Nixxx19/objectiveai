@@ -378,6 +378,7 @@ where
             essay_tasks: resolved_prompt.essay_tasks_for_type(prompt_type).unwrap().clone().compile(&prompt_params).unwrap(),
             tasks: resolved_prompt.tasks_for_type(prompt_type).unwrap().clone().compile(&prompt_params).unwrap(),
             description: resolved_prompt.description_for_type(prompt_type).unwrap().clone().compile(&prompt_params).unwrap(),
+            tasks_min,
         };
 
         let agent_client = self.agent_client.clone();
@@ -492,6 +493,7 @@ struct CompiledPrompts {
     essay_tasks: String,
     tasks: String,
     description: String,
+    tasks_min: u64,
 }
 
 fn run_all_steps<T, CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG>(
@@ -573,6 +575,7 @@ where
             prompts.essay.clone(), T::essay_tools(&state),
             essay_validate,
             id.clone(), created, object, continuation.take(), completion_index,
+            T::prompt_type(), 0, prompts.tasks_min,
         );
         while let Some(output) = step.next().await {
             match output {
@@ -609,6 +612,7 @@ where
             prompts.input_schema.clone(), T::input_schema_tools(&state),
             input_schema_validate,
             id.clone(), created, object, continuation.take(), completion_index,
+            T::prompt_type(), 1, prompts.tasks_min,
         );
         while let Some(output) = step.next().await {
             match output {
@@ -645,6 +649,7 @@ where
             prompts.essay_tasks.clone(), T::essay_tasks_tools(&state),
             essay_tasks_validate,
             id.clone(), created, object, continuation.take(), completion_index,
+            T::prompt_type(), 2, prompts.tasks_min,
         );
         while let Some(output) = step.next().await {
             match output {
@@ -681,6 +686,7 @@ where
             prompts.tasks.clone(), T::tasks_tools(&state),
             tasks_validate,
             id.clone(), created, object, continuation.take(), completion_index,
+            T::prompt_type(), 3, prompts.tasks_min,
         );
         while let Some(output) = step.next().await {
             match output {
@@ -717,6 +723,7 @@ where
             prompts.description.clone(), T::description_tools(&state),
             description_validate,
             id.clone(), created, object, continuation.take(), completion_index,
+            T::prompt_type(), 4, prompts.tasks_min,
         );
         while let Some(output) = step.next().await {
             match output {
@@ -944,6 +951,9 @@ fn run_step<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG>
     object: Object,
     initial_continuation: Option<Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK>>,
     initial_completion_index: u64,
+    invention_type: objectiveai::functions::inventions::prompts::StepPromptType,
+    invention_step: usize,
+    invention_tasks_min: u64,
 ) -> Pin<
     Box<
         dyn Stream<Item = StepOutput<OPENROUTER, CLAUDEAGENTSDK, MOCK>>
@@ -1008,6 +1018,9 @@ where
                 Some(invention_done),
                 None,
                 false,
+                Some(invention_type),
+                Some(invention_step),
+                Some(invention_tasks_min),
             )
             .await;
 
@@ -1101,6 +1114,9 @@ where
                     Some(invention_done),
                     None,
                     false,
+                    Some(invention_type),
+                    Some(invention_step),
+                    Some(invention_tasks_min),
                 )
                 .await;
 

@@ -62,6 +62,10 @@ pub trait UpstreamClient<AGENT, CONTINUATION> {
         cost_multiplier: rust_decimal::Decimal,
         // when false, the model should not be allowed to call tools
         tools_enabled: bool,
+        // invention context — only set when called from the invention client
+        invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
+        invention_step: Option<usize>,
+        invention_tasks_min: Option<u64>,
     ) -> impl Future<
         Output = Result<
             Self::Stream,
@@ -105,6 +109,9 @@ impl<AGENT, CONTINUATION> UpstreamClient<AGENT, CONTINUATION> for UnimplementedU
         _byok: Option<&str>,
         _cost_multiplier: rust_decimal::Decimal,
         _tools_enabled: bool,
+        _invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
+        _invention_step: Option<usize>,
+        _invention_tasks_min: Option<u64>,
     ) -> impl Future<
         Output = Result<
             Self::Stream,

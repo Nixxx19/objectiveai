@@ -55,7 +55,7 @@ async fn test_tools_not_allowed_with_tools_present() {
         .create(
             "test", 1000, &agent, None, &params, &[], &[], None,
             &tool_names, &tool_map, None, None,
-            rust_decimal::Decimal::ONE, false,
+            rust_decimal::Decimal::ONE, false, None, None, None,
         )
         .await;
     match result {
@@ -77,7 +77,7 @@ async fn test_tools_not_allowed_without_tools_proceeds() {
         .create(
             "test", 1000, &agent, None, &params, &[], &[], None,
             &[], &HashMap::new(), None, None,
-            rust_decimal::Decimal::ONE, false,
+            rust_decimal::Decimal::ONE, false, None, None, None,
         )
         .await;
     match result {

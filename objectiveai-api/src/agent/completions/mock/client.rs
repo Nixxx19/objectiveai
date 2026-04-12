@@ -65,7 +65,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         messages: &[objectiveai::agent::completions::message::Message],
         _mcp_connections: &[std::sync::Arc<crate::mcp::Connection>],
-        invention_tools: Option<
+        _invention_tools: Option<
             &[objectiveai::functions::inventions::InventionTool],
         >,
         tool_names: &[String],
@@ -74,6 +74,9 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
         byok: Option<&str>,
         _cost_multiplier: rust_decimal::Decimal,
         tools_enabled: bool,
+        invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
+        invention_step: Option<usize>,
+        invention_tasks_min: Option<u64>,
     ) -> impl Future<
         Output = Result<
             Self::Stream,
@@ -83,9 +86,6 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
     + 'static {
         let tools_enabled = tools_enabled;
         let mode = agent.base.mode.unwrap_or_default();
-        let has_invention_tools = invention_tools.is_some_and(|t| !t.is_empty());
-        let invention_tools: Vec<objectiveai::functions::inventions::InventionTool> =
-            invention_tools.map(|t| t.to_vec()).unwrap_or_default();
         let id = id.to_string();
         let agent_id = agent.id.clone();
         let error = agent.base.error == Some(true);
@@ -126,36 +126,6 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
                     .count() as u64
             })
             .unwrap_or(0);
-        // Extract the prompt text for invention step discovery.
-        // First step: last user message in messages.
-        // Subsequent steps: last UserMessage on continuation.
-        let prompt_text = if matches!(mode, objectiveai::agent::mock::Mode::Invention) {
-            use objectiveai::agent::completions::message::RichContent;
-            let extract_text = |c: &RichContent| match c {
-                RichContent::Text(t) => t.clone(),
-                RichContent::Parts(_) => String::new(),
-            };
-            // Check continuation first (later steps)
-            continuation
-                .and_then(|items| {
-                    items.iter().rev().find_map(|item| match item {
-                        ContinuationItem::UserMessage(u) => Some(extract_text(&u.content)),
-                        _ => None,
-                    })
-                })
-                // Fall back to messages (first step)
-                .or_else(|| {
-                    messages.iter().rev().find_map(|m| match m {
-                        objectiveai::agent::completions::message::Message::User(u) => {
-                            Some(extract_text(&u.content))
-                        }
-                        _ => None,
-                    })
-                })
-                .unwrap_or_default()
-        } else {
-            String::new()
-        };
         let seed = params.seed.map(|s| {
             use std::hash::Hasher;
             let mut hasher = twox_hash::XxHash3_64::with_seed(s as u64);
@@ -203,7 +173,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
                 return Err(super::Error::ExpectedError);
             }
 
-            if matches!(mode, objectiveai::agent::mock::Mode::Invention) && !has_invention_tools {
+            if matches!(mode, objectiveai::agent::mock::Mode::Invention) && invention_type.is_none() {
                 return Err(super::Error::InventionAgentWithoutInventionTools);
             }
 
@@ -291,12 +261,13 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
                 MockResponse::ToolCalls(vec![super::builder::write_tool_call(&mut rng)])
             } else if matches!(mode, objectiveai::agent::mock::Mode::Invention) && tools_enabled {
                 resolve_invention_response(
+                    invention_type.unwrap(),
+                    invention_step.unwrap(),
+                    invention_tasks_min.unwrap_or(3),
                     &tool_names,
                     &tool_map,
-                    &invention_tools,
-                    &prompt_text,
                     &mut rng,
-                ).await
+                )
             } else {
                 let effective_tool_names = if tools_enabled { &tool_names[..] } else { &[] };
                 resolve_mock_response(
@@ -769,236 +740,76 @@ pub(super) fn generate_tool_arguments(
     }
 }
 
-/// If the current task count equals the predicted task count (and both > 0),
-/// returns a `DeleteTask` tool call with a random index in `[0, task_length)`.
-async fn delete_if_at_predicted(
-    invention_tools: &[objectiveai::functions::inventions::InventionTool],
-    rng: &mut impl rand::Rng,
-) -> Option<MockToolCall> {
-    let tasks_len_str = call_invention_tool(
-        invention_tools, "ReadTasksLength", serde_json::Value::Null,
-    ).await;
-    let predicted_str = call_invention_tool(
-        invention_tools, "ReadPredictedTasksLength", serde_json::Value::Null,
-    ).await;
-    let tasks_len = tasks_len_str.parse::<u32>().ok()?;
-    let predicted = predicted_str.parse::<u32>().ok()?;
-    if tasks_len == 0 || tasks_len != predicted {
-        return None;
-    }
-    let index = rng.random_range(0..tasks_len);
-    Some(MockToolCall {
-        tool_name: "DeleteTask".to_string(),
-        call_id: format!("call_mock_{}", rng.random_range(0u64..u64::MAX)),
-        arguments: serde_json::json!({ "index": index }).to_string(),
-        n_deltas: 1,
-    })
-}
-
-/// Calls an invention tool by name with the given JSON argument and returns
-/// the result string, or the error string on failure.
-///
-/// TODO: Do not call directly. These calls bypass the agent completions loop
-/// and never appear in the continuation or stream. Tool invocations should be
-/// yielded as mock tool call responses instead.
-async fn call_invention_tool(
-    invention_tools: &[objectiveai::functions::inventions::InventionTool],
-    name: &str,
-    arg: serde_json::Value,
-) -> String {
-    match invention_tools.iter().find(|t| t.name == name) {
-        Some(t) => match (t.call)(arg).await {
-            Ok(s) => s,
-            Err(e) => e,
-        },
-        None => String::new(),
-    }
-}
-
-/// Generates tool calls for an invention agent based on step discovery.
-///
-/// Invention agents always produce tool calls (never plain content).
-async fn resolve_invention_response(
+/// Generates tool calls for an invention agent based on explicit type and step.
+fn resolve_invention_response(
+    invention_type: objectiveai::functions::inventions::prompts::StepPromptType,
+    invention_step: usize,
+    tasks_min: u64,
     tool_names: &[String],
     tool_map: &HashMap<String, ResolvedTool>,
-    invention_tools: &[objectiveai::functions::inventions::InventionTool],
-    prompt: &str,
-    rng: &mut (impl Rng + Send),
+    rng: &mut impl Rng,
 ) -> MockResponse {
-    use super::invention::InventionStep;
+    use objectiveai::functions::inventions::prompts::StepPromptType::*;
 
-    let mut step = match InventionStep::discover(tool_names, prompt) {
-        Some(s) => s,
-        None => {
-            // Unknown step — generate a random tool call from available tools.
-            let tc = random_invention_fallback(tool_names, tool_map, rng);
-            return MockResponse::ToolCalls(vec![tc]);
-        }
-    };
-
-    // Layer 3: refine steps that need input schema or task inspection.
-    if step.needs_input_schema() {
-        let input_schema_json = call_invention_tool(
-            invention_tools, "ReadInputSchema", serde_json::Value::Null,
-        ).await;
-        step = step.refine_with_input_schema(&input_schema_json);
-
-        // For description steps, also refine with task content.
-        if matches!(step,
-            InventionStep::DescriptionScalarLeaf
-            | InventionStep::DescriptionScalarBranch
-            | InventionStep::DescriptionVectorLeaf
-            | InventionStep::DescriptionVectorBranch
-        ) {
-            let task_json = call_invention_tool(
-                invention_tools, "ReadTask",
-                serde_json::json!({ "index": 0 }),
-            ).await;
-            step = step.refine_with_task(&task_json);
-        }
-    }
-
-    // Dispatch to the appropriate tool call generator.
-    let tc = match step {
-        InventionStep::EssayScalar => {
+    let tc = match (invention_type, invention_step) {
+        // Step 0: Essay
+        (AlphaScalarBranchFunction | AlphaScalarLeafFunction, 0) => {
             super::invention::alpha_scalar::essay_tool_call(tool_names, tool_map, rng)
         }
-        InventionStep::EssayVector => {
+        (AlphaVectorBranchFunction | AlphaVectorLeafFunction, 0) => {
             super::invention::alpha_vector::essay_tool_call(tool_names, tool_map, rng)
         }
-        InventionStep::InputSchemaScalar => {
+        // Step 1: Input Schema
+        (AlphaScalarBranchFunction | AlphaScalarLeafFunction, 1) => {
             super::invention::alpha_scalar::input_schema_tool_call(tool_names, tool_map, rng)
         }
-        InventionStep::InputSchemaVector => {
+        (AlphaVectorBranchFunction | AlphaVectorLeafFunction, 1) => {
             super::invention::alpha_vector::input_schema_tool_call(tool_names, tool_map, rng)
         }
-        InventionStep::EssayTasksScalar => {
+        // Step 2: Essay Tasks
+        (AlphaScalarBranchFunction | AlphaScalarLeafFunction, 2) => {
             super::invention::alpha_scalar::essay_tasks_tool_call(tool_names, tool_map, rng)
         }
-        InventionStep::EssayTasksVector => {
+        (AlphaVectorBranchFunction | AlphaVectorLeafFunction, 2) => {
             super::invention::alpha_vector::essay_tasks_tool_call(tool_names, tool_map, rng)
         }
-        InventionStep::TasksScalarLeaf => {
-            let input_schema_json = call_invention_tool(
-                invention_tools, "ReadInputSchema", serde_json::Value::Null,
-            ).await;
-            let predicted = call_invention_tool(
-                invention_tools, "ReadPredictedTasksLength", serde_json::Value::Null,
-            ).await;
-            if predicted.parse::<u64>().is_err() {
-                let (min_tasks, _) = super::invention::extract_task_count_range(prompt);
-                call_invention_tool(
-                    invention_tools, "EditPredictedTasksLength",
-                    serde_json::json!({"tasks_length": min_tasks}),
-                ).await;
-            }
-            if let Some(tc) = delete_if_at_predicted(invention_tools, rng).await {
-                return MockResponse::ToolCalls(vec![tc]);
-            }
-            super::invention::alpha_scalar_leaf::tasks_tool_call(
-                &input_schema_json, tool_names, tool_map, rng,
-            )
+        // Step 3: Tasks
+        (AlphaScalarLeafFunction, 3) => {
+            let schema = super::invention::schema_gen::random_scalar_input_schema(rng);
+            super::invention::alpha_scalar_leaf::tasks_tool_call(&schema, tool_names, tool_map, rng)
         }
-        InventionStep::TasksScalarBranch => {
-            let input_schema_json = call_invention_tool(
-                invention_tools, "ReadInputSchema", serde_json::Value::Null,
-            ).await;
-            let predicted = call_invention_tool(
-                invention_tools, "ReadPredictedTasksLength", serde_json::Value::Null,
-            ).await;
-            if predicted.parse::<u64>().is_err() {
-                let (min_tasks, _) = super::invention::extract_task_count_range(prompt);
-                call_invention_tool(
-                    invention_tools, "EditPredictedTasksLength",
-                    serde_json::json!({"tasks_length": min_tasks}),
-                ).await;
-            }
-            if let Some(tc) = delete_if_at_predicted(invention_tools, rng).await {
-                return MockResponse::ToolCalls(vec![tc]);
-            }
-            super::invention::alpha_scalar_branch::tasks_tool_call(
-                &input_schema_json, tool_names, tool_map, rng,
-            )
+        (AlphaScalarBranchFunction, 3) => {
+            let schema = super::invention::schema_gen::random_scalar_input_schema(rng);
+            super::invention::alpha_scalar_branch::tasks_tool_call(&schema, tool_names, tool_map, rng)
         }
-        InventionStep::TasksVectorLeaf => {
-            let input_schema_json = call_invention_tool(
-                invention_tools, "ReadInputSchema", serde_json::Value::Null,
-            ).await;
-            let predicted = call_invention_tool(
-                invention_tools, "ReadPredictedTasksLength", serde_json::Value::Null,
-            ).await;
-            if predicted.parse::<u64>().is_err() {
-                let (min_tasks, _) = super::invention::extract_task_count_range(prompt);
-                call_invention_tool(
-                    invention_tools, "EditPredictedTasksLength",
-                    serde_json::json!({"tasks_length": min_tasks}),
-                ).await;
-            }
-            if let Some(tc) = delete_if_at_predicted(invention_tools, rng).await {
-                return MockResponse::ToolCalls(vec![tc]);
-            }
-            super::invention::alpha_vector_leaf::tasks_tool_call(
-                &input_schema_json, tool_names, tool_map, rng,
-            )
+        (AlphaVectorLeafFunction, 3) => {
+            let schema = super::invention::schema_gen::random_vector_input_schema(rng);
+            super::invention::alpha_vector_leaf::tasks_tool_call(&schema, tool_names, tool_map, rng)
         }
-        InventionStep::TasksVectorBranch => {
-            let input_schema_json = call_invention_tool(
-                invention_tools, "ReadInputSchema", serde_json::Value::Null,
-            ).await;
-            let predicted = call_invention_tool(
-                invention_tools, "ReadPredictedTasksLength", serde_json::Value::Null,
-            ).await;
-            if predicted.parse::<u64>().is_err() {
-                let (min_tasks, _) = super::invention::extract_task_count_range(prompt);
-                call_invention_tool(
-                    invention_tools, "EditPredictedTasksLength",
-                    serde_json::json!({"tasks_length": min_tasks}),
-                ).await;
-            }
-            if let Some(tc) = delete_if_at_predicted(invention_tools, rng).await {
-                return MockResponse::ToolCalls(vec![tc]);
-            }
-            let tasks_length_str = call_invention_tool(
-                invention_tools, "ReadTasksLength", serde_json::Value::Null,
-            ).await;
-            let total_count = tasks_length_str.parse::<u32>().unwrap_or(0);
-            let scalar_count = total_count / 3;
-            super::invention::alpha_vector_branch::tasks_tool_call(
-                &input_schema_json, scalar_count, total_count,
-                tool_names, tool_map, rng,
-            )
+        (AlphaVectorBranchFunction, 3) => {
+            let schema = super::invention::schema_gen::random_vector_input_schema(rng);
+            super::invention::alpha_vector_branch::tasks_tool_call(&schema, 0, 0, tool_names, tool_map, rng)
         }
-        InventionStep::DescriptionScalarLeaf
-        | InventionStep::DescriptionScalarBranch
-        | InventionStep::DescriptionVectorLeaf
-        | InventionStep::DescriptionVectorBranch => {
+        // Step 4: Description
+        (_, 4) => {
+            super::invention::description_tool_call(tool_names, tool_map, rng)
+        }
+        // Unknown step — description fallback
+        _ => {
             super::invention::description_tool_call(tool_names, tool_map, rng)
         }
     };
 
-    MockResponse::ToolCalls(vec![tc])
-}
-
-/// Fallback: pick a random tool when step discovery fails.
-fn random_invention_fallback(
-    tool_names: &[String],
-    tool_map: &HashMap<String, ResolvedTool>,
-    rng: &mut impl Rng,
-) -> MockToolCall {
-    if tool_names.is_empty() {
-        return MockToolCall {
-            tool_name: "unknown".into(),
+    // For the tasks step, also emit EditPredictedTasksLength before the main tool call.
+    if invention_step == 3 {
+        let edit_tc = MockToolCall {
+            tool_name: "EditPredictedTasksLength".to_string(),
             call_id: format!("call_mock_{}", rng.random_range(0u64..u64::MAX)),
-            arguments: "{}".into(),
+            arguments: serde_json::json!({"tasks_length": tasks_min}).to_string(),
             n_deltas: 1,
         };
+        return MockResponse::ToolCalls(vec![edit_tc, tc]);
     }
-    let tool_name = &tool_names[rng.random_range(0..tool_names.len())];
-    let arguments = generate_tool_arguments(tool_map, tool_name, rng);
-    MockToolCall {
-        tool_name: tool_name.clone(),
-        call_id: format!("call_mock_{}", rng.random_range(0u64..u64::MAX)),
-        arguments,
-        n_deltas: rng.random_range(1u32..=5) as usize,
-    }
+
+    MockResponse::ToolCalls(vec![tc])
 }

@@ -763,6 +763,7 @@ impl super::InventionState for AlphaVectorLeafState {
         this.lock().unwrap().params.clone()
     }
     fn is_scalar() -> bool { false }
+    fn prompt_type() -> crate::functions::inventions::prompts::StepPromptType { crate::functions::inventions::prompts::StepPromptType::AlphaVectorLeafFunction }
     fn object() -> crate::functions::inventions::response::streaming::Object {
         crate::functions::inventions::response::streaming::Object::AlphaVectorFunctionInventionChunk
     }

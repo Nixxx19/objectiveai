@@ -68,6 +68,7 @@ fn reindex_name(name: &mut String, new_index: usize) {
 pub trait InventionState: Clone + Send + 'static {
     fn params(this: &Arc<Mutex<Self>>) -> Params;
     fn is_scalar() -> bool;
+    fn prompt_type() -> super::prompts::StepPromptType;
     fn object() -> super::response::streaming::Object;
     fn into_state(self) -> State;
 

@@ -247,6 +247,9 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::o
         byok: Option<&str>,
         cost_multiplier: rust_decimal::Decimal,
         _tools_enabled: bool,
+        _invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
+        _invention_step: Option<usize>,
+        _invention_tasks_min: Option<u64>,
     ) -> impl Future<
         Output = Result<
             Self::Stream,
