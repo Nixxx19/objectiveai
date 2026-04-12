@@ -36,6 +36,11 @@ pub(crate) fn compile_and_validate_one_input(
                 input,
                 output: None,
                 map: None,
+                tasks_min: None,
+                tasks_max: None,
+                depth: None,
+                name: None,
+                spec: None,
             });
             let len =
                 output_length.clone().compile_one(&params).map_err(|e| {
@@ -385,6 +390,11 @@ fn task_output_shape(
                 input: &t.input,
                 output: None,
                 map: None,
+                tasks_min: None,
+                tasks_max: None,
+                depth: None,
+                name: None,
+                spec: None,
             });
             let n =
                 t.output_length.clone().compile_one(&params).map_err(|e| {
@@ -464,6 +474,11 @@ fn mapped_task_output_shape(
                             input: &t.input,
                             output: None,
                             map: None,
+                            tasks_min: None,
+                            tasks_max: None,
+                            depth: None,
+                            name: None,
+                            spec: None,
                         });
                         t.output_length.clone().compile_one(&params).map_err(
                             |e| {
@@ -574,6 +589,11 @@ fn resolve_vector_function_output_length(
         input: task_input,
         output: None,
         map: None,
+        tasks_min: None,
+        tasks_max: None,
+        depth: None,
+        name: None,
+        spec: None,
     });
     let n = output_length_expr
         .clone()

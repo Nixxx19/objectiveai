@@ -57,7 +57,8 @@ fn string_property_schema(prop_name: &str, description: &str) -> serde_json::Map
 
 /// Schema for WriteInputSchema on scalar functions.
 /// Takes a `schema` property: a JSON string conforming to `functions.expression.ObjectInputSchema`.
-#[derive(Deserialize)]
+#[derive(Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "functions.inventions.ScalarInputSchemaObject")]
 pub struct ScalarInputSchemaObject {
     pub schema: String,
 }
@@ -70,7 +71,8 @@ impl JsonSchema for ScalarInputSchemaObject {
 
 /// Schema for WriteInputSchema on vector functions.
 /// Takes a `schema` property: a JSON string conforming to `functions.alpha_vector.expression.VectorFunctionInputSchema`.
-#[derive(Deserialize)]
+#[derive(Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "functions.inventions.VectorInputSchemaObject")]
 pub struct VectorInputSchemaObject {
     pub schema: String,
 }
@@ -83,7 +85,8 @@ impl JsonSchema for VectorInputSchemaObject {
 
 /// Schema for AppendTask on scalar leaf functions.
 /// Takes a `task` property: a JSON string conforming to `functions.alpha_scalar.LeafTaskExpression`.
-#[derive(Deserialize)]
+#[derive(Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "functions.inventions.ScalarLeafTaskObject")]
 pub struct ScalarLeafTaskObject {
     pub task: String,
 }
@@ -96,7 +99,8 @@ impl JsonSchema for ScalarLeafTaskObject {
 
 /// Schema for AppendTask on scalar branch functions.
 /// Takes a `task` property: a JSON string conforming to `functions.alpha_scalar.PartialPlaceholderBranchTaskExpression`.
-#[derive(Deserialize)]
+#[derive(Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "functions.inventions.ScalarBranchTaskObject")]
 pub struct ScalarBranchTaskObject {
     pub task: String,
 }
@@ -109,7 +113,8 @@ impl JsonSchema for ScalarBranchTaskObject {
 
 /// Schema for AppendTask on vector leaf functions.
 /// Takes a `task` property: a JSON string conforming to `functions.alpha_vector.LeafTaskExpression`.
-#[derive(Deserialize)]
+#[derive(Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "functions.inventions.VectorLeafTaskObject")]
 pub struct VectorLeafTaskObject {
     pub task: String,
 }
@@ -122,7 +127,8 @@ impl JsonSchema for VectorLeafTaskObject {
 
 /// Schema for AppendTask on vector branch functions.
 /// Takes a `task` property: a JSON string conforming to `functions.alpha_vector.PartialPlaceholderBranchTaskExpression`.
-#[derive(Deserialize)]
+#[derive(Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "functions.inventions.VectorBranchTaskObject")]
 pub struct VectorBranchTaskObject {
     pub task: String,
 }

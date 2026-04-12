@@ -191,6 +191,11 @@ fn apply_task_output_expression(
         input,
         output: Some(TaskOutput::Owned(task_output)),
         map: None,
+        tasks_min: None,
+        tasks_max: None,
+        depth: None,
+        name: None,
+        spec: None,
     });
 
     // Evaluate the expression - it transforms the raw output into TaskOutputOwned
@@ -882,6 +887,11 @@ where
                         input: &request.input,
                         output: None,
                         map: None,
+                        tasks_min: None,
+                        tasks_max: None,
+                        depth: None,
+                        name: None,
+                        spec: None,
                     }
                 ),
             ).map_err(super::Error::from).map_err(&send_err)?;
@@ -909,6 +919,11 @@ where
                             ),
                             output: None,
                             map: None,
+                            tasks_min: None,
+                            tasks_max: None,
+                            depth: None,
+                            name: None,
+                            spec: None,
                         }
                     )
                 ).map_err(super::Error::from).map_err(&send_err)?;
@@ -1229,6 +1244,11 @@ where
                                         ),
                                         output: None,
                                         map: None,
+                                        tasks_min: None,
+                                        tasks_max: None,
+                                        depth: None,
+                                        name: None,
+                                        spec: None,
                                     }
                                 )
                             ) {

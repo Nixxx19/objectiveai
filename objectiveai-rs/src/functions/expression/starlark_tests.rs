@@ -46,6 +46,11 @@ fn make_params(input: InputValue) -> Params<'static, 'static> {
         input,
         output: None,
         map: None,
+        tasks_min: None,
+        tasks_max: None,
+        depth: None,
+        name: None,
+        spec: None,
     })
 }
 
@@ -57,6 +62,11 @@ fn make_params_with_output(
         input,
         output: Some(output),
         map: None,
+        tasks_min: None,
+        tasks_max: None,
+        depth: None,
+        name: None,
+        spec: None,
     })
 }
 
@@ -68,6 +78,11 @@ fn make_params_with_map(
         input,
         output: None,
         map: Some(map),
+        tasks_min: None,
+        tasks_max: None,
+        depth: None,
+        name: None,
+        spec: None,
     })
 }
 
@@ -80,6 +95,11 @@ fn make_full_params(
         input,
         output: Some(output),
         map: Some(map),
+        tasks_min: None,
+        tasks_max: None,
+        depth: None,
+        name: None,
+        spec: None,
     })
 }
 

@@ -97,6 +97,11 @@ impl Function {
                 input,
                 output: None,
                 map: None,
+                tasks_min: None,
+                tasks_max: None,
+                depth: None,
+                name: None,
+                spec: None,
             });
 
         // compile tasks
@@ -276,6 +281,11 @@ impl Function {
                         input,
                         output: None,
                         map: None,
+                        tasks_min: None,
+                        tasks_max: None,
+                        depth: None,
+                        name: None,
+                        spec: None,
                     },
                 );
                 // compile output_length
@@ -326,6 +336,11 @@ impl Function {
                         input,
                         output: None,
                         map: None,
+                        tasks_min: None,
+                        tasks_max: None,
+                        depth: None,
+                        name: None,
+                        spec: None,
                     },
                 );
                 // compile input_split
@@ -376,6 +391,11 @@ impl Function {
                         input,
                         output: None,
                         map: None,
+                        tasks_min: None,
+                        tasks_max: None,
+                        depth: None,
+                        name: None,
+                        spec: None,
                     },
                 );
                 // compile input_merge

@@ -16,6 +16,11 @@ fn empty_params() -> Params<'static, 'static> {
         input: InputValue::Object(IndexMap::new()),
         output: None,
         map: None,
+        tasks_min: None,
+        tasks_max: None,
+        depth: None,
+        name: None,
+        spec: None,
     })
 }
 
@@ -43,6 +48,11 @@ fn params_with_object(
         input: InputValue::Object(map),
         output: None,
         map: None,
+        tasks_min: None,
+        tasks_max: None,
+        depth: None,
+        name: None,
+        spec: None,
     })
 }
 
