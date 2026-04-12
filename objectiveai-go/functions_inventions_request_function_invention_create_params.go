@@ -18,6 +18,7 @@ type FunctionsInventionsRequestFunctionInventionCreateParams struct {
 	// Defaults to 3 if not specified.
 	MaxStepRetries *uint32 `json:"max_step_retries,omitempty" validate:"omitempty,min=0,max=4294967295"`
 	Overwrite *bool `json:"overwrite,omitempty"`
+	Prompt *FunctionsInventionsPromptsInlinePromptOrRemoteCommitOptional `json:"prompt,omitempty"`
 	Provider *AgentCompletionsRequestProvider `json:"provider,omitempty"`
 	Remote *Remote `json:"remote,omitempty"`
 	Seed *int64 `json:"seed,omitempty" validate:"omitempty,min=-9223372036854775808,max=9223372036854775807"`

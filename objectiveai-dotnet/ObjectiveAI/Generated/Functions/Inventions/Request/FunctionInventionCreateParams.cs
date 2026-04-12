@@ -4,6 +4,7 @@
 using ObjectiveAI;
 using ObjectiveAI.Agent;
 using ObjectiveAI.Attributes;
+using ObjectiveAI.Functions.Inventions.Prompts;
 using ObjectiveAI.Functions.Inventions.State;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
@@ -49,6 +50,11 @@ Defaults to 3 if not specified.
     [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
     public bool? Overwrite { get; set; } = null;
+
+    [JsonPropertyName("prompt")]
+    [JsonSchemaOmitEmpty]
+    [JsonSchemaNullable]
+    public InlinePromptOrRemoteCommitOptional? Prompt { get; set; } = null;
 
     [JsonPropertyName("provider")]
     [JsonSchemaOmitEmpty]
