@@ -30,6 +30,8 @@ pub enum Error {
     JqCompile(String),
     #[error("jq runtime error: {0}")]
     JqRuntime(String),
+    #[error("io error: {0}")]
+    Io(#[from] std::io::Error),
     #[error("git error: {0}")]
     Git(#[from] git2::Error),
 }
