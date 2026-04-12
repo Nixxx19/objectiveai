@@ -32,60 +32,56 @@ impl Kind {
     }
 }
 
-fn repo_path(client: &Client, kind: Kind, owner: &str, repository: &str) -> PathBuf {
-    client.base_dir().join(kind.as_str()).join(owner).join(repository)
+fn repo_path(client: &Client, kind: Kind, repository: &str) -> PathBuf {
+    client.base_dir().join(kind.as_str()).join(&client.commit_author_name).join(repository)
 }
 
 /// Publishes an agent to the local filesystem git repository.
 pub async fn publish_agent(
     client: &Client,
-    owner: &str,
     repository: &str,
     agent: &crate::agent::RemoteAgentBaseWithFallbacks,
     message: &str,
     overwrite: bool,
 ) -> Result<String, Error> {
     let content = serde_json::to_string_pretty(agent).map_err(Error::Serialize)?;
-    publish(client, Kind::Agents, owner, repository, &content, message, overwrite).await
+    publish(client, Kind::Agents, repository, &content, message, overwrite).await
 }
 
 /// Publishes a swarm to the local filesystem git repository.
 pub async fn publish_swarm(
     client: &Client,
-    owner: &str,
     repository: &str,
     swarm: &crate::swarm::RemoteSwarmBase,
     message: &str,
     overwrite: bool,
 ) -> Result<String, Error> {
     let content = serde_json::to_string_pretty(swarm).map_err(Error::Serialize)?;
-    publish(client, Kind::Swarms, owner, repository, &content, message, overwrite).await
+    publish(client, Kind::Swarms, repository, &content, message, overwrite).await
 }
 
 /// Publishes a function to the local filesystem git repository.
 pub async fn publish_function(
     client: &Client,
-    owner: &str,
     repository: &str,
     function: &crate::functions::FullRemoteFunction,
     message: &str,
     overwrite: bool,
 ) -> Result<String, Error> {
     let content = serde_json::to_string_pretty(function).map_err(Error::Serialize)?;
-    publish(client, Kind::Functions, owner, repository, &content, message, overwrite).await
+    publish(client, Kind::Functions, repository, &content, message, overwrite).await
 }
 
 /// Publishes a profile to the local filesystem git repository.
 pub async fn publish_profile(
     client: &Client,
-    owner: &str,
     repository: &str,
     profile: &crate::functions::RemoteProfile,
     message: &str,
     overwrite: bool,
 ) -> Result<String, Error> {
     let content = serde_json::to_string_pretty(profile).map_err(Error::Serialize)?;
-    publish(client, Kind::Profiles, owner, repository, &content, message, overwrite).await
+    publish(client, Kind::Profiles, repository, &content, message, overwrite).await
 }
 
 /// Core publish: writes content to a git repository, commits, returns the commit SHA.
@@ -95,13 +91,12 @@ pub async fn publish_profile(
 async fn publish(
     client: &Client,
     kind: Kind,
-    owner: &str,
     repository: &str,
     content: &str,
     message: &str,
     overwrite: bool,
 ) -> Result<String, Error> {
-    let path = repo_path(client, kind, owner, repository);
+    let path = repo_path(client, kind, repository);
     let filename = kind.filename();
 
     tokio::fs::create_dir_all(&path).await?;
