@@ -23,6 +23,7 @@ fn extract_assistant_content(snapshot: &serde_json::Value) -> String {
 }
 
 /// Run the CLI and return raw stdout as a string (not JSON-parsed).
+/// Strips any "Logs ID:" prefix lines from the output.
 fn run_cli_text(args: &[&str]) -> String {
     let mut cmd = Command::new(cli_test_util::cli_binary());
     cmd.env("CONFIG_BASE_DIR", cli_test_util::tests_dir());
@@ -39,7 +40,12 @@ fn run_cli_text(args: &[&str]) -> String {
         );
     }
 
-    stdout.trim().to_string()
+    stdout.lines()
+        .filter(|line| !line.starts_with("Logs ID: "))
+        .collect::<Vec<_>>()
+        .join("\n")
+        .trim()
+        .to_string()
 }
 
 macro_rules! snapshot_test {

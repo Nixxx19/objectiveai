@@ -84,6 +84,10 @@ pub fn run_cli(args: &[&str]) -> serde_json::Value {
         );
     }
 
-    serde_json::from_str(stdout.trim())
+    let filtered: String = stdout.lines()
+        .filter(|line| !line.starts_with("Logs ID: "))
+        .collect::<Vec<_>>()
+        .join("\n");
+    serde_json::from_str(filtered.trim())
         .unwrap_or_else(|e| panic!("failed to parse CLI output as JSON: {e}\nstdout: {stdout}"))
 }

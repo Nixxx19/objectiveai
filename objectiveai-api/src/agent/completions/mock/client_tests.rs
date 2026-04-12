@@ -1137,7 +1137,9 @@ async fn test_invention_agent_with_invention_tools_ok() {
     let result = client
         .create(
             "test", 1000, &agent, None, &params, &[], &[], Some(&[inv2]),
-            &tool_names, &tool_map, None, None, rust_decimal::Decimal::ONE, true, None, None, None, None,
+            &tool_names, &tool_map, None, None, rust_decimal::Decimal::ONE, true,
+            Some(objectiveai::functions::inventions::prompts::StepPromptType::AlphaScalarLeafFunction),
+            Some(0), Some(3), None,
         )
         .await;
     assert!(result.is_ok(), "invention agent with tools should succeed");
