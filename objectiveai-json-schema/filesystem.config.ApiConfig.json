@@ -1,11 +1,11 @@
 {
-  "title": "config.ApiConfig",
+  "title": "filesystem.config.ApiConfig",
   "type": "object",
   "properties": {
     "headers": {
       "anyOf": [
         {
-          "$ref": "config.ApiHeadersConfig"
+          "$ref": "filesystem.config.ApiHeadersConfig"
         },
         {
           "type": "null"
@@ -16,7 +16,7 @@
     "local": {
       "anyOf": [
         {
-          "$ref": "config.ApiLocalConfig"
+          "$ref": "filesystem.config.ApiLocalConfig"
         },
         {
           "type": "null"
@@ -25,13 +25,13 @@
       "omitempty": true
     },
     "mode": {
-      "$ref": "config.ApiMode",
+      "$ref": "filesystem.config.ApiMode",
       "default": "local"
     },
     "remote": {
       "anyOf": [
         {
-          "$ref": "config.ApiRemoteConfig"
+          "$ref": "filesystem.config.ApiRemoteConfig"
         },
         {
           "type": "null"

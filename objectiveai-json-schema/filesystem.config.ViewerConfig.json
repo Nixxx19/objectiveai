@@ -1,11 +1,11 @@
 {
-  "title": "config.ViewerConfig",
+  "title": "filesystem.config.ViewerConfig",
   "type": "object",
   "properties": {
     "local": {
       "anyOf": [
         {
-          "$ref": "config.ViewerLocalConfig"
+          "$ref": "filesystem.config.ViewerLocalConfig"
         },
         {
           "type": "null"
@@ -14,7 +14,7 @@
       "omitempty": true
     },
     "mode": {
-      "$ref": "config.ViewerMode",
+      "$ref": "filesystem.config.ViewerMode",
       "default": "local"
     }
   }
