@@ -34,13 +34,162 @@ impl StepPromptExpression {
     }
 }
 
-/// Invention prompt configuration for all steps.
+/// A prompt specification that is either an inline prompt definition
+/// or a remote path reference.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+#[schemars(rename = "functions.inventions.prompt.InlinePromptOrRemoteCommitOptional")]
+pub enum InlinePromptOrRemoteCommitOptional {
+    #[schemars(title = "Inline")]
+    Inline(InlinePrompt),
+    #[schemars(title = "Remote")]
+    Remote(crate::RemotePathCommitOptional),
+}
+
+/// A Prompt definition, either remote or inline.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+#[schemars(rename = "functions.inventions.prompt.Prompt")]
+pub enum Prompt {
+    /// A remote prompt with metadata.
+    #[schemars(title = "Remote")]
+    Remote(RemotePrompt),
+    /// An inline prompt definition.
+    #[schemars(title = "Inline")]
+    Inline(InlinePrompt),
+}
+
+impl Prompt {
+    pub fn essay(&self) -> &[StepPromptExpression] {
+        match self {
+            Prompt::Remote(r) => r.essay(),
+            Prompt::Inline(i) => i.essay(),
+        }
+    }
+    pub fn input_schema(&self) -> &[StepPromptExpression] {
+        match self {
+            Prompt::Remote(r) => r.input_schema(),
+            Prompt::Inline(i) => i.input_schema(),
+        }
+    }
+    pub fn essay_tasks(&self) -> &[StepPromptExpression] {
+        match self {
+            Prompt::Remote(r) => r.essay_tasks(),
+            Prompt::Inline(i) => i.essay_tasks(),
+        }
+    }
+    pub fn tasks(&self) -> &[StepPromptExpression] {
+        match self {
+            Prompt::Remote(r) => r.tasks(),
+            Prompt::Inline(i) => i.tasks(),
+        }
+    }
+    pub fn description(&self) -> &[StepPromptExpression] {
+        match self {
+            Prompt::Remote(r) => r.description(),
+            Prompt::Inline(i) => i.description(),
+        }
+    }
+    pub fn supports_type(&self, t: StepPromptType) -> bool {
+        match self {
+            Prompt::Remote(r) => r.supports_type(t),
+            Prompt::Inline(i) => i.supports_type(t),
+        }
+    }
+    pub fn essay_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> {
+        match self {
+            Prompt::Remote(r) => r.essay_for_type(t),
+            Prompt::Inline(i) => i.essay_for_type(t),
+        }
+    }
+    pub fn input_schema_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> {
+        match self {
+            Prompt::Remote(r) => r.input_schema_for_type(t),
+            Prompt::Inline(i) => i.input_schema_for_type(t),
+        }
+    }
+    pub fn essay_tasks_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> {
+        match self {
+            Prompt::Remote(r) => r.essay_tasks_for_type(t),
+            Prompt::Inline(i) => i.essay_tasks_for_type(t),
+        }
+    }
+    pub fn tasks_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> {
+        match self {
+            Prompt::Remote(r) => r.tasks_for_type(t),
+            Prompt::Inline(i) => i.tasks_for_type(t),
+        }
+    }
+    pub fn description_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> {
+        match self {
+            Prompt::Remote(r) => r.description_for_type(t),
+            Prompt::Inline(i) => i.description_for_type(t),
+        }
+    }
+}
+
+/// A remote prompt with description and inline prompt fields.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.inventions.prompt.RemotePrompt")]
+pub struct RemotePrompt {
+    /// Human-readable description of the prompt.
+    pub description: String,
+    #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<InlinePrompt>")]
+    pub inner: InlinePrompt,
+}
+
+impl RemotePrompt {
+    pub fn essay(&self) -> &[StepPromptExpression] { self.inner.essay() }
+    pub fn input_schema(&self) -> &[StepPromptExpression] { self.inner.input_schema() }
+    pub fn essay_tasks(&self) -> &[StepPromptExpression] { self.inner.essay_tasks() }
+    pub fn tasks(&self) -> &[StepPromptExpression] { self.inner.tasks() }
+    pub fn description(&self) -> &[StepPromptExpression] { self.inner.description() }
+    pub fn supports_type(&self, t: StepPromptType) -> bool { self.inner.supports_type(t) }
+    pub fn essay_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { self.inner.essay_for_type(t) }
+    pub fn input_schema_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { self.inner.input_schema_for_type(t) }
+    pub fn essay_tasks_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { self.inner.essay_tasks_for_type(t) }
+    pub fn tasks_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { self.inner.tasks_for_type(t) }
+    pub fn description_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { self.inner.description_for_type(t) }
+}
+
+/// Inline invention prompt configuration for all steps.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "functions.inventions.Prompt")]
-pub struct Prompt {
+#[schemars(rename = "functions.inventions.prompt.InlinePrompt")]
+pub struct InlinePrompt {
     pub essay: Vec<StepPromptExpression>,
     pub input_schema: Vec<StepPromptExpression>,
     pub essay_tasks: Vec<StepPromptExpression>,
     pub tasks: Vec<StepPromptExpression>,
     pub description: Vec<StepPromptExpression>,
+}
+
+fn find_for_type(steps: &[StepPromptExpression], t: StepPromptType) -> Option<&StepPromptExpression> {
+    steps.iter().find(|s| s.r#type.contains(&t))
+}
+
+fn has_type(steps: &[StepPromptExpression], t: StepPromptType) -> bool {
+    find_for_type(steps, t).is_some()
+}
+
+impl InlinePrompt {
+    pub fn essay(&self) -> &[StepPromptExpression] { &self.essay }
+    pub fn input_schema(&self) -> &[StepPromptExpression] { &self.input_schema }
+    pub fn essay_tasks(&self) -> &[StepPromptExpression] { &self.essay_tasks }
+    pub fn tasks(&self) -> &[StepPromptExpression] { &self.tasks }
+    pub fn description(&self) -> &[StepPromptExpression] { &self.description }
+
+    pub fn supports_type(&self, t: StepPromptType) -> bool {
+        has_type(&self.essay, t)
+            && has_type(&self.input_schema, t)
+            && has_type(&self.essay_tasks, t)
+            && has_type(&self.tasks, t)
+            && has_type(&self.description, t)
+    }
+
+    pub fn essay_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { find_for_type(&self.essay, t) }
+    pub fn input_schema_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { find_for_type(&self.input_schema, t) }
+    pub fn essay_tasks_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { find_for_type(&self.essay_tasks, t) }
+    pub fn tasks_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { find_for_type(&self.tasks, t) }
+    pub fn description_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { find_for_type(&self.description, t) }
 }

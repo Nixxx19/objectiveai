@@ -21,8 +21,8 @@ pub struct GetPromptResponse {
     #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePath>")]
     pub path: crate::RemotePath,
     #[serde(flatten)]
-    #[schemars(schema_with = "crate::flatten_schema::<super::Prompt>")]
-    pub inner: super::Prompt,
+    #[schemars(schema_with = "crate::flatten_schema::<super::RemotePrompt>")]
+    pub inner: super::RemotePrompt,
 }
 
 /// Usage statistics for a prompt.
