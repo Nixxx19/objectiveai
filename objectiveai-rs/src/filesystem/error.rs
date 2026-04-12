@@ -30,6 +30,8 @@ pub enum Error {
     JqCompile(String),
     #[error("jq runtime error: {0}")]
     JqRuntime(String),
+    #[error("invalid repository name (alphanumeric and dashes only, max 100 chars): {0}")]
+    InvalidRepositoryName(String),
     #[error("io error: {0}")]
     Io(#[from] std::io::Error),
     #[error("git error: {0}")]

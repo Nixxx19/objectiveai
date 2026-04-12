@@ -43,6 +43,19 @@ pub enum Commands {
         #[command(subcommand)]
         command: profiles::Commands,
     },
+    /// Publish a function to the local filesystem
+    Publish {
+        /// Repository name
+        #[arg(long)]
+        repository: String,
+        #[command(flatten)]
+        body: crate::publish::BodySource,
+        #[command(flatten)]
+        message: crate::publish::MessageSource,
+        /// Overwrite if the file already exists
+        #[arg(long)]
+        overwrite: bool,
+    },
 }
 
 async fn get_favorites(cli_config: &crate::Config) -> Vec<objectiveai::filesystem::config::Favorite> {
@@ -89,6 +102,19 @@ impl Commands {
             Commands::Favorites { command } => command.handle(cli_config).await,
             Commands::Inventions { command } => command.handle(cli_config).await,
             Commands::Profiles { command } => command.handle(cli_config).await,
+            Commands::Publish { repository, body, message, overwrite } => {
+                let function: objectiveai::functions::FullRemoteFunction = body.resolve()?;
+                let msg = message.resolve()?;
+                let fs_client = objectiveai::filesystem::Client::new(
+                    cli_config.config_base_dir.as_deref(),
+                    cli_config.commit_author_name.as_deref(),
+                    cli_config.commit_author_email.as_deref(),
+                );
+                let sha = objectiveai::filesystem::publish::publish_function(
+                    &fs_client, &repository, &function, &msg, overwrite,
+                ).await?;
+                Ok(crate::Output::Api(sha))
+            }
         }
     }
 }

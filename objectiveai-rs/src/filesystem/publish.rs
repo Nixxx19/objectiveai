@@ -32,6 +32,16 @@ impl Kind {
     }
 }
 
+fn validate_repository_name(name: &str) -> Result<(), Error> {
+    if name.is_empty() || name.len() > 100 {
+        return Err(Error::InvalidRepositoryName(name.to_string()));
+    }
+    if !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') {
+        return Err(Error::InvalidRepositoryName(name.to_string()));
+    }
+    Ok(())
+}
+
 fn repo_path(client: &Client, kind: Kind, repository: &str) -> PathBuf {
     client.base_dir().join(kind.as_str()).join(&client.commit_author_name).join(repository)
 }
@@ -96,6 +106,8 @@ async fn publish(
     message: &str,
     overwrite: bool,
 ) -> Result<String, Error> {
+    validate_repository_name(repository)?;
+
     let path = repo_path(client, kind, repository);
     let filename = kind.filename();
 

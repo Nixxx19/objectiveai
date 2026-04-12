@@ -25,6 +25,19 @@ pub enum Commands {
         #[command(subcommand)]
         command: favorites::Commands,
     },
+    /// Publish a swarm to the local filesystem
+    Publish {
+        /// Repository name
+        #[arg(long)]
+        repository: String,
+        #[command(flatten)]
+        body: crate::publish::BodySource,
+        #[command(flatten)]
+        message: crate::publish::MessageSource,
+        /// Overwrite if the file already exists
+        #[arg(long)]
+        overwrite: bool,
+    },
 }
 
 async fn get_favorites(cli_config: &crate::Config) -> Vec<objectiveai::filesystem::config::Favorite> {
@@ -68,6 +81,18 @@ impl Commands {
             }
             Commands::Config { command } => command.handle(cli_config).await,
             Commands::Favorites { command } => command.handle(cli_config).await,
-        }
+            Commands::Publish { repository, body, message, overwrite } => {
+                let swarm: objectiveai::swarm::RemoteSwarmBase = body.resolve()?;
+                let msg = message.resolve()?;
+                let fs_client = objectiveai::filesystem::Client::new(
+                    cli_config.config_base_dir.as_deref(),
+                    cli_config.commit_author_name.as_deref(),
+                    cli_config.commit_author_email.as_deref(),
+                );
+                let sha = objectiveai::filesystem::publish::publish_swarm(
+                    &fs_client, &repository, &swarm, &msg, overwrite,
+                ).await?;
+                Ok(crate::Output::Api(sha))
+            }
     }
 }

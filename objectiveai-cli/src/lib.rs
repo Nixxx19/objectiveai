@@ -8,6 +8,7 @@ mod remote;
 mod get;
 mod list;
 mod favorite;
+mod publish;
 mod python;
 mod response_format;
 mod api;
