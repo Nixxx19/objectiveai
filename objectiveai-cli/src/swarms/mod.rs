@@ -94,5 +94,6 @@ impl Commands {
                 ).await?;
                 Ok(crate::Output::Api(sha))
             }
+        }
     }
 }

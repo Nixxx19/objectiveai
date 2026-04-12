@@ -226,7 +226,9 @@ fn make_request(state: ParamsState, seed: i64) -> Arc<FunctionInventionCreatePar
                 fallbacks: None,
             },
         ),
-        prompt: None,
+        prompt: objectiveai::functions::inventions::prompts::InlinePromptOrRemoteCommitOptional::Remote(
+            objectiveai::RemotePathCommitOptional::Mock { name: "default".to_string() },
+        ),
         seed: Some(seed),
         stream: Some(true),
         max_step_retries: Some(1),

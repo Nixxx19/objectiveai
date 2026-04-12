@@ -241,31 +241,14 @@ where
         // Resolve state and prompt concurrently.
         let state_fut = self.retrieve_router
             .get_function_invention_state(&ctx, request.state.clone());
-        let prompt_fut = async {
-            match &request.prompt {
-                Some(p) => self.retrieve_router
-                    .get_prompt(&ctx, p.clone())
-                    .await
-                    .map(Some),
-                None => {
-                    // Default: use the "default" mock prompt.
-                    let default = objectiveai::functions::inventions::prompts::InlinePromptOrRemoteCommitOptional::Remote(
-                        objectiveai::RemotePathCommitOptional::Mock { name: "default".to_string() },
-                    );
-                    self.retrieve_router
-                        .get_prompt(&ctx, default)
-                        .await
-                        .map(Some)
-                }
-            }
-        };
+        let prompt_fut = self.retrieve_router
+            .get_prompt(&ctx, request.prompt.clone());
         let (resolved_state, resolved_prompt) = tokio::join!(state_fut, prompt_fut);
         let resolved_state = resolved_state
             .map_err(|e| super::Error::InvalidState(e.to_string()))?
             .ok_or(super::Error::StateNotFound)?;
         let resolved_prompt = resolved_prompt
-            .map_err(super::Error::PromptFetch)?
-            .unwrap();
+            .map_err(super::Error::PromptFetch)?;
 
         // Validate params before starting.
         let params = match &resolved_state {

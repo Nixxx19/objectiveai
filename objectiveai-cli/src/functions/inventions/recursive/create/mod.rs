@@ -162,6 +162,9 @@ impl Commands {
             state,
             provider: None,
             agent,
+            prompt: objectiveai::functions::inventions::prompts::InlinePromptOrRemoteCommitOptional::Remote(
+                objectiveai::RemotePathCommitOptional::Mock { name: "default".to_string() },
+            ),
             seed,
             stream: Some(true),
             max_step_retries: None,
