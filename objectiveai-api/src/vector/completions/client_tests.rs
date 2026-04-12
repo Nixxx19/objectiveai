@@ -52,6 +52,13 @@ impl crate::retrieval::retrieve::Client<ctx::DefaultContextExt> for StubRetrieve
         unimplemented!()
     }
 
+    async fn get_prompt<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
+        &self,
+        _ctx: &ctx::Context<ctx::DefaultContextExt, PC>,
+        _path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::functions::inventions::prompts::RemotePrompt>, objectiveai::error::ResponseError> {
+        unimplemented!()
+    }
     async fn get_function_invention_state_file<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
         _ctx: &ctx::Context<ctx::DefaultContextExt, PC>,

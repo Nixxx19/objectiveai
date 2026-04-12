@@ -157,11 +157,11 @@ impl RemotePrompt {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "functions.inventions.prompts.InlinePrompt")]
 pub struct InlinePrompt {
-    pub essay: Vec<StepPromptExpression>,
-    pub input_schema: Vec<StepPromptExpression>,
-    pub essay_tasks: Vec<StepPromptExpression>,
-    pub tasks: Vec<StepPromptExpression>,
-    pub description: Vec<StepPromptExpression>,
+    pub essay_step: Vec<StepPromptExpression>,
+    pub input_schema_step: Vec<StepPromptExpression>,
+    pub essay_tasks_step: Vec<StepPromptExpression>,
+    pub tasks_step: Vec<StepPromptExpression>,
+    pub description_step: Vec<StepPromptExpression>,
 }
 
 fn find_for_type(steps: &[StepPromptExpression], t: StepPromptType) -> Option<&StepPromptExpression> {
@@ -173,23 +173,23 @@ fn has_type(steps: &[StepPromptExpression], t: StepPromptType) -> bool {
 }
 
 impl InlinePrompt {
-    pub fn essay(&self) -> &[StepPromptExpression] { &self.essay }
-    pub fn input_schema(&self) -> &[StepPromptExpression] { &self.input_schema }
-    pub fn essay_tasks(&self) -> &[StepPromptExpression] { &self.essay_tasks }
-    pub fn tasks(&self) -> &[StepPromptExpression] { &self.tasks }
-    pub fn description(&self) -> &[StepPromptExpression] { &self.description }
+    pub fn essay(&self) -> &[StepPromptExpression] { &self.essay_step }
+    pub fn input_schema(&self) -> &[StepPromptExpression] { &self.input_schema_step }
+    pub fn essay_tasks(&self) -> &[StepPromptExpression] { &self.essay_tasks_step }
+    pub fn tasks(&self) -> &[StepPromptExpression] { &self.tasks_step }
+    pub fn description(&self) -> &[StepPromptExpression] { &self.description_step }
 
     pub fn supports_type(&self, t: StepPromptType) -> bool {
-        has_type(&self.essay, t)
-            && has_type(&self.input_schema, t)
-            && has_type(&self.essay_tasks, t)
-            && has_type(&self.tasks, t)
-            && has_type(&self.description, t)
+        has_type(&self.essay_step, t)
+            && has_type(&self.input_schema_step, t)
+            && has_type(&self.essay_tasks_step, t)
+            && has_type(&self.tasks_step, t)
+            && has_type(&self.description_step, t)
     }
 
-    pub fn essay_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { find_for_type(&self.essay, t) }
-    pub fn input_schema_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { find_for_type(&self.input_schema, t) }
-    pub fn essay_tasks_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { find_for_type(&self.essay_tasks, t) }
-    pub fn tasks_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { find_for_type(&self.tasks, t) }
-    pub fn description_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { find_for_type(&self.description, t) }
+    pub fn essay_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { find_for_type(&self.essay_step, t) }
+    pub fn input_schema_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { find_for_type(&self.input_schema_step, t) }
+    pub fn essay_tasks_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { find_for_type(&self.essay_tasks_step, t) }
+    pub fn tasks_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { find_for_type(&self.tasks_step, t) }
+    pub fn description_for_type(&self, t: StepPromptType) -> Option<&StepPromptExpression> { find_for_type(&self.description_step, t) }
 }

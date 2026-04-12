@@ -67,6 +67,16 @@ impl crate::retrieval::retrieve::Client<ctx::DefaultContextExt> for StubRetrieve
         })
     }
 
+    async fn get_prompt<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
+        &self,
+        _ctx: &ctx::Context<ctx::DefaultContextExt, PC>,
+        _path: &objectiveai::RemotePath,
+    ) -> Result<Option<objectiveai::functions::inventions::prompts::RemotePrompt>, objectiveai::error::ResponseError> {
+        Err(objectiveai::error::ResponseError {
+            code: 501,
+            message: serde_json::json!("stub retrieve client should not be called"),
+        })
+    }
     async fn get_function_invention_state_file<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
         &self,
         _ctx: &ctx::Context<ctx::DefaultContextExt, PC>,
