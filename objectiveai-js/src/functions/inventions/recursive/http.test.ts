@@ -10,6 +10,7 @@ import type { FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
 import type { FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive } from "./response/unary/functionInventionRecursive";
 
 const mockInventionAgent = { upstream: "mock", output_mode: "instruction", mode: "invention" };
+const mockPrompt = { type: "mock", name: "default" };
 
 httpTestSuite<FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive>({
   name: "functions inventions recursive http",
@@ -51,6 +52,7 @@ httpTestSuite<FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
           description: "A valid scalar function.",
         },
         agent: mockInventionAgent,
+        prompt: mockPrompt,
         seed: 5300,
         stream: true,
         max_step_retries: 1,
@@ -83,6 +85,7 @@ httpTestSuite<FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
           tasks_length: 2,
         },
         agent: mockInventionAgent,
+        prompt: mockPrompt,
         seed: 5400,
         stream: true,
         max_step_retries: 1,
@@ -106,6 +109,7 @@ httpTestSuite<FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
           },
         },
         agent: mockInventionAgent,
+        prompt: mockPrompt,
         seed: 5900,
         stream: true,
         max_step_retries: 1,

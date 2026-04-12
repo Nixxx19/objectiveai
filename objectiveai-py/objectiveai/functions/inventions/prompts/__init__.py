@@ -7,6 +7,3 @@ def __getattr__(name):
     import importlib
     _generated = importlib.import_module(__name__ + '._generated')
     return getattr(_generated, name)
-
-
-from objectiveai.functions.inventions.prompts.http import *  # noqa: F401, F403, E402

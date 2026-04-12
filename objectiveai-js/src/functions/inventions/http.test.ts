@@ -10,6 +10,7 @@ import type { FunctionsInventionsResponseStreamingFunctionInventionChunk } from 
 import type { FunctionsInventionsResponseUnaryFunctionInvention } from "./response/unary/functionInvention";
 
 const mockInventionAgent = { upstream: "mock", output_mode: "instruction", mode: "invention" };
+const mockPrompt = { type: "mock", name: "default" };
 
 httpTestSuite<FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseUnaryFunctionInvention>({
   name: "functions inventions http",
@@ -28,6 +29,7 @@ httpTestSuite<FunctionsInventionsResponseStreamingFunctionInventionChunk, Functi
           name: "sl-default", spec: "Test function spec for mock invention.",
         },
         agent: mockInventionAgent,
+        prompt: mockPrompt,
         seed: 42,
         stream: true,
         max_step_retries: 1,
@@ -42,6 +44,7 @@ httpTestSuite<FunctionsInventionsResponseStreamingFunctionInventionChunk, Functi
           name: "vb-deep", spec: "Test function spec for mock invention.",
         },
         agent: mockInventionAgent,
+        prompt: mockPrompt,
         seed: 2025,
         stream: true,
         max_step_retries: 1,
@@ -94,6 +97,7 @@ httpTestSuite<FunctionsInventionsResponseStreamingFunctionInventionChunk, Functi
           },
         },
         agent: mockInventionAgent,
+        prompt: mockPrompt,
         seed: 80004,
         stream: true,
         max_step_retries: 1,

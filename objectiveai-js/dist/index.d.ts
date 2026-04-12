@@ -34622,7 +34622,7 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
     continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     max_step_retries: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     overwrite: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
-    prompt: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+    prompt: z.ZodUnion<readonly [z.ZodObject<{
         description_step: z.ZodArray<z.ZodObject<{
             type: z.ZodArray<z.ZodEnum<{
                 "alpha.scalar.branch.function": "alpha.scalar.branch.function";
@@ -34711,7 +34711,7 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
     }, z.core.$strip>, z.ZodObject<{
         name: z.ZodString;
         remote: z.ZodLiteral<"mock">;
-    }, z.core.$strip>]>]>>>;
+    }, z.core.$strip>]>]>;
     provider: z.ZodOptional<z.ZodNullable<z.ZodObject<{
         data_collection: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"deny">, z.ZodLiteral<"allow">]>>>;
         max_latency: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -45429,7 +45429,7 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
     continuation: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
     max_step_retries: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
     overwrite: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
-    prompt: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodUnion<readonly [z$1.ZodObject<{
+    prompt: z$1.ZodUnion<readonly [z$1.ZodObject<{
         description_step: z$1.ZodArray<z$1.ZodObject<{
             type: z$1.ZodArray<z$1.ZodEnum<{
                 "alpha.scalar.branch.function": "alpha.scalar.branch.function";
@@ -45518,7 +45518,7 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
     }, z$1.core.$strip>, z$1.ZodObject<{
         name: z$1.ZodString;
         remote: z$1.ZodLiteral<"mock">;
-    }, z$1.core.$strip>]>]>>>;
+    }, z$1.core.$strip>]>]>;
     provider: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodObject<{
         data_collection: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodUnion<readonly [z$1.ZodLiteral<"deny">, z$1.ZodLiteral<"allow">]>>>;
         max_latency: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
@@ -47046,7 +47046,7 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
     continuation: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
     max_step_retries: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
     overwrite: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
-    prompt: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodUnion<readonly [z$1.ZodObject<{
+    prompt: z$1.ZodUnion<readonly [z$1.ZodObject<{
         description_step: z$1.ZodArray<z$1.ZodObject<{
             type: z$1.ZodArray<z$1.ZodEnum<{
                 "alpha.scalar.branch.function": "alpha.scalar.branch.function";
@@ -47135,7 +47135,7 @@ declare const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreat
     }, z$1.core.$strip>, z$1.ZodObject<{
         name: z$1.ZodString;
         remote: z$1.ZodLiteral<"mock">;
-    }, z$1.core.$strip>]>]>>>;
+    }, z$1.core.$strip>]>]>;
     provider: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodObject<{
         data_collection: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodUnion<readonly [z$1.ZodLiteral<"deny">, z$1.ZodLiteral<"allow">]>>>;
         max_latency: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
@@ -48666,7 +48666,7 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsSchema: z.Z
     continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     max_step_retries: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     overwrite: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
-    prompt: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+    prompt: z.ZodUnion<readonly [z.ZodObject<{
         description_step: z.ZodArray<z.ZodObject<{
             type: z.ZodArray<z.ZodEnum<{
                 "alpha.scalar.branch.function": "alpha.scalar.branch.function";
@@ -48755,7 +48755,7 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsSchema: z.Z
     }, z.core.$strip>, z.ZodObject<{
         name: z.ZodString;
         remote: z.ZodLiteral<"mock">;
-    }, z.core.$strip>]>]>>>;
+    }, z.core.$strip>]>]>;
     provider: z.ZodOptional<z.ZodNullable<z.ZodObject<{
         data_collection: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"deny">, z.ZodLiteral<"allow">]>>>;
         max_latency: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
@@ -56734,7 +56734,7 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSc
     continuation: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
     max_step_retries: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
     overwrite: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
-    prompt: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodUnion<readonly [z$1.ZodObject<{
+    prompt: z$1.ZodUnion<readonly [z$1.ZodObject<{
         description_step: z$1.ZodArray<z$1.ZodObject<{
             type: z$1.ZodArray<z$1.ZodEnum<{
                 "alpha.scalar.branch.function": "alpha.scalar.branch.function";
@@ -56823,7 +56823,7 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSc
     }, z$1.core.$strip>, z$1.ZodObject<{
         name: z$1.ZodString;
         remote: z$1.ZodLiteral<"mock">;
-    }, z$1.core.$strip>]>]>>>;
+    }, z$1.core.$strip>]>]>;
     provider: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodObject<{
         data_collection: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodUnion<readonly [z$1.ZodLiteral<"deny">, z$1.ZodLiteral<"allow">]>>>;
         max_latency: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
@@ -58351,7 +58351,7 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema
     continuation: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
     max_step_retries: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
     overwrite: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
-    prompt: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodUnion<readonly [z$1.ZodObject<{
+    prompt: z$1.ZodUnion<readonly [z$1.ZodObject<{
         description_step: z$1.ZodArray<z$1.ZodObject<{
             type: z$1.ZodArray<z$1.ZodEnum<{
                 "alpha.scalar.branch.function": "alpha.scalar.branch.function";
@@ -58440,7 +58440,7 @@ declare const FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema
     }, z$1.core.$strip>, z$1.ZodObject<{
         name: z$1.ZodString;
         remote: z$1.ZodLiteral<"mock">;
-    }, z$1.core.$strip>]>]>>>;
+    }, z$1.core.$strip>]>]>;
     provider: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodObject<{
         data_collection: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodUnion<readonly [z$1.ZodLiteral<"deny">, z$1.ZodLiteral<"allow">]>>>;
         max_latency: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;

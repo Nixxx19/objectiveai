@@ -52,9 +52,7 @@ Defaults to 3 if not specified.
     public bool? Overwrite { get; set; } = null;
 
     [JsonPropertyName("prompt")]
-    [JsonSchemaOmitEmpty]
-    [JsonSchemaNullable]
-    public InlinePromptOrRemoteCommitOptional? Prompt { get; set; } = null;
+    public InlinePromptOrRemoteCommitOptional Prompt { get; set; } = default!;
 
     [JsonPropertyName("provider")]
     [JsonSchemaOmitEmpty]

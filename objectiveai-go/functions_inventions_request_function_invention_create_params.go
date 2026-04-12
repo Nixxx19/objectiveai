@@ -18,7 +18,7 @@ type FunctionsInventionsRequestFunctionInventionCreateParams struct {
 	// Defaults to 3 if not specified.
 	MaxStepRetries *uint32 `json:"max_step_retries,omitempty" validate:"omitempty,min=0,max=4294967295"`
 	Overwrite *bool `json:"overwrite,omitempty"`
-	Prompt *FunctionsInventionsPromptsInlinePromptOrRemoteCommitOptional `json:"prompt,omitempty"`
+	Prompt FunctionsInventionsPromptsInlinePromptOrRemoteCommitOptional `json:"prompt"`
 	Provider *AgentCompletionsRequestProvider `json:"provider,omitempty"`
 	Remote *Remote `json:"remote,omitempty"`
 	Seed *int64 `json:"seed,omitempty" validate:"omitempty,min=-9223372036854775808,max=9223372036854775807"`
@@ -36,7 +36,7 @@ func (v *FunctionsInventionsRequestFunctionInventionCreateParams) UnmarshalJSON(
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	for _, key := range []string{"agent", "state"} {
+	for _, key := range []string{"agent", "prompt", "state"} {
 		if _, ok := raw[key]; !ok {
 			return fmt.Errorf("FunctionsInventionsRequestFunctionInventionCreateParams: missing required field %q", key)
 		}
