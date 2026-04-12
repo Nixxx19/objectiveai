@@ -56,7 +56,31 @@ pub enum Commands {
         #[command(subcommand)]
         command: GetCommand,
     },
+    ScalarBranchTaskObject {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
+    ScalarInputSchemaObject {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
+    ScalarLeafTaskObject {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
     TasksLengthObject {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
+    VectorBranchTaskObject {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
+    VectorInputSchemaObject {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
+    VectorLeafTaskObject {
         #[command(subcommand)]
         command: GetCommand,
     },
@@ -65,7 +89,7 @@ pub enum Commands {
 impl Commands {
     pub fn handle(self) -> Result<crate::Output, crate::error::Error> {
         match self {
-            Commands::List => Ok(crate::Output::Schema("[\"recursive\",\"request\",\"response\",\"state\",\"DescriptionObject\",\"EssayObject\",\"EssayTasksObject\",\"IndexObject\",\"TasksLengthObject\"]")),
+            Commands::List => Ok(crate::Output::Schema("[\"recursive\",\"request\",\"response\",\"state\",\"DescriptionObject\",\"EssayObject\",\"EssayTasksObject\",\"IndexObject\",\"ScalarBranchTaskObject\",\"ScalarInputSchemaObject\",\"ScalarLeafTaskObject\",\"TasksLengthObject\",\"VectorBranchTaskObject\",\"VectorInputSchemaObject\",\"VectorLeafTaskObject\"]")),
             Commands::Recursive { command } => command.handle(),
             Commands::Request { command } => command.handle(),
             Commands::Response { command } => command.handle(),
@@ -82,8 +106,26 @@ impl Commands {
             Commands::IndexObject { .. } => Ok(crate::Output::Schema(
                 include_str!("../../../../../objectiveai-json-schema/functions.inventions.IndexObject.json"),
             )),
+            Commands::ScalarBranchTaskObject { .. } => Ok(crate::Output::Schema(
+                include_str!("../../../../../objectiveai-json-schema/functions.inventions.ScalarBranchTaskObject.json"),
+            )),
+            Commands::ScalarInputSchemaObject { .. } => Ok(crate::Output::Schema(
+                include_str!("../../../../../objectiveai-json-schema/functions.inventions.ScalarInputSchemaObject.json"),
+            )),
+            Commands::ScalarLeafTaskObject { .. } => Ok(crate::Output::Schema(
+                include_str!("../../../../../objectiveai-json-schema/functions.inventions.ScalarLeafTaskObject.json"),
+            )),
             Commands::TasksLengthObject { .. } => Ok(crate::Output::Schema(
                 include_str!("../../../../../objectiveai-json-schema/functions.inventions.TasksLengthObject.json"),
+            )),
+            Commands::VectorBranchTaskObject { .. } => Ok(crate::Output::Schema(
+                include_str!("../../../../../objectiveai-json-schema/functions.inventions.VectorBranchTaskObject.json"),
+            )),
+            Commands::VectorInputSchemaObject { .. } => Ok(crate::Output::Schema(
+                include_str!("../../../../../objectiveai-json-schema/functions.inventions.VectorInputSchemaObject.json"),
+            )),
+            Commands::VectorLeafTaskObject { .. } => Ok(crate::Output::Schema(
+                include_str!("../../../../../objectiveai-json-schema/functions.inventions.VectorLeafTaskObject.json"),
             )),
         }
     }

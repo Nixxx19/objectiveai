@@ -15,6 +15,19 @@ namespace ObjectiveAI.Functions.Expression;
 public partial class Params
 {
     /// <summary>
+    /// Current recursion depth.
+    /// Only provided for invention prompt expressions.
+    /// </summary>
+    [Description("""
+Current recursion depth.
+Only provided for invention prompt expressions.
+""")]
+    [JsonPropertyName("depth")]
+    [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
+    [JsonSchemaNullable]
+    public ulong? Depth { get; set; } = null;
+
+    /// <summary>
     /// The function's input data.
     /// </summary>
     [Description("The function's input data.")]
@@ -31,10 +44,60 @@ public partial class Params
     public ulong? Map { get; set; } = null;
 
     /// <summary>
+    /// The function's name.
+    /// Only provided for invention prompt expressions.
+    /// </summary>
+    [Description("""
+The function's name.
+Only provided for invention prompt expressions.
+""")]
+    [JsonPropertyName("name")]
+    [JsonSchemaNullable]
+    public string? Name { get; set; } = null;
+
+    /// <summary>
     /// Results from executed tasks. Only populated for task output expressions.
     /// </summary>
     [Description("Results from executed tasks. Only populated for task output expressions.")]
     [JsonPropertyName("output")]
     [JsonSchemaNullable]
     public TaskOutput? Output { get; set; } = null;
+
+    /// <summary>
+    /// The specification text.
+    /// Only provided for invention prompt expressions.
+    /// </summary>
+    [Description("""
+The specification text.
+Only provided for invention prompt expressions.
+""")]
+    [JsonPropertyName("spec")]
+    [JsonSchemaNullable]
+    public string? Spec { get; set; } = null;
+
+    /// <summary>
+    /// Resolved maximum task count for this node type.
+    /// Only provided for invention prompt expressions.
+    /// </summary>
+    [Description("""
+Resolved maximum task count for this node type.
+Only provided for invention prompt expressions.
+""")]
+    [JsonPropertyName("tasks_max")]
+    [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
+    [JsonSchemaNullable]
+    public ulong? TasksMax { get; set; } = null;
+
+    /// <summary>
+    /// Resolved minimum task count for this node type.
+    /// Only provided for invention prompt expressions.
+    /// </summary>
+    [Description("""
+Resolved minimum task count for this node type.
+Only provided for invention prompt expressions.
+""")]
+    [JsonPropertyName("tasks_min")]
+    [JsonSchemaRange(Minimum = "0", Maximum = "18446744073709551615")]
+    [JsonSchemaNullable]
+    public ulong? TasksMin { get; set; } = null;
 }

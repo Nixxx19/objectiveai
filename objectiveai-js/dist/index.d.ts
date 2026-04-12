@@ -25550,7 +25550,37 @@ declare function authListApiKeys(client: ObjectiveAI, options?: RequestOptions):
 declare function authGetOpenrouterByokApiKey(client: ObjectiveAI, options?: RequestOptions): Promise<AuthGetOpenRouterByokApiKeyResponse>;
 declare function authGetCredits(client: ObjectiveAI, options?: RequestOptions): Promise<AuthGetCreditsResponse>;
 
-declare const ConfigAgentsConfigSchema: z.ZodObject<{
+declare const ErrorErrorCreateParamsSchema: z.ZodObject<{
+    seed: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    stream: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+}, z.core.$strip>;
+type ErrorErrorCreateParams = z.infer<typeof ErrorErrorCreateParamsSchema>;
+
+declare const ErrorErrorResponseSchema: z.ZodObject<{
+    ok: z.ZodBoolean;
+}, z.core.$strip>;
+type ErrorErrorResponse = z.infer<typeof ErrorErrorResponseSchema>;
+
+declare const ErrorResponseErrorSchema: z.ZodObject<{
+    code: z.ZodNumber;
+    message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+}, z.core.$strip>;
+type ErrorResponseError = z.infer<typeof ErrorResponseErrorSchema>;
+
+declare const ErrorErrorCreateParamsStreamingSchema: z$1.ZodObject<{
+    seed: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
+    stream: z$1.ZodLiteral<true>;
+}, z$1.core.$strip>;
+type ErrorErrorCreateParamsStreaming = z$1.infer<typeof ErrorErrorCreateParamsStreamingSchema>;
+declare const ErrorErrorCreateParamsUnarySchema: z$1.ZodObject<{
+    seed: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
+    stream: z$1.ZodNullable<z$1.ZodOptional<z$1.ZodLiteral<false>>>;
+}, z$1.core.$strip>;
+type ErrorErrorCreateParamsUnary = z$1.infer<typeof ErrorErrorCreateParamsUnarySchema>;
+declare function errorCreateError(client: ObjectiveAI, body: ErrorErrorCreateParamsStreaming, options?: RequestOptions): Promise<Stream<ErrorErrorResponse>>;
+declare function errorCreateError(client: ObjectiveAI, body: ErrorErrorCreateParamsUnary, options?: RequestOptions): Promise<ErrorErrorResponse>;
+
+declare const FilesystemConfigAgentsConfigSchema: z.ZodObject<{
     favorites: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodIntersection<z.ZodUnion<readonly [z.ZodObject<{
         commit: z.ZodOptional<z.ZodNullable<z.ZodString>>;
         owner: z.ZodString;
@@ -25569,9 +25599,9 @@ declare const ConfigAgentsConfigSchema: z.ZodObject<{
         note: z.ZodString;
     }, z.core.$strip>>>>>;
 }, z.core.$strip>;
-type ConfigAgentsConfig = z.infer<typeof ConfigAgentsConfigSchema>;
+type FilesystemConfigAgentsConfig = z.infer<typeof FilesystemConfigAgentsConfigSchema>;
 
-declare const ConfigApiConfigSchema: z.ZodObject<{
+declare const FilesystemConfigApiConfigSchema: z.ZodObject<{
     headers: z.ZodOptional<z.ZodNullable<z.ZodObject<{
         http_referer: z.ZodOptional<z.ZodNullable<z.ZodString>>;
         user_agent: z.ZodOptional<z.ZodNullable<z.ZodString>>;
@@ -25596,9 +25626,9 @@ declare const ConfigApiConfigSchema: z.ZodObject<{
         objectiveai_address: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     }, z.core.$strip>>>;
 }, z.core.$strip>;
-type ConfigApiConfig = z.infer<typeof ConfigApiConfigSchema>;
+type FilesystemConfigApiConfig = z.infer<typeof FilesystemConfigApiConfigSchema>;
 
-declare const ConfigApiHeadersConfigSchema: z.ZodObject<{
+declare const FilesystemConfigApiHeadersConfigSchema: z.ZodObject<{
     http_referer: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     user_agent: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     x_commit_author_email: z.ZodOptional<z.ZodNullable<z.ZodString>>;
@@ -25611,25 +25641,25 @@ declare const ConfigApiHeadersConfigSchema: z.ZodObject<{
     x_viewer_address: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     x_viewer_signature: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>;
-type ConfigApiHeadersConfig = z.infer<typeof ConfigApiHeadersConfigSchema>;
+type FilesystemConfigApiHeadersConfig = z.infer<typeof FilesystemConfigApiHeadersConfigSchema>;
 
-declare const ConfigApiLocalConfigSchema: z.ZodObject<{
+declare const FilesystemConfigApiLocalConfigSchema: z.ZodObject<{
     claude_agent_sdk: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
 }, z.core.$strip>;
-type ConfigApiLocalConfig = z.infer<typeof ConfigApiLocalConfigSchema>;
+type FilesystemConfigApiLocalConfig = z.infer<typeof FilesystemConfigApiLocalConfigSchema>;
 
-declare const ConfigApiModeSchema: z.ZodEnum<{
+declare const FilesystemConfigApiModeSchema: z.ZodEnum<{
     remote: "remote";
     local: "local";
 }>;
-type ConfigApiMode = z.infer<typeof ConfigApiModeSchema>;
+type FilesystemConfigApiMode = z.infer<typeof FilesystemConfigApiModeSchema>;
 
-declare const ConfigApiRemoteConfigSchema: z.ZodObject<{
+declare const FilesystemConfigApiRemoteConfigSchema: z.ZodObject<{
     objectiveai_address: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>;
-type ConfigApiRemoteConfig = z.infer<typeof ConfigApiRemoteConfigSchema>;
+type FilesystemConfigApiRemoteConfig = z.infer<typeof FilesystemConfigApiRemoteConfigSchema>;
 
-declare const ConfigConfigSchema: z.ZodObject<{
+declare const FilesystemConfigConfigSchema: z.ZodObject<{
     agents: z.ZodOptional<z.ZodNullable<z.ZodObject<{
         favorites: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodIntersection<z.ZodUnion<readonly [z.ZodObject<{
             commit: z.ZodOptional<z.ZodNullable<z.ZodString>>;
@@ -25779,9 +25809,9 @@ declare const ConfigConfigSchema: z.ZodObject<{
         }>>;
     }, z.core.$strip>>>;
 }, z.core.$strip>;
-type ConfigConfig = z.infer<typeof ConfigConfigSchema>;
+type FilesystemConfigConfig = z.infer<typeof FilesystemConfigConfigSchema>;
 
-declare const ConfigFavoriteSchema: z.ZodIntersection<z.ZodUnion<readonly [z.ZodObject<{
+declare const FilesystemConfigFavoriteSchema: z.ZodIntersection<z.ZodUnion<readonly [z.ZodObject<{
     commit: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     owner: z.ZodString;
     remote: z.ZodLiteral<"github">;
@@ -25798,9 +25828,9 @@ declare const ConfigFavoriteSchema: z.ZodIntersection<z.ZodUnion<readonly [z.Zod
     name: z.ZodString;
     note: z.ZodString;
 }, z.core.$strip>>;
-type ConfigFavorite = z.infer<typeof ConfigFavoriteSchema>;
+type FilesystemConfigFavorite = z.infer<typeof FilesystemConfigFavoriteSchema>;
 
-declare const ConfigFunctionsConfigSchema: z.ZodObject<{
+declare const FilesystemConfigFunctionsConfigSchema: z.ZodObject<{
     favorites: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodIntersection<z.ZodUnion<readonly [z.ZodObject<{
         commit: z.ZodOptional<z.ZodNullable<z.ZodString>>;
         owner: z.ZodString;
@@ -25875,14 +25905,14 @@ declare const ConfigFunctionsConfigSchema: z.ZodObject<{
         }, z.core.$strip>>>;
     }, z.core.$strip>>>;
 }, z.core.$strip>;
-type ConfigFunctionsConfig = z.infer<typeof ConfigFunctionsConfigSchema>;
+type FilesystemConfigFunctionsConfig = z.infer<typeof FilesystemConfigFunctionsConfigSchema>;
 
-declare const ConfigFunctionsInventionsConfigSchema: z.ZodObject<{
+declare const FilesystemConfigFunctionsInventionsConfigSchema: z.ZodObject<{
     remote: z.ZodDefault<z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>>;
 }, z.core.$strip>;
-type ConfigFunctionsInventionsConfig = z.infer<typeof ConfigFunctionsInventionsConfigSchema>;
+type FilesystemConfigFunctionsInventionsConfig = z.infer<typeof FilesystemConfigFunctionsInventionsConfigSchema>;
 
-declare const ConfigFunctionsProfilesConfigSchema: z.ZodObject<{
+declare const FilesystemConfigFunctionsProfilesConfigSchema: z.ZodObject<{
     favorites: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodIntersection<z.ZodUnion<readonly [z.ZodObject<{
         commit: z.ZodOptional<z.ZodNullable<z.ZodString>>;
         owner: z.ZodString;
@@ -25935,9 +25965,9 @@ declare const ConfigFunctionsProfilesConfigSchema: z.ZodObject<{
         }, z.core.$strip>>>>;
     }, z.core.$strip>>>;
 }, z.core.$strip>;
-type ConfigFunctionsProfilesConfig = z.infer<typeof ConfigFunctionsProfilesConfigSchema>;
+type FilesystemConfigFunctionsProfilesConfig = z.infer<typeof FilesystemConfigFunctionsProfilesConfigSchema>;
 
-declare const ConfigFunctionsProfilesPairsConfigSchema: z.ZodObject<{
+declare const FilesystemConfigFunctionsProfilesPairsConfigSchema: z.ZodObject<{
     favorites: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
         function: z.ZodUnion<readonly [z.ZodObject<{
             commit: z.ZodOptional<z.ZodNullable<z.ZodString>>;
@@ -25971,9 +26001,9 @@ declare const ConfigFunctionsProfilesPairsConfigSchema: z.ZodObject<{
         }, z.core.$strip>]>;
     }, z.core.$strip>>>>;
 }, z.core.$strip>;
-type ConfigFunctionsProfilesPairsConfig = z.infer<typeof ConfigFunctionsProfilesPairsConfigSchema>;
+type FilesystemConfigFunctionsProfilesPairsConfig = z.infer<typeof FilesystemConfigFunctionsProfilesPairsConfigSchema>;
 
-declare const ConfigPairFavoriteSchema: z.ZodObject<{
+declare const FilesystemConfigPairFavoriteSchema: z.ZodObject<{
     function: z.ZodUnion<readonly [z.ZodObject<{
         commit: z.ZodOptional<z.ZodNullable<z.ZodString>>;
         owner: z.ZodString;
@@ -26005,9 +26035,9 @@ declare const ConfigPairFavoriteSchema: z.ZodObject<{
         remote: z.ZodLiteral<"mock">;
     }, z.core.$strip>]>;
 }, z.core.$strip>;
-type ConfigPairFavorite = z.infer<typeof ConfigPairFavoriteSchema>;
+type FilesystemConfigPairFavorite = z.infer<typeof FilesystemConfigPairFavoriteSchema>;
 
-declare const ConfigSwarmsConfigSchema: z.ZodObject<{
+declare const FilesystemConfigSwarmsConfigSchema: z.ZodObject<{
     favorites: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodIntersection<z.ZodUnion<readonly [z.ZodObject<{
         commit: z.ZodOptional<z.ZodNullable<z.ZodString>>;
         owner: z.ZodString;
@@ -26026,9 +26056,9 @@ declare const ConfigSwarmsConfigSchema: z.ZodObject<{
         note: z.ZodString;
     }, z.core.$strip>>>>>;
 }, z.core.$strip>;
-type ConfigSwarmsConfig = z.infer<typeof ConfigSwarmsConfigSchema>;
+type FilesystemConfigSwarmsConfig = z.infer<typeof FilesystemConfigSwarmsConfigSchema>;
 
-declare const ConfigViewerConfigSchema: z.ZodObject<{
+declare const FilesystemConfigViewerConfigSchema: z.ZodObject<{
     local: z.ZodOptional<z.ZodNullable<z.ZodObject<{
         secret: z.ZodOptional<z.ZodNullable<z.ZodString>>;
         signature: z.ZodOptional<z.ZodNullable<z.ZodString>>;
@@ -26038,55 +26068,31 @@ declare const ConfigViewerConfigSchema: z.ZodObject<{
         local: "local";
     }>>;
 }, z.core.$strip>;
-type ConfigViewerConfig = z.infer<typeof ConfigViewerConfigSchema>;
+type FilesystemConfigViewerConfig = z.infer<typeof FilesystemConfigViewerConfigSchema>;
 
-declare const ConfigViewerLocalConfigSchema: z.ZodObject<{
+declare const FilesystemConfigViewerLocalConfigSchema: z.ZodObject<{
     secret: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     signature: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>;
-type ConfigViewerLocalConfig = z.infer<typeof ConfigViewerLocalConfigSchema>;
+type FilesystemConfigViewerLocalConfig = z.infer<typeof FilesystemConfigViewerLocalConfigSchema>;
 
-declare const ConfigViewerModeSchema: z.ZodEnum<{
+declare const FilesystemConfigViewerModeSchema: z.ZodEnum<{
     remote: "remote";
     local: "local";
 }>;
-type ConfigViewerMode = z.infer<typeof ConfigViewerModeSchema>;
+type FilesystemConfigViewerMode = z.infer<typeof FilesystemConfigViewerModeSchema>;
 
-declare const ConfigViewerSecretSignaturePairSchema: z.ZodObject<{
+declare const FilesystemConfigViewerSecretSignaturePairSchema: z.ZodObject<{
     secret: z.ZodString;
     signature: z.ZodString;
 }, z.core.$strip>;
-type ConfigViewerSecretSignaturePair = z.infer<typeof ConfigViewerSecretSignaturePairSchema>;
+type FilesystemConfigViewerSecretSignaturePair = z.infer<typeof FilesystemConfigViewerSecretSignaturePairSchema>;
 
-declare const ErrorErrorCreateParamsSchema: z.ZodObject<{
-    seed: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    stream: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
+declare const FilesystemLogsListItemSchema: z.ZodObject<{
+    created: z.ZodNumber;
+    id: z.ZodString;
 }, z.core.$strip>;
-type ErrorErrorCreateParams = z.infer<typeof ErrorErrorCreateParamsSchema>;
-
-declare const ErrorErrorResponseSchema: z.ZodObject<{
-    ok: z.ZodBoolean;
-}, z.core.$strip>;
-type ErrorErrorResponse = z.infer<typeof ErrorErrorResponseSchema>;
-
-declare const ErrorResponseErrorSchema: z.ZodObject<{
-    code: z.ZodNumber;
-    message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
-}, z.core.$strip>;
-type ErrorResponseError = z.infer<typeof ErrorResponseErrorSchema>;
-
-declare const ErrorErrorCreateParamsStreamingSchema: z$1.ZodObject<{
-    seed: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
-    stream: z$1.ZodLiteral<true>;
-}, z$1.core.$strip>;
-type ErrorErrorCreateParamsStreaming = z$1.infer<typeof ErrorErrorCreateParamsStreamingSchema>;
-declare const ErrorErrorCreateParamsUnarySchema: z$1.ZodObject<{
-    seed: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodNumber>>;
-    stream: z$1.ZodNullable<z$1.ZodOptional<z$1.ZodLiteral<false>>>;
-}, z$1.core.$strip>;
-type ErrorErrorCreateParamsUnary = z$1.infer<typeof ErrorErrorCreateParamsUnarySchema>;
-declare function errorCreateError(client: ObjectiveAI, body: ErrorErrorCreateParamsStreaming, options?: RequestOptions): Promise<Stream<ErrorErrorResponse>>;
-declare function errorCreateError(client: ObjectiveAI, body: ErrorErrorCreateParamsUnary, options?: RequestOptions): Promise<ErrorErrorResponse>;
+type FilesystemLogsListItem = z.infer<typeof FilesystemLogsListItemSchema>;
 
 declare const FunctionsAlphaScalarBranchTaskExpressionSchema: z.ZodUnion<readonly [z.ZodIntersection<z.ZodIntersection<z.ZodUnion<readonly [z.ZodObject<{
     commit: z.ZodString;
@@ -32963,9 +32969,14 @@ declare const FunctionsExpressionNumberInputSchemaTypeSchema: z.ZodLiteral<"numb
 type FunctionsExpressionNumberInputSchemaType = z.infer<typeof FunctionsExpressionNumberInputSchemaTypeSchema>;
 
 declare const FunctionsExpressionParamsSchema: z.ZodObject<{
+    depth: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     input: z.ZodType<FunctionsExpressionInputValue, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputValue, unknown>>;
     map: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     output: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodNumber, z.ZodArray<z.ZodNumber>, z.ZodArray<z.ZodArray<z.ZodNumber>>, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>]>>>;
+    spec: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    tasks_max: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    tasks_min: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
 }, z.core.$strip>;
 type FunctionsExpressionParams = z.infer<typeof FunctionsExpressionParamsSchema>;
 
@@ -54698,10 +54709,40 @@ declare const FunctionsInventionsIndexObjectSchema: z.ZodObject<{
 }, z.core.$strip>;
 type FunctionsInventionsIndexObject = z.infer<typeof FunctionsInventionsIndexObjectSchema>;
 
+declare const FunctionsInventionsScalarBranchTaskObjectSchema: z.ZodObject<{
+    task: z.ZodString;
+}, z.core.$strip>;
+type FunctionsInventionsScalarBranchTaskObject = z.infer<typeof FunctionsInventionsScalarBranchTaskObjectSchema>;
+
+declare const FunctionsInventionsScalarInputSchemaObjectSchema: z.ZodObject<{
+    schema: z.ZodString;
+}, z.core.$strip>;
+type FunctionsInventionsScalarInputSchemaObject = z.infer<typeof FunctionsInventionsScalarInputSchemaObjectSchema>;
+
+declare const FunctionsInventionsScalarLeafTaskObjectSchema: z.ZodObject<{
+    task: z.ZodString;
+}, z.core.$strip>;
+type FunctionsInventionsScalarLeafTaskObject = z.infer<typeof FunctionsInventionsScalarLeafTaskObjectSchema>;
+
 declare const FunctionsInventionsTasksLengthObjectSchema: z.ZodObject<{
     tasks_length: z.ZodNumber;
 }, z.core.$strip>;
 type FunctionsInventionsTasksLengthObject = z.infer<typeof FunctionsInventionsTasksLengthObjectSchema>;
+
+declare const FunctionsInventionsVectorBranchTaskObjectSchema: z.ZodObject<{
+    task: z.ZodString;
+}, z.core.$strip>;
+type FunctionsInventionsVectorBranchTaskObject = z.infer<typeof FunctionsInventionsVectorBranchTaskObjectSchema>;
+
+declare const FunctionsInventionsVectorInputSchemaObjectSchema: z.ZodObject<{
+    schema: z.ZodString;
+}, z.core.$strip>;
+type FunctionsInventionsVectorInputSchemaObject = z.infer<typeof FunctionsInventionsVectorInputSchemaObjectSchema>;
+
+declare const FunctionsInventionsVectorLeafTaskObjectSchema: z.ZodObject<{
+    task: z.ZodString;
+}, z.core.$strip>;
+type FunctionsInventionsVectorLeafTaskObject = z.infer<typeof FunctionsInventionsVectorLeafTaskObjectSchema>;
 
 declare const FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSchema: z$1.ZodObject<{
     agent: z$1.ZodUnion<readonly [z$1.ZodIntersection<z$1.ZodUnion<readonly [z$1.ZodObject<{
@@ -86155,364 +86196,13 @@ type LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk = z.infer<t
 declare const LaboratoriesExecutionsResponseStreamingObjectSchema: z.ZodLiteral<"laboratory.execution.chunk">;
 type LaboratoriesExecutionsResponseStreamingObject = z.infer<typeof LaboratoriesExecutionsResponseStreamingObjectSchema>;
 
-declare const LaboratoriesExecutionsResponseUnaryBuilderSchema: z.ZodObject<{
-    agent_index: z.ZodNumber;
-    continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    created: z.ZodNumber;
-    error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-        code: z.ZodNumber;
-        message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
-    }, z.core.$strip>>>;
-    id: z.ZodString;
-    index: z.ZodNumber;
-    messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-        agent: z.ZodString;
-        content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-            text: z.ZodString;
-            type: z.ZodLiteral<"text">;
-        }, z.core.$strip>, z.ZodObject<{
-            image_url: z.ZodObject<{
-                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
-                url: z.ZodString;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"image_url">;
-        }, z.core.$strip>, z.ZodObject<{
-            input_audio: z.ZodObject<{
-                data: z.ZodString;
-                format: z.ZodString;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"input_audio">;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"input_video">;
-            video_url: z.ZodObject<{
-                url: z.ZodString;
-            }, z.core.$strip>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"video_url">;
-            video_url: z.ZodObject<{
-                url: z.ZodString;
-            }, z.core.$strip>;
-        }, z.core.$strip>, z.ZodObject<{
-            file: z.ZodObject<{
-                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"file">;
-        }, z.core.$strip>]>>]>>>;
-        created: z.ZodNumber;
-        finish_reason: z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>;
-        index: z.ZodNumber;
-        logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
-                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                logprob: z.ZodNumber;
-                token: z.ZodString;
-                top_logprobs: z.ZodArray<z.ZodObject<{
-                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    token: z.ZodString;
-                }, z.core.$strip>>;
-            }, z.core.$strip>>>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
-                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                logprob: z.ZodNumber;
-                token: z.ZodString;
-                top_logprobs: z.ZodArray<z.ZodObject<{
-                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    token: z.ZodString;
-                }, z.core.$strip>>;
-            }, z.core.$strip>>>>;
-        }, z.core.$strip>>>;
-        model: z.ZodString;
-        provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        role: z.ZodLiteral<"assistant">;
-        service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
-            function: z.ZodObject<{
-                arguments: z.ZodString;
-                name: z.ZodString;
-            }, z.core.$strip>;
-            id: z.ZodString;
-            type: z.ZodLiteral<"function">;
-        }, z.core.$strip>>>>;
-        upstream_id: z.ZodString;
-        usage: z.ZodObject<{
-            completion_tokens: z.ZodNumber;
-            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            }, z.core.$strip>>>;
-            cost: z.ZodNumber;
-            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                upstream_inference_cost: z.ZodNumber;
-                upstream_upstream_inference_cost: z.ZodNumber;
-            }, z.core.$strip>>>;
-            cost_multiplier: z.ZodNumber;
-            is_byok: z.ZodBoolean;
-            prompt_tokens: z.ZodNumber;
-            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            }, z.core.$strip>>>;
-            total_cost: z.ZodNumber;
-            total_tokens: z.ZodNumber;
-        }, z.core.$strip>;
-    }, z.core.$strip>, z.ZodObject<{
-        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-            text: z.ZodString;
-            type: z.ZodLiteral<"text">;
-        }, z.core.$strip>, z.ZodObject<{
-            image_url: z.ZodObject<{
-                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
-                url: z.ZodString;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"image_url">;
-        }, z.core.$strip>, z.ZodObject<{
-            input_audio: z.ZodObject<{
-                data: z.ZodString;
-                format: z.ZodString;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"input_audio">;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"input_video">;
-            video_url: z.ZodObject<{
-                url: z.ZodString;
-            }, z.core.$strip>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"video_url">;
-            video_url: z.ZodObject<{
-                url: z.ZodString;
-            }, z.core.$strip>;
-        }, z.core.$strip>, z.ZodObject<{
-            file: z.ZodObject<{
-                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"file">;
-        }, z.core.$strip>]>>]>;
-        index: z.ZodNumber;
-        role: z.ZodLiteral<"tool">;
-        tool_call_id: z.ZodString;
-    }, z.core.$strip>]>>;
-    object: z.ZodLiteral<"agent.completion">;
-    upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
-    usage: z.ZodObject<{
-        completion_tokens: z.ZodNumber;
-        completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        }, z.core.$strip>>>;
-        cost: z.ZodNumber;
-        cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            upstream_inference_cost: z.ZodNumber;
-            upstream_upstream_inference_cost: z.ZodNumber;
-        }, z.core.$strip>>>;
-        prompt_tokens: z.ZodNumber;
-        prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        }, z.core.$strip>>>;
-        total_cost: z.ZodNumber;
-        total_tokens: z.ZodNumber;
-    }, z.core.$strip>;
-}, z.core.$strip>;
-type LaboratoriesExecutionsResponseUnaryBuilder = z.infer<typeof LaboratoriesExecutionsResponseUnaryBuilderSchema>;
+declare function laboratoriesExecutionsResponseStreamingBuilderChunkMerged(a: LaboratoriesExecutionsResponseStreamingBuilderChunk, b: LaboratoriesExecutionsResponseStreamingBuilderChunk): [LaboratoriesExecutionsResponseStreamingBuilderChunk, boolean];
+declare function laboratoriesExecutionsResponseStreamingBuilderChunkMergedList(a: LaboratoriesExecutionsResponseStreamingBuilderChunk[], b: LaboratoriesExecutionsResponseStreamingBuilderChunk[]): [LaboratoriesExecutionsResponseStreamingBuilderChunk[], boolean];
 
-declare const LaboratoriesExecutionsResponseUnaryEvaluationSchema: z.ZodObject<{
-    agent_index: z.ZodNumber;
-    continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    created: z.ZodNumber;
-    error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-        code: z.ZodNumber;
-        message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
-    }, z.core.$strip>>>;
-    id: z.ZodString;
-    index: z.ZodNumber;
-    messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-        agent: z.ZodString;
-        content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-            text: z.ZodString;
-            type: z.ZodLiteral<"text">;
-        }, z.core.$strip>, z.ZodObject<{
-            image_url: z.ZodObject<{
-                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
-                url: z.ZodString;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"image_url">;
-        }, z.core.$strip>, z.ZodObject<{
-            input_audio: z.ZodObject<{
-                data: z.ZodString;
-                format: z.ZodString;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"input_audio">;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"input_video">;
-            video_url: z.ZodObject<{
-                url: z.ZodString;
-            }, z.core.$strip>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"video_url">;
-            video_url: z.ZodObject<{
-                url: z.ZodString;
-            }, z.core.$strip>;
-        }, z.core.$strip>, z.ZodObject<{
-            file: z.ZodObject<{
-                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"file">;
-        }, z.core.$strip>]>>]>>>;
-        created: z.ZodNumber;
-        finish_reason: z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>;
-        index: z.ZodNumber;
-        logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
-                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                logprob: z.ZodNumber;
-                token: z.ZodString;
-                top_logprobs: z.ZodArray<z.ZodObject<{
-                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    token: z.ZodString;
-                }, z.core.$strip>>;
-            }, z.core.$strip>>>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
-                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                logprob: z.ZodNumber;
-                token: z.ZodString;
-                top_logprobs: z.ZodArray<z.ZodObject<{
-                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    token: z.ZodString;
-                }, z.core.$strip>>;
-            }, z.core.$strip>>>>;
-        }, z.core.$strip>>>;
-        model: z.ZodString;
-        provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        role: z.ZodLiteral<"assistant">;
-        service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
-            function: z.ZodObject<{
-                arguments: z.ZodString;
-                name: z.ZodString;
-            }, z.core.$strip>;
-            id: z.ZodString;
-            type: z.ZodLiteral<"function">;
-        }, z.core.$strip>>>>;
-        upstream_id: z.ZodString;
-        usage: z.ZodObject<{
-            completion_tokens: z.ZodNumber;
-            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            }, z.core.$strip>>>;
-            cost: z.ZodNumber;
-            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                upstream_inference_cost: z.ZodNumber;
-                upstream_upstream_inference_cost: z.ZodNumber;
-            }, z.core.$strip>>>;
-            cost_multiplier: z.ZodNumber;
-            is_byok: z.ZodBoolean;
-            prompt_tokens: z.ZodNumber;
-            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            }, z.core.$strip>>>;
-            total_cost: z.ZodNumber;
-            total_tokens: z.ZodNumber;
-        }, z.core.$strip>;
-    }, z.core.$strip>, z.ZodObject<{
-        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-            text: z.ZodString;
-            type: z.ZodLiteral<"text">;
-        }, z.core.$strip>, z.ZodObject<{
-            image_url: z.ZodObject<{
-                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
-                url: z.ZodString;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"image_url">;
-        }, z.core.$strip>, z.ZodObject<{
-            input_audio: z.ZodObject<{
-                data: z.ZodString;
-                format: z.ZodString;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"input_audio">;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"input_video">;
-            video_url: z.ZodObject<{
-                url: z.ZodString;
-            }, z.core.$strip>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"video_url">;
-            video_url: z.ZodObject<{
-                url: z.ZodString;
-            }, z.core.$strip>;
-        }, z.core.$strip>, z.ZodObject<{
-            file: z.ZodObject<{
-                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"file">;
-        }, z.core.$strip>]>>]>;
-        index: z.ZodNumber;
-        role: z.ZodLiteral<"tool">;
-        tool_call_id: z.ZodString;
-    }, z.core.$strip>]>>;
-    object: z.ZodLiteral<"agent.completion">;
-    output: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionInputValue, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputValue, unknown>>>>;
-    upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
-    usage: z.ZodObject<{
-        completion_tokens: z.ZodNumber;
-        completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        }, z.core.$strip>>>;
-        cost: z.ZodNumber;
-        cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            upstream_inference_cost: z.ZodNumber;
-            upstream_upstream_inference_cost: z.ZodNumber;
-        }, z.core.$strip>>>;
-        prompt_tokens: z.ZodNumber;
-        prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        }, z.core.$strip>>>;
-        total_cost: z.ZodNumber;
-        total_tokens: z.ZodNumber;
-    }, z.core.$strip>;
-}, z.core.$strip>;
-type LaboratoriesExecutionsResponseUnaryEvaluation = z.infer<typeof LaboratoriesExecutionsResponseUnaryEvaluationSchema>;
+declare function laboratoriesExecutionsResponseStreamingEvaluationChunkMerged(a: LaboratoriesExecutionsResponseStreamingEvaluationChunk, b: LaboratoriesExecutionsResponseStreamingEvaluationChunk): [LaboratoriesExecutionsResponseStreamingEvaluationChunk, boolean];
+declare function laboratoriesExecutionsResponseStreamingEvaluationChunkMergedList(a: LaboratoriesExecutionsResponseStreamingEvaluationChunk[], b: LaboratoriesExecutionsResponseStreamingEvaluationChunk[]): [LaboratoriesExecutionsResponseStreamingEvaluationChunk[], boolean];
+
+declare function laboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkMerged(a: LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk, b: LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk): [LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk, boolean];
 
 declare const LaboratoriesExecutionsResponseUnaryLaboratoryExecutionSchema: z.ZodObject<{
     builders: z.ZodArray<z.ZodObject<{
@@ -86903,8 +86593,380 @@ declare const LaboratoriesExecutionsResponseUnaryLaboratoryExecutionSchema: z.Zo
 }, z.core.$strip>;
 type LaboratoriesExecutionsResponseUnaryLaboratoryExecution = z.infer<typeof LaboratoriesExecutionsResponseUnaryLaboratoryExecutionSchema>;
 
+declare function wasmLaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkMerged(a: LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk, b: LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk): LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk;
+declare function wasmLaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkNormalized(a: LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk): LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk;
+declare function wasmLaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkToUnary(a: LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk): LaboratoriesExecutionsResponseUnaryLaboratoryExecution;
+declare function wasmLaboratoriesExecutionsResponseStreamingGenerateLaboratoryExecutionChunk(seed: number): LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk;
+declare function wasmLaboratoriesExecutionsResponseStreamingNormalizeLaboratoryExecutionForTests(a: LaboratoriesExecutionsResponseUnaryLaboratoryExecution): LaboratoriesExecutionsResponseUnaryLaboratoryExecution;
+
+declare const LaboratoriesExecutionsResponseUnaryBuilderSchema: z.ZodObject<{
+    agent_index: z.ZodNumber;
+    continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    created: z.ZodNumber;
+    error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        code: z.ZodNumber;
+        message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+    }, z.core.$strip>>>;
+    id: z.ZodString;
+    index: z.ZodNumber;
+    messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+        agent: z.ZodString;
+        content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>>>;
+        created: z.ZodNumber;
+        finish_reason: z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>;
+        index: z.ZodNumber;
+        logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                logprob: z.ZodNumber;
+                token: z.ZodString;
+                top_logprobs: z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    token: z.ZodString;
+                }, z.core.$strip>>;
+            }, z.core.$strip>>>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                logprob: z.ZodNumber;
+                token: z.ZodString;
+                top_logprobs: z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    token: z.ZodString;
+                }, z.core.$strip>>;
+            }, z.core.$strip>>>>;
+        }, z.core.$strip>>>;
+        model: z.ZodString;
+        provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        role: z.ZodLiteral<"assistant">;
+        service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            function: z.ZodObject<{
+                arguments: z.ZodString;
+                name: z.ZodString;
+            }, z.core.$strip>;
+            id: z.ZodString;
+            type: z.ZodLiteral<"function">;
+        }, z.core.$strip>>>>;
+        upstream_id: z.ZodString;
+        usage: z.ZodObject<{
+            completion_tokens: z.ZodNumber;
+            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            cost: z.ZodNumber;
+            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                upstream_inference_cost: z.ZodNumber;
+                upstream_upstream_inference_cost: z.ZodNumber;
+            }, z.core.$strip>>>;
+            cost_multiplier: z.ZodNumber;
+            is_byok: z.ZodBoolean;
+            prompt_tokens: z.ZodNumber;
+            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            total_cost: z.ZodNumber;
+            total_tokens: z.ZodNumber;
+        }, z.core.$strip>;
+    }, z.core.$strip>, z.ZodObject<{
+        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>;
+        index: z.ZodNumber;
+        role: z.ZodLiteral<"tool">;
+        tool_call_id: z.ZodString;
+    }, z.core.$strip>]>>;
+    object: z.ZodLiteral<"agent.completion">;
+    upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
+    usage: z.ZodObject<{
+        completion_tokens: z.ZodNumber;
+        completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        cost: z.ZodNumber;
+        cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            upstream_inference_cost: z.ZodNumber;
+            upstream_upstream_inference_cost: z.ZodNumber;
+        }, z.core.$strip>>>;
+        prompt_tokens: z.ZodNumber;
+        prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        total_cost: z.ZodNumber;
+        total_tokens: z.ZodNumber;
+    }, z.core.$strip>;
+}, z.core.$strip>;
+type LaboratoriesExecutionsResponseUnaryBuilder = z.infer<typeof LaboratoriesExecutionsResponseUnaryBuilderSchema>;
+
+declare const LaboratoriesExecutionsResponseUnaryEvaluationSchema: z.ZodObject<{
+    agent_index: z.ZodNumber;
+    continuation: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    created: z.ZodNumber;
+    error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        code: z.ZodNumber;
+        message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+    }, z.core.$strip>>>;
+    id: z.ZodString;
+    index: z.ZodNumber;
+    messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+        agent: z.ZodString;
+        content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>>>;
+        created: z.ZodNumber;
+        finish_reason: z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>;
+        index: z.ZodNumber;
+        logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                logprob: z.ZodNumber;
+                token: z.ZodString;
+                top_logprobs: z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    token: z.ZodString;
+                }, z.core.$strip>>;
+            }, z.core.$strip>>>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                logprob: z.ZodNumber;
+                token: z.ZodString;
+                top_logprobs: z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    token: z.ZodString;
+                }, z.core.$strip>>;
+            }, z.core.$strip>>>>;
+        }, z.core.$strip>>>;
+        model: z.ZodString;
+        provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        role: z.ZodLiteral<"assistant">;
+        service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            function: z.ZodObject<{
+                arguments: z.ZodString;
+                name: z.ZodString;
+            }, z.core.$strip>;
+            id: z.ZodString;
+            type: z.ZodLiteral<"function">;
+        }, z.core.$strip>>>>;
+        upstream_id: z.ZodString;
+        usage: z.ZodObject<{
+            completion_tokens: z.ZodNumber;
+            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            cost: z.ZodNumber;
+            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                upstream_inference_cost: z.ZodNumber;
+                upstream_upstream_inference_cost: z.ZodNumber;
+            }, z.core.$strip>>>;
+            cost_multiplier: z.ZodNumber;
+            is_byok: z.ZodBoolean;
+            prompt_tokens: z.ZodNumber;
+            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            total_cost: z.ZodNumber;
+            total_tokens: z.ZodNumber;
+        }, z.core.$strip>;
+    }, z.core.$strip>, z.ZodObject<{
+        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>;
+        index: z.ZodNumber;
+        role: z.ZodLiteral<"tool">;
+        tool_call_id: z.ZodString;
+    }, z.core.$strip>]>>;
+    object: z.ZodLiteral<"agent.completion">;
+    output: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionInputValue, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputValue, unknown>>>>;
+    upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
+    usage: z.ZodObject<{
+        completion_tokens: z.ZodNumber;
+        completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        cost: z.ZodNumber;
+        cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            upstream_inference_cost: z.ZodNumber;
+            upstream_upstream_inference_cost: z.ZodNumber;
+        }, z.core.$strip>>>;
+        prompt_tokens: z.ZodNumber;
+        prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        total_cost: z.ZodNumber;
+        total_tokens: z.ZodNumber;
+    }, z.core.$strip>;
+}, z.core.$strip>;
+type LaboratoriesExecutionsResponseUnaryEvaluation = z.infer<typeof LaboratoriesExecutionsResponseUnaryEvaluationSchema>;
+
 declare const LaboratoriesExecutionsResponseUnaryObjectSchema: z.ZodLiteral<"laboratory.execution">;
 type LaboratoriesExecutionsResponseUnaryObject = z.infer<typeof LaboratoriesExecutionsResponseUnaryObjectSchema>;
+
+declare function laboratoriesExecutionsCreateLaboratoryExecution(client: ObjectiveAI, body: LaboratoriesExecutionsRequestLaboratoryExecutionCreateParams & {
+    stream: true;
+}, options?: RequestOptions): Promise<Stream<LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk>>;
+declare function laboratoriesExecutionsCreateLaboratoryExecution(client: ObjectiveAI, body: LaboratoriesExecutionsRequestLaboratoryExecutionCreateParams & {
+    stream?: false | null;
+}, options?: RequestOptions): Promise<LaboratoriesExecutionsResponseUnaryLaboratoryExecution>;
 
 declare const SwarmGetSwarmResponseSchema: z.ZodIntersection<z.ZodUnion<readonly [z.ZodObject<{
     commit: z.ZodString;
@@ -108024,4 +108086,4 @@ declare function merge<T extends {}>(a: T | null | undefined, b: T | null | unde
 declare function mergedString(a: string, b: string): [string, boolean];
 declare function mergedNumberArray(a: number[], b: number[]): [number[], boolean];
 
-export { type AgentAgent, type AgentAgentBase, AgentAgentBaseSchema, AgentAgentSchema, type AgentAgentWithFallbacks, AgentAgentWithFallbacksSchema, type AgentAgentWithFallbacksWithCount, AgentAgentWithFallbacksWithCountSchema, type AgentClaudeAgentSdkAgent, type AgentClaudeAgentSdkAgentBase, AgentClaudeAgentSdkAgentBaseSchema, AgentClaudeAgentSdkAgentSchema, type AgentClaudeAgentSdkContinuation, AgentClaudeAgentSdkContinuationSchema, type AgentClaudeAgentSdkEffort, AgentClaudeAgentSdkEffortSchema, type AgentClaudeAgentSdkOutputMode, AgentClaudeAgentSdkOutputModeSchema, type AgentClaudeAgentSdkUpstream, AgentClaudeAgentSdkUpstreamSchema, type AgentCompletionsMessageAssistantMessage, type AgentCompletionsMessageAssistantMessageExpression, AgentCompletionsMessageAssistantMessageExpressionSchema, AgentCompletionsMessageAssistantMessageSchema, type AgentCompletionsMessageAssistantToolCall, type AgentCompletionsMessageAssistantToolCallDelta, AgentCompletionsMessageAssistantToolCallDeltaSchema, type AgentCompletionsMessageAssistantToolCallExpression, AgentCompletionsMessageAssistantToolCallExpressionSchema, type AgentCompletionsMessageAssistantToolCallFunction, type AgentCompletionsMessageAssistantToolCallFunctionDelta, AgentCompletionsMessageAssistantToolCallFunctionDeltaSchema, type AgentCompletionsMessageAssistantToolCallFunctionExpression, AgentCompletionsMessageAssistantToolCallFunctionExpressionSchema, AgentCompletionsMessageAssistantToolCallFunctionSchema, AgentCompletionsMessageAssistantToolCallSchema, type AgentCompletionsMessageAssistantToolCallType, AgentCompletionsMessageAssistantToolCallTypeSchema, type AgentCompletionsMessageDeveloperMessage, type AgentCompletionsMessageDeveloperMessageExpression, AgentCompletionsMessageDeveloperMessageExpressionSchema, AgentCompletionsMessageDeveloperMessageSchema, type AgentCompletionsMessageFile, AgentCompletionsMessageFileSchema, type AgentCompletionsMessageImageUrl, type AgentCompletionsMessageImageUrlDetail, AgentCompletionsMessageImageUrlDetailSchema, AgentCompletionsMessageImageUrlSchema, type AgentCompletionsMessageInputAudio, AgentCompletionsMessageInputAudioSchema, type AgentCompletionsMessageMessage, type AgentCompletionsMessageMessageExpression, AgentCompletionsMessageMessageExpressionSchema, AgentCompletionsMessageMessageSchema, type AgentCompletionsMessageRichContent, type AgentCompletionsMessageRichContentExpression, AgentCompletionsMessageRichContentExpressionSchema, type AgentCompletionsMessageRichContentPart, type AgentCompletionsMessageRichContentPartExpression, AgentCompletionsMessageRichContentPartExpressionSchema, AgentCompletionsMessageRichContentPartSchema, AgentCompletionsMessageRichContentSchema, type AgentCompletionsMessageSimpleContent, type AgentCompletionsMessageSimpleContentExpression, AgentCompletionsMessageSimpleContentExpressionSchema, type AgentCompletionsMessageSimpleContentPart, type AgentCompletionsMessageSimpleContentPartExpression, AgentCompletionsMessageSimpleContentPartExpressionSchema, AgentCompletionsMessageSimpleContentPartSchema, AgentCompletionsMessageSimpleContentSchema, type AgentCompletionsMessageSystemMessage, type AgentCompletionsMessageSystemMessageExpression, AgentCompletionsMessageSystemMessageExpressionSchema, AgentCompletionsMessageSystemMessageSchema, type AgentCompletionsMessageToolMessage, type AgentCompletionsMessageToolMessageExpression, AgentCompletionsMessageToolMessageExpressionSchema, AgentCompletionsMessageToolMessageSchema, type AgentCompletionsMessageUserMessage, type AgentCompletionsMessageUserMessageExpression, AgentCompletionsMessageUserMessageExpressionSchema, AgentCompletionsMessageUserMessageSchema, type AgentCompletionsMessageVideoUrl, AgentCompletionsMessageVideoUrlSchema, type AgentCompletionsRequestAgentCompletionCreateParams, AgentCompletionsRequestAgentCompletionCreateParamsSchema, type AgentCompletionsRequestAgentCompletionCreateParamsStreaming, AgentCompletionsRequestAgentCompletionCreateParamsStreamingSchema, type AgentCompletionsRequestAgentCompletionCreateParamsUnary, AgentCompletionsRequestAgentCompletionCreateParamsUnarySchema, type AgentCompletionsRequestProvider, type AgentCompletionsRequestProviderDataCollection, AgentCompletionsRequestProviderDataCollectionSchema, type AgentCompletionsRequestProviderMaxPrice, AgentCompletionsRequestProviderMaxPriceSchema, AgentCompletionsRequestProviderSchema, type AgentCompletionsRequestProviderSort, AgentCompletionsRequestProviderSortSchema, type AgentCompletionsRequestResponseFormat, type AgentCompletionsRequestResponseFormatParam, AgentCompletionsRequestResponseFormatParamSchema, AgentCompletionsRequestResponseFormatSchema, type AgentCompletionsResponseAssistantRole, AgentCompletionsResponseAssistantRoleSchema, type AgentCompletionsResponseCompletionTokensDetails, AgentCompletionsResponseCompletionTokensDetailsSchema, type AgentCompletionsResponseCostDetails, AgentCompletionsResponseCostDetailsSchema, type AgentCompletionsResponseFinishReason, AgentCompletionsResponseFinishReasonSchema, type AgentCompletionsResponseLogprob, AgentCompletionsResponseLogprobSchema, type AgentCompletionsResponseLogprobs, AgentCompletionsResponseLogprobsSchema, type AgentCompletionsResponsePromptTokensDetails, AgentCompletionsResponsePromptTokensDetailsSchema, type AgentCompletionsResponseStreamingAgentCompletionChunk, AgentCompletionsResponseStreamingAgentCompletionChunkSchema, type AgentCompletionsResponseStreamingAssistantResponseChunk, AgentCompletionsResponseStreamingAssistantResponseChunkSchema, type AgentCompletionsResponseStreamingMessageChunk, AgentCompletionsResponseStreamingMessageChunkSchema, type AgentCompletionsResponseStreamingObject, AgentCompletionsResponseStreamingObjectSchema, type AgentCompletionsResponseToolResponse, AgentCompletionsResponseToolResponseSchema, type AgentCompletionsResponseToolRole, AgentCompletionsResponseToolRoleSchema, type AgentCompletionsResponseTopLogprob, AgentCompletionsResponseTopLogprobSchema, type AgentCompletionsResponseUnaryAgentCompletion, AgentCompletionsResponseUnaryAgentCompletionSchema, type AgentCompletionsResponseUnaryAssistantResponse, AgentCompletionsResponseUnaryAssistantResponseSchema, type AgentCompletionsResponseUnaryMessage, AgentCompletionsResponseUnaryMessageSchema, type AgentCompletionsResponseUnaryObject, AgentCompletionsResponseUnaryObjectSchema, type AgentCompletionsResponseUpstreamUsage, AgentCompletionsResponseUpstreamUsageSchema, type AgentCompletionsResponseUsage, AgentCompletionsResponseUsageSchema, type AgentContinuation, AgentContinuationSchema, type AgentGetAgentResponse, AgentGetAgentResponseSchema, type AgentInlineAgent, type AgentInlineAgentBase, AgentInlineAgentBaseSchema, type AgentInlineAgentBaseWithFallbacks, type AgentInlineAgentBaseWithFallbacksOrRemote, type AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional, AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema, AgentInlineAgentBaseWithFallbacksOrRemoteSchema, type AgentInlineAgentBaseWithFallbacksOrRemoteWithCount, AgentInlineAgentBaseWithFallbacksOrRemoteWithCountSchema, AgentInlineAgentBaseWithFallbacksSchema, AgentInlineAgentSchema, type AgentInlineAgentWithFallbacks, AgentInlineAgentWithFallbacksSchema, type AgentListAgentResponse, AgentListAgentResponseSchema, type AgentListAgentsRequest, AgentListAgentsRequestSchema, type AgentListAgentsSource, AgentListAgentsSourceSchema, type AgentMcpServer, AgentMcpServerSchema, type AgentMockAgent, type AgentMockAgentBase, AgentMockAgentBaseSchema, AgentMockAgentSchema, type AgentMockContinuation, AgentMockContinuationSchema, type AgentMockMode, AgentMockModeSchema, type AgentMockOutputMode, AgentMockOutputModeSchema, type AgentMockUpstream, AgentMockUpstreamSchema, type AgentOpenrouterAgent, type AgentOpenrouterAgentBase, AgentOpenrouterAgentBaseSchema, AgentOpenrouterAgentSchema, type AgentOpenrouterContinuation, AgentOpenrouterContinuationSchema, type AgentOpenrouterOutputMode, AgentOpenrouterOutputModeSchema, type AgentOpenrouterProvider, type AgentOpenrouterProviderQuantization, AgentOpenrouterProviderQuantizationSchema, AgentOpenrouterProviderSchema, type AgentOpenrouterReasoning, type AgentOpenrouterReasoningEffort, AgentOpenrouterReasoningEffortSchema, AgentOpenrouterReasoningSchema, type AgentOpenrouterReasoningSummaryVerbosity, AgentOpenrouterReasoningSummaryVerbositySchema, type AgentOpenrouterStop, AgentOpenrouterStopSchema, type AgentOpenrouterUpstream, AgentOpenrouterUpstreamSchema, type AgentOpenrouterVerbosity, AgentOpenrouterVerbositySchema, type AgentOutputMode, AgentOutputModeSchema, type AgentRemoteAgent, type AgentRemoteAgentBase, AgentRemoteAgentBaseSchema, type AgentRemoteAgentBaseWithFallbacks, AgentRemoteAgentBaseWithFallbacksSchema, AgentRemoteAgentSchema, type AgentRemoteAgentWithFallbacks, AgentRemoteAgentWithFallbacksSchema, type AgentUpstream, AgentUpstreamSchema, type AgentUsageAgentResponse, AgentUsageAgentResponseSchema, type AuthApiKeyWithMetadata, AuthApiKeyWithMetadataSchema, type AuthCreateApiKeyRequest, AuthCreateApiKeyRequestSchema, type AuthCreateOpenRouterByokApiKeyRequest, AuthCreateOpenRouterByokApiKeyRequestSchema, type AuthDisableApiKeyRequest, AuthDisableApiKeyRequestSchema, type AuthGetCreditsResponse, AuthGetCreditsResponseSchema, type AuthGetOpenRouterByokApiKeyResponse, AuthGetOpenRouterByokApiKeyResponseSchema, type AuthListApiKeyItem, AuthListApiKeyItemSchema, type AuthListApiKeyResponse, AuthListApiKeyResponseSchema, type ConfigAgentsConfig, ConfigAgentsConfigSchema, type ConfigApiConfig, ConfigApiConfigSchema, type ConfigApiHeadersConfig, ConfigApiHeadersConfigSchema, type ConfigApiLocalConfig, ConfigApiLocalConfigSchema, type ConfigApiMode, ConfigApiModeSchema, type ConfigApiRemoteConfig, ConfigApiRemoteConfigSchema, type ConfigConfig, ConfigConfigSchema, type ConfigFavorite, ConfigFavoriteSchema, type ConfigFunctionsConfig, ConfigFunctionsConfigSchema, type ConfigFunctionsInventionsConfig, ConfigFunctionsInventionsConfigSchema, type ConfigFunctionsProfilesConfig, ConfigFunctionsProfilesConfigSchema, type ConfigFunctionsProfilesPairsConfig, ConfigFunctionsProfilesPairsConfigSchema, type ConfigPairFavorite, ConfigPairFavoriteSchema, type ConfigSwarmsConfig, ConfigSwarmsConfigSchema, type ConfigViewerConfig, ConfigViewerConfigSchema, type ConfigViewerLocalConfig, ConfigViewerLocalConfigSchema, type ConfigViewerMode, ConfigViewerModeSchema, type ConfigViewerSecretSignaturePair, ConfigViewerSecretSignaturePairSchema, type ErrorErrorCreateParams, ErrorErrorCreateParamsSchema, type ErrorErrorCreateParamsStreaming, ErrorErrorCreateParamsStreamingSchema, type ErrorErrorCreateParamsUnary, ErrorErrorCreateParamsUnarySchema, type ErrorErrorResponse, ErrorErrorResponseSchema, type ErrorResponseError, ErrorResponseErrorSchema, type FunctionsAlphaInlineFunction, FunctionsAlphaInlineFunctionSchema, type FunctionsAlphaRemoteFunction, FunctionsAlphaRemoteFunctionSchema, type FunctionsAlphaScalarBranchTaskExpression, FunctionsAlphaScalarBranchTaskExpressionSchema, type FunctionsAlphaScalarInlineFunction, FunctionsAlphaScalarInlineFunctionSchema, type FunctionsAlphaScalarLeafTaskExpression, FunctionsAlphaScalarLeafTaskExpressionSchema, type FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression, FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionSchema, type FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpression, FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpression, FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarRemoteFunction, FunctionsAlphaScalarRemoteFunctionSchema, type FunctionsAlphaScalarScalarFunctionTaskExpression, FunctionsAlphaScalarScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarVectorCompletionTaskExpression, FunctionsAlphaScalarVectorCompletionTaskExpressionSchema, type FunctionsAlphaVectorBranchTaskExpression, FunctionsAlphaVectorBranchTaskExpressionSchema, type FunctionsAlphaVectorExpressionVectorFunctionInputSchema, FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema, type FunctionsAlphaVectorExpressionVectorFunctionInputValue, type FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression, FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema, FunctionsAlphaVectorExpressionVectorFunctionInputValueSchema, type FunctionsAlphaVectorInlineFunction, FunctionsAlphaVectorInlineFunctionSchema, type FunctionsAlphaVectorLeafTaskExpression, FunctionsAlphaVectorLeafTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression, FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpression, FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression, FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema, type FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpression, FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpression, FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema, type FunctionsAlphaVectorRemoteFunction, FunctionsAlphaVectorRemoteFunctionSchema, type FunctionsAlphaVectorScalarFunctionTaskExpression, FunctionsAlphaVectorScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorVectorCompletionTaskExpression, FunctionsAlphaVectorVectorCompletionTaskExpressionSchema, type FunctionsAlphaVectorVectorFunctionTaskExpression, FunctionsAlphaVectorVectorFunctionTaskExpressionSchema, type FunctionsCheckScalarFieldsValidation, FunctionsCheckScalarFieldsValidationSchema, type FunctionsCheckVectorFieldsValidation, FunctionsCheckVectorFieldsValidationSchema, type FunctionsCompiledTask, FunctionsCompiledTaskSchema, type FunctionsExecutionsRequestFunctionExecutionCreateParams, FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema, type FunctionsExecutionsRequestReasoning, FunctionsExecutionsRequestReasoningSchema, type FunctionsExecutionsRequestStrategy, FunctionsExecutionsRequestStrategySchema, type FunctionsExecutionsResponseOutput, FunctionsExecutionsResponseOutputSchema, type FunctionsExecutionsResponseStreamingFunctionExecutionChunk, FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema, type FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk, FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema, type FunctionsExecutionsResponseStreamingObject, FunctionsExecutionsResponseStreamingObjectSchema, type FunctionsExecutionsResponseStreamingReasoningSummaryChunk, FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema, type FunctionsExecutionsResponseStreamingTaskChunk, FunctionsExecutionsResponseStreamingTaskChunkSchema, type FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk, FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema, type FunctionsExecutionsResponseUnaryFunctionExecution, FunctionsExecutionsResponseUnaryFunctionExecutionSchema, type FunctionsExecutionsResponseUnaryFunctionExecutionTask, FunctionsExecutionsResponseUnaryFunctionExecutionTaskSchema, type FunctionsExecutionsResponseUnaryObject, FunctionsExecutionsResponseUnaryObjectSchema, type FunctionsExecutionsResponseUnaryReasoningSummary, FunctionsExecutionsResponseUnaryReasoningSummarySchema, type FunctionsExecutionsResponseUnaryTask, FunctionsExecutionsResponseUnaryTaskSchema, type FunctionsExecutionsResponseUnaryVectorCompletionTask, FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema, type FunctionsExecutionsRetryToken, FunctionsExecutionsRetryTokenSchema, type FunctionsExpressionAnyOfInputSchema, FunctionsExpressionAnyOfInputSchemaSchema, type FunctionsExpressionArrayInputSchema, FunctionsExpressionArrayInputSchemaSchema, type FunctionsExpressionArrayInputSchemaType, FunctionsExpressionArrayInputSchemaTypeSchema, type FunctionsExpressionAudioInputSchema, FunctionsExpressionAudioInputSchemaSchema, type FunctionsExpressionAudioInputSchemaType, FunctionsExpressionAudioInputSchemaTypeSchema, type FunctionsExpressionBooleanInputSchema, FunctionsExpressionBooleanInputSchemaSchema, type FunctionsExpressionBooleanInputSchemaType, FunctionsExpressionBooleanInputSchemaTypeSchema, type FunctionsExpressionExpression, FunctionsExpressionExpressionSchema, type FunctionsExpressionFileInputSchema, FunctionsExpressionFileInputSchemaSchema, type FunctionsExpressionFileInputSchemaType, FunctionsExpressionFileInputSchemaTypeSchema, type FunctionsExpressionImageInputSchema, FunctionsExpressionImageInputSchemaSchema, type FunctionsExpressionImageInputSchemaType, FunctionsExpressionImageInputSchemaTypeSchema, type FunctionsExpressionInputSchema, FunctionsExpressionInputSchemaSchema, type FunctionsExpressionInputValue, type FunctionsExpressionInputValueExpression, type FunctionsExpressionInputValueExpressionObject, FunctionsExpressionInputValueExpressionSchema, type FunctionsExpressionInputValueObject, FunctionsExpressionInputValueSchema, type FunctionsExpressionIntegerInputSchema, FunctionsExpressionIntegerInputSchemaSchema, type FunctionsExpressionIntegerInputSchemaType, FunctionsExpressionIntegerInputSchemaTypeSchema, type FunctionsExpressionNumberInputSchema, FunctionsExpressionNumberInputSchemaSchema, type FunctionsExpressionNumberInputSchemaType, FunctionsExpressionNumberInputSchemaTypeSchema, type FunctionsExpressionObjectInputSchema, FunctionsExpressionObjectInputSchemaSchema, type FunctionsExpressionObjectInputSchemaType, FunctionsExpressionObjectInputSchemaTypeSchema, type FunctionsExpressionParams, FunctionsExpressionParamsSchema, type FunctionsExpressionSpecial, FunctionsExpressionSpecialSchema, type FunctionsExpressionStringInputSchema, FunctionsExpressionStringInputSchemaSchema, type FunctionsExpressionStringInputSchemaType, FunctionsExpressionStringInputSchemaTypeSchema, type FunctionsExpressionTaskOutput, FunctionsExpressionTaskOutputSchema, type FunctionsExpressionVideoInputSchema, FunctionsExpressionVideoInputSchemaSchema, type FunctionsExpressionVideoInputSchemaType, FunctionsExpressionVideoInputSchemaTypeSchema, type FunctionsFullFunction, FunctionsFullFunctionSchema, type FunctionsFullInlineFunction, type FunctionsFullInlineFunctionOrRemoteCommitOptional, FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema, FunctionsFullInlineFunctionSchema, type FunctionsFullRemoteFunction, FunctionsFullRemoteFunctionSchema, type FunctionsFunction, FunctionsFunctionSchema, type FunctionsFunctionType, FunctionsFunctionTypeSchema, type FunctionsGetFunctionProfilePairResponse, FunctionsGetFunctionProfilePairResponseSchema, type FunctionsGetFunctionProfilePairUsageRequest, FunctionsGetFunctionProfilePairUsageRequestSchema, type FunctionsGetFunctionResponse, FunctionsGetFunctionResponseSchema, type FunctionsInlineFunction, FunctionsInlineFunctionSchema, type FunctionsInlineProfile, type FunctionsInlineProfileOrRemoteCommitOptional, FunctionsInlineProfileOrRemoteCommitOptionalSchema, FunctionsInlineProfileSchema, type FunctionsInlineTasksProfile, FunctionsInlineTasksProfileSchema, type FunctionsInventionsDescriptionObject, FunctionsInventionsDescriptionObjectSchema, type FunctionsInventionsEssayObject, FunctionsInventionsEssayObjectSchema, type FunctionsInventionsEssayTasksObject, FunctionsInventionsEssayTasksObjectSchema, type FunctionsInventionsIndexObject, FunctionsInventionsIndexObjectSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreaming, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreamingSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnary, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnarySchema, type FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema, type FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema, type FunctionsInventionsRecursiveResponseStreamingObject, FunctionsInventionsRecursiveResponseStreamingObjectSchema, type FunctionsInventionsRecursiveResponseUnaryFunctionInvention, type FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive, FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiveSchema, FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema, type FunctionsInventionsRecursiveResponseUnaryObject, FunctionsInventionsRecursiveResponseUnaryObjectSchema, type FunctionsInventionsRequestFunctionInventionCreateParams, FunctionsInventionsRequestFunctionInventionCreateParamsSchema, type FunctionsInventionsRequestFunctionInventionCreateParamsStreaming, FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSchema, type FunctionsInventionsRequestFunctionInventionCreateParamsUnary, FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema, type FunctionsInventionsResponseStreamingAgentCompletionChunk, FunctionsInventionsResponseStreamingAgentCompletionChunkSchema, type FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseStreamingFunctionInventionChunkSchema, type FunctionsInventionsResponseStreamingObject, FunctionsInventionsResponseStreamingObjectSchema, type FunctionsInventionsResponseUnaryAgentCompletion, FunctionsInventionsResponseUnaryAgentCompletionSchema, type FunctionsInventionsResponseUnaryFunctionInvention, FunctionsInventionsResponseUnaryFunctionInventionSchema, type FunctionsInventionsResponseUnaryObject, FunctionsInventionsResponseUnaryObjectSchema, type FunctionsInventionsStateAlphaScalarBranchState, FunctionsInventionsStateAlphaScalarBranchStateSchema, type FunctionsInventionsStateAlphaScalarLeafState, FunctionsInventionsStateAlphaScalarLeafStateSchema, type FunctionsInventionsStateAlphaScalarState, FunctionsInventionsStateAlphaScalarStateSchema, type FunctionsInventionsStateAlphaVectorBranchState, FunctionsInventionsStateAlphaVectorBranchStateSchema, type FunctionsInventionsStateAlphaVectorLeafState, FunctionsInventionsStateAlphaVectorLeafStateSchema, type FunctionsInventionsStateAlphaVectorState, FunctionsInventionsStateAlphaVectorStateSchema, type FunctionsInventionsStateInputSchema, FunctionsInventionsStateInputSchemaSchema, type FunctionsInventionsStateParams, FunctionsInventionsStateParamsSchema, type FunctionsInventionsStateParamsState, type FunctionsInventionsStateParamsStateOrRemoteCommitOptional, FunctionsInventionsStateParamsStateOrRemoteCommitOptionalSchema, FunctionsInventionsStateParamsStateSchema, type FunctionsInventionsStateState, FunctionsInventionsStateStateSchema, type FunctionsInventionsTasksLengthObject, FunctionsInventionsTasksLengthObjectSchema, type FunctionsListFunctionProfilePairItem, FunctionsListFunctionProfilePairItemSchema, type FunctionsListFunctionProfilePairResponse, FunctionsListFunctionProfilePairResponseSchema, type FunctionsListFunctionProfilePairsRequest, FunctionsListFunctionProfilePairsRequestSchema, type FunctionsListFunctionProfilePairsSource, FunctionsListFunctionProfilePairsSourceSchema, type FunctionsListFunctionResponse, FunctionsListFunctionResponseSchema, type FunctionsListFunctionsRequest, FunctionsListFunctionsRequestSchema, type FunctionsListFunctionsSource, FunctionsListFunctionsSourceSchema, type FunctionsPlaceholderScalarFunctionTask, type FunctionsPlaceholderScalarFunctionTaskExpression, FunctionsPlaceholderScalarFunctionTaskExpressionSchema, FunctionsPlaceholderScalarFunctionTaskSchema, type FunctionsPlaceholderVectorFunctionTask, type FunctionsPlaceholderVectorFunctionTaskExpression, FunctionsPlaceholderVectorFunctionTaskExpressionSchema, FunctionsPlaceholderVectorFunctionTaskSchema, type FunctionsProfile, FunctionsProfileSchema, type FunctionsProfilesComputationsRequestDatasetItem, FunctionsProfilesComputationsRequestDatasetItemSchema, type FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParams, FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParamsSchema, type FunctionsProfilesComputationsRequestTarget, FunctionsProfilesComputationsRequestTargetSchema, type FunctionsProfilesComputationsResponseFittingStats, FunctionsProfilesComputationsResponseFittingStatsSchema, type FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk, FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema, type FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema, type FunctionsProfilesComputationsResponseStreamingObject, FunctionsProfilesComputationsResponseStreamingObjectSchema, type FunctionsProfilesComputationsResponseUnaryFunctionExecution, FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema, type FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation, FunctionsProfilesComputationsResponseUnaryFunctionProfileComputationSchema, type FunctionsProfilesComputationsResponseUnaryObject, FunctionsProfilesComputationsResponseUnaryObjectSchema, type FunctionsProfilesComputationsRetryToken, FunctionsProfilesComputationsRetryTokenSchema, type FunctionsProfilesGetProfileResponse, FunctionsProfilesGetProfileResponseSchema, type FunctionsProfilesListProfileResponse, FunctionsProfilesListProfileResponseSchema, type FunctionsProfilesListProfilesRequest, FunctionsProfilesListProfilesRequestSchema, type FunctionsProfilesListProfilesSource, FunctionsProfilesListProfilesSourceSchema, type FunctionsProfilesUsageProfileResponse, FunctionsProfilesUsageProfileResponseSchema, type FunctionsRemoteFunction, FunctionsRemoteFunctionSchema, type FunctionsRemoteProfile, FunctionsRemoteProfileSchema, type FunctionsRemoteTasksProfile, FunctionsRemoteTasksProfileSchema, type FunctionsScalarFunctionTask, type FunctionsScalarFunctionTaskExpression, FunctionsScalarFunctionTaskExpressionSchema, FunctionsScalarFunctionTaskSchema, type FunctionsTask, type FunctionsTaskExpression, FunctionsTaskExpressionSchema, type FunctionsTaskProfile, FunctionsTaskProfileSchema, FunctionsTaskSchema, type FunctionsUsageFunctionProfilePairResponse, FunctionsUsageFunctionProfilePairResponseSchema, type FunctionsUsageFunctionResponse, FunctionsUsageFunctionResponseSchema, type FunctionsVectorCompletionTask, type FunctionsVectorCompletionTaskExpression, FunctionsVectorCompletionTaskExpressionSchema, FunctionsVectorCompletionTaskSchema, type FunctionsVectorFunctionTask, type FunctionsVectorFunctionTaskExpression, FunctionsVectorFunctionTaskExpressionSchema, FunctionsVectorFunctionTaskSchema, type LaboratoriesExecutionsRequestLaboratoryExecutionCreateParams, LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema, type LaboratoriesExecutionsResponseStreamingBuilderChunk, LaboratoriesExecutionsResponseStreamingBuilderChunkSchema, type LaboratoriesExecutionsResponseStreamingEvaluationChunk, LaboratoriesExecutionsResponseStreamingEvaluationChunkSchema, type LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk, LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkSchema, type LaboratoriesExecutionsResponseStreamingObject, LaboratoriesExecutionsResponseStreamingObjectSchema, type LaboratoriesExecutionsResponseUnaryBuilder, LaboratoriesExecutionsResponseUnaryBuilderSchema, type LaboratoriesExecutionsResponseUnaryEvaluation, LaboratoriesExecutionsResponseUnaryEvaluationSchema, type LaboratoriesExecutionsResponseUnaryLaboratoryExecution, LaboratoriesExecutionsResponseUnaryLaboratoryExecutionSchema, type LaboratoriesExecutionsResponseUnaryObject, LaboratoriesExecutionsResponseUnaryObjectSchema, ObjectiveAI, ObjectiveAIFetchError, type ObjectiveAIOptions, ObjectiveAIOptionsSchema, type PrefixedUuid, PrefixedUuidSchema, type Remote, type RemotePath, type RemotePathCommitOptional, RemotePathCommitOptionalSchema, RemotePathSchema, RemoteSchema, type RequestOptions, RequestOptionsSchema, Stream, type SwarmGetSwarmResponse, SwarmGetSwarmResponseSchema, type SwarmInlineSwarm, type SwarmInlineSwarmBase, type SwarmInlineSwarmBaseOrRemote, type SwarmInlineSwarmBaseOrRemoteCommitOptional, SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema, SwarmInlineSwarmBaseOrRemoteSchema, SwarmInlineSwarmBaseSchema, SwarmInlineSwarmSchema, type SwarmListSwarmResponse, SwarmListSwarmResponseSchema, type SwarmListSwarmsRequest, SwarmListSwarmsRequestSchema, type SwarmListSwarmsSource, SwarmListSwarmsSourceSchema, type SwarmRemoteSwarm, type SwarmRemoteSwarmBase, SwarmRemoteSwarmBaseSchema, SwarmRemoteSwarmSchema, type SwarmSwarm, type SwarmSwarmBase, SwarmSwarmBaseSchema, SwarmSwarmSchema, type SwarmUsageSwarmResponse, SwarmUsageSwarmResponseSchema, type VectorCompletionsCacheCacheVote, type VectorCompletionsCacheCacheVoteRequest, VectorCompletionsCacheCacheVoteRequestSchema, VectorCompletionsCacheCacheVoteSchema, type VectorCompletionsCacheCompletionVotes, VectorCompletionsCacheCompletionVotesSchema, type VectorCompletionsCacheGetCompletionVotesRequest, VectorCompletionsCacheGetCompletionVotesRequestSchema, type VectorCompletionsRequestVectorCompletionCreateParams, VectorCompletionsRequestVectorCompletionCreateParamsSchema, type VectorCompletionsRequestVectorCompletionCreateParamsStreaming, VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchema, type VectorCompletionsRequestVectorCompletionCreateParamsUnary, VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema, type VectorCompletionsResponseStreamingAgentCompletionChunk, VectorCompletionsResponseStreamingAgentCompletionChunkSchema, type VectorCompletionsResponseStreamingObject, VectorCompletionsResponseStreamingObjectSchema, type VectorCompletionsResponseStreamingVectorCompletionChunk, VectorCompletionsResponseStreamingVectorCompletionChunkSchema, type VectorCompletionsResponseUnaryAgentCompletion, VectorCompletionsResponseUnaryAgentCompletionSchema, type VectorCompletionsResponseUnaryObject, VectorCompletionsResponseUnaryObjectSchema, type VectorCompletionsResponseUnaryVectorCompletion, VectorCompletionsResponseUnaryVectorCompletionSchema, type VectorCompletionsResponseVote, VectorCompletionsResponseVoteSchema, type VectorCompletionsVectorResponses, VectorCompletionsVectorResponsesSchema, type Weights, type WeightsEntry, WeightsEntrySchema, WeightsSchema, agentCompletionsCreateAgentCompletion, agentCompletionsMessageAssistantToolCallDeltaMerged, agentCompletionsMessageAssistantToolCallDeltaMergedList, agentCompletionsMessageAssistantToolCallFunctionDeltaMerged, agentCompletionsMessageRichContentMerged, agentCompletionsResponseCompletionTokensDetailsMerged, agentCompletionsResponseCostDetailsMerged, agentCompletionsResponseLogprobsMerged, agentCompletionsResponsePromptTokensDetailsMerged, agentCompletionsResponseStreamingAgentCompletionChunkMerged, agentCompletionsResponseStreamingAssistantResponseChunkMerged, agentCompletionsResponseStreamingMessageChunkMerged, agentCompletionsResponseStreamingMessageChunkMergedList, agentCompletionsResponseUpstreamUsageMerged, agentCompletionsResponseUsageMerged, agentGetAgent, agentGetAgentUsage, agentListAgents, authCreateApiKey, authCreateOpenrouterByokApiKey, authDeleteOpenrouterByokApiKey, authDisableApiKey, authGetCredits, authGetOpenrouterByokApiKey, authListApiKeys, errorCreateError, functionsExecutionsCreateFunctionExecution, functionsExecutionsResponseStreamingFunctionExecutionChunkMerged, functionsExecutionsResponseStreamingReasoningSummaryChunkMerged, functionsExecutionsResponseStreamingTaskChunkMerged, functionsExecutionsResponseStreamingTaskChunkMergedList, functionsExecutionsResponseStreamingVectorCompletionTaskChunkMerged, functionsGetFunction, functionsGetFunctionProfilePairUsage, functionsGetFunctionUsage, functionsInventionsCreateFunctionInvention, functionsInventionsRecursiveCreateFunctionInventionRecursive, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMerged, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMergedList, functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMergedList, functionsInventionsResponseStreamingFunctionInventionChunkMerged, functionsListFunctionProfilePairs, functionsListFunctions, functionsProfilesComputationsComputeProfile, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMerged, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMergedList, functionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged, functionsProfilesGetProfile, functionsProfilesGetProfileUsage, functionsProfilesListProfiles, isResponseError, merge, mergedNumberArray, mergedString, numberIsEmpty, swarmGetSwarm, swarmGetSwarmUsage, swarmListSwarms, vectorCompletionsCacheGetCacheVote, vectorCompletionsCacheGetCompletionVotes, vectorCompletionsCreateVectorCompletion, vectorCompletionsResponseStreamingAgentCompletionChunkMerged, vectorCompletionsResponseStreamingAgentCompletionChunkMergedList, vectorCompletionsResponseStreamingVectorCompletionChunkMerged, vectorCompletionsResponseVoteMergedList, wasmAgentCompletionsMessagePromptId, wasmAgentCompletionsResponseStreamingAgentCompletionChunkMerged, wasmAgentCompletionsResponseStreamingAgentCompletionChunkNormalized, wasmAgentCompletionsResponseStreamingAgentCompletionChunkToUnary, wasmAgentCompletionsResponseStreamingGenerateAgentCompletionChunk, wasmAgentCompletionsResponseStreamingNormalizeAgentCompletionForTests, wasmAgentValidateAgent, wasmFunctionsAlphaCheckBranchScalarFunction, wasmFunctionsAlphaCheckBranchVectorFunction, wasmFunctionsAlphaCheckLeafScalarFunction, wasmFunctionsAlphaCheckLeafVectorFunction, wasmFunctionsCheckCheckScalarFields, wasmFunctionsCheckCheckVectorFields, wasmFunctionsCompileFunctionInputMerge, wasmFunctionsCompileFunctionInputSplit, wasmFunctionsCompileFunctionOutputLength, wasmFunctionsCompileFunctionTasks, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkMerged, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkNormalized, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkToUnary, wasmFunctionsExecutionsResponseStreamingGenerateFunctionExecutionChunk, wasmFunctionsExecutionsResponseStreamingNormalizeFunctionExecutionForTests, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkNormalized, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkToUnary, wasmFunctionsInventionsRecursiveResponseStreamingGenerateFunctionInventionRecursiveChunk, wasmFunctionsInventionsRecursiveResponseStreamingNormalizeFunctionInventionRecursiveForTests, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkMerged, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkNormalized, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkToUnary, wasmFunctionsInventionsResponseStreamingGenerateFunctionInventionChunk, wasmFunctionsInventionsResponseStreamingNormalizeFunctionInventionForTests, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkNormalized, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkToUnary, wasmFunctionsProfilesComputationsResponseStreamingGenerateFunctionProfileComputationChunk, wasmFunctionsProfilesComputationsResponseStreamingNormalizeFunctionProfileComputationForTests, wasmFunctionsValidateFunctionInput, wasmSwarmValidateSwarm, wasmVectorCompletionsResponseStreamingGenerateVectorCompletionChunk, wasmVectorCompletionsResponseStreamingNormalizeVectorCompletionForTests, wasmVectorCompletionsResponseStreamingVectorCompletionChunkMerged, wasmVectorCompletionsResponseStreamingVectorCompletionChunkNormalized, wasmVectorCompletionsResponseStreamingVectorCompletionChunkToUnary, wasmVectorCompletionsVectorResponseId };
+export { type AgentAgent, type AgentAgentBase, AgentAgentBaseSchema, AgentAgentSchema, type AgentAgentWithFallbacks, AgentAgentWithFallbacksSchema, type AgentAgentWithFallbacksWithCount, AgentAgentWithFallbacksWithCountSchema, type AgentClaudeAgentSdkAgent, type AgentClaudeAgentSdkAgentBase, AgentClaudeAgentSdkAgentBaseSchema, AgentClaudeAgentSdkAgentSchema, type AgentClaudeAgentSdkContinuation, AgentClaudeAgentSdkContinuationSchema, type AgentClaudeAgentSdkEffort, AgentClaudeAgentSdkEffortSchema, type AgentClaudeAgentSdkOutputMode, AgentClaudeAgentSdkOutputModeSchema, type AgentClaudeAgentSdkUpstream, AgentClaudeAgentSdkUpstreamSchema, type AgentCompletionsMessageAssistantMessage, type AgentCompletionsMessageAssistantMessageExpression, AgentCompletionsMessageAssistantMessageExpressionSchema, AgentCompletionsMessageAssistantMessageSchema, type AgentCompletionsMessageAssistantToolCall, type AgentCompletionsMessageAssistantToolCallDelta, AgentCompletionsMessageAssistantToolCallDeltaSchema, type AgentCompletionsMessageAssistantToolCallExpression, AgentCompletionsMessageAssistantToolCallExpressionSchema, type AgentCompletionsMessageAssistantToolCallFunction, type AgentCompletionsMessageAssistantToolCallFunctionDelta, AgentCompletionsMessageAssistantToolCallFunctionDeltaSchema, type AgentCompletionsMessageAssistantToolCallFunctionExpression, AgentCompletionsMessageAssistantToolCallFunctionExpressionSchema, AgentCompletionsMessageAssistantToolCallFunctionSchema, AgentCompletionsMessageAssistantToolCallSchema, type AgentCompletionsMessageAssistantToolCallType, AgentCompletionsMessageAssistantToolCallTypeSchema, type AgentCompletionsMessageDeveloperMessage, type AgentCompletionsMessageDeveloperMessageExpression, AgentCompletionsMessageDeveloperMessageExpressionSchema, AgentCompletionsMessageDeveloperMessageSchema, type AgentCompletionsMessageFile, AgentCompletionsMessageFileSchema, type AgentCompletionsMessageImageUrl, type AgentCompletionsMessageImageUrlDetail, AgentCompletionsMessageImageUrlDetailSchema, AgentCompletionsMessageImageUrlSchema, type AgentCompletionsMessageInputAudio, AgentCompletionsMessageInputAudioSchema, type AgentCompletionsMessageMessage, type AgentCompletionsMessageMessageExpression, AgentCompletionsMessageMessageExpressionSchema, AgentCompletionsMessageMessageSchema, type AgentCompletionsMessageRichContent, type AgentCompletionsMessageRichContentExpression, AgentCompletionsMessageRichContentExpressionSchema, type AgentCompletionsMessageRichContentPart, type AgentCompletionsMessageRichContentPartExpression, AgentCompletionsMessageRichContentPartExpressionSchema, AgentCompletionsMessageRichContentPartSchema, AgentCompletionsMessageRichContentSchema, type AgentCompletionsMessageSimpleContent, type AgentCompletionsMessageSimpleContentExpression, AgentCompletionsMessageSimpleContentExpressionSchema, type AgentCompletionsMessageSimpleContentPart, type AgentCompletionsMessageSimpleContentPartExpression, AgentCompletionsMessageSimpleContentPartExpressionSchema, AgentCompletionsMessageSimpleContentPartSchema, AgentCompletionsMessageSimpleContentSchema, type AgentCompletionsMessageSystemMessage, type AgentCompletionsMessageSystemMessageExpression, AgentCompletionsMessageSystemMessageExpressionSchema, AgentCompletionsMessageSystemMessageSchema, type AgentCompletionsMessageToolMessage, type AgentCompletionsMessageToolMessageExpression, AgentCompletionsMessageToolMessageExpressionSchema, AgentCompletionsMessageToolMessageSchema, type AgentCompletionsMessageUserMessage, type AgentCompletionsMessageUserMessageExpression, AgentCompletionsMessageUserMessageExpressionSchema, AgentCompletionsMessageUserMessageSchema, type AgentCompletionsMessageVideoUrl, AgentCompletionsMessageVideoUrlSchema, type AgentCompletionsRequestAgentCompletionCreateParams, AgentCompletionsRequestAgentCompletionCreateParamsSchema, type AgentCompletionsRequestAgentCompletionCreateParamsStreaming, AgentCompletionsRequestAgentCompletionCreateParamsStreamingSchema, type AgentCompletionsRequestAgentCompletionCreateParamsUnary, AgentCompletionsRequestAgentCompletionCreateParamsUnarySchema, type AgentCompletionsRequestProvider, type AgentCompletionsRequestProviderDataCollection, AgentCompletionsRequestProviderDataCollectionSchema, type AgentCompletionsRequestProviderMaxPrice, AgentCompletionsRequestProviderMaxPriceSchema, AgentCompletionsRequestProviderSchema, type AgentCompletionsRequestProviderSort, AgentCompletionsRequestProviderSortSchema, type AgentCompletionsRequestResponseFormat, type AgentCompletionsRequestResponseFormatParam, AgentCompletionsRequestResponseFormatParamSchema, AgentCompletionsRequestResponseFormatSchema, type AgentCompletionsResponseAssistantRole, AgentCompletionsResponseAssistantRoleSchema, type AgentCompletionsResponseCompletionTokensDetails, AgentCompletionsResponseCompletionTokensDetailsSchema, type AgentCompletionsResponseCostDetails, AgentCompletionsResponseCostDetailsSchema, type AgentCompletionsResponseFinishReason, AgentCompletionsResponseFinishReasonSchema, type AgentCompletionsResponseLogprob, AgentCompletionsResponseLogprobSchema, type AgentCompletionsResponseLogprobs, AgentCompletionsResponseLogprobsSchema, type AgentCompletionsResponsePromptTokensDetails, AgentCompletionsResponsePromptTokensDetailsSchema, type AgentCompletionsResponseStreamingAgentCompletionChunk, AgentCompletionsResponseStreamingAgentCompletionChunkSchema, type AgentCompletionsResponseStreamingAssistantResponseChunk, AgentCompletionsResponseStreamingAssistantResponseChunkSchema, type AgentCompletionsResponseStreamingMessageChunk, AgentCompletionsResponseStreamingMessageChunkSchema, type AgentCompletionsResponseStreamingObject, AgentCompletionsResponseStreamingObjectSchema, type AgentCompletionsResponseToolResponse, AgentCompletionsResponseToolResponseSchema, type AgentCompletionsResponseToolRole, AgentCompletionsResponseToolRoleSchema, type AgentCompletionsResponseTopLogprob, AgentCompletionsResponseTopLogprobSchema, type AgentCompletionsResponseUnaryAgentCompletion, AgentCompletionsResponseUnaryAgentCompletionSchema, type AgentCompletionsResponseUnaryAssistantResponse, AgentCompletionsResponseUnaryAssistantResponseSchema, type AgentCompletionsResponseUnaryMessage, AgentCompletionsResponseUnaryMessageSchema, type AgentCompletionsResponseUnaryObject, AgentCompletionsResponseUnaryObjectSchema, type AgentCompletionsResponseUpstreamUsage, AgentCompletionsResponseUpstreamUsageSchema, type AgentCompletionsResponseUsage, AgentCompletionsResponseUsageSchema, type AgentContinuation, AgentContinuationSchema, type AgentGetAgentResponse, AgentGetAgentResponseSchema, type AgentInlineAgent, type AgentInlineAgentBase, AgentInlineAgentBaseSchema, type AgentInlineAgentBaseWithFallbacks, type AgentInlineAgentBaseWithFallbacksOrRemote, type AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptional, AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema, AgentInlineAgentBaseWithFallbacksOrRemoteSchema, type AgentInlineAgentBaseWithFallbacksOrRemoteWithCount, AgentInlineAgentBaseWithFallbacksOrRemoteWithCountSchema, AgentInlineAgentBaseWithFallbacksSchema, AgentInlineAgentSchema, type AgentInlineAgentWithFallbacks, AgentInlineAgentWithFallbacksSchema, type AgentListAgentResponse, AgentListAgentResponseSchema, type AgentListAgentsRequest, AgentListAgentsRequestSchema, type AgentListAgentsSource, AgentListAgentsSourceSchema, type AgentMcpServer, AgentMcpServerSchema, type AgentMockAgent, type AgentMockAgentBase, AgentMockAgentBaseSchema, AgentMockAgentSchema, type AgentMockContinuation, AgentMockContinuationSchema, type AgentMockMode, AgentMockModeSchema, type AgentMockOutputMode, AgentMockOutputModeSchema, type AgentMockUpstream, AgentMockUpstreamSchema, type AgentOpenrouterAgent, type AgentOpenrouterAgentBase, AgentOpenrouterAgentBaseSchema, AgentOpenrouterAgentSchema, type AgentOpenrouterContinuation, AgentOpenrouterContinuationSchema, type AgentOpenrouterOutputMode, AgentOpenrouterOutputModeSchema, type AgentOpenrouterProvider, type AgentOpenrouterProviderQuantization, AgentOpenrouterProviderQuantizationSchema, AgentOpenrouterProviderSchema, type AgentOpenrouterReasoning, type AgentOpenrouterReasoningEffort, AgentOpenrouterReasoningEffortSchema, AgentOpenrouterReasoningSchema, type AgentOpenrouterReasoningSummaryVerbosity, AgentOpenrouterReasoningSummaryVerbositySchema, type AgentOpenrouterStop, AgentOpenrouterStopSchema, type AgentOpenrouterUpstream, AgentOpenrouterUpstreamSchema, type AgentOpenrouterVerbosity, AgentOpenrouterVerbositySchema, type AgentOutputMode, AgentOutputModeSchema, type AgentRemoteAgent, type AgentRemoteAgentBase, AgentRemoteAgentBaseSchema, type AgentRemoteAgentBaseWithFallbacks, AgentRemoteAgentBaseWithFallbacksSchema, AgentRemoteAgentSchema, type AgentRemoteAgentWithFallbacks, AgentRemoteAgentWithFallbacksSchema, type AgentUpstream, AgentUpstreamSchema, type AgentUsageAgentResponse, AgentUsageAgentResponseSchema, type AuthApiKeyWithMetadata, AuthApiKeyWithMetadataSchema, type AuthCreateApiKeyRequest, AuthCreateApiKeyRequestSchema, type AuthCreateOpenRouterByokApiKeyRequest, AuthCreateOpenRouterByokApiKeyRequestSchema, type AuthDisableApiKeyRequest, AuthDisableApiKeyRequestSchema, type AuthGetCreditsResponse, AuthGetCreditsResponseSchema, type AuthGetOpenRouterByokApiKeyResponse, AuthGetOpenRouterByokApiKeyResponseSchema, type AuthListApiKeyItem, AuthListApiKeyItemSchema, type AuthListApiKeyResponse, AuthListApiKeyResponseSchema, type ErrorErrorCreateParams, ErrorErrorCreateParamsSchema, type ErrorErrorCreateParamsStreaming, ErrorErrorCreateParamsStreamingSchema, type ErrorErrorCreateParamsUnary, ErrorErrorCreateParamsUnarySchema, type ErrorErrorResponse, ErrorErrorResponseSchema, type ErrorResponseError, ErrorResponseErrorSchema, type FilesystemConfigAgentsConfig, FilesystemConfigAgentsConfigSchema, type FilesystemConfigApiConfig, FilesystemConfigApiConfigSchema, type FilesystemConfigApiHeadersConfig, FilesystemConfigApiHeadersConfigSchema, type FilesystemConfigApiLocalConfig, FilesystemConfigApiLocalConfigSchema, type FilesystemConfigApiMode, FilesystemConfigApiModeSchema, type FilesystemConfigApiRemoteConfig, FilesystemConfigApiRemoteConfigSchema, type FilesystemConfigConfig, FilesystemConfigConfigSchema, type FilesystemConfigFavorite, FilesystemConfigFavoriteSchema, type FilesystemConfigFunctionsConfig, FilesystemConfigFunctionsConfigSchema, type FilesystemConfigFunctionsInventionsConfig, FilesystemConfigFunctionsInventionsConfigSchema, type FilesystemConfigFunctionsProfilesConfig, FilesystemConfigFunctionsProfilesConfigSchema, type FilesystemConfigFunctionsProfilesPairsConfig, FilesystemConfigFunctionsProfilesPairsConfigSchema, type FilesystemConfigPairFavorite, FilesystemConfigPairFavoriteSchema, type FilesystemConfigSwarmsConfig, FilesystemConfigSwarmsConfigSchema, type FilesystemConfigViewerConfig, FilesystemConfigViewerConfigSchema, type FilesystemConfigViewerLocalConfig, FilesystemConfigViewerLocalConfigSchema, type FilesystemConfigViewerMode, FilesystemConfigViewerModeSchema, type FilesystemConfigViewerSecretSignaturePair, FilesystemConfigViewerSecretSignaturePairSchema, type FilesystemLogsListItem, FilesystemLogsListItemSchema, type FunctionsAlphaInlineFunction, FunctionsAlphaInlineFunctionSchema, type FunctionsAlphaRemoteFunction, FunctionsAlphaRemoteFunctionSchema, type FunctionsAlphaScalarBranchTaskExpression, FunctionsAlphaScalarBranchTaskExpressionSchema, type FunctionsAlphaScalarInlineFunction, FunctionsAlphaScalarInlineFunctionSchema, type FunctionsAlphaScalarLeafTaskExpression, FunctionsAlphaScalarLeafTaskExpressionSchema, type FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression, FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionSchema, type FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpression, FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpression, FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarRemoteFunction, FunctionsAlphaScalarRemoteFunctionSchema, type FunctionsAlphaScalarScalarFunctionTaskExpression, FunctionsAlphaScalarScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarVectorCompletionTaskExpression, FunctionsAlphaScalarVectorCompletionTaskExpressionSchema, type FunctionsAlphaVectorBranchTaskExpression, FunctionsAlphaVectorBranchTaskExpressionSchema, type FunctionsAlphaVectorExpressionVectorFunctionInputSchema, FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema, type FunctionsAlphaVectorExpressionVectorFunctionInputValue, type FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression, FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema, FunctionsAlphaVectorExpressionVectorFunctionInputValueSchema, type FunctionsAlphaVectorInlineFunction, FunctionsAlphaVectorInlineFunctionSchema, type FunctionsAlphaVectorLeafTaskExpression, FunctionsAlphaVectorLeafTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression, FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpression, FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression, FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema, type FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpression, FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpression, FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema, type FunctionsAlphaVectorRemoteFunction, FunctionsAlphaVectorRemoteFunctionSchema, type FunctionsAlphaVectorScalarFunctionTaskExpression, FunctionsAlphaVectorScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorVectorCompletionTaskExpression, FunctionsAlphaVectorVectorCompletionTaskExpressionSchema, type FunctionsAlphaVectorVectorFunctionTaskExpression, FunctionsAlphaVectorVectorFunctionTaskExpressionSchema, type FunctionsCheckScalarFieldsValidation, FunctionsCheckScalarFieldsValidationSchema, type FunctionsCheckVectorFieldsValidation, FunctionsCheckVectorFieldsValidationSchema, type FunctionsCompiledTask, FunctionsCompiledTaskSchema, type FunctionsExecutionsRequestFunctionExecutionCreateParams, FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema, type FunctionsExecutionsRequestReasoning, FunctionsExecutionsRequestReasoningSchema, type FunctionsExecutionsRequestStrategy, FunctionsExecutionsRequestStrategySchema, type FunctionsExecutionsResponseOutput, FunctionsExecutionsResponseOutputSchema, type FunctionsExecutionsResponseStreamingFunctionExecutionChunk, FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema, type FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk, FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema, type FunctionsExecutionsResponseStreamingObject, FunctionsExecutionsResponseStreamingObjectSchema, type FunctionsExecutionsResponseStreamingReasoningSummaryChunk, FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema, type FunctionsExecutionsResponseStreamingTaskChunk, FunctionsExecutionsResponseStreamingTaskChunkSchema, type FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk, FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema, type FunctionsExecutionsResponseUnaryFunctionExecution, FunctionsExecutionsResponseUnaryFunctionExecutionSchema, type FunctionsExecutionsResponseUnaryFunctionExecutionTask, FunctionsExecutionsResponseUnaryFunctionExecutionTaskSchema, type FunctionsExecutionsResponseUnaryObject, FunctionsExecutionsResponseUnaryObjectSchema, type FunctionsExecutionsResponseUnaryReasoningSummary, FunctionsExecutionsResponseUnaryReasoningSummarySchema, type FunctionsExecutionsResponseUnaryTask, FunctionsExecutionsResponseUnaryTaskSchema, type FunctionsExecutionsResponseUnaryVectorCompletionTask, FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema, type FunctionsExecutionsRetryToken, FunctionsExecutionsRetryTokenSchema, type FunctionsExpressionAnyOfInputSchema, FunctionsExpressionAnyOfInputSchemaSchema, type FunctionsExpressionArrayInputSchema, FunctionsExpressionArrayInputSchemaSchema, type FunctionsExpressionArrayInputSchemaType, FunctionsExpressionArrayInputSchemaTypeSchema, type FunctionsExpressionAudioInputSchema, FunctionsExpressionAudioInputSchemaSchema, type FunctionsExpressionAudioInputSchemaType, FunctionsExpressionAudioInputSchemaTypeSchema, type FunctionsExpressionBooleanInputSchema, FunctionsExpressionBooleanInputSchemaSchema, type FunctionsExpressionBooleanInputSchemaType, FunctionsExpressionBooleanInputSchemaTypeSchema, type FunctionsExpressionExpression, FunctionsExpressionExpressionSchema, type FunctionsExpressionFileInputSchema, FunctionsExpressionFileInputSchemaSchema, type FunctionsExpressionFileInputSchemaType, FunctionsExpressionFileInputSchemaTypeSchema, type FunctionsExpressionImageInputSchema, FunctionsExpressionImageInputSchemaSchema, type FunctionsExpressionImageInputSchemaType, FunctionsExpressionImageInputSchemaTypeSchema, type FunctionsExpressionInputSchema, FunctionsExpressionInputSchemaSchema, type FunctionsExpressionInputValue, type FunctionsExpressionInputValueExpression, type FunctionsExpressionInputValueExpressionObject, FunctionsExpressionInputValueExpressionSchema, type FunctionsExpressionInputValueObject, FunctionsExpressionInputValueSchema, type FunctionsExpressionIntegerInputSchema, FunctionsExpressionIntegerInputSchemaSchema, type FunctionsExpressionIntegerInputSchemaType, FunctionsExpressionIntegerInputSchemaTypeSchema, type FunctionsExpressionNumberInputSchema, FunctionsExpressionNumberInputSchemaSchema, type FunctionsExpressionNumberInputSchemaType, FunctionsExpressionNumberInputSchemaTypeSchema, type FunctionsExpressionObjectInputSchema, FunctionsExpressionObjectInputSchemaSchema, type FunctionsExpressionObjectInputSchemaType, FunctionsExpressionObjectInputSchemaTypeSchema, type FunctionsExpressionParams, FunctionsExpressionParamsSchema, type FunctionsExpressionSpecial, FunctionsExpressionSpecialSchema, type FunctionsExpressionStringInputSchema, FunctionsExpressionStringInputSchemaSchema, type FunctionsExpressionStringInputSchemaType, FunctionsExpressionStringInputSchemaTypeSchema, type FunctionsExpressionTaskOutput, FunctionsExpressionTaskOutputSchema, type FunctionsExpressionVideoInputSchema, FunctionsExpressionVideoInputSchemaSchema, type FunctionsExpressionVideoInputSchemaType, FunctionsExpressionVideoInputSchemaTypeSchema, type FunctionsFullFunction, FunctionsFullFunctionSchema, type FunctionsFullInlineFunction, type FunctionsFullInlineFunctionOrRemoteCommitOptional, FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema, FunctionsFullInlineFunctionSchema, type FunctionsFullRemoteFunction, FunctionsFullRemoteFunctionSchema, type FunctionsFunction, FunctionsFunctionSchema, type FunctionsFunctionType, FunctionsFunctionTypeSchema, type FunctionsGetFunctionProfilePairResponse, FunctionsGetFunctionProfilePairResponseSchema, type FunctionsGetFunctionProfilePairUsageRequest, FunctionsGetFunctionProfilePairUsageRequestSchema, type FunctionsGetFunctionResponse, FunctionsGetFunctionResponseSchema, type FunctionsInlineFunction, FunctionsInlineFunctionSchema, type FunctionsInlineProfile, type FunctionsInlineProfileOrRemoteCommitOptional, FunctionsInlineProfileOrRemoteCommitOptionalSchema, FunctionsInlineProfileSchema, type FunctionsInlineTasksProfile, FunctionsInlineTasksProfileSchema, type FunctionsInventionsDescriptionObject, FunctionsInventionsDescriptionObjectSchema, type FunctionsInventionsEssayObject, FunctionsInventionsEssayObjectSchema, type FunctionsInventionsEssayTasksObject, FunctionsInventionsEssayTasksObjectSchema, type FunctionsInventionsIndexObject, FunctionsInventionsIndexObjectSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreaming, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreamingSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnary, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnarySchema, type FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema, type FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema, type FunctionsInventionsRecursiveResponseStreamingObject, FunctionsInventionsRecursiveResponseStreamingObjectSchema, type FunctionsInventionsRecursiveResponseUnaryFunctionInvention, type FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive, FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiveSchema, FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema, type FunctionsInventionsRecursiveResponseUnaryObject, FunctionsInventionsRecursiveResponseUnaryObjectSchema, type FunctionsInventionsRequestFunctionInventionCreateParams, FunctionsInventionsRequestFunctionInventionCreateParamsSchema, type FunctionsInventionsRequestFunctionInventionCreateParamsStreaming, FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSchema, type FunctionsInventionsRequestFunctionInventionCreateParamsUnary, FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema, type FunctionsInventionsResponseStreamingAgentCompletionChunk, FunctionsInventionsResponseStreamingAgentCompletionChunkSchema, type FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseStreamingFunctionInventionChunkSchema, type FunctionsInventionsResponseStreamingObject, FunctionsInventionsResponseStreamingObjectSchema, type FunctionsInventionsResponseUnaryAgentCompletion, FunctionsInventionsResponseUnaryAgentCompletionSchema, type FunctionsInventionsResponseUnaryFunctionInvention, FunctionsInventionsResponseUnaryFunctionInventionSchema, type FunctionsInventionsResponseUnaryObject, FunctionsInventionsResponseUnaryObjectSchema, type FunctionsInventionsScalarBranchTaskObject, FunctionsInventionsScalarBranchTaskObjectSchema, type FunctionsInventionsScalarInputSchemaObject, FunctionsInventionsScalarInputSchemaObjectSchema, type FunctionsInventionsScalarLeafTaskObject, FunctionsInventionsScalarLeafTaskObjectSchema, type FunctionsInventionsStateAlphaScalarBranchState, FunctionsInventionsStateAlphaScalarBranchStateSchema, type FunctionsInventionsStateAlphaScalarLeafState, FunctionsInventionsStateAlphaScalarLeafStateSchema, type FunctionsInventionsStateAlphaScalarState, FunctionsInventionsStateAlphaScalarStateSchema, type FunctionsInventionsStateAlphaVectorBranchState, FunctionsInventionsStateAlphaVectorBranchStateSchema, type FunctionsInventionsStateAlphaVectorLeafState, FunctionsInventionsStateAlphaVectorLeafStateSchema, type FunctionsInventionsStateAlphaVectorState, FunctionsInventionsStateAlphaVectorStateSchema, type FunctionsInventionsStateInputSchema, FunctionsInventionsStateInputSchemaSchema, type FunctionsInventionsStateParams, FunctionsInventionsStateParamsSchema, type FunctionsInventionsStateParamsState, type FunctionsInventionsStateParamsStateOrRemoteCommitOptional, FunctionsInventionsStateParamsStateOrRemoteCommitOptionalSchema, FunctionsInventionsStateParamsStateSchema, type FunctionsInventionsStateState, FunctionsInventionsStateStateSchema, type FunctionsInventionsTasksLengthObject, FunctionsInventionsTasksLengthObjectSchema, type FunctionsInventionsVectorBranchTaskObject, FunctionsInventionsVectorBranchTaskObjectSchema, type FunctionsInventionsVectorInputSchemaObject, FunctionsInventionsVectorInputSchemaObjectSchema, type FunctionsInventionsVectorLeafTaskObject, FunctionsInventionsVectorLeafTaskObjectSchema, type FunctionsListFunctionProfilePairItem, FunctionsListFunctionProfilePairItemSchema, type FunctionsListFunctionProfilePairResponse, FunctionsListFunctionProfilePairResponseSchema, type FunctionsListFunctionProfilePairsRequest, FunctionsListFunctionProfilePairsRequestSchema, type FunctionsListFunctionProfilePairsSource, FunctionsListFunctionProfilePairsSourceSchema, type FunctionsListFunctionResponse, FunctionsListFunctionResponseSchema, type FunctionsListFunctionsRequest, FunctionsListFunctionsRequestSchema, type FunctionsListFunctionsSource, FunctionsListFunctionsSourceSchema, type FunctionsPlaceholderScalarFunctionTask, type FunctionsPlaceholderScalarFunctionTaskExpression, FunctionsPlaceholderScalarFunctionTaskExpressionSchema, FunctionsPlaceholderScalarFunctionTaskSchema, type FunctionsPlaceholderVectorFunctionTask, type FunctionsPlaceholderVectorFunctionTaskExpression, FunctionsPlaceholderVectorFunctionTaskExpressionSchema, FunctionsPlaceholderVectorFunctionTaskSchema, type FunctionsProfile, FunctionsProfileSchema, type FunctionsProfilesComputationsRequestDatasetItem, FunctionsProfilesComputationsRequestDatasetItemSchema, type FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParams, FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParamsSchema, type FunctionsProfilesComputationsRequestTarget, FunctionsProfilesComputationsRequestTargetSchema, type FunctionsProfilesComputationsResponseFittingStats, FunctionsProfilesComputationsResponseFittingStatsSchema, type FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk, FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema, type FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema, type FunctionsProfilesComputationsResponseStreamingObject, FunctionsProfilesComputationsResponseStreamingObjectSchema, type FunctionsProfilesComputationsResponseUnaryFunctionExecution, FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema, type FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation, FunctionsProfilesComputationsResponseUnaryFunctionProfileComputationSchema, type FunctionsProfilesComputationsResponseUnaryObject, FunctionsProfilesComputationsResponseUnaryObjectSchema, type FunctionsProfilesComputationsRetryToken, FunctionsProfilesComputationsRetryTokenSchema, type FunctionsProfilesGetProfileResponse, FunctionsProfilesGetProfileResponseSchema, type FunctionsProfilesListProfileResponse, FunctionsProfilesListProfileResponseSchema, type FunctionsProfilesListProfilesRequest, FunctionsProfilesListProfilesRequestSchema, type FunctionsProfilesListProfilesSource, FunctionsProfilesListProfilesSourceSchema, type FunctionsProfilesUsageProfileResponse, FunctionsProfilesUsageProfileResponseSchema, type FunctionsRemoteFunction, FunctionsRemoteFunctionSchema, type FunctionsRemoteProfile, FunctionsRemoteProfileSchema, type FunctionsRemoteTasksProfile, FunctionsRemoteTasksProfileSchema, type FunctionsScalarFunctionTask, type FunctionsScalarFunctionTaskExpression, FunctionsScalarFunctionTaskExpressionSchema, FunctionsScalarFunctionTaskSchema, type FunctionsTask, type FunctionsTaskExpression, FunctionsTaskExpressionSchema, type FunctionsTaskProfile, FunctionsTaskProfileSchema, FunctionsTaskSchema, type FunctionsUsageFunctionProfilePairResponse, FunctionsUsageFunctionProfilePairResponseSchema, type FunctionsUsageFunctionResponse, FunctionsUsageFunctionResponseSchema, type FunctionsVectorCompletionTask, type FunctionsVectorCompletionTaskExpression, FunctionsVectorCompletionTaskExpressionSchema, FunctionsVectorCompletionTaskSchema, type FunctionsVectorFunctionTask, type FunctionsVectorFunctionTaskExpression, FunctionsVectorFunctionTaskExpressionSchema, FunctionsVectorFunctionTaskSchema, type LaboratoriesExecutionsRequestLaboratoryExecutionCreateParams, LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema, type LaboratoriesExecutionsResponseStreamingBuilderChunk, LaboratoriesExecutionsResponseStreamingBuilderChunkSchema, type LaboratoriesExecutionsResponseStreamingEvaluationChunk, LaboratoriesExecutionsResponseStreamingEvaluationChunkSchema, type LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk, LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkSchema, type LaboratoriesExecutionsResponseStreamingObject, LaboratoriesExecutionsResponseStreamingObjectSchema, type LaboratoriesExecutionsResponseUnaryBuilder, LaboratoriesExecutionsResponseUnaryBuilderSchema, type LaboratoriesExecutionsResponseUnaryEvaluation, LaboratoriesExecutionsResponseUnaryEvaluationSchema, type LaboratoriesExecutionsResponseUnaryLaboratoryExecution, LaboratoriesExecutionsResponseUnaryLaboratoryExecutionSchema, type LaboratoriesExecutionsResponseUnaryObject, LaboratoriesExecutionsResponseUnaryObjectSchema, ObjectiveAI, ObjectiveAIFetchError, type ObjectiveAIOptions, ObjectiveAIOptionsSchema, type PrefixedUuid, PrefixedUuidSchema, type Remote, type RemotePath, type RemotePathCommitOptional, RemotePathCommitOptionalSchema, RemotePathSchema, RemoteSchema, type RequestOptions, RequestOptionsSchema, Stream, type SwarmGetSwarmResponse, SwarmGetSwarmResponseSchema, type SwarmInlineSwarm, type SwarmInlineSwarmBase, type SwarmInlineSwarmBaseOrRemote, type SwarmInlineSwarmBaseOrRemoteCommitOptional, SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema, SwarmInlineSwarmBaseOrRemoteSchema, SwarmInlineSwarmBaseSchema, SwarmInlineSwarmSchema, type SwarmListSwarmResponse, SwarmListSwarmResponseSchema, type SwarmListSwarmsRequest, SwarmListSwarmsRequestSchema, type SwarmListSwarmsSource, SwarmListSwarmsSourceSchema, type SwarmRemoteSwarm, type SwarmRemoteSwarmBase, SwarmRemoteSwarmBaseSchema, SwarmRemoteSwarmSchema, type SwarmSwarm, type SwarmSwarmBase, SwarmSwarmBaseSchema, SwarmSwarmSchema, type SwarmUsageSwarmResponse, SwarmUsageSwarmResponseSchema, type VectorCompletionsCacheCacheVote, type VectorCompletionsCacheCacheVoteRequest, VectorCompletionsCacheCacheVoteRequestSchema, VectorCompletionsCacheCacheVoteSchema, type VectorCompletionsCacheCompletionVotes, VectorCompletionsCacheCompletionVotesSchema, type VectorCompletionsCacheGetCompletionVotesRequest, VectorCompletionsCacheGetCompletionVotesRequestSchema, type VectorCompletionsRequestVectorCompletionCreateParams, VectorCompletionsRequestVectorCompletionCreateParamsSchema, type VectorCompletionsRequestVectorCompletionCreateParamsStreaming, VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchema, type VectorCompletionsRequestVectorCompletionCreateParamsUnary, VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema, type VectorCompletionsResponseStreamingAgentCompletionChunk, VectorCompletionsResponseStreamingAgentCompletionChunkSchema, type VectorCompletionsResponseStreamingObject, VectorCompletionsResponseStreamingObjectSchema, type VectorCompletionsResponseStreamingVectorCompletionChunk, VectorCompletionsResponseStreamingVectorCompletionChunkSchema, type VectorCompletionsResponseUnaryAgentCompletion, VectorCompletionsResponseUnaryAgentCompletionSchema, type VectorCompletionsResponseUnaryObject, VectorCompletionsResponseUnaryObjectSchema, type VectorCompletionsResponseUnaryVectorCompletion, VectorCompletionsResponseUnaryVectorCompletionSchema, type VectorCompletionsResponseVote, VectorCompletionsResponseVoteSchema, type VectorCompletionsVectorResponses, VectorCompletionsVectorResponsesSchema, type Weights, type WeightsEntry, WeightsEntrySchema, WeightsSchema, agentCompletionsCreateAgentCompletion, agentCompletionsMessageAssistantToolCallDeltaMerged, agentCompletionsMessageAssistantToolCallDeltaMergedList, agentCompletionsMessageAssistantToolCallFunctionDeltaMerged, agentCompletionsMessageRichContentMerged, agentCompletionsResponseCompletionTokensDetailsMerged, agentCompletionsResponseCostDetailsMerged, agentCompletionsResponseLogprobsMerged, agentCompletionsResponsePromptTokensDetailsMerged, agentCompletionsResponseStreamingAgentCompletionChunkMerged, agentCompletionsResponseStreamingAssistantResponseChunkMerged, agentCompletionsResponseStreamingMessageChunkMerged, agentCompletionsResponseStreamingMessageChunkMergedList, agentCompletionsResponseUpstreamUsageMerged, agentCompletionsResponseUsageMerged, agentGetAgent, agentGetAgentUsage, agentListAgents, authCreateApiKey, authCreateOpenrouterByokApiKey, authDeleteOpenrouterByokApiKey, authDisableApiKey, authGetCredits, authGetOpenrouterByokApiKey, authListApiKeys, errorCreateError, functionsExecutionsCreateFunctionExecution, functionsExecutionsResponseStreamingFunctionExecutionChunkMerged, functionsExecutionsResponseStreamingReasoningSummaryChunkMerged, functionsExecutionsResponseStreamingTaskChunkMerged, functionsExecutionsResponseStreamingTaskChunkMergedList, functionsExecutionsResponseStreamingVectorCompletionTaskChunkMerged, functionsGetFunction, functionsGetFunctionProfilePairUsage, functionsGetFunctionUsage, functionsInventionsCreateFunctionInvention, functionsInventionsRecursiveCreateFunctionInventionRecursive, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMerged, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMergedList, functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMergedList, functionsInventionsResponseStreamingFunctionInventionChunkMerged, functionsListFunctionProfilePairs, functionsListFunctions, functionsProfilesComputationsComputeProfile, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMerged, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMergedList, functionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged, functionsProfilesGetProfile, functionsProfilesGetProfileUsage, functionsProfilesListProfiles, isResponseError, laboratoriesExecutionsCreateLaboratoryExecution, laboratoriesExecutionsResponseStreamingBuilderChunkMerged, laboratoriesExecutionsResponseStreamingBuilderChunkMergedList, laboratoriesExecutionsResponseStreamingEvaluationChunkMerged, laboratoriesExecutionsResponseStreamingEvaluationChunkMergedList, laboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkMerged, merge, mergedNumberArray, mergedString, numberIsEmpty, swarmGetSwarm, swarmGetSwarmUsage, swarmListSwarms, vectorCompletionsCacheGetCacheVote, vectorCompletionsCacheGetCompletionVotes, vectorCompletionsCreateVectorCompletion, vectorCompletionsResponseStreamingAgentCompletionChunkMerged, vectorCompletionsResponseStreamingAgentCompletionChunkMergedList, vectorCompletionsResponseStreamingVectorCompletionChunkMerged, vectorCompletionsResponseVoteMergedList, wasmAgentCompletionsMessagePromptId, wasmAgentCompletionsResponseStreamingAgentCompletionChunkMerged, wasmAgentCompletionsResponseStreamingAgentCompletionChunkNormalized, wasmAgentCompletionsResponseStreamingAgentCompletionChunkToUnary, wasmAgentCompletionsResponseStreamingGenerateAgentCompletionChunk, wasmAgentCompletionsResponseStreamingNormalizeAgentCompletionForTests, wasmAgentValidateAgent, wasmFunctionsAlphaCheckBranchScalarFunction, wasmFunctionsAlphaCheckBranchVectorFunction, wasmFunctionsAlphaCheckLeafScalarFunction, wasmFunctionsAlphaCheckLeafVectorFunction, wasmFunctionsCheckCheckScalarFields, wasmFunctionsCheckCheckVectorFields, wasmFunctionsCompileFunctionInputMerge, wasmFunctionsCompileFunctionInputSplit, wasmFunctionsCompileFunctionOutputLength, wasmFunctionsCompileFunctionTasks, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkMerged, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkNormalized, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkToUnary, wasmFunctionsExecutionsResponseStreamingGenerateFunctionExecutionChunk, wasmFunctionsExecutionsResponseStreamingNormalizeFunctionExecutionForTests, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkNormalized, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkToUnary, wasmFunctionsInventionsRecursiveResponseStreamingGenerateFunctionInventionRecursiveChunk, wasmFunctionsInventionsRecursiveResponseStreamingNormalizeFunctionInventionRecursiveForTests, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkMerged, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkNormalized, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkToUnary, wasmFunctionsInventionsResponseStreamingGenerateFunctionInventionChunk, wasmFunctionsInventionsResponseStreamingNormalizeFunctionInventionForTests, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkNormalized, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkToUnary, wasmFunctionsProfilesComputationsResponseStreamingGenerateFunctionProfileComputationChunk, wasmFunctionsProfilesComputationsResponseStreamingNormalizeFunctionProfileComputationForTests, wasmFunctionsValidateFunctionInput, wasmLaboratoriesExecutionsResponseStreamingGenerateLaboratoryExecutionChunk, wasmLaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkMerged, wasmLaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkNormalized, wasmLaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkToUnary, wasmLaboratoriesExecutionsResponseStreamingNormalizeLaboratoryExecutionForTests, wasmSwarmValidateSwarm, wasmVectorCompletionsResponseStreamingGenerateVectorCompletionChunk, wasmVectorCompletionsResponseStreamingNormalizeVectorCompletionForTests, wasmVectorCompletionsResponseStreamingVectorCompletionChunkMerged, wasmVectorCompletionsResponseStreamingVectorCompletionChunkNormalized, wasmVectorCompletionsResponseStreamingVectorCompletionChunkToUnary, wasmVectorCompletionsVectorResponseId };
