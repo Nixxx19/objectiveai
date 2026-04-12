@@ -13,39 +13,31 @@ const jsRoot = process.cwd(); // objectiveai-js
 const repoRoot = path.resolve(jsRoot, ".."); // objectiveai
 const wasmDir = path.join(repoRoot, "objectiveai-rs-wasm-js");
 const outDir = path.join(jsRoot, "src", "wasm");
+const wasmDistDir = path.join(wasmDir, "dist");
 
-// Clean up old files
+// 1. Validate dist/ is up to date
+const validateResult = spawnSync("bash", [path.join(wasmDir, "validate.sh")], {
+  stdio: "inherit",
+  shell: process.platform === "win32",
+});
+
+if (validateResult.status !== 0) {
+  process.exit(validateResult.status ?? 1);
+}
+
+// Clean up old output files
 if (existsSync(outDir)) {
   rmSync(outDir, { recursive: true });
 }
 mkdirSync(outDir, { recursive: true });
 
-// 1. Build nodejs target (we only need one target now - just need the glue code and .wasm)
-console.log("⚙ Building wasm-pack target: nodejs");
-
-const result = spawnSync(
-  "wasm-pack",
-  ["build", "--target", "nodejs", "--release", "--out-dir", "pkg-nodejs"],
-  {
-    cwd: wasmDir,
-    stdio: "inherit",
-    shell: process.platform === "win32",
-  },
-);
-
-if (result.status !== 0) {
-  console.error("Failed to build nodejs target");
-  process.exit(result.status ?? 1);
-}
-
 // 2. Read the generated files
-const nodejsPkgDir = path.join(wasmDir, "pkg-nodejs");
 const glueCode = readFileSync(
-  path.join(nodejsPkgDir, "objectiveai_wasm_js.js"),
+  path.join(wasmDistDir, "objectiveai_wasm_js.js"),
   "utf-8",
 );
 const wasmBinary = readFileSync(
-  path.join(nodejsPkgDir, "objectiveai_wasm_js_bg.wasm"),
+  path.join(wasmDistDir, "objectiveai_wasm_js_bg.wasm"),
 );
 const wasmBase64 = wasmBinary.toString("base64");
 
@@ -78,7 +70,7 @@ function decodeBase64(base64) {
 
 const wasmBytes = decodeBase64(WASM_BASE64);
 const wasmModule = new WebAssembly.Module(wasmBytes);
-const wasm = exports.__wasm = new WebAssembly.Instance(wasmModule, imports).exports;
+const wasm = exports.__wasm = new WebAssembly.Instance(wasmModule, __wbg_get_imports()).exports;
 
 wasm.__wbindgen_start();`;
 
@@ -99,8 +91,19 @@ if (modifiedGlue.includes("require('util')")) {
 writeFileSync(path.join(outDir, "loader.cjs"), modifiedGlue);
 console.log("✓ Created loader.cjs (universal CJS loader)");
 
-// 5. Create ESM version by wrapping the CJS code in an IIFE
+// 5. Read type declarations and extract exported function names
+const dtsContent = readFileSync(
+  path.join(wasmDistDir, "objectiveai_wasm_js.d.ts"),
+  "utf-8",
+);
+
+// Parse "export function foo(...)" declarations from the .d.ts file
+const exportedFunctions = [...dtsContent.matchAll(/^export function (\w+)\(/gm)].map(m => m[1]);
+console.log(`✓ Found ${exportedFunctions.length} exported WASM functions`);
+
+// 6. Create ESM version by wrapping the CJS code in an IIFE
 // This avoids symbol conflicts with the function declarations inside
+const esmExports = exportedFunctions.map(fn => `export const ${fn} = _wasm.${fn};`).join("\n");
 const esmLoader = `// Universal ESM loader with embedded base64 WASM
 // Works in Node.js and browsers without bundler configuration
 
@@ -114,36 +117,13 @@ const _wasm = (() => {
   return exports;
 })();
 
-export const validateEnsembleLlm = _wasm.validateEnsembleLlm;
-export const validateEnsemble = _wasm.validateEnsemble;
-export const validateFunctionInput = _wasm.validateFunctionInput;
-export const compileFunctionInputMaps = _wasm.compileFunctionInputMaps;
-export const compileFunctionTasks = _wasm.compileFunctionTasks;
-export const compileFunctionOutput = _wasm.compileFunctionOutput;
-export const compileFunctionOutputLength = _wasm.compileFunctionOutputLength;
-export const compileFunctionInputSplit = _wasm.compileFunctionInputSplit;
-export const compileFunctionInputMerge = _wasm.compileFunctionInputMerge;
-export const qualityCheckScalarFields = _wasm.qualityCheckScalarFields;
-export const qualityCheckVectorFields = _wasm.qualityCheckVectorFields;
-export const qualityCheckLeafFunction = _wasm.qualityCheckLeafFunction;
-export const qualityCheckBranchFunction = _wasm.qualityCheckBranchFunction;
-export const qualityCheckLeafScalarFunction = _wasm.qualityCheckLeafScalarFunction;
-export const qualityCheckLeafVectorFunction = _wasm.qualityCheckLeafVectorFunction;
-export const qualityCheckBranchScalarFunction = _wasm.qualityCheckBranchScalarFunction;
-export const qualityCheckBranchVectorFunction = _wasm.qualityCheckBranchVectorFunction;
-export const promptId = _wasm.promptId;
-export const toolsId = _wasm.toolsId;
-export const vectorResponseId = _wasm.vectorResponseId;
+${esmExports}
 `;
 
 writeFileSync(path.join(outDir, "loader.js"), esmLoader);
 console.log("✓ Created loader.js (universal ESM loader)");
 
-// 6. Copy type declarations
-const dtsContent = readFileSync(
-  path.join(nodejsPkgDir, "objectiveai_wasm_js.d.ts"),
-  "utf-8",
-);
+// 7. Copy type declarations
 writeFileSync(path.join(outDir, "loader.d.ts"), dtsContent);
 console.log("✓ Created loader.d.ts");
 

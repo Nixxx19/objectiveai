@@ -1,83 +1,60 @@
 import {
-  validateFunctionInput as wasmValidateFunctionInput,
-  compileFunctionInputMaps as wasmCompileFunctionInputMaps,
-  compileFunctionTasks as wasmCompileFunctionTasks,
-  // compileFunctionOutput as wasmCompileFunctionOutput, // TODO: Update for new per-task output expression architecture
-  compileFunctionOutputLength as wasmCompileFunctionOutputLength,
-  compileFunctionInputSplit as wasmCompileFunctionInputSplit,
-  compileFunctionInputMerge as wasmCompileFunctionInputMerge,
+  compileFunctionTasks,
+  compileFunctionInputSplit,
+  compileFunctionInputMerge,
+  compileFunctionOutputLength,
+  validateFunctionInput,
+  alphaCheckLeafScalarFunction,
+  alphaCheckLeafVectorFunction,
+  alphaCheckBranchScalarFunction,
+  alphaCheckBranchVectorFunction,
 } from "../wasm/loader.js";
-import { Function } from "./function";
-import { InputValue } from "./expression";
-import { CompiledTasks } from "./task";
-import { mapsToRecords } from "src/mapsToRecords";
+import type { FunctionsFunction } from "./function";
+import type { FunctionsCompiledTask } from "./compiledTask";
+import type { FunctionsAlphaScalarInlineFunction } from "./alpha_scalar/inlineFunction";
+import type { FunctionsAlphaVectorInlineFunction } from "./alpha_vector/inlineFunction";
+import type { FunctionsFullRemoteFunction } from "./fullRemoteFunction";
 
-export function validateFunctionInput(
-  function_: Function,
-  input: InputValue,
-): boolean | null {
-  const result = wasmValidateFunctionInput(function_, input);
-  return result === undefined ? null : result;
+export function wasmFunctionsCompileFunctionTasks(fn: FunctionsFunction, input: unknown): (FunctionsCompiledTask | FunctionsCompiledTask[] | null)[] {
+  const raw = JSON.parse(compileFunctionTasks(fn, input));
+  return raw.map((item: any) => {
+    if (item === null) return null;
+    if ("One" in item) return item.One;
+    if ("Many" in item) return item.Many;
+    return item;
+  });
 }
 
-export function compileFunctionInputMaps(
-  function_: Function,
-  input: InputValue,
-): InputValue[][] | null {
-  const result = wasmCompileFunctionInputMaps(function_, input);
-  if (result === undefined) return null;
-  const unmapped = mapsToRecords(result);
-  return unmapped as InputValue[][];
+export function wasmFunctionsCompileFunctionInputSplit(fn: FunctionsFunction, input: unknown): unknown[] | undefined {
+  const result = compileFunctionInputSplit(fn, input);
+  return result !== undefined ? JSON.parse(result) : undefined;
 }
 
-export function compileFunctionTasks(
-  function_: Function,
-  input: InputValue,
-): CompiledTasks {
-  const value = wasmCompileFunctionTasks(function_, input);
-  const unmapped = mapsToRecords(value);
-  // serde_wasm_bindgen serializes Rust Option::None as undefined,
-  // but skipped tasks should be null per CompiledTaskSchema.
-  const tasks = unmapped as unknown[];
-  return tasks.map((t) => (t === undefined ? null : t)) as CompiledTasks;
+export function wasmFunctionsCompileFunctionInputMerge(fn: FunctionsFunction, input: unknown[]): unknown | undefined {
+  const result = compileFunctionInputMerge(fn, input);
+  return result !== undefined ? JSON.parse(result) : undefined;
 }
 
-// TODO: Update for new per-task output expression architecture
-// export function compileFunctionOutput(
-//   function_: Function,
-//   input: InputValue,
-//   task_outputs: TaskOutputs,
-// ): CompiledFunctionOutput {
-//   const value = wasmCompileFunctionOutput(function_, input, task_outputs);
-//   const unmapped = mapsToRecords(value);
-//   return unmapped as CompiledFunctionOutput;
-// }
-
-export function compileFunctionOutputLength(
-  function_: Function,
-  input: InputValue,
-): number | null {
-  const result = wasmCompileFunctionOutputLength(function_, input);
-  return result === undefined ? null : result;
+export function wasmFunctionsCompileFunctionOutputLength(fn: FunctionsFunction, input: unknown): number | undefined {
+  return compileFunctionOutputLength(fn, input);
 }
 
-export function compileFunctionInputSplit(
-  function_: Function,
-  input: InputValue,
-): InputValue[] | null {
-  const result = wasmCompileFunctionInputSplit(function_, input);
-  if (result === undefined) return null;
-  const unmapped = mapsToRecords(result);
-  return unmapped as InputValue[];
+export function wasmFunctionsValidateFunctionInput(fn: FunctionsFunction, input: unknown): boolean | undefined {
+  return validateFunctionInput(fn, input);
 }
 
-export function compileFunctionInputMerge(
-  function_: Function,
-  inputs: InputValue[],
-): InputValue | null {
-  const result = wasmCompileFunctionInputMerge(function_, inputs);
-  if (result === undefined) return null;
-  const unmapped = mapsToRecords(result);
-  return unmapped as InputValue;
+export function wasmFunctionsAlphaCheckLeafScalarFunction(fn: FunctionsAlphaScalarInlineFunction): void {
+  alphaCheckLeafScalarFunction(fn);
 }
 
+export function wasmFunctionsAlphaCheckLeafVectorFunction(fn: FunctionsAlphaVectorInlineFunction): void {
+  alphaCheckLeafVectorFunction(fn);
+}
+
+export function wasmFunctionsAlphaCheckBranchScalarFunction(fn: FunctionsAlphaScalarInlineFunction, children?: Record<string, FunctionsFullRemoteFunction>): void {
+  alphaCheckBranchScalarFunction(fn, children);
+}
+
+export function wasmFunctionsAlphaCheckBranchVectorFunction(fn: FunctionsAlphaVectorInlineFunction, children?: Record<string, FunctionsFullRemoteFunction>): void {
+  alphaCheckBranchVectorFunction(fn, children);
+}

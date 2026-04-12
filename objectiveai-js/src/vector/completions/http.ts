@@ -1,61 +1,57 @@
 import z from "zod";
-import { convert, type JSONSchema } from "../../json_schema";
-import { ObjectiveAI, RequestOptions } from "../../client";
+import { ObjectiveAI, type RequestOptions } from "../../client";
 import { Stream } from "../../stream";
-import { VectorCompletion } from "./response/unary/vector_completion";
 import {
-  VectorCompletionCreateParams,
-  VectorCompletionCreateParamsStreaming,
-  VectorCompletionCreateParamsNonStreaming,
-} from "./request/vector_completion_create_params";
-import { VectorCompletionChunk } from "./response/streaming/vector_completion_chunk";
-import { VotesSchema } from "./response/vote";
+  VectorCompletionsRequestVectorCompletionCreateParamsSchema,
+  type VectorCompletionsRequestVectorCompletionCreateParams,
+} from "./request/vectorCompletionCreateParams";
+import type { VectorCompletionsResponseUnaryVectorCompletion } from "./response/unary/vectorCompletion";
+import type { VectorCompletionsResponseStreamingVectorCompletionChunk } from "./response/streaming/vectorCompletionChunk";
 
-export function create(
+export const VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchema =
+  VectorCompletionsRequestVectorCompletionCreateParamsSchema.extend({
+    stream: z.literal(true),
+  });
+export type VectorCompletionsRequestVectorCompletionCreateParamsStreaming = z.infer<
+  typeof VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchema
+>;
+
+export const VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema =
+  VectorCompletionsRequestVectorCompletionCreateParamsSchema.extend({
+    stream: z.literal(false).optional().nullable(),
+  });
+export type VectorCompletionsRequestVectorCompletionCreateParamsUnary = z.infer<
+  typeof VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema
+>;
+
+export function vectorCompletionsCreateVectorCompletion(
   client: ObjectiveAI,
-  body: VectorCompletionCreateParamsStreaming,
+  body: VectorCompletionsRequestVectorCompletionCreateParamsStreaming,
   options?: RequestOptions,
-): Promise<Stream<VectorCompletionChunk>>;
-export function create(
+): Promise<Stream<VectorCompletionsResponseStreamingVectorCompletionChunk>>;
+export function vectorCompletionsCreateVectorCompletion(
   client: ObjectiveAI,
-  body: VectorCompletionCreateParamsNonStreaming,
+  body: VectorCompletionsRequestVectorCompletionCreateParamsUnary,
   options?: RequestOptions,
-): Promise<VectorCompletion>;
-export function create(
+): Promise<VectorCompletionsResponseUnaryVectorCompletion>;
+export function vectorCompletionsCreateVectorCompletion(
   client: ObjectiveAI,
-  body: VectorCompletionCreateParams,
+  body: VectorCompletionsRequestVectorCompletionCreateParams,
   options?: RequestOptions,
-): Promise<Stream<VectorCompletionChunk> | VectorCompletion> {
+): Promise<
+  | Stream<VectorCompletionsResponseStreamingVectorCompletionChunk>
+  | VectorCompletionsResponseUnaryVectorCompletion
+> {
   if (body.stream) {
-    return client.post_streaming<VectorCompletionChunk>(
+    return client.post_streaming<VectorCompletionsResponseStreamingVectorCompletionChunk>(
       "/vector/completions",
       body,
       options,
     );
   }
-  return client.post_unary<VectorCompletion>(
+  return client.post_unary<VectorCompletionsResponseUnaryVectorCompletion>(
     "/vector/completions",
     body,
-    options,
-  );
-}
-
-export const RetrieveSchema = z
-  .object({
-    data: VotesSchema.optional().nullable(),
-  })
-  .describe("Response containing votes from a historical vector completion.");
-export type Retrieve = z.infer<typeof RetrieveSchema>;
-export const RetrieveJsonSchema: JSONSchema = convert(RetrieveSchema);
-
-export function retrieve(
-  client: ObjectiveAI,
-  id: string,
-  options?: RequestOptions,
-): Promise<Retrieve> {
-  return client.post_unary<Retrieve>(
-    `/vector/completions/${id}`,
-    {},
     options,
   );
 }
