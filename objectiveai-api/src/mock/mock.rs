@@ -285,12 +285,15 @@ pub fn get_prompt(
 /// Returns mock Prompt JSON by repository name.
 fn get_prompt_json(repository: &str) -> Option<&'static str> {
     match repository {
+        "default" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/prompts/default.json"))),
         _ => None,
     }
 }
 
 /// All mock Prompt repository names.
-const PROMPT_REPOSITORIES: &[&str] = &[];
+const PROMPT_REPOSITORIES: &[&str] = &[
+    "default",
+];
 
 /// Lists all mock Prompts.
 pub fn list_prompts() -> objectiveai::functions::inventions::prompts::response::ListPromptResponse {

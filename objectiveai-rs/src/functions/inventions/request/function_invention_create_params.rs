@@ -18,6 +18,9 @@ pub struct FunctionInventionCreateParams {
     pub agent: agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
+    pub prompt: Option<functions::inventions::prompts::InlinePromptOrRemoteCommitOptional>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub seed: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
