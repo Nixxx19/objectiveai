@@ -751,6 +751,7 @@ where
                     None,
                     None,
                     None,
+                    None,
                 ).await?;
                 let aggregate: Option<
                     objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
@@ -885,6 +886,7 @@ where
                                 None,
                                 None,
                                 None,
+                                None,
                             ).await {
                                 Ok(mut retry_stream) => {
                                     let mut retry_agg: Option<
@@ -1012,6 +1014,7 @@ where
                                 None,
                                 Some(transform_messages.clone()),
                                 false,
+                                None,
                                 None,
                                 None,
                                 None,

@@ -106,6 +106,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
         _invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
         _invention_step: Option<usize>,
         _invention_tasks_min: Option<u64>,
+        _invention_input_schema: Option<String>,
     ) -> impl Future<
         Output = Result<
             Self::Stream,

@@ -203,6 +203,7 @@ where
         invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
         invention_step: Option<usize>,
         invention_tasks_min: Option<u64>,
+        invention_input_schema: Option<String>,
     ) -> Result<
         objectiveai::agent::completions::response::unary::AgentCompletion,
         super::Error,
@@ -211,7 +212,7 @@ where
             objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
         > = None;
         let mut stream = self
-            .create_streaming_handle_usage(ctx, params, continuation, invention_tools, invention_done, transform_messages, viewer, invention_type, invention_step, invention_tasks_min)
+            .create_streaming_handle_usage(ctx, params, continuation, invention_tools, invention_done, transform_messages, viewer, invention_type, invention_step, invention_tasks_min, invention_input_schema)
             .await?;
         while let Some(item) = stream.next().await {
             match item {
@@ -244,6 +245,7 @@ where
         invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
         invention_step: Option<usize>,
         invention_tasks_min: Option<u64>,
+        invention_input_schema: Option<String>,
     ) -> Result<
         impl futures::Stream<
             Item = super::StreamItem<
@@ -261,7 +263,7 @@ where
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
         let _ = tokio::spawn(async move {
             let stream = match self
-                .create_streaming(ctx.clone(), params.clone(), continuation, invention_tools, invention_done, transform_messages, viewer, invention_type, invention_step, invention_tasks_min)
+                .create_streaming(ctx.clone(), params.clone(), continuation, invention_tools, invention_done, transform_messages, viewer, invention_type, invention_step, invention_tasks_min, invention_input_schema)
                 .await
             {
                 Ok(stream) => stream,
@@ -328,6 +330,7 @@ where
         invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
         invention_step: Option<usize>,
         invention_tasks_min: Option<u64>,
+        invention_input_schema: Option<String>,
     ) -> Result<
         impl futures::Stream<
             Item = super::StreamItem<
@@ -546,6 +549,7 @@ where
                                 invention_type,
                                 invention_step,
                                 invention_tasks_min,
+                                invention_input_schema.clone(),
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -582,6 +586,7 @@ where
                                 invention_type,
                                 invention_step,
                                 invention_tasks_min,
+                                invention_input_schema.clone(),
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -618,6 +623,7 @@ where
                                 invention_type,
                                 invention_step,
                                 invention_tasks_min,
+                                invention_input_schema.clone(),
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -689,6 +695,7 @@ where
         invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
         invention_step: Option<usize>,
         invention_tasks_min: Option<u64>,
+        invention_input_schema: Option<String>,
     ) -> Result<
         Pin<Box<dyn futures::Stream<Item = super::StreamItem<CONT>> + Send>>,
         super::Error,
@@ -731,6 +738,7 @@ where
             invention_type,
             invention_step,
             invention_tasks_min,
+            invention_input_schema.clone(),
         );
         let initial_stream =
             tokio::time::timeout(self.first_chunk_timeout, create_fut)
@@ -929,6 +937,7 @@ where
                         invention_type,
                         invention_step,
                         invention_tasks_min,
+                        invention_input_schema.clone(),
                     )
                     .await
                 {

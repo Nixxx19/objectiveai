@@ -77,6 +77,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
         invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
         invention_step: Option<usize>,
         invention_tasks_min: Option<u64>,
+        invention_input_schema: Option<String>,
     ) -> impl Future<
         Output = Result<
             Self::Stream,
@@ -264,6 +265,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
                     invention_type.unwrap(),
                     invention_step.unwrap(),
                     invention_tasks_min.unwrap_or(3),
+                    invention_input_schema.as_deref(),
                     &tool_names,
                     &tool_map,
                     &mut rng,
@@ -745,6 +747,7 @@ fn resolve_invention_response(
     invention_type: objectiveai::functions::inventions::prompts::StepPromptType,
     invention_step: usize,
     tasks_min: u64,
+    invention_input_schema: Option<&str>,
     tool_names: &[String],
     tool_map: &HashMap<String, ResolvedTool>,
     rng: &mut impl Rng,
@@ -775,20 +778,24 @@ fn resolve_invention_response(
         }
         // Step 3: Tasks
         (AlphaScalarLeafFunction, 3) => {
-            let schema = super::invention::schema_gen::random_scalar_input_schema(rng);
-            super::invention::alpha_scalar_leaf::tasks_tool_call(&schema, tool_names, tool_map, rng)
+            let fallback = r#"{"type":"object","properties":{"text":{"type":"string"}},"required":["text"]}"#;
+            let schema = invention_input_schema.unwrap_or(fallback);
+            super::invention::alpha_scalar_leaf::tasks_tool_call(schema, tasks_min, tool_names, tool_map, rng)
         }
         (AlphaScalarBranchFunction, 3) => {
-            let schema = super::invention::schema_gen::random_scalar_input_schema(rng);
-            super::invention::alpha_scalar_branch::tasks_tool_call(&schema, tool_names, tool_map, rng)
+            let fallback = r#"{"type":"object","properties":{"text":{"type":"string"}},"required":["text"]}"#;
+            let schema = invention_input_schema.unwrap_or(fallback);
+            super::invention::alpha_scalar_branch::tasks_tool_call(schema, tasks_min, tool_names, tool_map, rng)
         }
         (AlphaVectorLeafFunction, 3) => {
-            let schema = super::invention::schema_gen::random_vector_input_schema(rng);
-            super::invention::alpha_vector_leaf::tasks_tool_call(&schema, tool_names, tool_map, rng)
+            let fallback = r#"{"items":{"type":"string"}}"#;
+            let schema = invention_input_schema.unwrap_or(fallback);
+            super::invention::alpha_vector_leaf::tasks_tool_call(schema, tasks_min, tool_names, tool_map, rng)
         }
         (AlphaVectorBranchFunction, 3) => {
-            let schema = super::invention::schema_gen::random_vector_input_schema(rng);
-            super::invention::alpha_vector_branch::tasks_tool_call(&schema, 0, 0, tool_names, tool_map, rng)
+            let fallback = r#"{"items":{"type":"string"}}"#;
+            let schema = invention_input_schema.unwrap_or(fallback);
+            super::invention::alpha_vector_branch::tasks_tool_call(schema, 0, 0, tasks_min, tool_names, tool_map, rng)
         }
         // Step 4: Description
         (_, 4) => {
@@ -800,16 +807,6 @@ fn resolve_invention_response(
         }
     };
 
-    // For the tasks step, also emit EditPredictedTasksLength before the main tool call.
-    if invention_step == 3 {
-        let edit_tc = MockToolCall {
-            tool_name: "EditPredictedTasksLength".to_string(),
-            call_id: format!("call_mock_{}", rng.random_range(0u64..u64::MAX)),
-            arguments: serde_json::json!({"tasks_length": tasks_min}).to_string(),
-            n_deltas: 1,
-        };
-        return MockResponse::ToolCalls(vec![edit_tc, tc]);
-    }
 
     MockResponse::ToolCalls(vec![tc])
 }

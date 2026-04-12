@@ -66,6 +66,7 @@ pub trait UpstreamClient<AGENT, CONTINUATION> {
         invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
         invention_step: Option<usize>,
         invention_tasks_min: Option<u64>,
+        invention_input_schema: Option<String>,
     ) -> impl Future<
         Output = Result<
             Self::Stream,
@@ -112,6 +113,7 @@ impl<AGENT, CONTINUATION> UpstreamClient<AGENT, CONTINUATION> for UnimplementedU
         _invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
         _invention_step: Option<usize>,
         _invention_tasks_min: Option<u64>,
+        _invention_input_schema: Option<String>,
     ) -> impl Future<
         Output = Result<
             Self::Stream,

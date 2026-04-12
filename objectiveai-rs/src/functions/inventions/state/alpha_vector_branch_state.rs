@@ -870,6 +870,12 @@ impl super::InventionState for AlphaVectorBranchState {
     }
     fn into_state(self) -> super::State { super::State::AlphaVectorBranch(self) }
 
+    fn set_tasks_length(this: &Arc<Mutex<Self>>, len: u64) {
+        this.lock().unwrap().tasks_length = Some(len);
+    }
+    fn input_schema_json(this: &Arc<Mutex<Self>>) -> Option<String> {
+        this.lock().unwrap().input_schema.as_ref().map(|s| serde_json::to_string(s).unwrap())
+    }
     fn essay_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::InventionTool> {
         vec![Self::read_spec_tool(this), Self::write_essay_tool(this)]
     }

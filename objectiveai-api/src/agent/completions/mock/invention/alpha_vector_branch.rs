@@ -19,6 +19,7 @@ pub fn tasks_tool_call(
     input_schema_json: &str,
     scalar_count: u32,
     total_count: u32,
+    tasks_min: u64,
     tool_names: &[String],
     tool_map: &HashMap<String, ResolvedTool>,
     rng: &mut impl Rng,
@@ -45,6 +46,9 @@ pub fn tasks_tool_call(
                 random_placeholder_vector_task(&parsed, rng)
             };
             serde_json::json!({"task": task.to_string()}).to_string()
+        }
+        "EditPredictedTasksLength" => {
+            serde_json::json!({"tasks_length": tasks_min}).to_string()
         }
         "DeleteTask" | "ReadTask" => {
             serde_json::json!({ "index": rng.random_range(0u32..5) }).to_string()

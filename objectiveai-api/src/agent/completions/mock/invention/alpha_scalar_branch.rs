@@ -15,6 +15,7 @@ use crate::agent::completions::ResolvedTool;
 /// expressions are derived from the actual parent schema.
 pub fn tasks_tool_call(
     input_schema_json: &str,
+    tasks_min: u64,
     tool_names: &[String],
     tool_map: &HashMap<String, ResolvedTool>,
     rng: &mut impl Rng,
@@ -25,6 +26,9 @@ pub fn tasks_tool_call(
             let field_schemas = super::extract_input_field_schemas(input_schema_json);
             let task = random_placeholder_scalar_task(&field_schemas, rng);
             serde_json::json!({"task": task.to_string()}).to_string()
+        }
+        "EditPredictedTasksLength" => {
+            serde_json::json!({"tasks_length": tasks_min}).to_string()
         }
         "DeleteTask" | "ReadTask" => {
             serde_json::json!({ "index": rng.random_range(0u32..5) }).to_string()

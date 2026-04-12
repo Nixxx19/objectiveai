@@ -575,7 +575,7 @@ where
             prompts.essay.clone(), T::essay_tools(&state),
             essay_validate,
             id.clone(), created, object, continuation.take(), completion_index,
-            T::prompt_type(), 0, prompts.tasks_min,
+            T::prompt_type(), 0, prompts.tasks_min, None,
         );
         while let Some(output) = step.next().await {
             match output {
@@ -612,7 +612,7 @@ where
             prompts.input_schema.clone(), T::input_schema_tools(&state),
             input_schema_validate,
             id.clone(), created, object, continuation.take(), completion_index,
-            T::prompt_type(), 1, prompts.tasks_min,
+            T::prompt_type(), 1, prompts.tasks_min, None,
         );
         while let Some(output) = step.next().await {
             match output {
@@ -649,7 +649,7 @@ where
             prompts.essay_tasks.clone(), T::essay_tasks_tools(&state),
             essay_tasks_validate,
             id.clone(), created, object, continuation.take(), completion_index,
-            T::prompt_type(), 2, prompts.tasks_min,
+            T::prompt_type(), 2, prompts.tasks_min, None,
         );
         while let Some(output) = step.next().await {
             match output {
@@ -678,6 +678,9 @@ where
         yield state_chunk(&state, &id, created, object);
 
         // Step 4: Tasks (Body)
+        // Pre-set predicted tasks length so validate_function can succeed
+        // as soon as the correct number of tasks are appended.
+        T::set_tasks_length(&state, prompts.tasks_min);
         let tasks_validate = Arc::new({ let s = state.clone(); move || T::validate_function(&s) });
         if tasks_validate().is_err() {
         errored = false;
@@ -686,7 +689,7 @@ where
             prompts.tasks.clone(), T::tasks_tools(&state),
             tasks_validate,
             id.clone(), created, object, continuation.take(), completion_index,
-            T::prompt_type(), 3, prompts.tasks_min,
+            T::prompt_type(), 3, prompts.tasks_min, T::input_schema_json(&state),
         );
         while let Some(output) = step.next().await {
             match output {
@@ -723,7 +726,7 @@ where
             prompts.description.clone(), T::description_tools(&state),
             description_validate,
             id.clone(), created, object, continuation.take(), completion_index,
-            T::prompt_type(), 4, prompts.tasks_min,
+            T::prompt_type(), 4, prompts.tasks_min, None,
         );
         while let Some(output) = step.next().await {
             match output {
@@ -954,6 +957,7 @@ fn run_step<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG>
     invention_type: objectiveai::functions::inventions::prompts::StepPromptType,
     invention_step: usize,
     invention_tasks_min: u64,
+    invention_input_schema: Option<String>,
 ) -> Pin<
     Box<
         dyn Stream<Item = StepOutput<OPENROUTER, CLAUDEAGENTSDK, MOCK>>
@@ -1021,6 +1025,7 @@ where
                 Some(invention_type),
                 Some(invention_step),
                 Some(invention_tasks_min),
+                invention_input_schema.clone(),
             )
             .await;
 
@@ -1117,6 +1122,7 @@ where
                     Some(invention_type),
                     Some(invention_step),
                     Some(invention_tasks_min),
+                    invention_input_schema.clone(),
                 )
                 .await;
 

@@ -72,6 +72,9 @@ pub trait InventionState: Clone + Send + 'static {
     fn object() -> super::response::streaming::Object;
     fn into_state(self) -> State;
 
+    fn set_tasks_length(this: &Arc<Mutex<Self>>, len: u64);
+    fn input_schema_json(this: &Arc<Mutex<Self>>) -> Option<String>;
+
     fn essay_tools(this: &Arc<Mutex<Self>>) -> Vec<super::InventionTool>;
     fn validate_essay(this: &Arc<Mutex<Self>>) -> Result<(), String>;
 
