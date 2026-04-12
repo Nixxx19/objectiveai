@@ -32,13 +32,13 @@ describe("getLodLevel", () => {
 describe("getLodParams", () => {
   it("full: all visual features enabled", () => {
     const p = getLodParams("full");
-    expect(p.curvedEdges).toBe(true);
+    expect(p.curvedEdges).toBe(false);
     expect(p.showLabels).toBe(true);
     expect(p.showStreamingText).toBe(true);
     expect(p.showScoreBars).toBe(true);
     expect(p.showEdges).toBe(true);
     expect(p.maxLabelLength).toBe(0);
-    expect(p.cornerRadius).toBe(8);
+    expect(p.cornerRadius).toBe(4);
     expect(p.dotSize).toBe(0);
   });
 
@@ -49,7 +49,7 @@ describe("getLodParams", () => {
     expect(p.showStreamingText).toBe(false);
     expect(p.showScoreBars).toBe(false);
     expect(p.maxLabelLength).toBe(12);
-    expect(p.cornerRadius).toBe(4);
+    expect(p.cornerRadius).toBe(3);
     expect(p.showEdges).toBe(true);
   });
 

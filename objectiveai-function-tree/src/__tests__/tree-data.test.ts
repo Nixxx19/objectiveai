@@ -1,11 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { buildTree } from "../core/tree-data";
+import { buildTree, applyProfileWeights } from "../core/tree-data";
 import type {
   InputFunctionExecution,
   InputVectorCompletionTask,
   InputFunctionExecutionTask,
+  InputProfile,
   FunctionNodeData,
   VectorCompletionNodeData,
+  EnsembleLlmNodeData,
 } from "../types";
 
 // ---------------------------------------------------------------------------
@@ -104,7 +106,7 @@ describe("buildTree", () => {
     };
 
     const tree = buildTree(exec)!;
-    expect(tree.nodes.size).toBe(2); // root + vc (no LLM nodes)
+    expect(tree.nodes.size).toBe(4); // root + vc + 2 LLM nodes
 
     const root = tree.nodes.get("root")!;
     expect(root.state).toBe("complete");
@@ -114,7 +116,7 @@ describe("buildTree", () => {
     const vc = tree.nodes.get("vc-0")!;
     expect(vc.kind).toBe("vector-completion");
     expect(vc.state).toBe("complete");
-    expect(vc.children.length).toBe(0); // LLM nodes no longer tree children
+    expect(vc.children.length).toBe(2); // 2 LLM child nodes from votes
 
     // Vote data stored on the VC node for DetailPanel access
     const vcData = vc.data as VectorCompletionNodeData;
@@ -154,8 +156,8 @@ describe("buildTree", () => {
     };
 
     const tree = buildTree(exec)!;
-    // root + func-task + 2 vc (from nested) + vc (from root) = 5
-    expect(tree.nodes.size).toBe(5);
+    // root + func-task + 2 vc (1 vote each) + vc (2 votes) + 4 LLM nodes = 9
+    expect(tree.nodes.size).toBe(9);
 
     const root = tree.nodes.get("root")!;
     expect(root.children.length).toBe(2); // func-0 and vc-1
@@ -304,5 +306,170 @@ describe("buildTree", () => {
     const vcNode = tree.nodes.get("vc-0")!;
     const data = vcNode.data as VectorCompletionNodeData;
     expect(data.responses).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Edge weight tests
+// ---------------------------------------------------------------------------
+
+describe("edge weights", () => {
+  it("root node has null edgeWeight", () => {
+    const exec: InputFunctionExecution = {
+      id: "ew-1",
+      function: "user/func",
+      tasks: [],
+    };
+    const tree = buildTree(exec)!;
+    expect(tree.nodes.get("root")!.edgeWeight).toBeNull();
+  });
+
+  it("VC task nodes have null edgeWeight by default", () => {
+    const exec: InputFunctionExecution = {
+      id: "ew-2",
+      tasks: [makeVCTask(0, [0], [], [])],
+    };
+    const tree = buildTree(exec)!;
+    expect(tree.nodes.get("vc-0")!.edgeWeight).toBeNull();
+  });
+
+  it("LLM nodes get normalized edgeWeight from vote weights", () => {
+    const exec: InputFunctionExecution = {
+      id: "ew-3",
+      tasks: [
+        makeVCTask(0, [0], [
+          { ...makeVote(0), weight: 2 },
+          { ...makeVote(1), weight: 1 },
+        ], [0.5, 0.5]),
+      ],
+    };
+    const tree = buildTree(exec)!;
+    const vc = tree.nodes.get("vc-0")!;
+    const llm0 = tree.nodes.get(vc.children[0])!;
+    const llm1 = tree.nodes.get(vc.children[1])!;
+    // weight=2 / max(2) = 1.0, weight=1 / max(2) = 0.5
+    expect(llm0.edgeWeight).toBe(1);
+    expect(llm1.edgeWeight).toBe(0.5);
+  });
+
+  it("LLM nodes with equal weights all get edgeWeight of 1", () => {
+    const exec: InputFunctionExecution = {
+      id: "ew-4",
+      tasks: [
+        makeVCTask(0, [0], [makeVote(0), makeVote(1), makeVote(2)], [0.5, 0.3, 0.2]),
+      ],
+    };
+    const tree = buildTree(exec)!;
+    const vc = tree.nodes.get("vc-0")!;
+    // All votes have weight=1, so all normalized to 1.0
+    for (const childId of vc.children) {
+      expect(tree.nodes.get(childId)!.edgeWeight).toBe(1);
+    }
+  });
+
+  it("LLM nodes with zero max weight get null edgeWeight", () => {
+    const exec: InputFunctionExecution = {
+      id: "ew-5",
+      tasks: [
+        makeVCTask(0, [0], [
+          { ...makeVote(0), weight: 0 },
+          { ...makeVote(1), weight: 0 },
+        ], [0.5, 0.5]),
+      ],
+    };
+    const tree = buildTree(exec)!;
+    const vc = tree.nodes.get("vc-0")!;
+    for (const childId of vc.children) {
+      expect(tree.nodes.get(childId)!.edgeWeight).toBeNull();
+    }
+  });
+});
+
+describe("applyProfileWeights", () => {
+  it("applies per-task weights from profile", () => {
+    const exec: InputFunctionExecution = {
+      id: "pw-1",
+      tasks: [
+        makeVCTask(0, [0], [], []),
+        makeVCTask(1, [1], [], []),
+        makeVCTask(2, [2], [], []),
+      ],
+    };
+    const tree = buildTree(exec)!;
+    const profile: InputProfile = {
+      profile: [3, 1, 2],
+      tasks: [],
+    };
+    applyProfileWeights(tree, profile);
+
+    // Normalized: 3/3=1, 1/3=0.333, 2/3=0.667
+    const root = tree.nodes.get("root")!;
+    const c0 = tree.nodes.get(root.children[0])!;
+    const c1 = tree.nodes.get(root.children[1])!;
+    const c2 = tree.nodes.get(root.children[2])!;
+    expect(c0.edgeWeight).toBeCloseTo(1, 5);
+    expect(c1.edgeWeight).toBeCloseTo(1 / 3, 5);
+    expect(c2.edgeWeight).toBeCloseTo(2 / 3, 5);
+  });
+
+  it("applies per-LLM weights from profile tasks", () => {
+    const exec: InputFunctionExecution = {
+      id: "pw-2",
+      tasks: [
+        makeVCTask(0, [0], [makeVote(0), makeVote(1)], [0.6, 0.4]),
+      ],
+    };
+    const tree = buildTree(exec)!;
+    const profile: InputProfile = {
+      profile: [1],
+      tasks: [{ profile: [4, 2] }],
+    };
+    applyProfileWeights(tree, profile);
+
+    const vc = tree.nodes.get("vc-0")!;
+    const llm0 = tree.nodes.get(vc.children[0])!;
+    const llm1 = tree.nodes.get(vc.children[1])!;
+    // Profile overrides: 4/4=1, 2/4=0.5
+    expect(llm0.edgeWeight).toBeCloseTo(1, 5);
+    expect(llm1.edgeWeight).toBeCloseTo(0.5, 5);
+  });
+
+  it("does nothing with null profile", () => {
+    const exec: InputFunctionExecution = {
+      id: "pw-3",
+      tasks: [makeVCTask(0, [0], [], [])],
+    };
+    const tree = buildTree(exec)!;
+    applyProfileWeights(tree, null);
+    expect(tree.nodes.get("vc-0")!.edgeWeight).toBeNull();
+  });
+
+  it("handles empty profile weights array", () => {
+    const exec: InputFunctionExecution = {
+      id: "pw-4",
+      tasks: [makeVCTask(0, [0], [], [])],
+    };
+    const tree = buildTree(exec)!;
+    const profile: InputProfile = {
+      profile: [],
+      tasks: [],
+    };
+    applyProfileWeights(tree, profile);
+    expect(tree.nodes.get("vc-0")!.edgeWeight).toBeNull();
+  });
+
+  it("handles more profile weights than children", () => {
+    const exec: InputFunctionExecution = {
+      id: "pw-5",
+      tasks: [makeVCTask(0, [0], [], [])],
+    };
+    const tree = buildTree(exec)!;
+    const profile: InputProfile = {
+      profile: [1, 2, 3],
+      tasks: [],
+    };
+    applyProfileWeights(tree, profile);
+    // Only the first child gets a weight
+    expect(tree.nodes.get("vc-0")!.edgeWeight).toBeCloseTo(1 / 3, 5);
   });
 });

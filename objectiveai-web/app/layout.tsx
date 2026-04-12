@@ -1,52 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
+import { JetBrains_Mono } from "next/font/google";
+import { Shell } from "@/components/Shell";
 import "./globals.css";
-import AppShell from "@/components/AppShell";
-import { AuthProvider } from "@/contexts/AuthContext";
-import SonarlyTracker from "@/components/SonarlyTracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: {
-    default: "ObjectiveAI",
-    template: "%s | ObjectiveAI",
-  },
-  description:
-    "Score everything. Rank everything. Simulate anyone. A REST API platform for scoring, ranking, and simulating preferences using ensembles of LLMs.",
-  metadataBase: new URL("https://objective-ai.io"),
-  openGraph: {
-    type: "website",
-    siteName: "ObjectiveAI",
-    title: "ObjectiveAI",
-    description:
-      "Score everything. Rank everything. Simulate anyone. A REST API platform for scoring, ranking, and simulating preferences using ensembles of LLMs.",
-    url: "https://objective-ai.io",
-  },
-  twitter: {
-    card: "summary",
-    title: "ObjectiveAI",
-    description:
-      "Score everything. Rank everything. Simulate anyone. A REST API platform using ensembles of LLMs.",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
-
-export const viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 5,
+  title: "ObjectiveAI",
+  description: "Score everything. Rank everything. Simulate anyone.",
 };
 
 export default function RootLayout({
@@ -55,12 +25,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <SonarlyTracker />
-        <AuthProvider>
-          <AppShell>{children}</AppShell>
-        </AuthProvider>
+    <html lang="en" className={`${geistSans.variable} ${jetbrainsMono.variable}`}>
+      <body>
+        <Shell>{children}</Shell>
       </body>
     </html>
   );
