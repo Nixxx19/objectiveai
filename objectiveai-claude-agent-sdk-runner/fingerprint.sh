@@ -19,6 +19,7 @@ compute_fingerprint() {
   {
     echo "$SCRIPT_DIR/main.py"
     echo "$SCRIPT_DIR/requirements.txt"
+    echo "$SCRIPT_DIR/requirements-dev.txt"
   } | while IFS= read -r file; do
     relpath="${file#"$SCRIPT_DIR/"}"
     printf '%s\n' "$relpath"

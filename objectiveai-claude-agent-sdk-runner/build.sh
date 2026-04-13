@@ -39,10 +39,33 @@ run() {
     python3 -m venv "$VENV_DIR"
   fi
 
-  # ── install requirements ────────────────────────────────────────────────────────
+  # ── install requirements if missing ─────────────────────────────────────────────
 
-  echo "Installing requirements..."
-  "$PIP" install -r "$SCRIPT_DIR/requirements.txt" --quiet
+  install_if_missing() {
+    local req_file="$1"
+    local missing=false
+    while IFS= read -r line; do
+      [[ -z "$line" || "$line" == \#* || "$line" == -r* || "$line" == ../* ]] && continue
+      local pkg
+      pkg=$(echo "$line" | sed 's/[><=!].*//' | tr '-' '_')
+      if ! "$PYTHON" -c "import $pkg" 2>/dev/null; then
+        missing=true
+        break
+      fi
+    done < "$req_file"
+
+    if $missing; then
+      echo "Installing requirements from $req_file..."
+      "$PIP" install -r "$req_file" --quiet
+    fi
+  }
+
+  install_if_missing "$SCRIPT_DIR/requirements.txt"
+
+  if ! "$PYTHON" -c "import PyInstaller" 2>/dev/null; then
+    echo "Installing dev requirements..."
+    "$PIP" install -r "$SCRIPT_DIR/requirements-dev.txt" --quiet
+  fi
 
   # Stamp the fingerprint only after successful build.
   echo "$CURRENT_FP" > "$FINGERPRINT_FILE"
