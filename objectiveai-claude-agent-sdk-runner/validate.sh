@@ -1,31 +1,31 @@
 #!/usr/bin/env bash
-# Validates that venv/ exists and its fingerprint matches the current source.
+# Validates that embed/<target>/<profile>/ exists and its fingerprint matches.
 #
 # Usage:
-#   bash objectiveai-claude-agent-sdk-runner/validate.sh
+#   bash objectiveai-claude-agent-sdk-runner/validate.sh [--target <triple>] [--release]
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-VENV_DIR="$SCRIPT_DIR/venv"
-FINGERPRINT_FILE="$VENV_DIR/.fingerprint"
 
-if [ ! -d "$VENV_DIR" ] || [ ! -f "$FINGERPRINT_FILE" ]; then
-  echo "ERROR: venv/ is missing. Run build.sh first." >&2
+# Source fingerprint.sh to get CURRENT_FP, FINGERPRINT_FILE, TARGET, PROFILE.
+# It returns 1 (up to date) or 0 (changed) — suppress the early exit.
+source "$SCRIPT_DIR/fingerprint.sh" "$@" || true
+
+EMBED_DIR="$SCRIPT_DIR/embed/$TARGET/$PROFILE"
+
+if [ ! -d "$EMBED_DIR" ] || [ ! -f "$FINGERPRINT_FILE" ]; then
+  echo "ERROR: embed/$TARGET/$PROFILE is missing. Run build.sh first." >&2
   exit 1
 fi
 
-# Compute current fingerprint (source exits early if up to date, so we
-# suppress that by only importing the compute logic).
-source "$SCRIPT_DIR/fingerprint.sh" || true
-
 STORED_FP=$(cat "$FINGERPRINT_FILE")
 if [ "$CURRENT_FP" != "$STORED_FP" ]; then
-  echo "ERROR: venv/ is stale. Fingerprint mismatch:" >&2
+  echo "ERROR: embed/$TARGET/$PROFILE is stale. Fingerprint mismatch:" >&2
   echo "  stored:  ${STORED_FP:0:12}..." >&2
   echo "  current: ${CURRENT_FP:0:12}..." >&2
   echo "Run build.sh to rebuild." >&2
   exit 2
 fi
 
-echo "venv/ is valid (fingerprint: ${CURRENT_FP:0:12}...)"
+echo "embed/$TARGET/$PROFILE is valid (fingerprint: ${CURRENT_FP:0:12}...)"
