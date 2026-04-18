@@ -48,6 +48,8 @@ COPY objectiveai-viewer/package.json objectiveai-viewer/
 RUN pnpm install --frozen-lockfile
 
 # Build JS SDK (workspace resolves "objectiveai" locally)
+COPY objectiveai-json-schema/ objectiveai-json-schema/
+COPY objectiveai-rs-wasm-js/ objectiveai-rs-wasm-js/
 COPY objectiveai-js/ objectiveai-js/
 RUN pnpm run build:js
 
