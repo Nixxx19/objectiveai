@@ -101,7 +101,7 @@ ENV NEXT_PUBLIC_SONARLY_INGEST_POINT=${NEXT_PUBLIC_SONARLY_INGEST_POINT}
 WORKDIR /root
 COPY --from=builder /root/objectiveai-web/.next .next
 COPY --from=builder /root/objectiveai-web/public public
-COPY --from=builder /root/objectiveai-web/node_modules node_modules
+COPY --from=builder /root/node_modules node_modules
 COPY --from=builder \
     /root/objectiveai-web/package.json \
     /root/objectiveai-web/next.config.ts \
