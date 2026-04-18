@@ -1,6 +1,8 @@
 use clap::{Args, Subcommand};
 use futures::StreamExt;
 
+crate::define_inline_or_ref!(AgentArg, "agent", objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional, Remote);
+
 /// Shared params across all invention state types.
 #[derive(Args)]
 pub struct InventionParams {
@@ -67,9 +69,8 @@ pub enum Commands {
     AlphaScalar {
         #[command(flatten)]
         params: InventionParams,
-        /// Agent reference (e.g. favorite=name or remote=github,owner=x,repository=y)
-        #[arg(long)]
-        agent: crate::agent_ref::AgentRef,
+        #[command(flatten)]
+        agent: AgentArg,
         #[command(flatten)]
         continuation: crate::continuation::ContinuationArgs,
         /// Seed for deterministic mock responses
@@ -83,9 +84,8 @@ pub enum Commands {
     AlphaVector {
         #[command(flatten)]
         params: InventionParams,
-        /// Agent reference (e.g. favorite=name or remote=github,owner=x,repository=y)
-        #[arg(long)]
-        agent: crate::agent_ref::AgentRef,
+        #[command(flatten)]
+        agent: AgentArg,
         #[command(flatten)]
         continuation: crate::continuation::ContinuationArgs,
         /// Seed for deterministic mock responses
@@ -100,9 +100,8 @@ pub enum Commands {
         /// State reference (e.g. remote=mock,name=inv-good-sl or remote=github,owner=x,repository=y)
         #[arg(long)]
         state: crate::path_ref::PathRef,
-        /// Agent reference (e.g. favorite=name or remote=github,owner=x,repository=y)
-        #[arg(long)]
-        agent: crate::agent_ref::AgentRef,
+        #[command(flatten)]
+        agent: AgentArg,
         #[command(flatten)]
         continuation: crate::continuation::ContinuationArgs,
         /// Seed for deterministic mock responses
