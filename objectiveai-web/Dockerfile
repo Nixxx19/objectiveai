@@ -1,4 +1,4 @@
-# Builder
+# Builder (pnpm)
 FROM node:20 AS builder
 ARG AUTH_GOOGLE_CLIENT_ID
 ENV AUTH_GOOGLE_CLIENT_ID=${AUTH_GOOGLE_CLIENT_ID}
