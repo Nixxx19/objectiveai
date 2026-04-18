@@ -41,7 +41,15 @@ COPY package.json package-lock.json ./
 COPY objectiveai-js/package.json objectiveai-js/
 COPY objectiveai-function-tree/package.json objectiveai-function-tree/
 COPY objectiveai-web/package.json objectiveai-web/
-RUN npm install --include=dev --force
+# Strip win32-only packages from lockfile (generated on Windows, can't install on Linux)
+RUN node -e " \
+  const fs = require('fs'); \
+  const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8')); \
+  for (const [key, val] of Object.entries(lock.packages)) { \
+    if (val.os && val.os.length === 1 && val.os[0] === 'win32') delete lock.packages[key]; \
+  } \
+  fs.writeFileSync('package-lock.json', JSON.stringify(lock, null, 2));"
+RUN npm install --include=dev
 
 # Build JS SDK (workspace resolves "objectiveai" locally)
 COPY objectiveai-js/ objectiveai-js/
