@@ -44,6 +44,7 @@ COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
 COPY objectiveai-js/package.json objectiveai-js/
 COPY objectiveai-function-tree/package.json objectiveai-function-tree/
 COPY objectiveai-web/package.json objectiveai-web/
+COPY objectiveai-viewer/package.json objectiveai-viewer/
 RUN pnpm install --frozen-lockfile
 
 # Build JS SDK (workspace resolves "objectiveai" locally)
