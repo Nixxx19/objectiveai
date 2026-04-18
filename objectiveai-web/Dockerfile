@@ -41,7 +41,7 @@ COPY package.json package-lock.json ./
 COPY objectiveai-js/package.json objectiveai-js/
 COPY objectiveai-function-tree/package.json objectiveai-function-tree/
 COPY objectiveai-web/package.json objectiveai-web/
-RUN npm install --include=dev
+RUN npm install --include=dev --force
 
 # Build JS SDK (workspace resolves "objectiveai" locally)
 COPY objectiveai-js/ objectiveai-js/
