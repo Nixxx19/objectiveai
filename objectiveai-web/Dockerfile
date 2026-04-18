@@ -35,33 +35,28 @@ ENV NEXT_PUBLIC_SONARLY_PROJECT_KEY=${NEXT_PUBLIC_SONARLY_PROJECT_KEY}
 ARG NEXT_PUBLIC_SONARLY_INGEST_POINT
 ENV NEXT_PUBLIC_SONARLY_INGEST_POINT=${NEXT_PUBLIC_SONARLY_INGEST_POINT}
 
+# Install pnpm via corepack
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 # Install workspace dependencies
 WORKDIR /root
-COPY package.json package-lock.json ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
 COPY objectiveai-js/package.json objectiveai-js/
 COPY objectiveai-function-tree/package.json objectiveai-function-tree/
 COPY objectiveai-web/package.json objectiveai-web/
-# Strip win32-only packages from lockfile (generated on Windows, can't install on Linux)
-RUN node -e " \
-  const fs = require('fs'); \
-  const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8')); \
-  for (const [key, val] of Object.entries(lock.packages)) { \
-    if (val.os && val.os.length === 1 && val.os[0] === 'win32') delete lock.packages[key]; \
-  } \
-  fs.writeFileSync('package-lock.json', JSON.stringify(lock, null, 2));"
-RUN npm install --include=dev
+RUN pnpm install --frozen-lockfile
 
 # Build JS SDK (workspace resolves "objectiveai" locally)
 COPY objectiveai-js/ objectiveai-js/
-RUN npm run build:js
+RUN pnpm run build:js
 
 # Build function-tree
 COPY objectiveai-function-tree/ objectiveai-function-tree/
-RUN npm run build:tree
+RUN pnpm run build:tree
 
 # Build web
 COPY objectiveai-web/ objectiveai-web/
-RUN npm run build:web
+RUN pnpm run build:web
 
 # Runner
 FROM node:20-slim AS runner

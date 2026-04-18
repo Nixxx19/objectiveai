@@ -175,6 +175,10 @@ After declaring work "complete" on multi-page tasks, enumerate all affected page
 
 ## Development Workflow
 
+### Package Manager
+
+This repo uses **pnpm** (not npm). Run all commands with `pnpm`. Workspace filtering uses `pnpm --filter <package-name> run <script>`.
+
 ### SDK Testing
 
 Use `coding-agent-scratch/` folder for testing SDK calls and exploring API behavior. Create test scripts to verify CORS, client-side SDK usage, and API responses.
