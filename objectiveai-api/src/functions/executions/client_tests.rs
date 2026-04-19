@@ -1998,3 +1998,52 @@ async fn test_error_6_1_reasoning_agent_error() {
         result.reasoning,
     );
 }
+
+// ===========================================================================
+// Split tests
+// ===========================================================================
+
+/// Split: run scalar binary-classifier on 3 inputs, expect Vector output.
+#[tokio::test]
+async fn test_split_scalar_binary_seed_42() {
+    let client = make_client();
+    let request = Arc::new(FunctionExecutionCreateParams {
+        function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
+            objectiveai::RemotePathCommitOptional::Mock {
+                name: "binary-classifier".to_string(),
+            },
+        ),
+        profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
+            objectiveai::RemotePathCommitOptional::Mock {
+                name: "solo-instruction".to_string(),
+            },
+        ),
+        retry_token: None,
+        from_cache: None,
+        reasoning: None,
+        strategy: None,
+        input: InputValue::Array(vec![
+            InputValue::Object(indexmap::indexmap! {
+                "text".into() => InputValue::String("Hello world".into()),
+            }),
+            InputValue::Object(indexmap::indexmap! {
+                "text".into() => InputValue::String("Buy cheap watches".into()),
+            }),
+            InputValue::Object(indexmap::indexmap! {
+                "text".into() => InputValue::String("Good morning".into()),
+            }),
+        ]),
+        split: Some(true),
+        provider: None,
+        seed: Some(42),
+        stream: None,
+        continuation: None,
+    });
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/split_scalar_binary_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/split_scalar_binary_seed_42.json"),
+    );
+}
