@@ -197,6 +197,7 @@ impl Commands {
             reasoning: None,
             strategy: Some(strategy),
             input: input_value,
+            split: None,
             provider: None,
             seed,
             stream: Some(true),
