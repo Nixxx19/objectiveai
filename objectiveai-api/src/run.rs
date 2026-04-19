@@ -283,7 +283,7 @@ impl ConfigBuilder {
     pub fn build(self) -> Config {
         Config {
             // -- HttpClient fields --
-            objectiveai_address: self.objectiveai_address.unwrap_or_else(|| "https://api.objective-ai.io".to_string()),
+            objectiveai_address: self.objectiveai_address.unwrap_or_else(|| "https://api.objectiveai.dev".to_string()),
             objectiveai_authorization: self.objectiveai_authorization,
             openrouter_address: self.openrouter_address.unwrap_or_else(|| "https://openrouter.ai/api/v1".to_string()),
             openrouter_authorization: self.openrouter_authorization,
@@ -295,7 +295,7 @@ impl ConfigBuilder {
             http_referer: self.http_referer.unwrap_or_else(|| "https://objectiveai-ai.io/".to_string()),
             x_title: self.x_title.unwrap_or_else(|| "ObjectiveAI".to_string()),
             commit_author_name: self.commit_author_name.unwrap_or_else(|| "ObjectiveAI".to_string()),
-            commit_author_email: self.commit_author_email.unwrap_or_else(|| "admin@objective-ai.io".to_string()),
+            commit_author_email: self.commit_author_email.unwrap_or_else(|| "admin@objectiveai.dev".to_string()),
             // -- Other fields --
             claude_agent_sdk: self.claude_agent_sdk.unwrap_or(true),
             agent_completions_backoff_current_interval: self.agent_completions_backoff_current_interval.unwrap_or(100),
