@@ -126,6 +126,9 @@ pub enum Commands {
         /// Seed for deterministic mock responses
         #[arg(long)]
         seed: Option<i64>,
+        /// Treat input as an array and execute once per element
+        #[arg(long)]
+        split: bool,
         /// Run in the background: print PID and log path, then exit
         #[arg(long)]
         detach: bool,
@@ -146,6 +149,9 @@ pub enum Commands {
         /// Seed for deterministic mock responses
         #[arg(long)]
         seed: Option<i64>,
+        /// Treat input as an array and execute once per element
+        #[arg(long)]
+        split: bool,
         /// How many vector responses per execution (default 10)
         #[arg(long)]
         pool: Option<usize>,
@@ -170,13 +176,13 @@ async fn profile_favorites(cli_config: &crate::Config) -> Vec<objectiveai::files
 
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
-        let (function_source, profile_source, input_source, continuation_args, retry_token, seed, strategy, detach) = match self {
-            Commands::Standard { function, profile, input, continuation, retry_token, seed, detach } => {
-                (function, profile, input, continuation, retry_token, seed, objectiveai::functions::executions::request::Strategy::Default, detach)
+        let (function_source, profile_source, input_source, continuation_args, retry_token, seed, split, strategy, detach) = match self {
+            Commands::Standard { function, profile, input, continuation, retry_token, seed, split, detach } => {
+                (function, profile, input, continuation, retry_token, seed, split, objectiveai::functions::executions::request::Strategy::Default, detach)
             }
-            Commands::SwissSystem { function, profile, input, continuation, retry_token, seed, pool, rounds, detach } => {
+            Commands::SwissSystem { function, profile, input, continuation, retry_token, seed, split, pool, rounds, detach } => {
                 let strategy = objectiveai::functions::executions::request::Strategy::SwissSystem { pool, rounds };
-                (function, profile, input, continuation, retry_token, seed, strategy, detach)
+                (function, profile, input, continuation, retry_token, seed, split, strategy, detach)
             }
         };
 
@@ -197,7 +203,7 @@ impl Commands {
             reasoning: None,
             strategy: Some(strategy),
             input: input_value,
-            split: None,
+            split: if split { Some(true) } else { None },
             provider: None,
             seed,
             stream: Some(true),
