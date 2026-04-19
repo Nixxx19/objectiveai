@@ -295,6 +295,7 @@ fn make_request(
         reasoning: None,
         strategy: None,
         input,
+        split: None,
         provider: None,
         seed: Some(seed),
         stream: None,
@@ -1144,6 +1145,7 @@ async fn test_inline_scalar_placeholder_seed_42() {
         input: InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("Hello world".into()),
         }),
+        split: None,
         provider: None,
         seed: Some(42),
         stream: None,
@@ -1180,6 +1182,7 @@ async fn test_mock_25_scalar_placeholder_remote_swarm_seed_42() {
         input: InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("Hello world".into()),
         }),
+        split: None,
         provider: None,
         seed: Some(42),
         stream: None,
@@ -1216,6 +1219,7 @@ async fn test_mock_4_vector_swiss_default_20_items_seed_7() {
         input: InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array((0..20).map(|i| InputValue::String(format!("Item{i}"))).collect()),
         }),
+        split: None,
         provider: None,
         seed: Some(7),
         stream: None,
@@ -1251,6 +1255,7 @@ async fn test_mock_5_vector_swiss_pool5_rounds3_20_items_seed_7() {
             }),
             "items".into() => InputValue::Array((0..20).map(|i| InputValue::String(format!("Item{i}"))).collect()),
         }),
+        split: None,
         provider: None,
         seed: Some(7),
         stream: None,
@@ -1283,6 +1288,7 @@ async fn test_mock_7_vector_swiss_pool4_rounds3_20_items_seed_7() {
         input: InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array((0..20).map(|i| InputValue::String(format!("Item{i}"))).collect()),
         }),
+        split: None,
         provider: None,
         seed: Some(7),
         stream: None,
@@ -1448,6 +1454,7 @@ fn make_request_with_overrides(
         reasoning: None,
         strategy: None,
         input: InputValue::Object(indexmap::indexmap! {}),
+        split: None,
         provider: None,
         seed: Some(42),
         stream: None,
