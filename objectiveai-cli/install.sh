@@ -89,7 +89,24 @@ if [ -f "$FINGERPRINT_FILE" ]; then
   fi
 fi
 
-# ── Build ──────────────────────────────────────────────────────────────
+# ── Build embedded binaries ────────────────────────────────────────────
+# The CLI embeds viewer (via build.rs), and objectiveai-api embeds
+# mcp (linux-musl) and claude-agent-sdk-runner. Build them first.
+
+echo "Building embedded dependencies..."
+
+# claude-agent-sdk-runner (native target, always needed)
+bash "$REPO_ROOT/objectiveai-claude-agent-sdk-runner/build.sh" --release
+
+# mcp (linux-musl, needed by objectiveai-api with orchestrator-bollard)
+bash "$REPO_ROOT/objectiveai-mcp/build.sh" --target "$(uname -m)-unknown-linux-musl" --release
+
+# viewer (native target, unless --no-viewer)
+if [ "$NO_VIEWER" = "0" ]; then
+  bash "$REPO_ROOT/objectiveai-viewer/build.sh" --release
+fi
+
+# ── Build CLI ──────────────────────────────────────────────────────────
 
 if [ "$NO_VIEWER" = "1" ]; then
   echo "Building objectiveai-cli (release, no viewer)..."
