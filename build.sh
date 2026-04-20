@@ -43,7 +43,7 @@ CLI_PID=$!
 # Embedded binaries (depend on phase 1, run concurrently with phases 2+3).
 # viewer + mcp are cargo builds; claude-agent-sdk-runner is PyInstaller.
 # No --target for viewer/runner (host platform); mcp always linux-musl (for Docker).
-bash "$REPO_ROOT/objectiveai-viewer/build.sh" &
+bash "$REPO_ROOT/objectiveai-viewer/build.sh" --release &
 VIEWER_PID=$!
 bash "$REPO_ROOT/objectiveai-mcp/build.sh" --target "$(uname -m)-unknown-linux-musl" &
 MCP_PID=$!
