@@ -138,14 +138,31 @@ async function* messages() {
   yield message;
 }
 
+// Async generator that yields no messages — used on retry to resume
+// an existing session without sending a new user message.
+async function* emptyMessages() {}
+
 async function run() {
+  // Track the latest session_id so we can resume on retry after rate limit.
+  let currentSessionId = null;
+
   for (let attempt = 0; attempt <= rateLimitMaxRetries; attempt++) {
     let rateLimited = false;
 
-    const stream = query({ prompt: messages(), options: opts });
+    // On retry, resume the session captured from the previous attempt.
+    const attemptOpts = { ...opts };
+    let prompt;
+    if (attempt === 0) {
+      prompt = messages();
+    } else {
+      attemptOpts.resume = currentSessionId;
+      prompt = emptyMessages();
+    }
+
+    const stream = query({ prompt, options: attemptOpts });
 
     // Wait for all MCP servers to be connected.
-    const ourServers = new Set(Object.keys(opts.mcpServers || {}));
+    const ourServers = new Set(Object.keys(attemptOpts.mcpServers || {}));
     if (ourServers.size > 0) {
       let first = true;
       let delay = 1;
@@ -188,6 +205,11 @@ async function run() {
 
     // Stream events as JSONL to stdout.
     for await (const event of stream) {
+      // Track session_id so we can resume on rate limit retry.
+      if (event.session_id) {
+        currentSessionId = event.session_id;
+      }
+
       // Handle rate limit events
       if (
         event.type === "rate_limit_event" &&

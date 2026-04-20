@@ -347,18 +347,34 @@ async def run(args: argparse.Namespace) -> None:
 
     # Stream events as JSONL to stdout.
     # If rate-limited with status "rejected", wait until resets_at and retry.
+    # On retry, resume the same session so the agent's memory is preserved.
     max_retries = args.rate_limit_max_retries
+    current_session_id: str | None = None
     for attempt in range(max_retries + 1):
         rate_limited = False
 
+        # On retry, resume the session captured from the previous attempt.
+        if current_session_id is not None:
+            opts = replace_opts(opts, resume=current_session_id)
+
         async with ClaudeSDKClient(opts) as client:
-            await client.connect(prompt=messages())
+            # Only send the original message on the first attempt. On resume,
+            # the session already has the conversation history.
+            if attempt == 0:
+                await client.connect(prompt=messages())
+            else:
+                await client.connect()
 
             # Wait for all MCP servers to be connected.
             await wait_for_mcp_servers(client, our_servers)
 
             # Stream messages.
             async for msg in client.receive_messages():
+                # Track session_id from any message that has it.
+                msg_session_id = getattr(msg, "session_id", None)
+                if msg_session_id:
+                    current_session_id = msg_session_id
+
                 if isinstance(msg, RateLimitEvent) and msg.rate_limit_info.status == "rejected":
                     resets_at = msg.rate_limit_info.resets_at
                     if resets_at is not None and attempt < max_retries:
@@ -375,6 +391,12 @@ async def run(args: argparse.Namespace) -> None:
 
         if not rate_limited:
             break
+
+
+def replace_opts(opts: ClaudeAgentOptions, **changes: Any) -> ClaudeAgentOptions:
+    """Return a copy of opts with the given fields replaced."""
+    from dataclasses import replace
+    return replace(opts, **changes)
 
 
 def main() -> None:
