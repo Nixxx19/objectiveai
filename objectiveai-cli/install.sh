@@ -6,7 +6,11 @@
 # - Adds ~/.objectiveai to PATH if not already present
 #
 # Usage:
-#   bash objectiveai-cli/install.sh [--no-viewer]
+#   bash objectiveai-cli/install.sh [--no-viewer] [--claude-agent-sdk-python]
+#
+#   --no-viewer             Build without the embedded Tauri viewer
+#   --claude-agent-sdk-python   Use the Python Claude Agent SDK runner
+#                           (default: JavaScript runner)
 
 set -euo pipefail
 
@@ -16,8 +20,12 @@ INSTALL_DIR="$HOME/.objectiveai"
 
 # Parse args
 NO_VIEWER=0
+CLAUDE_AGENT_SDK_PYTHON=0
 for arg in "$@"; do
-  [ "$arg" = "--no-viewer" ] && NO_VIEWER=1
+  case "$arg" in
+    --no-viewer) NO_VIEWER=1 ;;
+    --claude-agent-sdk-python) CLAUDE_AGENT_SDK_PYTHON=1 ;;
+  esac
 done
 
 # Detect platform
@@ -43,8 +51,9 @@ FINGERPRINT_FILE="$INSTALL_DIR/.fingerprint"
 
 compute_fingerprint() {
   {
-    # Bake --no-viewer into fingerprint so the two variants don't collide
+    # Bake build flags into fingerprint so variants don't collide
     echo "NO_VIEWER=$NO_VIEWER"
+    echo "CLAUDE_AGENT_SDK_PYTHON=$CLAUDE_AGENT_SDK_PYTHON"
 
     # objectiveai-cli sources
     find "$SCRIPT_DIR/src" -type f -name '*.rs' | sort
@@ -57,6 +66,15 @@ compute_fingerprint() {
     # objectiveai-api (library dep)
     find "$REPO_ROOT/objectiveai-api/src" -type f -name '*.rs' | sort
     echo "$REPO_ROOT/objectiveai-api/Cargo.toml"
+
+    # Claude Agent SDK runner (one of the two, based on flag)
+    if [ "$CLAUDE_AGENT_SDK_PYTHON" = "1" ]; then
+      echo "$REPO_ROOT/objectiveai-claude-agent-sdk-runner-py/main.py"
+      echo "$REPO_ROOT/objectiveai-claude-agent-sdk-runner-py/requirements.txt"
+    else
+      echo "$REPO_ROOT/objectiveai-claude-agent-sdk-runner-js/main.js"
+      echo "$REPO_ROOT/objectiveai-claude-agent-sdk-runner-js/package.json"
+    fi
 
     # objectiveai-viewer (embedded binary, unless --no-viewer)
     if [ "$NO_VIEWER" = "0" ]; then
@@ -91,13 +109,16 @@ fi
 
 # ── Build embedded binaries ────────────────────────────────────────────
 # The CLI embeds viewer (via build.rs), and objectiveai-api embeds
-# mcp (linux-musl) and claude-agent-sdk-runner. Build them first.
+# mcp (linux-musl) and one of the two claude-agent-sdk-runners.
 
 echo "Building embedded dependencies..."
 
-# claude-agent-sdk-runners (native target)
-bash "$REPO_ROOT/objectiveai-claude-agent-sdk-runner-js/build.sh" --release
-bash "$REPO_ROOT/objectiveai-claude-agent-sdk-runner-py/build.sh" --release
+# claude-agent-sdk-runner (native target) — build the one we're using
+if [ "$CLAUDE_AGENT_SDK_PYTHON" = "1" ]; then
+  bash "$REPO_ROOT/objectiveai-claude-agent-sdk-runner-py/build.sh" --release
+else
+  bash "$REPO_ROOT/objectiveai-claude-agent-sdk-runner-js/build.sh" --release
+fi
 
 # mcp (linux-musl, needed by objectiveai-api with orchestrator-bollard)
 bash "$REPO_ROOT/objectiveai-mcp/build.sh" --target "$(uname -m)-unknown-linux-musl" --release
@@ -109,14 +130,21 @@ fi
 
 # ── Build CLI ──────────────────────────────────────────────────────────
 
-if [ "$NO_VIEWER" = "1" ]; then
-  echo "Building objectiveai-cli (release, no viewer)..."
-  cargo build --release -p objectiveai-cli --no-default-features --features rustpython,systempython \
-    --manifest-path "$REPO_ROOT/Cargo.toml"
+# Assemble feature list
+FEATURES="rustpython,systempython"
+if [ "$CLAUDE_AGENT_SDK_PYTHON" = "1" ]; then
+  FEATURES="$FEATURES,claude-agent-sdk-python"
 else
-  echo "Building objectiveai-cli (release)..."
-  cargo build --release -p objectiveai-cli --manifest-path "$REPO_ROOT/Cargo.toml"
+  FEATURES="$FEATURES,claude-agent-sdk-javascript"
 fi
+if [ "$NO_VIEWER" = "0" ]; then
+  FEATURES="$FEATURES,viewer"
+fi
+
+echo "Building objectiveai-cli (release, features: $FEATURES)..."
+cargo build --release -p objectiveai-cli --no-default-features \
+  --features "$FEATURES" \
+  --manifest-path "$REPO_ROOT/Cargo.toml"
 
 SRC="$REPO_ROOT/target/release/$SRC_NAME"
 if [ ! -f "$SRC" ]; then

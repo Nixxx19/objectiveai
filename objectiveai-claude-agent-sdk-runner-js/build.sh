@@ -62,7 +62,7 @@ run() {
   mkdir -p "$EMBED_DIR"
 
   echo "Building $MODULE ($PROFILE, $TARGET)..."
-  (cd "$SCRIPT_DIR" && npx yao-pkg main.js \
+  (cd "$SCRIPT_DIR" && npx -y -p @yao-pkg/pkg pkg main.js \
     --target "$pkg_target" \
     --output "$EMBED_DIR/$binary_name" \
     --config package.json) || return 1
