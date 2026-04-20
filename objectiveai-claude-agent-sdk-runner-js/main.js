@@ -6,10 +6,70 @@
  * Designed to be spawned as a subprocess by objectiveai-api.
  *
  * All parameters are accepted as CLI arguments (same API as the Python runner).
+ *
+ * The @anthropic-ai/claude-agent-sdk package is NOT bundled (proprietary
+ * license). At runtime we resolve it from the host system — global npm,
+ * Claude Code's local install, or any location Node's module resolution finds.
  */
 
-import { parseArgs } from "node:util";
-import { query } from "@anthropic-ai/claude-agent-sdk";
+"use strict";
+
+const { parseArgs } = require("node:util");
+const { createRequire } = require("node:module");
+const path = require("node:path");
+const fs = require("node:fs");
+const { execSync } = require("node:child_process");
+
+// ---------------------------------------------------------------------------
+// SDK resolution
+// ---------------------------------------------------------------------------
+// Try several candidate paths to find @anthropic-ai/claude-agent-sdk.
+
+function resolveSdk() {
+  const sdkName = "@anthropic-ai/claude-agent-sdk";
+  const candidates = [];
+
+  // 1. Global npm root
+  try {
+    const globalRoot = execSync("npm root -g", { encoding: "utf8" }).trim();
+    if (globalRoot) candidates.push(path.join(globalRoot, sdkName));
+  } catch { /* ignore */ }
+
+  // 2. Claude Code local install
+  const home = process.env.HOME || process.env.USERPROFILE;
+  if (home) {
+    candidates.push(path.join(home, ".claude", "local", "node_modules", sdkName));
+  }
+
+  // 3. Current working directory's node_modules
+  candidates.push(path.join(process.cwd(), "node_modules", sdkName));
+
+  // 4. NODE_PATH
+  if (process.env.NODE_PATH) {
+    for (const p of process.env.NODE_PATH.split(path.delimiter)) {
+      candidates.push(path.join(p, sdkName));
+    }
+  }
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      // Create a require anchored at the SDK's package.json so its internal
+      // requires resolve correctly too.
+      const pkgPath = path.join(candidate, "package.json");
+      if (fs.existsSync(pkgPath)) {
+        const req = createRequire(pkgPath);
+        return req(candidate);
+      }
+    }
+  }
+
+  throw new Error(
+    "@anthropic-ai/claude-agent-sdk not found. Install it globally: " +
+    "npm install -g @anthropic-ai/claude-agent-sdk"
+  );
+}
+
+const { query } = resolveSdk();
 
 // ---------------------------------------------------------------------------
 // CLI argument parsing
