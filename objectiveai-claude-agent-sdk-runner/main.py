@@ -16,6 +16,7 @@ import asyncio
 import json
 import os
 import sys
+import time
 from typing import Any
 
 from claude_agent_sdk import query, ClaudeAgentOptions
@@ -243,6 +244,12 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="User agent string (sets CLAUDE_AGENT_SDK_CLIENT_APP env var)",
     )
+    parser.add_argument(
+        "--rate-limit-max-retries",
+        type=int,
+        required=True,
+        help="Maximum number of retries on 429 rate limit (with retry-after backoff)",
+    )
     return parser.parse_args()
 
 
@@ -293,11 +300,26 @@ async def run(args: argparse.Namespace) -> None:
         yield message
 
     # Stream events as JSONL to stdout.
-    async for msg in query(prompt=messages(), options=opts):
-        d = serialize_message(msg)
-        if d is not None:
-            sys.stdout.write(json.dumps(d) + "\n")
-            sys.stdout.flush()
+    # If rate-limited with status "rejected", wait until resets_at and retry.
+    max_retries = args.rate_limit_max_retries
+    for attempt in range(max_retries + 1):
+        rate_limited = False
+        async for msg in query(prompt=messages(), options=opts):
+            if isinstance(msg, RateLimitEvent) and msg.rate_limit_info.status == "rejected":
+                resets_at = msg.rate_limit_info.resets_at
+                if resets_at is not None and attempt < max_retries:
+                    wait = max(0, resets_at - time.time()) + 1
+                    sys.stderr.write(f"Rate limited, retrying in {wait:.0f}s (attempt {attempt + 1}/{max_retries})\n")
+                    sys.stderr.flush()
+                    await asyncio.sleep(wait)
+                    rate_limited = True
+                    break
+            d = serialize_message(msg)
+            if d is not None:
+                sys.stdout.write(json.dumps(d) + "\n")
+                sys.stdout.flush()
+        if not rate_limited:
+            break
 
 
 def main() -> None:

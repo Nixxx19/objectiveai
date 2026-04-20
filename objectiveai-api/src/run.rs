@@ -73,6 +73,8 @@ struct EnvConfigBuilder {
     // -- Other fields --
     #[envconfig(from = "CLAUDE_AGENT_SDK")]
     claude_agent_sdk: Option<String>,
+    #[envconfig(from = "CLAUDE_AGENT_SDK_RATE_LIMIT_MAX_RETRIES")]
+    claude_agent_sdk_rate_limit_max_retries: Option<u64>,
     #[envconfig(from = "AGENT_COMPLETIONS_BACKOFF_CURRENT_INTERVAL")]
     agent_completions_backoff_current_interval: Option<u64>,
     #[envconfig(from = "AGENT_COMPLETIONS_BACKOFF_INITIAL_INTERVAL")]
@@ -168,6 +170,7 @@ impl EnvConfigBuilder {
             commit_author_email: self.commit_author_email,
             // -- Other fields --
             claude_agent_sdk: self.claude_agent_sdk.map(|s| parse_bool(&s)),
+            claude_agent_sdk_rate_limit_max_retries: self.claude_agent_sdk_rate_limit_max_retries,
             agent_completions_backoff_current_interval: self.agent_completions_backoff_current_interval,
             agent_completions_backoff_initial_interval: self.agent_completions_backoff_initial_interval,
             agent_completions_backoff_randomization_factor: self.agent_completions_backoff_randomization_factor,
@@ -226,6 +229,7 @@ pub struct ConfigBuilder {
     pub commit_author_email: Option<String>,
     // -- Other fields --
     pub claude_agent_sdk: Option<bool>,
+    pub claude_agent_sdk_rate_limit_max_retries: Option<u64>,
     pub agent_completions_backoff_current_interval: Option<u64>,
     pub agent_completions_backoff_initial_interval: Option<u64>,
     pub agent_completions_backoff_randomization_factor: Option<f64>,
@@ -298,6 +302,7 @@ impl ConfigBuilder {
             commit_author_email: self.commit_author_email.unwrap_or_else(|| "admin@objectiveai.dev".to_string()),
             // -- Other fields --
             claude_agent_sdk: self.claude_agent_sdk.unwrap_or(true),
+            claude_agent_sdk_rate_limit_max_retries: self.claude_agent_sdk_rate_limit_max_retries.unwrap_or(10),
             agent_completions_backoff_current_interval: self.agent_completions_backoff_current_interval.unwrap_or(100),
             agent_completions_backoff_initial_interval: self.agent_completions_backoff_initial_interval.unwrap_or(100),
             agent_completions_backoff_randomization_factor: self.agent_completions_backoff_randomization_factor.unwrap_or(0.5),
@@ -360,6 +365,7 @@ pub struct Config {
     pub commit_author_email: String,
     // -- Other fields --
     pub claude_agent_sdk: bool,
+    pub claude_agent_sdk_rate_limit_max_retries: u64,
     pub agent_completions_backoff_current_interval: u64,
     pub agent_completions_backoff_initial_interval: u64,
     pub agent_completions_backoff_randomization_factor: f64,
@@ -416,6 +422,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         commit_author_email,
         // -- Other fields --
         claude_agent_sdk,
+        claude_agent_sdk_rate_limit_max_retries,
         agent_completions_backoff_current_interval,
         agent_completions_backoff_initial_interval,
         agent_completions_backoff_randomization_factor,
@@ -576,7 +583,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
             x_title.clone(),
             http_referer.clone(),
         )),
-        Arc::new(agent::completions::claude_agent_sdk::Client::new(user_agent, claude_agent_sdk)),
+        Arc::new(agent::completions::claude_agent_sdk::Client::new(user_agent, claude_agent_sdk, claude_agent_sdk_rate_limit_max_retries)),
         Arc::new(agent::completions::mock::Client {
             delay: std::time::Duration::from_millis(mock_delay_ms),
             max_tool_calls: mock_max_tool_calls,
