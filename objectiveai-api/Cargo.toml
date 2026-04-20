@@ -13,9 +13,11 @@ keywords = ["llm", "ai", "swarm"]
 publish = true
 
 [features]
-default = ["orchestrator-bollard"]
+default = ["orchestrator-bollard", "claude-agent-sdk-javascript"]
 sqlite-persistent-cache = ["dep:rusqlite"]
 orchestrator-bollard = ["dep:bollard", "dep:tar"]
+claude-agent-sdk-python = []
+claude-agent-sdk-javascript = []
 
 [dependencies]
 objectiveai = { path = "../objectiveai-rs", version = "2.0.0", default-features = false, features = ["http"] }

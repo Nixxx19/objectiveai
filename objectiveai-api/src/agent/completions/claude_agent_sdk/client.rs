@@ -15,7 +15,7 @@ use crate::util::StreamOnce;
 
 /// Claude Agent SDK client for agent completions.
 ///
-/// Extracts the embedded Python-based `objectiveai-claude-agent-sdk-runner` binary
+/// Extracts the embedded Claude Agent SDK runner binary
 /// on first use and spawns it as a subprocess for each query.
 #[derive(Debug, Clone)]
 pub struct Client {

@@ -95,8 +95,9 @@ fi
 
 echo "Building embedded dependencies..."
 
-# claude-agent-sdk-runner (native target, always needed)
-bash "$REPO_ROOT/objectiveai-claude-agent-sdk-runner/build.sh" --release
+# claude-agent-sdk-runners (native target)
+bash "$REPO_ROOT/objectiveai-claude-agent-sdk-runner-js/build.sh" --release
+bash "$REPO_ROOT/objectiveai-claude-agent-sdk-runner-py/build.sh" --release
 
 # mcp (linux-musl, needed by objectiveai-api with orchestrator-bollard)
 bash "$REPO_ROOT/objectiveai-mcp/build.sh" --target "$(uname -m)-unknown-linux-musl" --release
