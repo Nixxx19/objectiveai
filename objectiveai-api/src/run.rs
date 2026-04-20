@@ -962,6 +962,19 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                 }
             }),
         )
+        // Function Invention State - get
+        .route(
+            "/functions/inventions/state",
+            axum::routing::post({
+                let retrieve_router = retrieve_router.clone();
+                let persistent_cache = persistent_cache.clone();
+                move |headers: axum::http::HeaderMap, Json(params): Json<
+                    objectiveai::RemotePathCommitOptional,
+                >| {
+                    get_function_invention_state(retrieve_router, headers, persistent_cache, suppress_output, params)
+                }
+            }),
+        )
         // Function Profile Computations - create
         .route(
             "/functions/profiles/compute",
@@ -1610,6 +1623,20 @@ async fn get_prompt(
 ) -> axum::response::Response {
     let ctx = context(&headers, persistent_cache, suppress_output);
     match retrieve_router.endpoint_get_prompt(&ctx, &params).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn get_function_invention_state(
+    retrieve_router: Arc<RetrieveRouter>,
+    headers: axum::http::HeaderMap,
+    persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
+    suppress_output: bool,
+    params: objectiveai::RemotePathCommitOptional,
+) -> axum::response::Response {
+    let ctx = context(&headers, persistent_cache, suppress_output);
+    match retrieve_router.endpoint_get_function_invention_state(&ctx, &params).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
     }
