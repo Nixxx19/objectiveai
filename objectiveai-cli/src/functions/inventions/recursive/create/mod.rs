@@ -95,11 +95,14 @@ pub enum Commands {
         #[arg(long)]
         detach: bool,
     },
-    /// Invent from a remote state (previously saved invention state files)
+    /// Invent from existing state (remote reference or inline JSON)
     Remote {
         /// State reference (e.g. remote=mock,name=inv-good-sl or remote=github,owner=x,repository=y)
-        #[arg(long)]
-        state: crate::path_ref::PathRef,
+        #[arg(long, required_unless_present = "state_inline")]
+        state: Option<crate::path_ref::PathRef>,
+        /// Inline JSON state
+        #[arg(long, conflicts_with = "state")]
+        state_inline: Option<String>,
         #[command(flatten)]
         agent: AgentArg,
         #[command(flatten)]
@@ -134,9 +137,17 @@ impl Commands {
                 );
                 (agent, continuation, seed, state, detach)
             }
-            Commands::Remote { state, agent, continuation, seed, detach } => {
-                let remote_path = state.resolve()?;
-                let state = objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Remote(remote_path);
+            Commands::Remote { state, state_inline, agent, continuation, seed, detach } => {
+                let state = if let Some(inline) = state_inline {
+                    let mut de = serde_json::Deserializer::from_str(&inline);
+                    let parsed: objectiveai::functions::inventions::ParamsState =
+                        serde_path_to_error::deserialize(&mut de)
+                            .map_err(crate::error::Error::InlineDeserialize)?;
+                    objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(parsed)
+                } else {
+                    let remote_path = state.expect("clap ensures one is set").resolve()?;
+                    objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Remote(remote_path)
+                };
                 (agent, continuation, seed, state, detach)
             }
         };
