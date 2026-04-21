@@ -362,6 +362,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
                                 msg_index,
                                 is_byok,
                                 cost_multiplier,
+                                objectiveai::agent::Upstream::ClaudeAgentSdk,
                             ) {
                                 Some(Ok(chunk)) => {
                                     // Advance the index when a message slot is

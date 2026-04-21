@@ -49,6 +49,7 @@ impl SDKMessage {
         assistant_index: u64,
         is_byok: bool,
         cost_multiplier: rust_decimal::Decimal,
+        upstream: objectiveai::agent::Upstream,
     ) -> Option<
         Result<
             objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
@@ -57,13 +58,13 @@ impl SDKMessage {
     > {
         match self {
             Self::PartialAssistantMessage(msg) => {
-                msg.into_downstream(id, created, agent, assistant_index).map(Ok)
+                msg.into_downstream(id, created, agent, assistant_index, upstream).map(Ok)
             }
             Self::UserMessage(msg) => {
-                msg.into_downstream(id, created, assistant_index).map(Ok)
+                msg.into_downstream(id, created, assistant_index, upstream).map(Ok)
             }
             Self::ResultMessage(msg) => {
-                Some(Ok(msg.into_downstream(id, created, agent, assistant_index, is_byok, cost_multiplier)))
+                Some(Ok(msg.into_downstream(id, created, agent, assistant_index, is_byok, cost_multiplier, upstream)))
             }
             Self::RateLimitEvent(_) => Some(Err(super::super::Error::RateLimit)),
             // All other variants are ignored.

@@ -25,7 +25,7 @@ fn test_text_delta() {
     });
 
     assert_eq!(
-        msg.into_downstream("id-1".to_string(), 1000, "agent-1".to_string(), 0, false, Decimal::from(1)),
+        msg.into_downstream("id-1".to_string(), 1000, "agent-1".to_string(), 0, false, Decimal::from(1), objectiveai::agent::Upstream::ClaudeAgentSdk),
         Some(Ok(objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
             id: "id-1".to_string(),
             created: 1000,
@@ -74,7 +74,7 @@ fn test_thinking_delta() {
     });
 
     assert_eq!(
-        msg.into_downstream("id-2".to_string(), 2000, "agent-2".to_string(), 3, false, Decimal::from(1)),
+        msg.into_downstream("id-2".to_string(), 2000, "agent-2".to_string(), 3, false, Decimal::from(1), objectiveai::agent::Upstream::ClaudeAgentSdk),
         Some(Ok(objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
             id: "id-2".to_string(),
             created: 2000,
@@ -126,7 +126,7 @@ fn test_tool_use_content_block_start() {
     });
 
     assert_eq!(
-        msg.into_downstream("id-3".to_string(), 3000, "agent-3".to_string(), 5, false, Decimal::from(1)),
+        msg.into_downstream("id-3".to_string(), 3000, "agent-3".to_string(), 5, false, Decimal::from(1), objectiveai::agent::Upstream::ClaudeAgentSdk),
         Some(Ok(objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
             id: "id-3".to_string(),
             created: 3000,
@@ -185,7 +185,7 @@ fn test_input_json_delta() {
     });
 
     assert_eq!(
-        msg.into_downstream("id-4".to_string(), 4000, "agent-4".to_string(), 0, false, Decimal::from(1)),
+        msg.into_downstream("id-4".to_string(), 4000, "agent-4".to_string(), 0, false, Decimal::from(1), objectiveai::agent::Upstream::ClaudeAgentSdk),
         Some(Ok(objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
             id: "id-4".to_string(),
             created: 4000,
@@ -251,7 +251,7 @@ fn test_message_delta_tool_use_stop_reason() {
     });
 
     assert_eq!(
-        msg.into_downstream("id-5".to_string(), 5000, "agent-5".to_string(), 0, false, Decimal::from(1)),
+        msg.into_downstream("id-5".to_string(), 5000, "agent-5".to_string(), 0, false, Decimal::from(1), objectiveai::agent::Upstream::ClaudeAgentSdk),
         Some(Ok(objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
             id: "id-5".to_string(),
             created: 5000,
@@ -294,7 +294,7 @@ fn test_content_block_stop_and_message_stop_ignored() {
     });
 
     assert_eq!(
-        stop.into_downstream("id-6".to_string(), 6000, "a".to_string(), 0, false, Decimal::from(1)),
+        stop.into_downstream("id-6".to_string(), 6000, "a".to_string(), 0, false, Decimal::from(1), objectiveai::agent::Upstream::ClaudeAgentSdk),
         None,
     );
 
@@ -311,7 +311,7 @@ fn test_content_block_stop_and_message_stop_ignored() {
     });
 
     assert_eq!(
-        msg_stop.into_downstream("id-6".to_string(), 6000, "a".to_string(), 0, false, Decimal::from(1)),
+        msg_stop.into_downstream("id-6".to_string(), 6000, "a".to_string(), 0, false, Decimal::from(1), objectiveai::agent::Upstream::ClaudeAgentSdk),
         None,
     );
 }
@@ -333,7 +333,7 @@ fn test_user_message_tool_result() {
     });
 
     assert_eq!(
-        msg.into_downstream("id-7".to_string(), 7000, "agent-7".to_string(), 4, false, Decimal::from(1)),
+        msg.into_downstream("id-7".to_string(), 7000, "agent-7".to_string(), 4, false, Decimal::from(1), objectiveai::agent::Upstream::ClaudeAgentSdk),
         Some(Ok(objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
             id: "id-7".to_string(),
             created: 7000,
@@ -377,7 +377,7 @@ fn test_user_message_without_tool_result_ignored() {
     });
 
     assert_eq!(
-        msg.into_downstream("id-8".to_string(), 8000, "a".to_string(), 0, false, Decimal::from(1)),
+        msg.into_downstream("id-8".to_string(), 8000, "a".to_string(), 0, false, Decimal::from(1), objectiveai::agent::Upstream::ClaudeAgentSdk),
         None,
     );
 }
@@ -391,6 +391,7 @@ fn test_rate_limit_event() {
 
     let result = msg.into_downstream(
         "id-9".to_string(), 9000, "a".to_string(), 0, false, Decimal::from(1),
+        objectiveai::agent::Upstream::ClaudeAgentSdk,
     );
 
     assert!(result.is_some());
@@ -437,7 +438,7 @@ fn test_result_success_byok() {
     }));
 
     assert_eq!(
-        msg.into_downstream("id-10".to_string(), 10000, "a".to_string(), 0, true, Decimal::from_str("1.5").unwrap()),
+        msg.into_downstream("id-10".to_string(), 10000, "a".to_string(), 0, true, Decimal::from_str("1.5").unwrap(), objectiveai::agent::Upstream::ClaudeAgentSdk),
         Some(Ok(objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
             id: "id-10".to_string(),
             created: 10000,

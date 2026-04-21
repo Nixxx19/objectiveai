@@ -376,6 +376,7 @@ impl UpstreamClient<
                                 msg_index,
                                 is_byok,
                                 cost_multiplier,
+                                objectiveai::agent::Upstream::ClaudeCode,
                             ) {
                                 Some(Ok(chunk)) => {
                                     use objectiveai::agent::completions::response::streaming::MessageChunk;
