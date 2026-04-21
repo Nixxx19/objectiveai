@@ -7,16 +7,16 @@ import (
 	"fmt"
 )
 
-// The base configuration for a Claude Agent SDK Agent (without computed ID).
-type AgentClaudeAgentSdkAgentBase struct {
+// The base configuration for a Claude Code Agent (without computed ID).
+type AgentClaudeCodeAgentBase struct {
 	// The effort level for model output.
-	Effort *AgentClaudeAgentSdkEffort `json:"effort,omitempty"`
+	Effort *AgentClaudeCodeEffort `json:"effort,omitempty"`
 	// MCP servers the agent can connect to.
 	MCPServers *[]AgentMcpServer `json:"mcp_servers,omitempty"`
 	// The upstream language model identifier.
 	Model string `json:"model"`
 	// The output mode for vector completions. Ignored for agent completions.
-	OutputMode AgentClaudeAgentSdkOutputMode `json:"output_mode"`
+	OutputMode AgentClaudeCodeOutputMode `json:"output_mode"`
 	// Rich content prepended to the user's prompt.
 	PrefixContent *AgentCompletionsMessageRichContent `json:"prefix_content,omitempty"`
 	// Rich content appended after the user's prompt.
@@ -28,29 +28,29 @@ type AgentClaudeAgentSdkAgentBase struct {
 	// Defaults to `true`. Set to `false` to disable.
 	Thinking *bool `json:"thinking,omitempty"`
 	// The upstream provider marker.
-	Upstream AgentClaudeAgentSdkUpstream `json:"upstream"`
+	Upstream AgentClaudeCodeUpstream `json:"upstream"`
 }
 
-func (AgentClaudeAgentSdkAgentBase) SchemaTitle() string { return "agent.claude_agent_sdk.AgentBase" }
-func (v AgentClaudeAgentSdkAgentBase) Validate() error {
+func (AgentClaudeCodeAgentBase) SchemaTitle() string { return "agent.claude_code.AgentBase" }
+func (v AgentClaudeCodeAgentBase) Validate() error {
 	return variantValidator.Struct(v)
 }
 
-func (v *AgentClaudeAgentSdkAgentBase) UnmarshalJSON(data []byte) error {
+func (v *AgentClaudeCodeAgentBase) UnmarshalJSON(data []byte) error {
 	var raw map[string]json.RawMessage
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
 	for _, key := range []string{"model", "output_mode", "upstream"} {
 		if _, ok := raw[key]; !ok {
-			return fmt.Errorf("AgentClaudeAgentSdkAgentBase: missing required field %q", key)
+			return fmt.Errorf("AgentClaudeCodeAgentBase: missing required field %q", key)
 		}
 	}
-	type Alias AgentClaudeAgentSdkAgentBase
+	type Alias AgentClaudeCodeAgentBase
 	var alias Alias
 	if err := json.Unmarshal(data, &alias); err != nil {
 		return err
 	}
-	*v = AgentClaudeAgentSdkAgentBase(alias)
+	*v = AgentClaudeCodeAgentBase(alias)
 	return nil
 }
