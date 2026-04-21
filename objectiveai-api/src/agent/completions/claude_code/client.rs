@@ -65,11 +65,12 @@ pub struct Client {
     pub user_agent: String,
     pub enabled: bool,
     pub rate_limit_max_retries: u64,
+    pub rate_limit_max_wait_secs: u64,
 }
 
 impl Client {
-    pub fn new(user_agent: String, enabled: bool, rate_limit_max_retries: u64) -> Self {
-        Self { user_agent, enabled, rate_limit_max_retries }
+    pub fn new(user_agent: String, enabled: bool, rate_limit_max_retries: u64, rate_limit_max_wait_secs: u64) -> Self {
+        Self { user_agent, enabled, rate_limit_max_retries, rate_limit_max_wait_secs }
     }
 }
 
@@ -248,6 +249,7 @@ impl UpstreamClient<
             let system_prompt = prompt.system_prompt.clone();
             let user_agent = client.user_agent.clone();
             let rate_limit_max_retries = client.rate_limit_max_retries;
+            let rate_limit_max_wait_secs = client.rate_limit_max_wait_secs;
             let has_mcp_config = !mcp_connections.is_empty() || invention_server.is_some();
 
             // Serialize the SDKUserMessage once — stdin content is identical
@@ -459,7 +461,8 @@ impl UpstreamClient<
                     }
 
                     // If we exited the inner loop due to rate limit, sleep
-                    // until resets_at and retry — up to rate_limit_max_retries.
+                    // until resets_at and retry — up to rate_limit_max_retries
+                    // and capped by rate_limit_max_wait_secs.
                     if let Some(resets_at) = rate_limited_resets_at {
                         let _ = child.kill().await;
                         if retries >= rate_limit_max_retries {
@@ -467,7 +470,6 @@ impl UpstreamClient<
                             had_error = true;
                             break 'retry;
                         }
-                        retries += 1;
                         let now_secs = std::time::SystemTime::now()
                             .duration_since(std::time::UNIX_EPOCH)
                             .map(|d| d.as_secs())
@@ -475,6 +477,14 @@ impl UpstreamClient<
                         let wait_secs = resets_at
                             .saturating_sub(now_secs)
                             .saturating_add(1);
+                        if wait_secs > rate_limit_max_wait_secs {
+                            // The rate-limit window is longer than we're
+                            // willing to wait — give up instead of sleeping.
+                            yield Err(super::Error::RateLimit);
+                            had_error = true;
+                            break 'retry;
+                        }
+                        retries += 1;
                         tokio::time::sleep(std::time::Duration::from_secs(wait_secs)).await;
                         continue 'retry;
                     }

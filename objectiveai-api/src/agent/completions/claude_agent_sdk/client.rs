@@ -22,15 +22,17 @@ pub struct Client {
     pub user_agent: String,
     pub enabled: bool,
     pub rate_limit_max_retries: u64,
+    pub rate_limit_max_wait_secs: u64,
     binary_path: Arc<std::sync::OnceLock<String>>,
 }
 
 impl Client {
-    pub fn new(user_agent: String, enabled: bool, rate_limit_max_retries: u64) -> Self {
+    pub fn new(user_agent: String, enabled: bool, rate_limit_max_retries: u64, rate_limit_max_wait_secs: u64) -> Self {
         Self {
             user_agent,
             enabled,
             rate_limit_max_retries,
+            rate_limit_max_wait_secs,
             binary_path: Arc::new(std::sync::OnceLock::new()),
         }
     }
@@ -276,6 +278,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
             }
             cmd.arg("--user-agent").arg(&client.user_agent);
             cmd.arg("--rate-limit-max-retries").arg(client.rate_limit_max_retries.to_string());
+            cmd.arg("--rate-limit-max-wait-secs").arg(client.rate_limit_max_wait_secs.to_string());
 
             cmd.stdin(std::process::Stdio::null())
                 .stdout(std::process::Stdio::piped())
