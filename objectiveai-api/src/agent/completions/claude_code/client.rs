@@ -6,7 +6,7 @@ use tokio::process::Command;
 use tokio_stream::wrappers::LinesStream;
 
 use super::super::{ContinuationItem, StreamItem, UpstreamClient};
-use super::sdk_message::SDKMessage;
+use super::sdk_message::{RateLimitEventType, RateLimitStatus, SDKMessage};
 use super::invention_server::InventionServer;
 use super::mcp_server_config::McpHttpServerConfig;
 use crate::util::StreamOnce;
@@ -243,66 +243,17 @@ impl UpstreamClient<
                 .unwrap_or(0);
 
             let agent_id = agent.id.clone();
-            let session_id = prompt.message.session_id.clone();
+            let initial_session_id = prompt.message.session_id.clone();
+            let model = agent.base.model.clone();
+            let system_prompt = prompt.system_prompt.clone();
+            let user_agent = client.user_agent.clone();
+            let rate_limit_max_retries = client.rate_limit_max_retries;
+            let has_mcp_config = !mcp_connections.is_empty() || invention_server.is_some();
 
-            // Serialize the SDKUserMessage as a single NDJSON line for stdin.
+            // Serialize the SDKUserMessage once — stdin content is identical
+            // across spawn attempts (resume is controlled via --resume).
             let message_json = serde_json::to_string(&prompt.message)
                 .map_err(|e| super::Error::Json(e.to_string()))?;
-
-            // Spawn `claude` directly from PATH with stream-json input/output.
-            let mut cmd = Command::new("claude");
-            cmd.arg("--input-format").arg("stream-json")
-                .arg("--output-format").arg("stream-json")
-                .arg("--verbose")
-                .arg("--include-partial-messages")
-                .arg("-p") // required with --input-format stream-json
-                .arg("--permission-mode").arg("bypassPermissions")
-                .arg("--model").arg(&agent.base.model)
-                .arg("--disallowed-tools").arg(DISALLOWED_TOOLS.join(","));
-
-            if let Some(sp) = &prompt.system_prompt {
-                cmd.arg("--system-prompt").arg(sp);
-            }
-            if !mcp_connections.is_empty() || invention_server.is_some() {
-                cmd.arg("--mcp-config").arg(&mcp_servers_json);
-            }
-            if !session_id.is_empty() {
-                cmd.arg("--resume").arg(&session_id);
-            }
-
-            cmd.stdin(std::process::Stdio::piped())
-                .stdout(std::process::Stdio::piped())
-                .stderr(std::process::Stdio::piped());
-            cmd.env_remove("CLAUDECODE");
-            if !client.user_agent.is_empty() {
-                cmd.env("CLAUDE_CODE_CLIENT_APP", &client.user_agent);
-            }
-
-            let mut child = cmd.spawn().map_err(|e| {
-                super::Error::Spawn(e.to_string())
-            })?;
-
-            // Write the user message to stdin as NDJSON, then close stdin.
-            if let Some(mut stdin) = child.stdin.take() {
-                let line = format!("{}\n", message_json);
-                stdin.write_all(line.as_bytes()).await.map_err(|e| {
-                    super::Error::Io(e.to_string())
-                })?;
-                stdin.shutdown().await.ok();
-                drop(stdin);
-            }
-
-            let stderr = child.stderr.take().expect("stderr was piped");
-            let stderr_handle = tokio::spawn(async move {
-                let mut buf = String::new();
-                let mut reader = BufReader::new(stderr);
-                let _ = tokio::io::AsyncReadExt::read_to_string(&mut reader, &mut buf).await;
-                buf
-            });
-
-            let stdout = child.stdout.take().expect("stdout was piped");
-            let reader = BufReader::new(stdout);
-            let mut lines_stream = LinesStream::new(reader.lines());
 
             let id_for_peek = id.clone();
             let our_mcp_server_names: std::collections::HashSet<String> = mcp_connections
@@ -311,93 +262,225 @@ impl UpstreamClient<
                 .chain(invention_server.as_ref().map(|_| "objectiveai-invention".to_string()))
                 .collect();
 
+            // Builds a fresh `claude` Command. Called once per spawn attempt so
+            // that we can re-spawn cleanly after a rate-limit wait.
+            let spawn_cmd = move |session_override: &str| -> Command {
+                let mut cmd = Command::new("claude");
+                cmd.arg("--input-format").arg("stream-json")
+                    .arg("--output-format").arg("stream-json")
+                    .arg("--verbose")
+                    .arg("--include-partial-messages")
+                    .arg("-p")
+                    .arg("--permission-mode").arg("bypassPermissions")
+                    .arg("--model").arg(&model)
+                    .arg("--disallowed-tools").arg(DISALLOWED_TOOLS.join(","));
+                if let Some(sp) = &system_prompt {
+                    cmd.arg("--system-prompt").arg(sp);
+                }
+                if has_mcp_config {
+                    cmd.arg("--mcp-config").arg(&mcp_servers_json);
+                }
+                if !session_override.is_empty() {
+                    cmd.arg("--resume").arg(session_override);
+                }
+                cmd.stdin(std::process::Stdio::piped())
+                    .stdout(std::process::Stdio::piped())
+                    .stderr(std::process::Stdio::piped());
+                cmd.env_remove("CLAUDECODE");
+                if !user_agent.is_empty() {
+                    cmd.env("CLAUDE_CODE_CLIENT_APP", &user_agent);
+                }
+                cmd
+            };
+
             let internal_stream = async_stream::stream! {
                 let _invention_server_guard = invention_server;
 
                 let mut latest_session_id = String::new();
-                let mut had_error = false;
                 let mut msg_index = assistant_index;
-                let mut saw_init = false;
+                let mut had_error = false;
+                let mut retries: u64 = 0;
 
-                loop {
-                    match lines_stream.next().await {
-                        None => {
-                            let stderr_ctx = stderr_handle.await.ok().unwrap_or_default();
-                            if !stderr_ctx.is_empty() {
-                                yield Err(super::Error::Stderr(stderr_ctx.trim().to_owned()));
-                                had_error = true;
-                            }
-                            break;
+                // Rate-limit retry loop. Each iteration spawns a fresh
+                // `claude` subprocess. If a rate_limit_event with status
+                // "rejected" arrives, we kill the child, sleep until
+                // resets_at, and spawn again (resuming the session).
+                'retry: loop {
+                    let session_for_spawn = if !latest_session_id.is_empty() {
+                        latest_session_id.clone()
+                    } else {
+                        initial_session_id.clone()
+                    };
+
+                    let mut cmd = spawn_cmd(&session_for_spawn);
+                    let mut child = match cmd.spawn() {
+                        Ok(c) => c,
+                        Err(e) => {
+                            yield Err(super::Error::Spawn(e.to_string()));
+                            had_error = true;
+                            break 'retry;
                         }
-                        Some(Err(e)) => {
+                    };
+
+                    if let Some(mut stdin) = child.stdin.take() {
+                        let line = format!("{}\n", message_json);
+                        if let Err(e) = stdin.write_all(line.as_bytes()).await {
                             let _ = child.kill().await;
                             yield Err(super::Error::Io(e.to_string()));
                             had_error = true;
-                            break;
+                            break 'retry;
                         }
-                        Some(Ok(line)) => {
-                            let trimmed = line.trim();
-                            if trimmed.is_empty() {
-                                continue;
-                            }
+                        stdin.shutdown().await.ok();
+                        drop(stdin);
+                    }
 
-                            // On the first line, parse raw JSON and validate
-                            // MCP server statuses from the system/init event.
-                            if !saw_init {
-                                if let Ok(value) = serde_json::from_str::<serde_json::Value>(trimmed) {
-                                    if value.get("type") == Some(&serde_json::Value::String("system".to_string()))
-                                        && value.get("subtype") == Some(&serde_json::Value::String("init".to_string()))
-                                    {
-                                        saw_init = true;
-                                        if let Err(e) = check_mcp_servers(&value, &our_mcp_server_names) {
-                                            yield Err(e);
-                                            had_error = true;
-                                            break;
+                    let stderr = child.stderr.take().expect("stderr was piped");
+                    let stderr_handle = tokio::spawn(async move {
+                        let mut buf = String::new();
+                        let mut reader = BufReader::new(stderr);
+                        let _ = tokio::io::AsyncReadExt::read_to_string(
+                            &mut reader, &mut buf
+                        ).await;
+                        buf
+                    });
+
+                    let stdout = child.stdout.take().expect("stdout was piped");
+                    let reader = BufReader::new(stdout);
+                    let mut lines_stream = LinesStream::new(reader.lines());
+
+                    let mut saw_init = false;
+                    // When set, break out of the line loop to retry after
+                    // sleeping until this Unix-seconds instant.
+                    let mut rate_limited_resets_at: Option<u64> = None;
+
+                    loop {
+                        match lines_stream.next().await {
+                            None => {
+                                let stderr_ctx = stderr_handle.await.ok().unwrap_or_default();
+                                if !stderr_ctx.is_empty() {
+                                    yield Err(super::Error::Stderr(stderr_ctx.trim().to_owned()));
+                                    had_error = true;
+                                }
+                                break;
+                            }
+                            Some(Err(e)) => {
+                                let _ = child.kill().await;
+                                yield Err(super::Error::Io(e.to_string()));
+                                had_error = true;
+                                break;
+                            }
+                            Some(Ok(line)) => {
+                                let trimmed = line.trim();
+                                if trimmed.is_empty() {
+                                    continue;
+                                }
+
+                                if !saw_init {
+                                    if let Ok(value) = serde_json::from_str::<serde_json::Value>(trimmed) {
+                                        if value.get("type") == Some(&serde_json::Value::String("system".to_string()))
+                                            && value.get("subtype") == Some(&serde_json::Value::String("init".to_string()))
+                                        {
+                                            saw_init = true;
+                                            if let Err(e) = check_mcp_servers(&value, &our_mcp_server_names) {
+                                                yield Err(e);
+                                                had_error = true;
+                                                break;
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            let sdk_msg: SDKMessage = match serde_json::from_str(trimmed) {
-                                Ok(msg) => msg,
-                                Err(_) => continue,
-                            };
+                                let sdk_msg: SDKMessage = match serde_json::from_str(trimmed) {
+                                    Ok(msg) => msg,
+                                    Err(_) => continue,
+                                };
 
-                            if let Some(sid) = sdk_msg.session_id() {
-                                if !sid.is_empty() {
-                                    latest_session_id = sid.to_string();
-                                }
-                            }
-
-                            match sdk_msg.into_downstream(
-                                id.clone(),
-                                created,
-                                agent_id.clone(),
-                                msg_index,
-                                is_byok,
-                                cost_multiplier,
-                                objectiveai::agent::Upstream::ClaudeCode,
-                            ) {
-                                Some(Ok(chunk)) => {
-                                    use objectiveai::agent::completions::response::streaming::MessageChunk;
-                                    let advances_index = chunk.messages.iter().any(|m| match m {
-                                        MessageChunk::Assistant(a) => a.finish_reason.is_some(),
-                                        MessageChunk::Tool(_) => true,
-                                    });
-                                    yield Ok(StreamItem::Chunk(chunk));
-                                    if advances_index {
-                                        msg_index += 1;
+                                if let Some(sid) = sdk_msg.session_id() {
+                                    if !sid.is_empty() {
+                                        latest_session_id = sid.to_string();
                                     }
                                 }
-                                Some(Err(sdk_err)) => {
-                                    yield Err(translate_sdk_error(&sdk_err.to_string()));
-                                    had_error = true;
-                                    break;
+
+                                // Intercept rate-limit events before
+                                // `into_downstream` converts them to an error.
+                                // Only retry on status = "rejected" with a
+                                // known resets_at; otherwise fall through.
+                                if let SDKMessage::RateLimitEvent(ref evt) = sdk_msg {
+                                    let rejected = evt
+                                        .rate_limit_info
+                                        .and_then(|i| i.status)
+                                        .map(|s| matches!(s, RateLimitStatus::Rejected))
+                                        .unwrap_or(false);
+                                    let resets = evt
+                                        .rate_limit_info
+                                        .and_then(|i| i.resets_at);
+                                    // Also treat `r#type == RateLimit` as a
+                                    // terminal rate-limit signal if we don't
+                                    // have info — upstream tests emit it.
+                                    let terminal_type = matches!(
+                                        evt.r#type,
+                                        RateLimitEventType::RateLimit
+                                    );
+                                    if rejected || terminal_type {
+                                        rate_limited_resets_at = resets;
+                                        break;
+                                    }
                                 }
-                                None => {}
+
+                                match sdk_msg.into_downstream(
+                                    id.clone(),
+                                    created,
+                                    agent_id.clone(),
+                                    msg_index,
+                                    is_byok,
+                                    cost_multiplier,
+                                    objectiveai::agent::Upstream::ClaudeCode,
+                                ) {
+                                    Some(Ok(chunk)) => {
+                                        use objectiveai::agent::completions::response::streaming::MessageChunk;
+                                        let advances_index = chunk.messages.iter().any(|m| match m {
+                                            MessageChunk::Assistant(a) => a.finish_reason.is_some(),
+                                            MessageChunk::Tool(_) => true,
+                                        });
+                                        yield Ok(StreamItem::Chunk(chunk));
+                                        if advances_index {
+                                            msg_index += 1;
+                                        }
+                                    }
+                                    Some(Err(sdk_err)) => {
+                                        yield Err(translate_sdk_error(&sdk_err.to_string()));
+                                        had_error = true;
+                                        break;
+                                    }
+                                    None => {}
+                                }
                             }
                         }
                     }
+
+                    // If we exited the inner loop due to rate limit, sleep
+                    // until resets_at and retry — up to rate_limit_max_retries.
+                    if let Some(resets_at) = rate_limited_resets_at {
+                        let _ = child.kill().await;
+                        if retries >= rate_limit_max_retries {
+                            yield Err(super::Error::RateLimit);
+                            had_error = true;
+                            break 'retry;
+                        }
+                        retries += 1;
+                        let now_secs = std::time::SystemTime::now()
+                            .duration_since(std::time::UNIX_EPOCH)
+                            .map(|d| d.as_secs())
+                            .unwrap_or(0);
+                        let wait_secs = resets_at
+                            .saturating_sub(now_secs)
+                            .saturating_add(1);
+                        tokio::time::sleep(std::time::Duration::from_secs(wait_secs)).await;
+                        continue 'retry;
+                    }
+
+                    // Normal completion (or non-rate-limit error).
+                    break 'retry;
                 }
 
                 if !had_error {

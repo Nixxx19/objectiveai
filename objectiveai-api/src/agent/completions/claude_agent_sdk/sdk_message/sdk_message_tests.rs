@@ -387,6 +387,7 @@ fn test_user_message_without_tool_result_ignored() {
 fn test_rate_limit_event() {
     let msg = SDKMessage::RateLimitEvent(SDKRateLimitEvent {
         r#type: RateLimitEventType::RateLimitEvent,
+        rate_limit_info: None,
     });
 
     let result = msg.into_downstream(
