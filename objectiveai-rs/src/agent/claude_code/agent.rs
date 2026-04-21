@@ -1,12 +1,12 @@
-//! Claude Agent SDK Agent types and validation logic.
+//! Claude Code Agent types and validation logic.
 
 use serde::{Deserialize, Serialize};
 use twox_hash::XxHash3_128;
 use schemars::JsonSchema;
 
-/// The base configuration for a Claude Agent SDK Agent (without computed ID).
+/// The base configuration for a Claude Code Agent (without computed ID).
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "agent.claude_agent_sdk.AgentBase")]
+#[schemars(rename = "agent.claude_code.AgentBase")]
 pub struct AgentBase {
     /// The upstream provider marker.
     pub upstream: super::Upstream,
@@ -157,9 +157,9 @@ impl AgentBase {
     }
 }
 
-/// A validated Claude Agent SDK Agent with its computed content-addressed ID.
+/// A validated Claude Code Agent with its computed content-addressed ID.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "agent.claude_agent_sdk.Agent")]
+#[schemars(rename = "agent.claude_code.Agent")]
 pub struct Agent {
     /// The deterministic content-addressed ID (22-character base62 string).
     pub id: String,

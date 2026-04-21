@@ -655,10 +655,13 @@ where
             map
         };
 
-        // Extract synthetic_reasoning from the primary agent
+        // Extract synthetic_reasoning from the primary agent.
+        // Only Openrouter supports synthetic_reasoning (requires ToolCall output
+        // mode); Claude Agent SDK, Claude Code, and Mock only support Instruction.
         let synthetic_reasoning = match agent.inner.agent() {
             objectiveai::agent::InlineAgent::Openrouter(a) => a.base.synthetic_reasoning.unwrap_or(false),
-            objectiveai::agent::InlineAgent::ClaudeAgentSdk(a) => a.base.synthetic_reasoning.unwrap_or(false),
+            objectiveai::agent::InlineAgent::ClaudeAgentSdk(_) => false,
+            objectiveai::agent::InlineAgent::ClaudeCode(_) => false,
             objectiveai::agent::InlineAgent::Mock(_) => false,
         };
 
