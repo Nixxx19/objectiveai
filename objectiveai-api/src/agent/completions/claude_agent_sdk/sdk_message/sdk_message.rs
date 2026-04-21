@@ -66,7 +66,26 @@ impl SDKMessage {
             Self::ResultMessage(msg) => {
                 Some(Ok(msg.into_downstream(id, created, agent, assistant_index, is_byok, cost_multiplier, upstream)))
             }
-            Self::RateLimitEvent(_) => Some(Err(super::super::Error::RateLimit)),
+            // Rate-limit events come in two shapes:
+            //   type="rate_limit_event" with rate_limit_info.status — a
+            //     status report. claude emits status="allowed" on every
+            //     successful call (informational); we only treat it as an
+            //     error when status is "rejected".
+            //   type="rate_limit" — terminal rate-limit signal (no info).
+            Self::RateLimitEvent(evt) => {
+                use super::sdk_rate_limit_event::{RateLimitEventType, RateLimitStatus};
+                let rejected = evt
+                    .rate_limit_info
+                    .and_then(|i| i.status)
+                    .map(|s| matches!(s, RateLimitStatus::Rejected))
+                    .unwrap_or(false);
+                let terminal = matches!(evt.r#type, RateLimitEventType::RateLimit);
+                if rejected || terminal {
+                    Some(Err(super::super::Error::RateLimit))
+                } else {
+                    None
+                }
+            }
             // All other variants are ignored.
             Self::AssistantMessage(_)
             | Self::UserMessageReplay(_)

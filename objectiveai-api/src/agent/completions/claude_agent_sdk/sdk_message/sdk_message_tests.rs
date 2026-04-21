@@ -382,9 +382,12 @@ fn test_user_message_without_tool_result_ignored() {
     );
 }
 
-/// 9. RateLimitEvent produces an error.
+/// 9. RateLimitEvent is ignored by into_downstream. Rate-limit handling is
+/// the caller's responsibility — the claude_code client intercepts these
+/// explicitly for rejected/terminal variants, and the claude_agent_sdk
+/// runners handle them entirely inside the subprocess.
 #[test]
-fn test_rate_limit_event() {
+fn test_rate_limit_event_is_ignored() {
     let msg = SDKMessage::RateLimitEvent(SDKRateLimitEvent {
         r#type: RateLimitEventType::RateLimitEvent,
         rate_limit_info: None,
@@ -395,8 +398,7 @@ fn test_rate_limit_event() {
         objectiveai::agent::Upstream::ClaudeAgentSdk,
     );
 
-    assert!(result.is_some());
-    assert!(matches!(result.unwrap(), Err(super::super::Error::RateLimit)));
+    assert!(result.is_none());
 }
 
 /// 10. ResultMessage::Success with BYOK produces correct cost split and token details.
