@@ -559,14 +559,14 @@ where
             }
         };
 
-        let name = state.name();
+        let repo = state.name();
         let publish_files = state.serialize_into_files();
         let description = crate::functions::inventions::extract_description(&state);
 
         let (updated_path, publish_error) = match request.remote {
             objectiveai::Remote::Filesystem => {
                 match crate::functions::inventions::publish_filesystem(
-                    &invention_client.filesystem_client, &ctx, name, &publish_files,
+                    &invention_client.filesystem_client, &ctx, repo, &publish_files,
                 ).await {
                     Ok(path) => (Some(path), None),
                     Err(e) => (None, Some(e)),
@@ -576,7 +576,7 @@ where
                 match crate::functions::inventions::publish_github(
                     &invention_client.github_client,
                     &invention_client.filesystem_client,
-                    &ctx, name, &description,
+                    &ctx, repo, &description,
                     &publish_files,
                 ).await {
                     Ok(path) => (Some(path), None),
