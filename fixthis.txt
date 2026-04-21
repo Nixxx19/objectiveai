@@ -1,0 +1,16 @@
+ Stopping to explain — I found a bug in the objectiveai-cli (not the psyop code) that's blocking scoring:
+
+  The bug: In objectiveai-cli/src/inline_or_ref.rs, the define_inline_or_ref! macro generates struct fields named reference and inline without explicit clap IDs. When both FunctionArg and ProfileArg (generated from this macro) are flattened
+   into the same subcommand, clap conflates their IDs — so --function-inline X --profile-inline Y triggers a spurious "cannot be used multiple times" error.
+
+  Proof: objectiveai functions executions create standard --function-inline X --input-inline Z works (past clap). Adding --profile-inline Y causes the duplicate error.
+
+  My proposed fix (not applied): Add explicit id = $arg_name / id = concat!($arg_name, "-inline") to the #[arg] attributes so IDs are unique per macro instantiation.
+
+  Since this is a change to the shared objectiveai CLI and rebuilding/reinstalling it is scope escalation beyond the psyop task, I held off. Three options:
+
+  1. Authorize me to apply the fix and reinstall objectiveai — cleanest, unblocks scoring.
+  2. I work around it in psychological-operations-cli — e.g., write function+profile JSON to a file, create a temp filesystem repo, call via --function remote=filesystem,.... Ugly but avoids touching shared tooling.
+  3. You fix it yourself and I'll just retry.
+
+  Which do you want
