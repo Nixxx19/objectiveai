@@ -212,7 +212,7 @@ impl UpstreamClient<
                 &messages,
                 continuation.as_deref(),
                 request_continuation_cas.as_ref(),
-            ).map_err(|e| translate_sdk_error(&e))?;
+            ).map_err(|e| translate_sdk_error(&e.to_string()))?;
 
             // Spawn invention server if invention tools are provided.
             let invention_server = if let Some(ref tools) = invention_tools {
