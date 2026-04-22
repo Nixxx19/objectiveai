@@ -737,7 +737,6 @@ where
                 let mut profile_path = None;
                 let mut object = objectiveai::functions::executions::response::streaming::Object::ScalarFunctionExecutionChunk;
                 let mut total_usage = objectiveai::agent::completions::response::Usage::default();
-                let mut chunk_index: u64 = 0;
 
                 // Phase 2: merge every inner stream, tagging each chunk with
                 // its split_idx. Chunks from any input are forwarded the
@@ -776,9 +775,18 @@ where
                     // Wrap the inner chunk as a task chunk under the parent
                     // response_id. The inner chunk's own `id` (a unique
                     // fnexec-* per split element) travels inside `inner`.
+                    //
+                    // `index` is set to `split_idx`, not a monotonic chunk
+                    // counter: `FunctionExecutionChunk::push_tasks` merges
+                    // task chunks by `index`, so multiple chunks from the
+                    // same split element must share an index to merge. A
+                    // unique per-chunk index would make the aggregated
+                    // `tasks` vector grow unbounded — O(N²) memory and I/O
+                    // for any consumer that writes the aggregate on each
+                    // chunk (e.g. the CLI log writer).
                     let object_for_chunk = chunk.object.clone();
                     let task_chunk = objectiveai::functions::executions::response::streaming::FunctionExecutionTaskChunk {
-                        index: chunk_index,
+                        index: split_idx as u64,
                         task_index: split_idx as u64,
                         task_path: vec![split_idx as u64],
                         swiss_pool_index: None,
@@ -786,7 +794,6 @@ where
                         split_index: Some(split_idx as u64),
                         inner: chunk,
                     };
-                    chunk_index += 1;
 
                     yield objectiveai::functions::executions::response::streaming::FunctionExecutionChunk {
                         id: response_id.clone(),
