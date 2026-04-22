@@ -42,6 +42,12 @@ impl Client {
     /// Cached after first extraction. Uses a content-based hash in the directory name
     /// so different API versions get separate binaries and the same version reuses
     /// the cached binary across restarts.
+    ///
+    /// Returns `None` when the crate is built without either
+    /// `claude-agent-sdk-javascript` or `claude-agent-sdk-python` feature — in
+    /// that configuration no runner binary is embedded, and `create()` returns
+    /// `Error::NotEnabled` before this method is reached.
+    #[cfg(any(feature = "claude-agent-sdk-javascript", feature = "claude-agent-sdk-python"))]
     fn binary_path(&self) -> Option<&str> {
         let path = self.binary_path.get_or_init(|| {
             let binary = super::claude_agent_sdk_binary::CLAUDE_AGENT_SDK_RUNNER;
@@ -82,6 +88,11 @@ impl Client {
             path.to_string_lossy().to_string()
         });
         if path.is_empty() { None } else { Some(path.as_str()) }
+    }
+
+    #[cfg(not(any(feature = "claude-agent-sdk-javascript", feature = "claude-agent-sdk-python")))]
+    fn binary_path(&self) -> Option<&str> {
+        None
     }
 }
 
@@ -199,6 +210,14 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
 
         async move {
             if !enabled {
+                return Err(super::Error::NotEnabled);
+            }
+
+            // When built without a Claude Agent SDK runner feature, no
+            // runner binary is embedded, so the client is non-functional
+            // regardless of the `enabled` flag.
+            #[cfg(not(any(feature = "claude-agent-sdk-javascript", feature = "claude-agent-sdk-python")))]
+            {
                 return Err(super::Error::NotEnabled);
             }
 
