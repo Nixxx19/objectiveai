@@ -4222,6 +4222,11 @@ var FunctionsInventionsStateParamsSchema = z368.z.object({
   name: z368.z.string(),
   spec: z368.z.string()
 }).meta({ title: "functions.inventions.state.Params" });
+
+// src/functions/inventions/state/http.ts
+function functionsInventionsStateGetFunctionInventionState(client, params, options) {
+  return client.post_unary("functions/inventions/state", params, options);
+}
 var FunctionsInventionsDescriptionObjectSchema = z368.z.object({
   description: z368.z.string()
 }).meta({ title: "functions.inventions.DescriptionObject" });
@@ -6008,6 +6013,7 @@ exports.functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveC
 exports.functionsInventionsResponseStreamingAgentCompletionChunkMerged = functionsInventionsResponseStreamingAgentCompletionChunkMerged;
 exports.functionsInventionsResponseStreamingAgentCompletionChunkMergedList = functionsInventionsResponseStreamingAgentCompletionChunkMergedList;
 exports.functionsInventionsResponseStreamingFunctionInventionChunkMerged = functionsInventionsResponseStreamingFunctionInventionChunkMerged;
+exports.functionsInventionsStateGetFunctionInventionState = functionsInventionsStateGetFunctionInventionState;
 exports.functionsListFunctionProfilePairs = functionsListFunctionProfilePairs;
 exports.functionsListFunctions = functionsListFunctions;
 exports.functionsProfilesComputationsComputeProfile = functionsProfilesComputationsComputeProfile;
