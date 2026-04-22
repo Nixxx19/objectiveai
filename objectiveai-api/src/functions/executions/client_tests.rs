@@ -2221,3 +2221,88 @@ async fn test_split_scalar_binary_seed_42() {
         include_str!("../../../assets/functions/executions/client_tests/split_scalar_binary_seed_42.json"),
     );
 }
+
+/// Split: tweet-scorer over 70 real tweets (input loaded from
+/// `inputs/70_tweets.json`), seed 42. Exercises the split-mode
+/// parallelization with a non-trivial fan-out and a nested scalar
+/// branch function wrapping three leaf sub-functions. Uses an inline
+/// profile with two mock agents (one with top_logprobs=6, one plain
+/// instruction) and equal weights.
+#[tokio::test]
+async fn test_split_tweet_scorer_70_tweets_seed_42() {
+    let client = make_client();
+    let input: InputValue = serde_json::from_str(include_str!(
+        "../../../assets/functions/executions/client_tests/inputs/70_tweets.json"
+    )).expect("70_tweets.json must parse as InputValue");
+    let request = Arc::new(FunctionExecutionCreateParams {
+        function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
+            objectiveai::RemotePathCommitOptional::Mock {
+                name: "tweet-scorer".to_string(),
+            },
+        ),
+        profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Inline(
+            objectiveai::functions::InlineProfile::Auto(
+                objectiveai::swarm::InlineSwarmBase {
+                    agents: vec![
+                        objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
+                            count: 1,
+                            inner: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
+                                objectiveai::agent::InlineAgentBaseWithFallbacks {
+                                    inner: objectiveai::agent::InlineAgentBase::Mock(
+                                        objectiveai::agent::mock::AgentBase {
+                                            upstream: objectiveai::agent::mock::Upstream::Mock,
+                                            output_mode: objectiveai::agent::mock::OutputMode::Instruction,
+                                            top_logprobs: Some(6),
+                                            error: None,
+                                            error_probability: None,
+                                            mode: None,
+                                            mcp_servers: None,
+                                        },
+                                    ),
+                                    fallbacks: None,
+                                },
+                            ),
+                        },
+                        objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
+                            count: 1,
+                            inner: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
+                                objectiveai::agent::InlineAgentBaseWithFallbacks {
+                                    inner: objectiveai::agent::InlineAgentBase::Mock(
+                                        objectiveai::agent::mock::AgentBase {
+                                            upstream: objectiveai::agent::mock::Upstream::Mock,
+                                            output_mode: objectiveai::agent::mock::OutputMode::Instruction,
+                                            top_logprobs: None,
+                                            error: None,
+                                            error_probability: None,
+                                            mode: None,
+                                            mcp_servers: None,
+                                        },
+                                    ),
+                                    fallbacks: None,
+                                },
+                            ),
+                        },
+                    ],
+                    weights: Some(objectiveai::Weights::Weights(vec![Decimal::ONE, Decimal::ONE])),
+                },
+            ),
+        ),
+        retry_token: None,
+        from_cache: None,
+        reasoning: None,
+        strategy: None,
+        input,
+        split: Some(true),
+        provider: None,
+        seed: Some(42),
+        stream: None,
+        continuation: None,
+    });
+    let result = normalize(run_execution_split(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/split_tweet_scorer_70_tweets_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/split_tweet_scorer_70_tweets_seed_42.json"),
+    );
+}
