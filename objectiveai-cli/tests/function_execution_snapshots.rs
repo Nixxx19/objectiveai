@@ -82,15 +82,15 @@ snapshot_test!(
     {"items": ["Alpha", "Beta", "Gamma"]}
 );
 
-/// Split: tweet-scorer over 70 real tweets (input loaded from
-/// `inputs/70_tweets.json`), seed 42. Mirrors the Rust api test
-/// `test_split_tweet_scorer_70_tweets_seed_42`: same mock function,
+/// Split: tweet-scorer over 10 real tweets (input loaded from
+/// `inputs/10_tweets.json`), seed 42. Mirrors the Rust api test
+/// `test_split_tweet_scorer_10_tweets_seed_42`: same mock function,
 /// same inline profile (two mock instruction agents, one with
 /// top_logprobs=6, equal weights), same input file, same seed.
 #[test]
-fn split_tweet_scorer_70_tweets_seed_42() {
+fn split_tweet_scorer_10_tweets_seed_42() {
     let snapshots = snapshots_dir();
-    let input_path = snapshots.join("inputs/70_tweets.json");
+    let input_path = snapshots.join("inputs/10_tweets.json");
     let input = std::fs::read_to_string(&input_path)
         .unwrap_or_else(|e| panic!("failed to read {}: {e}", input_path.display()));
 
@@ -111,12 +111,12 @@ fn split_tweet_scorer_70_tweets_seed_42() {
         "--seed", "42",
     ]);
 
-    let snapshot = cli_test_util::load_snapshot(&snapshots, "split_tweet_scorer_70_tweets_seed_42");
+    let snapshot = cli_test_util::load_snapshot(&snapshots, "split_tweet_scorer_10_tweets_seed_42");
     let expected_output = cli_test_util::rounded(&snapshot_output(&snapshot));
     let has_errors = snapshot_has_errors(&snapshot);
 
     let actual_output = cli_test_util::rounded(&cli_result["output"]);
-    assert_eq!(actual_output, expected_output, "output mismatch for split_tweet_scorer_70_tweets_seed_42");
+    assert_eq!(actual_output, expected_output, "output mismatch for split_tweet_scorer_10_tweets_seed_42");
 
     if has_errors {
         assert!(

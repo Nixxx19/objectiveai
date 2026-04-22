@@ -134,6 +134,10 @@ fn get_function_json(repository: &str) -> Option<&'static str> {
         "tweet-3cffCh20" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/tweet-3cffCh20.json"))),
         "tweet-3cffCh21" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/tweet-3cffCh21.json"))),
         "tweet-3cffCh22" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/tweet-3cffCh22.json"))),
+        "tweet-ranker" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/tweet-ranker.json"))),
+        "tweet-3YQMcu20" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/tweet-3YQMcu20.json"))),
+        "tweet-3YQMcu21" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/tweet-3YQMcu21.json"))),
+        "tweet-3YQMcu22" => Some(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/mock/functions/tweet-3YQMcu22.json"))),
         _ => None,
     }
 }
@@ -191,6 +195,8 @@ const FUNCTION_REPOSITORIES: &[&str] = &[
     "error-cycle-abc-a", "error-cycle-abc-b", "error-cycle-abc-c",
     "tweet-scorer",
     "tweet-3cffCh20", "tweet-3cffCh21", "tweet-3cffCh22",
+    "tweet-ranker",
+    "tweet-3YQMcu20", "tweet-3YQMcu21", "tweet-3YQMcu22",
 ];
 
 /// Lists all mock Functions.

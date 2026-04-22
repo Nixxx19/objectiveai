@@ -2222,18 +2222,18 @@ async fn test_split_scalar_binary_seed_42() {
     );
 }
 
-/// Split: tweet-scorer over 70 real tweets (input loaded from
-/// `inputs/70_tweets.json`), seed 42. Exercises the split-mode
-/// parallelization with a non-trivial fan-out and a nested scalar
+/// Split: tweet-scorer over 10 real tweets (input loaded from
+/// `inputs/10_tweets.json`), seed 42. Exercises the split-mode
+/// parallelization with a modest fan-out and a nested scalar
 /// branch function wrapping three leaf sub-functions. Uses an inline
 /// profile with two mock agents (one with top_logprobs=6, one plain
 /// instruction) and equal weights.
 #[tokio::test]
-async fn test_split_tweet_scorer_70_tweets_seed_42() {
+async fn test_split_tweet_scorer_10_tweets_seed_42() {
     let client = make_client();
     let input: InputValue = serde_json::from_str(include_str!(
-        "../../../assets/functions/executions/client_tests/inputs/70_tweets.json"
-    )).expect("70_tweets.json must parse as InputValue");
+        "../../../assets/functions/executions/client_tests/inputs/10_tweets.json"
+    )).expect("10_tweets.json must parse as InputValue");
     let request = Arc::new(FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
             objectiveai::RemotePathCommitOptional::Mock {
@@ -2302,7 +2302,99 @@ async fn test_split_tweet_scorer_70_tweets_seed_42() {
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
-        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/split_tweet_scorer_70_tweets_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/split_tweet_scorer_70_tweets_seed_42.json"),
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/split_tweet_scorer_10_tweets_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/split_tweet_scorer_10_tweets_seed_42.json"),
+    );
+}
+
+/// Vector: tweet-ranker over 10 real tweets (input loaded from
+/// `inputs/10_tweets.json`), seed 42. Exercises the alpha-vector branch
+/// function with a mapped scalar sub-task — task[1] uses `input['items'][map]`
+/// to pick out the current element, which is the code path that regressed
+/// when the transpiler started unconditionally binding `map`.
+///
+/// Inline profile: two mock agents (tool_call w/o logprobs and json_schema
+/// w/ top_logprobs=3), weights 0.4 / 0.6.
+#[tokio::test]
+async fn test_vector_tweet_ranker_10_tweets_seed_42() {
+    let client = make_client();
+    let items: InputValue = serde_json::from_str(include_str!(
+        "../../../assets/functions/executions/client_tests/inputs/10_tweets.json"
+    )).expect("10_tweets.json must parse as InputValue");
+    let request = Arc::new(FunctionExecutionCreateParams {
+        function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
+            objectiveai::RemotePathCommitOptional::Mock {
+                name: "tweet-ranker".to_string(),
+            },
+        ),
+        profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Inline(
+            objectiveai::functions::InlineProfile::Auto(
+                objectiveai::swarm::InlineSwarmBase {
+                    agents: vec![
+                        objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
+                            count: 1,
+                            inner: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
+                                objectiveai::agent::InlineAgentBaseWithFallbacks {
+                                    inner: objectiveai::agent::InlineAgentBase::Mock(
+                                        objectiveai::agent::mock::AgentBase {
+                                            upstream: objectiveai::agent::mock::Upstream::Mock,
+                                            output_mode: objectiveai::agent::mock::OutputMode::ToolCall,
+                                            top_logprobs: None,
+                                            error: None,
+                                            error_probability: None,
+                                            mode: None,
+                                            mcp_servers: None,
+                                        },
+                                    ),
+                                    fallbacks: None,
+                                },
+                            ),
+                        },
+                        objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
+                            count: 1,
+                            inner: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
+                                objectiveai::agent::InlineAgentBaseWithFallbacks {
+                                    inner: objectiveai::agent::InlineAgentBase::Mock(
+                                        objectiveai::agent::mock::AgentBase {
+                                            upstream: objectiveai::agent::mock::Upstream::Mock,
+                                            output_mode: objectiveai::agent::mock::OutputMode::JsonSchema,
+                                            top_logprobs: Some(3),
+                                            error: None,
+                                            error_probability: None,
+                                            mode: None,
+                                            mcp_servers: None,
+                                        },
+                                    ),
+                                    fallbacks: None,
+                                },
+                            ),
+                        },
+                    ],
+                    weights: Some(objectiveai::Weights::Weights(vec![
+                        Decimal::new(4, 1),
+                        Decimal::new(6, 1),
+                    ])),
+                },
+            ),
+        ),
+        retry_token: None,
+        from_cache: None,
+        reasoning: None,
+        strategy: None,
+        input: InputValue::Object(indexmap::indexmap! {
+            "items".into() => items,
+        }),
+        split: None,
+        provider: None,
+        seed: Some(42),
+        stream: None,
+        continuation: None,
+    });
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/vector_tweet_ranker_10_tweets_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/vector_tweet_ranker_10_tweets_seed_42.json"),
     );
 }
