@@ -671,101 +671,171 @@ where
         let request_input = request.input.clone();
 
         // ── Split dispatch ─────────────────────────────────────────────
+        //
+        // Runs one execution per array element concurrently.
+        //
+        // Phase 1: concurrently create every inner stream. If *any* setup
+        // fails, the whole call fails with that error.
+        //
+        // Phase 2: merge all inner streams via `select_all`, yielding each
+        // chunk as it arrives — a slow input never blocks a fast one.
         if request.split.unwrap_or(false) {
             let elements = match request.input.clone() {
                 objectiveai::functions::expression::InputValue::Array(arr) => arr,
                 _ => return Err(send_err(super::Error::SplitInputNotArray)),
             };
 
+            // Phase 1: create all inner streams concurrently. First Err wins.
+            // Each split element is its own sub-function-execution with a
+            // freshly-minted `response_id`. The parent's `response_id` is
+            // NOT passed down — it stays at the outer root level only.
+            let setup_futs = elements.into_iter().enumerate().map(|(split_idx, element)| {
+                let this = self.clone();
+                let ctx = ctx.clone();
+                let request = request.clone();
+                let retry_token = retry_token.clone();
+                let inner_response_id = self::response_id(created);
+                async move {
+                    this.execute_for_input(
+                        ctx,
+                        request,
+                        element,
+                        retry_token,
+                        inner_response_id,
+                        created,
+                        Some(split_idx as u64),
+                    )
+                    .await
+                    .map(move |stream| (split_idx, stream))
+                }
+            });
+            let inner_streams = futures::future::try_join_all(setup_futs)
+                .await
+                .map_err(&send_err)?;
+            let n = inner_streams.len();
+
             let viewer_client = self.viewer_client.clone();
             let viewer_ctx = ctx.clone();
 
             return Ok(async_stream::stream! {
+                use futures::StreamExt as _;
+
+                // Per-split outputs. Each slot defaults to an error; it gets
+                // overwritten whenever that split_idx's inner stream yields a
+                // chunk carrying an output (the last such wins). Root
+                // `output` and `usage` are stripped on forwarded chunks
+                // (mirrors Swiss strategy); `split_index` on the wrapped
+                // task chunk preserves per-element attribution.
                 let mut all_outputs: Vec<objectiveai::functions::expression::TaskOutputOwned> =
-                    Vec::with_capacity(elements.len());
-                let mut total_usage =
-                    objectiveai::agent::completions::response::Usage::default();
+                    (0..n)
+                        .map(|_| objectiveai::functions::expression::TaskOutputOwned::Err(
+                            serde_json::json!({"error": "no output produced"})
+                        ))
+                        .collect();
                 let mut tasks_errors = false;
                 let mut function_path = None;
                 let mut profile_path = None;
                 let mut object = objectiveai::functions::executions::response::streaming::Object::ScalarFunctionExecutionChunk;
+                let mut total_usage = objectiveai::agent::completions::response::Usage::default();
+                let mut chunk_index: u64 = 0;
 
-                for (split_idx, element) in elements.into_iter().enumerate() {
-                    let inner_stream = self.clone().execute_for_input(
-                        ctx.clone(),
-                        request.clone(),
-                        element,
-                        retry_token.clone(),
-                        response_id.clone(),
-                        created,
-                        Some(split_idx as u64),
-                    ).await;
+                // Phase 2: merge every inner stream, tagging each chunk with
+                // its split_idx. Chunks from any input are forwarded the
+                // instant they arrive.
+                type Tagged = std::pin::Pin<Box<dyn futures::Stream<
+                    Item = (usize, objectiveai::functions::executions::response::streaming::FunctionExecutionChunk),
+                > + Send>>;
+                let tagged: Vec<Tagged> = inner_streams
+                    .into_iter()
+                    .map(|(split_idx, stream)| {
+                        stream
+                            .map(move |chunk| (split_idx, chunk))
+                            .boxed() as Tagged
+                    })
+                    .collect();
 
-                    let inner_stream = match inner_stream {
-                        Ok(s) => s,
-                        Err(e) => {
-                            all_outputs.push(
-                                objectiveai::functions::expression::TaskOutputOwned::Err(
-                                    serde_json::json!({"error": e.to_string()})
-                                )
-                            );
-                            continue;
-                        }
-                    };
-
-                    futures::pin_mut!(inner_stream);
-                    while let Some(chunk) = inner_stream.next().await {
-                        // capture function/profile paths and object from first chunk
-                        if function_path.is_none() {
-                            function_path = chunk.function.clone();
-                            profile_path = chunk.profile.clone();
-                            object = chunk.object.clone();
-                        }
-                        if let Some(ref output) = chunk.output {
-                            all_outputs.push(output.output.clone());
-                        }
-                        if chunk.tasks_errors.unwrap_or(false) {
-                            tasks_errors = true;
-                        }
-                        if let Some(ref u) = chunk.usage {
-                            total_usage.push(u);
-                        }
-                        // yield chunk without individual output (combine at end)
-                        let mut forwarded = chunk;
-                        forwarded.output = None;
-                        forwarded.usage = None;
-                        yield forwarded;
+                let mut merged = futures::stream::select_all(tagged);
+                while let Some((split_idx, chunk)) = merged.next().await {
+                    // capture function/profile paths and object from the first chunk we see
+                    if function_path.is_none() {
+                        function_path = chunk.function.clone();
+                        profile_path = chunk.profile.clone();
+                        object = chunk.object.clone();
                     }
+                    if let Some(ref output) = chunk.output {
+                        // last output wins per split_idx
+                        all_outputs[split_idx] = output.output.clone();
+                    }
+                    if chunk.tasks_errors.unwrap_or(false) {
+                        tasks_errors = true;
+                    }
+                    if let Some(chunk_usage) = &chunk.usage {
+                        total_usage.push(chunk_usage);
+                    }
+
+                    // Wrap the inner chunk as a task chunk under the parent
+                    // response_id. The inner chunk's own `id` (a unique
+                    // fnexec-* per split element) travels inside `inner`.
+                    let object_for_chunk = chunk.object.clone();
+                    let task_chunk = objectiveai::functions::executions::response::streaming::FunctionExecutionTaskChunk {
+                        index: chunk_index,
+                        task_index: split_idx as u64,
+                        task_path: vec![split_idx as u64],
+                        swiss_pool_index: None,
+                        swiss_round: None,
+                        split_index: Some(split_idx as u64),
+                        inner: chunk,
+                    };
+                    chunk_index += 1;
+
+                    yield objectiveai::functions::executions::response::streaming::FunctionExecutionChunk {
+                        id: response_id.clone(),
+                        tasks: vec![
+                            objectiveai::functions::executions::response::streaming::TaskChunk::FunctionExecution(task_chunk),
+                        ],
+                        tasks_errors: if tasks_errors { Some(true) } else { None },
+                        reasoning: None,
+                        output: None,
+                        error: None,
+                        retry_token: None,
+                        created,
+                        function: function_path.clone(),
+                        profile: profile_path.clone(),
+                        object: object_for_chunk,
+                        usage: None,
+                    };
                 }
 
-                // combine outputs
-                let combined = if all_outputs.is_empty() {
-                    objectiveai::functions::expression::TaskOutputOwned::Err(
-                        serde_json::json!({"error": "no split outputs"})
-                    )
-                } else {
-                    match &all_outputs[0] {
-                        objectiveai::functions::expression::TaskOutputOwned::Scalar(_) => {
-                            objectiveai::functions::expression::TaskOutputOwned::Vector(
-                                all_outputs.into_iter().map(|o| match o {
-                                    objectiveai::functions::expression::TaskOutputOwned::Scalar(d) => d,
-                                    _ => rust_decimal::Decimal::ZERO,
-                                }).collect()
-                            )
-                        }
-                        objectiveai::functions::expression::TaskOutputOwned::Vector(_) => {
-                            objectiveai::functions::expression::TaskOutputOwned::Vectors(
-                                all_outputs.into_iter().map(|o| match o {
-                                    objectiveai::functions::expression::TaskOutputOwned::Vector(v) => v,
-                                    _ => Vec::new(),
-                                }).collect()
-                            )
-                        }
-                        _ => {
-                            objectiveai::functions::expression::TaskOutputOwned::Err(
-                                serde_json::json!({"error": "unexpected output type in split"})
-                            )
-                        }
+                // combine outputs — find the first non-error to determine the variant
+                let first_ok = all_outputs
+                    .iter()
+                    .find(|o| !matches!(o, objectiveai::functions::expression::TaskOutputOwned::Err(_)));
+                let combined = match first_ok {
+                    None => {
+                        objectiveai::functions::expression::TaskOutputOwned::Err(
+                            serde_json::json!({"error": "no split outputs"})
+                        )
+                    }
+                    Some(objectiveai::functions::expression::TaskOutputOwned::Scalar(_)) => {
+                        objectiveai::functions::expression::TaskOutputOwned::Vector(
+                            all_outputs.into_iter().map(|o| match o {
+                                objectiveai::functions::expression::TaskOutputOwned::Scalar(d) => d,
+                                _ => rust_decimal::Decimal::ZERO,
+                            }).collect()
+                        )
+                    }
+                    Some(objectiveai::functions::expression::TaskOutputOwned::Vector(_)) => {
+                        objectiveai::functions::expression::TaskOutputOwned::Vectors(
+                            all_outputs.into_iter().map(|o| match o {
+                                objectiveai::functions::expression::TaskOutputOwned::Vector(v) => v,
+                                _ => Vec::new(),
+                            }).collect()
+                        )
+                    }
+                    _ => {
+                        objectiveai::functions::expression::TaskOutputOwned::Err(
+                            serde_json::json!({"error": "unexpected output type in split"})
+                        )
                     }
                 };
 
