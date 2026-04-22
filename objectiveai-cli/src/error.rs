@@ -36,4 +36,6 @@ pub enum Error {
     EmptyStream,
     #[error("config set forbidden by server configuration")]
     ConfigSetForbidden,
+    #[error("log writer task panicked or was cancelled")]
+    WriterPanic,
 }
