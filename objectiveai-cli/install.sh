@@ -120,8 +120,15 @@ else
   bash "$REPO_ROOT/objectiveai-claude-agent-sdk-runner-js/build.sh" --release
 fi
 
-# mcp (linux-musl, needed by objectiveai-api with orchestrator-bollard)
-bash "$REPO_ROOT/objectiveai-mcp/build.sh" --target "$(uname -m)-unknown-linux-musl" --release
+# mcp (linux-musl, needed by objectiveai-api with orchestrator-bollard).
+# Match the host architecture (ARM hosts embed aarch64, x86_64 hosts embed
+# x86_64), but always target linux-musl. Normalize macOS's `arm64` to Rust's
+# `aarch64` triple convention.
+MCP_ARCH=$(uname -m)
+case "$MCP_ARCH" in
+  arm64) MCP_ARCH=aarch64 ;;
+esac
+bash "$REPO_ROOT/objectiveai-mcp/build.sh" --target "$MCP_ARCH-unknown-linux-musl" --release
 
 # viewer (native target, unless --no-viewer)
 if [ "$NO_VIEWER" = "0" ]; then
