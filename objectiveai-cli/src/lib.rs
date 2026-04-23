@@ -22,6 +22,7 @@ mod laboratories;
 mod log_line;
 mod log_stream;
 mod logs;
+pub mod update;
 mod vector;
 
 #[cfg(test)]

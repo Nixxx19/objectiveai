@@ -1,0 +1,431 @@
+//! Best-effort auto-update on startup.
+//!
+//! When the `updater` feature is enabled, the binary polls GitHub Releases
+//! at most once per [`UPDATE_CHECK_INTERVAL`]. If a newer published release
+//! is available for this platform + feature variant, the new binary is
+//! downloaded, atomically swapped in place of the running binary, and the
+//! CLI re-execs itself with the original argv.
+//!
+//! **Failure policy:** any error (network, rate-limit, malformed response,
+//! disk error, running from a repo `target/` dir, etc.) is swallowed with a
+//! short `stderr` marker and the CLI proceeds on the current binary. The
+//! updater must never prevent normal CLI use.
+//!
+//! When the `updater` feature is off, [`maybe_auto_update`] is a zero-cost
+//! no-op — neither `semver` nor any release-fetching code is compiled in.
+
+use std::ffi::OsString;
+
+/// Public entrypoint. Called unconditionally from `main.rs`. When the
+/// `updater` feature is disabled this is a no-op; when enabled, it may
+/// replace the binary + re-exec (in which case this fn never returns).
+pub async fn maybe_auto_update<I>(args: I)
+where
+    I: IntoIterator<Item = OsString> + Clone,
+{
+    #[cfg(feature = "updater")]
+    {
+        if let Err(e) = imp::run(args).await {
+            eprintln!("objectiveai: auto-update skipped: {e}");
+        }
+    }
+    #[cfg(not(feature = "updater"))]
+    {
+        let _ = args;
+    }
+}
+
+#[cfg(feature = "updater")]
+mod imp {
+    use std::ffi::OsString;
+    use std::path::{Path, PathBuf};
+    use std::time::{Duration, SystemTime, UNIX_EPOCH};
+
+    /// How often to poll the release feed. 24h matches the cadence at
+    /// which new binaries can realistically land.
+    const UPDATE_CHECK_INTERVAL: Duration = Duration::from_secs(24 * 3600);
+
+    /// Timeouts for the two network hops — keep tight so a flaky network
+    /// doesn't add perceptible startup latency.
+    const METADATA_TIMEOUT: Duration = Duration::from_secs(5);
+    const DOWNLOAD_TIMEOUT: Duration = Duration::from_secs(60);
+
+    const RELEASES_API: &str =
+        "https://api.github.com/repos/ObjectiveAI/objectiveai/releases/latest";
+
+    /// Setting `OBJECTIVEAI_SKIP_UPDATE` disables the updater. We set it
+    /// ourselves on the re-exec to prevent an update loop if the new
+    /// binary somehow still thinks it's older.
+    const SKIP_ENV_VAR: &str = "OBJECTIVEAI_SKIP_UPDATE";
+
+    /// Asset filename that matches THIS build, selected at compile time
+    /// from target triple + `viewer` feature. Unsupported platforms
+    /// resolve to `None` and the updater is a no-op for them.
+    const ASSET_NAME: Option<&str> = asset_name();
+
+    const fn asset_name() -> Option<&'static str> {
+        #[cfg(all(target_os = "linux", target_arch = "x86_64", feature = "viewer"))]
+        {
+            Some("objectiveai-linux-x86_64")
+        }
+        #[cfg(all(target_os = "linux", target_arch = "x86_64", not(feature = "viewer")))]
+        {
+            Some("objectiveai-linux-x86_64-no-viewer")
+        }
+        #[cfg(all(target_os = "macos", target_arch = "x86_64", feature = "viewer"))]
+        {
+            Some("objectiveai-macos-x86_64")
+        }
+        #[cfg(all(target_os = "macos", target_arch = "x86_64", not(feature = "viewer")))]
+        {
+            Some("objectiveai-macos-x86_64-no-viewer")
+        }
+        #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "viewer"))]
+        {
+            Some("objectiveai-macos-aarch64")
+        }
+        #[cfg(all(target_os = "macos", target_arch = "aarch64", not(feature = "viewer")))]
+        {
+            Some("objectiveai-macos-aarch64-no-viewer")
+        }
+        #[cfg(all(target_os = "windows", target_arch = "x86_64", feature = "viewer"))]
+        {
+            Some("objectiveai-windows-x86_64.exe")
+        }
+        #[cfg(all(target_os = "windows", target_arch = "x86_64", not(feature = "viewer")))]
+        {
+            Some("objectiveai-windows-x86_64-no-viewer.exe")
+        }
+        #[cfg(not(any(
+            all(target_os = "linux", target_arch = "x86_64"),
+            all(target_os = "macos", target_arch = "x86_64"),
+            all(target_os = "macos", target_arch = "aarch64"),
+            all(target_os = "windows", target_arch = "x86_64"),
+        )))]
+        {
+            None
+        }
+    }
+
+    #[derive(Debug, thiserror::Error)]
+    pub(super) enum Error {
+        #[error("unsupported platform (no matching release asset)")]
+        UnsupportedPlatform,
+        #[error("skipped by {SKIP_ENV_VAR}")]
+        Skipped,
+        #[error("running from dev tree")]
+        DevTree,
+        #[error("rate-limited (last check too recent)")]
+        RateLimited,
+        #[error("could not locate current binary: {0}")]
+        CurrentExe(std::io::Error),
+        #[error("write updated.txt: {0}")]
+        WriteMarker(std::io::Error),
+        #[error("http: {0}")]
+        Http(String),
+        #[error("github returned status {0}")]
+        BadStatus(reqwest::StatusCode),
+        #[error("malformed release metadata: {0}")]
+        BadMetadata(serde_json::Error),
+        #[error("semver parse: {0}")]
+        Semver(semver::Error),
+        #[error("no asset named {0} in latest release")]
+        NoAsset(&'static str),
+        #[error("download: {0}")]
+        Download(std::io::Error),
+        #[error("swap: {0}")]
+        Swap(std::io::Error),
+        #[error("re-exec: {0}")]
+        ReExec(std::io::Error),
+    }
+
+    #[derive(serde::Deserialize)]
+    struct Release {
+        tag_name: String,
+        assets: Vec<Asset>,
+    }
+
+    #[derive(serde::Deserialize)]
+    struct Asset {
+        name: String,
+        browser_download_url: String,
+    }
+
+    pub(super) async fn run<I>(args: I) -> Result<(), Error>
+    where
+        I: IntoIterator<Item = OsString> + Clone,
+    {
+        let asset_name = ASSET_NAME.ok_or(Error::UnsupportedPlatform)?;
+        if std::env::var_os(SKIP_ENV_VAR).is_some() {
+            return Err(Error::Skipped);
+        }
+
+        let current_exe = std::env::current_exe().map_err(Error::CurrentExe)?;
+        if looks_like_dev_tree(&current_exe) {
+            return Err(Error::DevTree);
+        }
+
+        // Best-effort cleanup of any stale `.exe.old` from a prior Windows
+        // swap. If we're not on Windows, or there's no stale file, this
+        // does nothing.
+        sweep_stale_old(&current_exe);
+
+        // Rate-limit gate. The marker lives in the config base dir so it
+        // shares the CONFIG_BASE_DIR override used everywhere else.
+        let marker = marker_path()?;
+        if !check_elapsed(&marker) {
+            return Err(Error::RateLimited);
+        }
+        // Refresh the marker BEFORE the network call so a network failure
+        // still rate-limits subsequent runs (we won't hammer GitHub).
+        write_marker(&marker)?;
+
+        let client = reqwest::Client::new();
+        let release: Release = {
+            let resp = client
+                .get(RELEASES_API)
+                .header("User-Agent", user_agent())
+                .header("Accept", "application/vnd.github+json")
+                .timeout(METADATA_TIMEOUT)
+                .send()
+                .await
+                .map_err(|e| Error::Http(e.to_string()))?;
+            let status = resp.status();
+            if !status.is_success() {
+                return Err(Error::BadStatus(status));
+            }
+            let body = resp
+                .bytes()
+                .await
+                .map_err(|e| Error::Http(e.to_string()))?;
+            serde_json::from_slice(&body).map_err(Error::BadMetadata)?
+        };
+
+        // Compare versions. Bail quietly when we're already current or
+        // somehow ahead (pre-release, local dev bump, etc.).
+        let remote_str = release.tag_name.strip_prefix('v').unwrap_or(&release.tag_name);
+        let remote = semver::Version::parse(remote_str).map_err(Error::Semver)?;
+        let local = semver::Version::parse(env!("CARGO_PKG_VERSION")).map_err(Error::Semver)?;
+        if remote <= local {
+            return Ok(());
+        }
+
+        let asset = release
+            .assets
+            .iter()
+            .find(|a| a.name == asset_name)
+            .ok_or(Error::NoAsset(asset_name))?;
+
+        // Download next to the current binary so the eventual rename is a
+        // same-filesystem operation (rename across devices fails).
+        let new_path = staged_path(&current_exe);
+        download_to(&client, &asset.browser_download_url, &new_path).await?;
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            std::fs::set_permissions(&new_path, std::fs::Permissions::from_mode(0o755))
+                .map_err(Error::Swap)?;
+        }
+
+        self_replace(&current_exe, &new_path)?;
+        re_exec(&current_exe, args)
+    }
+
+    /// Extension used for the downloaded-but-not-yet-installed binary.
+    /// Lives next to the target path so the final rename doesn't cross
+    /// filesystems.
+    fn staged_path(current_exe: &Path) -> PathBuf {
+        let mut p = current_exe.to_path_buf();
+        let filename = p
+            .file_name()
+            .map(|s| s.to_string_lossy().into_owned())
+            .unwrap_or_else(|| "objectiveai".to_string());
+        let pid = std::process::id();
+        p.set_file_name(format!("{filename}.new.{pid}"));
+        p
+    }
+
+    /// Detect common in-repo paths to avoid clobbering a developer's
+    /// `cargo run` output. The release binary lives under
+    /// `~/.objectiveai/` (or a user-chosen install path); the dev binary
+    /// lives under `<repo>/target/`.
+    fn looks_like_dev_tree(current_exe: &Path) -> bool {
+        current_exe
+            .components()
+            .any(|c| c.as_os_str() == "target" || c.as_os_str() == "target-objectiveai-mcp")
+    }
+
+    fn user_agent() -> String {
+        format!("objectiveai-cli/{}", env!("CARGO_PKG_VERSION"))
+    }
+
+    /// The marker is `<config_base_dir>/updated.txt`. Reuses
+    /// `objectiveai::filesystem::Client` so CONFIG_BASE_DIR / ~/.objectiveai
+    /// resolution matches the rest of the CLI.
+    fn marker_path() -> Result<PathBuf, Error> {
+        let fs_client = objectiveai::filesystem::Client::new(
+            None::<String>,
+            None::<String>,
+            None::<String>,
+        );
+        Ok(fs_client.base_dir().join("updated.txt"))
+    }
+
+    /// Returns true iff enough time has elapsed since the marker was last
+    /// updated. A missing or unreadable marker counts as "elapsed".
+    fn check_elapsed(marker: &Path) -> bool {
+        let Ok(contents) = std::fs::read_to_string(marker) else {
+            return true;
+        };
+        let Ok(ts) = contents.trim().parse::<u64>() else {
+            return true;
+        };
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|d| d.as_secs())
+            .unwrap_or(0);
+        now.saturating_sub(ts) >= UPDATE_CHECK_INTERVAL.as_secs()
+    }
+
+    fn write_marker(marker: &Path) -> Result<(), Error> {
+        if let Some(parent) = marker.parent() {
+            std::fs::create_dir_all(parent).map_err(Error::WriteMarker)?;
+        }
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|d| d.as_secs())
+            .unwrap_or(0);
+        std::fs::write(marker, now.to_string()).map_err(Error::WriteMarker)
+    }
+
+    async fn download_to(
+        client: &reqwest::Client,
+        url: &str,
+        dst: &Path,
+    ) -> Result<(), Error> {
+        use futures::StreamExt as _;
+        use tokio::io::AsyncWriteExt as _;
+
+        let resp = client
+            .get(url)
+            .header("User-Agent", user_agent())
+            .timeout(DOWNLOAD_TIMEOUT)
+            .send()
+            .await
+            .map_err(|e| Error::Http(e.to_string()))?;
+        let status = resp.status();
+        if !status.is_success() {
+            return Err(Error::BadStatus(status));
+        }
+
+        let mut file = tokio::fs::File::create(dst).await.map_err(Error::Download)?;
+        let mut stream = resp.bytes_stream();
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk.map_err(|e| Error::Http(e.to_string()))?;
+            file.write_all(&chunk).await.map_err(Error::Download)?;
+        }
+        file.flush().await.map_err(Error::Download)?;
+        Ok(())
+    }
+
+    /// Swap the staged binary into place of the currently-running one.
+    ///
+    /// **Unix**: `rename(new, current)` works because the running process
+    /// holds the binary by inode; overwriting the path doesn't unload the
+    /// live image, the old inode stays alive until the process exits.
+    ///
+    /// **Windows**: the running exe's path is locked for *writes*, but
+    /// *renaming* the running file to a different name is allowed (the
+    /// lock is on the path, not the inode). So we move the current binary
+    /// aside first, then drop the new one into the original path.
+    #[cfg(unix)]
+    fn self_replace(current: &Path, new: &Path) -> Result<(), Error> {
+        std::fs::rename(new, current).map_err(Error::Swap)
+    }
+
+    #[cfg(windows)]
+    fn self_replace(current: &Path, new: &Path) -> Result<(), Error> {
+        let old = current.with_extension("exe.old");
+        // Clear any previous `.old` that failed to get swept.
+        let _ = std::fs::remove_file(&old);
+        std::fs::rename(current, &old).map_err(Error::Swap)?;
+        std::fs::rename(new, current).map_err(|e| {
+            // Best effort: try to undo the rename so the user doesn't end
+            // up with a missing binary on the PATH.
+            let _ = std::fs::rename(&old, current);
+            Error::Swap(e)
+        })
+    }
+
+    #[cfg(not(any(unix, windows)))]
+    fn self_replace(_current: &Path, _new: &Path) -> Result<(), Error> {
+        Err(Error::Swap(std::io::Error::new(
+            std::io::ErrorKind::Unsupported,
+            "self-replace not implemented on this platform",
+        )))
+    }
+
+    fn sweep_stale_old(current: &Path) {
+        #[cfg(windows)]
+        {
+            let old = current.with_extension("exe.old");
+            let _ = std::fs::remove_file(old);
+        }
+        #[cfg(not(windows))]
+        {
+            let _ = current;
+        }
+    }
+
+    /// Re-exec the (now-updated) binary with the same argv. On all
+    /// platforms we spawn + wait rather than use `exec(2)` — the tokio
+    /// runtime is up, and using `exec` from inside an async fn would
+    /// leak the runtime. The extra process layer is free at user-scale.
+    fn re_exec<I>(current: &Path, args: I) -> Result<(), Error>
+    where
+        I: IntoIterator<Item = OsString>,
+    {
+        // Skip argv[0]; Command::new already sets it.
+        let forwarded: Vec<OsString> = args.into_iter().skip(1).collect();
+        let status = std::process::Command::new(current)
+            .args(forwarded)
+            .env(SKIP_ENV_VAR, "1")
+            .status()
+            .map_err(Error::ReExec)?;
+        std::process::exit(status.code().unwrap_or(0));
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Tests — cover only the feature-on configuration so they don't duplicate
+// for each feature matrix; they're compiled in alongside the real impl.
+// ---------------------------------------------------------------------------
+
+#[cfg(all(test, feature = "updater"))]
+mod tests {
+    #[test]
+    fn asset_name_resolves_for_current_target() {
+        // On every supported CI target, ASSET_NAME is Some(...). The cfg
+        // matrix in asset_name() would otherwise silently slip into None.
+        #[cfg(any(
+            all(target_os = "linux", target_arch = "x86_64"),
+            all(target_os = "macos", target_arch = "x86_64"),
+            all(target_os = "macos", target_arch = "aarch64"),
+            all(target_os = "windows", target_arch = "x86_64"),
+        ))]
+        assert!(super::imp::ASSET_NAME.is_some());
+    }
+
+    #[test]
+    fn version_ordering() {
+        fn needs_update(remote: &str, local: &str) -> bool {
+            let r = remote.strip_prefix('v').unwrap_or(remote);
+            semver::Version::parse(r).unwrap() > semver::Version::parse(local).unwrap()
+        }
+        assert!(needs_update("v2.0.1", "2.0.0"));
+        assert!(needs_update("2.0.1", "2.0.0"));
+        assert!(!needs_update("v2.0.0", "2.0.0"));
+        assert!(!needs_update("v2.0.0", "2.1.0"));
+        assert!(needs_update("v3.0.0", "2.99.99"));
+    }
+}
