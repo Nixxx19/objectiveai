@@ -381,18 +381,76 @@ mod imp {
     /// platforms we spawn + wait rather than use `exec(2)` — the tokio
     /// runtime is up, and using `exec` from inside an async fn would
     /// leak the runtime. The extra process layer is free at user-scale.
+    ///
+    /// This is strictly a passthrough:
+    /// - **stdin / stdout / stderr** are inherited from the parent, so
+    ///   piped input and terminal output behave identically to running
+    ///   the new binary directly.
+    /// - **Environment** is inherited unchanged except for `OBJECTIVEAI_SKIP_UPDATE=1`,
+    ///   which stops the child from re-running the updater and looping.
+    /// - **Current directory** is inherited (Command's default).
+    /// - **Argv** forwards every user-supplied argument verbatim;
+    ///   argv[0] is set to the binary path (on Unix we preserve the
+    ///   original argv[0] via `CommandExt::arg0` so tools that read
+    ///   their own invocation name see the same string they were given).
+    /// - **Exit code** mirrors the child's. Signal-terminated children
+    ///   propagate as `128 + signum` on Unix (POSIX convention); on
+    ///   Windows a child without an exit code maps to `1`.
     fn re_exec<I>(current: &Path, args: I) -> Result<(), Error>
     where
         I: IntoIterator<Item = OsString>,
     {
-        // Skip argv[0]; Command::new already sets it.
-        let forwarded: Vec<OsString> = args.into_iter().skip(1).collect();
-        let status = std::process::Command::new(current)
-            .args(forwarded)
-            .env(SKIP_ENV_VAR, "1")
-            .status()
-            .map_err(Error::ReExec)?;
-        std::process::exit(status.code().unwrap_or(0));
+        use std::process::{Command, Stdio};
+
+        let mut iter = args.into_iter();
+        let argv0 = iter.next(); // original invocation name
+        let forwarded: Vec<OsString> = iter.collect();
+
+        let mut cmd = Command::new(current);
+        cmd.args(&forwarded)
+            // Make inheritance explicit so future changes can't
+            // accidentally capture or close a handle.
+            .stdin(Stdio::inherit())
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            // Break the update loop: the re-exec'd child must not
+            // re-enter the updater even if its version check would
+            // somehow trigger again.
+            .env(SKIP_ENV_VAR, "1");
+
+        // On Unix, preserve argv[0] exactly so the child sees its
+        // original invocation name (matters for clap's program name in
+        // help output, shell completions, etc.). Windows' CreateProcess
+        // derives argv[0] from the command string and doesn't let us
+        // override it separately, so there it becomes the exe path.
+        #[cfg(unix)]
+        if let Some(argv0) = argv0.as_ref() {
+            use std::os::unix::process::CommandExt as _;
+            cmd.arg0(argv0);
+        }
+        #[cfg(not(unix))]
+        let _ = argv0;
+
+        let status = cmd.status().map_err(Error::ReExec)?;
+
+        // Propagate exit code faithfully. `None` here means "terminated
+        // by a signal" on Unix; fall back to `128 + signum`. On Windows
+        // `None` is the rare "no exit code available" case — use 1.
+        let code = match status.code() {
+            Some(c) => c,
+            None => {
+                #[cfg(unix)]
+                {
+                    use std::os::unix::process::ExitStatusExt as _;
+                    status.signal().map(|s| 128 + s).unwrap_or(1)
+                }
+                #[cfg(not(unix))]
+                {
+                    1
+                }
+            }
+        };
+        std::process::exit(code);
     }
 }
 
