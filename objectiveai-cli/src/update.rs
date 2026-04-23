@@ -41,9 +41,8 @@ mod imp {
     use std::path::{Path, PathBuf};
     use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-    /// How often to poll the release feed. 24h matches the cadence at
-    /// which new binaries can realistically land.
-    const UPDATE_CHECK_INTERVAL: Duration = Duration::from_secs(24 * 3600);
+    /// How often to poll the release feed.
+    const UPDATE_CHECK_INTERVAL: Duration = Duration::from_secs(2 * 3600);
 
     /// Timeouts for the two network hops — keep tight so a flaky network
     /// doesn't add perceptible startup latency.
