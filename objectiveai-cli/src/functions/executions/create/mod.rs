@@ -120,6 +120,8 @@ pub enum Commands {
         input: InputSource,
         #[command(flatten)]
         continuation: crate::continuation::ContinuationArgs,
+        #[command(flatten)]
+        instructions: crate::instructions::InstructionsIdArg,
         /// Retry token from a previous execution
         #[arg(long)]
         retry_token: Option<String>,
@@ -148,6 +150,8 @@ pub enum Commands {
         input: InputSource,
         #[command(flatten)]
         continuation: crate::continuation::ContinuationArgs,
+        #[command(flatten)]
+        instructions: crate::instructions::InstructionsIdArg,
         /// Retry token from a previous execution
         #[arg(long)]
         retry_token: Option<String>,
@@ -186,13 +190,13 @@ async fn profile_favorites(cli_config: &crate::Config) -> Vec<objectiveai::files
 
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
-        let (function_source, profile_source, input_source, continuation_args, retry_token, seed, split, invert, strategy, detach) = match self {
-            Commands::Standard { function, profile, input, continuation, retry_token, seed, split, invert, detach } => {
-                (function, profile, input, continuation, retry_token, seed, split, invert, objectiveai::functions::executions::request::Strategy::Default, detach)
+        let (function_source, profile_source, input_source, continuation_args, _instructions, retry_token, seed, split, invert, strategy, detach) = match self {
+            Commands::Standard { function, profile, input, continuation, instructions, retry_token, seed, split, invert, detach } => {
+                (function, profile, input, continuation, instructions, retry_token, seed, split, invert, objectiveai::functions::executions::request::Strategy::Default, detach)
             }
-            Commands::SwissSystem { function, profile, input, continuation, retry_token, seed, split, invert, pool, rounds, detach } => {
+            Commands::SwissSystem { function, profile, input, continuation, instructions, retry_token, seed, split, invert, pool, rounds, detach } => {
                 let strategy = objectiveai::functions::executions::request::Strategy::SwissSystem { pool, rounds };
-                (function, profile, input, continuation, retry_token, seed, split, invert, strategy, detach)
+                (function, profile, input, continuation, instructions, retry_token, seed, split, invert, strategy, detach)
             }
         };
 

@@ -97,6 +97,7 @@ pub enum Output {
     LogsList(Vec<objectiveai::filesystem::logs::ListItem>),
     LogsClear(u64),
     LogsSubscribe(Option<objectiveai::filesystem::logs::LogContent>),
+    Instructions(String),
 }
 
 #[derive(Subcommand)]
@@ -190,6 +191,7 @@ where
             objectiveai::filesystem::logs::LogContent::DataUrl(s) => s,
         }),
         Ok(Output::LogsSubscribe(None)) => Err("subscribe timed out".into()),
+        Ok(Output::Instructions(s)) => Ok(s),
         Err(e) => Err(format!("{e}")),
     }
 }

@@ -19,6 +19,7 @@ mod functions;
 mod viewer;
 mod schemas;
 mod laboratories;
+mod instructions;
 mod log_line;
 mod log_stream;
 mod logs;
