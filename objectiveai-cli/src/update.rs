@@ -57,6 +57,13 @@ mod imp {
     /// binary somehow still thinks it's older.
     const SKIP_ENV_VAR: &str = "OBJECTIVEAI_SKIP_UPDATE";
 
+    /// Env var the rest of the CLI also recognises for GitHub auth
+    /// (matches `objectiveai::HttpClient::new`'s `GITHUB_AUTHORIZATION`
+    /// fallback in `objectiveai-rs/src/http/client.rs:118`). When set,
+    /// it bumps our GitHub-API rate limit from 60/h → 5000/h and is
+    /// required for private-repo releases.
+    const GITHUB_AUTH_ENV_VAR: &str = "GITHUB_AUTHORIZATION";
+
     /// Asset filename that matches THIS build, selected at compile time
     /// from target triple + `viewer` feature. Unsupported platforms
     /// resolve to `None` and the updater is a no-op for them.
@@ -180,12 +187,17 @@ mod imp {
         write_marker(&marker)?;
 
         let client = reqwest::Client::new();
+        let auth = github_authorization().await;
         let release: Release = {
-            let resp = client
+            let mut req = client
                 .get(RELEASES_API)
                 .header("User-Agent", user_agent())
                 .header("Accept", "application/vnd.github+json")
-                .timeout(METADATA_TIMEOUT)
+                .timeout(METADATA_TIMEOUT);
+            if let Some(header) = auth.as_deref() {
+                req = req.header("Authorization", header);
+            }
+            let resp = req
                 .send()
                 .await
                 .map_err(|e| Error::Http(e.to_string()))?;
@@ -218,7 +230,7 @@ mod imp {
         // Download next to the current binary so the eventual rename is a
         // same-filesystem operation (rename across devices fails).
         let new_path = staged_path(&current_exe);
-        download_to(&client, &asset.browser_download_url, &new_path).await?;
+        download_to(&client, &asset.browser_download_url, auth.as_deref(), &new_path).await?;
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
@@ -262,12 +274,51 @@ mod imp {
     /// `objectiveai::filesystem::Client` so CONFIG_BASE_DIR / ~/.objectiveai
     /// resolution matches the rest of the CLI.
     fn marker_path() -> Result<PathBuf, Error> {
-        let fs_client = objectiveai::filesystem::Client::new(
-            None::<String>,
-            None::<String>,
-            None::<String>,
-        );
+        let fs_client = fs_client();
         Ok(fs_client.base_dir().join("updated.txt"))
+    }
+
+    fn fs_client() -> objectiveai::filesystem::Client {
+        objectiveai::filesystem::Client::new(
+            None::<String>,
+            None::<String>,
+            None::<String>,
+        )
+    }
+
+    /// Resolves the GitHub Authorization header value, if one is
+    /// available. Lookup order (same precedence the rest of the CLI
+    /// uses): env var first, then the filesystem config's stored
+    /// `api.headers.x_github_authorization`.
+    ///
+    /// Returns a value already formatted for the `Authorization`
+    /// header (`Bearer <token>`). The stored token may or may not
+    /// carry the `Bearer ` prefix; both forms are handled.
+    async fn github_authorization() -> Option<String> {
+        let raw = match std::env::var(GITHUB_AUTH_ENV_VAR) {
+            Ok(v) if !v.trim().is_empty() => Some(v),
+            _ => {
+                let client = fs_client();
+                // Best-effort: if the config file doesn't exist / is
+                // malformed, just skip.
+                match objectiveai::filesystem::config::client::read(&client).await {
+                    Ok(mut config) => config
+                        .api()
+                        .headers()
+                        .get_x_github_authorization()
+                        .map(|s| s.to_string()),
+                    Err(_) => None,
+                }
+            }
+        };
+        raw.map(|s| {
+            // The stored form may or may not include the scheme
+            // prefix. Strip it (if present) and re-prepend, so the
+            // outgoing header is always `Bearer <token>` exactly once.
+            let trimmed = s.trim();
+            let raw = trimmed.strip_prefix("Bearer ").unwrap_or(trimmed);
+            format!("Bearer {raw}")
+        })
     }
 
     /// Returns true iff enough time has elapsed since the marker was last
@@ -300,15 +351,20 @@ mod imp {
     async fn download_to(
         client: &reqwest::Client,
         url: &str,
+        auth: Option<&str>,
         dst: &Path,
     ) -> Result<(), Error> {
         use futures::StreamExt as _;
         use tokio::io::AsyncWriteExt as _;
 
-        let resp = client
+        let mut req = client
             .get(url)
             .header("User-Agent", user_agent())
-            .timeout(DOWNLOAD_TIMEOUT)
+            .timeout(DOWNLOAD_TIMEOUT);
+        if let Some(header) = auth {
+            req = req.header("Authorization", header);
+        }
+        let resp = req
             .send()
             .await
             .map_err(|e| Error::Http(e.to_string()))?;
