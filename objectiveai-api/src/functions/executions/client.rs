@@ -15,6 +15,73 @@ pub fn response_id(created: u64) -> String {
     format!("fnexec-{}-{}", uuid.simple(), created)
 }
 
+/// Inverts a single `TaskOutputOwned` in place.
+///
+/// - `Scalar(x)` → `Scalar(1 - x)` (distance-from-1 becomes distance-from-0).
+/// - `Vector(v)` → rank-inverted: the position that had the highest value
+///   ends up with the lowest, the position that had the lowest ends up with
+///   the highest, and so on. e.g. `[0.5, 0.2, 0.3]` → `[0.2, 0.5, 0.3]`.
+///   Total sum is preserved (still a valid probability distribution).
+/// - `Vectors(vv)` → each inner vector rank-inverted.
+/// - `Err(_)` is left untouched — there is no meaningful inverse of an error.
+fn invert_task_output(output: &mut objectiveai::functions::expression::TaskOutputOwned) {
+    use objectiveai::functions::expression::TaskOutputOwned;
+    match output {
+        TaskOutputOwned::Scalar(d) => {
+            *d = rust_decimal::Decimal::ONE - *d;
+        }
+        TaskOutputOwned::Vector(v) => invert_vector_in_place(v),
+        TaskOutputOwned::Vectors(vv) => {
+            for v in vv.iter_mut() {
+                invert_vector_in_place(v);
+            }
+        }
+        TaskOutputOwned::Err(_) => {}
+    }
+}
+
+/// Rank-inverts a vector of decimals in place: the position that ranked
+/// highest by value receives the smallest value, and so on.
+///
+/// Stable on ties — positions whose original values are equal keep their
+/// relative order, so `[0.4, 0.4, 0.2]` → `[0.2, 0.4, 0.4]` (deterministic).
+fn invert_vector_in_place(v: &mut Vec<rust_decimal::Decimal>) {
+    if v.len() <= 1 {
+        return;
+    }
+    // Sort original indices by value descending (stable; ties keep input order).
+    let mut indexed: Vec<(usize, rust_decimal::Decimal)> =
+        v.iter().enumerate().map(|(i, x)| (i, *x)).collect();
+    indexed.sort_by(|a, b| b.1.cmp(&a.1));
+    // Sort the values themselves ascending.
+    let mut sorted_asc: Vec<rust_decimal::Decimal> = v.clone();
+    sorted_asc.sort();
+    // Highest-rank position gets the smallest value, etc.
+    for (rank, (orig_idx, _)) in indexed.into_iter().enumerate() {
+        v[orig_idx] = sorted_asc[rank];
+    }
+}
+
+/// Recursively inverts every `output` field in a `FunctionExecutionChunk`,
+/// including those inside nested function-execution task chunks.
+///
+/// VectorCompletion task chunks carry raw vote/score data, not a function
+/// "output", so their inner `scores`/`votes` are intentionally untouched —
+/// `invert` is a final-output transformation, not a re-scoring of the
+/// underlying votes.
+fn invert_function_execution_chunk(
+    chunk: &mut objectiveai::functions::executions::response::streaming::FunctionExecutionChunk,
+) {
+    if let Some(output) = chunk.output.as_mut() {
+        invert_task_output(&mut output.output);
+    }
+    for task in chunk.tasks.iter_mut() {
+        if let objectiveai::functions::executions::response::streaming::TaskChunk::FunctionExecution(ft) = task {
+            invert_function_execution_chunk(&mut ft.inner);
+        }
+    }
+}
+
 /// Computes the final function output as a weighted average of task outputs.
 ///
 /// All task outputs are already validated `TaskOutputOwned` (scalar or vector)
@@ -496,6 +563,13 @@ where
     /// Executes a Function with streaming output and records usage.
     ///
     /// Streams chunks as they become available and records usage after completion.
+    ///
+    /// Honours `request.invert`: when set, every chunk's outputs (root +
+    /// nested function-execution tasks, recursively) are inverted before
+    /// being forwarded to the consumer or aggregated for the usage handler.
+    /// Inversion runs at this layer, *after* the inner client has finished
+    /// evaluating expressions, so user-supplied expressions always see the
+    /// original scores.
     pub async fn create_streaming_handle_usage(
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
@@ -508,6 +582,7 @@ where
         super::Error,
     >{
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+        let invert = request.invert.unwrap_or(false);
         tokio::spawn(async move {
             let mut aggregate: Option<
                 objectiveai::functions::executions::response::streaming::FunctionExecutionChunk,
@@ -524,7 +599,10 @@ where
                 }
             };
             futures::pin_mut!(stream);
-            while let Some(chunk) = stream.next().await {
+            while let Some(mut chunk) = stream.next().await {
+                if invert {
+                    invert_function_execution_chunk(&mut chunk);
+                }
                 match &mut aggregate {
                     Some(aggregate) => aggregate.push(&chunk),
                     None => aggregate = Some(chunk.clone()),
