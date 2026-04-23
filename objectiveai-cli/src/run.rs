@@ -22,6 +22,12 @@ struct EnvConfigBuilder {
     commit_author_name: Option<String>,
     #[envconfig(from = "COMMIT_AUTHOR_EMAIL")]
     commit_author_email: Option<String>,
+    /// Consumed by the auto-updater to authenticate against GitHub's
+    /// release API — matches the env name the rest of the CLI honours
+    /// (see `objectiveai::HttpClient::new` in
+    /// `objectiveai-rs/src/http/client.rs`).
+    #[envconfig(from = "GITHUB_AUTHORIZATION")]
+    github_authorization: Option<String>,
 }
 
 impl EnvConfigBuilder {
@@ -35,6 +41,7 @@ impl EnvConfigBuilder {
             config_base_dir: self.config_base_dir,
             commit_author_name: self.commit_author_name,
             commit_author_email: self.commit_author_email,
+            github_authorization: self.github_authorization,
         }
     }
 }
@@ -45,6 +52,7 @@ pub struct ConfigBuilder {
     pub config_base_dir: Option<String>,
     pub commit_author_name: Option<String>,
     pub commit_author_email: Option<String>,
+    pub github_authorization: Option<String>,
 }
 
 impl Envconfig for ConfigBuilder {
@@ -69,6 +77,7 @@ impl ConfigBuilder {
             config_base_dir: self.config_base_dir,
             commit_author_name: self.commit_author_name,
             commit_author_email: self.commit_author_email,
+            github_authorization: self.github_authorization,
         }
     }
 }
@@ -78,6 +87,7 @@ pub struct Config {
     pub config_base_dir: Option<String>,
     pub commit_author_name: Option<String>,
     pub commit_author_email: Option<String>,
+    pub github_authorization: Option<String>,
 }
 
 #[derive(Parser)]
@@ -165,17 +175,24 @@ impl Commands {
     }
 }
 
+/// Build the top-level CLI config from the process environment.
+///
+/// Isolated so `main.rs` can construct a single `Config` and share it
+/// with both the auto-updater (before parsing argv) and `run` itself.
+pub fn load_config() -> Config {
+    ConfigBuilder::init_from_env().unwrap_or_default().build()
+}
+
 /// Run the CLI, parsing arguments from the provided iterator.
 /// The iterator should include the binary name as the first element
 /// (e.g., `["objectiveai", "agents", "list"]`).
-pub async fn run<I, T>(args: I) -> Result<String, String>
+pub async fn run<I, T>(args: I, cli_config: &Config) -> Result<String, String>
 where
     I: IntoIterator<Item = T>,
     T: Into<std::ffi::OsString> + Clone,
 {
     let cli = Cli::try_parse_from(args).map_err(|e| e.to_string())?;
-    let cli_config = ConfigBuilder::init_from_env().unwrap_or_default().build();
-    match cli.command.handle(&cli_config).await {
+    match cli.command.handle(cli_config).await {
         Ok(Output::ConfigGet(output)) => Ok(output),
         Ok(Output::ConfigSet) => Ok("ok".into()),
         Ok(Output::Api(output)) => Ok(output),

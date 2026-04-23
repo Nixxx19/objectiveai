@@ -16,22 +16,29 @@
 
 use std::ffi::OsString;
 
+use crate::Config;
+
 /// Public entrypoint. Called unconditionally from `main.rs`. When the
 /// `updater` feature is disabled this is a no-op; when enabled, it may
 /// replace the binary + re-exec (in which case this fn never returns).
-pub async fn maybe_auto_update<I>(args: I)
+///
+/// `cli_config` is borrowed from `main.rs` so that env-sourced inputs
+/// (notably `GITHUB_AUTHORIZATION`) come through the same `Config`
+/// struct the rest of the CLI uses — no env-var names need to be
+/// defined in this module.
+pub async fn maybe_auto_update<I>(args: I, cli_config: &Config)
 where
     I: IntoIterator<Item = OsString> + Clone,
 {
     #[cfg(feature = "updater")]
     {
-        if let Err(e) = imp::run(args).await {
+        if let Err(e) = imp::run(args, cli_config).await {
             eprintln!("objectiveai: auto-update skipped: {e}");
         }
     }
     #[cfg(not(feature = "updater"))]
     {
-        let _ = args;
+        let _ = (args, cli_config);
     }
 }
 
@@ -56,13 +63,6 @@ mod imp {
     /// ourselves on the re-exec to prevent an update loop if the new
     /// binary somehow still thinks it's older.
     const SKIP_ENV_VAR: &str = "OBJECTIVEAI_SKIP_UPDATE";
-
-    /// Env var the rest of the CLI also recognises for GitHub auth
-    /// (matches `objectiveai::HttpClient::new`'s `GITHUB_AUTHORIZATION`
-    /// fallback in `objectiveai-rs/src/http/client.rs:118`). When set,
-    /// it bumps our GitHub-API rate limit from 60/h → 5000/h and is
-    /// required for private-repo releases.
-    const GITHUB_AUTH_ENV_VAR: &str = "GITHUB_AUTHORIZATION";
 
     /// Asset filename that matches THIS build, selected at compile time
     /// from target triple + `viewer` feature. Unsupported platforms
@@ -157,7 +157,7 @@ mod imp {
         browser_download_url: String,
     }
 
-    pub(super) async fn run<I>(args: I) -> Result<(), Error>
+    pub(super) async fn run<I>(args: I, cli_config: &super::Config) -> Result<(), Error>
     where
         I: IntoIterator<Item = OsString> + Clone,
     {
@@ -187,7 +187,7 @@ mod imp {
         write_marker(&marker)?;
 
         let client = reqwest::Client::new();
-        let auth = github_authorization().await;
+        let auth = github_authorization(cli_config).await;
         let release: Release = {
             let mut req = client
                 .get(RELEASES_API)
@@ -288,16 +288,21 @@ mod imp {
 
     /// Resolves the GitHub Authorization header value, if one is
     /// available. Lookup order (same precedence the rest of the CLI
-    /// uses): env var first, then the filesystem config's stored
-    /// `api.headers.x_github_authorization`.
+    /// uses): the env-sourced value on `cli_config` first, then the
+    /// filesystem config's stored `api.headers.x_github_authorization`.
     ///
     /// Returns a value already formatted for the `Authorization`
     /// header (`Bearer <token>`). The stored token may or may not
     /// carry the `Bearer ` prefix; both forms are handled.
-    async fn github_authorization() -> Option<String> {
-        let raw = match std::env::var(GITHUB_AUTH_ENV_VAR) {
-            Ok(v) if !v.trim().is_empty() => Some(v),
-            _ => {
+    async fn github_authorization(cli_config: &super::Config) -> Option<String> {
+        let raw = match cli_config
+            .github_authorization
+            .as_deref()
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+        {
+            Some(s) => Some(s.to_string()),
+            None => {
                 let client = fs_client();
                 // Best-effort: if the config file doesn't exist / is
                 // malformed, just skip.
