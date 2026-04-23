@@ -28,8 +28,12 @@ pub struct InstructionsIdArg {
 /// `INSTRUCTIONS.md` content, then a blank line, then the ID footer.
 ///
 /// `content` is the compile-time-embedded markdown string (via
-/// `include_str!`). The ID is a freshly-generated UUIDv4 simple-format.
+/// `include_str!`). The ID is a freshly-generated 128-bit random value
+/// (UUIDv4 source of randomness) encoded as base62 and left-padded to
+/// 22 characters — matches the same scheme objectiveai-rs uses for
+/// content-addressed IDs (`XxHash3_128 → base62 → 22 chars`).
 pub fn format_instructions(content: &str) -> String {
-    let id = uuid::Uuid::new_v4().simple().to_string();
+    let bits: u128 = uuid::Uuid::new_v4().as_u128();
+    let id = format!("{:0>22}", base62::encode(bits));
     format!("{content}\n\n Instructions ID: {id}")
 }
