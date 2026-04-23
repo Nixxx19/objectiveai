@@ -138,7 +138,7 @@ fi
 # ── Build CLI ──────────────────────────────────────────────────────────
 
 # Assemble feature list
-FEATURES="rustpython,systempython"
+FEATURES="rustpython,systempython,updater"
 if [ "$CLAUDE_AGENT_SDK_PYTHON" = "1" ]; then
   FEATURES="$FEATURES,claude-agent-sdk-python"
 else
@@ -147,7 +147,6 @@ fi
 if [ "$NO_VIEWER" = "0" ]; then
   FEATURES="$FEATURES,viewer"
 fi
-FEATURES="$FEATURES,updater"
 
 echo "Building objectiveai-cli (release, features: $FEATURES)..."
 cargo build --release -p objectiveai-cli --no-default-features \
