@@ -146,11 +146,8 @@ else
 fi
 if [ "$NO_VIEWER" = "0" ]; then
   FEATURES="$FEATURES,viewer"
-else
-  # No-viewer builds are distributed as standalone binaries (no CLI package
-  # manager updating them), so the in-binary self-update path is enabled.
-  FEATURES="$FEATURES,updater"
 fi
+FEATURES="$FEATURES,updater"
 
 echo "Building objectiveai-cli (release, features: $FEATURES)..."
 cargo build --release -p objectiveai-cli --no-default-features \
