@@ -1,7 +1,6 @@
 import type {
   FunctionsExecutionsResponseStreamingFunctionExecutionChunk,
   FunctionsExecutionsResponseStreamingTaskChunk,
-  FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk,
   FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk,
   VectorCompletionsResponseStreamingAgentCompletionChunk,
 } from "objectiveai";
@@ -25,6 +24,28 @@ interface VectorLeaf {
   vector: FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk;
 }
 
+// `TaskChunk` is `#[serde(untagged)]` in Rust, so the JSON has no
+// `{"FunctionExecution": …}` discriminator — both variants serialize as
+// flat objects whose fields come from their inner struct (via `#[flatten]`).
+// We discriminate by the `object` marker that every inner chunk carries.
+function isVectorCompletionTask(t: unknown): boolean {
+  return (
+    typeof t === "object" &&
+    t !== null &&
+    "object" in t &&
+    (t as { object?: unknown }).object === "vector.completion.chunk"
+  );
+}
+
+function isFunctionExecutionTask(t: unknown): boolean {
+  if (typeof t !== "object" || t === null || !("object" in t)) return false;
+  const o = (t as { object?: unknown }).object;
+  return (
+    o === "scalar.function.execution.chunk" ||
+    o === "vector.function.execution.chunk"
+  );
+}
+
 function collectVectorLeaves(
   tasks: FunctionsExecutionsResponseStreamingTaskChunk[] | undefined,
   inheritedModifiers: string[],
@@ -32,13 +53,20 @@ function collectVectorLeaves(
 ): void {
   if (!tasks) return;
   for (const t of tasks) {
-    if ("VectorCompletion" in t) {
-      const v = (t as { VectorCompletion: FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk }).VectorCompletion;
+    if (isVectorCompletionTask(t)) {
+      const v = t as unknown as FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk;
       out.push({ task_path: v.task_path ?? [], modifiers: inheritedModifiers, vector: v });
       continue;
     }
-    if ("FunctionExecution" in t) {
-      const fe = (t as { FunctionExecution: FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk }).FunctionExecution;
+    if (isFunctionExecutionTask(t)) {
+      // Function-execution wrapper: pick up any split/swiss modifiers, then
+      // recurse into its (flattened) `tasks` array.
+      const fe = t as unknown as {
+        split_index?: number | null;
+        swiss_pool_index?: number | null;
+        swiss_round?: number | null;
+        tasks?: FunctionsExecutionsResponseStreamingTaskChunk[];
+      };
       const mods = [...inheritedModifiers];
       if (fe.split_index !== undefined && fe.split_index !== null) {
         mods.push(`split=${fe.split_index}`);
@@ -49,10 +77,7 @@ function collectVectorLeaves(
       if (fe.swiss_round !== undefined && fe.swiss_round !== null) {
         mods.push(`round=${fe.swiss_round}`);
       }
-      // `inner` is `#[serde(flatten)]`ed in Rust, so its fields
-      // (tasks, output, usage, …) appear at the top level in TS.
-      const feTasks = (fe as unknown as { tasks?: FunctionsExecutionsResponseStreamingTaskChunk[] }).tasks;
-      collectVectorLeaves(feTasks, mods, out);
+      collectVectorLeaves(fe.tasks, mods, out);
       continue;
     }
   }
