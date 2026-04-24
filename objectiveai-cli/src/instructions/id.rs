@@ -1,9 +1,9 @@
-//! Shared helpers for the `instructions` subcommand family and the
+//! Shared helpers for the `instructions get` subcommand family and the
 //! corresponding `--instructions-id` argument required by every
 //! streaming `create` command.
 //!
 //! Flow:
-//! 1. The user runs e.g. `objectiveai agents completions instructions`
+//! 1. The user runs e.g. `objectiveai agents completions instructions get`
 //!    → the CLI mints a fresh Instructions ID, records it against the
 //!    matching scope in the config sqlite, and prints the embedded
 //!    `INSTRUCTIONS.md` content followed by `\n\n Instructions ID: <id>`.
@@ -29,9 +29,18 @@ pub enum InstructionsScope {
 }
 
 impl InstructionsScope {
+    /// Every scope, in a stable order. Used by `instructions clear` to
+    /// iterate the full set of per-scope tables.
+    pub const ALL: &'static [Self] = &[
+        Self::AgentCompletions,
+        Self::FunctionExecutions,
+        Self::FunctionInventionsRecursive,
+        Self::LaboratoryExecutions,
+    ];
+
     /// Name of the backing sqlite table. Hardcoded per-scope so the
     /// string is always `&'static str` (safe to interpolate into SQL).
-    fn table_name(self) -> &'static str {
+    pub fn table_name(self) -> &'static str {
         match self {
             Self::AgentCompletions => "agent_completions_instructions",
             Self::FunctionExecutions => "function_executions_instructions",
@@ -45,7 +54,7 @@ impl InstructionsScope {
 /// streaming `create` command's args struct.
 #[derive(Args, Clone, Debug)]
 pub struct InstructionsIdArg {
-    /// ID from the matching `instructions` subcommand. Required.
+    /// ID from the matching `instructions get` subcommand. Required.
     #[arg(long)]
     pub instructions_id: String,
 }
@@ -69,7 +78,7 @@ impl InstructionsIdArg {
 /// config sqlite, and return the full subcommand output
 /// (`<content>\n\n Instructions ID: <id>`).
 ///
-/// Called by each `instructions` subcommand handler.
+/// Called by each `instructions get` subcommand handler.
 pub fn issue(
     cli_config: &crate::Config,
     scope: InstructionsScope,
@@ -78,9 +87,9 @@ pub fn issue(
     let client = fs_client(cli_config);
     let id = generate_id();
     let table = scope.table_name();
-    // Table creation is idempotent — the `instructions` subcommand may
-    // be the first thing the user ever runs, in which case the sqlite
-    // file and this table both need to exist before the INSERT.
+    // Table creation is idempotent — the `instructions get` subcommand
+    // may be the first thing the user ever runs, in which case the
+    // sqlite file and this table both need to exist before the INSERT.
     objectiveai::filesystem::config::db::execute(
         &client,
         &format!(
@@ -99,8 +108,9 @@ pub fn issue(
 /// Check the supplied ID exists for this scope.
 ///
 /// - Returns [`crate::error::Error::UnknownInstructionsId`] when the
-///   table is missing (user has never run the matching `instructions`
-///   subcommand on this machine) or when no row matches the given id.
+///   table is missing (user has never run the matching `instructions
+///   get` subcommand on this machine) or when no row matches the given
+///   id.
 /// - Other db errors (e.g. corruption) propagate unchanged.
 pub fn verify(
     cli_config: &crate::Config,
@@ -127,6 +137,22 @@ pub fn verify(
         }
         Err(e) => Err(e.into()),
     }
+}
+
+/// Drop every per-scope table. Returns the number of tables that were
+/// dropped (always equal to `InstructionsScope::ALL.len()` since
+/// `DROP TABLE IF EXISTS` is idempotent).
+pub fn clear_all(cli_config: &crate::Config) -> Result<usize, crate::error::Error> {
+    let client = fs_client(cli_config);
+    for scope in InstructionsScope::ALL {
+        let table = scope.table_name();
+        objectiveai::filesystem::config::db::execute(
+            &client,
+            &format!("DROP TABLE IF EXISTS {table}"),
+            [],
+        )?;
+    }
+    Ok(InstructionsScope::ALL.len())
 }
 
 fn fs_client(cli_config: &crate::Config) -> objectiveai::filesystem::Client {

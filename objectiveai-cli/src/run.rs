@@ -10,6 +10,7 @@ use crate::schemas;
 use crate::laboratories;
 use crate::logs;
 use crate::vector;
+use crate::instructions;
 use crate::error;
 
 #[derive(Envconfig)]
@@ -157,6 +158,11 @@ enum Commands {
         #[command(subcommand)]
         command: logs::Commands,
     },
+    /// Manage Instructions IDs across all streaming `create` scopes
+    Instructions {
+        #[command(subcommand)]
+        command: instructions::Commands,
+    },
 }
 
 impl Commands {
@@ -171,6 +177,7 @@ impl Commands {
             Commands::Laboratories { command } => command.handle(cli_config).await,
             Commands::Vector { command } => command.handle(cli_config).await,
             Commands::Logs { command } => command.handle(cli_config).await,
+            Commands::Instructions { command } => command.handle(cli_config),
         }
     }
 }
