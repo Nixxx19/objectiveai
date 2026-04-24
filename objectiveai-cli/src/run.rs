@@ -94,6 +94,10 @@ pub struct Config {
 #[derive(Parser)]
 #[command(name = "objectiveai")]
 #[command(about = "ObjectiveAI CLI")]
+#[command(after_help = "\
+JSON schemas for every public type are available via `objectiveai schemas`. \
+Run `objectiveai schemas --help` to browse them, or pipe a specific schema \
+into your tool of choice to drive structured-output generation.")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
