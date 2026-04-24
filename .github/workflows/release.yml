@@ -87,6 +87,12 @@ jobs:
             src_name: objectiveai
             install_args: ""
             viewer: true
+          - os: ubuntu-24.04-arm
+            mcp_target: aarch64-unknown-linux-musl
+            asset: objectiveai-linux-aarch64
+            src_name: objectiveai
+            install_args: ""
+            viewer: true
           - os: macos-13
             mcp_target: x86_64-unknown-linux-musl
             asset: objectiveai-macos-x86_64
@@ -109,6 +115,12 @@ jobs:
           - os: ubuntu-22.04
             mcp_target: x86_64-unknown-linux-musl
             asset: objectiveai-linux-x86_64-no-viewer
+            src_name: objectiveai
+            install_args: "--no-viewer"
+            viewer: false
+          - os: ubuntu-24.04-arm
+            mcp_target: aarch64-unknown-linux-musl
+            asset: objectiveai-linux-aarch64-no-viewer
             src_name: objectiveai
             install_args: "--no-viewer"
             viewer: false

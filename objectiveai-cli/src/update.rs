@@ -78,6 +78,14 @@ mod imp {
         {
             Some("objectiveai-linux-x86_64-no-viewer")
         }
+        #[cfg(all(target_os = "linux", target_arch = "aarch64", feature = "viewer"))]
+        {
+            Some("objectiveai-linux-aarch64")
+        }
+        #[cfg(all(target_os = "linux", target_arch = "aarch64", not(feature = "viewer")))]
+        {
+            Some("objectiveai-linux-aarch64-no-viewer")
+        }
         #[cfg(all(target_os = "macos", target_arch = "x86_64", feature = "viewer"))]
         {
             Some("objectiveai-macos-x86_64")
@@ -104,6 +112,7 @@ mod imp {
         }
         #[cfg(not(any(
             all(target_os = "linux", target_arch = "x86_64"),
+            all(target_os = "linux", target_arch = "aarch64"),
             all(target_os = "macos", target_arch = "x86_64"),
             all(target_os = "macos", target_arch = "aarch64"),
             all(target_os = "windows", target_arch = "x86_64"),
