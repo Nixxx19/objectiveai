@@ -61,11 +61,13 @@ pub enum Commands {
 
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
-        let (message_source, agent_arg, continuation_args, response_format_args, _instructions, seed, detach) = match self {
+        let (message_source, agent_arg, continuation_args, response_format_args, instructions, seed, detach) = match self {
             Commands::Standard { messages, agent, continuation, response_format, instructions, seed, detach } => {
                 (messages, agent, continuation, response_format, instructions, seed, detach)
             }
         };
+
+        instructions.verify(cli_config, crate::instructions::InstructionsScope::AgentCompletions)?;
 
         if detach {
             crate::api::detach::detach().await;

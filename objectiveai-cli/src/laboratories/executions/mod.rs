@@ -26,9 +26,11 @@ impl Commands {
         match self {
             Commands::Create { args } => create::handle(args, cli_config).await,
             Commands::Instructions => Ok(crate::Output::Instructions(
-                crate::instructions::format_instructions(include_str!(
-                    "../../../assets/laboratories/executions/create/INSTRUCTIONS.md"
-                )),
+                crate::instructions::issue(
+                    cli_config,
+                    crate::instructions::InstructionsScope::LaboratoryExecutions,
+                    include_str!("../../../assets/laboratories/executions/create/INSTRUCTIONS.md"),
+                )?,
             )),
             Commands::Logs { command } => command.handle(cli_config).await,
         }

@@ -124,7 +124,7 @@ pub enum Commands {
 
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
-        let (agent_ref, continuation_args, _instructions, seed, state, detach) = match self {
+        let (agent_ref, continuation_args, instructions, seed, state, detach) = match self {
             Commands::AlphaScalar { params, agent, continuation, instructions, seed, detach } => {
                 let p = params.into_params();
                 let state = objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(
@@ -157,6 +157,8 @@ impl Commands {
                 (agent, continuation, instructions, seed, state, detach)
             }
         };
+
+        instructions.verify(cli_config, crate::instructions::InstructionsScope::FunctionInventionsRecursive)?;
 
         if detach {
             crate::api::detach::detach().await;

@@ -37,9 +37,11 @@ impl Commands {
         match self {
             Commands::Create { command } => command.handle(cli_config).await,
             Commands::Instructions => Ok(crate::Output::Instructions(
-                crate::instructions::format_instructions(include_str!(
-                    "../../../assets/agents/completions/create/INSTRUCTIONS.md"
-                )),
+                crate::instructions::issue(
+                    cli_config,
+                    crate::instructions::InstructionsScope::AgentCompletions,
+                    include_str!("../../../assets/agents/completions/create/INSTRUCTIONS.md"),
+                )?,
             )),
             Commands::Logs { command } => command.handle(cli_config).await,
             Commands::Continuations { command } => command.handle(cli_config).await,

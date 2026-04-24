@@ -190,7 +190,7 @@ async fn profile_favorites(cli_config: &crate::Config) -> Vec<objectiveai::files
 
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config) -> Result<crate::Output, crate::error::Error> {
-        let (function_source, profile_source, input_source, continuation_args, _instructions, retry_token, seed, split, invert, strategy, detach) = match self {
+        let (function_source, profile_source, input_source, continuation_args, instructions, retry_token, seed, split, invert, strategy, detach) = match self {
             Commands::Standard { function, profile, input, continuation, instructions, retry_token, seed, split, invert, detach } => {
                 (function, profile, input, continuation, instructions, retry_token, seed, split, invert, objectiveai::functions::executions::request::Strategy::Default, detach)
             }
@@ -199,6 +199,8 @@ impl Commands {
                 (function, profile, input, continuation, instructions, retry_token, seed, split, invert, strategy, detach)
             }
         };
+
+        instructions.verify(cli_config, crate::instructions::InstructionsScope::FunctionExecutions)?;
 
         if detach {
             crate::api::detach::detach().await;
