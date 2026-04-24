@@ -28,6 +28,24 @@ Agent has a decision
 
 ## Install
 
+### CLI
+
+Install the pre-built binary with one command:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ObjectiveAI/objectiveai/main/install.sh | bash
+```
+
+Leaner, no-viewer build:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ObjectiveAI/objectiveai/main/install.sh | bash -s -- --no-viewer
+```
+
+Supported platforms: Linux x86_64, Linux aarch64 (Raspberry Pi 4+, Graviton), macOS x86_64, macOS aarch64 (Apple Silicon), Windows x86_64. The installer drops the binary at `~/.objectiveai/objectiveai` and adds it to `PATH`; the CLI self-updates on startup from [GitHub Releases](https://github.com/ObjectiveAI/objectiveai/releases).
+
+### SDK
+
 ```bash
 npm install objectiveai
 ```
