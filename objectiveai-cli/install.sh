@@ -49,6 +49,16 @@ fi
 
 FINGERPRINT_FILE="$INSTALL_DIR/.fingerprint"
 
+# Cross-platform SHA-256 wrapper. macOS runners ship `shasum` (Perl) but
+# not GNU `sha256sum`; Linux/Windows-Git-bash typically ship both — we
+# prefer `sha256sum` when it exists so output format stays identical
+# across the common case, and fall back to `shasum -a 256` otherwise.
+if command -v sha256sum >/dev/null 2>&1; then
+  _sha256() { sha256sum "$@"; }
+else
+  _sha256() { shasum -a 256 "$@"; }
+fi
+
 compute_fingerprint() {
   {
     # Bake build flags into fingerprint so variants don't collide
@@ -90,11 +100,11 @@ compute_fingerprint() {
     if [ -f "$file" ]; then
       relpath="${file#"$REPO_ROOT/"}"
       printf '%s\n' "$relpath"
-      sha256sum "$file"
+      _sha256 "$file"
     else
       printf '%s\n' "$file"
     fi
-  done | sha256sum | awk '{print $1}'
+  done | _sha256 | awk '{print $1}'
 }
 
 CURRENT_FP=$(compute_fingerprint)
