@@ -60,34 +60,3 @@ fn value_too_large() {
     let path: Vec<u16> = vec![255];
     assert!(path_to_u128(&path).is_err());
 }
-
-#[test]
-fn looks_like_path_suffix_accepts_six_base62_chars() {
-    for s in ["abc123", "000000", "ZZZZZZ", "aB3xYz"] {
-        assert_eq!(s.len(), PATH_SUFFIX_LEN);
-        assert!(looks_like_path_suffix(s), "{s:?} should look like a path");
-    }
-}
-
-#[test]
-fn looks_like_path_suffix_rejects_wrong_length() {
-    // The whole point of the check: short user-chosen suffixes
-    // (`-v`, `-x`, `-final`) are *not* paths even when every
-    // character is valid base62.
-    for s in ["", "v", "x", "abc", "final", "abcde", "abcdefg"] {
-        assert!(
-            !looks_like_path_suffix(s),
-            "{s:?} ({} chars) must not look like a path",
-            s.len(),
-        );
-    }
-}
-
-#[test]
-fn looks_like_path_suffix_rejects_non_base62_chars() {
-    // Six chars but containing non-base62: still not a path.
-    for s in ["abc-12", "ab.c12", "abc 12", "ab_c12", "ab/c12"] {
-        assert_eq!(s.len(), PATH_SUFFIX_LEN);
-        assert!(!looks_like_path_suffix(s), "{s:?} contains non-base62");
-    }
-}

@@ -33,16 +33,25 @@ use schemars::JsonSchema;
 
 /// Constructs a child name by appending the task index to the parent's path.
 ///
-/// Detection rule: the trailing `-<segment>` is treated as an existing
-/// path encoding *only if* `<segment>` is exactly
-/// [`super::path::PATH_SUFFIX_LEN`] characters of valid base62.
-/// Anything else (`-v`, `-final`, `-x2`, …) is treated as part of the
-/// user's name and a fresh path segment is appended. This prevents the
-/// previous bug where `unsettlingness-ranker-v` had its `-v` decoded as
-/// base62 → `31` → path → replaced.
+/// Splits `parent_name` by `-`, takes the last segment, and tries to decode
+/// it as a base62 path. If successful, pushes `task_index` and re-encodes.
+/// If not, appends a new `-` segment with just the index encoded.
+///
+/// Detection of "is this trailing segment a path?" requires BOTH:
+///   1. `last.len() == super::path::PATH_SUFFIX_LEN`, AND
+///   2. `b62_to_path(last)` succeeds.
+///
+/// The length check is what stops a user-chosen suffix like `-v`,
+/// `-vii`, or `-final` from being mistakenly decoded as a path and
+/// replaced. Both checks are required — see the path module's header
+/// comment for the full invariant.
 fn child_name(parent_name: &str, task_index: usize) -> String {
     if let Some((prefix, last)) = parent_name.rsplit_once('-') {
-        if super::path::looks_like_path_suffix(last) {
+        // ADDITIONAL length check — the original code only checked
+        // "does it parse?", which lets `-v` (decodes as 57 → path
+        // [56]) sneak through. Real paths are always exactly
+        // PATH_SUFFIX_LEN base62 chars.
+        if last.len() == super::path::PATH_SUFFIX_LEN {
             if let Ok(mut path) = super::path::b62_to_path::<u64>(last) {
                 path.push(task_index as u64);
                 if let Ok(b62) = super::path::path_to_b62(&path) {
@@ -51,26 +60,23 @@ fn child_name(parent_name: &str, task_index: usize) -> String {
             }
         }
     }
-    // Either there's no `-` in the name, or the trailing segment was a
-    // user-chosen suffix (not exactly PATH_SUFFIX_LEN base62 chars).
-    // Append a fresh path segment without touching the user's name.
+    // Couldn't parse existing path segment — start a new one.
     let path = [task_index as u64];
-    // path_to_b62 of a single small index never fails — task_index
-    // would have to exceed MAX_VAL=254 to fail validation, and the
-    // tasks list is much shorter than that. If something does go
-    // wrong, fall back to a decimal so we still produce *something*
-    // unique rather than panicking.
     let b62 = super::path::path_to_b62(&path).unwrap_or_else(|_| format!("{}", task_index));
     format!("{}-{}", parent_name, b62)
 }
 
-/// Fixes a task name after reindexing (e.g. after a delete). Same
-/// detection rule as [`child_name`]: only a trailing
-/// [`super::path::PATH_SUFFIX_LEN`]-char base62 segment is treated as
-/// a real path. User-chosen suffixes like `-v` stay put.
+/// Fixes a task name after reindexing (e.g. after a delete).
+///
+/// Tries to parse the last `-` segment as a base62 path. If successful,
+/// pops the last element and pushes `new_index`. If parsing fails, leaves
+/// the name unchanged.
+///
+/// Same length+parse detection rule as [`child_name`] — see its docs.
 fn reindex_name(name: &mut String, new_index: usize) {
     if let Some((prefix, last)) = name.rsplit_once('-') {
-        if super::path::looks_like_path_suffix(last) {
+        // ADDITIONAL length check — see child_name.
+        if last.len() == super::path::PATH_SUFFIX_LEN {
             if let Ok(mut path) = super::path::b62_to_path::<u64>(last) {
                 if !path.is_empty() {
                     path.pop();
@@ -90,11 +96,11 @@ mod child_name_tests {
 
     #[test]
     fn user_suffix_v_is_preserved() {
-        // Real-world regression: `unsettlingness-ranker-v` had its
-        // `-v` decoded as base62 → integer → path and replaced with
-        // the child's path. The fix gates path detection on
-        // `looks_like_path_suffix` (exactly PATH_SUFFIX_LEN base62
-        // chars), so `"v"` (1 char) is no longer treated as a path.
+        // Regression: `unsettlingness-ranker-v` had its `-v` decoded
+        // as base62 → integer → path and replaced with the child's
+        // path. Detection now requires the trailing segment to be
+        // exactly PATH_SUFFIX_LEN chars, so `"v"` (1 char) doesn't
+        // qualify and a fresh path segment is appended.
         let child = child_name("unsettlingness-ranker-v", 0);
         assert!(
             child.starts_with("unsettlingness-ranker-v-"),
@@ -104,11 +110,19 @@ mod child_name_tests {
 
     #[test]
     fn user_suffix_vi_is_preserved() {
-        // The follow-up case the user reported.
         let child = child_name("unsettlingness-ranker-vi", 0);
         assert!(
             child.starts_with("unsettlingness-ranker-vi-"),
             "user suffix `-vi` was dropped: {child:?}",
+        );
+    }
+
+    #[test]
+    fn user_suffix_vii_is_preserved() {
+        let child = child_name("unsettlingness-ranker-vii", 0);
+        assert!(
+            child.starts_with("unsettlingness-ranker-vii-"),
+            "user suffix `-vii` was dropped: {child:?}",
         );
     }
 
