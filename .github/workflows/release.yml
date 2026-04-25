@@ -71,6 +71,9 @@ jobs:
           name: mcp-${{ matrix.target }}
           path: objectiveai-mcp/embed/${{ matrix.target }}/release/
           if-no-files-found: error
+          # `.fingerprint` is a hidden dotfile and is required for the
+          # downstream build-cli jobs to short-circuit the rebuild step.
+          include-hidden-files: true
 
   build-cli:
     name: Build CLI (${{ matrix.asset }})
