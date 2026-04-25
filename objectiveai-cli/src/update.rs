@@ -6,10 +6,14 @@
 //! downloaded, atomically swapped in place of the running binary, and the
 //! CLI re-execs itself with the original argv.
 //!
-//! **Failure policy:** any error (network, rate-limit, malformed response,
-//! disk error, running from a repo `target/` dir, etc.) is swallowed with a
-//! short `stderr` marker and the CLI proceeds on the current binary. The
-//! updater must never prevent normal CLI use.
+//! **Output policy:** the updater is silent on every "I shouldn't run
+//! right now" path — unsupported platform, opt-out env var, dev tree,
+//! rate-limit, already-current — and silent on the successful re-exec
+//! path. The *only* time it writes anything is when something actually
+//! goes wrong (network/disk/swap/etc.), in which case a single
+//! `objectiveai: auto-update error: <reason>` line goes to stderr and
+//! the CLI proceeds on the current binary. The updater must never
+//! prevent normal CLI use.
 //!
 //! When the `updater` feature is off, [`maybe_auto_update`] is a zero-cost
 //! no-op — neither `semver` nor any release-fetching code is compiled in.
@@ -33,7 +37,7 @@ where
     #[cfg(feature = "updater")]
     {
         if let Err(e) = imp::run(args, cli_config).await {
-            eprintln!("objectiveai: auto-update skipped: {e}");
+            eprintln!("objectiveai: auto-update error: {e}");
         }
     }
     #[cfg(not(feature = "updater"))]
@@ -122,16 +126,15 @@ mod imp {
         }
     }
 
+    /// Real failures only. The "I shouldn't even try to update right
+    /// now" cases (unsupported platform, opt-out env var, dev tree,
+    /// rate-limit, already-current) are *not* errors and silently
+    /// short-circuit `run` with `Ok(())` — see the early returns there.
+    /// Anything that lands in this enum is something the user should
+    /// know about: network failure, malformed release, missing asset,
+    /// failed swap, etc.
     #[derive(Debug, thiserror::Error)]
     pub(super) enum Error {
-        #[error("unsupported platform (no matching release asset)")]
-        UnsupportedPlatform,
-        #[error("skipped by {SKIP_ENV_VAR}")]
-        Skipped,
-        #[error("running from dev tree")]
-        DevTree,
-        #[error("rate-limited (last check too recent)")]
-        RateLimited,
         #[error("could not locate current binary: {0}")]
         CurrentExe(std::io::Error),
         #[error("write updated.txt: {0}")]
@@ -170,14 +173,22 @@ mod imp {
     where
         I: IntoIterator<Item = OsString> + Clone,
     {
-        let asset_name = ASSET_NAME.ok_or(Error::UnsupportedPlatform)?;
+        // Silent short-circuit: nothing to do on platforms with no
+        // release asset.
+        let Some(asset_name) = ASSET_NAME else {
+            return Ok(());
+        };
+        // Silent short-circuit: opt-out via env var (also set by the
+        // re-exec to prevent loops).
         if std::env::var_os(SKIP_ENV_VAR).is_some() {
-            return Err(Error::Skipped);
+            return Ok(());
         }
 
         let current_exe = std::env::current_exe().map_err(Error::CurrentExe)?;
+        // Silent short-circuit: running out of a `target/` dir is a dev
+        // build, never an installed binary.
         if looks_like_dev_tree(&current_exe) {
-            return Err(Error::DevTree);
+            return Ok(());
         }
 
         // Best-effort cleanup of any stale `.exe.old` from a prior Windows
@@ -185,11 +196,12 @@ mod imp {
         // does nothing.
         sweep_stale_old(&current_exe);
 
-        // Rate-limit gate. The marker lives in the config base dir so it
-        // shares the CONFIG_BASE_DIR override used everywhere else.
+        // Silent short-circuit: rate-limit gate. The marker lives in the
+        // config base dir so it shares the CONFIG_BASE_DIR override used
+        // everywhere else.
         let marker = marker_path()?;
         if !check_elapsed(&marker) {
-            return Err(Error::RateLimited);
+            return Ok(());
         }
         // Refresh the marker BEFORE the network call so a network failure
         // still rate-limits subsequent runs (we won't hammer GitHub).
