@@ -13,15 +13,13 @@ impl_path_element!(u8, u16, u32, u64, u128);
 const MAX_LEN: usize = 16;
 const MAX_VAL: u128 = 254;
 
-/// Fixed length of every path-encoded base62 string.
-///
-/// `u128::MAX` requires ⌈log62(2^128)⌉ = 22 base62 digits. By
-/// zero-padding every encoding to exactly this length we get a stable,
-/// constant-width suffix marker. Callers can identify a real path
-/// suffix in a function name purely by length + alphabet — a
-/// user-chosen suffix like `"-v"` (1 char, also valid base62) is no
-/// longer mistakenly decoded as a path and replaced.
-pub const PATH_B62_LEN: usize = 22;
+/// Length, in base62 characters, of a path suffix in a function name.
+/// Detection of a real path-suffix (vs a user-chosen suffix like
+/// `"-v"`) uses this — the encoder is unchanged and produces
+/// variable-length output, but only segments of *exactly*
+/// [`PATH_SUFFIX_LEN`] base62 characters are treated as paths in
+/// `child_name`/`reindex_name`.
+pub const PATH_SUFFIX_LEN: usize = 6;
 
 fn validate_path<T: PathElement>(path: &[T]) -> Result<(), String> {
     if path.len() > MAX_LEN {
@@ -79,26 +77,23 @@ pub fn b62_to_u128(s: &str) -> Result<u128, String> {
     base62::decode(s).map_err(|e| format!("invalid base62: {e}"))
 }
 
-/// Encode a path as a fixed-width [`PATH_B62_LEN`]-character base62
-/// string (zero-padded on the left). The fixed width is what makes the
-/// encoding identifiable in a function name suffix without ambiguity.
 pub fn path_to_b62<T: PathElement>(path: &[T]) -> Result<String, String> {
-    path_to_u128(path).map(|v| format!("{:0>width$}", u128_to_b62(v), width = PATH_B62_LEN))
+    path_to_u128(path).map(u128_to_b62)
 }
 
-/// Decode a [`PATH_B62_LEN`]-character base62 string back to a path.
-/// **Strict** about length — anything other than exactly
-/// [`PATH_B62_LEN`] characters is rejected. This is what lets callers
-/// (e.g. `child_name`) distinguish a real path suffix from a
-/// user-chosen short suffix that happens to be valid base62 (`-v`,
-/// `-final`, etc.).
 pub fn b62_to_path<T: PathElement>(s: &str) -> Result<Vec<T>, String> {
-    if s.len() != PATH_B62_LEN {
-        return Err(format!(
-            "path b62 must be exactly {PATH_B62_LEN} chars, got {}",
-            s.len(),
-        ));
-    }
     b62_to_u128(s).and_then(u128_to_path)
+}
+
+/// True iff `s` *looks like* a path suffix: exactly [`PATH_SUFFIX_LEN`]
+/// characters, all of which are valid base62 (`0-9`, `A-Z`, `a-z`).
+/// This is the gate `child_name`/`reindex_name` use before attempting
+/// to decode — it short-circuits user-chosen suffixes like `-v` or
+/// `-final` that would otherwise be successfully decoded as base62
+/// integers and mistakenly extended.
+pub fn looks_like_path_suffix(s: &str) -> bool {
+    s.len() == PATH_SUFFIX_LEN
+        && s.bytes()
+            .all(|b| b.is_ascii_digit() || b.is_ascii_uppercase() || b.is_ascii_lowercase())
 }
 

@@ -62,39 +62,32 @@ fn value_too_large() {
 }
 
 #[test]
-fn b62_is_fixed_width() {
-    // Both a tiny and a moderate path encode to the same width,
-    // proving callers can length-check the suffix.
-    let small = path_to_b62(&[0u64]).unwrap();
-    let bigger = path_to_b62(&[3u64, 200, 0, 42]).unwrap();
-    assert_eq!(small.len(), PATH_B62_LEN);
-    assert_eq!(bigger.len(), PATH_B62_LEN);
-}
-
-#[test]
-fn b62_decode_rejects_short_input() {
-    // Used to misparse user-chosen short suffixes (`-v`, `-final`,
-    // ...) as real paths and replace them with computed paths.
-    for s in ["v", "final", "x", "abc"] {
-        assert!(b62_to_path::<u64>(s).is_err(), "{s:?} must not parse");
+fn looks_like_path_suffix_accepts_six_base62_chars() {
+    for s in ["abc123", "000000", "ZZZZZZ", "aB3xYz"] {
+        assert_eq!(s.len(), PATH_SUFFIX_LEN);
+        assert!(looks_like_path_suffix(s), "{s:?} should look like a path");
     }
 }
 
 #[test]
-fn b62_decode_rejects_too_long_input() {
-    // Anything longer than PATH_B62_LEN is also not a valid path
-    // encoding — the encoder always pads to exactly PATH_B62_LEN.
-    let s = "a".repeat(PATH_B62_LEN + 1);
-    assert!(b62_to_path::<u64>(&s).is_err());
+fn looks_like_path_suffix_rejects_wrong_length() {
+    // The whole point of the check: short user-chosen suffixes
+    // (`-v`, `-x`, `-final`) are *not* paths even when every
+    // character is valid base62.
+    for s in ["", "v", "x", "abc", "final", "abcde", "abcdefg"] {
+        assert!(
+            !looks_like_path_suffix(s),
+            "{s:?} ({} chars) must not look like a path",
+            s.len(),
+        );
+    }
 }
 
 #[test]
-fn b62_decode_accepts_fixed_width_zero_padded() {
-    // Real path encodings round-trip through the strict decoder.
-    for path in [vec![0u64], vec![3, 200, 0, 42], vec![254; 16]] {
-        let b62 = path_to_b62(&path).unwrap();
-        assert_eq!(b62.len(), PATH_B62_LEN);
-        let back: Vec<u64> = b62_to_path(&b62).unwrap();
-        assert_eq!(back, path);
+fn looks_like_path_suffix_rejects_non_base62_chars() {
+    // Six chars but containing non-base62: still not a path.
+    for s in ["abc-12", "ab.c12", "abc 12", "ab_c12", "ab/c12"] {
+        assert_eq!(s.len(), PATH_SUFFIX_LEN);
+        assert!(!looks_like_path_suffix(s), "{s:?} contains non-base62");
     }
 }
