@@ -262,7 +262,49 @@ async def run(args: argparse.Namespace) -> int:
     return exit_code
 
 
+def _silence_proactor_pipe_warnings() -> None:
+    """Workaround for a long-standing CPython bug on Windows.
+
+    On Windows, asyncio uses `_ProactorBasePipeTransport`. Its `__del__`
+    runs during interpreter shutdown and may try to `repr` itself for a
+    debug log; `__repr__` calls `fileno()` on the underlying pipe; if
+    the pipe is already closed (which is *normal* at shutdown — the OS
+    or the SDK subprocess we drove has gone away) `fileno()` raises
+    `ValueError: I/O operation on closed pipe`. Python prints the trace
+    as `Exception ignored in:` on stderr.
+
+    The exception is harmless — the transport has already released
+    everything it owned — but anything downstream that treats stderr as
+    a failure signal (e.g. objectiveai-api wrapping our exit) sees it
+    and reports a 500. Wrap `__del__` so the closed-pipe case is
+    swallowed without affecting the rest of cleanup.
+
+    Refs: bpo-39232, gh-91555.
+    """
+    if sys.platform != "win32":
+        return
+    try:
+        from asyncio.proactor_events import _ProactorBasePipeTransport  # type: ignore[attr-defined]
+    except Exception:
+        return
+    original = _ProactorBasePipeTransport.__del__
+
+    def _patched(self, *a: Any, **kw: Any) -> None:
+        try:
+            original(self, *a, **kw)
+        except (ValueError, OSError):
+            # Closed-pipe race during shutdown — drop it. Anything else
+            # propagates so real bugs still surface.
+            pass
+
+    _ProactorBasePipeTransport.__del__ = _patched  # type: ignore[method-assign]
+
+
 def main() -> None:
+    # Suppress the cosmetic Windows asyncio shutdown warning before we
+    # start the loop, so even crashes-during-cleanup don't leak it.
+    _silence_proactor_pipe_warnings()
+
     args = parse_args()
     try:
         code = asyncio.run(run(args))
