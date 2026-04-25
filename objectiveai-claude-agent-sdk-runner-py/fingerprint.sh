@@ -53,7 +53,11 @@ compute_fingerprint() {
     if [ -f "$file" ]; then
       relpath="${file#"$SCRIPT_DIR/"}"
       printf '%s\n' "$relpath"
-      _sha256 "$file"
+      # Strip the path from the hash line — sha256sum's default output
+      # `<hash>  <path>` would otherwise embed the runner's absolute path
+      # (different on Linux, macOS, Windows) and break cross-runner
+      # fingerprint matching.
+      _sha256 "$file" | awk '{print $1}'
     else
       printf '%s\n' "$file"
     fi
