@@ -33,9 +33,13 @@ use schemars::JsonSchema;
 
 /// Constructs a child name by appending the task index to the parent's path.
 ///
-/// Splits `parent_name` by `-`, takes the last segment, and tries to decode
-/// it as a base62 path. If successful, pushes `task_index` and re-encodes.
-/// If not, appends a new `-` segment with just the index encoded.
+/// The "is the last `-` segment a path?" check is now
+/// length-strict — only a [`super::path::PATH_B62_LEN`]-character
+/// base62 string is treated as a real path suffix. This prevents
+/// user-chosen short suffixes like `-v` from being mistakenly parsed
+/// as paths (which would *replace* `-v` with the child's path instead
+/// of appending). See `b62_to_path` — it enforces the length itself,
+/// so this function just relies on `Err` propagation.
 fn child_name(parent_name: &str, task_index: usize) -> String {
     if let Some((prefix, last)) = parent_name.rsplit_once('-') {
         if let Ok(mut path) = super::path::b62_to_path::<u64>(last) {
@@ -45,17 +49,26 @@ fn child_name(parent_name: &str, task_index: usize) -> String {
             }
         }
     }
-    // Couldn't parse existing path segment — start a new one.
+    // Either there's no `-` in the name, or the trailing segment
+    // wasn't a real path encoding (e.g. user named the function
+    // `name-v`). Append a fresh path segment without touching the
+    // user's name.
     let path = [task_index as u64];
+    // path_to_b62 of a single small index never fails — task_index
+    // would have to exceed MAX_VAL=254 to fail validation, and the
+    // tasks list is much shorter than that. If something does go
+    // wrong, fall back to a decimal so we still produce *something*
+    // unique rather than panicking.
     let b62 = super::path::path_to_b62(&path).unwrap_or_else(|_| format!("{}", task_index));
     format!("{}-{}", parent_name, b62)
 }
 
 /// Fixes a task name after reindexing (e.g. after a delete).
 ///
-/// Tries to parse the last `-` segment as a base62 path. If successful,
-/// pops the last element and pushes `new_index`. If parsing fails, leaves
-/// the name unchanged.
+/// Same length-strict check as [`child_name`]: only a fixed-width
+/// [`super::path::PATH_B62_LEN`]-character base62 suffix is treated as
+/// a real path. A user-chosen suffix like `-v` is preserved
+/// untouched.
 fn reindex_name(name: &mut String, new_index: usize) {
     if let Some((prefix, last)) = name.rsplit_once('-') {
         if let Ok(mut path) = super::path::b62_to_path::<u64>(last) {
@@ -67,6 +80,57 @@ fn reindex_name(name: &mut String, new_index: usize) {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod child_name_tests {
+    use super::*;
+
+    #[test]
+    fn user_suffix_v_is_preserved() {
+        // Real-world regression: a function named with `-v` had its
+        // suffix swallowed because `b62_to_path("v")` decoded `v` as
+        // valid base62 and treated it as an existing path. The strict
+        // length check in `b62_to_path` now rejects `"v"` and
+        // `child_name` appends a fresh path segment instead.
+        let child = child_name("unsettlingness-ranker-v", 0);
+        let suffix = child
+            .strip_prefix("unsettlingness-ranker-v-")
+            .expect("user suffix `-v` must remain intact");
+        assert_eq!(suffix.len(), super::super::path::PATH_B62_LEN);
+    }
+
+    #[test]
+    fn other_short_user_suffixes_are_preserved() {
+        for parent in ["myfn-final", "scorer-x", "cluster-abc"] {
+            let child = child_name(parent, 0);
+            assert!(
+                child.starts_with(&format!("{parent}-")),
+                "{parent:?} → {child:?} dropped the user suffix",
+            );
+        }
+    }
+
+    #[test]
+    fn real_path_suffix_is_extended() {
+        // A parent that already has a real path suffix gets its path
+        // extended in place — the user-name half is left untouched.
+        let path0 = super::super::path::path_to_b62(&[3u64]).unwrap();
+        let parent = format!("myfn-{path0}");
+        let child = child_name(&parent, 7);
+        let suffix = child
+            .strip_prefix("myfn-")
+            .expect("user-name half must survive");
+        let decoded: Vec<u64> = super::super::path::b62_to_path(suffix).unwrap();
+        assert_eq!(decoded, vec![3, 7]);
+    }
+
+    #[test]
+    fn reindex_leaves_user_suffix_alone() {
+        let mut name = String::from("scorer-v");
+        reindex_name(&mut name, 9);
+        assert_eq!(name, "scorer-v");
     }
 }
 
