@@ -149,9 +149,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: pnpm/action-setup@v4
+        with:
+          # Match `packageManager` in the root package.json so workspace
+          # resolution stays consistent with local installs.
+          version: 10.25.0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          # Pin Python to avoid macOS runners flipping the default to a
+          # version PyInstaller doesn't yet support, and to keep the
+          # sdk-runner-py fingerprint stable across runner OS versions.
+          python-version: '3.13'
       - name: Install Linux Tauri deps
         if: runner.os == 'Linux' && matrix.viewer
         run: |
