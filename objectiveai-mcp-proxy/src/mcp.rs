@@ -1,7 +1,9 @@
 //! MCP Streamable-HTTP endpoint: parses inbound JSON-RPC, dispatches by method.
 
+use std::sync::Arc;
+
 use axum::{
-    extract::Json,
+    extract::{Json, State},
     http::{HeaderMap, HeaderValue, StatusCode},
     response::{IntoResponse, Response},
 };
@@ -12,14 +14,13 @@ use objectiveai::mcp::{
     },
 };
 
+use crate::sessions::SessionManager;
+
 /// MCP protocol version this proxy speaks.
 const PROTOCOL_VERSION: &str = "2025-06-18";
 
 /// JSON-RPC error code: method not found.
 const METHOD_NOT_FOUND: i64 = -32601;
-
-/// Mock session id used until real session management lands.
-const MOCK_SESSION_ID: &str = "TODO";
 
 /// Capabilities advertised to clients during `initialize`.
 fn server_capabilities() -> ServerCapabilities {
@@ -53,7 +54,10 @@ fn server_info() -> Implementation {
 }
 
 /// POST handler for the MCP Streamable HTTP endpoint.
-pub async fn handle(Json(req): Json<serde_json::Value>) -> Response {
+pub async fn handle(
+    State(sessions): State<Arc<SessionManager>>,
+    Json(req): Json<serde_json::Value>,
+) -> Response {
     // Notifications (no `id`) and requests share the same wire shape but
     // notifications return 202 Accepted with no body. Detect by absence of `id`.
     if req.get("id").is_none() {
@@ -66,13 +70,13 @@ pub async fn handle(Json(req): Json<serde_json::Value>) -> Response {
     };
 
     match request.method.as_str() {
-        "initialize" => initialize(request),
+        "initialize" => initialize(&sessions, request),
         other => method_not_found(request.id, other),
     }
 }
 
 /// Construct the `initialize` response.
-fn initialize(request: JsonRpcRequest) -> Response {
+fn initialize(sessions: &SessionManager, request: JsonRpcRequest) -> Response {
     let result = InitializeResult {
         protocol_version: PROTOCOL_VERSION.into(),
         capabilities: server_capabilities(),
@@ -90,11 +94,19 @@ fn initialize(request: JsonRpcRequest) -> Response {
         result,
     };
 
+    // No upstream connections wired up yet — register an empty session so
+    // the freshly minted id is real and tracked.
+    let session_id = sessions.add(Vec::new());
     let mut headers = HeaderMap::new();
-    headers.insert(
-        "Mcp-Session-Id",
-        HeaderValue::from_static(MOCK_SESSION_ID),
-    );
+    let header_value = match HeaderValue::from_str(&session_id) {
+        Ok(v) => v,
+        Err(_) => {
+            return bad_request(format!(
+                "session id is not a valid header value: {session_id}"
+            ));
+        }
+    };
+    headers.insert("Mcp-Session-Id", header_value);
 
     (StatusCode::OK, headers, Json(body)).into_response()
 }

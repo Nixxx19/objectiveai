@@ -1,7 +1,12 @@
 mod mcp;
+mod sessions;
+
+use std::sync::Arc;
 
 use envconfig::Envconfig;
 use tokio_util::sync::CancellationToken;
+
+use crate::sessions::SessionManager;
 
 #[derive(Envconfig)]
 struct EnvConfigBuilder {
@@ -80,7 +85,10 @@ async fn main() -> anyhow::Result<()> {
     );
 
     let ct = CancellationToken::new();
-    let router = axum::Router::new().route("/", axum::routing::post(mcp::handle));
+    let session_manager = Arc::new(SessionManager::new());
+    let router = axum::Router::new()
+        .route("/", axum::routing::post(mcp::handle))
+        .with_state(session_manager);
     let listener = tokio::net::TcpListener::bind(format!(
         "{}:{}",
         config.address, config.port,
