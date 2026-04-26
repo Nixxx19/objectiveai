@@ -36,7 +36,7 @@ pub struct JsonRpcError {
 }
 
 /// JSON-RPC 2.0 notification (no `id` field).
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct JsonRpcNotification {
     pub jsonrpc: String,
     pub method: String,

@@ -9,10 +9,15 @@
 use futures::future::join_all;
 use indexmap::IndexMap;
 use objectiveai::mcp::{
-    Connection,
+    Connection, JsonRpcNotification,
     resource::{ListResourcesResult, ReadResourceResult, Resource},
     tool::{CallToolRequestParams, CallToolResult, ListToolsResult, Tool},
 };
+use tokio::sync::broadcast;
+
+/// Capacity of the per-session outbound notification channel. Sized so
+/// even a noisy upstream can't easily lap a slow SSE consumer.
+const OUTBOUND_CAPACITY: usize = 64;
 
 /// Per-session state.
 ///
@@ -35,11 +40,50 @@ pub struct Session {
     /// `Connection` fires the upstream listener's wakeup signal so it can
     /// self-cancel within scheduler latency once no external handle remains.
     pub connections: IndexMap<String, Connection>,
+    /// Fan-out channel for server-initiated notifications. Whenever an
+    /// upstream emits `notifications/tools/list_changed` or
+    /// `notifications/resources/list_changed`, a JsonRpcNotification with
+    /// the matching method is published here. Subscribers (the SSE GET
+    /// stream in `mcp::handle_get`) drain it onto the wire to the
+    /// downstream client.
+    ///
+    /// `broadcast` rather than `mpsc` so multiple concurrent GET streams
+    /// for the same session — which the MCP spec allows — each see every
+    /// notification.
+    pub outbound: broadcast::Sender<JsonRpcNotification>,
 }
 
 impl Session {
     pub(crate) fn new(connections: IndexMap<String, Connection>) -> Self {
-        Self { connections }
+        let (outbound, _) = broadcast::channel(OUTBOUND_CAPACITY);
+
+        // Wire each upstream's list_changed callbacks to publish a
+        // matching notification onto the outbound channel. Callbacks fire
+        // under the upstream's cache write lock (before the network
+        // refresh), so by the time the downstream client re-fetches via
+        // tools/list or resources/list it'll either get the new list or
+        // wait on the lock until the new list lands — never sees the
+        // stale list with a fresh notification.
+        for connection in connections.values() {
+            let tx = outbound.clone();
+            connection.set_on_tools_list_changed(move || {
+                let _ = tx.send(JsonRpcNotification {
+                    jsonrpc: "2.0".into(),
+                    method: "notifications/tools/list_changed".into(),
+                    params: None,
+                });
+            });
+            let tx = outbound.clone();
+            connection.set_on_resources_list_changed(move || {
+                let _ = tx.send(JsonRpcNotification {
+                    jsonrpc: "2.0".into(),
+                    method: "notifications/resources/list_changed".into(),
+                    params: None,
+                });
+            });
+        }
+
+        Self { connections, outbound }
     }
 
     /// Fan `tools/list` out to every upstream in parallel, prefix each

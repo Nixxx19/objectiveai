@@ -12,6 +12,7 @@ use axum::{
     },
 };
 use futures::stream;
+use tokio::sync::broadcast;
 use objectiveai::mcp::{
     JsonRpcError, JsonRpcRequest, JsonRpcResponse,
     initialize_result::{
@@ -99,11 +100,11 @@ pub async fn handle_delete(
 // ---- GET handler (server-initiated SSE stream) ----------------------------
 
 /// GET `/`: open the per-session SSE stream so the server can push
-/// `notifications/*` and request responses to the client. Right now the
-/// stream is silent — the underlying source is a never-resolving
-/// `stream::pending` and the proxy only emits keepalive pings. When
-/// upstream notification forwarding lands the stream will source from
-/// whatever publisher we wire up at that point.
+/// server-initiated notifications to the client. Currently sources from
+/// `session.outbound`, which the upstream-list-changed callbacks publish
+/// `notifications/tools/list_changed` and
+/// `notifications/resources/list_changed` onto. Periodic SSE keepalives
+/// hold the connection open during quiet periods.
 pub async fn handle_get(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -113,11 +114,33 @@ pub async fn handle_get(
         Err(resp) => return resp,
     };
 
-    if state.sessions.get(&session_id).is_none() {
-        return (StatusCode::NOT_FOUND, "unknown session").into_response();
-    }
+    let session = match state.sessions.get(&session_id) {
+        Some(s) => s,
+        None => return (StatusCode::NOT_FOUND, "unknown session").into_response(),
+    };
 
-    let stream = stream::pending::<Result<Event, Infallible>>();
+    let rx = session.outbound.subscribe();
+    let stream = stream::unfold(rx, |mut rx| async move {
+        loop {
+            match rx.recv().await {
+                Ok(notification) => {
+                    let event = match Event::default().json_data(&notification) {
+                        Ok(e) => e,
+                        Err(e) => {
+                            tracing::warn!(error = %e, "failed to encode SSE event");
+                            continue;
+                        }
+                    };
+                    return Some((Ok::<_, Infallible>(event), rx));
+                }
+                Err(broadcast::error::RecvError::Lagged(n)) => {
+                    tracing::warn!(skipped = n, "SSE consumer lagged; dropped notifications");
+                    continue;
+                }
+                Err(broadcast::error::RecvError::Closed) => return None,
+            }
+        }
+    });
 
     Sse::new(stream)
         .keep_alive(KeepAlive::new().interval(SSE_KEEP_ALIVE))
