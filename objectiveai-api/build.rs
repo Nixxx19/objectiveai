@@ -90,7 +90,7 @@ fn claude_agent_sdk_runner() {
     let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
     let workspace_dir = std::path::Path::new(&manifest_dir).parent().unwrap();
 
-    #[cfg(feature = "claude-agent-sdk-python")]
+    #[cfg(feature = "claude-agent-sdk")]
     {
         let validate_script = workspace_dir
             .join("objectiveai-claude-agent-sdk-runner-py")
@@ -119,7 +119,7 @@ fn claude_agent_sdk_runner() {
             .join(&profile)
             .join(binary_name);
         println!(
-            "cargo:rustc-env=OBJECTIVEAI_CLAUDE_AGENT_SDK_RUNNER_PY_PATH={}",
+            "cargo:rustc-env=OBJECTIVEAI_CLAUDE_AGENT_SDK_RUNNER_PATH={}",
             binary_path.display()
         );
         println!("cargo:rerun-if-changed=../objectiveai-claude-agent-sdk-runner-py/embed/");

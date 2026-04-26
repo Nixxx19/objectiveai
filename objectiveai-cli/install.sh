@@ -138,7 +138,7 @@ fi
 # ── Build CLI ──────────────────────────────────────────────────────────
 
 # Assemble feature list
-FEATURES="rustpython,systempython,updater,claude-agent-sdk-python"
+FEATURES="rustpython,systempython,updater,claude-agent-sdk"
 if [ "$NO_VIEWER" = "0" ]; then
   FEATURES="$FEATURES,viewer"
 fi

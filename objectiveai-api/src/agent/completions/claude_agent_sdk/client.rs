@@ -44,10 +44,10 @@ impl Client {
     /// the cached binary across restarts.
     ///
     /// Returns `None` when the crate is built without the
-    /// `claude-agent-sdk-python` feature — in that configuration no runner
+    /// `claude-agent-sdk` feature — in that configuration no runner
     /// binary is embedded, and `create()` returns `Error::NotEnabled`
     /// before this method is reached.
-    #[cfg(feature = "claude-agent-sdk-python")]
+    #[cfg(feature = "claude-agent-sdk")]
     fn binary_path(&self) -> Option<&str> {
         let path = self.binary_path.get_or_init(|| {
             let binary = super::claude_agent_sdk_binary::CLAUDE_AGENT_SDK_RUNNER;
@@ -90,7 +90,7 @@ impl Client {
         if path.is_empty() { None } else { Some(path.as_str()) }
     }
 
-    #[cfg(not(feature = "claude-agent-sdk-python"))]
+    #[cfg(not(feature = "claude-agent-sdk"))]
     fn binary_path(&self) -> Option<&str> {
         None
     }
@@ -213,10 +213,10 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
                 return Err(super::Error::NotEnabled);
             }
 
-            // When built without the claude-agent-sdk-python feature, no
+            // When built without the claude-agent-sdk feature, no
             // runner binary is embedded, so the client is non-functional
             // regardless of the `enabled` flag.
-            #[cfg(not(feature = "claude-agent-sdk-python"))]
+            #[cfg(not(feature = "claude-agent-sdk"))]
             {
                 return Err(super::Error::NotEnabled);
             }
