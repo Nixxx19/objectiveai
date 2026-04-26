@@ -1,8 +1,8 @@
-use std::fs;
 use std::path::{Path, PathBuf};
 
 use glob::Pattern;
 use regex::RegexBuilder;
+use tokio::fs;
 use walkdir::WalkDir;
 
 use crate::util;
@@ -42,9 +42,9 @@ pub struct GrepSearchInput {
     pub multiline: Option<bool>,
 }
 
-pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
+pub async fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
     let base_path = match &input.path {
-        Some(p) => util::normalize_path(p).map_err(|e| format!("Invalid path: {e}"))?,
+        Some(p) => util::normalize_path(p).await.map_err(|e| format!("Invalid path: {e}"))?,
         None => std::env::current_dir().map_err(|e| format!("Failed to get CWD: {e}"))?,
     };
 
@@ -99,12 +99,12 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
     // For files_with_matches mode, collect (path, mtime) pairs for sorting
     let mut file_mtimes: Vec<(String, Option<std::time::SystemTime>)> = Vec::new();
 
-    for file_path in collect_search_files(&base_path).map_err(|e| format!("Search failed: {e}"))? {
+    for file_path in collect_search_files(&base_path).await.map_err(|e| format!("Search failed: {e}"))? {
         if !matches_filters(&file_path, &glob_filters, file_type) {
             continue;
         }
 
-        let Ok(file_contents) = fs::read_to_string(&file_path) else {
+        let Ok(file_contents) = fs::read_to_string(&file_path).await else {
             continue; // Skip files that can't be read as text
         };
 
@@ -152,7 +152,10 @@ pub fn grep_search(input: &GrepSearchInput) -> Result<String, String> {
         }
 
         if output_mode == "files_with_matches" {
-            let mtime = fs::metadata(&file_path).and_then(|m| m.modified()).ok();
+            let mtime = match fs::metadata(&file_path).await {
+                Ok(m) => m.modified().ok(),
+                Err(_) => None,
+            };
             file_mtimes.push((rel_path, mtime));
             continue;
         }
@@ -269,20 +272,28 @@ fn is_vcs_dir(entry: &walkdir::DirEntry) -> bool {
     false
 }
 
-fn collect_search_files(base_path: &Path) -> std::io::Result<Vec<PathBuf>> {
-    if base_path.is_file() {
+async fn collect_search_files(base_path: &Path) -> std::io::Result<Vec<PathBuf>> {
+    let base_metadata = fs::metadata(base_path).await?;
+    if base_metadata.is_file() {
         return Ok(vec![base_path.to_path_buf()]);
     }
 
-    let mut files = Vec::new();
-    let walker = WalkDir::new(base_path).into_iter().filter_entry(|e| !is_vcs_dir(e));
-    for entry in walker {
-        let entry = entry.map_err(|e| std::io::Error::other(e.to_string()))?;
-        if entry.file_type().is_file() {
-            files.push(entry.path().to_path_buf());
+    // walkdir's iterator is synchronous; run it on a blocking thread so we
+    // don't tie up the runtime while traversing very large trees.
+    let base_path = base_path.to_path_buf();
+    tokio::task::spawn_blocking(move || {
+        let mut files = Vec::new();
+        let walker = WalkDir::new(&base_path).into_iter().filter_entry(|e| !is_vcs_dir(e));
+        for entry in walker {
+            let entry = entry.map_err(|e| std::io::Error::other(e.to_string()))?;
+            if entry.file_type().is_file() {
+                files.push(entry.path().to_path_buf());
+            }
         }
-    }
-    Ok(files)
+        Ok(files)
+    })
+    .await
+    .map_err(|e| std::io::Error::other(e.to_string()))?
 }
 
 fn type_to_extensions(file_type: &str) -> Option<&'static [&'static str]> {

@@ -30,8 +30,8 @@ impl FileStateEntry {
 }
 
 /// Normalize a cache key path: canonicalize if possible, otherwise return as-is.
-fn normalize_cache_key(path: &str) -> String {
-    match std::fs::canonicalize(Path::new(path)) {
+async fn normalize_cache_key(path: &str) -> String {
+    match tokio::fs::canonicalize(Path::new(path)).await {
         Ok(canonical) => canonical.to_string_lossy().to_string(),
         Err(_) => path.to_string(),
     }
@@ -54,14 +54,14 @@ impl FileStateCache {
     }
 
     /// Get the cached state for a file path.
-    pub fn get(&self, path: &str) -> Option<FileStateEntry> {
-        let key = normalize_cache_key(path);
+    pub async fn get(&self, path: &str) -> Option<FileStateEntry> {
+        let key = normalize_cache_key(path).await;
         self.inner.read().unwrap().get(&key).cloned()
     }
 
     /// Set the cached state for a file path.
-    pub fn set(&self, path: String, entry: FileStateEntry) {
-        let key = normalize_cache_key(&path);
+    pub async fn set(&self, path: String, entry: FileStateEntry) {
+        let key = normalize_cache_key(&path).await;
         let mut inner = self.inner.write().unwrap();
         // Evict an entry if we're at capacity and this is a new key
         if inner.len() >= MAX_CACHE_ENTRIES && !inner.contains_key(&key) {

@@ -15,7 +15,6 @@ use rmcp::transport::streamable_http_server::{
     session::local::LocalSessionManager,
 };
 use tokio_util::sync::CancellationToken;
-
 use crate::tools::FilesystemMcp;
 
 #[derive(Envconfig)]

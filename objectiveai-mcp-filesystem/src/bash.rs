@@ -2,12 +2,13 @@ const MAX_OUTPUT_CHARS: usize = 30_000;
 const MAX_PERSISTED_SIZE: usize = 64 * 1024 * 1024; // 64MB
 
 use std::collections::HashMap;
-use std::fs::OpenOptions;
 use std::path::PathBuf;
 use std::process::Stdio;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
+
+use tokio::fs;
 
 #[derive(Debug, serde::Serialize)]
 pub struct BashOutput {
@@ -211,15 +212,19 @@ pub async fn execute_bash(
         "bash-output-{}",
         CWD_COUNTER.fetch_add(1, Ordering::Relaxed)
     ));
-    std::fs::create_dir_all(tool_results_dir())
+    fs::create_dir_all(tool_results_dir())
+        .await
         .map_err(|e| format!("Failed to create tool-results dir: {e}"))?;
 
-    let output_file = OpenOptions::new()
+    let output_file = fs::OpenOptions::new()
         .write(true)
         .create(true)
         .truncate(true)
         .open(&output_file_path)
-        .map_err(|e| format!("Failed to create output file: {e}"))?;
+        .await
+        .map_err(|e| format!("Failed to create output file: {e}"))?
+        .into_std()
+        .await;
 
     let stdout_file = output_file
         .try_clone()
@@ -254,7 +259,7 @@ pub async fn execute_bash(
     };
 
     // Read the output file
-    let full_output = std::fs::read_to_string(&output_file_path).unwrap_or_default();
+    let full_output = fs::read_to_string(&output_file_path).await.unwrap_or_default();
     let full_output_size = full_output.len();
 
     let mut persisted_output_path: Option<String> = None;
@@ -265,7 +270,7 @@ pub async fn execute_bash(
 
         // The file is already on disk — truncate it if it exceeds MAX_PERSISTED_SIZE
         if full_output_size > MAX_PERSISTED_SIZE {
-            let _ = std::fs::write(&output_file_path, &full_output[..MAX_PERSISTED_SIZE]);
+            let _ = fs::write(&output_file_path, &full_output[..MAX_PERSISTED_SIZE]).await;
         }
         persisted_output_path = Some(output_file_path.to_string_lossy().into_owned());
 
@@ -283,19 +288,19 @@ pub async fn execute_bash(
         )
     } else {
         // Small output — clean up the temp file
-        let _ = std::fs::remove_file(&output_file_path);
+        let _ = fs::remove_file(&output_file_path).await;
         full_output
     };
 
     // Read the saved CWD from the temp file
-    if let Ok(new_cwd) = std::fs::read_to_string(&cwd_file) {
+    if let Ok(new_cwd) = fs::read_to_string(&cwd_file).await {
         let new_cwd = new_cwd.trim();
         if !new_cwd.is_empty() {
             shell_state.set_cwd(PathBuf::from(new_cwd));
         }
     }
     // Clean up the CWD file
-    let _ = std::fs::remove_file(&cwd_file);
+    let _ = fs::remove_file(&cwd_file).await;
 
     let return_code_interpretation = interpret_return_code(command, exit_code);
     let no_output_expected = is_silent_command(command);

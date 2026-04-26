@@ -1,6 +1,7 @@
 use crate::state::{FileStateCache, FileStateEntry};
 use crate::util;
 use std::path::Path;
+use tokio::fs;
 
 const MAX_READ_SIZE_BYTES: u64 = 10 * 1024 * 1024; // 10 MB
 const MAX_IMAGE_FILE_SIZE: u64 = 20 * 1024 * 1024; // 20 MB
@@ -85,7 +86,7 @@ struct ReadFileJsonOutput {
     file: TextFilePayload,
 }
 
-pub fn read_file(
+pub async fn read_file(
     file_state: &FileStateCache,
     path: &str,
     offset: Option<usize>,
@@ -103,31 +104,32 @@ pub fn read_file(
     }
 
     let absolute_path = util::normalize_path_allow_missing(path)
+        .await
         .map_err(|e| format!("Failed to resolve path: {e}"))?;
     let absolute_path_str = absolute_path.to_string_lossy().to_string();
 
     // File-not-found with suggestions
-    if !absolute_path.exists() {
+    if !fs::try_exists(&absolute_path).await.unwrap_or(false) {
         let mut msg = format!(
             "File does not exist. Note: your current working directory is {}.",
             std::env::current_dir()
                 .map(|p| p.to_string_lossy().into_owned())
                 .unwrap_or_default()
         );
-        if let Some(similar) = util::find_similar_file(&absolute_path) {
+        if let Some(similar) = util::find_similar_file(&absolute_path).await {
             msg.push_str(&format!("\nDid you mean: {similar}"));
         }
-        if let Some(suggested) = util::suggest_path_under_cwd(path) {
+        if let Some(suggested) = util::suggest_path_under_cwd(path).await {
             msg.push_str(&format!("\nSuggested path: {suggested}"));
         }
         return Err(msg);
     }
 
     // file_unchanged dedup: if same path, same offset/limit, same mtime -> return stub
-    if let Some(cached) = file_state.get(&absolute_path_str) {
+    if let Some(cached) = file_state.get(&absolute_path_str).await {
         // Only dedup entries that came from a prior Read (offset is Some), not from Edit/Write
         if cached.offset.is_some() && cached.offset == offset && cached.limit == limit {
-            if let Ok(current_mtime) = util::get_file_mtime_ms(&absolute_path) {
+            if let Ok(current_mtime) = util::get_file_mtime_ms(&absolute_path).await {
                 if current_mtime == cached.timestamp {
                     return Ok(ReadOutput::FileUnchanged(
                         "File unchanged since last read. The content from the earlier Read tool_result in this conversation is still current \u{2014} refer to that instead of re-reading.".into()
@@ -141,7 +143,8 @@ pub fn read_file(
 
     // Image files -- return as Content::image
     if has_extension_in(&absolute_path, IMAGE_EXTENSIONS) {
-        let metadata = std::fs::metadata(&absolute_path)
+        let metadata = fs::metadata(&absolute_path)
+            .await
             .map_err(|e| format!("Failed to read file metadata: {e}"))?;
         if metadata.len() > MAX_IMAGE_FILE_SIZE {
             return Err(format!(
@@ -149,13 +152,15 @@ pub fn read_file(
                 metadata.len()
             ));
         }
-        let bytes = std::fs::read(&absolute_path)
+        let bytes = fs::read(&absolute_path)
+            .await
             .map_err(|e| format!("Failed to read image file: {e}"))?;
         let media_type = detect_image_format(&bytes).to_string();
         let base64 = base64::Engine::encode(&base64::engine::general_purpose::STANDARD, &bytes);
 
         // Update file state (store placeholder content, not the base64)
         let mtime_ms = util::get_file_mtime_ms(&absolute_path)
+            .await
             .map_err(|e| format!("Failed to get file mtime: {e}"))?;
         file_state.set(absolute_path_str, FileStateEntry {
             content: format!("[image: {} bytes]", bytes.len()),
@@ -163,14 +168,15 @@ pub fn read_file(
             offset,
             limit,
             is_partial_view: false,
-        });
+        }).await;
 
         return Ok(ReadOutput::Image { base64, media_type });
     }
 
     // Notebook files (.ipynb)
     if ext.eq_ignore_ascii_case("ipynb") {
-        let metadata = std::fs::metadata(&absolute_path)
+        let metadata = fs::metadata(&absolute_path)
+            .await
             .map_err(|e| format!("Failed to read file metadata: {e}"))?;
         if metadata.len() > MAX_READ_SIZE_BYTES {
             return Err(format!(
@@ -178,11 +184,12 @@ pub fn read_file(
                 metadata.len()
             ));
         }
-        let blocks = crate::notebook::read_notebook(&absolute_path)?;
+        let blocks = crate::notebook::read_notebook(&absolute_path).await?;
 
         // Update file state
-        let raw = std::fs::read_to_string(&absolute_path).unwrap_or_default();
+        let raw = fs::read_to_string(&absolute_path).await.unwrap_or_default();
         let mtime_ms = util::get_file_mtime_ms(&absolute_path)
+            .await
             .map_err(|e| format!("Failed to get file mtime: {e}"))?;
         file_state.set(absolute_path_str, FileStateEntry {
             content: util::normalize_line_endings(&raw),
@@ -190,14 +197,14 @@ pub fn read_file(
             offset,
             limit,
             is_partial_view: false,
-        });
+        }).await;
 
         return Ok(ReadOutput::Notebook(blocks));
     }
 
     // PDF files
     if ext.eq_ignore_ascii_case("pdf") {
-        return read_pdf(&absolute_path, pages);
+        return read_pdf(&absolute_path, pages).await;
     }
 
     // Binary file rejection
@@ -209,7 +216,8 @@ pub fn read_file(
     }
 
     // Check file size before reading text
-    let metadata = std::fs::metadata(&absolute_path)
+    let metadata = fs::metadata(&absolute_path)
+        .await
         .map_err(|e| format!("Failed to read file metadata: {e}"))?;
     if metadata.len() > MAX_READ_SIZE_BYTES {
         return Err(format!(
@@ -219,7 +227,8 @@ pub fn read_file(
         ));
     }
 
-    let raw_content = std::fs::read_to_string(&absolute_path)
+    let raw_content = fs::read_to_string(&absolute_path)
+        .await
         .map_err(|e| format!("Failed to read file: {e}"))?;
 
     let content = util::normalize_line_endings(&raw_content);
@@ -241,6 +250,7 @@ pub fn read_file(
     let start_line = start_index.saturating_add(1);
 
     let mtime_ms = util::get_file_mtime_ms(&absolute_path)
+        .await
         .map_err(|e| format!("Failed to get file mtime: {e}"))?;
 
     file_state.set(absolute_path_str.clone(), FileStateEntry {
@@ -249,7 +259,7 @@ pub fn read_file(
         offset,
         limit,
         is_partial_view: false,
-    });
+    }).await;
 
     let output = ReadFileJsonOutput {
         kind: "text".into(),
@@ -298,10 +308,11 @@ fn parse_pdf_page_range(pages: &str) -> Result<(usize, usize), String> {
 }
 
 /// Get PDF page count using pdfinfo.
-fn get_pdf_page_count(path: &std::path::Path) -> Result<usize, String> {
-    let output = std::process::Command::new("pdfinfo")
+async fn get_pdf_page_count(path: &std::path::Path) -> Result<usize, String> {
+    let output = tokio::process::Command::new("pdfinfo")
         .arg(path.to_string_lossy().as_ref())
         .output()
+        .await
         .map_err(|_| "pdfinfo not available. Install poppler-utils.".to_string())?;
 
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -318,8 +329,9 @@ fn get_pdf_page_count(path: &std::path::Path) -> Result<usize, String> {
 }
 
 /// Extract PDF pages as JPEG images using pdftoppm.
-fn read_pdf(path: &std::path::Path, pages: Option<&str>) -> Result<ReadOutput, String> {
-    let file_size = std::fs::metadata(path)
+async fn read_pdf(path: &std::path::Path, pages: Option<&str>) -> Result<ReadOutput, String> {
+    let file_size = fs::metadata(path)
+        .await
         .map_err(|e| format!("Failed to read PDF metadata: {e}"))?
         .len();
     if file_size > PDF_MAX_EXTRACT_SIZE {
@@ -327,9 +339,10 @@ fn read_pdf(path: &std::path::Path, pages: Option<&str>) -> Result<ReadOutput, S
     }
 
     // Check if pdftoppm is available
-    let pdftoppm_check = std::process::Command::new("pdftoppm")
+    let pdftoppm_check = tokio::process::Command::new("pdftoppm")
         .arg("-v")
-        .output();
+        .output()
+        .await;
     if pdftoppm_check.is_err() {
         return Err("PDF reading requires pdftoppm (from poppler-utils). Install it with: apt install poppler-utils (Linux), brew install poppler (macOS), or pacman -S poppler (MSYS2).".into());
     }
@@ -339,7 +352,7 @@ fn read_pdf(path: &std::path::Path, pages: Option<&str>) -> Result<ReadOutput, S
         parse_pdf_page_range(pages_str)?
     } else {
         // Get page count first using pdfinfo
-        let page_count = get_pdf_page_count(path)?;
+        let page_count = get_pdf_page_count(path).await?;
         if page_count > 10 {
             return Err(format!(
                 "PDF has {page_count} pages. Please specify a page range using the 'pages' parameter (max {PDF_MAX_PAGES_PER_READ} pages per request). Example: pages=\"1-10\""
@@ -369,11 +382,12 @@ fn read_pdf(path: &std::path::Path, pages: Option<&str>) -> Result<ReadOutput, S
             .unwrap_or_default()
             .as_millis()
     ));
-    std::fs::create_dir_all(&tmp_dir)
+    fs::create_dir_all(&tmp_dir)
+        .await
         .map_err(|e| format!("Failed to create temp dir for PDF: {e}"))?;
 
     // Run pdftoppm to extract pages as JPEG
-    let mut cmd = std::process::Command::new("pdftoppm");
+    let mut cmd = tokio::process::Command::new("pdftoppm");
     cmd.arg("-jpeg")
         .arg("-r").arg("150")  // 150 DPI
         .arg("-f").arg(first_page.to_string())
@@ -382,31 +396,36 @@ fn read_pdf(path: &std::path::Path, pages: Option<&str>) -> Result<ReadOutput, S
         .arg(tmp_dir.join("page").to_string_lossy().as_ref());
 
     let output = cmd.output()
+        .await
         .map_err(|e| format!("Failed to run pdftoppm: {e}"))?;
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
-        let _ = std::fs::remove_dir_all(&tmp_dir);
+        let _ = fs::remove_dir_all(&tmp_dir).await;
         return Err(format!("pdftoppm failed: {stderr}"));
     }
 
     // Collect the generated JPEG files
-    let mut image_files: Vec<_> = std::fs::read_dir(&tmp_dir)
-        .map_err(|e| format!("Failed to read temp dir: {e}"))?
-        .filter_map(|e| e.ok())
-        .filter(|e| {
-            e.path().extension()
-                .and_then(|ext| ext.to_str())
-                .map(|ext| ext == "jpg")
-                .unwrap_or(false)
-        })
-        .collect();
+    let mut image_files: Vec<std::path::PathBuf> = Vec::new();
+    let mut entries = fs::read_dir(&tmp_dir)
+        .await
+        .map_err(|e| format!("Failed to read temp dir: {e}"))?;
+    while let Ok(Some(entry)) = entries.next_entry().await {
+        let entry_path = entry.path();
+        let is_jpg = entry_path.extension()
+            .and_then(|ext| ext.to_str())
+            .map(|ext| ext == "jpg")
+            .unwrap_or(false);
+        if is_jpg {
+            image_files.push(entry_path);
+        }
+    }
 
     // Sort by filename to get pages in order
-    image_files.sort_by_key(|e| e.file_name());
+    image_files.sort_by(|a, b| a.file_name().cmp(&b.file_name()));
 
     if image_files.is_empty() {
-        let _ = std::fs::remove_dir_all(&tmp_dir);
+        let _ = fs::remove_dir_all(&tmp_dir).await;
         return Err("PDF extraction produced no pages. The PDF may be empty or corrupted.".into());
     }
 
@@ -414,8 +433,9 @@ fn read_pdf(path: &std::path::Path, pages: Option<&str>) -> Result<ReadOutput, S
     use crate::notebook::NotebookBlock;
     let mut blocks = Vec::new();
 
-    for (i, entry) in image_files.iter().enumerate() {
-        let img_bytes = std::fs::read(entry.path())
+    for (i, entry_path) in image_files.iter().enumerate() {
+        let img_bytes = fs::read(entry_path)
+            .await
             .map_err(|e| format!("Failed to read extracted page: {e}"))?;
         let b64 = base64::Engine::encode(
             &base64::engine::general_purpose::STANDARD,
@@ -430,7 +450,7 @@ fn read_pdf(path: &std::path::Path, pages: Option<&str>) -> Result<ReadOutput, S
     }
 
     // Clean up temp dir
-    let _ = std::fs::remove_dir_all(&tmp_dir);
+    let _ = fs::remove_dir_all(&tmp_dir).await;
 
     Ok(ReadOutput::Notebook(blocks))
 }

@@ -1,7 +1,7 @@
-use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::time::UNIX_EPOCH;
+use tokio::fs;
 
 /// Check if a path is a UNC path (\\server\share or //server/share).
 /// UNC paths on Windows can trigger SMB authentication and leak NTLM credentials.
@@ -11,13 +11,17 @@ pub fn is_unc_path(path: &str) -> bool {
 
 /// Search for a file with the same base name but different extension in the same directory.
 /// Returns the full path to the similar file, matching Claude Code's findSimilarFile behavior.
-pub fn find_similar_file(path: &Path) -> Option<String> {
+pub async fn find_similar_file(path: &Path) -> Option<String> {
     let parent = path.parent()?;
     let stem = path.file_stem()?.to_str()?;
-    let entries = std::fs::read_dir(parent).ok()?;
-    for entry in entries.flatten() {
+    let mut entries = fs::read_dir(parent).await.ok()?;
+    while let Ok(Some(entry)) = entries.next_entry().await {
         let entry_path = entry.path();
-        if entry_path.is_file() && entry_path != path {
+        let is_file = fs::metadata(&entry_path)
+            .await
+            .map(|m| m.is_file())
+            .unwrap_or(false);
+        if is_file && entry_path != path {
             if let Some(entry_stem) = entry_path.file_stem().and_then(|s| s.to_str()) {
                 if entry_stem == stem {
                     return Some(entry_path.to_string_lossy().into_owned());
@@ -33,7 +37,7 @@ pub fn find_similar_file(path: &Path) -> Option<String> {
 /// but the file actually exists at $CWD/relative/path.
 /// Matches Claude Code's suggestPathUnderCwd: collects path components,
 /// then tries progressively shorter suffixes (from 1 component to all) under CWD.
-pub fn suggest_path_under_cwd(requested_path: &str) -> Option<String> {
+pub async fn suggest_path_under_cwd(requested_path: &str) -> Option<String> {
     let cwd = std::env::current_dir().ok()?;
     let requested = Path::new(requested_path);
     let components: Vec<std::path::Component> = requested.components().collect();
@@ -46,10 +50,10 @@ pub fn suggest_path_under_cwd(requested_path: &str) -> Option<String> {
     for i in (1..components.len()).rev() {
         let suffix: PathBuf = components[i..].iter().collect();
         let candidate = cwd.join(&suffix);
-        if candidate.exists() {
+        if fs::try_exists(&candidate).await.unwrap_or(false) {
             // Make sure we're not just returning the same path
-            let candidate_canonical = candidate.canonicalize().ok();
-            let requested_canonical = requested.canonicalize().ok();
+            let candidate_canonical = fs::canonicalize(&candidate).await.ok();
+            let requested_canonical = fs::canonicalize(requested).await.ok();
             if candidate_canonical != requested_canonical {
                 return Some(candidate.to_string_lossy().into_owned());
             }
@@ -59,30 +63,30 @@ pub fn suggest_path_under_cwd(requested_path: &str) -> Option<String> {
 }
 
 /// Normalize a path to an absolute canonical path.
-pub fn normalize_path(path: &str) -> io::Result<PathBuf> {
+pub async fn normalize_path(path: &str) -> io::Result<PathBuf> {
     let candidate = if Path::new(path).is_absolute() {
         PathBuf::from(path)
     } else {
         std::env::current_dir()?.join(path)
     };
-    candidate.canonicalize()
+    fs::canonicalize(&candidate).await
 }
 
 /// Normalize a path, allowing the file to not exist yet (for writes).
-pub fn normalize_path_allow_missing(path: &str) -> io::Result<PathBuf> {
+pub async fn normalize_path_allow_missing(path: &str) -> io::Result<PathBuf> {
     let candidate = if Path::new(path).is_absolute() {
         PathBuf::from(path)
     } else {
         std::env::current_dir()?.join(path)
     };
 
-    if let Ok(canonical) = candidate.canonicalize() {
+    if let Ok(canonical) = fs::canonicalize(&candidate).await {
         return Ok(canonical);
     }
 
     if let Some(parent) = candidate.parent() {
-        let canonical_parent = parent
-            .canonicalize()
+        let canonical_parent = fs::canonicalize(parent)
+            .await
             .unwrap_or_else(|_| parent.to_path_buf());
         if let Some(name) = candidate.file_name() {
             return Ok(canonical_parent.join(name));
@@ -93,8 +97,8 @@ pub fn normalize_path_allow_missing(path: &str) -> io::Result<PathBuf> {
 }
 
 /// Get file modification time in milliseconds since epoch.
-pub fn get_file_mtime_ms(path: &Path) -> io::Result<u64> {
-    let metadata = fs::metadata(path)?;
+pub async fn get_file_mtime_ms(path: &Path) -> io::Result<u64> {
+    let metadata = fs::metadata(path).await?;
     let modified = metadata.modified()?;
     Ok(modified
         .duration_since(UNIX_EPOCH)

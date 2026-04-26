@@ -124,8 +124,8 @@ impl FilesystemMcp {
     }
 
     #[tool(name = "Read", description = "Reads a file from the local filesystem.")]
-    fn read(&self, Parameters(req): Parameters<ReadRequest>) -> Result<CallToolResult, rmcp::ErrorData> {
-        match crate::read_file::read_file(&self.file_state, &req.file_path, req.offset, req.limit, req.pages.as_deref()) {
+    async fn read(&self, Parameters(req): Parameters<ReadRequest>) -> Result<CallToolResult, rmcp::ErrorData> {
+        match crate::read_file::read_file(&self.file_state, &req.file_path, req.offset, req.limit, req.pages.as_deref()).await {
             Ok(crate::read_file::ReadOutput::Text(json)) => {
                 Ok(CallToolResult::success(vec![Content::text(json)]))
             }
@@ -149,22 +149,22 @@ impl FilesystemMcp {
     }
 
     #[tool(name = "Write", description = "Writes a file to the local filesystem.")]
-    fn write(&self, Parameters(req): Parameters<WriteRequest>) -> String {
-        match crate::write_file::write_file(&self.file_state, &req.file_path, &req.content) {
+    async fn write(&self, Parameters(req): Parameters<WriteRequest>) -> String {
+        match crate::write_file::write_file(&self.file_state, &req.file_path, &req.content).await {
             Ok(output) => output,
             Err(e) => e,
         }
     }
 
     #[tool(name = "Edit", description = "Performs exact string replacements in files.")]
-    fn edit(&self, Parameters(req): Parameters<EditRequest>) -> String {
+    async fn edit(&self, Parameters(req): Parameters<EditRequest>) -> String {
         match crate::edit_file::edit_file(
             &self.file_state,
             &req.file_path,
             &req.old_string,
             &req.new_string,
             req.replace_all.unwrap_or(false),
-        ) {
+        ).await {
             Ok(output) => output,
             Err(e) => e,
         }
@@ -187,8 +187,8 @@ impl FilesystemMcp {
     }
 
     #[tool(name = "Glob", description = "Fast file pattern matching tool that works with any codebase size")]
-    fn glob(&self, Parameters(req): Parameters<GlobRequest>) -> String {
-        match crate::glob_search::glob_search(&req.pattern, req.path.as_deref()) {
+    async fn glob(&self, Parameters(req): Parameters<GlobRequest>) -> String {
+        match crate::glob_search::glob_search(&req.pattern, req.path.as_deref()).await {
             Ok(output) => {
                 if output.contains("\"truncated\": true") {
                     format!("{output}\n(Results are truncated. Consider using a more specific path or pattern.)")
@@ -201,7 +201,7 @@ impl FilesystemMcp {
     }
 
     #[tool(name = "Grep", description = "A powerful search tool built on ripgrep")]
-    fn grep(&self, Parameters(req): Parameters<GrepRequest>) -> String {
+    async fn grep(&self, Parameters(req): Parameters<GrepRequest>) -> String {
         let input = crate::grep_search::GrepSearchInput {
             pattern: req.pattern,
             path: req.path,
@@ -218,7 +218,7 @@ impl FilesystemMcp {
             offset: req.offset,
             multiline: req.multiline,
         };
-        match crate::grep_search::grep_search(&input) {
+        match crate::grep_search::grep_search(&input).await {
             Ok(output) => output,
             Err(e) => e,
         }

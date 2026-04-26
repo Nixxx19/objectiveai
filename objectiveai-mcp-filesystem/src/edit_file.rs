@@ -1,5 +1,6 @@
 use crate::state::{FileStateCache, FileStateEntry};
 use crate::util;
+use tokio::fs;
 
 const MAX_EDIT_FILE_SIZE: u64 = 1024 * 1024 * 1024; // 1 GiB
 
@@ -21,7 +22,7 @@ pub struct EditFileOutput {
     pub user_modified: bool,
 }
 
-pub fn edit_file(
+pub async fn edit_file(
     file_state: &FileStateCache,
     path: &str,
     old_string: &str,
@@ -48,20 +49,25 @@ pub fn edit_file(
     }
 
     let absolute_path = util::normalize_path_allow_missing(path)
+        .await
         .map_err(|e| format!("Failed to resolve path: {e}"))?;
     let absolute_path_str = absolute_path.to_string_lossy().to_string();
+    let absolute_path_exists = fs::try_exists(&absolute_path).await.unwrap_or(false);
 
     // Fix 8: Empty old_string + file doesn't exist = file creation
-    if old_string.is_empty() && !absolute_path.exists() {
+    if old_string.is_empty() && !absolute_path_exists {
         if let Some(parent) = absolute_path.parent() {
-            std::fs::create_dir_all(parent)
+            fs::create_dir_all(parent)
+                .await
                 .map_err(|e| format!("Failed to create directories: {e}"))?;
         }
-        std::fs::write(&absolute_path, new_string)
+        fs::write(&absolute_path, new_string)
+            .await
             .map_err(|e| format!("Failed to create file: {e}"))?;
 
         // Update cache
         let mtime_ms = util::get_file_mtime_ms(&absolute_path)
+            .await
             .map_err(|e| format!("Failed to get file mtime: {e}"))?;
         file_state.set(absolute_path_str.clone(), FileStateEntry {
             content: util::normalize_line_endings(new_string),
@@ -69,7 +75,7 @@ pub fn edit_file(
             offset: None,
             limit: None,
             is_partial_view: false,
-        });
+        }).await;
 
         let patch = util::make_patch("", new_string);
 
@@ -88,16 +94,18 @@ pub fn edit_file(
     }
 
     // Empty old_string on existing file: allow if file is empty, reject if file has content
-    let is_empty_old_on_existing = old_string.is_empty() && absolute_path.exists();
+    let is_empty_old_on_existing = old_string.is_empty() && absolute_path_exists;
     if is_empty_old_on_existing {
-        let existing = std::fs::read_to_string(&absolute_path).unwrap_or_default();
+        let existing = fs::read_to_string(&absolute_path).await.unwrap_or_default();
         if !existing.trim().is_empty() {
             return Err("Cannot create new file - file already exists.".into());
         }
         // File is empty — write new_string directly, skip must-read check
-        std::fs::write(&absolute_path, new_string)
+        fs::write(&absolute_path, new_string)
+            .await
             .map_err(|e| format!("Failed to write file: {e}"))?;
         let mtime_ms = util::get_file_mtime_ms(&absolute_path)
+            .await
             .map_err(|e| format!("Failed to get file mtime: {e}"))?;
         file_state.set(absolute_path_str.clone(), FileStateEntry {
             content: util::normalize_line_endings(new_string),
@@ -105,7 +113,7 @@ pub fn edit_file(
             offset: None,
             limit: None,
             is_partial_view: false,
-        });
+        }).await;
         let patch = util::make_patch("", new_string);
         let output = EditFileOutput {
             file_path: absolute_path_str,
@@ -121,24 +129,24 @@ pub fn edit_file(
     }
 
     // Error code 4: file does not exist
-    if !absolute_path.exists() {
+    if !absolute_path_exists {
         let mut msg = format!(
             "File does not exist. Note: your current working directory is {}.",
             std::env::current_dir()
                 .map(|p| p.to_string_lossy().into_owned())
                 .unwrap_or_default()
         );
-        if let Some(similar) = util::find_similar_file(&absolute_path) {
+        if let Some(similar) = util::find_similar_file(&absolute_path).await {
             msg.push_str(&format!("\nDid you mean: {similar}"));
         }
-        if let Some(suggested) = util::suggest_path_under_cwd(path) {
+        if let Some(suggested) = util::suggest_path_under_cwd(path).await {
             msg.push_str(&format!("\nSuggested path: {suggested}"));
         }
         return Err(msg);
     }
 
     // Must-read check (error code 6)
-    let cached = file_state.get(&absolute_path_str);
+    let cached = file_state.get(&absolute_path_str).await;
     match &cached {
         None => {
             return Err("File has not been read yet. Read it first before writing to it.".into());
@@ -151,7 +159,8 @@ pub fn edit_file(
     let cached = cached.unwrap();
 
     // Check file size before reading
-    let metadata = std::fs::metadata(&absolute_path)
+    let metadata = fs::metadata(&absolute_path)
+        .await
         .map_err(|e| format!("Failed to read file metadata: {e}"))?;
     let file_size = metadata.len();
     if file_size > MAX_EDIT_FILE_SIZE {
@@ -161,7 +170,8 @@ pub fn edit_file(
     }
 
     // Read current file content (bytes for UTF-16LE BOM detection)
-    let file_bytes = std::fs::read(&absolute_path)
+    let file_bytes = fs::read(&absolute_path)
+        .await
         .map_err(|e| format!("Failed to read file: {e}"))?;
     let (original_file_raw, is_utf16le) = if file_bytes.len() >= 2 && file_bytes[0] == 0xFF && file_bytes[1] == 0xFE {
         // UTF-16LE with BOM
@@ -175,6 +185,7 @@ pub fn edit_file(
 
     // Staleness check (error code 7)
     let current_mtime = util::get_file_mtime_ms(&absolute_path)
+        .await
         .map_err(|e| format!("Failed to get file mtime: {e}"))?;
     if current_mtime > cached.timestamp {
         // Windows content-comparison fallback for full reads
@@ -225,15 +236,18 @@ pub fn edit_file(
         for u in updated.encode_utf16() {
             out_bytes.extend_from_slice(&u.to_le_bytes());
         }
-        std::fs::write(&absolute_path, &out_bytes)
+        fs::write(&absolute_path, &out_bytes)
+            .await
             .map_err(|e| format!("Failed to write file: {e}"))?;
     } else {
-        std::fs::write(&absolute_path, &updated)
+        fs::write(&absolute_path, &updated)
+            .await
             .map_err(|e| format!("Failed to write file: {e}"))?;
     }
 
     // Update readFileState
     let mtime_ms = util::get_file_mtime_ms(&absolute_path)
+        .await
         .map_err(|e| format!("Failed to get file mtime: {e}"))?;
     file_state.set(absolute_path_str.clone(), FileStateEntry {
         content: updated.clone(),
@@ -241,7 +255,7 @@ pub fn edit_file(
         offset: None,
         limit: None,
         is_partial_view: false,
-    });
+    }).await;
 
     let patch = util::make_patch(&original_file, &updated);
 

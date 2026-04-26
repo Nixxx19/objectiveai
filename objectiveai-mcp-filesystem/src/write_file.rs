@@ -1,5 +1,6 @@
 use crate::state::{FileStateCache, FileStateEntry};
 use crate::util;
+use tokio::fs;
 
 #[derive(Debug, serde::Serialize)]
 pub struct WriteFileOutput {
@@ -14,7 +15,7 @@ pub struct WriteFileOutput {
     pub original_file: Option<String>,
 }
 
-pub fn write_file(
+pub async fn write_file(
     file_state: &FileStateCache,
     path: &str,
     content: &str,
@@ -25,15 +26,16 @@ pub fn write_file(
     }
 
     let absolute_path = util::normalize_path_allow_missing(path)
+        .await
         .map_err(|e| format!("Failed to resolve path: {e}"))?;
     let absolute_path_str = absolute_path.to_string_lossy().to_string();
 
     // Check if file exists
-    let file_exists = absolute_path.exists();
+    let file_exists = fs::try_exists(&absolute_path).await.unwrap_or(false);
 
     if file_exists {
         // Must-read check (error code 2)
-        let cached = file_state.get(&absolute_path_str);
+        let cached = file_state.get(&absolute_path_str).await;
         match cached {
             None => {
                 return Err("File has not been read yet. Read it first before writing to it.".into());
@@ -44,12 +46,13 @@ pub fn write_file(
             Some(entry) => {
                 // Staleness check (error code 3)
                 let current_mtime = util::get_file_mtime_ms(&absolute_path)
+                    .await
                     .map_err(|e| format!("Failed to get file mtime: {e}"))?;
                 if current_mtime > entry.timestamp {
                     // Windows content-comparison fallback for full reads
                     let is_full_read = !entry.is_partial_view && entry.offset.is_none() && entry.limit.is_none();
                     if is_full_read {
-                        if let Ok(current_content) = std::fs::read_to_string(&absolute_path) {
+                        if let Ok(current_content) = fs::read_to_string(&absolute_path).await {
                             let normalized_current = util::normalize_line_endings(&current_content);
                             let normalized_cached = util::normalize_line_endings(&entry.content);
                             if normalized_current != normalized_cached {
@@ -75,23 +78,26 @@ pub fn write_file(
 
     // Read original content before overwriting (for patch generation)
     let original_file = if file_exists {
-        std::fs::read_to_string(&absolute_path).ok()
+        fs::read_to_string(&absolute_path).await.ok()
     } else {
         None
     };
 
     // Create parent directories if needed
     if let Some(parent) = absolute_path.parent() {
-        std::fs::create_dir_all(parent)
+        fs::create_dir_all(parent)
+            .await
             .map_err(|e| format!("Failed to create directories: {e}"))?;
     }
 
     // Write the file
-    std::fs::write(&absolute_path, content)
+    fs::write(&absolute_path, content)
+        .await
         .map_err(|e| format!("Failed to write file: {e}"))?;
 
     // Update readFileState
     let mtime_ms = util::get_file_mtime_ms(&absolute_path)
+        .await
         .map_err(|e| format!("Failed to get file mtime: {e}"))?;
     file_state.set(absolute_path_str.clone(), FileStateEntry {
         content: util::normalize_line_endings(content),
@@ -99,7 +105,7 @@ pub fn write_file(
         offset: None,
         limit: None,
         is_partial_view: false,
-    });
+    }).await;
 
     let patch = if let Some(ref orig) = original_file {
         util::make_patch(orig, content)

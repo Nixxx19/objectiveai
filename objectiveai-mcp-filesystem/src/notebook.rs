@@ -114,8 +114,9 @@ impl NotebookMetadata {
 }
 
 /// Read and parse a Jupyter notebook, returning content blocks.
-pub fn read_notebook(path: &Path) -> Result<Vec<NotebookBlock>, String> {
-    let raw = std::fs::read_to_string(path)
+pub async fn read_notebook(path: &Path) -> Result<Vec<NotebookBlock>, String> {
+    let raw = tokio::fs::read_to_string(path)
+        .await
         .map_err(|e| format!("Failed to read notebook: {e}"))?;
     let notebook: Notebook = serde_json::from_str(&raw)
         .map_err(|e| format!("Failed to parse notebook JSON: {e}"))?;
