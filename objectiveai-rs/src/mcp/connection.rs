@@ -16,12 +16,16 @@ use tokio::sync::{Notify, RwLock};
 
 /// Callback fired by [`Connection`] when the upstream MCP server emits
 /// `notifications/tools/list_changed` or `notifications/resources/list_changed`.
-/// The corresponding cache (`tools` / `resources`) has already been
-/// refreshed by the time this fires, so the callback can read the new
-/// list immediately if it wants.
+///
+/// **Timing:** runs after the corresponding cache's write lock is taken
+/// but *before* the network paginate that replaces it. That ordering
+/// matches the moment the staleness window opens — anyone blocked on the
+/// read lock won't return until the new list lands. The callback should
+/// not call back into `list_tools` / `list_resources`: doing so would
+/// re-take the lock the listener already holds and deadlock.
 ///
 /// Stored behind an `Arc` so the listener task can cheaply clone it out
-/// of the lock and call it without holding the read guard across an await.
+/// of the lock and call it without holding the read guard.
 pub type ListChangedCallback = Arc<dyn Fn() + Send + Sync + 'static>;
 
 /// A registered-or-not callback slot. Wrapper so [`ConnectionInner`] can
@@ -204,9 +208,15 @@ impl Connection {
     }
 
     /// Register a callback to fire whenever the upstream emits
-    /// `notifications/tools/list_changed`. The tool cache is refreshed
-    /// *before* the callback runs, so the callback can call
-    /// [`Connection::list_tools`] and see the new list immediately.
+    /// `notifications/tools/list_changed`.
+    ///
+    /// **Timing:** the callback runs *after* the tool cache's write lock
+    /// is acquired but *before* the network paginate that replaces it.
+    /// That means readers blocked on the read lock won't return until the
+    /// new list is in place, and the callback observes the moment the
+    /// staleness window opens. The proxy uses this to emit its own
+    /// `notifications/tools/list_changed` to downstream clients at the
+    /// right instant.
     ///
     /// Replaces any previously-registered tools-list-changed callback.
     /// All clones of this `Connection` share the same callback slot.
@@ -218,8 +228,8 @@ impl Connection {
     }
 
     /// Register a callback to fire whenever the upstream emits
-    /// `notifications/resources/list_changed`. The resource cache is
-    /// refreshed *before* the callback runs.
+    /// `notifications/resources/list_changed`. Same timing contract as
+    /// [`Connection::set_on_tools_list_changed`].
     ///
     /// Replaces any previously-registered resources-list-changed callback.
     /// All clones of this `Connection` share the same callback slot.
@@ -443,10 +453,13 @@ impl ConnectionInner {
         });
 
         // Spawn background tool lister if the server supports tools.
+        // Initial population happens before any callback could be
+        // registered, so pass `None` — there's no list-change to signal
+        // for the very first fetch.
         if conn.initialize_result.capabilities.tools.is_some() {
             let conn = Arc::clone(&conn);
             tokio::spawn(async move {
-                conn.refresh_tools().await;
+                conn.refresh_tools(None).await;
             });
         }
 
@@ -454,7 +467,7 @@ impl ConnectionInner {
         if conn.initialize_result.capabilities.resources.is_some() {
             let conn = Arc::clone(&conn);
             tokio::spawn(async move {
-                conn.refresh_resources().await;
+                conn.refresh_resources(None).await;
             });
         }
 
@@ -880,8 +893,18 @@ impl ConnectionInner {
     }
 
     /// Re-fetches all tools from the server, replacing the cached list.
-    async fn refresh_tools(&self) {
+    ///
+    /// Optionally fires `on_change` *after* the write lock is acquired but
+    /// *before* the network paginate begins, so the callback observes the
+    /// "list change is in flight" edge — readers blocked on the read lock
+    /// won't return until the new list lands. The proxy uses this to
+    /// re-emit `notifications/tools/list_changed` to its downstream client
+    /// at the moment the staleness window opens.
+    async fn refresh_tools(&self, on_change: Option<ListChangedCallback>) {
         let mut guard = self.tools.write().await;
+        if let Some(cb) = on_change {
+            cb();
+        }
         let mut all_tools = Vec::new();
         let mut cursor: Option<String> = None;
         let result = loop {
@@ -900,8 +923,13 @@ impl ConnectionInner {
     }
 
     /// Re-fetches all resources from the server, replacing the cached list.
-    async fn refresh_resources(&self) {
+    /// See [`ConnectionInner::refresh_tools`] for the callback timing
+    /// contract.
+    async fn refresh_resources(&self, on_change: Option<ListChangedCallback>) {
         let mut guard = self.resources.write().await;
+        if let Some(cb) = on_change {
+            cb();
+        }
         let mut all_resources = Vec::new();
         let mut cursor: Option<String> = None;
         let result = loop {
@@ -1015,25 +1043,24 @@ impl ConnectionInner {
                                 };
                                 match method.as_str() {
                                     "notifications/tools/list_changed" if tools => {
-                                        this.refresh_tools().await;
-                                        // Cache is updated; fan the
-                                        // change out to whoever
-                                        // registered a callback (e.g. the
-                                        // proxy re-emitting the
-                                        // notification to its own client).
-                                        if let Some(cb) =
-                                            this.on_tools_list_changed.get()
-                                        {
-                                            cb();
-                                        }
+                                        // refresh_tools fires the
+                                        // callback after taking the
+                                        // write lock but before the
+                                        // network paginate, so the
+                                        // proxy's downstream
+                                        // notifications/tools/list_changed
+                                        // emission lines up with the
+                                        // staleness window opening.
+                                        this.refresh_tools(
+                                            this.on_tools_list_changed.get(),
+                                        )
+                                        .await;
                                     }
                                     "notifications/resources/list_changed" if resources => {
-                                        this.refresh_resources().await;
-                                        if let Some(cb) =
-                                            this.on_resources_list_changed.get()
-                                        {
-                                            cb();
-                                        }
+                                        this.refresh_resources(
+                                            this.on_resources_list_changed.get(),
+                                        )
+                                        .await;
                                     }
                                     _ => {}
                                 }
