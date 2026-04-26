@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use envconfig::Envconfig;
 use rmcp::{
     ServerHandler,
@@ -75,13 +76,15 @@ struct ObjectiveAiRequest {
 #[derive(Debug, Clone)]
 struct ObjectiveAiMcpCli {
     tool_router: ToolRouter<Self>,
+    cli_config: Arc<objectiveai_cli::Config>,
 }
 
 #[tool_router]
 impl ObjectiveAiMcpCli {
-    fn new() -> Self {
+    fn new(cli_config: Arc<objectiveai_cli::Config>) -> Self {
         Self {
             tool_router: Self::tool_router(),
+            cli_config,
         }
     }
 
@@ -97,7 +100,7 @@ impl ObjectiveAiMcpCli {
             .chain(req.command)
             .collect();
 
-        match objectiveai_cli::run(args).await {
+        match objectiveai_cli::run(args, &self.cli_config).await {
             Ok(output) => output,
             Err(e) => format!("error: {e}"),
         }
@@ -130,6 +133,11 @@ async fn main() -> anyhow::Result<()> {
     let config = ConfigBuilder::init_from_env()
         .unwrap_or_default()
         .build();
+    let cli_config = Arc::new(
+        objectiveai_cli::ConfigBuilder::init_from_env()
+            .unwrap_or_default()
+            .build(),
+    );
 
     tracing::info!(
         "Starting ObjectiveAI CLI MCP server on {}:{}",
@@ -137,7 +145,7 @@ async fn main() -> anyhow::Result<()> {
         config.port,
     );
 
-    let server = ObjectiveAiMcpCli::new();
+    let server = ObjectiveAiMcpCli::new(cli_config);
     let ct = CancellationToken::new();
 
     let service: StreamableHttpService<ObjectiveAiMcpCli, LocalSessionManager> =
