@@ -24,7 +24,8 @@ use objectiveai::mcp::{
 };
 
 use crate::AppState;
-use crate::sessions::{CallToolError, ReadResourceError, SessionManager};
+use crate::session::{CallToolError, ReadResourceError};
+use crate::session_manager::SessionManager;
 use crate::upstream::{BadInit, connect_all, parse_init_headers};
 
 /// MCP protocol version this proxy speaks.

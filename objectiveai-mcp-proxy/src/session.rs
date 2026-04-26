@@ -1,13 +1,13 @@
-//! Session manager.
+//! Per-session state and per-session dispatch.
 //!
-//! Holds the live MCP upstream connections and per-session routing state
-//! that belong to each MCP session. Session IDs are UUIDv4s — 36 ASCII
-//! visible characters (all in the 0x21-0x7E range required by MCP
-//! 2025-06-18 §basic/transports#session-management).
+//! A `Session` owns the upstream MCP connections that belong to one MCP
+//! session and is responsible for fanning `tools/list` / `resources/list`
+//! out to them and routing `tools/call` / `resources/read` to the right
+//! upstream. The registry that minds session ids and hands out
+//! `Arc<Session>`s lives in [`crate::session_manager`].
 
 use std::sync::Arc;
 
-use dashmap::DashMap;
 use futures::future::join_all;
 use indexmap::IndexMap;
 use objectiveai::mcp::{
@@ -16,10 +16,11 @@ use objectiveai::mcp::{
     tool::{CallToolRequestParams, CallToolResult, ListToolsResult, Tool},
 };
 
-/// Per-session state owned by the [`SessionManager`].
+/// Per-session state.
 ///
-/// All routing, fan-out, and forwarding methods live here — `SessionManager`
-/// is just the registry that hands out `Arc<Session>`s by id.
+/// All routing, fan-out, and forwarding methods live here. The registry
+/// that hands out `Arc<Session>`s by id is `SessionManager` (in
+/// [`crate::session_manager`]).
 #[derive(Debug)]
 pub struct Session {
     /// Live upstream MCP connections keyed by their
@@ -35,7 +36,7 @@ pub struct Session {
 }
 
 impl Session {
-    fn new(connections: IndexMap<String, Arc<Connection>>) -> Self {
+    pub(crate) fn new(connections: IndexMap<String, Arc<Connection>>) -> Self {
         Self { connections }
     }
 
@@ -200,45 +201,3 @@ pub enum ReadResourceError {
     Upstream(#[from] objectiveai::mcp::Error),
 }
 
-/// Maps a session id to its [`Session`] state.
-#[derive(Debug, Default)]
-pub struct SessionManager {
-    sessions: DashMap<String, Arc<Session>>,
-}
-
-impl SessionManager {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    /// Register a new session and return its freshly-minted session id.
-    ///
-    /// Connections are keyed by their upstream `server_info.name`. If two
-    /// upstreams advertise the same name, the later one wins with a warn —
-    /// the proxy's prefix scheme can't disambiguate them anyway, so
-    /// silently keeping both would create unroutable tools.
-    pub fn add(&self, connections: Vec<Arc<Connection>>) -> String {
-        let mut by_name: IndexMap<String, Arc<Connection>> = IndexMap::with_capacity(connections.len());
-        for connection in connections {
-            let name = connection.initialize_result.server_info.name.clone();
-            if by_name.contains_key(&name) {
-                tracing::warn!(
-                    server_name = %name,
-                    "two upstreams report the same server_info.name; later upstream wins",
-                );
-            }
-            by_name.insert(name, connection);
-        }
-
-        let id = uuid::Uuid::new_v4().to_string();
-        self.sessions
-            .insert(id.clone(), Arc::new(Session::new(by_name)));
-        id
-    }
-
-    /// Cheap clone-out of a [`Session`] — never holds a DashMap guard
-    /// across the await boundary.
-    pub fn get(&self, session_id: &str) -> Option<Arc<Session>> {
-        self.sessions.get(session_id).map(|e| e.value().clone())
-    }
-}

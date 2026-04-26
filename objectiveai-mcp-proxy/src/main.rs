@@ -1,5 +1,6 @@
 mod mcp;
-mod sessions;
+mod session;
+mod session_manager;
 mod upstream;
 
 use std::sync::Arc;
@@ -9,7 +10,7 @@ use envconfig::Envconfig;
 use objectiveai::mcp::Client;
 use tokio_util::sync::CancellationToken;
 
-use crate::sessions::SessionManager;
+use crate::session_manager::SessionManager;
 
 /// Shared state every axum handler reaches via `State<AppState>`.
 #[derive(Clone)]
