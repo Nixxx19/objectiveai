@@ -5,8 +5,8 @@ edition = "2024"
 
 [features]
 default = []
-filesystem = ["glob", "regex", "walkdir", "serde_json", "pathdiff", "indexmap", "base64"]
-cli = ["dep:objectiveai-cli", "serde_json"]
+filesystem = ["glob", "regex", "walkdir", "pathdiff", "base64"]
+cli = ["dep:objectiveai-cli"]
 cli-viewer = ["cli", "objectiveai-cli/viewer"]
 cli-rustpython = ["cli", "objectiveai-cli/rustpython"]
 cli-systempython = ["cli", "objectiveai-cli/systempython"]
@@ -14,12 +14,14 @@ cli-systempython = ["cli", "objectiveai-cli/systempython"]
 [dependencies]
 anyhow = "1.0.102"
 axum = "0.8.8"
+backoff = { version = "0.4.0", features = ["tokio"] }
 base64 = { version = "0.22", optional = true }
 dotenv = "0.15.0"
 envconfig = "0.11.1"
 futures = "0.3"
+futures-util = "0.3.32"
 glob = { version = "0.3", optional = true }
-indexmap = { version = "2", optional = true }
+indexmap = { version = "2", features = ["serde"] }
 # Direct dep (no features) so cargo invalidates objectiveai-mcp whenever
 # objectiveai-rs changes, matching what fingerprint.sh already tracks.
 # Disabling default features avoids pulling in `filesystem`'s vendored
@@ -28,12 +30,14 @@ objectiveai = { path = "../objectiveai-rs", version = "2.0.0", default-features 
 objectiveai-cli = { path = "../objectiveai-cli", version = "2.0.0", optional = true, default-features = false }
 pathdiff = { version = "0.2", optional = true }
 regex = { version = "1", optional = true }
+reqwest = { version = "0.12.28", default-features = false, features = ["charset", "http2", "rustls-tls", "json", "stream"] }
 rmcp = { version = "0.16.0", features = ["server", "transport-streamable-http-server"] }
 schemars = "1.2.1"
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = { version = "1", optional = true }
+serde_json = { version = "1.0.149", features = ["preserve_order"] }
+thiserror = "2.0.18"
 tokio = { version = "1.50.0", features = ["full"] }
-tokio-util = "0.7.18"
+tokio-util = { version = "0.7.18", features = ["io"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 walkdir = { version = "2", optional = true }

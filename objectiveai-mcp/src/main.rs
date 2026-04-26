@@ -4,6 +4,8 @@ mod filesystem;
 #[cfg(feature = "cli")]
 mod cli;
 
+mod mcp_client;
+
 use rmcp::{
     ServerHandler,
     handler::server::router::tool::ToolRouter,
