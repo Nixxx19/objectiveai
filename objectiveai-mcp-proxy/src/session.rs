@@ -6,6 +6,7 @@
 //! upstream. The registry that minds session ids and hands out
 //! `Arc<Session>`s lives in [`crate::session_manager`].
 
+use dashmap::DashMap;
 use futures::future::join_all;
 use indexmap::IndexMap;
 use objectiveai::mcp::{
@@ -14,10 +15,18 @@ use objectiveai::mcp::{
     tool::{CallToolRequestParams, CallToolResult, ListToolsResult, Tool},
 };
 use tokio::sync::broadcast;
+use tokio_util::sync::CancellationToken;
 
 /// Capacity of the per-session outbound notification channel. Sized so
 /// even a noisy upstream can't easily lap a slow SSE consumer.
 const OUTBOUND_CAPACITY: usize = 64;
+
+/// Hashable key for a JSON-RPC request id. JSON-RPC ids can be number,
+/// string, or null, so we serialize to canonical JSON and hash on that.
+fn request_id_key(id: &serde_json::Value) -> String {
+    // serde_json::to_string is infallible for any Value.
+    serde_json::to_string(id).unwrap_or_default()
+}
 
 /// Per-session state.
 ///
@@ -51,6 +60,14 @@ pub struct Session {
     /// for the same session — which the MCP spec allows — each see every
     /// notification.
     pub outbound: broadcast::Sender<JsonRpcNotification>,
+    /// In-flight per-request cancellation tokens, keyed by the inbound
+    /// JSON-RPC request id (stringified for hashability — JSON-RPC ids
+    /// can be number, string, or null). The downstream client cancels a
+    /// request by sending `notifications/cancelled` with the matching
+    /// `requestId`; the handler that owns that id observes the token
+    /// firing via `tokio::select!` and returns a `-32800 request cancelled`
+    /// JSON-RPC error. Drops the upstream call's future as a side effect.
+    in_flight: DashMap<String, CancellationToken>,
 }
 
 impl Session {
@@ -83,7 +100,40 @@ impl Session {
             });
         }
 
-        Self { connections, outbound }
+        Self {
+            connections,
+            outbound,
+            in_flight: DashMap::new(),
+        }
+    }
+
+    /// Mint a [`CancellationToken`] for an inbound request id, store it,
+    /// and hand back a clone. The handler `select!`s on the clone; the
+    /// stored token is what `cancel_in_flight` fires.
+    pub fn register_in_flight(&self, id: &serde_json::Value) -> CancellationToken {
+        let token = CancellationToken::new();
+        self.in_flight.insert(request_id_key(id), token.clone());
+        token
+    }
+
+    /// Drop the in-flight token for `id`. Always paired with an earlier
+    /// `register_in_flight` via a guard so we don't leak entries on the
+    /// happy path.
+    pub fn deregister_in_flight(&self, id: &serde_json::Value) {
+        self.in_flight.remove(&request_id_key(id));
+    }
+
+    /// Fire the cancellation token associated with `id`, if any. Returns
+    /// `true` if a token was found and cancelled. Triggered by an inbound
+    /// `notifications/cancelled` from the downstream client.
+    pub fn cancel_in_flight(&self, id: &serde_json::Value) -> bool {
+        match self.in_flight.get(&request_id_key(id)) {
+            Some(entry) => {
+                entry.value().cancel();
+                true
+            }
+            None => false,
+        }
     }
 
     /// Fan `tools/list` out to every upstream in parallel, prefix each

@@ -2,8 +2,11 @@
 //! notifications + responses; GET serves the server-initiated SSE stream.
 
 use std::convert::Infallible;
+use std::sync::Arc;
 use std::time::Duration;
+
 use axum::{
+    body::Bytes,
     extract::{Json, State},
     http::{HeaderMap, HeaderValue, StatusCode},
     response::{
@@ -12,9 +15,8 @@ use axum::{
     },
 };
 use futures::stream;
-use tokio::sync::broadcast;
 use objectiveai::mcp::{
-    JsonRpcError, JsonRpcRequest, JsonRpcResponse,
+    JsonRpcError, JsonRpcNotification, JsonRpcRequest, JsonRpcResponse,
     initialize_result::{
         Implementation, InitializeResult, ResourcesCapability, ServerCapabilities,
         ToolsCapability,
@@ -22,13 +24,16 @@ use objectiveai::mcp::{
     resource::ReadResourceRequestParams,
     tool::CallToolRequestParams,
 };
+use tokio::sync::broadcast;
+
 use crate::AppState;
-use crate::session::{CallToolError, ReadResourceError};
+use crate::session::{CallToolError, ReadResourceError, Session};
 use crate::session_manager::SessionManager;
 use crate::upstream::{BadInit, connect_all};
 
-/// MCP protocol version this proxy speaks.
-const PROTOCOL_VERSION: &str = "2025-06-18";
+/// MCP protocol version this proxy speaks. Pinned — there is only one
+/// supported version, and we reject any other.
+const PROTOCOL_VERSION: &str = "2025-11-25";
 
 /// JSON-RPC error codes we use.
 const PARSE_ERROR: i64 = -32700;
@@ -36,6 +41,8 @@ const INVALID_REQUEST: i64 = -32600;
 const METHOD_NOT_FOUND: i64 = -32601;
 const INVALID_PARAMS: i64 = -32602;
 const INTERNAL_ERROR: i64 = -32603;
+/// Spec-defined "Request cancelled" code per MCP 2025-11-25 utilities/cancellation.
+const REQUEST_CANCELLED: i64 = -32800;
 
 /// Header the client sends to identify its session on every request after
 /// `initialize`.
@@ -48,15 +55,42 @@ const SSE_KEEP_ALIVE: Duration = Duration::from_secs(15);
 // ---- POST handler ----------------------------------------------------------
 
 /// POST `/`: receive a single JSON-RPC envelope, dispatch by method.
+///
+/// **Cancellation propagation note.** The handler future is held directly
+/// by axum (no `tokio::spawn` between us and the upstream RPC). When the
+/// downstream client closes its TCP connection mid-request, axum drops
+/// this future, which drops the in-flight `session.call_tool(&params).await`,
+/// which drops reqwest's `send()` future, which sends RST_STREAM (HTTP/2)
+/// or closes the TCP stream (HTTP/1.1). That gives us connection-level
+/// cancellation propagation for free.
 pub async fn handle_post(
     State(state): State<AppState>,
     headers: HeaderMap,
-    Json(body): Json<serde_json::Value>,
+    body: Bytes,
 ) -> Response {
-    // Notifications and responses (no `id`) get 202 Accepted with no body.
-    // The proxy doesn't yet act on either; this matches the spec's
-    // requirement that the server accepts them.
+    if let Err(resp) = require_streamable_http_accept(&headers) {
+        return resp;
+    }
+
+    // Manual body parse so malformed JSON returns a JSON-RPC -32700
+    // envelope rather than axum's plain-text 400.
+    let body: serde_json::Value = match serde_json::from_slice(&body) {
+        Ok(v) => v,
+        Err(e) => return parse_error_response(format!("invalid JSON: {e}")),
+    };
+
+    // Notifications (no `id`) and responses get 202 Accepted with no body.
+    // notifications/cancelled is the one notification we actually act on:
+    // look up the in-flight token for params.requestId in the session
+    // (if any) and fire it.
     if body.get("id").is_none() {
+        if let Ok(notification) =
+            serde_json::from_value::<JsonRpcNotification>(body)
+        {
+            if notification.method == "notifications/cancelled" {
+                handle_cancelled_notification(&state, &headers, &notification);
+            }
+        }
         return StatusCode::ACCEPTED.into_response();
     }
 
@@ -74,6 +108,42 @@ pub async fn handle_post(
         "resources/read" => handle_resources_read(&state.sessions, &headers, request).await,
         other => method_not_found_response(request.id, other),
     }
+}
+
+/// Look up the in-flight token for `params.requestId` and fire it. Quietly
+/// no-ops if anything's missing — there's nothing to do if we can't
+/// identify the request being cancelled.
+fn handle_cancelled_notification(
+    state: &AppState,
+    headers: &HeaderMap,
+    notification: &JsonRpcNotification,
+) {
+    let session_id = match headers
+        .get(SESSION_ID_HEADER)
+        .and_then(|v| v.to_str().ok())
+    {
+        Some(s) => s,
+        None => return,
+    };
+    let session = match state.sessions.get(session_id) {
+        Some(s) => s,
+        None => return,
+    };
+    let request_id = match notification
+        .params
+        .as_ref()
+        .and_then(|p| p.get("requestId"))
+    {
+        Some(id) => id,
+        None => return,
+    };
+    let cancelled = session.cancel_in_flight(request_id);
+    tracing::debug!(
+        session = %session_id,
+        request_id = %request_id,
+        cancelled,
+        "notifications/cancelled received",
+    );
 }
 
 // ---- DELETE handler (explicit session termination) ------------------------
@@ -154,6 +224,35 @@ async fn handle_initialize(
     headers: &HeaderMap,
     request: JsonRpcRequest,
 ) -> Response {
+    // Validate the client's requested protocolVersion. We don't care
+    // about anything else in `params` (clientInfo / capabilities) — they
+    // don't change our routing or our advertised feature set.
+    match request.params.as_ref().and_then(|p| p.get("protocolVersion")) {
+        Some(v) => match v.as_str() {
+            Some(version) if version == PROTOCOL_VERSION => {}
+            Some(other) => {
+                return invalid_request_response(
+                    request.id,
+                    format!(
+                        "unsupported protocolVersion {other:?}; this proxy only speaks {PROTOCOL_VERSION}",
+                    ),
+                );
+            }
+            None => {
+                return invalid_params_response(
+                    request.id,
+                    "params.protocolVersion must be a string".into(),
+                );
+            }
+        },
+        None => {
+            return invalid_params_response(
+                request.id,
+                "params.protocolVersion is required".into(),
+            );
+        }
+    }
+
     let connections = match connect_all(&state.client, headers).await {
         Ok(c) => c,
         Err(BadInit::NotUtf8 { header }) => {
@@ -225,7 +324,7 @@ async fn handle_tools_list(
 
     let session = match sessions.get(&session_id) {
         Some(s) => s,
-        None => return invalid_request_response(request.id, "unknown session".into()),
+        None => return unknown_session_response(),
     };
 
     let result = session.list_tools().await;
@@ -249,7 +348,7 @@ async fn handle_tools_call(
 
     let session = match sessions.get(&session_id) {
         Some(s) => s,
-        None => return invalid_request_response(request.id, "unknown session".into()),
+        None => return unknown_session_response(),
     };
 
     let params: CallToolRequestParams = match request.params.clone() {
@@ -265,7 +364,21 @@ async fn handle_tools_call(
         None => return invalid_params_response(request.id, "missing params".into()),
     };
 
-    match session.call_tool(&params).await {
+    let token = session.register_in_flight(&request.id);
+    let _guard = InFlightGuard {
+        session: Arc::clone(&session),
+        id: request.id.clone(),
+    };
+
+    let result = tokio::select! {
+        biased;
+        _ = token.cancelled() => {
+            return cancelled_response(request.id);
+        }
+        result = session.call_tool(&params) => result,
+    };
+
+    match result {
         Ok(result) => {
             let body = JsonRpcResponse::Success {
                 jsonrpc: "2.0".into(),
@@ -295,7 +408,7 @@ async fn handle_resources_list(
 
     let session = match sessions.get(&session_id) {
         Some(s) => s,
-        None => return invalid_request_response(request.id, "unknown session".into()),
+        None => return unknown_session_response(),
     };
 
     let result = session.list_resources().await;
@@ -319,7 +432,7 @@ async fn handle_resources_read(
 
     let session = match sessions.get(&session_id) {
         Some(s) => s,
-        None => return invalid_request_response(request.id, "unknown session".into()),
+        None => return unknown_session_response(),
     };
 
     let params: ReadResourceRequestParams = match request.params.clone() {
@@ -335,7 +448,21 @@ async fn handle_resources_read(
         None => return invalid_params_response(request.id, "missing params".into()),
     };
 
-    match session.read_resource(&params.uri).await {
+    let token = session.register_in_flight(&request.id);
+    let _guard = InFlightGuard {
+        session: Arc::clone(&session),
+        id: request.id.clone(),
+    };
+
+    let result = tokio::select! {
+        biased;
+        _ = token.cancelled() => {
+            return cancelled_response(request.id);
+        }
+        result = session.read_resource(&params.uri) => result,
+    };
+
+    match result {
         Ok(result) => {
             let body = JsonRpcResponse::Success {
                 jsonrpc: "2.0".into(),
@@ -359,13 +486,80 @@ fn extract_session_id(headers: &HeaderMap) -> Result<String, Response> {
     match headers.get(SESSION_ID_HEADER) {
         Some(v) => match v.to_str() {
             Ok(s) => Ok(s.to_string()),
-            Err(_) => Err(parse_error_response(format!(
-                "{SESSION_ID_HEADER} is not valid UTF-8"
-            ))),
+            // Per spec, missing / unparseable session id maps to HTTP 404
+            // — this isn't a JSON-RPC envelope concern, it's transport.
+            Err(_) => Err((
+                StatusCode::NOT_FOUND,
+                format!("{SESSION_ID_HEADER} is not valid UTF-8"),
+            )
+                .into_response()),
         },
-        None => Err(parse_error_response(format!(
-            "missing {SESSION_ID_HEADER} header"
-        ))),
+        None => Err((
+            StatusCode::NOT_FOUND,
+            format!("missing {SESSION_ID_HEADER} header"),
+        )
+            .into_response()),
+    }
+}
+
+/// Spec-compliant 404 for "the session id was present but unknown."
+/// Same shape the MCP spec mandates for session expiration.
+fn unknown_session_response() -> Response {
+    (StatusCode::NOT_FOUND, "unknown session").into_response()
+}
+
+/// Build a JSON-RPC `-32800 Request cancelled` error response, returned
+/// when an in-flight call is cancelled via `notifications/cancelled`.
+fn cancelled_response(id: serde_json::Value) -> Response {
+    json_rpc_error_response(StatusCode::OK, id, REQUEST_CANCELLED, "request cancelled".into())
+}
+
+/// RAII guard that removes the in-flight cancellation token when the
+/// handler future returns or is dropped (cancellation, panic, etc.).
+/// Owns its `id` clone so the handler can still move `request.id` into
+/// the response builders without borrow-conflicts.
+struct InFlightGuard {
+    session: Arc<Session>,
+    id: serde_json::Value,
+}
+
+impl Drop for InFlightGuard {
+    fn drop(&mut self) {
+        self.session.deregister_in_flight(&self.id);
+    }
+}
+
+/// Per Streamable HTTP spec, POST clients must declare both
+/// `application/json` and `text/event-stream` (or `*/*`) in `Accept`.
+/// Reject with `406 Not Acceptable` otherwise.
+fn require_streamable_http_accept(headers: &HeaderMap) -> Result<(), Response> {
+    let raw = headers
+        .get(axum::http::header::ACCEPT)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("");
+
+    let mut json = false;
+    let mut sse = false;
+    let mut wildcard = false;
+    for part in raw.split(',') {
+        // Strip parameters like ";q=0.5" and lowercase the media type.
+        let media = part.split(';').next().unwrap_or("").trim().to_ascii_lowercase();
+        match media.as_str() {
+            "application/json" => json = true,
+            "text/event-stream" => sse = true,
+            "*/*" | "application/*" | "text/*" => wildcard = true,
+            _ => {}
+        }
+    }
+
+    if (json && sse) || wildcard {
+        Ok(())
+    } else {
+        Err((
+            StatusCode::NOT_ACCEPTABLE,
+            "Accept header must list both application/json and text/event-stream",
+        )
+            .into_response())
     }
 }
 
@@ -376,9 +570,10 @@ fn server_capabilities() -> ServerCapabilities {
         completions: None,
         prompts: None,
         // Tools and resources are exactly what `objectiveai::mcp::Connection`
-        // exercises today. list_changed=true is honest about future
-        // intent — the GET stream is open and will emit notifications
-        // once upstream change-watch wiring lands.
+        // exercises today. list_changed=true is honest: upstream
+        // notifications/{tools,resources}/list_changed are forwarded onto
+        // this session's SSE GET stream via Session's per-upstream
+        // callbacks (see session::Session::new).
         tools: Some(ToolsCapability {
             list_changed: Some(true),
         }),
