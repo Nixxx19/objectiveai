@@ -3,7 +3,6 @@
 
 use std::convert::Infallible;
 use std::time::Duration;
-
 use axum::{
     extract::{Json, State},
     http::{HeaderMap, HeaderValue, StatusCode},
@@ -22,7 +21,6 @@ use objectiveai::mcp::{
     resource::ReadResourceRequestParams,
     tool::CallToolRequestParams,
 };
-
 use crate::AppState;
 use crate::session::{CallToolError, ReadResourceError};
 use crate::session_manager::SessionManager;

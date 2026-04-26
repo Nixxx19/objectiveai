@@ -5,7 +5,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 
 use indexmap::IndexMap;
-use tokio::sync::RwLock;
+use tokio::sync::{Notify, RwLock};
 
 /// An active connection to an MCP server using the Streamable HTTP transport.
 ///
@@ -52,6 +52,15 @@ pub struct Connection {
     /// All resources from the server, populated by background pagination.
     resources:
         RwLock<Result<Arc<Vec<super::resource::Resource>>, Arc<super::Error>>>,
+
+    /// Cancellation channel for the long-lived `listen_for_list_changes`
+    /// task. External wrappers around `Arc<Connection>` (e.g. the proxy's
+    /// per-session handle) call `external_dropped.notify_waiters()` from
+    /// their `Drop` impl so the listener wakes immediately and can
+    /// re-check `Arc::strong_count`. Without this signal the listener
+    /// would only re-check liveness when the upstream's SSE keepalive
+    /// closes the stream (often 15-60s).
+    pub external_dropped: Arc<Notify>,
 }
 
 impl Connection {
@@ -101,6 +110,7 @@ impl Connection {
             next_id: AtomicU64::new(2),
             tools: RwLock::new(Ok(Arc::new(Vec::new()))),
             resources: RwLock::new(Ok(Arc::new(Vec::new()))),
+            external_dropped: Arc::new(Notify::new()),
         })
     }
 
@@ -150,6 +160,7 @@ impl Connection {
             next_id: AtomicU64::new(2),
             tools: RwLock::new(Ok(Arc::new(Vec::new()))),
             resources: RwLock::new(Ok(Arc::new(Vec::new()))),
+            external_dropped: Arc::new(Notify::new()),
         })
     }
 
@@ -195,6 +206,7 @@ impl Connection {
             next_id: AtomicU64::new(2),
             tools: RwLock::new(Ok(Arc::new(Vec::new()))),
             resources: RwLock::new(Ok(Arc::new(Vec::new()))),
+            external_dropped: Arc::new(Notify::new()),
         });
 
         // Spawn background tool lister if the server supports tools.
@@ -233,10 +245,17 @@ impl Connection {
                 // every external strong reference to this Connection is
                 // dropped. If we cloned an `Arc` instead, the spawned task
                 // would itself keep the Connection alive forever.
+                //
+                // Also clone the `external_dropped` Notify so the listener
+                // wakes up *immediately* when an external wrapper around
+                // `Arc<Connection>` is dropped — see
+                // `listen_for_list_changes` doc.
                 let weak = Arc::downgrade(&conn);
+                let external_dropped = Arc::clone(&conn.external_dropped);
                 tokio::spawn(async move {
                     Self::listen_for_list_changes(
                         weak,
+                        external_dropped,
                         tools_list_changed,
                         resources_list_changed,
                     )
@@ -698,30 +717,28 @@ impl Connection {
     /// Takes a [`Weak<Self>`] (not `Arc<Self>`) so the spawned task
     /// doesn't itself keep the [`Connection`] alive.
     ///
-    /// Cancellation has two layers:
+    /// Cancellation is event-driven, not poll-based:
+    ///
     /// 1. At the top of every outer-loop iteration we upgrade the weak;
     ///    if every external strong reference is gone, the task returns.
-    /// 2. While parked inside the SSE read loop (the long-lived case —
-    ///    we may sit on `next_line().await` for the upstream's entire
-    ///    keepalive interval), we [`tokio::select!`] the line reader
-    ///    against a periodic tick. On each tick we check
-    ///    `Arc::strong_count(&this) == 1`; when true, the strong ref we
-    ///    hold is the *only* one left, which means every external holder
-    ///    has dropped — exit immediately so the Connection drops too.
+    /// 2. While parked inside the SSE read loop, we [`tokio::select!`]
+    ///    the line reader against `external_dropped.notified()`. External
+    ///    wrappers around `Arc<Connection>` fire `notify_waiters()` from
+    ///    their `Drop` impl; when that fires, we re-check
+    ///    `Arc::strong_count(&this) == 1` and exit immediately if no
+    ///    external holder remains.
+    /// 3. As a backup for the race where a drop fires *between* iterations
+    ///    (we missed the notify because we weren't yet registered), the
+    ///    top of every inner-loop iteration also checks the strong count.
     async fn listen_for_list_changes(
         weak: Weak<Self>,
+        external_dropped: Arc<Notify>,
         tools: bool,
         resources: bool,
     ) {
         use futures_util::TryStreamExt;
         use tokio::io::AsyncBufReadExt;
         use tokio_util::io::StreamReader;
-
-        /// How often the inner read loop checks `Arc::strong_count` while
-        /// parked on `next_line().await`. Cap on cancellation latency for
-        /// the in-stream-wait case; small enough that DELETE-then-shutdown
-        /// feels instant, large enough to be free in steady state.
-        const SELF_CANCEL_CHECK_INTERVAL: Duration = Duration::from_secs(1);
 
         loop {
             // Layer 1: between-reconnect liveness check.
@@ -743,13 +760,14 @@ impl Connection {
             let reader = StreamReader::new(stream);
             let mut lines = reader.lines();
 
-            let mut check_tick = tokio::time::interval(SELF_CANCEL_CHECK_INTERVAL);
-            check_tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
-            // First tick fires immediately; consume it so we don't
-            // strong_count-check before we've even tried to read.
-            check_tick.tick().await;
-
             'inner: loop {
+                // Layer 3: race-window backup. If a drop fired between
+                // our last `notified()` registration and this one, the
+                // notify is gone — but the strong count tells us.
+                if Arc::strong_count(&this) == 1 {
+                    return;
+                }
+
                 tokio::select! {
                     line_result = lines.next_line() => {
                         match line_result {
@@ -778,16 +796,10 @@ impl Connection {
                             _ => break 'inner,
                         }
                     }
-                    _ = check_tick.tick() => {
-                        // Layer 2: in-stream-wait liveness check. If our
-                        // `this` is the *only* strong ref left, every
-                        // external holder has dropped — bail out before
-                        // any further wait could keep the Connection
-                        // (and its upstream HTTP session) alive.
-                        if Arc::strong_count(&this) == 1 {
-                            return;
-                        }
-                    }
+                    // Layer 2: an external wrapper just fired notify_waiters
+                    // from its Drop. Loop back; the strong-count check at
+                    // the top decides whether to exit.
+                    _ = external_dropped.notified() => {}
                 }
             }
 

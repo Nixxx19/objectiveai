@@ -8,12 +8,11 @@
 //! looking sessions back up.
 
 use std::sync::Arc;
-
 use dashmap::DashMap;
 use indexmap::IndexMap;
 use objectiveai::mcp::Connection;
 
-use crate::session::Session;
+use crate::session::{Session, UpstreamConnection};
 
 /// Maps a session id to its [`Session`] state.
 #[derive(Debug, Default)]
@@ -32,8 +31,13 @@ impl SessionManager {
     /// upstreams advertise the same name, the later one wins with a warn —
     /// the proxy's prefix scheme can't disambiguate them anyway, so
     /// silently keeping both would create unroutable tools.
+    ///
+    /// Each `Arc<Connection>` is wrapped in an [`UpstreamConnection`]
+    /// whose `Drop` fires the connection's `external_dropped` notify, so
+    /// the upstream's listener task wakes up immediately when the session
+    /// goes away (instead of waiting for the upstream's SSE keepalive).
     pub fn add(&self, connections: Vec<Arc<Connection>>) -> String {
-        let mut by_name: IndexMap<String, Arc<Connection>> =
+        let mut by_name: IndexMap<String, UpstreamConnection> =
             IndexMap::with_capacity(connections.len());
         for connection in connections {
             let name = connection.initialize_result.server_info.name.clone();
@@ -43,7 +47,7 @@ impl SessionManager {
                     "two upstreams report the same server_info.name; later upstream wins",
                 );
             }
-            by_name.insert(name, connection);
+            by_name.insert(name, UpstreamConnection::new(connection));
         }
 
         let id = uuid::Uuid::new_v4().to_string();
@@ -61,12 +65,13 @@ impl SessionManager {
     /// Remove a session from the registry. Returns `Some(_)` if a session
     /// was present, `None` if the id was unknown.
     ///
-    /// Note: removing the session releases this map's `Arc<Session>`, but
-    /// each `Arc<Connection>` inside the session has long-running
-    /// background tasks (the upstream SSE listener) that hold their own
-    /// `Arc<Connection>` clones — those tasks keep the upstream
-    /// connections alive until the proxy process restarts. A proper shutdown
-    /// signal on `Connection` is needed to fully reclaim the resources.
+    /// Once every `Arc<Session>` to the removed session has dropped, the
+    /// session's `IndexMap<String, UpstreamConnection>` drops, every
+    /// `UpstreamConnection`'s `Drop` fires its upstream's
+    /// `external_dropped` notify, and each upstream's listener task wakes
+    /// to re-check liveness. With the last `Arc<Connection>` released the
+    /// listener sees `Arc::strong_count == 1` (only itself) and exits,
+    /// which drops the `Connection` and closes the upstream HTTP session.
     pub fn remove(&self, session_id: &str) -> Option<Arc<Session>> {
         self.sessions.remove(session_id).map(|(_, session)| session)
     }
