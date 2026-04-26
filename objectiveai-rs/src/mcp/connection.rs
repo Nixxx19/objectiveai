@@ -303,14 +303,14 @@ impl Connection {
                 ));
             }
 
-            let rpc_response: JsonRpcResponse<R> =
+            let rpc_response: super::JsonRpcResponse<R> =
                 response.json().await.map_err(|e| {
                     backoff::Error::transient(super::Error::Request(e))
                 })?;
 
             match rpc_response {
-                JsonRpcResponse::Success { result, .. } => Ok(result),
-                JsonRpcResponse::Error { error, .. } => {
+                super::JsonRpcResponse::Success { result, .. } => Ok(result),
+                super::JsonRpcResponse::Error { error, .. } => {
                     Err(backoff::Error::permanent(super::Error::JsonRpc {
                         code: error.code,
                         message: error.message,
@@ -704,7 +704,7 @@ impl Connection {
                     None => continue,
                 };
 
-                let method = match serde_json::from_str::<JsonRpcNotification>(data) {
+                let method = match serde_json::from_str::<super::JsonRpcNotification>(data) {
                     Ok(n) => n.method,
                     Err(_) => continue,
                 };
@@ -726,38 +726,3 @@ impl Connection {
     }
 }
 
-/// JSON-RPC 2.0 response envelope.
-#[derive(serde::Deserialize)]
-#[serde(untagged)]
-pub(super) enum JsonRpcResponse<T> {
-    Success {
-        #[allow(dead_code)]
-        jsonrpc: String,
-        #[allow(dead_code)]
-        id: serde_json::Value,
-        result: T,
-    },
-    Error {
-        #[allow(dead_code)]
-        jsonrpc: String,
-        #[allow(dead_code)]
-        id: serde_json::Value,
-        error: JsonRpcError,
-    },
-}
-
-/// JSON-RPC 2.0 error object.
-#[derive(serde::Deserialize)]
-pub(super) struct JsonRpcError {
-    pub code: i64,
-    pub message: String,
-    pub data: Option<serde_json::Value>,
-}
-
-/// JSON-RPC 2.0 notification (no `id` field).
-#[derive(serde::Deserialize)]
-struct JsonRpcNotification {
-    #[allow(dead_code)]
-    jsonrpc: String,
-    method: String,
-}

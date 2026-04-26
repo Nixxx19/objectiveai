@@ -135,13 +135,13 @@ impl Client {
             .ok_or(super::Error::NoSessionId)?;
 
         // Parse the initialize result.
-        let rpc_response: super::connection::JsonRpcResponse<
+        let rpc_response: super::JsonRpcResponse<
             super::initialize_result::InitializeResult,
         > = response.json().await.map_err(super::Error::Request)?;
 
         let initialize_result = match rpc_response {
-            super::connection::JsonRpcResponse::Success { result, .. } => result,
-            super::connection::JsonRpcResponse::Error { error, .. } => {
+            super::JsonRpcResponse::Success { result, .. } => result,
+            super::JsonRpcResponse::Error { error, .. } => {
                 return Err(super::Error::JsonRpc {
                     code: error.code,
                     message: error.message,
