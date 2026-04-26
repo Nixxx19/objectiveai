@@ -15,10 +15,10 @@ const AUTHORIZATION_KEY: &str = "Authorization";
 
 /// One upstream MCP server the proxy should connect to for a session.
 #[derive(Debug)]
-pub struct UpstreamSpec {
-    pub url: String,
-    pub authorization: Option<String>,
-    pub extra_headers: IndexMap<String, String>,
+struct UpstreamSpec {
+    url: String,
+    authorization: Option<String>,
+    extra_headers: IndexMap<String, String>,
 }
 
 /// Why parsing the three custom session-init headers failed.
@@ -34,18 +34,51 @@ pub enum BadInit {
     },
 }
 
-/// Read `X-MCP-Servers`, `X-MCP-Headers`, `X-MCP-Authorization` from the
-/// inbound `initialize` request and produce one [`UpstreamSpec`] per
-/// server URL with the merged headers ready to forward.
+/// Parse the three custom session-init headers and connect to every
+/// upstream they describe in parallel.
 ///
-/// All three headers are optional. If `X-MCP-Servers` is absent or empty,
-/// returns an empty Vec — the session still initializes, the client just
-/// gets nothing back from `tools/list` etc.
+/// Headers (all optional):
+/// - `X-MCP-Servers`: JSON array of upstream URLs. Empty / absent → empty
+///   Vec is returned (the session still initializes, the client just gets
+///   nothing from `tools/list` etc).
+/// - `X-MCP-Headers`: JSON `{string: string}` of extra HTTP headers
+///   forwarded on every upstream request.
+/// - `X-MCP-Authorization`: JSON `{url: string}` per-URL `Authorization`
+///   value. Overrides whatever `X-MCP-Headers` would have sent for that URL.
 ///
-/// Per-URL precedence: `X-MCP-Headers` is the base set forwarded to every
-/// upstream; `X-MCP-Authorization[<url>]` overrides the `Authorization`
-/// entry just for that one upstream.
-pub fn parse_init_headers(http_headers: &HeaderMap) -> Result<Vec<UpstreamSpec>, BadInit> {
+/// Duplicate URLs in `X-MCP-Servers` are ignored (first-occurrence wins).
+/// Per-upstream connect failures are logged and dropped — best-effort,
+/// matches the rest of the proxy's failure semantics. The returned Vec
+/// contains only the connections that successfully completed `initialize`,
+/// in the order their URLs first appeared.
+pub async fn connect_all(
+    client: &Client,
+    http_headers: &HeaderMap,
+) -> Result<Vec<Arc<Connection>>, BadInit> {
+    let specs = parse_init_headers(http_headers)?;
+
+    let attempts = specs.into_iter().map(|spec| {
+        let url = spec.url.clone();
+        async move {
+            let result = client
+                .connect(spec.url, spec.authorization, None, spec.extra_headers)
+                .await;
+            (url, result)
+        }
+    });
+
+    let results = join_all(attempts).await;
+    let mut connections = Vec::with_capacity(results.len());
+    for (url, result) in results {
+        match result {
+            Ok(conn) => connections.push(conn),
+            Err(e) => tracing::warn!(url = %url, error = %e, "upstream connect failed"),
+        }
+    }
+    Ok(connections)
+}
+
+fn parse_init_headers(http_headers: &HeaderMap) -> Result<Vec<UpstreamSpec>, BadInit> {
     let servers: Vec<String> = match http_headers.get(SERVERS_HEADER) {
         Some(v) => {
             let s = v.to_str().map_err(|_| BadInit::NotUtf8 { header: SERVERS_HEADER })?;
@@ -109,29 +142,4 @@ pub fn parse_init_headers(http_headers: &HeaderMap) -> Result<Vec<UpstreamSpec>,
     }
 
     Ok(specs)
-}
-
-/// Connect to every upstream in `specs` in parallel. Failures are logged
-/// and dropped; the returned Vec contains only the connections that
-/// successfully completed `initialize`. Order matches `specs` order.
-pub async fn connect_all(client: &Client, specs: Vec<UpstreamSpec>) -> Vec<Arc<Connection>> {
-    let attempts = specs.into_iter().map(|spec| {
-        let url = spec.url.clone();
-        async move {
-            let result = client
-                .connect(spec.url, spec.authorization, None, spec.extra_headers)
-                .await;
-            (url, result)
-        }
-    });
-
-    let results = join_all(attempts).await;
-    let mut connections = Vec::with_capacity(results.len());
-    for (url, result) in results {
-        match result {
-            Ok(conn) => connections.push(conn),
-            Err(e) => tracing::warn!(url = %url, error = %e, "upstream connect failed"),
-        }
-    }
-    connections
 }

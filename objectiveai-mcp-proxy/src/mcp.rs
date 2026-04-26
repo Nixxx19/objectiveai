@@ -26,7 +26,7 @@ use objectiveai::mcp::{
 use crate::AppState;
 use crate::session::{CallToolError, ReadResourceError};
 use crate::session_manager::SessionManager;
-use crate::upstream::{BadInit, connect_all, parse_init_headers};
+use crate::upstream::{BadInit, connect_all};
 
 /// MCP protocol version this proxy speaks.
 const PROTOCOL_VERSION: &str = "2025-06-18";
@@ -112,8 +112,8 @@ async fn handle_initialize(
     headers: &HeaderMap,
     request: JsonRpcRequest,
 ) -> Response {
-    let specs = match parse_init_headers(headers) {
-        Ok(s) => s,
+    let connections = match connect_all(&state.client, headers).await {
+        Ok(c) => c,
         Err(BadInit::NotUtf8 { header }) => {
             return invalid_request_response(
                 request.id,
@@ -128,7 +128,6 @@ async fn handle_initialize(
         }
     };
 
-    let connections = connect_all(&state.client, specs).await;
     let session_id = state.sessions.add(connections);
 
     let result = InitializeResult {
