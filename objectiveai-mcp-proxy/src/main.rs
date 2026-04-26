@@ -1,3 +1,5 @@
+mod mcp;
+
 use envconfig::Envconfig;
 use tokio_util::sync::CancellationToken;
 
@@ -78,7 +80,7 @@ async fn main() -> anyhow::Result<()> {
     );
 
     let ct = CancellationToken::new();
-    let router = axum::Router::new();
+    let router = axum::Router::new().route("/", axum::routing::post(mcp::handle));
     let listener = tokio::net::TcpListener::bind(format!(
         "{}:{}",
         config.address, config.port,
