@@ -28,7 +28,7 @@ pub struct Client {
     pub rate_limit_max_wait_secs: u64,
     /// FIFO concurrency cap forwarded to the runner via `--query-limit`.
     pub query_limit: u64,
-    binary_path: Arc<std::sync::OnceLock<String>>,
+    binary_path: Arc<OnceCell<String>>,
     /// Lazily-spawned shared runner. Initialized on first request via
     /// `tokio::sync::OnceCell::get_or_try_init`. All concurrent
     /// `create()` callers race for the same singleton; only one
@@ -63,66 +63,76 @@ impl Client {
             rate_limit_max_retries,
             rate_limit_max_wait_secs,
             query_limit,
-            binary_path: Arc::new(std::sync::OnceLock::new()),
+            binary_path: Arc::new(OnceCell::new()),
             runner: Arc::new(OnceCell::new()),
         }
     }
 
     /// Extracts the embedded runner binary to a temp directory and returns its path.
     ///
-    /// Cached after first extraction. Uses a content-based hash in the directory name
-    /// so different API versions get separate binaries and the same version reuses
-    /// the cached binary across restarts.
+    /// Cached after first extraction in a `tokio::sync::OnceCell` so the
+    /// expensive write happens only once even under concurrent first-callers.
+    /// Uses a content-based hash in the directory name so different API
+    /// versions get separate binaries and the same version reuses the cached
+    /// binary across restarts.
     ///
     /// Returns `None` when the crate is built without the
     /// `claude-agent-sdk` feature — in that configuration no runner
     /// binary is embedded, and `create()` returns `Error::NotEnabled`
     /// before this method is reached.
     #[cfg(feature = "claude-agent-sdk")]
-    fn binary_path(&self) -> Option<&str> {
-        let path = self.binary_path.get_or_init(|| {
-            let binary = super::claude_agent_sdk_binary::CLAUDE_AGENT_SDK_RUNNER;
+    async fn binary_path(&self) -> Option<&str> {
+        let path = self
+            .binary_path
+            .get_or_init(|| async {
+                let binary = super::claude_agent_sdk_binary::CLAUDE_AGENT_SDK_RUNNER;
 
-            // Fast fingerprint: hash length + head/tail for cache key.
-            use std::hash::{Hash, Hasher};
-            let mut hasher = std::collections::hash_map::DefaultHasher::new();
-            binary.len().hash(&mut hasher);
-            binary[..binary.len().min(4096)].hash(&mut hasher);
-            binary[binary.len().saturating_sub(4096)..].hash(&mut hasher);
-            let hash = hasher.finish();
+                // Fast fingerprint: hash length + head/tail for cache key.
+                use std::hash::{Hash, Hasher};
+                let mut hasher = std::collections::hash_map::DefaultHasher::new();
+                binary.len().hash(&mut hasher);
+                binary[..binary.len().min(4096)].hash(&mut hasher);
+                binary[binary.len().saturating_sub(4096)..].hash(&mut hasher);
+                let hash = hasher.finish();
 
-            let binary_name = if cfg!(windows) {
-                "objectiveai-claude-agent-sdk-runner.exe"
-            } else {
-                "objectiveai-claude-agent-sdk-runner"
-            };
+                let binary_name = if cfg!(windows) {
+                    "objectiveai-claude-agent-sdk-runner.exe"
+                } else {
+                    "objectiveai-claude-agent-sdk-runner"
+                };
 
-            let dir = std::env::temp_dir()
-                .join(format!("objectiveai-sdk-runner-{hash:016x}"));
-            let path = dir.join(binary_name);
+                let dir = std::env::temp_dir()
+                    .join(format!("objectiveai-sdk-runner-{hash:016x}"));
+                let path = dir.join(binary_name);
 
-            if !path.exists() {
-                std::fs::create_dir_all(&dir).ok();
-                if std::fs::write(&path, binary).is_err() {
-                    return String::new();
+                if !tokio::fs::try_exists(&path).await.unwrap_or(false) {
+                    let _ = tokio::fs::create_dir_all(&dir).await;
+                    if tokio::fs::write(&path, binary).await.is_err() {
+                        return String::new();
+                    }
+                    #[cfg(unix)]
+                    {
+                        use std::os::unix::fs::PermissionsExt;
+                        let _ = tokio::fs::set_permissions(
+                            &path,
+                            std::fs::Permissions::from_mode(0o755),
+                        )
+                        .await;
+                    }
                 }
-                #[cfg(unix)]
-                {
-                    use std::os::unix::fs::PermissionsExt;
-                    let _ = std::fs::set_permissions(
-                        &path,
-                        std::fs::Permissions::from_mode(0o755),
-                    );
-                }
-            }
 
-            path.to_string_lossy().to_string()
-        });
-        if path.is_empty() { None } else { Some(path.as_str()) }
+                path.to_string_lossy().to_string()
+            })
+            .await;
+        if path.is_empty() {
+            None
+        } else {
+            Some(path.as_str())
+        }
     }
 
     #[cfg(not(feature = "claude-agent-sdk"))]
-    fn binary_path(&self) -> Option<&str> {
+    async fn binary_path(&self) -> Option<&str> {
         None
     }
 
@@ -133,6 +143,7 @@ impl Client {
         let query_limit = self.query_limit;
         let binary_path = self
             .binary_path()
+            .await
             .ok_or_else(|| {
                 super::Error::Spawn(
                     "failed to extract claude-agent-sdk-runner binary".to_string(),
