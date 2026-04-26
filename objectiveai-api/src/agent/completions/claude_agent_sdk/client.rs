@@ -1,39 +1,71 @@
 use std::pin::Pin;
 use std::sync::Arc;
 use futures::{Stream, StreamExt};
-use tokio::io::AsyncBufReadExt;
-use tokio::io::BufReader;
-use tokio::process::Command;
-use tokio_stream::wrappers::LinesStream;
+use indexmap::IndexMap;
+use tokio::sync::OnceCell;
 
 use super::super::{ContinuationItem, StreamItem, UpstreamClient};
 use super::invention_server::InventionServer;
-use super::mcp_server_config::McpHttpServerConfig;
+use super::mcp_server_config::{McpHttpServerConfig, McpServerConfig};
 use super::prompt::Prompt;
+use super::runner::{Runner, RunnerUpdate};
 use super::sdk_message::SDKMessage;
+use super::stdio::{RunParams, StdioEndStatus};
 use crate::util::StreamOnce;
 
 /// Claude Agent SDK client for agent completions.
 ///
-/// Extracts the embedded Claude Agent SDK runner binary
-/// on first use and spawns it as a subprocess for each query.
-#[derive(Debug, Clone)]
+/// Owns the Python runner subprocess for the lifetime of the
+/// client. The subprocess is spawned **lazily** on the first
+/// `create()` call and reused for every subsequent request — see
+/// [`Client::runner_handle`]. The runner multiplexes N concurrent
+/// streams over a single (stdin, stdout, stderr) triple, with the
+/// in-flight cap enforced by `--query-limit`.
+#[derive(Clone)]
 pub struct Client {
     pub user_agent: String,
     pub enabled: bool,
     pub rate_limit_max_retries: u64,
     pub rate_limit_max_wait_secs: u64,
+    /// FIFO concurrency cap forwarded to the runner via `--query-limit`.
+    pub query_limit: u64,
     binary_path: Arc<std::sync::OnceLock<String>>,
+    /// Lazily-spawned shared runner. Initialized on first request via
+    /// `tokio::sync::OnceCell::get_or_try_init`. All concurrent
+    /// `create()` callers race for the same singleton; only one
+    /// initializer runs.
+    runner: Arc<OnceCell<Arc<Runner>>>,
+}
+
+impl std::fmt::Debug for Client {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Client")
+            .field("user_agent", &self.user_agent)
+            .field("enabled", &self.enabled)
+            .field("rate_limit_max_retries", &self.rate_limit_max_retries)
+            .field("rate_limit_max_wait_secs", &self.rate_limit_max_wait_secs)
+            .field("query_limit", &self.query_limit)
+            .field("runner_initialized", &self.runner.initialized())
+            .finish()
+    }
 }
 
 impl Client {
-    pub fn new(user_agent: String, enabled: bool, rate_limit_max_retries: u64, rate_limit_max_wait_secs: u64) -> Self {
+    pub fn new(
+        user_agent: String,
+        enabled: bool,
+        rate_limit_max_retries: u64,
+        rate_limit_max_wait_secs: u64,
+        query_limit: u64,
+    ) -> Self {
         Self {
             user_agent,
             enabled,
             rate_limit_max_retries,
             rate_limit_max_wait_secs,
+            query_limit,
             binary_path: Arc::new(std::sync::OnceLock::new()),
+            runner: Arc::new(OnceCell::new()),
         }
     }
 
@@ -94,14 +126,41 @@ impl Client {
     fn binary_path(&self) -> Option<&str> {
         None
     }
+
+    /// Get-or-init the shared runner subprocess. The first caller to
+    /// hit this on a given `Client` pays the spawn cost; subsequent
+    /// callers receive a clone of the same `Arc<Runner>`.
+    async fn runner_handle(&self) -> Result<Arc<Runner>, super::Error> {
+        let query_limit = self.query_limit;
+        let binary_path = self
+            .binary_path()
+            .ok_or_else(|| {
+                super::Error::Spawn(
+                    "failed to extract claude-agent-sdk-runner binary".to_string(),
+                )
+            })?
+            .to_owned();
+
+        let runner = self
+            .runner
+            .get_or_try_init(|| async move {
+                let r = Runner::spawn(&binary_path, query_limit)
+                    .await
+                    .map_err(|e| super::Error::Spawn(e.to_string()))?;
+                Ok::<_, super::Error>(Arc::new(r))
+            })
+            .await?;
+        Ok(runner.clone())
+    }
 }
 
-/// Builds the MCP servers JSON object from connections and an optional invention server.
-fn build_mcp_servers_json(
+/// Build the typed `mcp_servers` map that goes into [`RunParams`].
+/// Replaces the old `serde_json::Value`-based intermediate
+/// representation with strongly-typed [`McpServerConfig`].
+fn build_mcp_servers(
     mcp_connections: &[Arc<crate::mcp::Connection>],
     invention_server: Option<&InventionServer>,
-) -> String {
-    use indexmap::IndexMap;
+) -> IndexMap<String, McpServerConfig> {
     use std::collections::HashMap;
 
     let mut name_counts: HashMap<String, usize> = HashMap::new();
@@ -110,7 +169,7 @@ fn build_mcp_servers_json(
         *name_counts.entry(name.clone()).or_default() += 1;
     }
 
-    let mut servers: IndexMap<String, serde_json::Value> = IndexMap::new();
+    let mut servers: IndexMap<String, McpServerConfig> = IndexMap::new();
 
     for conn in mcp_connections {
         let name = &conn.initialize_result.server_info.name;
@@ -120,18 +179,17 @@ fn build_mcp_servers_json(
             name.clone()
         };
         let config = McpHttpServerConfig::from(conn.as_ref());
-        servers.insert(key, serde_json::to_value(&config).unwrap());
+        servers.insert(key, McpServerConfig::Http(config));
     }
 
     if let Some(inv) = invention_server {
-        let config = inv.mcp_server_config();
         servers.insert(
             "objectiveai-invention".to_string(),
-            serde_json::to_value(&config).unwrap(),
+            McpServerConfig::Http(inv.mcp_server_config()),
         );
     }
 
-    serde_json::to_string(&servers).unwrap()
+    servers
 }
 
 /// Validates that the response_format is compatible with the Claude Agent SDK.
@@ -154,6 +212,46 @@ fn validate_response_format(
             }
         }
         Some(_) => Err(super::Error::UnsupportedResponseFormat),
+    }
+}
+
+/// Drop-guard that fires a best-effort `cancel` for `request_id` when
+/// the consumer drops the returned stream early. Sending cancel for
+/// a request that already finished is harmless — the runner replies
+/// `end(error, "cancel-unknown-id")`, but we've already unregistered
+/// from the runner's registry by then so the line is dropped.
+struct CancelOnDrop {
+    runner: Option<Arc<Runner>>,
+    id: Option<String>,
+}
+
+impl CancelOnDrop {
+    fn new(runner: Arc<Runner>, id: String) -> Self {
+        Self {
+            runner: Some(runner),
+            id: Some(id),
+        }
+    }
+
+    /// Disarm — the request finished naturally, no cancel needed.
+    fn defuse(&mut self) {
+        self.runner = None;
+        self.id = None;
+    }
+}
+
+impl Drop for CancelOnDrop {
+    fn drop(&mut self) {
+        let (Some(runner), Some(id)) = (self.runner.take(), self.id.take()) else {
+            return;
+        };
+        // Spawn rather than block — Drop is sync.
+        if tokio::runtime::Handle::try_current().is_ok() {
+            tokio::spawn(async move {
+                let _ = runner.send_cancel(&id).await;
+                runner.unregister(&id).await;
+            });
+        }
     }
 }
 
@@ -245,15 +343,14 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
                 None
             };
 
-            // Serialize message and MCP servers for CLI args.
-            let message_json = serde_json::to_string(&prompt.message)
-                .map_err(|e| super::Error::Json(e.to_string()))?;
-            let mcp_servers_json =
-                build_mcp_servers_json(&mcp_connections, invention_server.as_ref());
+            let mcp_servers = build_mcp_servers(
+                &mcp_connections,
+                invention_server.as_ref(),
+            );
 
-            // Compute assistant_index from continuation.
-            // State items carry a message_count (may be >1 since the SDK
-            // handles its own multi-turn loop). Other items count as 1.
+            // Compute assistant_index from continuation. State items
+            // carry a message_count (may be >1 since the SDK handles
+            // its own multi-turn loop). Other items count as 1.
             let assistant_index = continuation
                 .as_deref()
                 .map(|c| {
@@ -267,117 +364,87 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
                 })
                 .unwrap_or(0);
 
-            let binary = client.binary_path()
-                .ok_or_else(|| super::Error::Spawn(
-                    "failed to extract claude-agent-sdk-runner binary".to_string(),
-                ))?
-                .to_owned();
+            // Lazy-spawn (or reuse) the runner subprocess.
+            let runner = client.runner_handle().await?;
+
+            // Each agent-completions request gets its own caller-side
+            // id. We use `id` (the upstream id) rather than minting a
+            // separate UUID — the upstream id is already unique per
+            // request and lets the runner's diag lines be cross-
+            // referenced against agent-completion logs.
+            let request_id = id.clone();
+
+            let mut rx = runner
+                .register(request_id.clone())
+                .await
+                .map_err(|e| super::Error::Spawn(e.to_string()))?;
+
+            // Cancel-on-drop guard: arms now, defuses on natural
+            // completion below.
+            let mut cancel_guard = CancelOnDrop::new(runner.clone(), request_id.clone());
+
+            // Build the params object — borrows from locals in this
+            // async block, valid for the duration of the await.
+            let session_id = prompt.message.session_id.as_str();
+            let resume_arg: Option<&str> =
+                if session_id.is_empty() { None } else { Some(session_id) };
+            let user_agent_arg: Option<&str> =
+                if client.user_agent.is_empty() { None } else { Some(client.user_agent.as_str()) };
+
+            let run_params = RunParams {
+                model: agent.base.model.as_str(),
+                message: &prompt.message,
+                system_prompt: prompt.system_prompt.as_deref(),
+                effort: agent.base.effort,
+                thinking_disabled: agent.base.thinking == Some(false),
+                mcp_servers: &mcp_servers,
+                resume: resume_arg,
+                user_agent: user_agent_arg,
+                rate_limit_max_retries: client.rate_limit_max_retries,
+                rate_limit_max_wait_secs: client.rate_limit_max_wait_secs,
+            };
+
+            if let Err(e) = runner.send_run(&request_id, run_params).await {
+                runner.unregister(&request_id).await;
+                cancel_guard.defuse();
+                return Err(super::Error::Spawn(e.to_string()));
+            }
+
+            let id_for_chunks = id.clone();
             let agent_id = agent.id.clone();
 
-            // Spawn the Python-based runner binary with CLI args.
-            let mut cmd = Command::new(&binary);
-            cmd.arg("--model").arg(&agent.base.model)
-                .arg("--message").arg(&message_json);
-
-            if let Some(s) = &prompt.system_prompt {
-                cmd.arg("--system-prompt").arg(s);
-            }
-            if let Some(e) = agent.base.effort {
-                cmd.arg("--effort").arg(e.as_str());
-            }
-            if agent.base.thinking == Some(false) {
-                cmd.arg("--thinking-disabled");
-            }
-            if mcp_servers_json != "{}" {
-                cmd.arg("--mcp-servers").arg(&mcp_servers_json);
-            }
-            let session_id = &prompt.message.session_id;
-            if !session_id.is_empty() {
-                cmd.arg("--resume").arg(session_id);
-            }
-            cmd.arg("--user-agent").arg(&client.user_agent);
-            cmd.arg("--rate-limit-max-retries").arg(client.rate_limit_max_retries.to_string());
-            cmd.arg("--rate-limit-max-wait-secs").arg(client.rate_limit_max_wait_secs.to_string());
-
-            cmd.stdin(std::process::Stdio::null())
-                .stdout(std::process::Stdio::piped())
-                .stderr(std::process::Stdio::piped());
-            cmd.env_remove("CLAUDECODE");
-
-            let mut child = cmd.spawn().map_err(|e| {
-                super::Error::Spawn(e.to_string())
-            })?;
-
-            // Collect stderr in background.
-            let stderr = child.stderr.take().expect("stderr was piped");
-            let stderr_handle = tokio::spawn(async move {
-                let mut buf = String::new();
-                let mut reader = BufReader::new(stderr);
-                let _ = tokio::io::AsyncReadExt::read_to_string(&mut reader, &mut buf).await;
-                buf
-            });
-
-            // Read stdout lines.
-            let stdout = child.stdout.take().expect("stdout was piped");
-            let reader = BufReader::new(stdout);
-            let mut lines_stream = LinesStream::new(reader.lines());
-
-            let id_for_peek = id.clone();
             let internal_stream = async_stream::stream! {
-                // Keep invention server alive for the duration of the stream.
+                // Keep invention server alive for the duration of the
+                // stream and arm the cancel-on-drop.
                 let _invention_server_guard = invention_server;
+                let mut cancel_guard = cancel_guard;
 
                 let mut latest_session_id = String::new();
                 let mut had_error = false;
                 let mut msg_index = assistant_index;
                 // Most-recent assistant index, so the SDK's trailing
-                // ResultMessage (a usage/cost summary, not a real second
-                // turn) can re-use it. Per protocol, assistant messages
-                // never sit back-to-back at distinct indices — they
-                // alternate with tool messages — so the trailer must
-                // merge into the assistant that just finished, not stand
-                // as its own message at the next index.
+                // ResultMessage (a usage/cost summary, not a real
+                // second turn) can re-use it. Per protocol, assistant
+                // messages never sit back-to-back at distinct indices
+                // — they alternate with tool messages — so the trailer
+                // must merge into the assistant that just finished.
                 let mut last_assistant_index: Option<u64> = None;
 
                 loop {
-                    match lines_stream.next().await {
+                    let update = match rx.recv().await {
+                        Some(u) => u,
                         None => {
-                            // Process ended — collect stderr.
-                            let stderr_ctx = stderr_handle.await
-                                .ok()
-                                .unwrap_or_default();
-
-                            if !stderr_ctx.is_empty() {
-                                yield Err(
-                                    super::Error::Stderr(stderr_ctx.trim().to_owned()),
-                                );
-                                had_error = true;
-                            }
-                            break;
-                        }
-                        Some(Err(e)) => {
-                            let _ = child.kill().await;
-                            yield Err(
-                                super::Error::Io(e.to_string()),
-                            );
+                            // The runner unregistered us without sending
+                            // an end (it does that when forwarding the
+                            // `end` line). Treat as runner-died.
+                            yield Err(super::Error::NoOutput);
                             had_error = true;
                             break;
                         }
-                        Some(Ok(line)) => {
-                            let trimmed = line.trim();
-                            if trimmed.is_empty() {
-                                continue;
-                            }
+                    };
 
-                            let sdk_msg: SDKMessage = match serde_json::from_str(trimmed) {
-                                Ok(msg) => msg,
-                                Err(e) => {
-                                    // Log deserialization errors but continue — unknown
-                                    // message types are expected as the SDK evolves.
-                                    continue;
-                                }
-                            };
-
+                    match update {
+                        RunnerUpdate::Event(sdk_msg) => {
                             // Track latest session_id.
                             if let Some(sid) = sdk_msg.session_id() {
                                 if !sid.is_empty() {
@@ -385,11 +452,8 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
                                 }
                             }
 
-                            // ResultMessage is the SDK's end-of-stream
-                            // usage/cost trailer, not a fresh assistant
-                            // turn — it must merge into the previous
-                            // assistant's message slot, not occupy the
-                            // next one. Use that assistant's index.
+                            // ResultMessage merges into the last
+                            // assistant index instead of advancing.
                             let effective_index = match &sdk_msg {
                                 SDKMessage::ResultMessage(_) => {
                                     last_assistant_index.unwrap_or(msg_index)
@@ -398,7 +462,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
                             };
 
                             match sdk_msg.into_downstream(
-                                id.clone(),
+                                id_for_chunks.clone(),
                                 created,
                                 agent_id.clone(),
                                 effective_index,
@@ -407,11 +471,6 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
                                 objectiveai::agent::Upstream::ClaudeAgentSdk,
                             ) {
                                 Some(Ok(chunk)) => {
-                                    // Track the index of any assistant in
-                                    // this chunk and decide whether to
-                                    // advance to the next message slot.
-                                    // Tool messages always advance; assistant
-                                    // messages advance only on finish_reason.
                                     use objectiveai::agent::completions::response::streaming::MessageChunk;
                                     let mut advances_index = false;
                                     for m in &chunk.messages {
@@ -442,11 +501,46 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
                                 }
                             }
                         }
+                        RunnerUpdate::End(StdioEndStatus::Ok) => {
+                            // Natural completion. Disarm the cancel
+                            // guard — request is already done.
+                            cancel_guard.defuse();
+                            break;
+                        }
+                        RunnerUpdate::End(StdioEndStatus::Cancelled) => {
+                            // Caller-initiated cancel landed. Defuse.
+                            cancel_guard.defuse();
+                            break;
+                        }
+                        RunnerUpdate::End(StdioEndStatus::Error { error }) => {
+                            cancel_guard.defuse();
+                            yield Err(super::Error::Stderr(error));
+                            had_error = true;
+                            break;
+                        }
+                        RunnerUpdate::Diag { level: _, message: _ } => {
+                            // Diags are informational (rate-limit
+                            // retries etc.) — no downstream channel
+                            // for them at this layer. Drop them; the
+                            // user-visible signal is the eventual
+                            // event/end.
+                        }
+                        RunnerUpdate::Fatal(message) => {
+                            cancel_guard.defuse();
+                            yield Err(super::Error::Stderr(message));
+                            had_error = true;
+                            break;
+                        }
+                        RunnerUpdate::RunnerExited => {
+                            cancel_guard.defuse();
+                            yield Err(super::Error::NoOutput);
+                            had_error = true;
+                            break;
+                        }
                     }
                 }
 
                 if !had_error {
-                    // Yield final state with session_id and message count.
                     yield Ok(StreamItem::State(super::State {
                         session_id: latest_session_id,
                         message_count: msg_index - assistant_index,
@@ -456,16 +550,12 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
 
             // Await the first stream item. If it is an error,
             // return Err so the caller never sees an error as the
-            // first yielded item.
+            // first yielded item (per the upstream contract).
             let mut stream = Box::pin(internal_stream);
             match stream.next().await {
-                Some(Err(e)) => {
-                    return Err(e);
-                }
+                Some(Err(e)) => Err(e),
                 Some(Ok(first)) => {
-                    // Map the remaining internal stream: typed errors become
-                    // error chunks for mid-stream delivery to the client.
-                    let id_for_stream = id_for_peek.clone();
+                    let id_for_stream = id.clone();
                     let rest = stream.map(move |item| match item {
                         Ok(si) => si,
                         Err(e) => {
@@ -487,9 +577,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
                         Box::pin(StreamOnce::new(first).chain(rest));
                     Ok(boxed)
                 }
-                None => {
-                    return Err(super::Error::NoOutput);
-                }
+                None => Err(super::Error::NoOutput),
             }
         }
     }

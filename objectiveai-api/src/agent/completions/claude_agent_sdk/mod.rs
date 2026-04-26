@@ -10,8 +10,10 @@ mod error;
 pub mod invention_server;
 pub mod mcp_server_config;
 pub mod prompt;
+pub mod runner;
 pub mod sdk_message;
 mod state;
+pub mod stdio;
 
 pub use client::*;
 pub use error::*;
