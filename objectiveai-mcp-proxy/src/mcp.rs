@@ -193,17 +193,18 @@ async fn handle_tools_list(
         Err(resp) => return resp,
     };
 
-    match sessions.list_tools(&session_id).await {
-        Some(result) => {
-            let body = JsonRpcResponse::Success {
-                jsonrpc: "2.0".into(),
-                id: request.id,
-                result,
-            };
-            (StatusCode::OK, Json(body)).into_response()
-        }
-        None => invalid_request_response(request.id, "unknown session".into()),
-    }
+    let session = match sessions.get(&session_id) {
+        Some(s) => s,
+        None => return invalid_request_response(request.id, "unknown session".into()),
+    };
+
+    let result = session.list_tools().await;
+    let body = JsonRpcResponse::Success {
+        jsonrpc: "2.0".into(),
+        id: request.id,
+        result,
+    };
+    (StatusCode::OK, Json(body)).into_response()
 }
 
 async fn handle_tools_call(
@@ -214,6 +215,11 @@ async fn handle_tools_call(
     let session_id = match extract_session_id(headers) {
         Ok(id) => id,
         Err(resp) => return resp,
+    };
+
+    let session = match sessions.get(&session_id) {
+        Some(s) => s,
+        None => return invalid_request_response(request.id, "unknown session".into()),
     };
 
     let params: CallToolRequestParams = match request.params.clone() {
@@ -229,7 +235,7 @@ async fn handle_tools_call(
         None => return invalid_params_response(request.id, "missing params".into()),
     };
 
-    match sessions.call_tool(&session_id, &params).await {
+    match session.call_tool(&params).await {
         Ok(result) => {
             let body = JsonRpcResponse::Success {
                 jsonrpc: "2.0".into(),
@@ -237,9 +243,6 @@ async fn handle_tools_call(
                 result,
             };
             (StatusCode::OK, Json(body)).into_response()
-        }
-        Err(CallToolError::SessionNotFound(_)) => {
-            invalid_request_response(request.id, "unknown session".into())
         }
         Err(CallToolError::ToolNotFound(name)) => {
             method_not_found_response(request.id, &format!("tool: {name}"))
@@ -260,17 +263,18 @@ async fn handle_resources_list(
         Err(resp) => return resp,
     };
 
-    match sessions.list_resources(&session_id).await {
-        Some(result) => {
-            let body = JsonRpcResponse::Success {
-                jsonrpc: "2.0".into(),
-                id: request.id,
-                result,
-            };
-            (StatusCode::OK, Json(body)).into_response()
-        }
-        None => invalid_request_response(request.id, "unknown session".into()),
-    }
+    let session = match sessions.get(&session_id) {
+        Some(s) => s,
+        None => return invalid_request_response(request.id, "unknown session".into()),
+    };
+
+    let result = session.list_resources().await;
+    let body = JsonRpcResponse::Success {
+        jsonrpc: "2.0".into(),
+        id: request.id,
+        result,
+    };
+    (StatusCode::OK, Json(body)).into_response()
 }
 
 async fn handle_resources_read(
@@ -281,6 +285,11 @@ async fn handle_resources_read(
     let session_id = match extract_session_id(headers) {
         Ok(id) => id,
         Err(resp) => return resp,
+    };
+
+    let session = match sessions.get(&session_id) {
+        Some(s) => s,
+        None => return invalid_request_response(request.id, "unknown session".into()),
     };
 
     let params: ReadResourceRequestParams = match request.params.clone() {
@@ -296,7 +305,7 @@ async fn handle_resources_read(
         None => return invalid_params_response(request.id, "missing params".into()),
     };
 
-    match sessions.read_resource(&session_id, &params.uri).await {
+    match session.read_resource(&params.uri).await {
         Ok(result) => {
             let body = JsonRpcResponse::Success {
                 jsonrpc: "2.0".into(),
@@ -304,9 +313,6 @@ async fn handle_resources_read(
                 result,
             };
             (StatusCode::OK, Json(body)).into_response()
-        }
-        Err(ReadResourceError::SessionNotFound(_)) => {
-            invalid_request_response(request.id, "unknown session".into())
         }
         Err(ReadResourceError::ResourceNotFound(uri)) => {
             invalid_params_response(request.id, format!("resource not found: {uri}"))
