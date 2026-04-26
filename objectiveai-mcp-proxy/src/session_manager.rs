@@ -28,25 +28,49 @@ impl SessionManager {
     /// Register a new session and return its freshly-minted session id.
     ///
     /// Connections are keyed by their upstream `server_info.name`. If two
-    /// upstreams advertise the same name, the later one wins with a warn —
-    /// the proxy's prefix scheme can't disambiguate them anyway, so
-    /// silently keeping both would create unroutable tools.
+    /// or more upstreams advertise the same name, every one of them gets
+    /// disambiguated as `<name>_<index>` where `<index>` is its position
+    /// in the original `connections` Vec (which mirrors the order URLs
+    /// appeared in `X-MCP-Servers`). Tools and resources then ship to the
+    /// downstream client as `<name>_<index>_<tool>` etc. A name with only
+    /// one occurrence keeps the bare `<name>` prefix.
     ///
     /// `Connection` is itself a cheaply-clonable Arc wrapper; dropping it
     /// fires the upstream listener's wakeup signal so the listener can
     /// self-cancel within scheduler latency once no external handle remains.
     pub fn add(&self, connections: Vec<Connection>) -> String {
+        // First pass: which names are duplicated? Anything that shows up
+        // more than once in the input gets the `_<index>` suffix.
+        let mut name_counts: std::collections::HashMap<String, usize> =
+            std::collections::HashMap::new();
+        for c in &connections {
+            *name_counts
+                .entry(c.initialize_result.server_info.name.clone())
+                .or_insert(0) += 1;
+        }
+
+        // Second pass: build the keyed IndexMap, suffixing only the
+        // names that need disambiguation.
         let mut by_name: IndexMap<String, Connection> =
             IndexMap::with_capacity(connections.len());
-        for connection in connections {
-            let name = connection.initialize_result.server_info.name.clone();
-            if by_name.contains_key(&name) {
+        for (idx, connection) in connections.into_iter().enumerate() {
+            let raw = connection.initialize_result.server_info.name.clone();
+            let key = if name_counts.get(&raw).copied().unwrap_or(0) > 1 {
+                format!("{raw}_{idx}")
+            } else {
+                raw
+            };
+            // After the suffixing rule, true collisions can still happen
+            // if an upstream literally names itself "foo_0" and another
+            // is the 0th instance of "foo". Rare; keep the late-wins
+            // warn as a safety net.
+            if by_name.contains_key(&key) {
                 tracing::warn!(
-                    server_name = %name,
-                    "two upstreams report the same server_info.name; later upstream wins",
+                    key = %key,
+                    "two upstreams produce the same prefix after disambiguation; later upstream wins",
                 );
             }
-            by_name.insert(name, connection);
+            by_name.insert(key, connection);
         }
 
         let id = uuid::Uuid::new_v4().to_string();
