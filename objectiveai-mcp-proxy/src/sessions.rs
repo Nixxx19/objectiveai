@@ -15,12 +15,6 @@ use objectiveai::mcp::{
     resource::{ListResourcesResult, ReadResourceResult, Resource},
     tool::{CallToolRequestParams, CallToolResult, ListToolsResult, Tool},
 };
-use tokio::sync::broadcast;
-
-/// SSE event broadcast bound. The proxy may eventually publish list-changed
-/// notifications; until then nothing is sent and the receiver just stays
-/// open. Bound is small because there's nothing to back up.
-const OUTBOUND_BROADCAST_CAPACITY: usize = 64;
 
 /// Per-session state owned by the [`SessionManager`].
 ///
@@ -38,18 +32,11 @@ pub struct Session {
     /// Insertion order matches the order URLs appeared in `X-MCP-Servers`,
     /// so listings are deterministic.
     pub connections: IndexMap<String, Arc<Connection>>,
-    /// Fan-out channel for server-initiated SSE messages. The GET endpoint
-    /// subscribes; future notification-forwarding code will publish into it.
-    pub outbound: broadcast::Sender<serde_json::Value>,
 }
 
 impl Session {
     fn new(connections: IndexMap<String, Arc<Connection>>) -> Self {
-        let (outbound, _) = broadcast::channel(OUTBOUND_BROADCAST_CAPACITY);
-        Self {
-            connections,
-            outbound,
-        }
+        Self { connections }
     }
 
     /// Fan `tools/list` out to every upstream in parallel, prefix each

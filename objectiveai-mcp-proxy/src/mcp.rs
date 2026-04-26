@@ -12,7 +12,7 @@ use axum::{
         sse::{Event, KeepAlive, Sse},
     },
 };
-use futures::stream::{Stream, StreamExt};
+use futures::stream;
 use objectiveai::mcp::{
     JsonRpcError, JsonRpcRequest, JsonRpcResponse,
     initialize_result::{
@@ -22,7 +22,6 @@ use objectiveai::mcp::{
     resource::ReadResourceRequestParams,
     tool::CallToolRequestParams,
 };
-use tokio_stream::wrappers::BroadcastStream;
 
 use crate::AppState;
 use crate::sessions::{CallToolError, ReadResourceError, SessionManager};
@@ -80,9 +79,11 @@ pub async fn handle_post(
 // ---- GET handler (server-initiated SSE stream) ----------------------------
 
 /// GET `/`: open the per-session SSE stream so the server can push
-/// `notifications/*` and request responses to the client. The proxy holds
-/// the stream open with periodic keepalives; data emission lands when
-/// upstream notification forwarding is wired in a follow-up.
+/// `notifications/*` and request responses to the client. Right now the
+/// stream is silent — the underlying source is a never-resolving
+/// `stream::pending` and the proxy only emits keepalive pings. When
+/// upstream notification forwarding lands the stream will source from
+/// whatever publisher we wire up at that point.
 pub async fn handle_get(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -92,24 +93,11 @@ pub async fn handle_get(
         Err(resp) => return resp,
     };
 
-    let session = match state.sessions.get(&session_id) {
-        Some(s) => s,
-        None => return (StatusCode::NOT_FOUND, "unknown session").into_response(),
-    };
+    if state.sessions.get(&session_id).is_none() {
+        return (StatusCode::NOT_FOUND, "unknown session").into_response();
+    }
 
-    let receiver = session.outbound.subscribe();
-    let stream = BroadcastStream::new(receiver).filter_map(|result| async move {
-        match result {
-            Ok(value) => Event::default().json_data(value).ok().map(Ok::<_, Infallible>),
-            // BroadcastStream surfaces a Lagged error if a slow consumer
-            // missed events. We don't currently emit anything, so this is
-            // never hit; if it ever fires we just skip the lagged window.
-            Err(_) => None,
-        }
-    });
-
-    let stream: Box<dyn Stream<Item = Result<Event, Infallible>> + Send + Unpin> =
-        Box::new(Box::pin(stream));
+    let stream = stream::pending::<Result<Event, Infallible>>();
 
     Sse::new(stream)
         .keep_alive(KeepAlive::new().interval(SSE_KEEP_ALIVE))
