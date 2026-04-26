@@ -3,6 +3,8 @@
 use std::sync::Arc;
 use std::time::Duration;
 
+use indexmap::IndexMap;
+
 /// Client for creating MCP connections.
 ///
 /// Holds shared configuration (HTTP client, headers, backoff parameters)
@@ -74,11 +76,18 @@ impl Client {
     /// Sends an `initialize` JSON-RPC request to the server and extracts
     /// the `Mcp-Session-Id` from the response. Returns a [`Connection`]
     /// that can be used to list/call tools and list/read resources.
+    ///
+    /// `extra_headers` are forwarded on every request this connection
+    /// makes to the upstream — both the initial `initialize` POST and
+    /// every subsequent RPC. They are applied *after* the fixed headers
+    /// so callers can't accidentally clobber `Mcp-Session-Id`,
+    /// `Content-Type`, etc.
     pub async fn connect(
         &self,
         url: String,
         authorization: Option<String>,
         session_id: Option<String>,
+        extra_headers: IndexMap<String, String>,
     ) -> Result<Arc<super::Connection>, super::Error> {
         if url == "mock" {
             return Ok(super::Connection::new_mock(url));
@@ -116,6 +125,9 @@ impl Client {
         request = request.header("X-Title", &self.x_title);
         request = request.header("Referer", &self.http_referer);
         request = request.header("HTTP-Referer", &self.http_referer);
+        for (name, value) in &extra_headers {
+            request = request.header(name, value);
+        }
 
         let response =
             request.send().await.map_err(super::Error::Connection)?;
@@ -158,6 +170,7 @@ impl Client {
             self.user_agent.clone(),
             self.x_title.clone(),
             self.http_referer.clone(),
+            extra_headers,
             self.backoff_current_interval,
             self.backoff_initial_interval,
             self.backoff_randomization_factor,

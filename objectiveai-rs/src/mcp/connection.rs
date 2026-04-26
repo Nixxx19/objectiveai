@@ -3,6 +3,8 @@
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
+
+use indexmap::IndexMap;
 use tokio::sync::RwLock;
 
 /// An active connection to an MCP server using the Streamable HTTP transport.
@@ -23,6 +25,10 @@ pub struct Connection {
     pub user_agent: String,
     pub x_title: String,
     pub http_referer: String,
+    /// Extra HTTP headers forwarded on every POST and GET this connection
+    /// makes. Applied *after* the fixed headers above (`Content-Type`,
+    /// `Mcp-Session-Id`, `User-Agent`, etc.) so the fixed set always wins.
+    pub extra_headers: IndexMap<String, String>,
 
     pub backoff_current_interval: Duration,
     pub backoff_initial_interval: Duration,
@@ -61,6 +67,7 @@ impl Connection {
             user_agent: String::new(),
             x_title: String::new(),
             http_referer: String::new(),
+            extra_headers: IndexMap::new(),
             backoff_current_interval: Duration::ZERO,
             backoff_initial_interval: Duration::ZERO,
             backoff_randomization_factor: 0.0,
@@ -108,6 +115,7 @@ impl Connection {
             user_agent: String::new(),
             x_title: String::new(),
             http_referer: String::new(),
+            extra_headers: IndexMap::new(),
             backoff_current_interval: Duration::from_millis(500),
             backoff_initial_interval: Duration::from_millis(500),
             backoff_randomization_factor: 0.5,
@@ -156,6 +164,7 @@ impl Connection {
         user_agent: String,
         x_title: String,
         http_referer: String,
+        extra_headers: IndexMap<String, String>,
         backoff_current_interval: Duration,
         backoff_initial_interval: Duration,
         backoff_randomization_factor: f64,
@@ -173,6 +182,7 @@ impl Connection {
             user_agent,
             x_title,
             http_referer,
+            extra_headers,
             backoff_current_interval,
             backoff_initial_interval,
             backoff_randomization_factor,
@@ -264,6 +274,9 @@ impl Connection {
         request = request.header("X-Title", &self.x_title);
         request = request.header("Referer", &self.http_referer);
         request = request.header("HTTP-Referer", &self.http_referer);
+        for (name, value) in &self.extra_headers {
+            request = request.header(name, value);
+        }
         request
     }
 
@@ -665,6 +678,9 @@ impl Connection {
         request = request.header("X-Title", &self.x_title);
         request = request.header("Referer", &self.http_referer);
         request = request.header("HTTP-Referer", &self.http_referer);
+        for (name, value) in &self.extra_headers {
+            request = request.header(name, value);
+        }
         request
     }
 
