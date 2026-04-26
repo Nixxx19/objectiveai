@@ -6,9 +6,6 @@
 //! upstream. The registry that minds session ids and hands out
 //! `Arc<Session>`s lives in [`crate::session_manager`].
 
-use std::ops::Deref;
-use std::sync::Arc;
-
 use futures::future::join_all;
 use indexmap::IndexMap;
 use objectiveai::mcp::{
@@ -16,51 +13,6 @@ use objectiveai::mcp::{
     resource::{ListResourcesResult, ReadResourceResult, Resource},
     tool::{CallToolRequestParams, CallToolResult, ListToolsResult, Tool},
 };
-use tokio::sync::Notify;
-
-/// Owned wrapper around an upstream `Arc<Connection>` whose `Drop` fires
-/// the connection's `external_dropped` `Notify`.
-///
-/// The point: the upstream `Connection`'s background SSE listener is
-/// parked on `next_line().await` for the upstream's whole keepalive
-/// interval (often 15-60 s). When the proxy drops a session it wants the
-/// listener to wake **immediately**. The plain `Arc<Connection>` Drop
-/// only fires when the strong count hits zero, but the listener itself
-/// holds an `Arc<Connection>` for the duration of one read cycle, so
-/// "strong count → 0" never happens until the read cycle ends.
-///
-/// `UpstreamConnection`'s Drop fires `notify_waiters()` on every drop,
-/// which the listener `select!`s against. The listener wakes, re-checks
-/// `Arc::strong_count`, and exits when it sees `1` (only itself).
-///
-/// Deref'ing exposes all `Connection` methods transparently.
-#[derive(Debug)]
-pub struct UpstreamConnection {
-    inner: Arc<Connection>,
-    notify: Arc<Notify>,
-}
-
-impl UpstreamConnection {
-    pub fn new(inner: Arc<Connection>) -> Self {
-        let notify = Arc::clone(&inner.external_dropped);
-        Self { inner, notify }
-    }
-}
-
-impl Deref for UpstreamConnection {
-    type Target = Connection;
-    fn deref(&self) -> &Connection {
-        &self.inner
-    }
-}
-
-impl Drop for UpstreamConnection {
-    fn drop(&mut self) {
-        // Wake the upstream's listener so it can re-check liveness now,
-        // not on the next SSE keepalive. Cheap signal: just sets wakers.
-        self.notify.notify_waiters();
-    }
-}
 
 /// Per-session state.
 ///
@@ -78,11 +30,15 @@ pub struct Session {
     ///
     /// Insertion order matches the order URLs appeared in `X-MCP-Servers`,
     /// so listings are deterministic.
-    pub connections: IndexMap<String, UpstreamConnection>,
+    ///
+    /// `Connection` is itself a cheaply-clonable Arc wrapper; dropping a
+    /// `Connection` fires the upstream listener's wakeup signal so it can
+    /// self-cancel within scheduler latency once no external handle remains.
+    pub connections: IndexMap<String, Connection>,
 }
 
 impl Session {
-    pub(crate) fn new(connections: IndexMap<String, UpstreamConnection>) -> Self {
+    pub(crate) fn new(connections: IndexMap<String, Connection>) -> Self {
         Self { connections }
     }
 
@@ -201,8 +157,8 @@ impl Session {
     /// Server names that contain `_` are supported via longest-prefix
     /// match: if both `fs` and `fs_extra` are connected and the inbound
     /// name is `fs_extra_Read`, the `fs_extra` upstream wins.
-    fn route<'a>(&'a self, prefixed: &str) -> Option<(&'a UpstreamConnection, String)> {
-        let mut best: Option<(&'a str, &'a UpstreamConnection)> = None;
+    fn route<'a>(&'a self, prefixed: &str) -> Option<(&'a Connection, String)> {
+        let mut best: Option<(&'a str, &'a Connection)> = None;
         for (name, conn) in &self.connections {
             // Need at least one char after the `_` to count as a real prefix
             // hit (otherwise an exact match `name == prefixed` would route

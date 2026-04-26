@@ -12,7 +12,7 @@ use dashmap::DashMap;
 use indexmap::IndexMap;
 use objectiveai::mcp::Connection;
 
-use crate::session::{Session, UpstreamConnection};
+use crate::session::Session;
 
 /// Maps a session id to its [`Session`] state.
 #[derive(Debug, Default)]
@@ -32,12 +32,11 @@ impl SessionManager {
     /// the proxy's prefix scheme can't disambiguate them anyway, so
     /// silently keeping both would create unroutable tools.
     ///
-    /// Each `Arc<Connection>` is wrapped in an [`UpstreamConnection`]
-    /// whose `Drop` fires the connection's `external_dropped` notify, so
-    /// the upstream's listener task wakes up immediately when the session
-    /// goes away (instead of waiting for the upstream's SSE keepalive).
-    pub fn add(&self, connections: Vec<Arc<Connection>>) -> String {
-        let mut by_name: IndexMap<String, UpstreamConnection> =
+    /// `Connection` is itself a cheaply-clonable Arc wrapper; dropping it
+    /// fires the upstream listener's wakeup signal so the listener can
+    /// self-cancel within scheduler latency once no external handle remains.
+    pub fn add(&self, connections: Vec<Connection>) -> String {
+        let mut by_name: IndexMap<String, Connection> =
             IndexMap::with_capacity(connections.len());
         for connection in connections {
             let name = connection.initialize_result.server_info.name.clone();
@@ -47,7 +46,7 @@ impl SessionManager {
                     "two upstreams report the same server_info.name; later upstream wins",
                 );
             }
-            by_name.insert(name, UpstreamConnection::new(connection));
+            by_name.insert(name, connection);
         }
 
         let id = uuid::Uuid::new_v4().to_string();
@@ -66,12 +65,11 @@ impl SessionManager {
     /// was present, `None` if the id was unknown.
     ///
     /// Once every `Arc<Session>` to the removed session has dropped, the
-    /// session's `IndexMap<String, UpstreamConnection>` drops, every
-    /// `UpstreamConnection`'s `Drop` fires its upstream's
-    /// `external_dropped` notify, and each upstream's listener task wakes
-    /// to re-check liveness. With the last `Arc<Connection>` released the
-    /// listener sees `Arc::strong_count == 1` (only itself) and exits,
-    /// which drops the `Connection` and closes the upstream HTTP session.
+    /// session's `IndexMap<String, Connection>` drops, every `Connection`'s
+    /// `Drop` fires its upstream's wakeup signal, and each upstream's
+    /// listener task wakes to re-check liveness. The listener sees
+    /// `Arc::strong_count == 1` (only itself) and exits, which drops the
+    /// inner state and closes the upstream HTTP session.
     pub fn remove(&self, session_id: &str) -> Option<Arc<Session>> {
         self.sessions.remove(session_id).map(|(_, session)| session)
     }

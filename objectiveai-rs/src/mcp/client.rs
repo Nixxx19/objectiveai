@@ -1,6 +1,5 @@
 //! MCP client for creating connections to MCP servers.
 
-use std::sync::Arc;
 use std::time::Duration;
 
 use indexmap::IndexMap;
@@ -88,7 +87,7 @@ impl Client {
         authorization: Option<String>,
         session_id: Option<String>,
         extra_headers: IndexMap<String, String>,
-    ) -> Result<Arc<super::Connection>, super::Error> {
+    ) -> Result<super::Connection, super::Error> {
         if url == "mock" {
             return Ok(super::Connection::new_mock(url));
         }

@@ -1,5 +1,12 @@
 //! MCP connection for communicating with an MCP server.
+//!
+//! [`Connection`] is a cheaply-clonable handle around an internal
+//! [`ConnectionInner`]. Cloning bumps the inner refcount; dropping fires
+//! `external_dropped.notify_waiters()` so the long-lived background SSE
+//! listener wakes up and can re-check liveness immediately, exiting once
+//! it observes that no external `Connection` handle remains.
 
+use std::ops::Deref;
 use std::sync::{Arc, Weak};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
@@ -9,15 +16,164 @@ use tokio::sync::{Notify, RwLock};
 
 /// An active connection to an MCP server using the Streamable HTTP transport.
 ///
-/// Created by [`Client::connect`](super::Client::connect). Provides methods
-/// for listing/calling tools and listing/reading resources. All requests
-/// include the `Mcp-Session-Id` header for session continuity.
+/// Cheaply clonable (one `Arc` bump). Dropping any handle fires the
+/// internal `external_dropped` `Notify` so the upstream SSE listener task
+/// wakes immediately and can re-check `Arc::strong_count(&inner)`. When
+/// the listener sees only itself holding the inner Arc, it exits and the
+/// upstream HTTP session closes.
 ///
-/// On creation, background tasks are spawned to paginate through all tools
-/// and resources. The write lock is held for the entire duration of
-/// pagination, so readers block until all pages have been fetched.
+/// Use the public methods (`list_tools`, `call_tool`, `list_resources`,
+/// `read_resource`, `call_tool_as_message`, `tool_key`) for the upstream
+/// MCP protocol surface. The inner state ([`ConnectionInner`]) is also
+/// reachable via `Deref` for read-only field access (e.g.
+/// `connection.url`, `connection.initialize_result.server_info.name`),
+/// but its methods are private — you must go through `Connection`.
 #[derive(Debug)]
 pub struct Connection {
+    inner: Arc<ConnectionInner>,
+}
+
+impl Clone for Connection {
+    fn clone(&self) -> Self {
+        Self { inner: Arc::clone(&self.inner) }
+    }
+}
+
+impl Drop for Connection {
+    fn drop(&mut self) {
+        // Wake the upstream SSE listener so it can re-check liveness
+        // without waiting for the upstream's keepalive interval. Cheap:
+        // just notifies wakers, returns immediately.
+        self.inner.external_dropped.notify_waiters();
+    }
+}
+
+impl Deref for Connection {
+    type Target = ConnectionInner;
+    fn deref(&self) -> &ConnectionInner {
+        &self.inner
+    }
+}
+
+impl Connection {
+    pub(super) fn new(
+        http_client: reqwest::Client,
+        url: String,
+        session_id: String,
+        authorization: Option<String>,
+        user_agent: String,
+        x_title: String,
+        http_referer: String,
+        extra_headers: IndexMap<String, String>,
+        backoff_current_interval: Duration,
+        backoff_initial_interval: Duration,
+        backoff_randomization_factor: f64,
+        backoff_multiplier: f64,
+        backoff_max_interval: Duration,
+        backoff_max_elapsed_time: Duration,
+        call_timeout: Duration,
+        initialize_result: super::initialize_result::InitializeResult,
+    ) -> Self {
+        let inner = ConnectionInner::new(
+            http_client,
+            url,
+            session_id,
+            authorization,
+            user_agent,
+            x_title,
+            http_referer,
+            extra_headers,
+            backoff_current_interval,
+            backoff_initial_interval,
+            backoff_randomization_factor,
+            backoff_multiplier,
+            backoff_max_interval,
+            backoff_max_elapsed_time,
+            call_timeout,
+            initialize_result,
+        );
+        Self { inner }
+    }
+
+    pub(super) fn new_mock(url: String) -> Self {
+        Self { inner: ConnectionInner::new_mock(url) }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn new_for_test(name: String, url: String) -> Self {
+        Self { inner: ConnectionInner::new_for_test(name, url) }
+    }
+
+    /// Send a JSON-RPC notification to the upstream. Used by `Client`
+    /// right after `initialize` to send `notifications/initialized`.
+    pub(super) async fn notify<P: serde::Serialize>(
+        &self,
+        method: &str,
+        params: &P,
+    ) -> Result<(), super::Error> {
+        self.inner.notify(method, params).await
+    }
+
+    /// Returns a key identifying this connection for tool namespacing.
+    pub fn tool_key(&self) -> String {
+        self.inner.tool_key()
+    }
+
+    /// Returns the session ID for this connection.
+    pub fn session_id(&self) -> &str {
+        self.inner.session_id()
+    }
+
+    /// Returns all tools from the upstream server.
+    pub async fn list_tools(
+        &self,
+    ) -> Result<Arc<Vec<super::tool::Tool>>, Arc<super::Error>> {
+        self.inner.list_tools().await
+    }
+
+    /// Calls a tool on the upstream server.
+    pub async fn call_tool(
+        &self,
+        params: &super::tool::CallToolRequestParams,
+    ) -> Result<super::tool::CallToolResult, super::Error> {
+        self.inner.call_tool(params).await
+    }
+
+    /// Calls a tool and converts the result into a [`ToolMessage`].
+    pub async fn call_tool_as_message(
+        &self,
+        params: &super::tool::CallToolRequestParams,
+        tool_call_id: String,
+    ) -> Result<
+        crate::agent::completions::message::ToolMessage,
+        super::Error,
+    > {
+        self.inner.call_tool_as_message(params, tool_call_id).await
+    }
+
+    /// Returns all resources from the upstream server.
+    pub async fn list_resources(
+        &self,
+    ) -> Result<Arc<Vec<super::resource::Resource>>, Arc<super::Error>> {
+        self.inner.list_resources().await
+    }
+
+    /// Reads a resource from the upstream server.
+    pub async fn read_resource(
+        &self,
+        uri: &str,
+    ) -> Result<super::resource::ReadResourceResult, super::Error> {
+        self.inner.read_resource(uri).await
+    }
+}
+
+/// The actual connection state. Behind an `Arc` inside [`Connection`].
+///
+/// Fields are public for read-only access (callers reach them via
+/// `Connection`'s `Deref`), but every method on this type is private —
+/// the public surface lives on [`Connection`] and delegates through.
+#[derive(Debug)]
+pub struct ConnectionInner {
     pub http_client: reqwest::Client,
     pub url: String,
     pub session_id: String,
@@ -53,21 +209,17 @@ pub struct Connection {
     resources:
         RwLock<Result<Arc<Vec<super::resource::Resource>>, Arc<super::Error>>>,
 
-    /// Cancellation channel for the long-lived `listen_for_list_changes`
-    /// task. External wrappers around `Arc<Connection>` (e.g. the proxy's
-    /// per-session handle) call `external_dropped.notify_waiters()` from
-    /// their `Drop` impl so the listener wakes immediately and can
-    /// re-check `Arc::strong_count`. Without this signal the listener
-    /// would only re-check liveness when the upstream's SSE keepalive
-    /// closes the stream (often 15-60s).
-    pub external_dropped: Arc<Notify>,
+    /// Wakeup signal for the long-lived `listen_for_list_changes` task.
+    /// Fired by [`Connection`]'s `Drop` impl on every external handle drop
+    /// so the listener can re-check `Arc::strong_count` immediately and
+    /// exit when no external handle remains.
+    external_dropped: Arc<Notify>,
 }
 
-impl Connection {
-    /// Creates a minimal connection for unit testing.
+impl ConnectionInner {
     /// Creates a mock connection that never makes network requests.
     /// All RPC calls return empty/default results.
-    pub(super) fn new_mock(url: String) -> Arc<Self> {
+    fn new_mock(url: String) -> Arc<Self> {
         Arc::new(Self {
             http_client: reqwest::Client::new(),
             url,
@@ -116,7 +268,7 @@ impl Connection {
 
     /// Creates a minimal connection for unit testing.
     #[cfg(test)]
-    pub(crate) fn new_for_test(name: String, url: String) -> Arc<Self> {
+    fn new_for_test(name: String, url: String) -> Arc<Self> {
         Arc::new(Self {
             http_client: reqwest::Client::new(),
             url,
@@ -166,8 +318,8 @@ impl Connection {
 
     /// Creates a new connection and spawns background tasks to paginate
     /// all tools and resources. Called internally by
-    /// [`Client::connect`](super::Client::connect).
-    pub(super) fn new(
+    /// [`Client::connect`](super::Client::connect) (via [`Connection::new`]).
+    fn new(
         http_client: reqwest::Client,
         url: String,
         session_id: String,
@@ -360,7 +512,7 @@ impl Connection {
     }
 
     /// Sends a JSON-RPC notification (no response expected, no retries).
-    pub(super) async fn notify<P: serde::Serialize>(
+    async fn notify<P: serde::Serialize>(
         &self,
         method: &str,
         params: &P,
@@ -392,12 +544,12 @@ impl Connection {
     }
 
     /// Returns a key identifying this connection for tool namespacing.
-    pub fn tool_key(&self) -> String {
+    fn tool_key(&self) -> String {
         format!("{}-{}", self.initialize_result.server_info.name, self.url)
     }
 
     /// Returns the session ID for this connection.
-    pub fn session_id(&self) -> &str {
+    fn session_id(&self) -> &str {
         &self.session_id
     }
 
@@ -419,14 +571,14 @@ impl Connection {
     ///
     /// Blocks until background pagination completes, then returns a
     /// cheap `Arc` clone of the result.
-    pub async fn list_tools(
+    async fn list_tools(
         &self,
     ) -> Result<Arc<Vec<super::tool::Tool>>, Arc<super::Error>> {
         self.tools.read().await.clone()
     }
 
     /// Calls a tool on the MCP server.
-    pub async fn call_tool(
+    async fn call_tool(
         &self,
         params: &super::tool::CallToolRequestParams,
     ) -> Result<super::tool::CallToolResult, super::Error> {
@@ -460,7 +612,7 @@ impl Connection {
     ///
     /// If `is_error` is set on the result, the content is prefixed with
     /// an error indicator.
-    pub async fn call_tool_as_message(
+    async fn call_tool_as_message(
         &self,
         params: &super::tool::CallToolRequestParams,
         tool_call_id: String,
@@ -626,14 +778,14 @@ impl Connection {
     ///
     /// Blocks until background pagination completes, then returns a
     /// cheap `Arc` clone of the result.
-    pub async fn list_resources(
+    async fn list_resources(
         &self,
     ) -> Result<Arc<Vec<super::resource::Resource>>, Arc<super::Error>> {
         self.resources.read().await.clone()
     }
 
     /// Reads a resource from the MCP server.
-    pub async fn read_resource(
+    async fn read_resource(
         &self,
         uri: &str,
     ) -> Result<super::resource::ReadResourceResult, super::Error> {

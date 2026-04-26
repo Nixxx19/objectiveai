@@ -1,8 +1,6 @@
 //! Parsing of the proxy's three custom session-init headers and fan-out
 //! connect over the resulting upstream specs.
 
-use std::sync::Arc;
-
 use axum::http::HeaderMap;
 use futures::future::join_all;
 use indexmap::IndexMap;
@@ -54,7 +52,7 @@ pub enum BadInit {
 pub async fn connect_all(
     client: &Client,
     http_headers: &HeaderMap,
-) -> Result<Vec<Arc<Connection>>, BadInit> {
+) -> Result<Vec<Connection>, BadInit> {
     let specs = parse_init_headers(http_headers)?;
 
     let attempts = specs.into_iter().map(|spec| {
