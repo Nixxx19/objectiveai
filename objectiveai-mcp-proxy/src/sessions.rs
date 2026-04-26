@@ -27,14 +27,14 @@ pub struct Session {
     /// Live upstream MCP connections, in the order their URLs appeared in
     /// `X-MCP-Servers`.
     pub connections: Vec<Arc<Connection>>,
-    /// Tool name → index into `connections`. Populated lazily by
+    /// Prefixed tool name → (index into `connections`, original tool name
+    /// the upstream knows it by). Populated lazily by
     /// [`SessionManager::list_tools`] and refreshed on a cache miss inside
     /// [`SessionManager::call_tool`].
-    tool_owner: DashMap<String, usize>,
-    /// Resource URI → index into `connections`. Populated lazily by
-    /// [`SessionManager::list_resources`] and refreshed on a cache miss
-    /// inside [`SessionManager::read_resource`].
-    resource_owner: DashMap<String, usize>,
+    tool_owner: DashMap<String, (usize, String)>,
+    /// Prefixed resource URI → (index into `connections`, original URI the
+    /// upstream knows it by). Same lifecycle as `tool_owner`.
+    resource_owner: DashMap<String, (usize, String)>,
     /// Fan-out channel for server-initiated SSE messages. The GET
     /// endpoint subscribes; future notification-forwarding code will
     /// publish into it.
@@ -51,6 +51,17 @@ impl Session {
             outbound,
         }
     }
+}
+
+/// Prefix a tool/resource name with the upstream server's
+/// `initialize_result.server_info.name` so two upstreams that both expose
+/// e.g. `search` don't collide. Format: `<server-name>_<original>`.
+fn prefix_name(connection: &Connection, name: &str) -> String {
+    format!(
+        "{}_{}",
+        connection.initialize_result.server_info.name,
+        name
+    )
 }
 
 /// Failure modes for [`SessionManager::call_tool`].
@@ -118,20 +129,27 @@ impl SessionManager {
 
         let mut tools: Vec<Tool> = Vec::new();
         for (idx, result) in results.into_iter().enumerate() {
+            let connection = &session.connections[idx];
             match result {
                 Ok(arc) => {
                     for tool in arc.iter() {
-                        if let Some(prev) = session.tool_owner.insert(tool.name.clone(), idx) {
-                            if prev != idx {
+                        let prefixed = prefix_name(connection, &tool.name);
+                        if let Some(prev) = session
+                            .tool_owner
+                            .insert(prefixed.clone(), (idx, tool.name.clone()))
+                        {
+                            if prev.0 != idx {
                                 tracing::warn!(
-                                    tool = %tool.name,
-                                    previous_upstream = prev,
+                                    tool = %prefixed,
+                                    previous_upstream = prev.0,
                                     new_upstream = idx,
-                                    "tool name collision; new upstream wins",
+                                    "prefixed tool name collision; new upstream wins",
                                 );
                             }
                         }
-                        tools.push(tool.clone());
+                        let mut prefixed_tool = tool.clone();
+                        prefixed_tool.name = prefixed;
+                        tools.push(prefixed_tool);
                     }
                 }
                 Err(e) => tracing::warn!(error = %e, upstream = idx, "list_tools failed"),
@@ -161,22 +179,27 @@ impl SessionManager {
 
         let mut resources: Vec<Resource> = Vec::new();
         for (idx, result) in results.into_iter().enumerate() {
+            let connection = &session.connections[idx];
             match result {
                 Ok(arc) => {
                     for resource in arc.iter() {
-                        if let Some(prev) =
-                            session.resource_owner.insert(resource.uri.clone(), idx)
+                        let prefixed = prefix_name(connection, &resource.uri);
+                        if let Some(prev) = session
+                            .resource_owner
+                            .insert(prefixed.clone(), (idx, resource.uri.clone()))
                         {
-                            if prev != idx {
+                            if prev.0 != idx {
                                 tracing::warn!(
-                                    uri = %resource.uri,
-                                    previous_upstream = prev,
+                                    uri = %prefixed,
+                                    previous_upstream = prev.0,
                                     new_upstream = idx,
-                                    "resource URI collision; new upstream wins",
+                                    "prefixed resource URI collision; new upstream wins",
                                 );
                             }
                         }
-                        resources.push(resource.clone());
+                        let mut prefixed_resource = resource.clone();
+                        prefixed_resource.uri = prefixed;
+                        resources.push(prefixed_resource);
                     }
                 }
                 Err(e) => tracing::warn!(error = %e, upstream = idx, "list_resources failed"),
@@ -205,23 +228,33 @@ impl SessionManager {
             .get(session_id)
             .ok_or_else(|| CallToolError::SessionNotFound(session_id.to_string()))?;
 
-        let idx = match session.tool_owner.get(&params.name).map(|e| *e.value()) {
-            Some(i) => i,
-            None => {
-                self.refresh_tool_owner(&session).await;
-                session
-                    .tool_owner
-                    .get(&params.name)
-                    .map(|e| *e.value())
-                    .ok_or_else(|| CallToolError::ToolNotFound(params.name.clone()))?
-            }
-        };
+        let (idx, original_name) =
+            match session.tool_owner.get(&params.name).map(|e| e.value().clone()) {
+                Some(v) => v,
+                None => {
+                    self.refresh_tool_owner(&session).await;
+                    session
+                        .tool_owner
+                        .get(&params.name)
+                        .map(|e| e.value().clone())
+                        .ok_or_else(|| CallToolError::ToolNotFound(params.name.clone()))?
+                }
+            };
 
         let connection = session
             .connections
             .get(idx)
             .ok_or_else(|| CallToolError::ToolNotFound(params.name.clone()))?;
-        Ok(connection.call_tool(params).await?)
+        // Forward to the upstream with the un-prefixed tool name it actually
+        // knows; pass everything else (`arguments`, `task`, `_meta`)
+        // through unchanged.
+        let upstream_params = CallToolRequestParams {
+            name: original_name,
+            arguments: params.arguments.clone(),
+            task: params.task.clone(),
+            _meta: params._meta.clone(),
+        };
+        Ok(connection.call_tool(&upstream_params).await?)
     }
 
     /// Forward `resources/read` to whichever upstream owns the URI. Same
@@ -235,23 +268,24 @@ impl SessionManager {
             .get(session_id)
             .ok_or_else(|| ReadResourceError::SessionNotFound(session_id.to_string()))?;
 
-        let idx = match session.resource_owner.get(uri).map(|e| *e.value()) {
-            Some(i) => i,
-            None => {
-                self.refresh_resource_owner(&session).await;
-                session
-                    .resource_owner
-                    .get(uri)
-                    .map(|e| *e.value())
-                    .ok_or_else(|| ReadResourceError::ResourceNotFound(uri.to_string()))?
-            }
-        };
+        let (idx, original_uri) =
+            match session.resource_owner.get(uri).map(|e| e.value().clone()) {
+                Some(v) => v,
+                None => {
+                    self.refresh_resource_owner(&session).await;
+                    session
+                        .resource_owner
+                        .get(uri)
+                        .map(|e| e.value().clone())
+                        .ok_or_else(|| ReadResourceError::ResourceNotFound(uri.to_string()))?
+                }
+            };
 
         let connection = session
             .connections
             .get(idx)
             .ok_or_else(|| ReadResourceError::ResourceNotFound(uri.to_string()))?;
-        Ok(connection.read_resource(uri).await?)
+        Ok(connection.read_resource(&original_uri).await?)
     }
 
     /// Re-fetch every upstream's tool list and rebuild `tool_owner`.
@@ -267,10 +301,14 @@ impl SessionManager {
         .await;
 
         for (idx, result) in results.into_iter().enumerate() {
+            let connection = &session.connections[idx];
             match result {
                 Ok(arc) => {
                     for tool in arc.iter() {
-                        session.tool_owner.insert(tool.name.clone(), idx);
+                        let prefixed = prefix_name(connection, &tool.name);
+                        session
+                            .tool_owner
+                            .insert(prefixed, (idx, tool.name.clone()));
                     }
                 }
                 Err(e) => {
@@ -294,10 +332,14 @@ impl SessionManager {
         .await;
 
         for (idx, result) in results.into_iter().enumerate() {
+            let connection = &session.connections[idx];
             match result {
                 Ok(arc) => {
                     for resource in arc.iter() {
-                        session.resource_owner.insert(resource.uri.clone(), idx);
+                        let prefixed = prefix_name(connection, &resource.uri);
+                        session
+                            .resource_owner
+                            .insert(prefixed, (idx, resource.uri.clone()));
                     }
                 }
                 Err(e) => {

@@ -82,8 +82,17 @@ pub fn parse_init_headers(http_headers: &HeaderMap) -> Result<Vec<UpstreamSpec>,
             None => IndexMap::new(),
         };
 
+    let mut seen = std::collections::HashSet::new();
     let mut specs = Vec::with_capacity(servers.len());
     for url in servers {
+        // First-occurrence-wins de-duplication: a duplicate URL is silently
+        // ignored. Prevents the proxy from opening N redundant upstream
+        // connections to the same server when the client misconfigures.
+        if !seen.insert(url.clone()) {
+            tracing::debug!(url = %url, "ignoring duplicate X-MCP-Servers entry");
+            continue;
+        }
+
         let mut headers = global_headers.clone();
         // Lift Authorization out of the global header set into its dedicated
         // field; per-URL override wins if present.
