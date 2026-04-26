@@ -29,8 +29,8 @@ impl ObjectiveAiMcpCli {
     }
 
     #[tool(
-        name = "ObjectiveAI",
-        description = "Run an ObjectiveAI CLI command. Supports all subcommands: agents, swarms, functions, api, schemas, viewer."
+        name = "ObjectiveAI CLI",
+        description = "Run an ObjectiveAI CLI command."
     )]
     async fn objectiveai(
         &self,
@@ -51,7 +51,7 @@ impl ObjectiveAiMcpCli {
 impl ServerHandler for ObjectiveAiMcpCli {
     fn get_info(&self) -> ServerInfo {
         ServerInfo {
-            instructions: Some("ObjectiveAI CLI MCP server".into()),
+            instructions: Some("Run an ObjectiveAI CLI command.".into()),
             capabilities: ServerCapabilities::builder().enable_tools().build(),
             ..Default::default()
         }
