@@ -1,5 +1,5 @@
-use super::state::{FileStateCache, FileStateEntry};
-use super::util;
+use crate::state::{FileStateCache, FileStateEntry};
+use crate::util;
 use std::path::Path;
 
 const MAX_READ_SIZE_BYTES: u64 = 10 * 1024 * 1024; // 10 MB
@@ -60,7 +60,7 @@ pub enum ReadOutput {
     /// Image file (base64 data + media type)
     Image { base64: String, media_type: String },
     /// Notebook cells (text + embedded images), also used for PDF page images
-    Notebook(Vec<super::notebook::NotebookBlock>),
+    Notebook(Vec<crate::notebook::NotebookBlock>),
     /// File unchanged since last read (dedup stub)
     FileUnchanged(String),
 }
@@ -178,7 +178,7 @@ pub fn read_file(
                 metadata.len()
             ));
         }
-        let blocks = super::notebook::read_notebook(&absolute_path)?;
+        let blocks = crate::notebook::read_notebook(&absolute_path)?;
 
         // Update file state
         let raw = std::fs::read_to_string(&absolute_path).unwrap_or_default();
@@ -411,7 +411,7 @@ fn read_pdf(path: &std::path::Path, pages: Option<&str>) -> Result<ReadOutput, S
     }
 
     // Read each image and build notebook-style blocks (reuse NotebookBlock)
-    use super::notebook::NotebookBlock;
+    use crate::notebook::NotebookBlock;
     let mut blocks = Vec::new();
 
     for (i, entry) in image_files.iter().enumerate() {

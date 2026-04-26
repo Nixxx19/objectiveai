@@ -6,7 +6,7 @@ use rmcp::{
     schemars, tool, tool_handler, tool_router,
 };
 
-use super::state::FileStateCache;
+use crate::state::FileStateCache;
 
 // --- Input schemas (matching Claude Code exactly) ---
 
@@ -104,7 +104,7 @@ pub struct GrepRequest {
 pub struct FilesystemMcp {
     pub tool_router: ToolRouter<Self>,
     file_state: FileStateCache,
-    shell_state: super::bash::ShellState,
+    shell_state: crate::bash::ShellState,
 }
 
 #[tool_router]
@@ -112,7 +112,7 @@ impl FilesystemMcp {
     pub fn new() -> Self {
         Self {
             tool_router: Self::tool_router(),
-            shell_state: super::bash::ShellState::new(),
+            shell_state: crate::bash::ShellState::new(),
             file_state: FileStateCache::new(),
         }
     }
@@ -125,23 +125,23 @@ impl FilesystemMcp {
 
     #[tool(name = "Read", description = "Reads a file from the local filesystem.")]
     fn read(&self, Parameters(req): Parameters<ReadRequest>) -> Result<CallToolResult, rmcp::ErrorData> {
-        match super::read_file::read_file(&self.file_state, &req.file_path, req.offset, req.limit, req.pages.as_deref()) {
-            Ok(super::read_file::ReadOutput::Text(json)) => {
+        match crate::read_file::read_file(&self.file_state, &req.file_path, req.offset, req.limit, req.pages.as_deref()) {
+            Ok(crate::read_file::ReadOutput::Text(json)) => {
                 Ok(CallToolResult::success(vec![Content::text(json)]))
             }
-            Ok(super::read_file::ReadOutput::Image { base64, media_type }) => {
+            Ok(crate::read_file::ReadOutput::Image { base64, media_type }) => {
                 Ok(CallToolResult::success(vec![Content::image(base64, media_type)]))
             }
-            Ok(super::read_file::ReadOutput::Notebook(blocks)) => {
+            Ok(crate::read_file::ReadOutput::Notebook(blocks)) => {
                 let contents: Vec<Content> = blocks.into_iter().map(|b| match b {
-                    super::notebook::NotebookBlock::Text(text) => Content::text(text),
-                    super::notebook::NotebookBlock::Image { base64, media_type } => {
+                    crate::notebook::NotebookBlock::Text(text) => Content::text(text),
+                    crate::notebook::NotebookBlock::Image { base64, media_type } => {
                         Content::image(base64, media_type)
                     }
                 }).collect();
                 Ok(CallToolResult::success(contents))
             }
-            Ok(super::read_file::ReadOutput::FileUnchanged(stub)) => {
+            Ok(crate::read_file::ReadOutput::FileUnchanged(stub)) => {
                 Ok(CallToolResult::success(vec![Content::text(stub)]))
             }
             Err(e) => Ok(CallToolResult::error(vec![Content::text(e)])),
@@ -150,7 +150,7 @@ impl FilesystemMcp {
 
     #[tool(name = "Write", description = "Writes a file to the local filesystem.")]
     fn write(&self, Parameters(req): Parameters<WriteRequest>) -> String {
-        match super::write_file::write_file(&self.file_state, &req.file_path, &req.content) {
+        match crate::write_file::write_file(&self.file_state, &req.file_path, &req.content) {
             Ok(output) => output,
             Err(e) => e,
         }
@@ -158,7 +158,7 @@ impl FilesystemMcp {
 
     #[tool(name = "Edit", description = "Performs exact string replacements in files.")]
     fn edit(&self, Parameters(req): Parameters<EditRequest>) -> String {
-        match super::edit_file::edit_file(
+        match crate::edit_file::edit_file(
             &self.file_state,
             &req.file_path,
             &req.old_string,
@@ -172,10 +172,10 @@ impl FilesystemMcp {
 
     #[tool(name = "Bash", description = "Executes a given bash command and returns its output.")]
     async fn bash(&self, Parameters(req): Parameters<BashRequest>) -> Content {
-        match super::bash::execute_bash(&self.shell_state, &req.command, req.timeout).await {
+        match crate::bash::execute_bash(&self.shell_state, &req.command, req.timeout).await {
             Ok(output) => {
                 if output.is_image {
-                    if let Some(parsed) = super::bash::parse_data_uri(&output.stdout) {
+                    if let Some(parsed) = crate::bash::parse_data_uri(&output.stdout) {
                         return Content::image(parsed.data, parsed.media_type);
                     }
                 }
@@ -188,7 +188,7 @@ impl FilesystemMcp {
 
     #[tool(name = "Glob", description = "Fast file pattern matching tool that works with any codebase size")]
     fn glob(&self, Parameters(req): Parameters<GlobRequest>) -> String {
-        match super::glob_search::glob_search(&req.pattern, req.path.as_deref()) {
+        match crate::glob_search::glob_search(&req.pattern, req.path.as_deref()) {
             Ok(output) => {
                 if output.contains("\"truncated\": true") {
                     format!("{output}\n(Results are truncated. Consider using a more specific path or pattern.)")
@@ -202,7 +202,7 @@ impl FilesystemMcp {
 
     #[tool(name = "Grep", description = "A powerful search tool built on ripgrep")]
     fn grep(&self, Parameters(req): Parameters<GrepRequest>) -> String {
-        let input = super::grep_search::GrepSearchInput {
+        let input = crate::grep_search::GrepSearchInput {
             pattern: req.pattern,
             path: req.path,
             glob: req.glob,
@@ -218,7 +218,7 @@ impl FilesystemMcp {
             offset: req.offset,
             multiline: req.multiline,
         };
-        match super::grep_search::grep_search(&input) {
+        match crate::grep_search::grep_search(&input) {
             Ok(output) => output,
             Err(e) => e,
         }

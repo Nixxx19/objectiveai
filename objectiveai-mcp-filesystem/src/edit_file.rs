@@ -1,5 +1,5 @@
-use super::state::{FileStateCache, FileStateEntry};
-use super::util;
+use crate::state::{FileStateCache, FileStateEntry};
+use crate::util;
 
 const MAX_EDIT_FILE_SIZE: u64 = 1024 * 1024 * 1024; // 1 GiB
 

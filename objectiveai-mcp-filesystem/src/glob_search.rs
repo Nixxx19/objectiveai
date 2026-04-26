@@ -2,7 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::time::Instant;
 
-use super::util;
+use crate::util;
 
 #[derive(Debug, serde::Serialize)]
 pub struct GlobSearchOutput {

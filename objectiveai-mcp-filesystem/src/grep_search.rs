@@ -5,7 +5,7 @@ use glob::Pattern;
 use regex::RegexBuilder;
 use walkdir::WalkDir;
 
-use super::util;
+use crate::util;
 
 #[derive(Debug, serde::Serialize)]
 pub struct GrepSearchOutput {

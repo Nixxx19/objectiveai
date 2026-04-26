@@ -1,4 +1,13 @@
-mod filesystem;
+mod bash;
+mod edit_file;
+mod glob_search;
+mod grep_search;
+mod notebook;
+mod read_file;
+mod state;
+mod tools;
+mod util;
+mod write_file;
 
 use envconfig::Envconfig;
 use rmcp::transport::streamable_http_server::{
@@ -7,7 +16,7 @@ use rmcp::transport::streamable_http_server::{
 };
 use tokio_util::sync::CancellationToken;
 
-use crate::filesystem::FilesystemMcp;
+use crate::tools::FilesystemMcp;
 
 #[derive(Envconfig)]
 struct EnvConfigBuilder {
