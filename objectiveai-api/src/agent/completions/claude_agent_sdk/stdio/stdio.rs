@@ -1,8 +1,8 @@
 //! Long-lived runner subprocess + per-request dispatcher.
 //!
-//! One `Runner` owns one Python runner subprocess. The subprocess is
+//! One [`Runner`] owns one Python runner subprocess. The subprocess is
 //! spawned lazily (via [`tokio::sync::OnceCell`] on the parent
-//! [`super::Client`]) and then reused for every subsequent
+//! `super::super::Client`) and then reused for every subsequent
 //! `agent_completions::create` call against that client. Concurrency
 //! comes from the runner's own asyncio multiplexer — it accepts N
 //! concurrent `run` requests over a single (stdin, stdout, stderr)
@@ -24,8 +24,8 @@
 //!   │   stderr reader task ◀── stderr (NDJSON)   │
 //!   └────────────────────────────────────────────┘
 //!                                │  for each line:
-//!                                │    extract_id → look up sender
-//!                                │    deserialize → forward Update
+//!                                │    deserialize → look up sender by id
+//!                                │                  → forward Update
 //!                                ▼
 //!   Per-request consumer pulls Updates → maps to StreamItem<State>
 //! ```
@@ -33,9 +33,9 @@
 //! Crash handling: when either reader sees EOF, all in-flight senders
 //! are dropped (their consumers see channel closure). Subsequent
 //! `register`/`send_*` calls fail with [`RunnerError::Closed`]. We do
-//! not auto-restart here — the caller can drop the parent
-//! [`super::Client`]'s `OnceCell` and let the next request spawn a
-//! fresh runner if/when we add that policy.
+//! not auto-restart here — the caller can drop the parent client's
+//! `OnceCell` and let the next request spawn a fresh runner if/when
+//! we add that policy.
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -45,56 +45,15 @@ use tokio::process::{ChildStdin, Command};
 use tokio::sync::{mpsc, Mutex};
 use tokio::task::JoinHandle;
 
-use super::sdk_message::SDKMessage;
-use super::stdio::{
-    extract_id, RunParams, StdioDiagLevel, StdioEndStatus, StdioError, StdioInput,
-    StdioOutput,
+use super::super::sdk_message::SDKMessage;
+use super::{
+    RunParams, RunnerError, RunnerUpdate, StdioError, StdioInput, StdioOutput,
 };
-
-/// One thing that happened for an in-flight request, delivered via
-/// the per-request mpsc channel.
-#[derive(Debug)]
-pub enum RunnerUpdate {
-    /// One stdout `event` line, fully parsed.
-    Event(SDKMessage),
-    /// Terminal `end` line — emitted exactly once per accepted run.
-    /// Receivers should treat the channel as closed after this.
-    End(StdioEndStatus),
-    /// One stderr `diag` line for this request.
-    Diag {
-        level: StdioDiagLevel,
-        message: String,
-    },
-    /// Process-level fatal — the runner is exiting non-zero. Fanned
-    /// out to every in-flight request as a courtesy. Receivers should
-    /// fail their stream with this message.
-    Fatal(String),
-    /// The runner subprocess exited (or its IO closed) without ever
-    /// emitting an `end` for this request. Receivers should fail
-    /// with a runner-died error.
-    RunnerExited,
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum RunnerError {
-    #[error("runner subprocess has exited")]
-    Closed,
-    #[error("spawn runner: {0}")]
-    Spawn(String),
-    #[error("write to runner stdin: {0}")]
-    Write(String),
-    #[error("serialize runner request: {0}")]
-    Serialize(#[from] serde_json::Error),
-    /// A request id was registered but the registry already had one
-    /// with the same id. The caller's id-allocator is broken.
-    #[error("duplicate request id: {0}")]
-    DuplicateId(String),
-}
 
 type Registry = Arc<Mutex<HashMap<String, mpsc::UnboundedSender<RunnerUpdate>>>>;
 
 /// One long-lived Claude Agent SDK runner subprocess. Created lazily
-/// by [`super::Client`] via `tokio::sync::OnceCell`.
+/// by `super::super::Client` via `tokio::sync::OnceCell`.
 pub struct Runner {
     /// stdin write half. Held under a mutex so concurrent
     /// `send_run`/`send_cancel` calls can't interleave bytes mid-line.
@@ -274,26 +233,15 @@ impl Runner {
         Ok(())
     }
 
-    /// Process one stdout line — look up the registered sender for
-    /// the line's id (using the cheap byte-level prefix scan) and
-    /// forward a typed [`RunnerUpdate`].
+    /// Process one stdout line — full-deserialize and route the
+    /// resulting [`RunnerUpdate`] to the per-id channel. Malformed
+    /// lines are dropped silently; they'd be a runner bug, and we
+    /// keep going so other in-flight requests keep working.
     async fn dispatch_stdout(line: &str, registry: &Registry) {
-        let id = match extract_id(line) {
-            Ok(Some(id)) => id,
-            // stdout lines must always have an id — drop anything
-            // malformed silently. A malformed line here is a runner
-            // bug; we keep going so other in-flight requests keep
-            // working.
-            Ok(None) | Err(_) => return,
-        };
         let parsed: StdioOutput<SDKMessage> = match serde_json::from_str(line) {
             Ok(p) => p,
             Err(_) => return,
         };
-        // The pre-scanned `id` already verified the line is well-
-        // formed enough to route; we still pull it from the parsed
-        // payload to make the routing target unambiguous.
-        let _ = id;
         match parsed {
             StdioOutput::Event { id, event } => {
                 Self::send_to(registry, &id, RunnerUpdate::Event(event)).await;

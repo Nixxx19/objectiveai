@@ -34,26 +34,22 @@
 //! {"type":"fatal","message":"..."}
 //! ```
 //!
-//! ## Fast id-prefix check
+//! ## Routing
 //!
-//! [`StdioOutput::try_parse`] and [`StdioError::try_parse`] take the
-//! request id the caller is interested in and return
-//! `Ok(Some(...))` only if the line belongs to that id (or, in the
-//! [`StdioError`] case, is an untagged `fatal`). They start with a
-//! cheap byte-level scan that walks past the `"type":"<v>"` pair,
-//! checks whether the second key is `"id"`, and (if so) compares its
-//! string value to the requested id — all without invoking
-//! `serde_json` on the rest of the line. Only on a match do they
-//! pay for full deserialization. Lines tagged with another caller's
-//! id are dropped with `Ok(None)` after a few hundred ns of scan
-//! work.
+//! The [`Runner`] dispatcher full-deserializes each stdout line into a
+//! [`StdioOutput<SDKMessage>`][StdioOutput] (and each stderr line into
+//! a [`StdioError`]) and routes by the `id` field on the parsed value.
+//! There's no separate scan layer — every line on these pipes belongs
+//! to one of our active requests, so there's nothing to early-exit on.
 
-mod id_prefix;
-pub use id_prefix::*;
 mod run_params;
 pub use run_params::*;
-mod scanner;
-pub use scanner::*;
+mod runner_error;
+pub use runner_error::*;
+mod runner_update;
+pub use runner_update::*;
+mod stdio;
+pub use stdio::*;
 mod stdio_diag_level;
 pub use stdio_diag_level::*;
 mod stdio_end_status;
@@ -64,5 +60,3 @@ mod stdio_input;
 pub use stdio_input::*;
 mod stdio_output;
 pub use stdio_output::*;
-mod stdio_parse_error;
-pub use stdio_parse_error::*;
