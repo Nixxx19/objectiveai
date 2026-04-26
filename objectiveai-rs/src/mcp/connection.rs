@@ -1,6 +1,6 @@
 //! MCP connection for communicating with an MCP server.
 
-use std::sync::Arc;
+use std::sync::{Arc, Weak};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 
@@ -229,9 +229,14 @@ impl Connection {
                 .unwrap_or(false);
 
             if tools_list_changed || resources_list_changed {
-                let conn = Arc::clone(&conn);
+                // Hand the listener a `Weak` so it can self-cancel once
+                // every external strong reference to this Connection is
+                // dropped. If we cloned an `Arc` instead, the spawned task
+                // would itself keep the Connection alive forever.
+                let weak = Arc::downgrade(&conn);
                 tokio::spawn(async move {
-                    conn.listen_for_list_changes(
+                    Self::listen_for_list_changes(
+                        weak,
                         tools_list_changed,
                         resources_list_changed,
                     )
@@ -689,8 +694,14 @@ impl Connection {
     /// `notifications/resources/list_changed`. On each notification,
     /// write-locks and re-fetches the full list. Reconnects on
     /// disconnection with a brief delay.
+    ///
+    /// Takes a [`Weak<Self>`] (not `Arc<Self>`) so the spawned task
+    /// doesn't itself keep the [`Connection`] alive. At the top of every
+    /// outer-loop iteration we try to upgrade the weak; if every external
+    /// strong reference is gone, the task returns and the upstream HTTP
+    /// connection drops.
     async fn listen_for_list_changes(
-        &self,
+        weak: Weak<Self>,
         tools: bool,
         resources: bool,
     ) {
@@ -699,10 +710,17 @@ impl Connection {
         use tokio_util::io::StreamReader;
 
         loop {
-            let response = match self.get().send().await {
+            // Liveness check: if no external Arc<Self> is left, no one
+            // cares about list-change notifications anymore — exit and let
+            // the Connection drop.
+            let Some(this) = weak.upgrade() else { return };
+            let backoff_delay = this.backoff_initial_interval;
+
+            let response = match this.get().send().await {
                 Ok(r) if r.status().is_success() => r,
                 _ => {
-                    tokio::time::sleep(self.backoff_initial_interval).await;
+                    drop(this);
+                    tokio::time::sleep(backoff_delay).await;
                     continue;
                 }
             };
@@ -727,17 +745,19 @@ impl Connection {
 
                 match method.as_str() {
                     "notifications/tools/list_changed" if tools => {
-                        self.refresh_tools().await;
+                        this.refresh_tools().await;
                     }
                     "notifications/resources/list_changed" if resources => {
-                        self.refresh_resources().await;
+                        this.refresh_resources().await;
                     }
                     _ => {}
                 }
             }
 
-            // Stream ended — reconnect after a brief delay.
-            tokio::time::sleep(self.backoff_initial_interval).await;
+            // Stream ended — drop the strong ref before sleeping so the
+            // next iteration's weak-upgrade can detect liveness honestly.
+            drop(this);
+            tokio::time::sleep(backoff_delay).await;
         }
     }
 }
