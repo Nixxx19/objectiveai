@@ -77,6 +77,27 @@ pub async fn handle_post(
     }
 }
 
+// ---- DELETE handler (explicit session termination) ------------------------
+
+/// DELETE `/`: end the session named by `Mcp-Session-Id`. Per
+/// 2025-06-18/basic/transports#session-management the client uses this to
+/// explicitly terminate its session; the server responds 200 on success
+/// and 404 if the id is unknown.
+pub async fn handle_delete(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Response {
+    let session_id = match extract_session_id(&headers) {
+        Ok(id) => id,
+        Err(resp) => return resp,
+    };
+
+    match state.sessions.remove(&session_id) {
+        Some(_) => StatusCode::OK.into_response(),
+        None => (StatusCode::NOT_FOUND, "unknown session").into_response(),
+    }
+}
+
 // ---- GET handler (server-initiated SSE stream) ----------------------------
 
 /// GET `/`: open the per-session SSE stream so the server can push

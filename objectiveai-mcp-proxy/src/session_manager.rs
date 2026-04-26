@@ -57,4 +57,17 @@ impl SessionManager {
     pub fn get(&self, session_id: &str) -> Option<Arc<Session>> {
         self.sessions.get(session_id).map(|e| e.value().clone())
     }
+
+    /// Remove a session from the registry. Returns `Some(_)` if a session
+    /// was present, `None` if the id was unknown.
+    ///
+    /// Note: removing the session releases this map's `Arc<Session>`, but
+    /// each `Arc<Connection>` inside the session has long-running
+    /// background tasks (the upstream SSE listener) that hold their own
+    /// `Arc<Connection>` clones — those tasks keep the upstream
+    /// connections alive until the proxy process restarts. A proper shutdown
+    /// signal on `Connection` is needed to fully reclaim the resources.
+    pub fn remove(&self, session_id: &str) -> Option<Arc<Session>> {
+        self.sessions.remove(session_id).map(|(_, session)| session)
+    }
 }

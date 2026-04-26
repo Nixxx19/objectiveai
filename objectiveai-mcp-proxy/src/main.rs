@@ -125,7 +125,9 @@ async fn main() -> anyhow::Result<()> {
     let router = axum::Router::new()
         .route(
             "/",
-            axum::routing::post(mcp::handle_post).get(mcp::handle_get),
+            axum::routing::post(mcp::handle_post)
+                .get(mcp::handle_get)
+                .delete(mcp::handle_delete),
         )
         .with_state(state);
     let listener = tokio::net::TcpListener::bind(format!(
