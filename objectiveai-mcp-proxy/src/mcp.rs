@@ -24,9 +24,9 @@ use objectiveai::mcp::{
 };
 
 use crate::AppState;
-use crate::session::{CallToolError, ConnectError, ReadResourceError, Session};
+use crate::session::{CallToolError, ReadResourceError};
 use crate::session_manager::SessionManager;
-use crate::upstream::BadInit;
+use crate::upstream::{BadInit, connect_all, parse_init_headers};
 
 /// MCP protocol version this proxy speaks.
 const PROTOCOL_VERSION: &str = "2025-06-18";
@@ -112,15 +112,15 @@ async fn handle_initialize(
     headers: &HeaderMap,
     request: JsonRpcRequest,
 ) -> Response {
-    let session = match Session::connect(&state.client, headers).await {
+    let specs = match parse_init_headers(headers) {
         Ok(s) => s,
-        Err(ConnectError::BadInit(BadInit::NotUtf8 { header })) => {
+        Err(BadInit::NotUtf8 { header }) => {
             return invalid_request_response(
                 request.id,
                 format!("{header} is not valid UTF-8"),
             );
         }
-        Err(ConnectError::BadInit(BadInit::NotJson { header, source })) => {
+        Err(BadInit::NotJson { header, source }) => {
             return invalid_request_response(
                 request.id,
                 format!("{header} is not valid JSON: {source}"),
@@ -128,7 +128,8 @@ async fn handle_initialize(
         }
     };
 
-    let session_id = state.sessions.add(session);
+    let connections = connect_all(&state.client, specs).await;
+    let session_id = state.sessions.add(connections);
 
     let result = InitializeResult {
         protocol_version: PROTOCOL_VERSION.into(),
