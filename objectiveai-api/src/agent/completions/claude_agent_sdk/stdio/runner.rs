@@ -47,7 +47,8 @@ use tokio::task::JoinHandle;
 
 use super::super::sdk_message::SDKMessage;
 use super::{
-    RunParams, RunnerError, RunnerUpdate, StdioError, StdioInput, StdioOutput,
+    RunParams, RunnerError, RunnerStream, RunnerUpdate, StdioError, StdioInput,
+    StdioOutput,
 };
 
 type Registry = Arc<Mutex<HashMap<String, mpsc::UnboundedSender<RunnerUpdate>>>>;
@@ -166,10 +167,33 @@ impl Runner {
         })
     }
 
-    /// Register a new request `id` and return the receive half of
-    /// its channel. Caller must keep the receiver alive for as long
-    /// as it expects to receive updates.
-    pub async fn register(
+    /// Start one in-flight request: register an id, send the `run`,
+    /// and return a [`RunnerStream`] of updates for it. Dropping the
+    /// stream sends a `cancel` and unregisters the id unless it
+    /// already saw a terminal update — see [`RunnerStream`].
+    ///
+    /// `create_stream` borrows `self` through an `Arc` so the stream
+    /// can keep the runner alive for its drop handler. The expected
+    /// caller already holds an `Arc<Runner>` via the parent client's
+    /// `OnceCell`.
+    pub async fn create_stream<'a>(
+        self: &Arc<Self>,
+        id: String,
+        params: RunParams<'a>,
+    ) -> Result<RunnerStream, RunnerError> {
+        let rx = self.register(id.clone()).await?;
+        if let Err(e) = self.send_run(&id, params).await {
+            // The runner never accepted the id, so there's nothing
+            // to cancel — just clean up the registry entry.
+            self.unregister(&id).await;
+            return Err(e);
+        }
+        Ok(RunnerStream::new(rx, self.clone(), id))
+    }
+
+    /// Register a new request `id`. Internal — `create_stream` is the
+    /// public entry point.
+    async fn register(
         &self,
         id: String,
     ) -> Result<mpsc::UnboundedReceiver<RunnerUpdate>, RunnerError> {
@@ -185,15 +209,17 @@ impl Runner {
         Ok(rx)
     }
 
-    /// Drop a request's registry entry. Idempotent.
-    pub async fn unregister(&self, id: &str) {
+    /// Drop a request's registry entry. Idempotent. Internal —
+    /// called by `create_stream` on send-failure and by
+    /// `RunnerStream::drop`.
+    pub(super) async fn unregister(&self, id: &str) {
         let mut reg = self.registry.lock().await;
         reg.remove(id);
     }
 
-    /// Send a `run` request to the runner's stdin. The caller should
-    /// have called [`Self::register`] for this `id` first.
-    pub async fn send_run<'a>(
+    /// Send a `run` request to the runner's stdin. Internal — used
+    /// by `create_stream` after `register` succeeds.
+    async fn send_run<'a>(
         &self,
         id: &'a str,
         params: RunParams<'a>,
@@ -207,8 +233,9 @@ impl Runner {
 
     /// Send a `cancel` request to the runner's stdin. Best-effort —
     /// the runner emits a single `end` line for the request whether
-    /// it was in flight, queued, or already done.
-    pub async fn send_cancel(&self, id: &str) -> Result<(), RunnerError> {
+    /// it was in flight, queued, or already done. Internal — called
+    /// by `RunnerStream::drop`.
+    pub(super) async fn send_cancel(&self, id: &str) -> Result<(), RunnerError> {
         if self.closed.load(std::sync::atomic::Ordering::Acquire) {
             return Err(RunnerError::Closed);
         }

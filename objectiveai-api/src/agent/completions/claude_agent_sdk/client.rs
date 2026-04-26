@@ -9,7 +9,7 @@ use super::invention_server::InventionServer;
 use super::mcp_server_config::{McpHttpServerConfig, McpServerConfig};
 use super::prompt::Prompt;
 use super::sdk_message::SDKMessage;
-use super::stdio::{RunParams, Runner, RunnerUpdate, StdioEndStatus};
+use super::stdio::{RunParams, Runner, RunnerStream, RunnerUpdate, StdioEndStatus};
 use crate::util::StreamOnce;
 
 /// Claude Agent SDK client for agent completions.
@@ -214,46 +214,6 @@ fn validate_response_format(
     }
 }
 
-/// Drop-guard that fires a best-effort `cancel` for `request_id` when
-/// the consumer drops the returned stream early. Sending cancel for
-/// a request that already finished is harmless — the runner replies
-/// `end(error, "cancel-unknown-id")`, but we've already unregistered
-/// from the runner's registry by then so the line is dropped.
-struct CancelOnDrop {
-    runner: Option<Arc<Runner>>,
-    id: Option<String>,
-}
-
-impl CancelOnDrop {
-    fn new(runner: Arc<Runner>, id: String) -> Self {
-        Self {
-            runner: Some(runner),
-            id: Some(id),
-        }
-    }
-
-    /// Disarm — the request finished naturally, no cancel needed.
-    fn defuse(&mut self) {
-        self.runner = None;
-        self.id = None;
-    }
-}
-
-impl Drop for CancelOnDrop {
-    fn drop(&mut self) {
-        let (Some(runner), Some(id)) = (self.runner.take(), self.id.take()) else {
-            return;
-        };
-        // Spawn rather than block — Drop is sync.
-        if tokio::runtime::Handle::try_current().is_ok() {
-            tokio::spawn(async move {
-                let _ = runner.send_cancel(&id).await;
-                runner.unregister(&id).await;
-            });
-        }
-    }
-}
-
 impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation> for Client {
     type State = super::State;
     type Stream = Pin<
@@ -366,24 +326,9 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
             // Lazy-spawn (or reuse) the runner subprocess.
             let runner = client.runner_handle().await?;
 
-            // Each agent-completions request gets its own caller-side
-            // id. We use `id` (the upstream id) rather than minting a
-            // separate UUID — the upstream id is already unique per
-            // request and lets the runner's diag lines be cross-
-            // referenced against agent-completion logs.
-            let request_id = id.clone();
-
-            let mut rx = runner
-                .register(request_id.clone())
-                .await
-                .map_err(|e| super::Error::Spawn(e.to_string()))?;
-
-            // Cancel-on-drop guard: arms now, defuses on natural
-            // completion below.
-            let mut cancel_guard = CancelOnDrop::new(runner.clone(), request_id.clone());
-
             // Build the params object — borrows from locals in this
-            // async block, valid for the duration of the await.
+            // async block, valid for the duration of the await on
+            // create_stream.
             let session_id = prompt.message.session_id.as_str();
             let resume_arg: Option<&str> =
                 if session_id.is_empty() { None } else { Some(session_id) };
@@ -403,20 +348,27 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
                 rate_limit_max_wait_secs: client.rate_limit_max_wait_secs,
             };
 
-            if let Err(e) = runner.send_run(&request_id, run_params).await {
-                runner.unregister(&request_id).await;
-                cancel_guard.defuse();
-                return Err(super::Error::Spawn(e.to_string()));
-            }
+            // Each agent-completions request gets its own caller-side
+            // id. We use `id` (the upstream id) rather than minting a
+            // separate UUID — the upstream id is already unique per
+            // request and lets the runner's diag lines be cross-
+            // referenced against agent-completion logs. The returned
+            // RunnerStream auto-cancels on drop unless it saw a
+            // terminal update.
+            let mut rx = runner
+                .create_stream(id.clone(), run_params)
+                .await
+                .map_err(|e| super::Error::Spawn(e.to_string()))?;
 
             let id_for_chunks = id.clone();
             let agent_id = agent.id.clone();
 
             let internal_stream = async_stream::stream! {
                 // Keep invention server alive for the duration of the
-                // stream and arm the cancel-on-drop.
+                // stream. RunnerStream's Drop handles cancellation
+                // automatically.
                 let _invention_server_guard = invention_server;
-                let mut cancel_guard = cancel_guard;
+                let mut rx = rx;
 
                 let mut latest_session_id = String::new();
                 let mut had_error = false;
@@ -430,12 +382,14 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
                 let mut last_assistant_index: Option<u64> = None;
 
                 loop {
-                    let update = match rx.recv().await {
+                    let update = match rx.next().await {
                         Some(u) => u,
                         None => {
-                            // The runner unregistered us without sending
-                            // an end (it does that when forwarding the
-                            // `end` line). Treat as runner-died.
+                            // The RunnerStream closed without sending
+                            // an end (already-terminal updates close
+                            // it cleanly via marking it complete first
+                            // — getting None here means the runner
+                            // died mid-flight).
                             yield Err(super::Error::NoOutput);
                             had_error = true;
                             break;
@@ -500,19 +454,12 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
                                 }
                             }
                         }
-                        RunnerUpdate::End(StdioEndStatus::Ok) => {
-                            // Natural completion. Disarm the cancel
-                            // guard — request is already done.
-                            cancel_guard.defuse();
-                            break;
-                        }
-                        RunnerUpdate::End(StdioEndStatus::Cancelled) => {
-                            // Caller-initiated cancel landed. Defuse.
-                            cancel_guard.defuse();
-                            break;
-                        }
+                        // Terminal updates: RunnerStream marks itself
+                        // complete on these, so dropping `rx` after we
+                        // break won't trigger a (no-op) cancel.
+                        RunnerUpdate::End(StdioEndStatus::Ok) => break,
+                        RunnerUpdate::End(StdioEndStatus::Cancelled) => break,
                         RunnerUpdate::End(StdioEndStatus::Error { error }) => {
-                            cancel_guard.defuse();
                             yield Err(super::Error::Stderr(error));
                             had_error = true;
                             break;
@@ -525,13 +472,11 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
                             // event/end.
                         }
                         RunnerUpdate::Fatal(message) => {
-                            cancel_guard.defuse();
                             yield Err(super::Error::Stderr(message));
                             had_error = true;
                             break;
                         }
                         RunnerUpdate::RunnerExited => {
-                            cancel_guard.defuse();
                             yield Err(super::Error::NoOutput);
                             had_error = true;
                             break;
