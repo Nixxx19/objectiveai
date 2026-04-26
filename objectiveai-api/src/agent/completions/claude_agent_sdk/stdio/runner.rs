@@ -6,7 +6,10 @@
 //! `agent_completions::create` call against that client. Concurrency
 //! comes from the runner's own asyncio multiplexer — it accepts N
 //! concurrent `run` requests over a single (stdin, stdout, stderr)
-//! triple, with the FIFO semaphore enforced by `--query-limit N`.
+//! triple. The FIFO `query_limit` is enforced on the Rust side via a
+//! [`tokio::sync::Semaphore`] on `Runner`; surplus requests wait for a
+//! permit before their `run` line is sent, so the Python runner sees
+//! only what we let through.
 //!
 //! ## Architecture
 //!
@@ -42,7 +45,7 @@ use std::sync::Arc;
 
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::process::{ChildStdin, Command};
-use tokio::sync::{mpsc, Mutex};
+use tokio::sync::{mpsc, Mutex, Semaphore};
 use tokio::task::JoinHandle;
 
 use super::super::sdk_message::SDKMessage;
@@ -69,6 +72,14 @@ pub struct Runner {
     /// Set by the reader tasks when they detect EOF on either pipe.
     closed: Arc<std::sync::atomic::AtomicBool>,
 
+    /// FIFO concurrency cap on in-flight requests. `create_stream`
+    /// acquires a permit *before* sending `run` to stdin, and the
+    /// returned [`RunnerStream`] holds the permit for its lifetime.
+    /// `tokio::sync::Semaphore` is FIFO (waiters live in a queue,
+    /// `add_permits` wakes the oldest), so accepted-order equals
+    /// run-order. Queued requests never touch the runner subprocess.
+    semaphore: Arc<Semaphore>,
+
     /// Reader tasks are kept alive by their JoinHandles being held
     /// here. Aborted on drop.
     _stdout_task: JoinHandle<()>,
@@ -77,10 +88,11 @@ pub struct Runner {
 
 impl Runner {
     /// Spawn the runner subprocess, set up the stdout/stderr reader
-    /// tasks, and return a handle.
+    /// tasks, and return a handle. The Python runner has no built-in
+    /// concurrency cap; the FIFO `query_limit` is enforced entirely
+    /// here by the `tokio::sync::Semaphore` stored on `Self`.
     pub async fn spawn(binary: &str, query_limit: u64) -> Result<Self, RunnerError> {
         let mut cmd = Command::new(binary);
-        cmd.arg("--query-limit").arg(query_limit.to_string());
         cmd.stdin(std::process::Stdio::piped())
             .stdout(std::process::Stdio::piped())
             .stderr(std::process::Stdio::piped());
@@ -107,6 +119,7 @@ impl Runner {
 
         let registry: Registry = Arc::new(Mutex::new(HashMap::new()));
         let closed = Arc::new(std::sync::atomic::AtomicBool::new(false));
+        let semaphore = Arc::new(Semaphore::new(query_limit as usize));
 
         // Stdout reader task — fully parses each line as
         // StdioOutput<SDKMessage> and forwards to the registered
@@ -162,15 +175,19 @@ impl Runner {
             stdin: Mutex::new(stdin),
             registry,
             closed,
+            semaphore,
             _stdout_task: stdout_task,
             _stderr_task: stderr_task,
         })
     }
 
-    /// Start one in-flight request: register an id, send the `run`,
-    /// and return a [`RunnerStream`] of updates for it. Dropping the
-    /// stream sends a `cancel` and unregisters the id unless it
-    /// already saw a terminal update — see [`RunnerStream`].
+    /// Start one in-flight request: acquire a FIFO permit (the
+    /// concurrency cap), register an id, send the `run`, and return a
+    /// [`RunnerStream`] of updates for it. The returned stream holds
+    /// the permit for its lifetime, so the cap is released on drop /
+    /// terminal update. Dropping the stream sends a `cancel` and
+    /// unregisters the id unless it already saw a terminal update —
+    /// see [`RunnerStream`].
     ///
     /// `create_stream` borrows `self` through an `Arc` so the stream
     /// can keep the runner alive for its drop handler. The expected
@@ -181,14 +198,21 @@ impl Runner {
         id: String,
         params: RunParams<'a>,
     ) -> Result<RunnerStream, RunnerError> {
+        let permit = self
+            .semaphore
+            .clone()
+            .acquire_owned()
+            .await
+            .expect("Runner semaphore is never closed");
         let rx = self.register(id.clone()).await?;
         if let Err(e) = self.send_run(&id, params).await {
             // The runner never accepted the id, so there's nothing
-            // to cancel — just clean up the registry entry.
+            // to cancel — just clean up the registry entry. Permit
+            // is released when it drops at the end of this scope.
             self.unregister(&id).await;
             return Err(e);
         }
-        Ok(RunnerStream::new(rx, self.clone(), id))
+        Ok(RunnerStream::new(rx, self.clone(), id, permit))
     }
 
     /// Register a new request `id`. Internal — `create_stream` is the

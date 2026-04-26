@@ -7,14 +7,14 @@ attaching a string ``id`` to every request; every line emitted on
 stdout and stderr carries that same ``id`` so the caller can
 demultiplex events from N concurrent streams.
 
-Spawn with one required argument that caps in-flight SDK queries:
+Spawn with no arguments:
 
-  $ runner --query-limit 5
+  $ runner
 
-When more than ``query_limit`` ``run`` requests are accepted, surplus
-tasks queue FIFO and proceed only as in-flight slots free up. Queued
-requests are still cancellable — a ``cancel`` for a queued ``id`` is
-honored before any SDK work begins.
+The runner has no built-in concurrency cap. The Rust caller
+(objectiveai-api) enforces a FIFO ``query_limit`` on its side via a
+``tokio::sync::Semaphore``, so surplus requests never reach this
+process — they wait for a slot before the ``run`` line is sent.
 
 Wire protocol — NDJSON, one JSON object per line, UTF-8, terminated by
 ``\\n``:
@@ -50,7 +50,6 @@ from __future__ import annotations
 
 __version__ = "3.0.0"
 
-import argparse
 import asyncio
 import json
 import os
@@ -356,123 +355,114 @@ async def handle_run(
     params: dict[str, Any],
     stdout_writer: Writer,
     stderr_writer: Writer,
-    query_semaphore: asyncio.Semaphore,
 ) -> None:
     """Run one Claude Agent SDK conversation, tagging every emit with
     ``request_id``. Always emits exactly one terminal ``end`` line via
     ``asyncio.shield`` even on cancellation.
 
-    All SDK work is wrapped in ``async with query_semaphore:`` so that
-    only ``query_limit`` queries hold the SDK at once. ``asyncio.Semaphore``
-    is FIFO: when a slot frees, the longest-waiting task acquires next.
-    Cancellation while waiting on the semaphore propagates without
-    consuming a permit (the ``async with`` never enters its body).
+    The Rust caller enforces the FIFO concurrency cap on its side, so
+    every ``run`` that reaches this function already holds a slot —
+    there is nothing to wait for here.
     """
     status: str = "ok"
     error: Optional[str] = None
     try:
-        # Wait for an in-flight slot. FIFO: surplus tasks queue here in the
-        # order they were created, which equals the order their `run`
-        # requests were accepted. A cancel arriving while we wait raises
-        # CancelledError out of __aenter__ before any permit is acquired,
-        # so cancelled-while-queued requests do not consume a slot.
-        async with query_semaphore:
-            message: dict[str, Any] = params["message"]
-            mcp_servers: dict[str, Any] = params.get("mcp_servers") or {}
+        message: dict[str, Any] = params["message"]
+        mcp_servers: dict[str, Any] = params.get("mcp_servers") or {}
 
-            # Build thinking config.
-            thinking = None
-            if params.get("thinking_disabled"):
-                thinking = {"type": "disabled"}
+        # Build thinking config.
+        thinking = None
+        if params.get("thinking_disabled"):
+            thinking = {"type": "disabled"}
 
-            # Build env overrides — routed to ClaudeAgentOptions.env, NOT
-            # os.environ. Concurrent runs with different user_agents are
-            # therefore isolated per-subprocess.
-            env: dict[str, str] = {}
-            ua = params.get("user_agent")
-            if ua:
-                env["CLAUDE_AGENT_SDK_CLIENT_APP"] = ua
+        # Build env overrides — routed to ClaudeAgentOptions.env, NOT
+        # os.environ. Concurrent runs with different user_agents are
+        # therefore isolated per-subprocess.
+        env: dict[str, str] = {}
+        ua = params.get("user_agent")
+        if ua:
+            env["CLAUDE_AGENT_SDK_CLIENT_APP"] = ua
 
-            opts = ClaudeAgentOptions(
-                model=params["model"],
-                system_prompt=params.get("system_prompt"),
-                effort=params.get("effort"),
-                thinking=thinking,
-                mcp_servers=mcp_servers,
-                resume=params.get("resume"),
-                env=env,
-                tools=[],
-                include_partial_messages=True,
-                permission_mode="bypassPermissions",
-            )
+        opts = ClaudeAgentOptions(
+            model=params["model"],
+            system_prompt=params.get("system_prompt"),
+            effort=params.get("effort"),
+            thinking=thinking,
+            mcp_servers=mcp_servers,
+            resume=params.get("resume"),
+            env=env,
+            tools=[],
+            include_partial_messages=True,
+            permission_mode="bypassPermissions",
+        )
 
-            # Async generator yielding the single SDK user message.
-            async def messages():
-                yield message
+        # Async generator yielding the single SDK user message.
+        async def messages():
+            yield message
 
-            our_servers = set(mcp_servers.keys())
+        our_servers = set(mcp_servers.keys())
 
-            max_retries = int(params["rate_limit_max_retries"])
-            max_wait_secs = int(params.get("rate_limit_max_wait_secs", 180))
-            current_session_id: str | None = None
+        max_retries = int(params["rate_limit_max_retries"])
+        max_wait_secs = int(params.get("rate_limit_max_wait_secs", 180))
+        current_session_id: str | None = None
 
-            for attempt in range(max_retries + 1):
-                rate_limited = False
+        for attempt in range(max_retries + 1):
+            rate_limited = False
 
-                # On retry, resume the session captured from the previous attempt.
-                if current_session_id is not None:
-                    opts = replace(opts, resume=current_session_id)
+            # On retry, resume the session captured from the previous attempt.
+            if current_session_id is not None:
+                opts = replace(opts, resume=current_session_id)
 
-                async with ClaudeSDKClient(opts) as client:
-                    # Only send the original message on the first attempt.
-                    # On resume, the session already has the conversation
-                    # history.
-                    if attempt == 0:
-                        await client.connect(prompt=messages())
-                    else:
-                        await client.connect()
+            async with ClaudeSDKClient(opts) as client:
+                # Only send the original message on the first attempt.
+                # On resume, the session already has the conversation
+                # history.
+                if attempt == 0:
+                    await client.connect(prompt=messages())
+                else:
+                    await client.connect()
 
-                    await wait_for_mcp_servers(client, our_servers)
+                await wait_for_mcp_servers(client, our_servers)
 
-                    async for msg in client.receive_messages():
-                        # Track session_id from any message that has it.
-                        msg_session_id = getattr(msg, "session_id", None)
-                        if msg_session_id:
-                            current_session_id = msg_session_id
+                async for msg in client.receive_messages():
+                    # Track session_id from any message that has it.
+                    msg_session_id = getattr(msg, "session_id", None)
+                    if msg_session_id:
+                        current_session_id = msg_session_id
 
-                        if (
-                            isinstance(msg, RateLimitEvent)
-                            and msg.rate_limit_info.status == "rejected"
-                        ):
-                            resets_at = msg.rate_limit_info.resets_at
-                            if resets_at is not None and attempt < max_retries:
-                                wait = max(0, resets_at - time.time()) + 1
-                                if wait > max_wait_secs:
-                                    await stderr_writer.emit_diag(
-                                        request_id,
-                                        "warn",
-                                        f"Rate limited, but wait {wait:.0f}s "
-                                        f"exceeds max {max_wait_secs}s — giving up",
-                                    )
-                                    # Fall through to emit the event and
-                                    # exit the outer retry loop on this
-                                    # attempt.
-                                else:
-                                    await stderr_writer.emit_diag(
-                                        request_id,
-                                        "warn",
-                                        f"Rate limited, retrying in {wait:.0f}s "
-                                        f"(attempt {attempt + 1}/{max_retries})",
-                                    )
-                                    await asyncio.sleep(wait)
-                                    rate_limited = True
-                                    break
-                        d = serialize_message(msg)
-                        if d is not None:
-                            await stdout_writer.emit_event(request_id, d)
+                    if (
+                        isinstance(msg, RateLimitEvent)
+                        and msg.rate_limit_info.status == "rejected"
+                    ):
+                        resets_at = msg.rate_limit_info.resets_at
+                        if resets_at is not None and attempt < max_retries:
+                            wait = max(0, resets_at - time.time()) + 1
+                            if wait > max_wait_secs:
+                                await stderr_writer.emit_diag(
+                                    request_id,
+                                    "warn",
+                                    f"Rate limited, but wait {wait:.0f}s "
+                                    f"exceeds max {max_wait_secs}s — giving up",
+                                )
+                                # Fall through to emit the event and
+                                # exit the outer retry loop on this
+                                # attempt.
+                            else:
+                                await stderr_writer.emit_diag(
+                                    request_id,
+                                    "warn",
+                                    f"Rate limited, retrying in {wait:.0f}s "
+                                    f"(attempt {attempt + 1}/{max_retries})",
+                                )
+                                await asyncio.sleep(wait)
+                                rate_limited = True
+                                break
+                    d = serialize_message(msg)
+                    if d is not None:
+                        await stdout_writer.emit_event(request_id, d)
 
-                if not rate_limited:
-                    break
+            if not rate_limited:
+                break
     except asyncio.CancelledError:
         status, error = "cancelled", None
         # Re-raised in the finally after we emit the terminal end line.
@@ -540,7 +530,6 @@ async def _dispatch(
     tasks: dict[str, asyncio.Task],
     stdout_writer: Writer,
     stderr_writer: Writer,
-    query_semaphore: asyncio.Semaphore,
 ) -> None:
     msg_type = msg.get("type")
     request_id = msg.get("id")
@@ -565,7 +554,6 @@ async def _dispatch(
                 params,
                 stdout_writer,
                 stderr_writer,
-                query_semaphore,
             )
         )
         tasks[request_id] = task
@@ -617,15 +605,10 @@ async def _dispatch(
 # ---------------------------------------------------------------------------
 
 
-async def main_loop(query_limit: int) -> None:
+async def main_loop() -> None:
     stdout_writer = Writer(sys.stdout.buffer)
     stderr_writer = Writer(sys.stderr.buffer)
     tasks: dict[str, asyncio.Task] = {}
-    # asyncio.Semaphore is FIFO: waiters live in a deque, release() wakes
-    # the front. Tasks created in dispatch order arrive at acquire() in
-    # that same order (asyncio's ready queue is FIFO), so accepted-order
-    # equals semaphore-wait order equals run-order.
-    query_semaphore = asyncio.Semaphore(query_limit)
 
     while True:
         line = await read_one_line_from_stdin()
@@ -642,12 +625,10 @@ async def main_loop(query_limit: int) -> None:
             continue
         if not isinstance(msg, dict):
             continue
-        await _dispatch(
-            msg, tasks, stdout_writer, stderr_writer, query_semaphore
-        )
+        await _dispatch(msg, tasks, stdout_writer, stderr_writer)
 
-    # Drain phase: every in-flight (or still-queued) task emits its own
-    # end line as it finishes or is cancelled.
+    # Drain phase: every in-flight task emits its own end line as it
+    # finishes or is cancelled.
     if tasks:
         await asyncio.gather(*list(tasks.values()), return_exceptions=True)
 
@@ -730,42 +711,17 @@ def _emit_pre_startup_fatal(message: str) -> None:
         pass
 
 
-def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description=(
-            "ObjectiveAI Claude Agent SDK Runner — stdio NDJSON server."
-        ),
-    )
-    parser.add_argument(
-        "--query-limit",
-        type=int,
-        required=True,
-        help=(
-            "Maximum number of in-flight Claude Agent SDK queries. Surplus "
-            "`run` requests queue FIFO until a slot opens. Must be >= 1."
-        ),
-    )
-    args = parser.parse_args()
-    if args.query_limit < 1:
-        parser.error("--query-limit must be >= 1")
-    return args
-
-
 def main() -> None:
     try:
-        args = _parse_args()
         _silence_proactor_pipe_warnings()
         # Avoid conflicts with the SDK-spawned `claude` CLI.
         os.environ.pop("CLAUDECODE", None)
-    except SystemExit:
-        # argparse already printed its error; let it propagate.
-        raise
     except Exception as e:
         _emit_pre_startup_fatal(f"startup: {e}")
         sys.exit(1)
 
     try:
-        asyncio.run(main_loop(args.query_limit))
+        asyncio.run(main_loop())
     except Exception as e:
         _emit_pre_startup_fatal(f"main_loop: {e}")
         sys.exit(1)

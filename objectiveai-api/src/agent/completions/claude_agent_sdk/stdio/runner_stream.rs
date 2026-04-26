@@ -3,7 +3,7 @@ use std::sync::Arc;
 use std::task::{Context, Poll};
 
 use futures::Stream;
-use tokio::sync::mpsc;
+use tokio::sync::{mpsc, OwnedSemaphorePermit};
 
 use super::{Runner, RunnerUpdate};
 
@@ -30,6 +30,10 @@ pub struct RunnerStream {
     runner: Arc<Runner>,
     id: String,
     completed: bool,
+    /// FIFO concurrency permit acquired by `Runner::create_stream`.
+    /// Released when this stream drops, freeing a slot for the next
+    /// queued request.
+    _permit: OwnedSemaphorePermit,
 }
 
 impl RunnerStream {
@@ -37,12 +41,14 @@ impl RunnerStream {
         rx: mpsc::UnboundedReceiver<RunnerUpdate>,
         runner: Arc<Runner>,
         id: String,
+        permit: OwnedSemaphorePermit,
     ) -> Self {
         Self {
             rx,
             runner,
             id,
             completed: false,
+            _permit: permit,
         }
     }
 }

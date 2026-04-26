@@ -18,15 +18,19 @@ use crate::util::StreamOnce;
 /// client. The subprocess is spawned **lazily** on the first
 /// `create()` call and reused for every subsequent request — see
 /// [`Client::runner_handle`]. The runner multiplexes N concurrent
-/// streams over a single (stdin, stdout, stderr) triple, with the
-/// in-flight cap enforced by `--query-limit`.
+/// streams over a single (stdin, stdout, stderr) triple; the in-flight
+/// cap is enforced on the Rust side by a `tokio::sync::Semaphore`
+/// inside [`Runner`].
 #[derive(Clone)]
 pub struct Client {
     pub user_agent: String,
     pub enabled: bool,
     pub rate_limit_max_retries: u64,
     pub rate_limit_max_wait_secs: u64,
-    /// FIFO concurrency cap forwarded to the runner via `--query-limit`.
+    /// FIFO concurrency cap on in-flight runner requests, enforced
+    /// inside [`Runner`] by a `tokio::sync::Semaphore`. Surplus
+    /// requests wait for a permit before their `run` line is sent to
+    /// the Python runner subprocess.
     pub query_limit: u64,
     binary_path: Arc<OnceCell<String>>,
     /// Lazily-spawned shared runner. Initialized on first request via
