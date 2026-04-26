@@ -8,13 +8,16 @@
 
 use std::sync::Arc;
 
+use axum::http::HeaderMap;
 use futures::future::join_all;
 use indexmap::IndexMap;
 use objectiveai::mcp::{
-    Connection,
+    Client, Connection,
     resource::{ListResourcesResult, ReadResourceResult, Resource},
     tool::{CallToolRequestParams, CallToolResult, ListToolsResult, Tool},
 };
+
+use crate::upstream::{BadInit, connect_all, parse_init_headers};
 
 /// Per-session state.
 ///
@@ -36,8 +39,39 @@ pub struct Session {
 }
 
 impl Session {
-    pub(crate) fn new(connections: IndexMap<String, Arc<Connection>>) -> Self {
-        Self { connections }
+    /// Build a session from the inbound `initialize` request's headers.
+    ///
+    /// Parses the three custom session-init headers (`X-MCP-Servers`,
+    /// `X-MCP-Headers`, `X-MCP-Authorization`), connects to every upstream
+    /// in parallel via the shared MCP [`Client`], and packs the surviving
+    /// connections into a name-keyed `IndexMap`. Per-upstream connect
+    /// failures are logged and dropped — best-effort, matches the rest of
+    /// the proxy's failure semantics. Header-parse failures bubble up as
+    /// [`ConnectError::BadInit`].
+    pub async fn connect(
+        client: &Client,
+        http_headers: &HeaderMap,
+    ) -> Result<Self, ConnectError> {
+        let specs = parse_init_headers(http_headers)?;
+        let connections = connect_all(client, specs).await;
+
+        // Two upstreams reporting the same server_info.name can't be
+        // disambiguated by the prefix scheme, so the later one wins with a
+        // warn. Silently keeping both would create unroutable tools.
+        let mut by_name: IndexMap<String, Arc<Connection>> =
+            IndexMap::with_capacity(connections.len());
+        for connection in connections {
+            let name = connection.initialize_result.server_info.name.clone();
+            if by_name.contains_key(&name) {
+                tracing::warn!(
+                    server_name = %name,
+                    "two upstreams report the same server_info.name; later upstream wins",
+                );
+            }
+            by_name.insert(name, connection);
+        }
+
+        Ok(Self { connections: by_name })
     }
 
     /// Fan `tools/list` out to every upstream in parallel, prefix each
@@ -181,6 +215,13 @@ impl Session {
 /// Format: `<server-name>_<original>`.
 fn prefix_name(server_name: &str, name: &str) -> String {
     format!("{server_name}_{name}")
+}
+
+/// Failure modes for [`Session::connect`].
+#[derive(Debug, thiserror::Error)]
+pub enum ConnectError {
+    #[error("invalid init headers: {0}")]
+    BadInit(#[from] BadInit),
 }
 
 /// Failure modes for [`Session::call_tool`].

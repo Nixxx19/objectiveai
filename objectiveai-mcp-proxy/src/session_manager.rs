@@ -10,8 +10,6 @@
 use std::sync::Arc;
 
 use dashmap::DashMap;
-use indexmap::IndexMap;
-use objectiveai::mcp::Connection;
 
 use crate::session::Session;
 
@@ -26,29 +24,11 @@ impl SessionManager {
         Self::default()
     }
 
-    /// Register a new session and return its freshly-minted session id.
-    ///
-    /// Connections are keyed by their upstream `server_info.name`. If two
-    /// upstreams advertise the same name, the later one wins with a warn —
-    /// the proxy's prefix scheme can't disambiguate them anyway, so
-    /// silently keeping both would create unroutable tools.
-    pub fn add(&self, connections: Vec<Arc<Connection>>) -> String {
-        let mut by_name: IndexMap<String, Arc<Connection>> =
-            IndexMap::with_capacity(connections.len());
-        for connection in connections {
-            let name = connection.initialize_result.server_info.name.clone();
-            if by_name.contains_key(&name) {
-                tracing::warn!(
-                    server_name = %name,
-                    "two upstreams report the same server_info.name; later upstream wins",
-                );
-            }
-            by_name.insert(name, connection);
-        }
-
+    /// Register an already-constructed [`Session`] and return its
+    /// freshly-minted session id.
+    pub fn add(&self, session: Session) -> String {
         let id = uuid::Uuid::new_v4().to_string();
-        self.sessions
-            .insert(id.clone(), Arc::new(Session::new(by_name)));
+        self.sessions.insert(id.clone(), Arc::new(session));
         id
     }
 
