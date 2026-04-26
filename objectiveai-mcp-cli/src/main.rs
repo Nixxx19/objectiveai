@@ -1,17 +1,13 @@
+mod objectiveai;
+
 use std::sync::Arc;
 use envconfig::Envconfig;
-use rmcp::{
-    ServerHandler,
-    handler::server::router::tool::ToolRouter,
-    handler::server::wrapper::Parameters,
-    model::{ServerCapabilities, ServerInfo},
-    schemars, tool, tool_handler, tool_router,
-};
 use rmcp::transport::streamable_http_server::{
     StreamableHttpServerConfig, StreamableHttpService,
     session::local::LocalSessionManager,
 };
 use tokio_util::sync::CancellationToken;
+use crate::objectiveai::ObjectiveAiMcpCli;
 
 #[derive(Envconfig)]
 struct EnvConfigBuilder {
@@ -65,57 +61,6 @@ impl ConfigBuilder {
 struct Config {
     address: String,
     port: u16,
-}
-
-#[derive(Debug, serde::Deserialize, schemars::JsonSchema)]
-struct ObjectiveAiRequest {
-    #[schemars(description = "The command arguments to pass to the ObjectiveAI CLI (e.g. [\"agents\", \"list\"] or [\"functions\", \"executions\", \"create\", \"--help\"])")]
-    command: Vec<String>,
-}
-
-#[derive(Debug, Clone)]
-struct ObjectiveAiMcpCli {
-    tool_router: ToolRouter<Self>,
-    cli_config: Arc<objectiveai_cli::Config>,
-}
-
-#[tool_router]
-impl ObjectiveAiMcpCli {
-    fn new(cli_config: Arc<objectiveai_cli::Config>) -> Self {
-        Self {
-            tool_router: Self::tool_router(),
-            cli_config,
-        }
-    }
-
-    #[tool(
-        name = "ObjectiveAI",
-        description = "Run an ObjectiveAI CLI command. Supports all subcommands: agents, swarms, functions, api, schemas, viewer."
-    )]
-    async fn objectiveai(
-        &self,
-        Parameters(req): Parameters<ObjectiveAiRequest>,
-    ) -> String {
-        let args: Vec<String> = std::iter::once("objectiveai".to_string())
-            .chain(req.command)
-            .collect();
-
-        match objectiveai_cli::run(args, &self.cli_config).await {
-            Ok(output) => output,
-            Err(e) => format!("error: {e}"),
-        }
-    }
-}
-
-#[tool_handler]
-impl ServerHandler for ObjectiveAiMcpCli {
-    fn get_info(&self) -> ServerInfo {
-        ServerInfo {
-            instructions: Some("ObjectiveAI CLI MCP server".into()),
-            capabilities: ServerCapabilities::builder().enable_tools().build(),
-            ..Default::default()
-        }
-    }
 }
 
 #[tokio::main]
