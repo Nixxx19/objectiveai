@@ -7,12 +7,49 @@
 //! it observes that no external `Connection` handle remains.
 
 use std::ops::Deref;
-use std::sync::{Arc, Weak};
+use std::sync::{Arc, RwLock as StdRwLock, Weak};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 
 use indexmap::IndexMap;
 use tokio::sync::{Notify, RwLock};
+
+/// Callback fired by [`Connection`] when the upstream MCP server emits
+/// `notifications/tools/list_changed` or `notifications/resources/list_changed`.
+/// The corresponding cache (`tools` / `resources`) has already been
+/// refreshed by the time this fires, so the callback can read the new
+/// list immediately if it wants.
+///
+/// Stored behind an `Arc` so the listener task can cheaply clone it out
+/// of the lock and call it without holding the read guard across an await.
+pub type ListChangedCallback = Arc<dyn Fn() + Send + Sync + 'static>;
+
+/// A registered-or-not callback slot. Wrapper so [`ConnectionInner`] can
+/// keep `#[derive(Debug)]` (a raw `dyn Fn` isn't `Debug`).
+struct CallbackSlot(StdRwLock<Option<ListChangedCallback>>);
+
+impl CallbackSlot {
+    fn new() -> Self {
+        Self(StdRwLock::new(None))
+    }
+
+    fn set(&self, callback: ListChangedCallback) {
+        *self.0.write().unwrap() = Some(callback);
+    }
+
+    /// Cheap clone-out of the current callback (if any). The `Arc` clone
+    /// lets us release the read guard before invoking the callback.
+    fn get(&self) -> Option<ListChangedCallback> {
+        self.0.read().unwrap().clone()
+    }
+}
+
+impl std::fmt::Debug for CallbackSlot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let set = self.0.read().map(|g| g.is_some()).unwrap_or(false);
+        f.debug_struct("CallbackSlot").field("set", &set).finish()
+    }
+}
 
 /// An active connection to an MCP server using the Streamable HTTP transport.
 ///
@@ -165,6 +202,33 @@ impl Connection {
     ) -> Result<super::resource::ReadResourceResult, super::Error> {
         self.inner.read_resource(uri).await
     }
+
+    /// Register a callback to fire whenever the upstream emits
+    /// `notifications/tools/list_changed`. The tool cache is refreshed
+    /// *before* the callback runs, so the callback can call
+    /// [`Connection::list_tools`] and see the new list immediately.
+    ///
+    /// Replaces any previously-registered tools-list-changed callback.
+    /// All clones of this `Connection` share the same callback slot.
+    pub fn set_on_tools_list_changed<F>(&self, callback: F)
+    where
+        F: Fn() + Send + Sync + 'static,
+    {
+        self.inner.on_tools_list_changed.set(Arc::new(callback));
+    }
+
+    /// Register a callback to fire whenever the upstream emits
+    /// `notifications/resources/list_changed`. The resource cache is
+    /// refreshed *before* the callback runs.
+    ///
+    /// Replaces any previously-registered resources-list-changed callback.
+    /// All clones of this `Connection` share the same callback slot.
+    pub fn set_on_resources_list_changed<F>(&self, callback: F)
+    where
+        F: Fn() + Send + Sync + 'static,
+    {
+        self.inner.on_resources_list_changed.set(Arc::new(callback));
+    }
 }
 
 /// The actual connection state. Behind an `Arc` inside [`Connection`].
@@ -214,6 +278,17 @@ pub struct ConnectionInner {
     /// so the listener can re-check `Arc::strong_count` immediately and
     /// exit when no external handle remains.
     external_dropped: Arc<Notify>,
+
+    /// Optional callback fired *after* the listener has refreshed the
+    /// tool cache in response to an upstream `notifications/tools/list_changed`.
+    /// Set via [`Connection::set_on_tools_list_changed`].
+    on_tools_list_changed: CallbackSlot,
+
+    /// Optional callback fired *after* the listener has refreshed the
+    /// resource cache in response to an upstream
+    /// `notifications/resources/list_changed`.
+    /// Set via [`Connection::set_on_resources_list_changed`].
+    on_resources_list_changed: CallbackSlot,
 }
 
 impl ConnectionInner {
@@ -263,6 +338,8 @@ impl ConnectionInner {
             tools: RwLock::new(Ok(Arc::new(Vec::new()))),
             resources: RwLock::new(Ok(Arc::new(Vec::new()))),
             external_dropped: Arc::new(Notify::new()),
+            on_tools_list_changed: CallbackSlot::new(),
+            on_resources_list_changed: CallbackSlot::new(),
         })
     }
 
@@ -313,6 +390,8 @@ impl ConnectionInner {
             tools: RwLock::new(Ok(Arc::new(Vec::new()))),
             resources: RwLock::new(Ok(Arc::new(Vec::new()))),
             external_dropped: Arc::new(Notify::new()),
+            on_tools_list_changed: CallbackSlot::new(),
+            on_resources_list_changed: CallbackSlot::new(),
         })
     }
 
@@ -359,6 +438,8 @@ impl ConnectionInner {
             tools: RwLock::new(Ok(Arc::new(Vec::new()))),
             resources: RwLock::new(Ok(Arc::new(Vec::new()))),
             external_dropped: Arc::new(Notify::new()),
+            on_tools_list_changed: CallbackSlot::new(),
+            on_resources_list_changed: CallbackSlot::new(),
         });
 
         // Spawn background tool lister if the server supports tools.
@@ -935,9 +1016,24 @@ impl ConnectionInner {
                                 match method.as_str() {
                                     "notifications/tools/list_changed" if tools => {
                                         this.refresh_tools().await;
+                                        // Cache is updated; fan the
+                                        // change out to whoever
+                                        // registered a callback (e.g. the
+                                        // proxy re-emitting the
+                                        // notification to its own client).
+                                        if let Some(cb) =
+                                            this.on_tools_list_changed.get()
+                                        {
+                                            cb();
+                                        }
                                     }
                                     "notifications/resources/list_changed" if resources => {
                                         this.refresh_resources().await;
+                                        if let Some(cb) =
+                                            this.on_resources_list_changed.get()
+                                        {
+                                            cb();
+                                        }
                                     }
                                     _ => {}
                                 }
