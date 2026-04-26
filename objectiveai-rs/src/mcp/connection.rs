@@ -696,10 +696,18 @@ impl Connection {
     /// disconnection with a brief delay.
     ///
     /// Takes a [`Weak<Self>`] (not `Arc<Self>`) so the spawned task
-    /// doesn't itself keep the [`Connection`] alive. At the top of every
-    /// outer-loop iteration we try to upgrade the weak; if every external
-    /// strong reference is gone, the task returns and the upstream HTTP
-    /// connection drops.
+    /// doesn't itself keep the [`Connection`] alive.
+    ///
+    /// Cancellation has two layers:
+    /// 1. At the top of every outer-loop iteration we upgrade the weak;
+    ///    if every external strong reference is gone, the task returns.
+    /// 2. While parked inside the SSE read loop (the long-lived case —
+    ///    we may sit on `next_line().await` for the upstream's entire
+    ///    keepalive interval), we [`tokio::select!`] the line reader
+    ///    against a periodic tick. On each tick we check
+    ///    `Arc::strong_count(&this) == 1`; when true, the strong ref we
+    ///    hold is the *only* one left, which means every external holder
+    ///    has dropped — exit immediately so the Connection drops too.
     async fn listen_for_list_changes(
         weak: Weak<Self>,
         tools: bool,
@@ -709,10 +717,14 @@ impl Connection {
         use tokio::io::AsyncBufReadExt;
         use tokio_util::io::StreamReader;
 
+        /// How often the inner read loop checks `Arc::strong_count` while
+        /// parked on `next_line().await`. Cap on cancellation latency for
+        /// the in-stream-wait case; small enough that DELETE-then-shutdown
+        /// feels instant, large enough to be free in steady state.
+        const SELF_CANCEL_CHECK_INTERVAL: Duration = Duration::from_secs(1);
+
         loop {
-            // Liveness check: if no external Arc<Self> is left, no one
-            // cares about list-change notifications anymore — exit and let
-            // the Connection drop.
+            // Layer 1: between-reconnect liveness check.
             let Some(this) = weak.upgrade() else { return };
             let backoff_delay = this.backoff_initial_interval;
 
@@ -731,26 +743,51 @@ impl Connection {
             let reader = StreamReader::new(stream);
             let mut lines = reader.lines();
 
-            while let Ok(Some(line)) = lines.next_line().await {
-                // SSE data lines start with "data: ".
-                let data = match line.strip_prefix("data: ") {
-                    Some(d) => d,
-                    None => continue,
-                };
+            let mut check_tick = tokio::time::interval(SELF_CANCEL_CHECK_INTERVAL);
+            check_tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+            // First tick fires immediately; consume it so we don't
+            // strong_count-check before we've even tried to read.
+            check_tick.tick().await;
 
-                let method = match serde_json::from_str::<super::JsonRpcNotification>(data) {
-                    Ok(n) => n.method,
-                    Err(_) => continue,
-                };
-
-                match method.as_str() {
-                    "notifications/tools/list_changed" if tools => {
-                        this.refresh_tools().await;
+            'inner: loop {
+                tokio::select! {
+                    line_result = lines.next_line() => {
+                        match line_result {
+                            Ok(Some(line)) => {
+                                // SSE data lines start with "data: ".
+                                let Some(data) = line.strip_prefix("data: ") else {
+                                    continue 'inner;
+                                };
+                                let method = match serde_json::from_str::<super::JsonRpcNotification>(data) {
+                                    Ok(n) => n.method,
+                                    Err(_) => continue 'inner,
+                                };
+                                match method.as_str() {
+                                    "notifications/tools/list_changed" if tools => {
+                                        this.refresh_tools().await;
+                                    }
+                                    "notifications/resources/list_changed" if resources => {
+                                        this.refresh_resources().await;
+                                    }
+                                    _ => {}
+                                }
+                            }
+                            // Stream ended cleanly or errored — break out
+                            // to the outer loop so we either reconnect or,
+                            // if everyone's gone, exit at the top.
+                            _ => break 'inner,
+                        }
                     }
-                    "notifications/resources/list_changed" if resources => {
-                        this.refresh_resources().await;
+                    _ = check_tick.tick() => {
+                        // Layer 2: in-stream-wait liveness check. If our
+                        // `this` is the *only* strong ref left, every
+                        // external holder has dropped — bail out before
+                        // any further wait could keep the Connection
+                        // (and its upstream HTTP session) alive.
+                        if Arc::strong_count(&this) == 1 {
+                            return;
+                        }
                     }
-                    _ => {}
                 }
             }
 
