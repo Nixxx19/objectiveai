@@ -1,5 +1,5 @@
 [package]
-name = "objectiveai-mcp-test-upstream"
+name = "test-upstream"
 version = "2.0.0"
 edition = "2024"
 
@@ -7,7 +7,7 @@ edition = "2024"
 path = "src/lib.rs"
 
 [[bin]]
-name = "objectiveai-mcp-test-upstream"
+name = "test-upstream"
 path = "src/main.rs"
 
 [dependencies]
@@ -18,7 +18,7 @@ dotenv = "0.15.0"
 envconfig = "0.11.1"
 futures = "0.3.32"
 indexmap = { version = "2.13.0", features = ["serde"] }
-objectiveai = { path = "../objectiveai-rs", version = "2.0.0", default-features = false, features = ["mcp"] }
+objectiveai = { path = "../../objectiveai-rs", version = "2.0.0", default-features = false, features = ["mcp"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.149", features = ["preserve_order"] }
 tokio = { version = "1.50.0", features = ["full"] }

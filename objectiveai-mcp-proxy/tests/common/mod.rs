@@ -8,8 +8,8 @@
 //! (cargo sets this for tests in the same package). The test upstream
 //! binary is computed from `CARGO_MANIFEST_DIR` — you must run
 //! `cargo build --workspace` (or equivalently
-//! `cargo build -p objectiveai-mcp-test-upstream`) before `cargo test`,
-//! or use `scripts/test-all.sh` which handles both.
+//! `cargo build -p test-upstream`) before `cargo test`, or use
+//! `scripts/test-all.sh` which handles both.
 
 #![allow(dead_code)] // Each integration test only uses a subset of helpers.
 
@@ -18,7 +18,7 @@ use std::net::{SocketAddr, TcpListener};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 
-use objectiveai_mcp_test_upstream::{TestResource, TestTool};
+use test_upstream::{TestResource, TestTool};
 use rmcp::ServiceExt;
 use rmcp::service::RunningService;
 use rmcp::transport::StreamableHttpClientTransport;
@@ -304,9 +304,9 @@ fn test_upstream_binary() -> PathBuf {
         .to_path_buf();
 
     let bin_name = if cfg!(windows) {
-        "objectiveai-mcp-test-upstream.exe"
+        "test-upstream.exe"
     } else {
-        "objectiveai-mcp-test-upstream"
+        "test-upstream"
     };
 
     // Tests typically run after `cargo build --workspace` (no --release)

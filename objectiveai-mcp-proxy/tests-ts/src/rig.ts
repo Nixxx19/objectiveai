@@ -5,7 +5,7 @@
 // `@modelcontextprotocol/sdk` Client through the proxy with whatever
 // custom session-init headers the test wants.
 //
-// Run `cargo build --release -p objectiveai-mcp-proxy -p objectiveai-mcp-test-upstream`
+// Run `cargo build --release -p objectiveai-mcp-proxy -p test-upstream`
 // (or `scripts/test-all.sh`) before `pnpm test`.
 
 import { spawn, type ChildProcess } from 'node:child_process';
@@ -21,7 +21,9 @@ const READY_TIMEOUT_MS = 15_000;
 const POLL_INTERVAL_MS = 50;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const WORKSPACE = resolve(__dirname, '..', '..');
+// __dirname is .../objectiveai-mcp-proxy/tests-ts/src; workspace root
+// is three levels up.
+const WORKSPACE = resolve(__dirname, '..', '..', '..');
 
 export type ToolBehavior =
   | { kind: 'echo' }
@@ -168,7 +170,7 @@ async function spawnUpstream(spec: UpstreamSpec): Promise<UpstreamHandle> {
     env.HEADER_GATE_VALUE = spec.headerGate.value;
   }
 
-  const child = spawn(binaryPath('objectiveai-mcp-test-upstream'), [], {
+  const child = spawn(binaryPath('test-upstream'), [], {
     env,
     stdio: ['ignore', 'ignore', 'ignore'],
   });
@@ -254,6 +256,6 @@ function binaryPath(name: string): string {
   }
   throw new Error(
     `could not find ${exeName} under ${WORKSPACE}/target/{release,debug}/. ` +
-      `Run \`cargo build --release -p objectiveai-mcp-proxy -p objectiveai-mcp-test-upstream\` first.`,
+      `Run \`cargo build --release -p objectiveai-mcp-proxy -p test-upstream\` first.`,
   );
 }

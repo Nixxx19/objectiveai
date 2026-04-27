@@ -5,7 +5,7 @@
 use std::net::SocketAddr;
 
 use envconfig::Envconfig;
-use objectiveai_mcp_test_upstream::{Config, TestResource, TestTool, spawn_test_upstream};
+use test_upstream::{Config, TestResource, TestTool, spawn_test_upstream};
 
 #[derive(Envconfig)]
 struct EnvConfigBuilder {

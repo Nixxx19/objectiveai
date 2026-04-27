@@ -26,7 +26,7 @@ esac
 echo "==> Building release binaries"
 cargo build --release \
   -p objectiveai-mcp-proxy \
-  -p objectiveai-mcp-test-upstream
+  -p test-upstream
 
 if [[ "$mode" == "all" || "$mode" == "rust" ]]; then
   echo "==> Rust integration tests (rmcp client → proxy)"
@@ -35,8 +35,8 @@ fi
 
 if [[ "$mode" == "all" || "$mode" == "ts" ]]; then
   echo "==> TypeScript integration tests (@modelcontextprotocol/sdk client → proxy)"
-  pnpm --filter objectiveai-mcp-proxy-tests-ts install
-  pnpm --filter objectiveai-mcp-proxy-tests-ts run test
+  pnpm --filter tests-ts install
+  pnpm --filter tests-ts run test
 fi
 
 echo "==> All compliance tests passed."
