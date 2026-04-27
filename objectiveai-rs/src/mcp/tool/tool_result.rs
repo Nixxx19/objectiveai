@@ -16,13 +16,16 @@ pub struct ToolResultContent {
     pub content: Vec<super::ContentBlock>,
     /// Structured content from the tool result.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[serde(rename = "structuredContent")]
     pub structured_content: Option<IndexMap<String, serde_json::Value>>,
     /// Whether this result represents an error.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[serde(rename = "isError")]
     pub is_error: Option<bool>,
     /// Extension metadata.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub _meta: Option<IndexMap<String, serde_json::Value>>,
 }

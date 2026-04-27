@@ -18,9 +18,11 @@ pub struct InitializeResult {
     pub server_info: Implementation,
     /// Optional instructions for LLM integration.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub instructions: Option<String>,
     /// Extension metadata.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub _meta: Option<IndexMap<String, serde_json::Value>>,
 }
 
@@ -32,18 +34,22 @@ pub struct Implementation {
     pub name: String,
     /// Human-readable title.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub title: Option<String>,
     /// The implementation version.
     pub version: String,
     /// Optional website URL.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[serde(rename = "websiteUrl")]
     pub website_url: Option<String>,
     /// Optional description.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub description: Option<String>,
     /// Optional icons for UI display.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub icons: Option<Vec<super::shared::Icon>>,
 }
 
@@ -53,24 +59,31 @@ pub struct Implementation {
 pub struct ServerCapabilities {
     /// Non-standard experimental capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub experimental: Option<IndexMap<String, serde_json::Value>>,
     /// Logging support. Presence indicates the server supports sending log messages.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub logging: Option<LoggingCapability>,
     /// Completions support. Presence indicates the server supports completions.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub completions: Option<CompletionsCapability>,
     /// Prompt template capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub prompts: Option<PromptsCapability>,
     /// Resource capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub resources: Option<ResourcesCapability>,
     /// Tool capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub tools: Option<ToolsCapability>,
     /// Task capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub tasks: Option<TasksCapability>,
 }
 
@@ -80,6 +93,7 @@ pub struct ServerCapabilities {
 pub struct PromptsCapability {
     /// Whether the server emits notifications when the prompt list changes.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[serde(rename = "listChanged")]
     pub list_changed: Option<bool>,
 }
@@ -90,9 +104,11 @@ pub struct PromptsCapability {
 pub struct ResourcesCapability {
     /// Whether the server supports resource subscriptions.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub subscribe: Option<bool>,
     /// Whether the server emits notifications when the resource list changes.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[serde(rename = "listChanged")]
     pub list_changed: Option<bool>,
 }
@@ -103,6 +119,7 @@ pub struct ResourcesCapability {
 pub struct ToolsCapability {
     /// Whether the server emits notifications when the tool list changes.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[serde(rename = "listChanged")]
     pub list_changed: Option<bool>,
 }
@@ -125,12 +142,15 @@ pub struct CompletionsCapability {}
 pub struct TasksCapability {
     /// Present if the server supports listing tasks.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub list: Option<TasksListCapability>,
     /// Present if the server supports cancelling tasks.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub cancel: Option<TasksCancelCapability>,
     /// Task creation capabilities for specific request types.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub requests: Option<TasksRequestsCapability>,
 }
 
@@ -150,6 +170,7 @@ pub struct TasksCancelCapability {}
 pub struct TasksRequestsCapability {
     /// Task support for tool-related requests.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub tools: Option<TasksToolsCapability>,
 }
 
@@ -159,6 +180,7 @@ pub struct TasksRequestsCapability {
 pub struct TasksToolsCapability {
     /// Present if tools/call supports task creation.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub call: Option<TasksToolsCallCapability>,
 }
 

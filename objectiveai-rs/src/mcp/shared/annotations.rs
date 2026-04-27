@@ -20,12 +20,15 @@ pub enum Role {
 pub struct Annotations {
     /// Intended audience(s) for the content.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub audience: Option<Vec<Role>>,
     /// Importance hint, from 0 (least) to 1 (most).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub priority: Option<f64>,
     /// ISO 8601 timestamp for the most recent modification.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[serde(rename = "lastModified")]
     pub last_modified: Option<String>,
 }

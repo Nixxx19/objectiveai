@@ -26,6 +26,7 @@ pub struct ToolExecution {
     /// Indicates the tool's preference for task-augmented execution.
     /// Defaults to "forbidden" if not present.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[serde(rename = "taskSupport")]
     pub task_support: Option<TaskSupport>,
 }

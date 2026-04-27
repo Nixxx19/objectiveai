@@ -16,5 +16,6 @@ pub struct ToolUseContent {
     pub input: IndexMap<String, serde_json::Value>,
     /// Extension metadata.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub _meta: Option<IndexMap<String, serde_json::Value>>,
 }

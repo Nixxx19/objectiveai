@@ -36,7 +36,7 @@ use objectiveai::mcp::{
     shared::{ResourceContents, ResourceContentsUnion, TextResourceContents},
     tool::{
         CallToolRequestParams, CallToolResult, ContentBlock, ListToolsResult,
-        TextContent, Tool, ToolSchema, ToolSchemaType,
+        TextContent, Tool, ToolSchemaObject, ToolSchemaType,
     },
 };
 use serde::{Deserialize, Serialize};
@@ -623,7 +623,7 @@ fn test_tool_to_tool(t: &TestTool) -> Tool {
         title: None,
         description: t.description.clone(),
         icons: None,
-        input_schema: ToolSchema {
+        input_schema: ToolSchemaObject {
             r#type: ToolSchemaType::Object,
             properties: None,
             required: None,

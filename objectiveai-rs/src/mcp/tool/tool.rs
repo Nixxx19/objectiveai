@@ -12,12 +12,15 @@ pub struct Tool {
     pub name: String,
     /// A human-readable display name.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub title: Option<String>,
     /// A human-readable description of the tool.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub description: Option<String>,
     /// Icons for the tool.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub icons: Option<Vec<super::super::shared::Icon>>,
     /// JSON Schema defining the expected input parameters.
     /// Must have `type: "object"` at the root level.
@@ -26,16 +29,20 @@ pub struct Tool {
     /// JSON Schema defining the structure of the tool's output
     /// (returned in `structuredContent`).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[serde(rename = "outputSchema")]
     pub output_schema: Option<ToolSchemaObject>,
     /// Additional tool metadata.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub annotations: Option<super::ToolAnnotations>,
     /// Execution-related properties.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub execution: Option<super::ToolExecution>,
     /// Extension metadata.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub _meta: Option<IndexMap<String, serde_json::Value>>,
 }
 
@@ -62,9 +69,11 @@ pub struct ToolSchemaObject {
     pub r#type: ToolSchemaType,
     /// Property definitions.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub properties: Option<IndexMap<String, serde_json::Value>>,
     /// Required property names.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub required: Option<Vec<String>>,
     /// Additional schema fields.
     #[serde(flatten)]

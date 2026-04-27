@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 pub struct ListToolsRequest {
     /// An opaque cursor for pagination.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub cursor: Option<String>,
 }
 
@@ -21,9 +22,11 @@ pub struct ListToolsResult {
     pub tools: Vec<super::Tool>,
     /// An opaque cursor for fetching the next page.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[serde(rename = "nextCursor")]
     pub next_cursor: Option<String>,
     /// Extension metadata.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub _meta: Option<IndexMap<String, serde_json::Value>>,
 }

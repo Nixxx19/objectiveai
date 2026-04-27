@@ -22,12 +22,15 @@ pub struct Icon {
     pub src: String,
     /// MIME type for the icon.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[serde(rename = "mimeType")]
     pub mime_type: Option<String>,
     /// Sizes at which the icon can be used (e.g., "48x48", "96x96", "any").
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub sizes: Option<Vec<String>>,
     /// Theme this icon is intended for.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub theme: Option<IconTheme>,
 }

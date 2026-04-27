@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 pub struct TaskMetadata {
     /// Time-to-live for the task, in seconds.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub ttl: Option<f64>,
 }
 
@@ -21,12 +22,15 @@ pub struct CallToolRequestParams {
     pub name: String,
     /// Arguments to pass to the tool.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub arguments: Option<IndexMap<String, serde_json::Value>>,
     /// Extension metadata.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub _meta: Option<IndexMap<String, serde_json::Value>>,
     /// If specified, the caller is requesting task-augmented execution.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub task: Option<TaskMetadata>,
 }
 
@@ -39,13 +43,16 @@ pub struct CallToolResult {
     pub content: Vec<super::ContentBlock>,
     /// Structured tool output matching the tool's `outputSchema`.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[serde(rename = "structuredContent")]
     pub structured_content: Option<IndexMap<String, serde_json::Value>>,
     /// Whether the tool call ended in an error.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     #[serde(rename = "isError")]
     pub is_error: Option<bool>,
     /// Extension metadata.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub _meta: Option<IndexMap<String, serde_json::Value>>,
 }

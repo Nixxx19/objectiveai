@@ -37,6 +37,7 @@ pub struct JsonRpcError {
     pub code: i64,
     pub message: String,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub data: Option<serde_json::Value>,
 }
 
@@ -47,5 +48,6 @@ pub struct JsonRpcNotification {
     pub jsonrpc: String,
     pub method: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub params: Option<serde_json::Value>,
 }
