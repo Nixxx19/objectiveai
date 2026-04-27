@@ -22,7 +22,7 @@ use objectiveai::mcp::{
         ToolsCapability,
     },
     resource::ReadResourceRequestParams,
-    tool::CallToolRequestParams,
+    tool::{CallToolRequestParams, ContentBlock, TextContent},
 };
 use tokio::sync::broadcast;
 
@@ -373,7 +373,28 @@ async fn handle_tools_call(
     };
 
     match result {
-        Ok(result) => {
+        Ok(mut result) => {
+            // Drain any pending `/notify` content blocks and prepend
+            // them, wrapped in a `<system-reminder>` text-block pair,
+            // ahead of the upstream's tool-result content. Anything
+            // queued after this drain rides the *next* tool call.
+            let pending = session.drain_notifications().await;
+            if !pending.is_empty() {
+                let mut prefixed = Vec::with_capacity(2 + pending.len() + result.content.len());
+                prefixed.push(ContentBlock::Text(TextContent {
+                    text: SYSTEM_REMINDER_PREFIX.to_string(),
+                    annotations: None,
+                    _meta: None,
+                }));
+                prefixed.extend(pending);
+                prefixed.push(ContentBlock::Text(TextContent {
+                    text: SYSTEM_REMINDER_SUFFIX.to_string(),
+                    annotations: None,
+                    _meta: None,
+                }));
+                prefixed.append(&mut result.content);
+                result.content = prefixed;
+            }
             let body = JsonRpcResponse::Success {
                 jsonrpc: "2.0".into(),
                 id: request.id,
@@ -388,6 +409,42 @@ async fn handle_tools_call(
             internal_error_response(request.id, format!("upstream call_tool: {e}"))
         }
     }
+}
+
+/// Wrap text bracketing `pending_notifications` blocks on the next
+/// `tools/call` response. Mirrors the way Claude itself surfaces
+/// in-flight user messages — text-only, no `IMPORTANT:` line.
+const SYSTEM_REMINDER_PREFIX: &str =
+    "<system-reminder>\nThe user sent a new message while you were working:\n";
+const SYSTEM_REMINDER_SUFFIX: &str = "\n\n</system-reminder>";
+
+/// `POST /notify` — queue content blocks to be prepended (wrapped in a
+/// `<system-reminder>` block) onto the next `tools/call` response on
+/// the session named by `Mcp-Session-Id`.
+pub async fn handle_notify(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    body: Bytes,
+) -> Response {
+    let session_id = match extract_session_id(&headers) {
+        Ok(id) => id,
+        Err(resp) => return resp,
+    };
+
+    let session = match state.sessions.get(&session_id) {
+        Some(s) => s,
+        None => return unknown_session_response(),
+    };
+
+    let blocks: Vec<ContentBlock> = match serde_json::from_slice(&body) {
+        Ok(b) => b,
+        Err(e) => {
+            return parse_error_response(format!("invalid /notify body: {e}"));
+        }
+    };
+
+    session.enqueue_notifications(blocks).await;
+    StatusCode::ACCEPTED.into_response()
 }
 
 async fn handle_resources_list(

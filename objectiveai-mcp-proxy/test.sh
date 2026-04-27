@@ -21,19 +21,26 @@ mkdir -p "$LOG_DIR"
 > "$LOG_FILE"
 
 run_all() {
+  # `set -e` is automatically disabled inside a function called in an
+  # `|| EXIT=$?` context, so we can't rely on early steps short-
+  # circuiting the function. Track exit status explicitly per step and
+  # OR them together so a failing cargo test isn't masked by a passing
+  # pnpm run (or vice versa).
+  local rc=0
   echo "==> Building release binaries"
   cargo build --release \
     --manifest-path "$REPO_ROOT/Cargo.toml" \
     -p objectiveai-mcp-proxy \
-    -p test-upstream
+    -p test-upstream || rc=$?
   echo "==> Rust integration tests (rmcp client → proxy)"
   cargo test \
     --manifest-path "$REPO_ROOT/Cargo.toml" \
     -p objectiveai-mcp-proxy \
-    --tests
+    --tests || rc=$?
   echo "==> TypeScript integration tests (@modelcontextprotocol/sdk → proxy)"
-  pnpm --filter tests-ts install
-  pnpm --filter tests-ts run test
+  pnpm --filter tests-ts install || rc=$?
+  pnpm --filter tests-ts run test || rc=$?
+  return "$rc"
 }
 
 EXIT=0

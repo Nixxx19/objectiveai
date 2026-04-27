@@ -8,7 +8,7 @@ afterEach(async () => {
   rig = undefined;
 });
 
-test('missing X-MCP-Authorization → upstream is dropped from listing', async () => {
+test('missing X-MCP-Authorization → initialize fails with -32603', async () => {
   rig = await startRig([
     {
       serverName: 'private',
@@ -16,12 +16,9 @@ test('missing X-MCP-Authorization → upstream is dropped from listing', async (
       requireAuth: 'Bearer secret',
     },
   ]);
-  const client = await rig.connectClient({
-    'X-MCP-Servers': rig.xMcpServers(),
-  });
-  const tools = (await client.listTools()).tools;
-  expect(tools).toEqual([]);
-  await client.close();
+  await expect(
+    rig.connectClient({ 'X-MCP-Servers': rig.xMcpServers() }),
+  ).rejects.toThrow(/-32603.*upstream connect failed/);
 });
 
 test('correct X-MCP-Authorization → upstream connects, tools appear', async () => {
