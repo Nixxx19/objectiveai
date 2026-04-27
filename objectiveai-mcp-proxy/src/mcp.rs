@@ -255,17 +255,11 @@ async fn handle_initialize(
 
     let connections = match connect_all(&state.client, headers).await {
         Ok(c) => c,
-        Err(BadInit::NotUtf8 { header }) => {
-            return invalid_request_response(
-                request.id,
-                format!("{header} is not valid UTF-8"),
-            );
+        Err(e @ (BadInit::NotUtf8 { .. } | BadInit::NotJson { .. })) => {
+            return invalid_request_response(request.id, e.to_string());
         }
-        Err(BadInit::NotJson { header, source }) => {
-            return invalid_request_response(
-                request.id,
-                format!("{header} is not valid JSON: {source}"),
-            );
+        Err(e @ BadInit::UpstreamConnectFailed { .. }) => {
+            return internal_error_response(request.id, e.to_string());
         }
     };
 
