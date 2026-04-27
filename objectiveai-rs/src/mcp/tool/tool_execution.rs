@@ -9,10 +9,13 @@ use serde::{Deserialize, Serialize};
 #[schemars(rename = "mcp.tool.TaskSupport")]
 pub enum TaskSupport {
     /// Clients MUST invoke the tool as a task.
+    #[schemars(title = "Required")]
     Required,
     /// Clients MAY invoke the tool as a task or normal request.
+    #[schemars(title = "Optional")]
     Optional,
     /// Clients MUST NOT attempt to invoke the tool as a task.
+    #[schemars(title = "Forbidden")]
     Forbidden,
 }
 

@@ -7,7 +7,7 @@ fn mcp_tool(name: &str) -> objectiveai::mcp::tool::Tool {
         title: None,
         description: None,
         icons: None,
-        input_schema: objectiveai::mcp::tool::ToolSchema {
+        input_schema: objectiveai::mcp::tool::ToolSchemaObject {
             r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
             properties: None,
             required: None,

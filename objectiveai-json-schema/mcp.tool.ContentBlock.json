@@ -3,6 +3,7 @@
   "description": "A content block that can be used in prompts and tool results.",
   "anyOf": [
     {
+      "title": "Text",
       "description": "Text content.",
       "type": "object",
       "$ref": "mcp.tool.TextContent",
@@ -16,6 +17,7 @@
       }
     },
     {
+      "title": "Image",
       "description": "Image content (base64-encoded).",
       "type": "object",
       "$ref": "mcp.tool.ImageContent",
@@ -29,6 +31,7 @@
       }
     },
     {
+      "title": "Audio",
       "description": "Audio content (base64-encoded).",
       "type": "object",
       "$ref": "mcp.tool.AudioContent",
@@ -42,6 +45,7 @@
       }
     },
     {
+      "title": "ResourceLink",
       "description": "A resource link.",
       "type": "object",
       "$ref": "mcp.tool.ResourceLink",
@@ -55,6 +59,7 @@
       }
     },
     {
+      "title": "EmbeddedResource",
       "description": "An embedded resource.",
       "type": "object",
       "$ref": "mcp.tool.EmbeddedResource",

@@ -1480,7 +1480,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
             title: None,
             description: Some("Read a file from disk".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "path".into() => serde_json::json!({"type": "string"}),
@@ -1498,7 +1498,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
             title: None,
             description: Some("Write content to a file".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "path".into() => serde_json::json!({"type": "string"}),
@@ -1517,7 +1517,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
             title: Some("List Directory".into()),
             description: Some("List files in a directory".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "path".into() => serde_json::json!({"type": "string"}),
@@ -1536,7 +1536,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
             title: None,
             description: None,
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "path".into() => serde_json::json!({"type": "string"}),
@@ -1554,7 +1554,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
             title: None,
             description: Some("Get file metadata".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "path".into() => serde_json::json!({"type": "string"}),
@@ -1580,7 +1580,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
             title: None,
             description: Some("Run a SQL query".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "sql".into() => serde_json::json!({"type": "string"}),
@@ -1601,7 +1601,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
             title: None,
             description: Some("Insert a row".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "table".into() => serde_json::json!({"type": "string"}),
@@ -1620,7 +1620,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
             title: None,
             description: Some("Update rows".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "table".into() => serde_json::json!({"type": "string"}),
@@ -1640,7 +1640,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
             title: None,
             description: Some("Delete rows".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "table".into() => serde_json::json!({"type": "string"}),
@@ -1659,7 +1659,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
             title: None,
             description: Some("List all tables".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: None,
                 required: None,
@@ -1683,7 +1683,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
             title: None,
             description: Some("Fetch a URL".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "url".into() => serde_json::json!({"type": "string", "format": "uri"}),
@@ -1703,7 +1703,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
             title: None,
             description: Some("Parse HTML and extract text".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "html".into() => serde_json::json!({"type": "string"}),
@@ -1722,7 +1722,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
             title: None,
             description: Some("Take a screenshot of a webpage".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "url".into() => serde_json::json!({"type": "string"}),
@@ -1742,7 +1742,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
             title: None,
             description: Some("DNS lookup".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "hostname".into() => serde_json::json!({"type": "string"}),
@@ -1760,7 +1760,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
             title: None,
             description: None,
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "domain".into() => serde_json::json!({"type": "string"}),
@@ -2076,7 +2076,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
             title: None,
             description: Some("Search the knowledge base".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "query".into() => serde_json::json!({"type": "string"}),
@@ -2095,7 +2095,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
             title: None,
             description: Some("Index a document".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "title".into() => serde_json::json!({"type": "string"}),
@@ -2115,7 +2115,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
             title: None,
             description: Some("Retrieve a document by ID".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "id".into() => serde_json::json!({"type": "string"}),
@@ -2133,7 +2133,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
             title: None,
             description: Some("Delete a document".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "id".into() => serde_json::json!({"type": "string"}),
@@ -2151,7 +2151,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
             title: None,
             description: Some("List all collections".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: None,
                 required: None,
@@ -2175,7 +2175,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
             title: None,
             description: Some("Search code repositories".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "query".into() => serde_json::json!({"type": "string"}),
@@ -2195,7 +2195,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
             title: None,
             description: Some("Get file contents from repo".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "repo".into() => serde_json::json!({"type": "string"}),
@@ -2215,7 +2215,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
             title: None,
             description: Some("List repositories".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "org".into() => serde_json::json!({"type": "string"}),
@@ -2233,7 +2233,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
             title: None,
             description: Some("Git blame for a file".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "repo".into() => serde_json::json!({"type": "string"}),
@@ -2252,7 +2252,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
             title: None,
             description: Some("Diff between commits".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "repo".into() => serde_json::json!({"type": "string"}),
@@ -2280,7 +2280,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
             title: None,
             description: Some("Send an email".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "to".into() => serde_json::json!({"type": "string"}),
@@ -2301,7 +2301,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
             title: None,
             description: Some("Read inbox messages".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "limit".into() => serde_json::json!({"type": "integer", "default": 20}),
@@ -2320,7 +2320,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
             title: None,
             description: Some("Archive a message".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "message_id".into() => serde_json::json!({"type": "string"}),
@@ -2338,7 +2338,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
             title: None,
             description: Some("Create a draft email".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "to".into() => serde_json::json!({"type": "string"}),
@@ -2358,7 +2358,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
             title: None,
             description: Some("List email labels".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: None,
                 required: None,
@@ -2662,7 +2662,7 @@ fn test_mcp_tool_conflicts_with_invention_tool() {
             title: None,
             description: Some("Run analytics query".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "dataset".into() => serde_json::json!({"type": "string"}),
@@ -2681,7 +2681,7 @@ fn test_mcp_tool_conflicts_with_invention_tool() {
             title: None,
             description: Some("List available datasets".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: None,
                 required: None,
@@ -2868,7 +2868,7 @@ fn test_mcp_tool_conflicts_with_response_format_tool() {
             title: None,
             description: Some("Grade a student submission".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "submission_id".into() => serde_json::json!({"type": "string"}),
@@ -2887,7 +2887,7 @@ fn test_mcp_tool_conflicts_with_response_format_tool() {
             title: None,
             description: Some("List student submissions".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "course_id".into() => serde_json::json!({"type": "string"}),
@@ -3078,7 +3078,7 @@ fn test_four_way_name_conflict_mcp_x2_invention_response_format() {
             title: None,
             description: Some("Render output to display".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "format".into() => serde_json::json!({"type": "string", "enum": ["html", "pdf", "png"]}),
@@ -3097,7 +3097,7 @@ fn test_four_way_name_conflict_mcp_x2_invention_response_format() {
             title: None,
             description: Some("Preview rendered output".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "render_id".into() => serde_json::json!({"type": "string"}),
@@ -3123,7 +3123,7 @@ fn test_four_way_name_conflict_mcp_x2_invention_response_format() {
             title: None,
             description: Some("Write to log output".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "level".into() => serde_json::json!({"type": "string", "enum": ["debug", "info", "warn", "error"]}),
@@ -3142,7 +3142,7 @@ fn test_four_way_name_conflict_mcp_x2_invention_response_format() {
             title: None,
             description: Some("Tail recent log entries".into()),
             icons: None,
-            input_schema: objectiveai::mcp::tool::ToolSchema {
+            input_schema: objectiveai::mcp::tool::ToolSchemaObject {
                 r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
                 properties: Some(indexmap::indexmap! {
                     "n".into() => serde_json::json!({"type": "integer", "default": 50}),

@@ -64,7 +64,7 @@
     },
     "inputSchema": {
       "description": "JSON Schema defining the expected input parameters.\nMust have `type: \"object\"` at the root level.",
-      "$ref": "mcp.tool.ToolSchema"
+      "$ref": "mcp.tool.ToolSchemaObject"
     },
     "name": {
       "description": "The programmatic name of the tool.",
@@ -74,7 +74,7 @@
       "description": "JSON Schema defining the structure of the tool's output\n(returned in `structuredContent`).",
       "anyOf": [
         {
-          "$ref": "mcp.tool.ToolSchema"
+          "$ref": "mcp.tool.ToolSchemaObject"
         },
         {
           "type": "null"

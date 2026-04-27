@@ -44,6 +44,8 @@ pub struct BlobResourceContents {
 #[serde(untagged)]
 #[schemars(rename = "mcp.shared.ResourceContentsUnion")]
 pub enum ResourceContentsUnion {
+    #[schemars(title = "Text")]
     Text(TextResourceContents),
+    #[schemars(title = "Blob")]
     Blob(BlobResourceContents),
 }

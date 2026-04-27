@@ -8,7 +8,9 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "lowercase")]
 #[schemars(rename = "mcp.shared.IconTheme")]
 pub enum IconTheme {
+    #[schemars(title = "Light")]
     Light,
+    #[schemars(title = "Dark")]
     Dark,
 }
 

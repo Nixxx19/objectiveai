@@ -8,7 +8,9 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "lowercase")]
 #[schemars(rename = "mcp.shared.Role")]
 pub enum Role {
+    #[schemars(title = "User")]
     User,
+    #[schemars(title = "Assistant")]
     Assistant,
 }
 

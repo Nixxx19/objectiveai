@@ -13,17 +13,22 @@ use serde::{Deserialize, Serialize};
 pub enum ContentBlock {
     /// Text content.
     #[serde(rename = "text")]
+    #[schemars(title = "Text")]
     Text(super::TextContent),
     /// Image content (base64-encoded).
     #[serde(rename = "image")]
+    #[schemars(title = "Image")]
     Image(super::ImageContent),
     /// Audio content (base64-encoded).
     #[serde(rename = "audio")]
+    #[schemars(title = "Audio")]
     Audio(super::AudioContent),
     /// A resource link.
     #[serde(rename = "resource_link")]
+    #[schemars(title = "ResourceLink")]
     ResourceLink(super::ResourceLink),
     /// An embedded resource.
     #[serde(rename = "resource")]
+    #[schemars(title = "EmbeddedResource")]
     EmbeddedResource(super::EmbeddedResource),
 }

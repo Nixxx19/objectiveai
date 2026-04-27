@@ -414,7 +414,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::mcp::tool::ResourceLink),
             schemars::schema_for!(crate::mcp::tool::TextContent),
             schemars::schema_for!(crate::mcp::tool::Tool),
-            schemars::schema_for!(crate::mcp::tool::ToolSchema),
+            schemars::schema_for!(crate::mcp::tool::ToolSchemaObject),
             schemars::schema_for!(crate::mcp::tool::ToolSchemaType),
             schemars::schema_for!(crate::mcp::tool::ToolAnnotations),
             schemars::schema_for!(crate::mcp::tool::ToolExecution),

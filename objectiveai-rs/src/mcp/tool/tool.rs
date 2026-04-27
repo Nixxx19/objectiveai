@@ -22,12 +22,12 @@ pub struct Tool {
     /// JSON Schema defining the expected input parameters.
     /// Must have `type: "object"` at the root level.
     #[serde(rename = "inputSchema")]
-    pub input_schema: ToolSchema,
+    pub input_schema: ToolSchemaObject,
     /// JSON Schema defining the structure of the tool's output
     /// (returned in `structuredContent`).
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "outputSchema")]
-    pub output_schema: Option<ToolSchema>,
+    pub output_schema: Option<ToolSchemaObject>,
     /// Additional tool metadata.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub annotations: Option<super::ToolAnnotations>,
@@ -56,8 +56,8 @@ pub enum ToolSchemaType {
 
 /// JSON Schema for tool input/output. Must have `type: "object"`.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "mcp.tool.ToolSchema")]
-pub struct ToolSchema {
+#[schemars(rename = "mcp.tool.ToolSchemaObject")]
+pub struct ToolSchemaObject {
     /// Always "object".
     pub r#type: ToolSchemaType,
     /// Property definitions.

@@ -341,7 +341,7 @@ async fn test_with_mcp_tools() {
         title: None,
         description: Some("Search tool".into()),
         icons: None,
-        input_schema: objectiveai::mcp::tool::ToolSchema {
+        input_schema: objectiveai::mcp::tool::ToolSchemaObject {
             r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
             properties: Some(indexmap::indexmap! {
                 "query".into() => serde_json::json!({"type": "string"}),
@@ -418,7 +418,7 @@ fn make_mcp_tool(name: &str, properties: Option<indexmap::IndexMap<String, serde
         title: None,
         description: Some(format!("{name} tool")),
         icons: None,
-        input_schema: objectiveai::mcp::tool::ToolSchema {
+        input_schema: objectiveai::mcp::tool::ToolSchemaObject {
             r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
             properties,
             required: None,

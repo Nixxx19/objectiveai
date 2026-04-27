@@ -1,9 +1,20 @@
 {
   "title": "mcp.shared.Role",
   "description": "The role of a message sender.",
-  "type": "string",
-  "enum": [
-    "user",
-    "assistant"
+  "anyOf": [
+    {
+      "title": "User",
+      "type": "string",
+      "enum": [
+        "user"
+      ]
+    },
+    {
+      "title": "Assistant",
+      "type": "string",
+      "enum": [
+        "assistant"
+      ]
+    }
   ]
 }
