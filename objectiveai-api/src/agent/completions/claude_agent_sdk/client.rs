@@ -4,8 +4,7 @@ use futures::{Stream, StreamExt};
 use indexmap::IndexMap;
 use tokio::sync::OnceCell;
 
-use super::super::{ContinuationItem, StreamItem, UpstreamClient};
-use super::invention_server::InventionServer;
+use super::super::{ContinuationItem, InventionServer, StreamItem, UpstreamClient};
 use super::mcp_server_config::{McpHttpServerConfig, McpServerConfig};
 use super::prompt::Prompt;
 use super::sdk_message::SDKMessage;

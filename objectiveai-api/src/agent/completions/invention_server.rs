@@ -4,11 +4,10 @@ use std::sync::Arc;
 use futures::FutureExt;
 use rmcp::{
     ServerHandler,
-    handler::server::router::tool::{ToolRouter, ToolRoute},
+    handler::server::router::tool::{ToolRoute, ToolRouter},
     handler::server::tool::ToolCallContext,
     model::{
-        CallToolRequestParams, CallToolResult, Content,
-        ServerCapabilities, ServerInfo, Tool,
+        CallToolRequestParams, CallToolResult, Content, ServerCapabilities, ServerInfo, Tool,
     },
     transport::streamable_http_server::{
         StreamableHttpServerConfig, StreamableHttpService,
@@ -19,11 +18,15 @@ use serde_json::Value;
 use tokio::net::TcpListener;
 use tokio_util::sync::CancellationToken;
 
-use super::mcp_server_config::{McpHttpServerConfig, McpHttpServerConfigType};
 use objectiveai::functions::inventions::InventionTool;
 
+/// In-process MCP HTTP server that wraps a set of `InventionTool` callables.
+/// Used by `agent/completions/client.rs` whenever a request supplies
+/// invention tools — its URL is added to the per-agent proxy connection's
+/// `X-MCP-Servers` list so every upstream that the proxy fans out to can
+/// reach the invention tools just like any other MCP server.
 pub struct InventionServer {
-    pub(super) port: u16,
+    port: u16,
     _cancel: CancellationToken,
     server_handle: tokio::task::AbortHandle,
 }
@@ -57,14 +60,19 @@ impl InventionMcp {
                 tool_def,
                 move |ctx: ToolCallContext<'_, InventionMcp>| {
                     let call_fn = call_fn.clone();
-                    let arguments = ctx.arguments.clone().map(Value::Object).unwrap_or(Value::Object(Default::default()));
+                    let arguments = ctx
+                        .arguments
+                        .clone()
+                        .map(Value::Object)
+                        .unwrap_or(Value::Object(Default::default()));
                     async move {
                         let result = call_fn(arguments).await;
                         match result {
                             Ok(text) => Ok(CallToolResult::success(vec![Content::text(text)])),
                             Err(text) => Ok(CallToolResult::error(vec![Content::text(text)])),
                         }
-                    }.boxed()
+                    }
+                    .boxed()
                 },
             ));
         }
@@ -132,10 +140,21 @@ impl InventionServer {
         }
     }
 
-    pub fn mcp_server_config(&self) -> McpHttpServerConfig {
-        McpHttpServerConfig {
-            r#type: McpHttpServerConfigType::Http,
-            url: format!("http://127.0.0.1:{}/mcp", self.port),
+    /// Streamable-HTTP MCP endpoint URL (one entry to add to the proxy's
+    /// `X-MCP-Servers` array).
+    pub fn url(&self) -> String {
+        format!("http://127.0.0.1:{}/mcp", self.port)
+    }
+
+    /// Transitional helper for callers still wiring this server directly
+    /// into Claude Agent SDK / Claude Code mcp configs. Will be removed
+    /// once those callers are migrated to the proxy connection.
+    pub fn mcp_server_config(
+        &self,
+    ) -> super::claude_agent_sdk::mcp_server_config::McpHttpServerConfig {
+        super::claude_agent_sdk::mcp_server_config::McpHttpServerConfig {
+            r#type: super::claude_agent_sdk::mcp_server_config::McpHttpServerConfigType::Http,
+            url: self.url(),
             headers: None,
         }
     }

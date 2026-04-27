@@ -5,9 +5,8 @@ use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::process::Command;
 use tokio_stream::wrappers::LinesStream;
 
-use super::super::{ContinuationItem, StreamItem, UpstreamClient};
+use super::super::{ContinuationItem, InventionServer, StreamItem, UpstreamClient};
 use super::sdk_message::{RateLimitEventType, RateLimitStatus, SDKMessage};
-use super::invention_server::InventionServer;
 use super::mcp_server_config::McpHttpServerConfig;
 use crate::util::StreamOnce;
 

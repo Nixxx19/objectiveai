@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use indexmap::IndexMap;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 use super::*;
 use objectiveai::functions::inventions::InventionTool;
@@ -57,12 +57,11 @@ fn init_params() -> Value {
 /// Parse a response that may be JSON or SSE (text/event-stream with `data:` lines).
 async fn parse_response(resp: reqwest::Response) -> Value {
     let body = resp.text().await.unwrap();
-    // Try plain JSON first
     if let Ok(v) = serde_json::from_str::<Value>(&body) {
         return v;
     }
-    // Parse as SSE: concatenate all `data: ` lines
-    let data: String = body.lines()
+    let data: String = body
+        .lines()
         .filter_map(|l| l.strip_prefix("data: "))
         .collect::<Vec<_>>()
         .join("");
@@ -79,13 +78,13 @@ async fn init_session(client: &reqwest::Client, base_url: &str) -> String {
         .send()
         .await
         .unwrap();
-    let session_id = resp.headers()
+    let session_id = resp
+        .headers()
         .get("mcp-session-id")
         .map(|v| v.to_str().unwrap().to_string())
         .unwrap_or_default();
     let _body = parse_response(resp).await;
 
-    // Send initialized notification
     client
         .post(base_url)
         .header("Accept", ACCEPT)
@@ -119,7 +118,7 @@ async fn test_initialize() {
     let server = InventionServer::new(vec![]).await;
     let client = reqwest::Client::new();
     let resp = client
-        .post(&format!("http://127.0.0.1:{}/mcp", server.port))
+        .post(&server.url())
         .header("Accept", ACCEPT)
         .json(&init_params())
         .send()
@@ -135,8 +134,7 @@ async fn test_initialize() {
 async fn test_notifications_initialized() {
     let server = InventionServer::new(vec![]).await;
     let client = reqwest::Client::new();
-    let url = format!("http://127.0.0.1:{}/mcp", server.port);
-    let session_id = init_session(&client, &url).await;
+    let session_id = init_session(&client, &server.url()).await;
     assert!(!session_id.is_empty());
 }
 
@@ -144,15 +142,21 @@ async fn test_notifications_initialized() {
 async fn test_tools_list() {
     let server = InventionServer::new(vec![echo_tool()]).await;
     let client = reqwest::Client::new();
-    let url = format!("http://127.0.0.1:{}/mcp", server.port);
+    let url = server.url();
     let session_id = init_session(&client, &url).await;
 
-    let resp = rpc(&client, &url, &session_id, json!({
-        "jsonrpc": "2.0",
-        "id": 2,
-        "method": "tools/list",
-        "params": {}
-    })).await;
+    let resp = rpc(
+        &client,
+        &url,
+        &session_id,
+        json!({
+            "jsonrpc": "2.0",
+            "id": 2,
+            "method": "tools/list",
+            "params": {}
+        }),
+    )
+    .await;
 
     let tools = resp["result"]["tools"].as_array().unwrap();
     assert_eq!(tools.len(), 1);
@@ -164,18 +168,24 @@ async fn test_tools_list() {
 async fn test_tools_call_success() {
     let server = InventionServer::new(vec![echo_tool()]).await;
     let client = reqwest::Client::new();
-    let url = format!("http://127.0.0.1:{}/mcp", server.port);
+    let url = server.url();
     let session_id = init_session(&client, &url).await;
 
-    let resp = rpc(&client, &url, &session_id, json!({
-        "jsonrpc": "2.0",
-        "id": 3,
-        "method": "tools/call",
-        "params": {
-            "name": "echo",
-            "arguments": { "text": "hello world" }
-        }
-    })).await;
+    let resp = rpc(
+        &client,
+        &url,
+        &session_id,
+        json!({
+            "jsonrpc": "2.0",
+            "id": 3,
+            "method": "tools/call",
+            "params": {
+                "name": "echo",
+                "arguments": { "text": "hello world" }
+            }
+        }),
+    )
+    .await;
 
     assert_eq!(resp["result"]["isError"], false);
     assert_eq!(resp["result"]["content"][0]["type"], "text");
@@ -186,18 +196,24 @@ async fn test_tools_call_success() {
 async fn test_tools_call_error() {
     let server = InventionServer::new(vec![failing_tool()]).await;
     let client = reqwest::Client::new();
-    let url = format!("http://127.0.0.1:{}/mcp", server.port);
+    let url = server.url();
     let session_id = init_session(&client, &url).await;
 
-    let resp = rpc(&client, &url, &session_id, json!({
-        "jsonrpc": "2.0",
-        "id": 4,
-        "method": "tools/call",
-        "params": {
-            "name": "fail",
-            "arguments": {}
-        }
-    })).await;
+    let resp = rpc(
+        &client,
+        &url,
+        &session_id,
+        json!({
+            "jsonrpc": "2.0",
+            "id": 4,
+            "method": "tools/call",
+            "params": {
+                "name": "fail",
+                "arguments": {}
+            }
+        }),
+    )
+    .await;
 
     assert_eq!(resp["result"]["isError"], true);
     assert_eq!(
@@ -210,49 +226,56 @@ async fn test_tools_call_error() {
 async fn test_tools_call_not_found() {
     let server = InventionServer::new(vec![]).await;
     let client = reqwest::Client::new();
-    let url = format!("http://127.0.0.1:{}/mcp", server.port);
+    let url = server.url();
     let session_id = init_session(&client, &url).await;
 
-    let resp = rpc(&client, &url, &session_id, json!({
-        "jsonrpc": "2.0",
-        "id": 5,
-        "method": "tools/call",
-        "params": {
-            "name": "nonexistent",
-            "arguments": {}
-        }
-    })).await;
+    let resp = rpc(
+        &client,
+        &url,
+        &session_id,
+        json!({
+            "jsonrpc": "2.0",
+            "id": 5,
+            "method": "tools/call",
+            "params": {
+                "name": "nonexistent",
+                "arguments": {}
+            }
+        }),
+    )
+    .await;
 
     assert!(resp["error"].is_object());
-    // rmcp returns -32602 (invalid params) for unknown tool names
     assert!(resp["error"]["code"].as_i64().unwrap() < 0);
 }
 
 #[tokio::test]
-async fn test_mcp_server_config() {
+async fn test_url() {
     let server = InventionServer::new(vec![]).await;
-    let config = server.mcp_server_config();
-    assert_eq!(config.r#type, McpHttpServerConfigType::Http);
-    assert_eq!(
-        config.url,
-        format!("http://127.0.0.1:{}/mcp", server.port)
-    );
-    assert!(config.headers.is_none());
+    let url = server.url();
+    assert!(url.starts_with("http://127.0.0.1:"));
+    assert!(url.ends_with("/mcp"));
 }
 
 #[tokio::test]
 async fn test_unknown_method() {
     let server = InventionServer::new(vec![]).await;
     let client = reqwest::Client::new();
-    let url = format!("http://127.0.0.1:{}/mcp", server.port);
+    let url = server.url();
     let session_id = init_session(&client, &url).await;
 
-    let resp = rpc(&client, &url, &session_id, json!({
-        "jsonrpc": "2.0",
-        "id": 6,
-        "method": "unknown/method",
-        "params": {}
-    })).await;
+    let resp = rpc(
+        &client,
+        &url,
+        &session_id,
+        json!({
+            "jsonrpc": "2.0",
+            "id": 6,
+            "method": "unknown/method",
+            "params": {}
+        }),
+    )
+    .await;
 
     assert!(resp["error"].is_object());
     assert!(resp["error"]["code"].as_i64().unwrap() < 0);

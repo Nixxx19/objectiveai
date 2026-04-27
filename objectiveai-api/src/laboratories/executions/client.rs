@@ -37,7 +37,8 @@ pub fn response_id(created: u64) -> String {
 }
 
 /// Laboratory client that runs builder agents in orchestrated environments
-/// (Docker containers, GCP instances, etc.) with the embedded objectiveai-mcp binary.
+/// (Docker containers, GCP instances, etc.) with the embedded
+/// objectiveai-mcp-filesystem binary.
 pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, RETRF, RETRM, CUSG, LUSG, ORCH> {
     pub agent_client: Arc<
         crate::agent::completions::Client<
@@ -147,7 +148,10 @@ where
 
         // Spawn builder environments and resolve agents concurrently
         #[cfg(feature = "orchestrator-bollard")]
-        let binaries: &[(&str, &[u8])] = &[("objectiveai-mcp", super::mcp_binary::MCP_BINARY)];
+        let binaries: &[(&str, &[u8])] = &[(
+            "objectiveai-mcp-filesystem",
+            super::mcp_binary::MCP_FILESYSTEM_BINARY,
+        )];
         #[cfg(not(feature = "orchestrator-bollard"))]
         let binaries: &[(&str, &[u8])] = &[];
         let orchestrator_fut = self.orchestrator.spawn_containers(
