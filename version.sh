@@ -166,7 +166,10 @@ CARGO_TOMLS=(
   objectiveai-cli/Cargo.toml
   objectiveai-cli/builder/Cargo.toml
   objectiveai-json-schema/builder/Cargo.toml
-  objectiveai-mcp/Cargo.toml
+  objectiveai-mcp-cli/Cargo.toml
+  objectiveai-mcp-filesystem/Cargo.toml
+  objectiveai-mcp-proxy/Cargo.toml
+  objectiveai-mcp-proxy/test-upstream/Cargo.toml
   objectiveai-rs/Cargo.toml
   objectiveai-rs-cffi/Cargo.toml
   objectiveai-rs-macros/Cargo.toml

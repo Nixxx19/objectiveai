@@ -180,7 +180,9 @@ objectiveai/
 ├── objectiveai-rs/             # Rust SDK (core crate: types, validation, compilation)
 ├── objectiveai-api/            # API server (self-hostable)
 ├── objectiveai-cli/            # CLI tool
-├── objectiveai-mcp/            # MCP server (embedded in lab executions)
+├── objectiveai-mcp-cli/        # MCP server exposing the CLI as an MCP tool
+├── objectiveai-mcp-filesystem/ # MCP filesystem server (Docker-injected into lab executions)
+├── objectiveai-mcp-proxy/      # MCP multiplexing proxy (sidecar of objectiveai-api)
 ├── objectiveai-viewer/         # Local Tauri viewer (optional, embedded in CLI)
 ├── objectiveai-web/            # Web interface (production)
 ├── objectiveai-js/             # TypeScript SDK (npm: objectiveai)
