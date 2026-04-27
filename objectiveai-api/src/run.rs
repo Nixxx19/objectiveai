@@ -14,7 +14,7 @@ use crate::{
     error::ResponseErrorExt,
     filesystem,
     functions::{self, profiles::computations::Client},
-    github, mcp, objectiveai_http,
+    github, objectiveai_http,
     retrieval, viewer,
     util::StreamOnce,
     vector,
@@ -583,7 +583,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
     ));
 
     // MCP Client
-    let mcp_client = Arc::new(mcp::Client::new(
+    let mcp_client = Arc::new(objectiveai::mcp::Client::new(
         http_client.clone(),
         user_agent.clone(),
         x_title.clone(),
@@ -604,9 +604,17 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         std::time::Duration::from_millis(mcp_call_timeout),
     ));
 
+    // Lazy in-process mcp-proxy. Each per-agent MCP connection goes
+    // through this; it boots on the first request that needs it and
+    // lives for the rest of the program.
+    let proxy_spawner = Arc::new(agent::completions::ProxySpawner::new(
+        objectiveai_mcp_proxy::ConfigBuilder::default,
+    ));
+
     // Agent Completions Client
     let agent_completions_client = Arc::new(agent::completions::Client::new(
         mcp_client.clone(),
+        proxy_spawner,
         mcp_authorization.clone(),
         retrieve_router.clone(),
         Arc::new(agent::completions::usage_handler::LogUsageHandler),

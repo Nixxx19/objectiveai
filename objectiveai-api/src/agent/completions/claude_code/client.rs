@@ -5,7 +5,7 @@ use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::process::Command;
 use tokio_stream::wrappers::LinesStream;
 
-use super::super::{ContinuationItem, InventionServer, StreamItem, UpstreamClient};
+use super::super::{ContinuationItem, StreamItem, UpstreamClient};
 use super::sdk_message::{RateLimitEventType, RateLimitStatus, SDKMessage};
 use super::mcp_server_config::McpHttpServerConfig;
 use crate::util::StreamOnce;
@@ -74,35 +74,27 @@ impl Client {
 }
 
 /// Builds the MCP servers JSON config for claude's `--mcp-config` flag.
-/// claude expects `{"mcpServers": {"name": {...}, ...}}`.
+/// claude expects `{"mcpServers": {"name": {...}, ...}}`. With the
+/// per-agent proxy connection, this is at most one entry pointing the
+/// `claude` child at the proxy with the agent's pre-initialized
+/// `Mcp-Session-Id` header. The name is sourced from the connection's
+/// `server_info.name`, never hardcoded.
 fn build_mcp_servers_json(
-    mcp_connections: &[Arc<crate::mcp::Connection>],
-    invention_server: Option<&InventionServer>,
+    mcp_connection: Option<&objectiveai::mcp::Connection>,
 ) -> String {
     use indexmap::IndexMap;
-    use std::collections::HashMap;
-
-    let mut name_counts: HashMap<String, usize> = HashMap::new();
-    for conn in mcp_connections {
-        let name = &conn.initialize_result.server_info.name;
-        *name_counts.entry(name.clone()).or_default() += 1;
-    }
 
     let mut servers: IndexMap<String, serde_json::Value> = IndexMap::new();
-    for conn in mcp_connections {
-        let name = &conn.initialize_result.server_info.name;
-        let key = if name_counts.get(name).copied().unwrap_or(0) > 1 {
-            format!("{name} ({})", conn.url)
-        } else {
-            name.clone()
+    if let Some(conn) = mcp_connection {
+        let mut headers = IndexMap::new();
+        headers.insert("Mcp-Session-Id".to_string(), conn.session_id.clone());
+        let config = McpHttpServerConfig {
+            r#type: super::mcp_server_config::McpHttpServerConfigType::Http,
+            url: conn.url.clone(),
+            headers: Some(headers),
         };
-        let config = McpHttpServerConfig::from(conn.as_ref());
-        servers.insert(key, serde_json::to_value(&config).unwrap());
-    }
-    if let Some(inv) = invention_server {
-        let config = inv.mcp_server_config();
         servers.insert(
-            "objectiveai-invention".to_string(),
+            conn.initialize_result.server_info.name.clone(),
             serde_json::to_value(&config).unwrap(),
         );
     }
@@ -145,12 +137,7 @@ impl UpstreamClient<
         request_continuation: Option<&objectiveai::agent::claude_code::Continuation>,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         messages: &[objectiveai::agent::completions::message::Message],
-        mcp_connections: &[Arc<crate::mcp::Connection>],
-        invention_tools: Option<
-            &[objectiveai::functions::inventions::InventionTool],
-        >,
-        tool_names: &[String],
-        tool_map: &std::collections::HashMap<String, super::super::tool::ResolvedTool>,
+        mcp_connection: Option<objectiveai::mcp::Connection>,
         continuation: Option<&[ContinuationItem<Self::State>]>,
         byok: Option<&str>,
         cost_multiplier: rust_decimal::Decimal,
@@ -168,14 +155,15 @@ impl UpstreamClient<
     + 'static {
         let enabled = self.enabled;
         let tools_enabled = _tools_enabled;
-        let has_tools = !tool_names.is_empty();
+        // TODO(orchestration-rewrite): the Claude Code upstream no
+        // longer receives a pre-resolved tool list; once implemented,
+        // source this from `mcp_connection.list_tools()` instead.
+        let has_tools = false;
         let is_byok = byok.is_some();
         let id = id.to_string();
         let agent = agent.clone();
         let params = params.clone();
         let messages = messages.to_vec();
-        let mcp_connections = mcp_connections.to_vec();
-        let invention_tools = invention_tools.map(|t| t.to_vec());
         let continuation = continuation.map(|c| c.to_vec());
         let request_continuation_cc = request_continuation.cloned();
         let client = self.clone();
@@ -214,19 +202,7 @@ impl UpstreamClient<
                 request_continuation_cas.as_ref(),
             ).map_err(|e| translate_sdk_error(&e.to_string()))?;
 
-            // Spawn invention server if invention tools are provided.
-            let invention_server = if let Some(ref tools) = invention_tools {
-                if !tools.is_empty() {
-                    Some(InventionServer::new(tools.clone()).await)
-                } else {
-                    None
-                }
-            } else {
-                None
-            };
-
-            let mcp_servers_json =
-                build_mcp_servers_json(&mcp_connections, invention_server.as_ref());
+            let mcp_servers_json = build_mcp_servers_json(mcp_connection.as_ref());
 
             // Compute assistant_index from continuation.
             let assistant_index = continuation
@@ -249,7 +225,7 @@ impl UpstreamClient<
             let user_agent = client.user_agent.clone();
             let rate_limit_max_retries = client.rate_limit_max_retries;
             let rate_limit_max_wait_secs = client.rate_limit_max_wait_secs;
-            let has_mcp_config = !mcp_connections.is_empty() || invention_server.is_some();
+            let has_mcp_config = mcp_connection.is_some();
 
             // Serialize the SDKUserMessage once — stdin content is identical
             // across spawn attempts (resume is controlled via --resume).
@@ -257,10 +233,12 @@ impl UpstreamClient<
                 .map_err(|e| super::Error::Json(e.to_string()))?;
 
             let id_for_peek = id.clone();
-            let our_mcp_server_names: std::collections::HashSet<String> = mcp_connections
-                .iter()
-                .map(|c| c.initialize_result.server_info.name.clone())
-                .chain(invention_server.as_ref().map(|_| "objectiveai-invention".to_string()))
+            // We claim the single proxy entry (and only that) when filtering
+            // mcp_server messages from the child's output stream.
+            let our_mcp_server_names: std::collections::HashSet<String> = mcp_connection
+                .as_ref()
+                .map(|_| "objectiveai-proxy".to_string())
+                .into_iter()
                 .collect();
 
             // Builds a fresh `claude` Command. Called once per spawn attempt so
@@ -295,8 +273,6 @@ impl UpstreamClient<
             };
 
             let internal_stream = async_stream::stream! {
-                let _invention_server_guard = invention_server;
-
                 let mut latest_session_id = String::new();
                 let mut msg_index = assistant_index;
                 let mut had_error = false;

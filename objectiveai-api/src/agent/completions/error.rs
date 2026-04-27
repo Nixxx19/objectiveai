@@ -10,19 +10,19 @@ pub enum Error {
     AgentNotFound(String),
 
     #[error("MCP connection error: {0}")]
-    McpConnection(crate::mcp::Error),
+    McpConnection(objectiveai::mcp::Error),
 
     #[error("MCP connection error: {0}")]
-    McpConnectionArc(std::sync::Arc<crate::mcp::Error>),
+    McpConnectionArc(std::sync::Arc<objectiveai::mcp::Error>),
 
     #[error("MCP list_tools error ({url}): {error}")]
     McpListTools {
         url: String,
-        error: std::sync::Arc<crate::mcp::Error>,
+        error: std::sync::Arc<objectiveai::mcp::Error>,
     },
 
     #[error("MCP call_tool error: {0}")]
-    McpCallTool(crate::mcp::Error),
+    McpCallTool(objectiveai::mcp::Error),
 
     #[error("{0}")]
     Fetch(objectiveai::error::ResponseError),

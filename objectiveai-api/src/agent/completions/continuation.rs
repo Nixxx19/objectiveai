@@ -1,24 +1,22 @@
-use std::collections::HashSet;
-use std::sync::Arc;
-use crate::mcp;
+use objectiveai::mcp;
 
 #[derive(Debug, Clone)]
 pub enum Continuation<OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK> {
     Openrouter {
         items: Vec<ContinuationItem<OPENROUTER>>,
-        mcp_connections: Arc<Vec<Arc<mcp::Connection>>>,
+        mcp_connection: Option<mcp::Connection>,
     },
     ClaudeAgentSdk {
         items: Vec<ContinuationItem<CLAUDEAGENTSDK>>,
-        mcp_connections: Arc<Vec<Arc<mcp::Connection>>>,
+        mcp_connection: Option<mcp::Connection>,
     },
     ClaudeCode {
         items: Vec<ContinuationItem<CLAUDECODE>>,
-        mcp_connections: Arc<Vec<Arc<mcp::Connection>>>,
+        mcp_connection: Option<mcp::Connection>,
     },
     Mock {
         items: Vec<ContinuationItem<MOCK>>,
-        mcp_connections: Arc<Vec<Arc<mcp::Connection>>>,
+        mcp_connection: Option<mcp::Connection>,
     },
 }
 
@@ -50,17 +48,15 @@ impl<OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK> Continuation<OPENROUTER, CLAU
         }
     }
 
-    pub fn mcp_connections(&self) -> &Arc<Vec<Arc<mcp::Connection>>> {
+    /// The single MCP proxy connection for this agent (or `None` if the
+    /// agent had no MCP servers and no invention tools).
+    pub fn mcp_connection(&self) -> Option<&mcp::Connection> {
         match self {
-            Self::Openrouter { mcp_connections, .. }
-            | Self::ClaudeAgentSdk { mcp_connections, .. }
-            | Self::ClaudeCode { mcp_connections, .. }
-            | Self::Mock { mcp_connections, .. } => mcp_connections,
+            Self::Openrouter { mcp_connection, .. }
+            | Self::ClaudeAgentSdk { mcp_connection, .. }
+            | Self::ClaudeCode { mcp_connection, .. }
+            | Self::Mock { mcp_connection, .. } => mcp_connection.as_ref(),
         }
-    }
-
-    pub fn mcp_urls(&self) -> HashSet<String> {
-        self.mcp_connections().iter().map(|c| c.url.clone()).collect()
     }
 }
 

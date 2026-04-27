@@ -133,7 +133,7 @@ fn make_client() -> super::Client<
     StubUsageHandler,
 > {
     super::Client::new(
-        Arc::new(crate::mcp::Client::new(
+        Arc::new(objectiveai::mcp::Client::new(
             reqwest::Client::new(),
             String::new(),
             String::new(),

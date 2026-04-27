@@ -110,7 +110,7 @@ fn make_client() -> Arc<TestClient> {
         Arc::new(crate::retrieval::retrieve::mock::MockClient),
     ));
     let agent_client = Arc::new(crate::agent::completions::Client::new(
-        Arc::new(crate::mcp::Client::new(
+        Arc::new(objectiveai::mcp::Client::new(
             reqwest::Client::new(),
             String::new(), String::new(), String::new(),
             Duration::from_millis(1), Duration::ZERO, Duration::ZERO,

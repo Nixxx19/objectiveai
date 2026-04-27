@@ -2,6 +2,7 @@ use std::{collections::HashMap, pin::Pin, sync::Arc, time::Duration};
 
 use crate::ctx;
 use futures::StreamExt;
+use indexmap::IndexMap;
 
 /// A function that transforms messages before they are sent to an upstream.
 /// Keyed by agent ID so each agent in an swarm can receive different messages.
@@ -17,59 +18,47 @@ pub fn response_id(created: u64) -> String {
 
 // ---------------------------------------------------------------------------
 
-/// Extracts the set of required MCP URLs from whichever continuation source is active.
-/// Internal continuation takes precedence over request continuation.
-fn required_mcp_urls<O, C, CC, M>(
-    internal: Option<&super::Continuation<O, C, CC, M>>,
-    request: Option<&objectiveai::agent::Continuation>,
-) -> std::collections::HashSet<String> {
-    if let Some(ic) = internal {
-        ic.mcp_urls()
-    } else if let Some(rc) = request {
-        rc.mcp_sessions().keys().cloned().collect()
-    } else {
-        std::collections::HashSet::new()
-    }
-}
-
-/// Filters agents to those whose MCP server URLs are a superset of `required_urls`
-/// and (if `required_upstream` is set) match the required upstream type.
+/// Filters agents by upstream type (if required by the continuation) and
+/// drops agents whose declared MCP servers can't be authorized — i.e. any
+/// server with `requires_auth = true` for which we lack a value in
+/// `request_mcp_auth` / `self.mcp_authorization`. The proxy connection
+/// is per-agent now, so there's no "URL superset" filter anymore.
 fn filter_agents(
     agents: Vec<objectiveai::agent::InlineAgent>,
-    required_urls: &std::collections::HashSet<String>,
     required_upstream: Option<objectiveai::agent::Upstream>,
+    request_mcp_auth: Option<&std::collections::HashMap<String, String>>,
+    default_mcp_auth: Option<&std::collections::HashMap<String, String>>,
 ) -> Vec<objectiveai::agent::InlineAgent> {
-    agents.into_iter().filter(|agent| {
-        // Filter by upstream type if required.
-        if let Some(upstream) = required_upstream {
-            if agent.base().upstream() != upstream {
-                return false;
+    agents
+        .into_iter()
+        .filter(|agent| {
+            if let Some(upstream) = required_upstream {
+                if agent.base().upstream() != upstream {
+                    return false;
+                }
             }
-        }
-        // Filter by MCP superset: agent's URLs must contain all required URLs.
-        if required_urls.is_empty() {
-            return true;
-        }
-        let agent_urls: std::collections::HashSet<&str> = agent.base().mcp_servers()
-            .map(|s| s.iter().map(|s| s.url.as_str()).collect())
-            .unwrap_or_default();
-        required_urls.iter().all(|url| agent_urls.contains(url.as_str()))
-    }).collect()
+            if let Some(servers) = agent.base().mcp_servers() {
+                for s in servers {
+                    if s.authorization
+                        && request_mcp_auth.and_then(|m| m.get(&s.url)).is_none()
+                        && default_mcp_auth.and_then(|m| m.get(&s.url)).is_none()
+                    {
+                        return false;
+                    }
+                }
+            }
+            true
+        })
+        .collect()
 }
 
 // ---------------------------------------------------------------------------
 
-/// A shared, re-awaitable handle to a single MCP connection.
-/// Uses `Arc<crate::mcp::Error>` so the result is `Clone` (required by `Shared`).
-pub type McpHandle = futures::future::Shared<
-    tokio::sync::oneshot::Receiver<
-        Result<Arc<crate::mcp::Connection>, Arc<crate::mcp::Error>>
-    >
->;
-
 pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, RETRF, RETRM, CUSG> {
     /// MCP Client
-    pub mcp_client: Arc<crate::mcp::Client>,
+    pub mcp_client: Arc<objectiveai::mcp::Client>,
+    /// Lazy in-process mcp-proxy used for every per-agent MCP connection.
+    pub proxy_spawner: Arc<super::ProxySpawner>,
     /// Default MCP authorization headers (used when ctx doesn't provide them).
     pub mcp_authorization: Option<Arc<std::collections::HashMap<String, String>>>,
     /// Retrieve router for resolving remote agent references.
@@ -108,7 +97,8 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, R
 
 impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, RETRF, RETRM, CUSG> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, RETRF, RETRM, CUSG> {
     pub fn new(
-        mcp_client: Arc<crate::mcp::Client>,
+        mcp_client: Arc<objectiveai::mcp::Client>,
+        proxy_spawner: Arc<super::ProxySpawner>,
         mcp_authorization: Option<Arc<std::collections::HashMap<String, String>>>,
         retrieve_router: Arc<crate::retrieval::retrieve::Router<RETRG, RETRF, RETRM, CTXEXT>>,
         usage_handler: Arc<CUSG>,
@@ -128,6 +118,7 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, RETRF, RETRM, 
     ) -> Self {
         Self {
             mcp_client,
+            proxy_spawner,
             mcp_authorization,
             retrieve_router,
             usage_handler,
@@ -155,6 +146,7 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, RETRF, RETRM, 
     fn clone(&self) -> Self {
         Self {
             mcp_client: self.mcp_client.clone(),
+            proxy_spawner: self.proxy_spawner.clone(),
             mcp_authorization: self.mcp_authorization.clone(),
             retrieve_router: self.retrieve_router.clone(),
             usage_handler: self.usage_handler.clone(),
@@ -403,18 +395,35 @@ where
             );
         }
 
-        // 2. Extract continuation items, MCP connections, and upstream type.
+        // 2. Extract continuation items, MCP connection, and upstream type.
         let cont_upstream = continuation.as_ref().map(|c| c.upstream());
-        let (mut cont_items_or, mut cont_items_cas, mut cont_items_cc, mut cont_items_mock, internal_conns) = match continuation {
-            Some(super::Continuation::Openrouter { items, mcp_connections }) => (items, vec![], vec![], vec![], Some(mcp_connections)),
-            Some(super::Continuation::ClaudeAgentSdk { items, mcp_connections }) => (vec![], items, vec![], vec![], Some(mcp_connections)),
-            Some(super::Continuation::ClaudeCode { items, mcp_connections }) => (vec![], vec![], items, vec![], Some(mcp_connections)),
-            Some(super::Continuation::Mock { items, mcp_connections }) => (vec![], vec![], vec![], items, Some(mcp_connections)),
+        let (
+            mut cont_items_or,
+            mut cont_items_cas,
+            mut cont_items_cc,
+            mut cont_items_mock,
+            internal_conn,
+        ) = match continuation {
+            Some(super::Continuation::Openrouter { items, mcp_connection }) => {
+                (items, vec![], vec![], vec![], mcp_connection)
+            }
+            Some(super::Continuation::ClaudeAgentSdk { items, mcp_connection }) => {
+                (vec![], items, vec![], vec![], mcp_connection)
+            }
+            Some(super::Continuation::ClaudeCode { items, mcp_connection }) => {
+                (vec![], vec![], items, vec![], mcp_connection)
+            }
+            Some(super::Continuation::Mock { items, mcp_connection }) => {
+                (vec![], vec![], vec![], items, mcp_connection)
+            }
             None => (vec![], vec![], vec![], vec![], None),
         };
 
         // 3. Always resolve agents from params.agent.
-        let agent_wf = self.retrieve_router.get_agent(&ctx, params.agent.clone()).await
+        let agent_wf = self
+            .retrieve_router
+            .get_agent(&ctx, params.agent.clone())
+            .await
             .map_err(|e| super::Error::InvalidAgent(e.message.to_string()))?;
         let inline = agent_wf.inline();
         let mut all_agents: Vec<objectiveai::agent::InlineAgent> = vec![inline.inner.clone()];
@@ -422,41 +431,32 @@ where
             all_agents.extend(fallbacks.iter().cloned());
         }
 
-        // 4. Determine required MCP URLs and upstream type from continuation.
-        let required_mcp_urls: std::collections::HashSet<String> = if let Some(conns) = &internal_conns {
-            conns.iter().map(|c| c.url.clone()).collect()
-        } else if let Some(rc) = &request_continuation {
-            rc.mcp_sessions().keys().cloned().collect()
-        } else {
-            std::collections::HashSet::new()
-        };
+        // 4. Filter agents: drop those whose required upstream doesn't
+        //    match the continuation, or whose required MCP authorization
+        //    is missing.
         let required_upstream = cont_upstream
             .or_else(|| request_continuation.as_ref().map(|c| c.upstream()));
-
-        // 5. Filter agents by upstream type + MCP superset.
-        let filtered_agents = filter_agents(all_agents, &required_mcp_urls, required_upstream);
-
-        // 6. Spawn shared MCP connection map.
-        let request_sessions = if internal_conns.is_none() {
-            request_continuation.as_ref().map(|c| c.mcp_sessions())
-        } else {
-            None
-        };
-        let mcp_map = self.spawn_mcp_connection_map(
-            &filtered_agents, &ctx, internal_conns.as_ref(), request_sessions,
+        let request_mcp_auth = ctx.mcp_authorization().await;
+        let filtered_agents = filter_agents(
+            all_agents,
+            required_upstream,
+            request_mcp_auth.as_deref(),
+            self.mcp_authorization.as_deref(),
         );
 
-        // 7. Build agent attempts.
+        // 5. Build agent attempts. Per-agent proxy connection is opened
+        //    lazily inside the retry loop so the in-process proxy only
+        //    boots when something actually needs it.
         struct AgentAttempt {
             agent: objectiveai::agent::InlineAgent,
-            mcp_urls: Vec<String>,
         }
-        let attempts: Vec<AgentAttempt> = filtered_agents.into_iter().map(|agent| {
-            let mcp_urls = agent.base().mcp_servers()
-                .map(|s| s.iter().map(|s| s.url.clone()).collect())
-                .unwrap_or_default();
-            AgentAttempt { agent, mcp_urls }
-        }).collect();
+        let attempts: Vec<AgentAttempt> = filtered_agents
+            .into_iter()
+            .map(|agent| AgentAttempt { agent })
+            .collect();
+        // Suppress unused-binding warning while the proxy connection
+        // wiring is still being threaded through.
+        let _ = (&internal_conn, &self.proxy_spawner);
 
         // 8. Backoff retry loop — try each agent in order.
         let mut backoff = backoff::ExponentialBackoff {
@@ -474,55 +474,13 @@ where
             let mut errors: Vec<super::Error> = Vec::new();
 
             for attempt in &attempts {
-                // Await MCP connections for THIS agent from the shared map.
-                let mut mcp_connections_vec = Vec::with_capacity(attempt.mcp_urls.len());
-                let mut mcp_ok = true;
-                for url in &attempt.mcp_urls {
-                    let handle = mcp_map.get(url).expect("MCP URL missing from shared map");
-                    match handle.clone().await.unwrap() {
-                        Ok(conn) => mcp_connections_vec.push(conn),
-                        Err(e) => {
-                            errors.push(super::Error::McpConnectionArc(e));
-                            mcp_ok = false;
-                            break;
-                        }
-                    }
-                }
-                if !mcp_ok {
-                    continue;
-                }
-                let mcp_connections = Arc::new(mcp_connections_vec);
-
-                // a. List MCP tools for each connection.
-                let mut mcp_tools = Vec::new();
-                let mut mcp_ok = true;
-                for conn in mcp_connections.iter() {
-                    match conn.list_tools().await {
-                        Ok(tools) => mcp_tools.push(tools),
-                        Err(e) => {
-                            errors.push(super::Error::McpListTools {
-                                url: conn.url.clone(),
-                                error: e,
-                            });
-                            mcp_ok = false;
-                            break;
-                        }
-                    }
-                }
-                if !mcp_ok {
-                    continue;
-                }
-
-                // b. Resolve response format for this agent.
-                let response_format = resolve_response_format(attempt.agent.id(), &params);
-
-                // c. Resolve tools.
-                let (tool_names, tool_map) = super::tool::resolve_tools(
-                    &mcp_connections,
-                    &mcp_tools,
-                    invention_tools.as_deref(),
-                    response_format.as_ref(),
-                );
+                // TODO(orchestration-rewrite): connect once per agent to
+                // the in-process proxy here, with X-MCP-Servers /
+                // X-MCP-Authorization / X-MCP-Headers built from the
+                // agent's declared mcp_servers + the invention server
+                // URL (when applicable). Skip the agent on connect
+                // failure. For now we pass `None` to every upstream.
+                let mcp_connection: Option<objectiveai::mcp::Connection> = None;
 
                 // d. Get BYOK for this agent's upstream.
                 let byok = ctx.upstream_authorization(attempt.agent.base().upstream()).await;
@@ -540,18 +498,17 @@ where
                 for byok_attempt in &byok_attempts {
                     let err = match &attempt.agent {
                         objectiveai::agent::InlineAgent::Openrouter(or_agent) => {
-                            let c = mcp_connections.clone();
+                            let c = mcp_connection.clone();
                             let rc = match &request_continuation {
                                 Some(objectiveai::agent::Continuation::Openrouter(c)) => Some(c),
                                 _ => None,
                             };
                             match self.run_agent_loop(
-                                self.openrouter.clone(), or_agent, rc, &params, &mcp_connections,
-                                invention_tools.as_deref(), &tool_names, &tool_map,
+                                self.openrouter.clone(), or_agent, rc, &params, mcp_connection.clone(),
                                 &mut cont_items_or, &id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 move |items| super::Continuation::Openrouter {
-                                    items, mcp_connections: c,
+                                    items, mcp_connection: c,
                                 },
                                 |e| super::Error::UpstreamOpenrouter(Box::new(e)),
                                 objectiveai::agent::InlineAgentRef::Openrouter(&or_agent.base),
@@ -577,18 +534,17 @@ where
                             }
                         }
                         objectiveai::agent::InlineAgent::ClaudeAgentSdk(cas_agent) => {
-                            let c = mcp_connections.clone();
+                            let c = mcp_connection.clone();
                             let rc = match &request_continuation {
                                 Some(objectiveai::agent::Continuation::ClaudeAgentSdk(c)) => Some(c),
                                 _ => None,
                             };
                             match self.run_agent_loop(
-                                self.claude_agent_sdk.clone(), cas_agent, rc, &params, &mcp_connections,
-                                invention_tools.as_deref(), &tool_names, &tool_map,
+                                self.claude_agent_sdk.clone(), cas_agent, rc, &params, mcp_connection.clone(),
                                 &mut cont_items_cas, &id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 move |items| super::Continuation::ClaudeAgentSdk {
-                                    items, mcp_connections: c,
+                                    items, mcp_connection: c,
                                 },
                                 |e| super::Error::UpstreamClaudeAgentSdk(Box::new(e)),
                                 objectiveai::agent::InlineAgentRef::ClaudeAgentSdk(&cas_agent.base),
@@ -614,18 +570,17 @@ where
                             }
                         }
                         objectiveai::agent::InlineAgent::ClaudeCode(cc_agent) => {
-                            let c = mcp_connections.clone();
+                            let c = mcp_connection.clone();
                             let rc = match &request_continuation {
                                 Some(objectiveai::agent::Continuation::ClaudeCode(c)) => Some(c),
                                 _ => None,
                             };
                             match self.run_agent_loop(
-                                self.claude_code.clone(), cc_agent, rc, &params, &mcp_connections,
-                                invention_tools.as_deref(), &tool_names, &tool_map,
+                                self.claude_code.clone(), cc_agent, rc, &params, mcp_connection.clone(),
                                 &mut cont_items_cc, &id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 move |items| super::Continuation::ClaudeCode {
-                                    items, mcp_connections: c,
+                                    items, mcp_connection: c,
                                 },
                                 |e| super::Error::UpstreamClaudeCode(Box::new(e)),
                                 objectiveai::agent::InlineAgentRef::ClaudeCode(&cc_agent.base),
@@ -651,18 +606,17 @@ where
                             }
                         }
                         objectiveai::agent::InlineAgent::Mock(mock_agent) => {
-                            let c = mcp_connections.clone();
+                            let c = mcp_connection.clone();
                             let rc = match &request_continuation {
                                 Some(objectiveai::agent::Continuation::Mock(c)) => Some(c),
                                 _ => None,
                             };
                             match self.run_agent_loop(
-                                self.mock.clone(), mock_agent, rc, &params, &mcp_connections,
-                                invention_tools.as_deref(), &tool_names, &tool_map,
+                                self.mock.clone(), mock_agent, rc, &params, mcp_connection.clone(),
                                 &mut cont_items_mock, &id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 move |items| super::Continuation::Mock {
-                                    items, mcp_connections: c,
+                                    items, mcp_connection: c,
                                 },
                                 |e| super::Error::UpstreamMock(Box::new(e)),
                                 objectiveai::agent::InlineAgentRef::Mock(&mock_agent.base),
@@ -726,10 +680,7 @@ where
         agent: &A,
         request_continuation: Option<&RC>,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
-        mcp_connections: &[Arc<crate::mcp::Connection>],
-        invention_tools: Option<&[objectiveai::functions::inventions::InventionTool]>,
-        tool_names: &[String],
-        tool_map: &HashMap<String, super::tool::ResolvedTool>,
+        mcp_connection: Option<objectiveai::mcp::Connection>,
         cont_items: &mut Vec<super::ContinuationItem<U::State>>,
         id: &str,
         created: u64,
@@ -776,10 +727,7 @@ where
             request_continuation.clone(),
             params,
             &messages,
-            mcp_connections,
-            invention_tools,
-            tool_names,
-            tool_map,
+            mcp_connection.clone(),
             cont_ref,
             byok,
             cost_multiplier,
@@ -799,11 +747,7 @@ where
         let mut continuation_items = std::mem::take(cont_items);
         let other_chunk_timeout = self.other_chunk_timeout;
         let agent = agent.clone();
-        let mcp_connections = mcp_connections.to_vec();
         let params = params.clone();
-        let invention_tools = invention_tools.map(|s| s.to_vec());
-        let tool_names = tool_names.to_vec();
-        let tool_map = tool_map.clone();
         let id = id.to_string();
         let byok = byok.map(|s| s.to_string());
         let request_continuation = request_continuation.cloned();
@@ -880,136 +824,43 @@ where
                     break;
                 }
 
-                let Some(ref agg) = aggregate else { break };
-
-                let callable = extract_callable_tool_calls(agg, &tool_map);
-
-                if callable.is_empty() {
-                    break;
-                }
-
-                if let Some(state) = current_state.take() {
-                    continuation_items.push(super::ContinuationItem::State(state));
-                }
-
-                let mut any_invention_tool_called = false;
-                for (call_id, call_name, call_args) in &callable {
-                    match tool_map.get(call_name) {
-                        Some(super::tool::ResolvedTool::Mcp { connection, tool }) => {
-                            let args: Option<indexmap::IndexMap<String, serde_json::Value>> =
-                                serde_json::from_str(call_args).ok();
-                            match connection
-                                .call_tool_as_message(
-                                    &crate::mcp::tool::CallToolRequestParams {
-                                        name: tool.name.clone(),
-                                        arguments: args,
-                                        _meta: None,
-                                        task: None,
-                                    },
-                                    call_id.clone(),
-                                )
-                                .await
-                            {
-                                Ok(tool_msg) => {
-                                    let idx = continuation_items.len() as u64;
-                                    let chunk = make_tool_chunk(&id, created, upstream_kind, idx, &tool_msg);
-                                    if let Some(ref mut agg) = aggregate {
-                                        agg.push(&chunk);
-                                    }
-                                    yield super::StreamItem::Chunk(chunk);
-                                    continuation_items
-                                        .push(super::ContinuationItem::ToolMessage(tool_msg));
-                                }
-                                Err(_) => {
-                                    had_error = true;
-                                    break;
-                                }
-                            }
-                        }
-                        Some(super::tool::ResolvedTool::InventionTool(inv)) => {
-                            any_invention_tool_called = true;
-                            let args: serde_json::Value = serde_json::from_str(call_args)
-                                .unwrap_or(serde_json::Value::Object(Default::default()));
-                            let content = match (inv.call)(args).await {
-                                Ok(text) => text,
-                                Err(text) => format!("Error: {text}"),
-                            };
-                            let tool_msg = ToolMessage {
-                                content: RichContent::Text(content),
-                                tool_call_id: call_id.clone(),
-                            };
-                            let idx = continuation_items.len() as u64;
-                            let chunk = make_tool_chunk(&id, created, upstream_kind, idx, &tool_msg);
-                            if let Some(ref mut agg) = aggregate {
-                                agg.push(&chunk);
-                            }
-                            yield super::StreamItem::Chunk(chunk);
-                            continuation_items
-                                .push(super::ContinuationItem::ToolMessage(tool_msg));
-                        }
-                        _ => {}
-                    }
-                }
-
-                if had_error {
-                    break;
-                }
-
-                // When invention_done signals completion, disable tools so the
-                // model responds with content and the loop terminates naturally.
-                let tools_enabled = if any_invention_tool_called {
-                    !invention_done.as_ref().is_some_and(|f| f())
-                } else {
-                    true
-                };
-
-                // Reset aggregate so the next iteration doesn't carry
-                // old tool calls forward from the previous response.
-                aggregate = None;
-
-                match upstream
-                    .create(
-                        &id,
-                        created,
-                        &agent,
-                        request_continuation.as_ref(),
-                        &params,
-                        &messages,
-                        &mcp_connections,
-                        invention_tools.as_deref(),
-                        &tool_names,
-                        &tool_map,
-                        Some(&continuation_items),
-                        byok.as_deref(),
-                        cost_multiplier,
-                        tools_enabled,
-                        invention_type,
-                        invention_step,
-                        invention_tasks_min,
-                        invention_input_schema.clone(),
-                    )
-                    .await
-                {
-                    Ok(new_stream) => {
-                        stream = Box::pin(new_stream);
-                    }
-                    Err(e) => {
-                        use objectiveai::error::StatusError;
-                        let e = map_upstream_err(e);
-                        final_error = Some(objectiveai::error::ResponseError {
-                            code: e.status(),
-                            message: e.message()
-                                .unwrap_or(serde_json::Value::Null),
-                        });
-                        break;
-                    }
-                }
+                // TODO(orchestration-rewrite): re-enable tool dispatch
+                // through the per-agent proxy connection
+                // (`mcp_connection.call_tool_as_message(...)`) and
+                // re-issue `upstream.create()` for the next turn. While
+                // the orchestrator is being repointed at the proxy,
+                // the tool loop terminates after the first turn.
+                let _ = (
+                    &mcp_connection,
+                    &request_continuation,
+                    &params,
+                    &agent,
+                    &id,
+                    &byok,
+                    &invention_done,
+                    &invention_type,
+                    &invention_step,
+                    &invention_tasks_min,
+                    &invention_input_schema,
+                    &cost_multiplier,
+                    &map_upstream_err,
+                    &mut continuation_items,
+                    &mut current_state,
+                    &mut aggregate,
+                );
+                break;
             }
 
-            // Build MCP sessions map from active connections.
-            let mcp_sessions: indexmap::IndexMap<String, String> = mcp_connections.iter()
-                .map(|c| (c.url.clone(), c.session_id.clone()))
-                .collect();
+            // Build MCP sessions map. With the per-agent proxy connection,
+            // this is at most one entry: `proxy_url → agent_session_id`.
+            let mcp_sessions: IndexMap<String, String> = mcp_connection
+                .as_ref()
+                .map(|c| {
+                    let mut m = IndexMap::new();
+                    m.insert(c.url.clone(), c.session_id.clone());
+                    m
+                })
+                .unwrap_or_default();
 
             // Build response continuation token.
             let response_cont = upstream.response_continuation(
@@ -1045,85 +896,6 @@ where
         }))
     }
 
-    /// Spawns a shared map of MCP connections keyed by URL.
-    ///
-    /// Collects all unique MCP URLs across all agents, then for each URL:
-    /// - If an internal continuation has a live connection for this URL, reuses it.
-    /// - Otherwise, spawns a fresh connection (with session ID from request
-    ///   continuation if available).
-    ///
-    /// Connections are shared: if two agents use the same MCP URL, they share
-    /// one handle.
-    pub fn spawn_mcp_connection_map(
-        &self,
-        agents: &[objectiveai::agent::InlineAgent],
-        ctx: &crate::ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
-        internal_connections: Option<&Arc<Vec<Arc<crate::mcp::Connection>>>>,
-        request_sessions: Option<&indexmap::IndexMap<String, String>>,
-    ) -> HashMap<String, McpHandle> {
-        // Collect all unique MCP URLs across all agents, with their authorization flag.
-        let mut unique_urls: indexmap::IndexMap<String, bool> = indexmap::IndexMap::new();
-        for agent in agents {
-            if let Some(servers) = agent.base().mcp_servers() {
-                for server in servers {
-                    unique_urls.entry(server.url.clone())
-                        .or_insert(server.authorization);
-                }
-            }
-        }
-
-        // Build a lookup of existing internal connections by URL.
-        let internal_by_url: HashMap<&str, &Arc<crate::mcp::Connection>> = internal_connections
-            .map(|conns| conns.iter().map(|c| (c.url.as_str(), c)).collect())
-            .unwrap_or_default();
-
-        let mut map = HashMap::with_capacity(unique_urls.len());
-
-        for (url, requires_auth) in &unique_urls {
-            // If internal continuation already has a live connection, reuse it.
-            if let Some(existing) = internal_by_url.get(url.as_str()) {
-                let conn = (*existing).clone();
-                let (tx, rx) = tokio::sync::oneshot::channel();
-                let _ = tx.send(Ok(conn));
-                map.insert(url.clone(), futures::FutureExt::shared(rx));
-                continue;
-            }
-
-            // Spawn a fresh connection.
-            let map_key = url.clone();
-            let url = url.clone();
-            let requires_auth = *requires_auth;
-            let session_id = request_sessions.and_then(|m| m.get(&url).cloned());
-            let mcp_client = self.mcp_client.clone();
-            let self_mcp_auth = self.mcp_authorization.clone();
-            let ctx = ctx.clone();
-
-            let (tx, rx) = tokio::sync::oneshot::channel();
-            tokio::spawn(async move {
-                let mcp_auth = ctx.mcp_authorization().await;
-                let authorization = if requires_auth {
-                    match mcp_auth.as_ref().and_then(|m| m.get(&url))
-                        .or_else(|| self_mcp_auth.as_ref().and_then(|m| m.get(&url)))
-                    {
-                        Some(auth) => Some(auth.clone()),
-                        None => {
-                            let _ = tx.send(Err(Arc::new(crate::mcp::Error::MissingAuthorization(url))));
-                            return;
-                        }
-                    }
-                } else {
-                    None
-                };
-                match mcp_client.connect(url, authorization, session_id).await {
-                    Ok(conn) => { let _ = tx.send(Ok(conn)); }
-                    Err(e) => { let _ = tx.send(Err(Arc::new(e))); }
-                }
-            });
-            map.insert(map_key, futures::FutureExt::shared(rx));
-        }
-
-        map
-    }
 }
 
 /// Resolves the response format for a given agent from the request params.

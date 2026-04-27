@@ -162,7 +162,7 @@ fn make_agent_client(
     retrieve_router: &Arc<crate::retrieval::retrieve::Router<StubRetrieveClient, StubRetrieveClient, crate::retrieval::retrieve::mock::MockClient, ctx::DefaultContextExt>>,
 ) -> Arc<crate::agent::completions::Client<ctx::DefaultContextExt, UnimplementedUpstreamClient, UnimplementedUpstreamClient, UnimplementedUpstreamClient, crate::agent::completions::mock::Client, StubRetrieveClient, StubRetrieveClient, crate::retrieval::retrieve::mock::MockClient, StubAgentUsageHandler>> {
     Arc::new(crate::agent::completions::Client::new(
-        Arc::new(crate::mcp::Client::new(
+        Arc::new(objectiveai::mcp::Client::new(
             reqwest::Client::new(),
             String::new(),
             String::new(),
