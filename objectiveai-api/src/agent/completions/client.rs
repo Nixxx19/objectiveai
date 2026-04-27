@@ -444,19 +444,116 @@ where
             self.mcp_authorization.as_deref(),
         );
 
-        // 5. Build agent attempts. Per-agent proxy connection is opened
-        //    lazily inside the retry loop so the in-process proxy only
-        //    boots when something actually needs it.
+        // 5. Spawn the invention server (if applicable) so its URL can
+        //    be added to every per-agent proxy `X-MCP-Servers` list.
+        //    Held on the stack for the rest of `create_streaming`'s
+        //    lifetime; its `Drop` aborts the in-process server task.
+        let invention_server = match invention_tools.as_ref() {
+            Some(tools) if !tools.is_empty() => {
+                Some(super::InventionServer::new(tools.clone()).await)
+            }
+            _ => None,
+        };
+        let invention_url = invention_server.as_ref().map(|s| s.url());
+
+        // 6. Boot the in-process proxy (idempotent — first call wins,
+        //    subsequent calls reuse the same handle) and kick off one
+        //    connect per agent in parallel. Awaiting each `JoinHandle`
+        //    inside the per-agent branch later means the round-trips
+        //    overlap rather than serializing.
+        let proxy_handle = self
+            .proxy_spawner
+            .get()
+            .await
+            .map_err(|e| send_viewer_err(super::Error::McpProxyBootstrap(e.to_string())))?;
+        let proxy_url = proxy_handle.url.clone();
+
+        let request_mcp_auth_owned = request_mcp_auth.clone();
+        let default_mcp_auth_owned = self.mcp_authorization.clone();
+        let internal_conn_for_resume = internal_conn.clone();
+
+        let connect_handles: Vec<
+            tokio::task::JoinHandle<Result<objectiveai::mcp::Connection, objectiveai::mcp::Error>>,
+        > = filtered_agents
+            .iter()
+            .map(|agent| {
+                // Build the per-agent X-MCP-* header set.
+                let mut urls: Vec<String> = agent
+                    .base()
+                    .mcp_servers()
+                    .map(|s| s.iter().map(|s| s.url.clone()).collect())
+                    .unwrap_or_default();
+                if let Some(u) = &invention_url {
+                    urls.push(u.clone());
+                }
+
+                let mut auth_map: indexmap::IndexMap<String, String> =
+                    indexmap::IndexMap::new();
+                if let Some(servers) = agent.base().mcp_servers() {
+                    for s in servers {
+                        if let Some(v) = request_mcp_auth_owned
+                            .as_deref()
+                            .and_then(|m| m.get(&s.url))
+                            .or_else(|| {
+                                default_mcp_auth_owned
+                                    .as_deref()
+                                    .and_then(|m| m.get(&s.url))
+                            })
+                        {
+                            auth_map.insert(s.url.clone(), v.clone());
+                        }
+                    }
+                }
+
+                // Forward the same innate identity headers
+                // (User-Agent / X-Title / Referer / HTTP-Referer) the
+                // mcp client stamps locally — the proxy re-emits them
+                // on its outbound upstream calls so the upstreams see
+                // the api server, not the proxy, as the originator.
+                let mcp_inner_headers = self.mcp_client.headers();
+
+                let extra_headers: indexmap::IndexMap<String, String> =
+                    indexmap::indexmap! {
+                        "X-MCP-Servers".to_string() => serde_json::to_string(&urls).unwrap(),
+                        "X-MCP-Authorization".to_string() => serde_json::to_string(&auth_map).unwrap(),
+                        "X-MCP-Headers".to_string() => serde_json::to_string(&mcp_inner_headers).unwrap(),
+                    };
+
+                let mcp_client = self.mcp_client.clone();
+                let proxy_url = proxy_url.clone();
+                // Resume the proxy session if we're continuing — the
+                // upstream sessions already live behind it.
+                let session_id = internal_conn_for_resume
+                    .as_ref()
+                    .map(|c| c.session_id.clone());
+                tokio::spawn(async move {
+                    mcp_client
+                        .connect(proxy_url, None, session_id, extra_headers)
+                        .await
+                })
+            })
+            .collect();
+
+        // 7. Build agent attempts. Each holds its own connect-handle
+        //    JoinHandle index; the actual `await` happens inside the
+        //    per-agent branch in step 8 below.
         struct AgentAttempt {
             agent: objectiveai::agent::InlineAgent,
+            connect_handle: tokio::task::JoinHandle<
+                Result<objectiveai::mcp::Connection, objectiveai::mcp::Error>,
+            >,
         }
-        let attempts: Vec<AgentAttempt> = filtered_agents
+        let mut attempts: Vec<AgentAttempt> = filtered_agents
             .into_iter()
-            .map(|agent| AgentAttempt { agent })
+            .zip(connect_handles)
+            .map(|(agent, connect_handle)| AgentAttempt { agent, connect_handle })
             .collect();
-        // Suppress unused-binding warning while the proxy connection
-        // wiring is still being threaded through.
-        let _ = (&internal_conn, &self.proxy_spawner);
+        // Slot of resolved-or-None per attempt — populated lazily on
+        // first awaited iteration of the retry loop, reused across
+        // backoff retries so we don't re-issue the connect.
+        let mut attempt_connections: Vec<Option<objectiveai::mcp::Connection>> =
+            (0..attempts.len()).map(|_| None).collect();
+        let mut attempt_connect_done: Vec<bool> = (0..attempts.len()).map(|_| false).collect();
 
         // 8. Backoff retry loop — try each agent in order.
         let mut backoff = backoff::ExponentialBackoff {
@@ -473,14 +570,41 @@ where
         loop {
             let mut errors: Vec<super::Error> = Vec::new();
 
-            for attempt in &attempts {
-                // TODO(orchestration-rewrite): connect once per agent to
-                // the in-process proxy here, with X-MCP-Servers /
-                // X-MCP-Authorization / X-MCP-Headers built from the
-                // agent's declared mcp_servers + the invention server
-                // URL (when applicable). Skip the agent on connect
-                // failure. For now we pass `None` to every upstream.
-                let mcp_connection: Option<objectiveai::mcp::Connection> = None;
+            for (idx, attempt) in attempts.iter_mut().enumerate() {
+                // Resolve the per-agent proxy connect handle on first
+                // visit. All N connects were spawned up-front so the
+                // initialize round-trips overlap; awaiting individual
+                // handles here is cheap on later retry iterations.
+                if !attempt_connect_done[idx] {
+                    attempt_connect_done[idx] = true;
+                    // We need to take the JoinHandle out (can't await
+                    // through `&mut`). Replace with a dummy spawn — only
+                    // ever awaited again if `attempt_connect_done` was
+                    // somehow flipped back, which we never do.
+                    let handle = std::mem::replace(
+                        &mut attempt.connect_handle,
+                        tokio::spawn(async {
+                            Err(objectiveai::mcp::Error::MissingAuthorization(
+                                "<consumed>".into(),
+                            ))
+                        }),
+                    );
+                    match handle.await.unwrap() {
+                        Ok(conn) => attempt_connections[idx] = Some(conn),
+                        Err(e) => errors.push(super::Error::McpConnection(e)),
+                    }
+                }
+                // An agent whose declared MCP servers are empty has no
+                // connection but is still allowed to run (no proxy
+                // session needed); only skip when the agent declared
+                // servers and the connect failed.
+                let agent_needs_mcp = attempt.agent.base().mcp_servers().is_some()
+                    || invention_url.is_some();
+                let mcp_connection: Option<objectiveai::mcp::Connection> =
+                    attempt_connections[idx].clone();
+                if agent_needs_mcp && mcp_connection.is_none() {
+                    continue;
+                }
 
                 // d. Get BYOK for this agent's upstream.
                 let byok = ctx.upstream_authorization(attempt.agent.base().upstream()).await;
@@ -743,6 +867,22 @@ where
                 .map_err(|_| super::Error::Timeout)?
                 .map_err(&map_upstream_err)?;
 
+        // Resolve the proxy's tool name set once upfront. Used to
+        // distinguish tool calls the orchestrator should dispatch
+        // (proxy-routed MCP calls, including invention tools served
+        // through the proxy) from tool calls the upstream encodes for
+        // its own reasons (response_format, etc.).
+        let mcp_tool_names: Option<std::collections::HashSet<String>> =
+            if let Some(conn) = &mcp_connection {
+                let tools = conn.list_tools().await.map_err(|e| super::Error::McpListTools {
+                    url: conn.url.clone(),
+                    error: e,
+                })?;
+                Some(tools.iter().map(|t| t.name.clone()).collect())
+            } else {
+                None
+            };
+
         // Success — take ownership of continuation items and build the stream.
         let mut continuation_items = std::mem::take(cont_items);
         let other_chunk_timeout = self.other_chunk_timeout;
@@ -824,31 +964,125 @@ where
                     break;
                 }
 
-                // TODO(orchestration-rewrite): re-enable tool dispatch
-                // through the per-agent proxy connection
-                // (`mcp_connection.call_tool_as_message(...)`) and
-                // re-issue `upstream.create()` for the next turn. While
-                // the orchestrator is being repointed at the proxy,
-                // the tool loop terminates after the first turn.
-                let _ = (
-                    &mcp_connection,
-                    &request_continuation,
-                    &params,
-                    &agent,
-                    &id,
-                    &byok,
-                    &invention_done,
-                    &invention_type,
-                    &invention_step,
-                    &invention_tasks_min,
-                    &invention_input_schema,
-                    &cost_multiplier,
-                    &map_upstream_err,
-                    &mut continuation_items,
-                    &mut current_state,
-                    &mut aggregate,
-                );
-                break;
+                let Some(ref agg) = aggregate else { break };
+                let callable =
+                    extract_callable_tool_calls(agg, mcp_tool_names.as_ref());
+                if callable.is_empty() {
+                    break;
+                }
+
+                if let Some(state) = current_state.take() {
+                    continuation_items.push(super::ContinuationItem::State(state));
+                }
+
+                // Fan all tool calls in this turn out to the proxy in
+                // parallel; the proxy itself multiplexes onto its
+                // upstreams. Sequential `.await` per call would stack
+                // RPC latencies. `join_all` keeps the order so we yield
+                // tool messages in the same order the assistant called
+                // them — the proxy's per-call latency dominates the
+                // turn rather than the sum.
+                let conn = mcp_connection
+                    .as_ref()
+                    .expect("callable extraction returns empty without a connection")
+                    .clone();
+                let dispatch_futs = callable
+                    .iter()
+                    .map(|(call_id, name, args)| {
+                        let conn = conn.clone();
+                        let call_id = call_id.clone();
+                        let name = name.clone();
+                        let args_json = args.clone();
+                        async move {
+                            let arguments: Option<
+                                indexmap::IndexMap<String, serde_json::Value>,
+                            > = serde_json::from_str(&args_json).ok();
+                            conn.call_tool_as_message(
+                                &objectiveai::mcp::tool::CallToolRequestParams {
+                                    name,
+                                    arguments,
+                                    _meta: None,
+                                    task: None,
+                                },
+                                call_id,
+                            )
+                            .await
+                        }
+                    })
+                    .collect::<Vec<_>>();
+                let results = futures::future::join_all(dispatch_futs).await;
+
+                let mut any_invention_tool_called = false;
+                for result in results {
+                    match result {
+                        Ok(tool_msg) => {
+                            let idx = continuation_items.len() as u64;
+                            let chunk = make_tool_chunk(&id, created, upstream_kind, idx, &tool_msg);
+                            if let Some(ref mut agg) = aggregate {
+                                agg.push(&chunk);
+                            }
+                            yield super::StreamItem::Chunk(chunk);
+                            continuation_items
+                                .push(super::ContinuationItem::ToolMessage(tool_msg));
+                        }
+                        Err(_) => {
+                            had_error = true;
+                            break;
+                        }
+                    }
+                }
+
+                // `invention_done` is the sentinel the invention client
+                // hands us to signal "the model produced enough invention
+                // tasks; let it close out with a free-form response next
+                // turn". We can't tell from here whether any of the tools
+                // we just dispatched were invention tools (the proxy
+                // hides that), so we let the sentinel decide on its own.
+                let _ = &any_invention_tool_called;
+                let tools_enabled = !invention_done.as_ref().is_some_and(|f| f());
+
+                if had_error {
+                    break;
+                }
+
+                // Reset aggregate so the next iteration doesn't carry
+                // old tool calls forward from the previous response.
+                aggregate = None;
+
+                let _ = (&invention_type, &invention_step, &invention_tasks_min);
+                match upstream
+                    .create(
+                        &id,
+                        created,
+                        &agent,
+                        request_continuation.as_ref(),
+                        &params,
+                        &messages,
+                        mcp_connection.clone(),
+                        Some(&continuation_items),
+                        byok.as_deref(),
+                        cost_multiplier,
+                        tools_enabled,
+                        invention_type,
+                        invention_step,
+                        invention_tasks_min,
+                        invention_input_schema.clone(),
+                    )
+                    .await
+                {
+                    Ok(new_stream) => {
+                        stream = Box::pin(new_stream);
+                    }
+                    Err(e) => {
+                        use objectiveai::error::StatusError;
+                        let e = map_upstream_err(e);
+                        final_error = Some(objectiveai::error::ResponseError {
+                            code: e.status(),
+                            message: e.message().unwrap_or(serde_json::Value::Null),
+                        });
+                        break;
+                    }
+                }
             }
 
             // Build MCP sessions map. With the per-agent proxy connection,
@@ -910,16 +1144,24 @@ fn resolve_response_format(
     }
 }
 
-/// Extracts callable tool calls (MCP and invention) from the accumulated chunk.
-/// Returns `(call_id, resolved_tool_name, arguments_json)` for each callable tool.
+/// Extracts callable tool calls from the last assistant message.
+///
+/// `callable_names` is the set of tool names the proxy connection
+/// advertises (or `None` when the agent has no MCP work to do — in
+/// which case nothing is callable). Tool calls whose names aren't in
+/// the set are response-format / hallucinated-tool calls that the
+/// orchestrator should leave alone, so the loop terminates.
+///
+/// Returns `(call_id, tool_name, arguments_json)` for each callable
+/// tool, in the order the assistant emitted them.
 fn extract_callable_tool_calls(
     aggregate: &objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
-    tool_map: &HashMap<String, super::tool::ResolvedTool>,
+    callable_names: Option<&std::collections::HashSet<String>>,
 ) -> Vec<(String, String, String)> {
     use objectiveai::agent::completions::response::streaming::MessageChunk;
 
     let mut callable = Vec::new();
-    // Find the last assistant message and extract its accumulated tool calls.
+    let Some(names) = callable_names else { return callable };
     for msg in aggregate.messages.iter().rev() {
         if let MessageChunk::Assistant(chunk) = msg {
             if let Some(tool_calls) = &chunk.tool_calls {
@@ -938,16 +1180,12 @@ fn extract_callable_tool_calls(
                     if name.is_empty() {
                         continue;
                     }
-                    match tool_map.get(&name) {
-                        Some(super::tool::ResolvedTool::Mcp { .. })
-                        | Some(super::tool::ResolvedTool::InventionTool(_)) => {
-                            callable.push((id, name, args));
-                        }
-                        _ => {}
+                    if names.contains(&name) {
+                        callable.push((id, name, args));
                     }
                 }
             }
-            break; // only inspect the last assistant message
+            break;
         }
     }
     callable

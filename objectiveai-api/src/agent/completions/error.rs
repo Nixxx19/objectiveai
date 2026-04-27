@@ -24,6 +24,9 @@ pub enum Error {
     #[error("MCP call_tool error: {0}")]
     McpCallTool(objectiveai::mcp::Error),
 
+    #[error("MCP proxy bootstrap failed: {0}")]
+    McpProxyBootstrap(String),
+
     #[error("{0}")]
     Fetch(objectiveai::error::ResponseError),
 
@@ -65,6 +68,7 @@ impl objectiveai::error::StatusError for Error {
             Self::McpConnection(_) | Self::McpConnectionArc(_) => 502,
             Self::McpListTools { .. } => 502,
             Self::McpCallTool(_) => 502,
+            Self::McpProxyBootstrap(_) => 500,
             Self::Fetch(e) => e.code,
             Self::UpstreamOpenrouter(e)
             | Self::UpstreamClaudeAgentSdk(e)
