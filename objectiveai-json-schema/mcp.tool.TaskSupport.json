@@ -1,0 +1,27 @@
+{
+  "title": "mcp.tool.TaskSupport",
+  "description": "The tool's preference for task-augmented execution.",
+  "anyOf": [
+    {
+      "description": "Clients MUST invoke the tool as a task.",
+      "type": "string",
+      "enum": [
+        "required"
+      ]
+    },
+    {
+      "description": "Clients MAY invoke the tool as a task or normal request.",
+      "type": "string",
+      "enum": [
+        "optional"
+      ]
+    },
+    {
+      "description": "Clients MUST NOT attempt to invoke the tool as a task.",
+      "type": "string",
+      "enum": [
+        "forbidden"
+      ]
+    }
+  ]
+}

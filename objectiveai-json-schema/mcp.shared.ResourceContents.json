@@ -1,0 +1,34 @@
+{
+  "title": "mcp.shared.ResourceContents",
+  "description": "Base fields shared by all resource contents.",
+  "type": "object",
+  "properties": {
+    "_meta": {
+      "description": "Extension metadata.",
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "mimeType": {
+      "description": "The MIME type of this resource, if known.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "uri": {
+      "description": "The URI of this resource.",
+      "type": "string"
+    }
+  }
+}

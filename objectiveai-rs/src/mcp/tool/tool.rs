@@ -1,10 +1,12 @@
 //! MCP Tool definition.
 
 use indexmap::IndexMap;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// A tool that an MCP server exposes for invocation.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.tool.Tool")]
 pub struct Tool {
     /// The programmatic name of the tool.
     pub name: String,
@@ -45,14 +47,16 @@ impl Tool {
 }
 
 /// The type of a JSON Schema used by MCP tools.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, JsonSchema)]
 #[serde(rename_all = "lowercase")]
+#[schemars(rename = "mcp.tool.ToolSchemaType")]
 pub enum ToolSchemaType {
     Object,
 }
 
 /// JSON Schema for tool input/output. Must have `type: "object"`.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.tool.ToolSchema")]
 pub struct ToolSchema {
     /// Always "object".
     pub r#type: ToolSchemaType,

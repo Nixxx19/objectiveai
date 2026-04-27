@@ -1,0 +1,85 @@
+{
+  "title": "mcp.resource.Resource",
+  "description": "A known resource that the server is capable of reading.",
+  "type": "object",
+  "properties": {
+    "_meta": {
+      "description": "Extension metadata.",
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "annotations": {
+      "description": "Optional annotations for the client.",
+      "anyOf": [
+        {
+          "$ref": "mcp.shared.Annotations"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "description": {
+      "description": "A description of what this resource represents.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "icons": {
+      "description": "Icons for the resource.",
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "mcp.shared.Icon"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "mimeType": {
+      "description": "The MIME type of this resource, if known.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "name": {
+      "description": "The programmatic name of the resource.",
+      "type": "string"
+    },
+    "title": {
+      "description": "A human-readable display name.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "uri": {
+      "description": "The URI of this resource.",
+      "type": "string"
+    }
+  }
+}

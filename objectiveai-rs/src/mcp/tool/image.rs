@@ -1,10 +1,12 @@
 //! Image content block.
 
 use indexmap::IndexMap;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// Image content (base64-encoded).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.tool.ImageContent")]
 pub struct ImageContent {
     /// The base64-encoded image data.
     pub data: String,

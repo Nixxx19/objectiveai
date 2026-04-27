@@ -1,17 +1,20 @@
 //! Icon types for MCP entities.
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// Theme preference for an icon.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, JsonSchema)]
 #[serde(rename_all = "lowercase")]
+#[schemars(rename = "mcp.shared.IconTheme")]
 pub enum IconTheme {
     Light,
     Dark,
 }
 
 /// An icon that can be displayed in a user interface.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.shared.Icon")]
 pub struct Icon {
     /// URL or data URI for the icon.
     pub src: String,

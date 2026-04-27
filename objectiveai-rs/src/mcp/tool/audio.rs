@@ -1,10 +1,12 @@
 //! Audio content block.
 
 use indexmap::IndexMap;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// Audio content (base64-encoded).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.tool.AudioContent")]
 pub struct AudioContent {
     /// The base64-encoded audio data.
     pub data: String,

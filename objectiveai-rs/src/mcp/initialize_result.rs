@@ -1,10 +1,12 @@
 //! Types for the MCP `initialize` response.
 
 use indexmap::IndexMap;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// The server's response to an `initialize` request.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.InitializeResult")]
 pub struct InitializeResult {
     /// The MCP protocol version the server wants to use.
     #[serde(rename = "protocolVersion")]
@@ -23,7 +25,8 @@ pub struct InitializeResult {
 }
 
 /// Information about a client or server implementation.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.Implementation")]
 pub struct Implementation {
     /// The implementation name.
     pub name: String,
@@ -45,7 +48,8 @@ pub struct Implementation {
 }
 
 /// Capabilities that an MCP server may support.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.ServerCapabilities")]
 pub struct ServerCapabilities {
     /// Non-standard experimental capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -71,7 +75,8 @@ pub struct ServerCapabilities {
 }
 
 /// Capabilities for prompt templates.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.PromptsCapability")]
 pub struct PromptsCapability {
     /// Whether the server emits notifications when the prompt list changes.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -80,7 +85,8 @@ pub struct PromptsCapability {
 }
 
 /// Capabilities for resources.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.ResourcesCapability")]
 pub struct ResourcesCapability {
     /// Whether the server supports resource subscriptions.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -92,7 +98,8 @@ pub struct ResourcesCapability {
 }
 
 /// Capabilities for tools.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.ToolsCapability")]
 pub struct ToolsCapability {
     /// Whether the server emits notifications when the tool list changes.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -102,16 +109,19 @@ pub struct ToolsCapability {
 
 /// Marker capability for logging support. Presence indicates the server
 /// supports sending log messages to the client.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.LoggingCapability")]
 pub struct LoggingCapability {}
 
 /// Marker capability for completions support. Presence indicates the server
 /// supports argument value completions.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.CompletionsCapability")]
 pub struct CompletionsCapability {}
 
 /// Capabilities for task creation and management.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.TasksCapability")]
 pub struct TasksCapability {
     /// Present if the server supports listing tasks.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -125,15 +135,18 @@ pub struct TasksCapability {
 }
 
 /// Marker capability for task listing support.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.TasksListCapability")]
 pub struct TasksListCapability {}
 
 /// Marker capability for task cancellation support.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.TasksCancelCapability")]
 pub struct TasksCancelCapability {}
 
 /// Task creation capabilities scoped to request types.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.TasksRequestsCapability")]
 pub struct TasksRequestsCapability {
     /// Task support for tool-related requests.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -141,7 +154,8 @@ pub struct TasksRequestsCapability {
 }
 
 /// Task capabilities for tool requests.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.TasksToolsCapability")]
 pub struct TasksToolsCapability {
     /// Present if tools/call supports task creation.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -149,5 +163,6 @@ pub struct TasksToolsCapability {
 }
 
 /// Marker capability for tools/call task creation support.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.TasksToolsCallCapability")]
 pub struct TasksToolsCallCapability {}

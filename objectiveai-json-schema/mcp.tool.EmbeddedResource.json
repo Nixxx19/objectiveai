@@ -1,0 +1,34 @@
+{
+  "title": "mcp.tool.EmbeddedResource",
+  "description": "The contents of a resource, embedded into a prompt or tool call result.",
+  "type": "object",
+  "properties": {
+    "_meta": {
+      "description": "Extension metadata.",
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "annotations": {
+      "description": "Optional annotations for the client.",
+      "anyOf": [
+        {
+          "$ref": "mcp.shared.Annotations"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "resource": {
+      "description": "The embedded resource contents.",
+      "$ref": "mcp.shared.ResourceContentsUnion"
+    }
+  }
+}

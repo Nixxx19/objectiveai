@@ -1,10 +1,12 @@
 //! Types for tools/call requests and responses.
 
 use indexmap::IndexMap;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// Metadata for a long-running task.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.tool.TaskMetadata")]
 pub struct TaskMetadata {
     /// Time-to-live for the task, in seconds.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -12,7 +14,8 @@ pub struct TaskMetadata {
 }
 
 /// Parameters for a `tools/call` request.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.tool.CallToolRequestParams")]
 pub struct CallToolRequestParams {
     /// The name of the tool to call.
     pub name: String,
@@ -28,7 +31,8 @@ pub struct CallToolRequestParams {
 }
 
 /// The server's response to a `tools/call` request.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.tool.CallToolResult")]
 pub struct CallToolResult {
     /// Content blocks representing the result of the tool call.
     #[serde(default)]

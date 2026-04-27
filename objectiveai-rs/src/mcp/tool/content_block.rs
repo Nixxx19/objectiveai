@@ -3,11 +3,13 @@
 //! A content block is the union of all content types that can appear in
 //! prompts, tool results, and sampling messages.
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// A content block that can be used in prompts and tool results.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
+#[schemars(rename = "mcp.tool.ContentBlock")]
 pub enum ContentBlock {
     /// Text content.
     #[serde(rename = "text")]

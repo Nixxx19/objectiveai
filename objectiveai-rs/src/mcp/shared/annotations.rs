@@ -1,17 +1,20 @@
 //! Annotations for content blocks, providing clients additional context.
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// The role of a message sender.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, JsonSchema)]
 #[serde(rename_all = "lowercase")]
+#[schemars(rename = "mcp.shared.Role")]
 pub enum Role {
     User,
     Assistant,
 }
 
 /// Optional annotations providing clients additional context about content.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.shared.Annotations")]
 pub struct Annotations {
     /// Intended audience(s) for the content.
     #[serde(skip_serializing_if = "Option::is_none")]

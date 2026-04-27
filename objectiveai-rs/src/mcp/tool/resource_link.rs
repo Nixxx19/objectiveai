@@ -1,10 +1,12 @@
 //! Resource link content block.
 
 use indexmap::IndexMap;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// A resource link included in a prompt or tool call result.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.tool.ResourceLink")]
 pub struct ResourceLink {
     /// The programmatic name of the resource.
     pub name: String,

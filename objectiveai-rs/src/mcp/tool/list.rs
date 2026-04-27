@@ -1,10 +1,12 @@
 //! Types for tools/list requests and responses.
 
 use indexmap::IndexMap;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// Parameters for a `tools/list` request.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.tool.ListToolsRequest")]
 pub struct ListToolsRequest {
     /// An opaque cursor for pagination.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -12,7 +14,8 @@ pub struct ListToolsRequest {
 }
 
 /// The server's response to a `tools/list` request.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.tool.ListToolsResult")]
 pub struct ListToolsResult {
     /// The list of tools available on the server.
     pub tools: Vec<super::Tool>,

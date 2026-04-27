@@ -1,10 +1,12 @@
 //! Tool use content block.
 
 use indexmap::IndexMap;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// A tool call request from an assistant.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.tool.ToolUseContent")]
 pub struct ToolUseContent {
     /// The name of the tool to invoke.
     pub name: String,

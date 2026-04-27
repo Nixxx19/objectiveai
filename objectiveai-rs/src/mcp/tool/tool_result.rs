@@ -1,10 +1,12 @@
 //! Tool result content block.
 
 use indexmap::IndexMap;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// The result of a tool invocation.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.tool.ToolResultContent")]
 pub struct ToolResultContent {
     /// The unique identifier for the corresponding tool call.
     #[serde(rename = "toolUseId")]

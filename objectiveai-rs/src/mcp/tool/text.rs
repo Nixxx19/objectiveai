@@ -1,10 +1,12 @@
 //! Text content block.
 
 use indexmap::IndexMap;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// Text content.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "mcp.tool.TextContent")]
 pub struct TextContent {
     /// The text content of the message.
     pub text: String,
