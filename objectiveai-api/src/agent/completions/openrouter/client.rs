@@ -237,7 +237,7 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::o
         request_continuation: Option<&objectiveai::agent::openrouter::Continuation>,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         messages: &[objectiveai::agent::completions::message::Message],
-        _mcp_connection: Option<objectiveai::mcp::Connection>,
+        mcp_connection: Option<objectiveai::mcp::Connection>,
         continuation: Option<&[ContinuationItem<Self::State>]>,
         byok: Option<&str>,
         cost_multiplier: rust_decimal::Decimal,
@@ -258,12 +258,6 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::o
         let agent = agent.clone();
         let params = params.clone();
         let messages = messages.to_vec();
-        // TODO(orchestration-rewrite): derive tool_names/tool_map from
-        // `_mcp_connection.list_tools()` once the orchestrator stops
-        // pre-building them. Empty for now per the trait change.
-        let tool_names: Vec<String> = Vec::new();
-        let tool_map: std::collections::HashMap<String, super::super::tool::ResolvedTool> =
-            std::collections::HashMap::new();
         let continuation = continuation.map(|c| c.to_vec());
         let request_continuation = request_continuation.cloned();
         let client = self.clone();
@@ -283,6 +277,32 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::o
                     return Err(super::Error::ToolsNotAllowedWithRequiredToolCall);
                 }
             }
+
+            // Source MCP tools from the per-agent proxy connection (if any).
+            // The proxy fans out to the agent's declared upstream MCP
+            // servers and the invention server, so a single list_tools()
+            // here returns the union — no separate invention_tools path.
+            let mcp_tools = match mcp_connection.as_ref() {
+                Some(conn) => Some(conn.list_tools().await.map_err(|error| {
+                    super::Error::Mcp {
+                        url: conn.url.clone(),
+                        error,
+                    }
+                })?),
+                None => None,
+            };
+            use objectiveai::agent::completions::request::ResponseFormatParam;
+            let response_format = match params.response_format.as_ref() {
+                Some(ResponseFormatParam::Single(rf)) => Some(rf.clone()),
+                Some(ResponseFormatParam::PerAgent(map)) => map.get(&agent.id).cloned(),
+                None => None,
+            };
+            let (tool_names, tool_map) = super::super::tool::resolve_tools(
+                mcp_connection.as_ref(),
+                mcp_tools.as_ref(),
+                None,
+                response_format.as_ref(),
+            );
 
             let request =
                 super::request::ChatCompletionCreateParams::new(
