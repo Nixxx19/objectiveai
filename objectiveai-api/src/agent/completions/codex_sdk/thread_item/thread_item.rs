@@ -1,13 +1,14 @@
 use serde::{Deserialize, Serialize};
 
-/// A typed item carried inside `item.started` / `item.updated` / `item.completed`
-/// events. The wire shape is `{"type": <discriminator>, ...fields}` where the
-/// discriminator is the `snake_case` form of the variant name (matching the
-/// Python SDK's `_ITEM_MODELS` registry in `parsing.py`).
+/// A typed item carried inside `item.started` / `item.updated` /
+/// `item.completed` events. The wire shape is `{"type": <discriminator>,
+/// ...fields}` — each leaf struct carries its own `r#type` field, so the
+/// parent enum is `untagged` and serde dispatches by trying each variant
+/// in declaration order.
 ///
-/// The [`Self::Unknown`] variant mirrors `UnknownThreadItem` in `types.py`:
-/// any item whose `type` we don't recognise still parses, preserving the
-/// raw payload for forward compatibility.
+/// The [`Self::Unknown`] variant mirrors `UnknownThreadItem` in
+/// `types.py:197-204`: any item whose `type` we don't recognise still
+/// parses, preserving the discriminator and `id` for forward compatibility.
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(untagged)]
 pub enum ThreadItem {
@@ -16,7 +17,7 @@ pub enum ThreadItem {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-#[serde(tag = "type", rename_all = "snake_case")]
+#[serde(untagged)]
 pub enum KnownThreadItem {
     AgentMessage(super::AgentMessageItem),
     Reasoning(super::ReasoningItem),

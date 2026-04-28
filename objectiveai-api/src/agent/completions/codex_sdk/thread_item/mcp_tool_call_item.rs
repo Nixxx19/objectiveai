@@ -1,8 +1,15 @@
 use serde::{Deserialize, Serialize};
 
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum McpToolCallItemType {
+    McpToolCall,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct McpToolCallItem {
     pub id: String,
+    pub r#type: McpToolCallItemType,
     pub server: String,
     pub tool: String,
     /// Arguments forwarded to the tool. The shape is defined by the MCP

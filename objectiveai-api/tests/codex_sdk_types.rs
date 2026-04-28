@@ -699,3 +699,108 @@ fn error_variants_cover_all_codex_sdk_error_subclasses() {
     assert!(Error::Install("nope".into()).to_string().contains("codex install failed"));
     assert!(Error::Auth("nope".into()).to_string().contains("codex auth failed"));
 }
+
+// ---------------------------------------------------------------------------
+// Standalone leaf round-trips — confirm each discriminator-bearing struct
+// works on its own (not just nested inside its parent enum). This is the
+// fix for the bug where TextInput/LocalImageInput dropped the `type` field.
+// ---------------------------------------------------------------------------
+
+#[test]
+fn text_input_round_trips_standalone() {
+    let wire = json!({"type": "text", "text": "hi"});
+    let parsed: TextInput = serde_json::from_value(wire.clone()).unwrap();
+    assert_eq!(parsed.r#type, TextInputType::Text);
+    assert_eq!(parsed.text, "hi");
+    assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
+}
+
+#[test]
+fn text_input_rejects_wrong_type_literal() {
+    let wire = json!({"type": "local_image", "text": "hi"});
+    let result: Result<TextInput, _> = serde_json::from_value(wire);
+    assert!(result.is_err(), "TextInput must reject the wrong type literal");
+}
+
+#[test]
+fn local_image_input_round_trips_standalone() {
+    let wire = json!({"type": "local_image", "path": "/tmp/x.png"});
+    let parsed: LocalImageInput = serde_json::from_value(wire.clone()).unwrap();
+    assert_eq!(parsed.r#type, LocalImageInputType::LocalImage);
+    assert_eq!(parsed.path, "/tmp/x.png");
+    assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
+}
+
+#[test]
+fn local_image_input_rejects_wrong_type_literal() {
+    let wire = json!({"type": "text", "path": "/tmp/x.png"});
+    let result: Result<LocalImageInput, _> = serde_json::from_value(wire);
+    assert!(result.is_err(), "LocalImageInput must reject the wrong type literal");
+}
+
+#[test]
+fn agent_message_item_round_trips_standalone() {
+    let wire = json!({"id": "i", "type": "agent_message", "text": "hi"});
+    let parsed: AgentMessageItem = serde_json::from_value(wire.clone()).unwrap();
+    assert_eq!(parsed.r#type, AgentMessageItemType::AgentMessage);
+    assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
+}
+
+#[test]
+fn command_execution_item_round_trips_standalone() {
+    let wire = json!({
+        "id": "c",
+        "type": "command_execution",
+        "command": "ls",
+        "aggregated_output": "",
+        "status": "in_progress",
+    });
+    let parsed: CommandExecutionItem = serde_json::from_value(wire.clone()).unwrap();
+    assert_eq!(parsed.r#type, CommandExecutionItemType::CommandExecution);
+    assert_eq!(parsed.exit_code, None);
+    assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
+}
+
+#[test]
+fn mcp_tool_call_item_rejects_wrong_type_literal() {
+    let wire = json!({
+        "id": "t",
+        "type": "agent_message",  // wrong literal
+        "server": "fs",
+        "tool": "read_file",
+        "arguments": {},
+        "status": "in_progress",
+    });
+    let result: Result<McpToolCallItem, _> = serde_json::from_value(wire);
+    assert!(result.is_err());
+}
+
+#[test]
+fn thread_started_event_round_trips_standalone() {
+    let wire = json!({"type": "thread.started", "thread_id": "thr"});
+    let parsed: ThreadStartedEvent = serde_json::from_value(wire.clone()).unwrap();
+    assert_eq!(parsed.r#type, ThreadStartedEventType::ThreadStarted);
+    assert_eq!(parsed.thread_id, "thr");
+    assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
+}
+
+#[test]
+fn turn_completed_event_round_trips_standalone() {
+    let wire = json!({
+        "type": "turn.completed",
+        "usage": {"input_tokens": 1, "cached_input_tokens": 0, "output_tokens": 2},
+    });
+    let parsed: TurnCompletedEvent = serde_json::from_value(wire.clone()).unwrap();
+    assert_eq!(parsed.r#type, TurnCompletedEventType::TurnCompleted);
+    assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
+}
+
+#[test]
+fn turn_completed_event_rejects_wrong_type_literal() {
+    let wire = json!({
+        "type": "turn.failed",
+        "usage": {"input_tokens": 1, "cached_input_tokens": 0, "output_tokens": 2},
+    });
+    let result: Result<TurnCompletedEvent, _> = serde_json::from_value(wire);
+    assert!(result.is_err());
+}

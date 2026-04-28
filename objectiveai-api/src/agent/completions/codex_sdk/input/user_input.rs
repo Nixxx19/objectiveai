@@ -1,10 +1,12 @@
 use serde::{Deserialize, Serialize};
 
-/// Externally-tagged input variant. The `type` discriminator is `text` or
-/// `local_image`, matching the wire format produced by `_to_wire_item` in the
-/// Python SDK (`utils.py`).
+/// Untagged union over the leaf input types. Each leaf carries its own
+/// `r#type` discriminator field, so serde dispatches by trying variants in
+/// declaration order and matching whichever leaf's literal type accepts.
+/// Mirrors Python's `UserInput = Union[TextInput, LocalImageInput]`
+/// (`types.py:79`).
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(tag = "type", rename_all = "snake_case")]
+#[serde(untagged)]
 pub enum UserInput {
     Text(super::TextInput),
     LocalImage(super::LocalImageInput),
