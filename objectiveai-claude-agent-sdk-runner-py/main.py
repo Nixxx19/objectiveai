@@ -464,7 +464,14 @@ async def handle_run(
             if not rate_limited:
                 break
     except asyncio.CancelledError:
-        status, error = "cancelled", None
+        # Reachable only on subprocess SIGTERM during the drain phase
+        # (in-flight cancellation isn't part of the wire protocol — the
+        # Claude Agent SDK can't guarantee a stop point that doesn't
+        # leave a billing event unaccounted for, so we let queries run
+        # to natural completion). Surface the abort as an error so the
+        # consumer sees that the work didn't finish.
+        status = "error"
+        error = "cancelled"
         # Re-raised in the finally after we emit the terminal end line.
         raise
     except Exception as e:
@@ -582,16 +589,10 @@ async def _dispatch(
         task.add_done_callback(_done)
         return
 
-    if msg_type == "cancel":
-        if not isinstance(request_id, str) or not request_id:
-            return
-        existing = tasks.get(request_id)
-        if existing is not None:
-            existing.cancel()
-            # The task's finally block emits end(cancelled). Don't echo.
-            return
-        await stdout_writer.emit_end(request_id, "error", "cancel-unknown-id")
-        return
+    # Note: there is no `cancel` handler. In-flight cancellation isn't
+    # supported because the Claude Agent SDK can't guarantee a stop
+    # point that doesn't leave a billing event unaccounted for. A
+    # `cancel`-typed line falls into the unknown-type handler below.
 
     # Unknown type — emit a tagged error if we have an id; otherwise drop.
     if isinstance(request_id, str) and request_id:

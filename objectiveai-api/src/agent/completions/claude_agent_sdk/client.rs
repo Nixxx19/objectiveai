@@ -440,10 +440,8 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::ag
                             }
                         }
                         // Terminal updates: RunnerStream marks itself
-                        // complete on these, so dropping `rx` after we
-                        // break won't trigger a (no-op) cancel.
+                        // complete on these.
                         RunnerUpdate::End(StdioEndStatus::Ok) => break,
-                        RunnerUpdate::End(StdioEndStatus::Cancelled) => break,
                         RunnerUpdate::End(StdioEndStatus::Error { error }) => {
                             yield Err(super::Error::Stderr(error));
                             had_error = true;
