@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-use std::sync::Arc;
 use std::time::Duration;
 
 use futures::StreamExt;
@@ -12,14 +10,12 @@ use objectiveai::agent::completions::request::{
 use objectiveai::agent::completions::response::streaming::{
     AgentCompletionChunk, AssistantResponseChunk, MessageChunk,
 };
-use objectiveai::agent::completions::response::unary::{
-    AgentCompletion, Message,
-};
+use objectiveai::agent::completions::response::unary::AgentCompletion;
 use objectiveai::agent::mock::{Agent, AgentBase};
 
 use super::Client;
-use crate::agent::completions::tool::{resolve_tools, ResolvedTool};
 use crate::agent::completions::upstream_client::UpstreamClient;
+use crate::test_mcp_server::{self, TestTool};
 
 fn default_agent() -> Agent {
     Agent::try_from(AgentBase::default()).unwrap()
@@ -68,12 +64,10 @@ fn default_client() -> Client {
 async fn run_mock(
     agent: &Agent,
     params: &AgentCompletionCreateParams,
-    tool_names: &[String],
-    tool_map: &HashMap<String, ResolvedTool>,
+    mcp_connection: Option<objectiveai::mcp::Connection>,
 ) -> AgentCompletion {
     let client = default_client();
     let messages = vec![];
-    let mcp_connections: Vec<Arc<objectiveai::mcp::Connection>> = vec![];
 
     let stream = match client
         .create(
@@ -83,10 +77,7 @@ async fn run_mock(
             None,
             params,
             &messages,
-            &mcp_connections,
-            None,
-            tool_names,
-            tool_map,
+            mcp_connection,
             None,
             None,
             rust_decimal::Decimal::ONE,
@@ -160,8 +151,7 @@ async fn test_no_tools_no_response_format_seed_42() {
     let completion = normalize(run_mock(
         &default_agent(),
         &default_params_with_seed(42),
-        &[],
-        &HashMap::new(),
+        None,
     ).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
@@ -176,8 +166,7 @@ async fn test_no_tools_no_response_format_seed_123() {
     let completion = normalize(run_mock(
         &default_agent(),
         &default_params_with_seed(123),
-        &[],
-        &HashMap::new(),
+        None,
     ).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
@@ -192,8 +181,7 @@ async fn test_no_tools_no_response_format_seed_1() {
     let completion = normalize(run_mock(
         &default_agent(),
         &default_params_with_seed(1),
-        &[],
-        &HashMap::new(),
+        None,
     ).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
@@ -208,8 +196,7 @@ async fn test_no_tools_no_response_format_seed_2() {
     let completion = normalize(run_mock(
         &default_agent(),
         &default_params_with_seed(2),
-        &[],
-        &HashMap::new(),
+        None,
     ).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
@@ -223,16 +210,16 @@ async fn test_no_tools_no_response_format_seed_2() {
 async fn test_deterministic_with_same_seed() {
     let agent = default_agent();
     let params = default_params_with_seed(123);
-    let a = normalize(run_mock(&agent, &params, &[], &HashMap::new()).await);
-    let b = normalize(run_mock(&agent, &params, &[], &HashMap::new()).await);
+    let a = normalize(run_mock(&agent, &params, None).await);
+    let b = normalize(run_mock(&agent, &params, None).await);
     assert_eq!(a, b);
 }
 
 #[tokio::test]
 async fn test_different_seeds_differ() {
     let agent = default_agent();
-    let a = normalize(run_mock(&agent, &default_params_with_seed(1), &[], &HashMap::new()).await);
-    let b = normalize(run_mock(&agent, &default_params_with_seed(2), &[], &HashMap::new()).await);
+    let a = normalize(run_mock(&agent, &default_params_with_seed(1), None).await);
+    let b = normalize(run_mock(&agent, &default_params_with_seed(2), None).await);
     assert_ne!(a, b);
 }
 
@@ -246,8 +233,8 @@ async fn test_grammar_response_format_rejected() {
 
     let result = client
         .create(
-            "test", 1000, &agent, None, &params, &[], &[], None, &[],
-            &HashMap::new(), None, None, rust_decimal::Decimal::ONE, true, None, None, None, None,
+            "test", 1000, &agent, None, &params, &[], None, None, None,
+            rust_decimal::Decimal::ONE, true, None, None, None, None,
         )
         .await;
     match result {
@@ -264,8 +251,8 @@ async fn test_python_response_format_rejected() {
 
     let result = client
         .create(
-            "test", 1000, &agent, None, &params, &[], &[], None, &[],
-            &HashMap::new(), None, None, rust_decimal::Decimal::ONE, true, None, None, None, None,
+            "test", 1000, &agent, None, &params, &[], None, None, None,
+            rust_decimal::Decimal::ONE, true, None, None, None, None,
         )
         .await;
     match result {
@@ -279,8 +266,7 @@ async fn test_json_object_response_format() {
     let completion = normalize(run_mock(
         &default_agent(),
         &params_with_response_format(42, ResponseFormat::JsonObject),
-        &[],
-        &HashMap::new(),
+        None,
     ).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
@@ -303,8 +289,7 @@ async fn test_json_schema_response_format() {
     let completion = normalize(run_mock(
         &default_agent(),
         &params,
-        &[],
-        &HashMap::new(),
+        None,
     ).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
@@ -319,8 +304,7 @@ async fn test_text_response_format() {
     let completion = normalize(run_mock(
         &default_agent(),
         &params_with_response_format(77, ResponseFormat::Text),
-        &[],
-        &HashMap::new(),
+        None,
     ).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
@@ -332,35 +316,18 @@ async fn test_text_response_format() {
 
 #[tokio::test]
 async fn test_with_mcp_tools() {
-    let conn = objectiveai::mcp::Connection::new_for_test(
-        "test-server".into(),
-        "https://test.com/mcp".into(),
-    );
-    let tools = Arc::new(vec![objectiveai::mcp::tool::Tool {
-        name: "search".into(),
-        title: None,
-        description: Some("Search tool".into()),
-        icons: None,
-        input_schema: objectiveai::mcp::tool::ToolSchemaObject {
-            r#type: objectiveai::mcp::tool::ToolSchemaType::Object,
-            properties: Some(indexmap::indexmap! {
-                "query".into() => serde_json::json!({"type": "string"}),
-            }),
-            required: None,
-            extra: indexmap::IndexMap::new(),
-        },
-        output_schema: None,
-        annotations: None,
-        execution: None,
-        _meta: None,
-    }]);
+    let server = test_mcp_server::spawn("test", vec![TestTool::noop(make_mcp_tool(
+        "search",
+        Some(indexmap::indexmap! {
+            "query".into() => serde_json::json!({"type": "string"}),
+        }),
+    ))]).await;
+    let conn = test_mcp_server::connect_through_proxy(&[&server]).await;
 
-    let (tool_names, tool_map) = resolve_tools(&[conn], &[tools], None, None);
     let completion = normalize(run_mock(
         &default_agent(),
         &default_params_with_seed(99),
-        &tool_names,
-        &tool_map,
+        Some(conn),
     ).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
@@ -384,13 +351,11 @@ async fn test_required_tool_call() {
         required: Some(true),
     };
     let params = params_with_response_format(42, rf.clone());
-    let (tool_names, tool_map) = resolve_tools(&[], &[], None, Some(&rf));
 
     let completion = normalize(run_mock(
         &default_agent(),
         &params,
-        &tool_names,
-        &tool_map,
+        None,
     ).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
@@ -435,26 +400,24 @@ fn make_mcp_tool(name: &str, properties: Option<indexmap::IndexMap<String, serde
 
 #[tokio::test]
 async fn test_multiple_mcp_tools() {
-    let conn1 = objectiveai::mcp::Connection::new_for_test("weather".into(), "https://weather.com/mcp".into());
-    let conn2 = objectiveai::mcp::Connection::new_for_test("maps".into(), "https://maps.com/mcp".into());
-    let tools1 = Arc::new(vec![
-        make_mcp_tool("get_forecast", Some(indexmap::indexmap! {
+    let server_a = test_mcp_server::spawn("test", vec![
+        TestTool::noop(make_mcp_tool("get_forecast", Some(indexmap::indexmap! {
             "city".into() => serde_json::json!({"type": "string"}),
-        })),
-        make_mcp_tool("get_alerts", None),
-    ]);
-    let tools2 = Arc::new(vec![
-        make_mcp_tool("directions", Some(indexmap::indexmap! {
+        }))),
+        TestTool::noop(make_mcp_tool("get_alerts", None)),
+    ]).await;
+    let server_b = test_mcp_server::spawn("test", vec![
+        TestTool::noop(make_mcp_tool("directions", Some(indexmap::indexmap! {
             "from".into() => serde_json::json!({"type": "string"}),
             "to".into() => serde_json::json!({"type": "string"}),
-        })),
-    ]);
-    let (tool_names, tool_map) = resolve_tools(&[conn1, conn2], &[tools1, tools2], None, None);
+        }))),
+    ]).await;
+    let conn = test_mcp_server::connect_through_proxy(&[&server_a, &server_b]).await;
+
     let completion = normalize(run_mock(
         &default_agent(),
         &default_params_with_seed(50),
-        &tool_names,
-        &tool_map,
+        Some(conn),
     ).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
@@ -479,12 +442,16 @@ async fn test_invention_tools_only() {
             "path": {"type": "string"},
         }),
     });
-    let (tool_names, tool_map) = resolve_tools(&[], &[], Some(&[inv1, inv2]), None);
+    let server = test_mcp_server::spawn("test", vec![
+        TestTool::from_invention(inv1),
+        TestTool::from_invention(inv2),
+    ]).await;
+    let conn = test_mcp_server::connect_through_proxy(&[&server]).await;
+
     let completion = normalize(run_mock(
         &default_agent(),
         &default_params_with_seed(88),
-        &tool_names,
-        &tool_map,
+        Some(conn),
     ).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
@@ -496,25 +463,25 @@ async fn test_invention_tools_only() {
 
 #[tokio::test]
 async fn test_mcp_and_invention_no_response_format() {
-    let conn = objectiveai::mcp::Connection::new_for_test("db".into(), "https://db.com/mcp".into());
-    let tools = Arc::new(vec![
-        make_mcp_tool("query_db", Some(indexmap::indexmap! {
-            "sql".into() => serde_json::json!({"type": "string"}),
-        })),
-        make_mcp_tool("list_tables", None),
-    ]);
     let inv = make_invention_tool("validate", indexmap::indexmap! {
         "type".into() => serde_json::json!("object"),
         "properties".into() => serde_json::json!({
             "data": {"type": "string"},
         }),
     });
-    let (tool_names, tool_map) = resolve_tools(&[conn], &[tools], Some(&[inv]), None);
+    let mcp_server = test_mcp_server::spawn("test", vec![
+        TestTool::noop(make_mcp_tool("query_db", Some(indexmap::indexmap! {
+            "sql".into() => serde_json::json!({"type": "string"}),
+        }))),
+        TestTool::noop(make_mcp_tool("list_tables", None)),
+    ]).await;
+    let inv_server = test_mcp_server::spawn("test", vec![TestTool::from_invention(inv)]).await;
+    let conn = test_mcp_server::connect_through_proxy(&[&mcp_server, &inv_server]).await;
+
     let completion = normalize(run_mock(
         &default_agent(),
         &default_params_with_seed(150),
-        &tool_names,
-        &tool_map,
+        Some(conn),
     ).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
@@ -526,19 +493,20 @@ async fn test_mcp_and_invention_no_response_format() {
 
 #[tokio::test]
 async fn test_mcp_invention_and_response_format() {
-    let conn = objectiveai::mcp::Connection::new_for_test("search-api".into(), "https://search.com/mcp".into());
-    let tools = Arc::new(vec![
-        make_mcp_tool("web_search", Some(indexmap::indexmap! {
-            "query".into() => serde_json::json!({"type": "string"}),
-            "max_results".into() => serde_json::json!({"type": "integer"}),
-        })),
-    ]);
     let inv = make_invention_tool("calculate", indexmap::indexmap! {
         "type".into() => serde_json::json!("object"),
         "properties".into() => serde_json::json!({
             "expression": {"type": "string"},
         }),
     });
+    let mcp_server = test_mcp_server::spawn("test", vec![
+        TestTool::noop(make_mcp_tool("web_search", Some(indexmap::indexmap! {
+            "query".into() => serde_json::json!({"type": "string"}),
+            "max_results".into() => serde_json::json!({"type": "integer"}),
+        }))),
+    ]).await;
+    let inv_server = test_mcp_server::spawn("test", vec![TestTool::from_invention(inv)]).await;
+    let conn = test_mcp_server::connect_through_proxy(&[&mcp_server, &inv_server]).await;
     let rf = ResponseFormat::ToolCall {
         name: "submit_answer".into(),
         description: "Submit the final answer".into(),
@@ -551,13 +519,12 @@ async fn test_mcp_invention_and_response_format() {
         },
         required: None,
     };
-    let params = params_with_response_format(200, rf.clone());
-    let (tool_names, tool_map) = resolve_tools(&[conn], &[tools], Some(&[inv]), Some(&rf));
+    let params = params_with_response_format(200, rf);
+
     let completion = normalize(run_mock(
         &default_agent(),
         &params,
-        &tool_names,
-        &tool_map,
+        Some(conn),
     ).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
@@ -575,12 +542,10 @@ async fn test_mcp_invention_and_response_format() {
 async fn collect_assistant_chunks(
     agent: &Agent,
     params: &AgentCompletionCreateParams,
-    tool_names: &[String],
-    tool_map: &HashMap<String, ResolvedTool>,
+    mcp_connection: Option<objectiveai::mcp::Connection>,
 ) -> Vec<AssistantResponseChunk> {
     let client = default_client();
     let messages = vec![];
-    let mcp_connections: Vec<Arc<objectiveai::mcp::Connection>> = vec![];
 
     let stream = client
         .create(
@@ -590,10 +555,7 @@ async fn collect_assistant_chunks(
             None,
             params,
             &messages,
-            &mcp_connections,
-            None,
-            tool_names,
-            tool_map,
+            mcp_connection,
             None,
             None,
             rust_decimal::Decimal::ONE,
@@ -669,7 +631,7 @@ async fn test_logprobs_top_2_seed_42() {
     let agent = agent_with_top_logprobs(2);
     let params = default_params_with_seed(42);
 
-    let chunks = collect_assistant_chunks(&agent, &params, &[], &HashMap::new()).await;
+    let chunks = collect_assistant_chunks(&agent, &params, None).await;
     assert_logprobs_reconstruct_content(&chunks);
 
     // Each logprob should have at most 2 top_logprobs entries.
@@ -688,7 +650,7 @@ async fn test_logprobs_top_2_seed_42() {
     }
 
     // Snapshot
-    let completion = normalize(run_mock(&agent, &params, &[], &HashMap::new()).await);
+    let completion = normalize(run_mock(&agent, &params, None).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -702,10 +664,9 @@ async fn test_logprobs_top_5_seed_42() {
     let agent = agent_with_top_logprobs(5);
     let params = default_params_with_seed(42);
 
-    let chunks = collect_assistant_chunks(&agent, &params, &[], &HashMap::new()).await;
+    let chunks = collect_assistant_chunks(&agent, &params, None).await;
     assert_logprobs_reconstruct_content(&chunks);
 
-    // Each logprob should have at most 5 top_logprobs entries.
     for (i, chunk) in chunks.iter().enumerate() {
         if chunk.content.is_none() {
             continue;
@@ -720,8 +681,7 @@ async fn test_logprobs_top_5_seed_42() {
         }
     }
 
-    // Snapshot
-    let completion = normalize(run_mock(&agent, &params, &[], &HashMap::new()).await);
+    let completion = normalize(run_mock(&agent, &params, None).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -735,10 +695,9 @@ async fn test_logprobs_top_20_seed_42() {
     let agent = agent_with_top_logprobs(20);
     let params = default_params_with_seed(42);
 
-    let chunks = collect_assistant_chunks(&agent, &params, &[], &HashMap::new()).await;
+    let chunks = collect_assistant_chunks(&agent, &params, None).await;
     assert_logprobs_reconstruct_content(&chunks);
 
-    // Each logprob should have at most 20 top_logprobs entries.
     for (i, chunk) in chunks.iter().enumerate() {
         if chunk.content.is_none() {
             continue;
@@ -753,8 +712,7 @@ async fn test_logprobs_top_20_seed_42() {
         }
     }
 
-    // Snapshot
-    let completion = normalize(run_mock(&agent, &params, &[], &HashMap::new()).await);
+    let completion = normalize(run_mock(&agent, &params, None).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -768,14 +726,12 @@ async fn test_logprobs_top_3_json_object() {
     let agent = agent_with_top_logprobs(3);
     let params = params_with_response_format(42, ResponseFormat::JsonObject);
 
-    let chunks = collect_assistant_chunks(&agent, &params, &[], &HashMap::new()).await;
+    let chunks = collect_assistant_chunks(&agent, &params, None).await;
     assert_logprobs_reconstruct_content(&chunks);
 
-    // json_object with logprobs should produce valid JSON as content.
     let content_chunks: Vec<_> = chunks.iter().filter(|c| c.content.is_some()).collect();
     assert!(!content_chunks.is_empty(), "expected at least one content chunk");
 
-    // The aggregated content should parse as JSON.
     let full_content: String = content_chunks
         .iter()
         .filter_map(|c| match &c.content {
@@ -786,7 +742,7 @@ async fn test_logprobs_top_3_json_object() {
     serde_json::from_str::<serde_json::Value>(&full_content)
         .expect("aggregated json_object content should be valid JSON");
 
-    let completion = normalize(run_mock(&agent, &params, &[], &HashMap::new()).await);
+    let completion = normalize(run_mock(&agent, &params, None).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -808,10 +764,9 @@ async fn test_logprobs_top_10_json_schema() {
     });
     let agent = agent_with_top_logprobs(10);
 
-    let chunks = collect_assistant_chunks(&agent, &params, &[], &HashMap::new()).await;
+    let chunks = collect_assistant_chunks(&agent, &params, None).await;
     assert_logprobs_reconstruct_content(&chunks);
 
-    // Aggregated content should parse as JSON with the expected keys.
     let full_content: String = chunks
         .iter()
         .filter_map(|c| match &c.content {
@@ -824,7 +779,7 @@ async fn test_logprobs_top_10_json_schema() {
     assert!(parsed.get("score").is_some(), "expected 'score' key");
     assert!(parsed.get("label").is_some(), "expected 'label' key");
 
-    let completion = normalize(run_mock(&agent, &params, &[], &HashMap::new()).await);
+    let completion = normalize(run_mock(&agent, &params, None).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -838,15 +793,14 @@ async fn test_logprobs_top_5_mcp_tools_seed_99() {
     let agent = agent_with_top_logprobs(5);
     let params = default_params_with_seed(99);
 
-    let conn = objectiveai::mcp::Connection::new_for_test("api".into(), "https://api.com/mcp".into());
-    let tools = Arc::new(vec![
-        make_mcp_tool("fetch_data", Some(indexmap::indexmap! {
+    let server = test_mcp_server::spawn("test", vec![
+        TestTool::noop(make_mcp_tool("fetch_data", Some(indexmap::indexmap! {
             "url".into() => serde_json::json!({"type": "string"}),
-        })),
-    ]);
-    let (tool_names, tool_map) = resolve_tools(&[conn], &[tools], None, None);
+        }))),
+    ]).await;
+    let conn = test_mcp_server::connect_through_proxy(&[&server]).await;
 
-    let chunks = collect_assistant_chunks(&agent, &params, &tool_names, &tool_map).await;
+    let chunks = collect_assistant_chunks(&agent, &params, Some(conn.clone())).await;
 
     // Content chunks must have logprobs; tool_call chunks must NOT.
     for (i, chunk) in chunks.iter().enumerate() {
@@ -865,7 +819,7 @@ async fn test_logprobs_top_5_mcp_tools_seed_99() {
     }
     assert_logprobs_reconstruct_content(&chunks);
 
-    let completion = normalize(run_mock(&agent, &params, &tool_names, &tool_map).await);
+    let completion = normalize(run_mock(&agent, &params, Some(conn)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -888,16 +842,13 @@ async fn test_logprobs_top_7_required_tool_call() {
         },
         required: Some(true),
     };
-    let params = params_with_response_format(88, rf.clone());
-    let (tool_names, tool_map) = resolve_tools(&[], &[], None, Some(&rf));
+    let params = params_with_response_format(88, rf);
 
-    let chunks = collect_assistant_chunks(&agent, &params, &tool_names, &tool_map).await;
+    let chunks = collect_assistant_chunks(&agent, &params, None).await;
 
-    // Required tool call always forces tool calls — no content chunks at all.
     let has_content = chunks.iter().any(|c| c.content.is_some());
     assert!(!has_content, "required tool call should produce no content chunks");
 
-    // Every non-reasoning chunk should be a tool_call chunk with no logprobs.
     let tool_chunks: Vec<_> = chunks.iter().filter(|c| c.tool_calls.is_some()).collect();
     assert!(!tool_chunks.is_empty(), "expected at least one tool_call chunk");
     for (i, chunk) in tool_chunks.iter().enumerate() {
@@ -907,9 +858,7 @@ async fn test_logprobs_top_7_required_tool_call() {
         );
     }
 
-    let completion = normalize(run_mock(
-        &agent, &params, &tool_names, &tool_map,
-    ).await);
+    let completion = normalize(run_mock(&agent, &params, None).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -923,10 +872,9 @@ async fn test_logprobs_top_15_text_seed_33() {
     let agent = agent_with_top_logprobs(15);
     let params = params_with_response_format(33, ResponseFormat::Text);
 
-    let chunks = collect_assistant_chunks(&agent, &params, &[], &HashMap::new()).await;
+    let chunks = collect_assistant_chunks(&agent, &params, None).await;
     assert_logprobs_reconstruct_content(&chunks);
 
-    // Every logprob token should have bytes matching the token string.
     for chunk in &chunks {
         if let Some(lps) = &chunk.logprobs {
             for lp in lps.content.as_deref().unwrap_or_default() {
@@ -946,7 +894,7 @@ async fn test_logprobs_top_15_text_seed_33() {
         }
     }
 
-    let completion = normalize(run_mock(&agent, &params, &[], &HashMap::new()).await);
+    let completion = normalize(run_mock(&agent, &params, None).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -959,18 +907,20 @@ async fn test_logprobs_top_15_text_seed_33() {
 async fn test_logprobs_top_4_invention_mcp_response_format() {
     let agent = agent_with_top_logprobs(4);
 
-    let conn = objectiveai::mcp::Connection::new_for_test("store".into(), "https://store.com/mcp".into());
-    let mcp_tools = Arc::new(vec![
-        make_mcp_tool("lookup_item", Some(indexmap::indexmap! {
-            "id".into() => serde_json::json!({"type": "integer"}),
-        })),
-    ]);
     let inv = make_invention_tool("summarize", indexmap::indexmap! {
         "type".into() => serde_json::json!("object"),
         "properties".into() => serde_json::json!({
             "text": {"type": "string"},
         }),
     });
+    let mcp_server = test_mcp_server::spawn("test", vec![
+        TestTool::noop(make_mcp_tool("lookup_item", Some(indexmap::indexmap! {
+            "id".into() => serde_json::json!({"type": "integer"}),
+        }))),
+    ]).await;
+    let inv_server = test_mcp_server::spawn("test", vec![TestTool::from_invention(inv)]).await;
+    let conn = test_mcp_server::connect_through_proxy(&[&mcp_server, &inv_server]).await;
+
     let rf = ResponseFormat::ToolCall {
         name: "final_answer".into(),
         description: "Submit the final answer".into(),
@@ -983,12 +933,10 @@ async fn test_logprobs_top_4_invention_mcp_response_format() {
         },
         required: None,
     };
-    let params = params_with_response_format(150, rf.clone());
-    let (tool_names, tool_map) = resolve_tools(&[conn], &[mcp_tools], Some(&[inv]), Some(&rf));
+    let params = params_with_response_format(150, rf);
 
-    let chunks = collect_assistant_chunks(&agent, &params, &tool_names, &tool_map).await;
+    let chunks = collect_assistant_chunks(&agent, &params, Some(conn.clone())).await;
 
-    // Mixed path: content chunks get logprobs, tool_call chunks don't.
     for (i, chunk) in chunks.iter().enumerate() {
         if chunk.content.is_some() {
             assert!(chunk.logprobs.is_some(), "chunk {i}: content without logprobs");
@@ -999,9 +947,7 @@ async fn test_logprobs_top_4_invention_mcp_response_format() {
     }
     assert_logprobs_reconstruct_content(&chunks);
 
-    let completion = normalize(run_mock(
-        &agent, &params, &tool_names, &tool_map,
-    ).await);
+    let completion = normalize(run_mock(&agent, &params, Some(conn)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -1023,8 +969,8 @@ async fn test_tools_not_allowed_with_required_tool_call() {
 
     let result = client
         .create(
-            "test", 1000, &agent, None, &params, &[], &[], None, &[],
-            &HashMap::new(), None, None, rust_decimal::Decimal::ONE, false, None, None, None, None,
+            "test", 1000, &agent, None, &params, &[], None, None, None,
+            rust_decimal::Decimal::ONE, false, None, None, None, None,
         )
         .await;
     match result {
@@ -1048,8 +994,8 @@ async fn test_tools_not_allowed_with_optional_tool_call_ok() {
     // Optional tool call should succeed even with tools_enabled = false.
     let result = client
         .create(
-            "test", 1000, &agent, None, &params, &[], &[], None, &[],
-            &HashMap::new(), None, None, rust_decimal::Decimal::ONE, false, None, None, None, None,
+            "test", 1000, &agent, None, &params, &[], None, None, None,
+            rust_decimal::Decimal::ONE, false, None, None, None, None,
         )
         .await;
     assert!(result.is_ok(), "optional tool call should succeed when tools disabled");
@@ -1058,21 +1004,20 @@ async fn test_tools_not_allowed_with_optional_tool_call_ok() {
 #[tokio::test]
 async fn test_tools_not_allowed_no_tool_calls_generated() {
     let agent = default_agent();
-    let params = default_params_with_seed(42);
-    let client = default_client();
-
-    // Set up a tool that would normally be callable.
-    let mut tool_map = HashMap::new();
-    tool_map.insert("my_tool".into(), ResolvedTool::ResponseFormat {
+    // Use a response-format ToolCall so the mock has a callable tool to choose
+    // from; tools_enabled=false should still suppress generation.
+    let params = params_with_response_format(42, ResponseFormat::ToolCall {
+        name: "my_tool".into(),
         description: "test tool".into(),
         schema: indexmap::IndexMap::new(),
+        required: None,
     });
-    let tool_names = vec!["my_tool".into()];
+    let client = default_client();
 
     let stream = client
         .create(
-            "test", 1000, &agent, None, &params, &[], &[], None, &tool_names,
-            &tool_map, None, None, rust_decimal::Decimal::ONE, false, None, None, None, None,
+            "test", 1000, &agent, None, &params, &[], None, None, None,
+            rust_decimal::Decimal::ONE, false, None, None, None, None,
         )
         .await
         .expect("create should succeed");
@@ -1104,8 +1049,8 @@ async fn test_invention_agent_without_invention_tools() {
 
     let result = client
         .create(
-            "test", 1000, &agent, None, &params, &[], &[], None, &[],
-            &HashMap::new(), None, None, rust_decimal::Decimal::ONE, true, None, None, None, None,
+            "test", 1000, &agent, None, &params, &[], None, None, None,
+            rust_decimal::Decimal::ONE, true, None, None, None, None,
         )
         .await;
     match result {
@@ -1129,15 +1074,15 @@ async fn test_invention_agent_with_invention_tools_ok() {
             "code": {"type": "string"},
         }),
     });
-    let inv2 = inv.clone();
-    let (tool_names, tool_map) = resolve_tools(&[], &[], Some(&[inv]), None);
+    let server = test_mcp_server::spawn("test", vec![TestTool::from_invention(inv)]).await;
+    let conn = test_mcp_server::connect_through_proxy(&[&server]).await;
 
-    // With invention tools provided, should succeed.
+    // With invention tools provided through the proxy, should succeed.
     let client = default_client();
     let result = client
         .create(
-            "test", 1000, &agent, None, &params, &[], &[], Some(&[inv2]),
-            &tool_names, &tool_map, None, None, rust_decimal::Decimal::ONE, true,
+            "test", 1000, &agent, None, &params, &[], Some(conn), None, None,
+            rust_decimal::Decimal::ONE, true,
             Some(objectiveai::functions::inventions::prompts::StepPromptType::AlphaScalarLeafFunction),
             Some(0), Some(3), None,
         )

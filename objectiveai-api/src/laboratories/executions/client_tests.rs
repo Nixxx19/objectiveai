@@ -112,8 +112,13 @@ fn make_client() -> Arc<TestClient> {
         Arc::new(objectiveai::mcp::Client::new(
             reqwest::Client::new(),
             String::new(), String::new(), String::new(),
-            Duration::from_millis(1), Duration::ZERO, Duration::ZERO,
-            0.0, 1.0, Duration::ZERO, Duration::ZERO, Duration::from_millis(1),
+            // connect_timeout/call_timeout = 10s wait limits; all
+            // backoff knobs zero so first-try failures surface as bugs.
+            Duration::from_secs(10), Duration::ZERO, Duration::ZERO,
+            0.0, 0.0, Duration::ZERO, Duration::ZERO, Duration::from_secs(10),
+        )),
+        Arc::new(crate::agent::completions::ProxySpawner::new(
+            objectiveai_mcp_proxy::ConfigBuilder::default,
         )),
         None,
         retrieve_router.clone(),
@@ -130,8 +135,9 @@ fn make_client() -> Arc<TestClient> {
             Duration::ZERO, Duration::from_millis(1),
         )),
         Duration::ZERO, Duration::ZERO, 0.0, 1.0,
-        Duration::ZERO, Duration::from_millis(1),
-        Duration::from_millis(1), Duration::from_millis(1),
+        Duration::ZERO, Duration::ZERO,
+        // first_chunk_timeout / other_chunk_timeout are wait limits.
+        Duration::from_secs(10), Duration::from_secs(10),
     ));
     Arc::new(super::Client {
         agent_client,

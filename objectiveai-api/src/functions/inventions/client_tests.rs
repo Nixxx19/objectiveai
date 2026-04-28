@@ -144,14 +144,22 @@ fn make_client() -> Arc<TestClient> {
             String::new(),
             String::new(),
             String::new(),
-            Duration::from_millis(1),
+            // connect_timeout: tests do real localhost I/O via the
+            // ProxySpawner; 10s is the wait limit before treating it as
+            // a bug. All retry/backoff knobs below are zero so a real
+            // first-try failure surfaces immediately instead of being
+            // masked by retries.
+            Duration::from_secs(10),
             Duration::ZERO,
             Duration::ZERO,
             0.0,
-            1.0,
+            0.0,
             Duration::ZERO,
             Duration::ZERO,
-            Duration::from_millis(1),
+            Duration::from_secs(10),
+        )),
+        Arc::new(crate::agent::completions::ProxySpawner::new(
+            objectiveai_mcp_proxy::ConfigBuilder::default,
         )),
         None, // mcp_authorization
         retrieve_router.clone(),
@@ -173,8 +181,9 @@ fn make_client() -> Arc<TestClient> {
         1.0,
         Duration::ZERO,
         Duration::ZERO,
-        Duration::from_millis(1),
-        Duration::from_millis(1),
+        // first_chunk_timeout / other_chunk_timeout are wait limits.
+        Duration::from_secs(10),
+        Duration::from_secs(10),
     ));
     let github_client = Arc::new(crate::github::Client::new(
         reqwest::Client::new(),

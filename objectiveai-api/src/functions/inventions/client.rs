@@ -898,6 +898,7 @@ fn build_agent_params(
     }
 }
 
+
 /// Creates a user message from a prompt string.
 fn user_message(prompt: &str) -> objectiveai::agent::completions::message::UserMessage {
     objectiveai::agent::completions::message::UserMessage {
@@ -960,36 +961,44 @@ where
         let validate_for_done = validate.clone();
         let max_step_retries = request.max_step_retries.unwrap_or(3);
 
+        // Spawn the InventionServer for this step. It hosts the
+        // step-specific tools the agent will call, lives for the duration
+        // of `run_step`, and gets aborted on drop. As long as we drop it
+        // *after* draining every agent stream below, the proxy's open
+        // upstream connections to it remain valid.
+        let invention_server = super::InventionServer::new(tools).await;
+        let invention_url = invention_server.url();
+
         // The messages array on the request is fixed after the very first
         // step. If we have a continuation (i.e. this is not the first step),
         // the prompt goes as a user message on the continuation and the
         // request messages are empty. If no continuation exists (first step),
         // the prompt goes into the request messages.
-        let agent_params = if let Some(ref mut cont) = continuation {
+        let agent_params = Arc::new(if let Some(ref mut cont) = continuation {
             cont.push_user_message(user_message(&prompt));
-            Arc::new(build_agent_params(&request, vec![]))
+            build_agent_params(&request, vec![])
         } else {
-            Arc::new(build_agent_params(
+            build_agent_params(
                 &request,
                 vec![objectiveai::agent::completions::message::Message::User(
                     user_message(&prompt),
                 )],
-            ))
-        };
+            )
+        });
 
-        // The agent completions loop handles tool calling internally via
-        // invention_done. When validate returns Ok, invention_done fires,
-        // tools_enabled becomes false, and the model produces a final
-        // content-only response that ends the loop naturally.
-        let invention_done = Arc::new(move || validate_for_done().is_ok());
+        // `disable_tools` is the orchestrator's signal that the model has
+        // produced what we needed — once `validate()` succeeds, the next
+        // continuation runs with tools off and the model closes out with
+        // a content-only response.
+        let disable_tools = Arc::new(move || validate_for_done().is_ok());
 
         let stream_result = agent_client
             .create_streaming(
                 ctx.clone(),
                 agent_params.clone(),
                 continuation.take(),
-                Some(tools.clone()),
-                Some(invention_done),
+                Some(disable_tools),
+                vec![invention_url.clone()],
                 None,
                 false,
                 Some(invention_type),
@@ -1078,15 +1087,15 @@ where
             completion_index += 1;
 
             let validate_for_done = validate.clone();
-            let invention_done = Arc::new(move || validate_for_done().is_ok());
+            let disable_tools = Arc::new(move || validate_for_done().is_ok());
 
             let stream_result = agent_client
                 .create_streaming(
                     ctx.clone(),
                     agent_params.clone(),
                     continuation.take(),
-                    Some(tools.clone()),
-                    Some(invention_done),
+                    Some(disable_tools),
+                    vec![invention_url.clone()],
                     None,
                     false,
                     Some(invention_type),

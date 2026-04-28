@@ -661,6 +661,7 @@ where
         let synthetic_reasoning = match agent.inner.agent() {
             objectiveai::agent::InlineAgent::Openrouter(a) => a.base.synthetic_reasoning.unwrap_or(false),
             objectiveai::agent::InlineAgent::ClaudeAgentSdk(_) => false,
+            objectiveai::agent::InlineAgent::CodexSdk(_) => false,
             objectiveai::agent::InlineAgent::Mock(_) => false,
         };
 
@@ -746,8 +747,8 @@ where
                     ctx.clone(),
                     agent_params.clone(),
                     None,
-                    None,
-                    None,
+                    None, // disable_tools
+                    vec![],
                     Some(transform_messages.clone()),
                     false,
                     None,
@@ -881,8 +882,8 @@ where
                                 ctx.clone(),
                                 agent_params.clone(),
                                 Some(cont),
-                                None,
-                                None,
+                                None, // disable_tools
+                                vec![],
                                 Some(transform_messages.clone()),
                                 false,
                                 None,
@@ -1012,8 +1013,8 @@ where
                                 ctx.clone(),
                                 retry_params,
                                 Some(cont),
-                                None,
-                                None,
+                                None, // disable_tools
+                                vec![],
                                 Some(transform_messages.clone()),
                                 false,
                                 None,

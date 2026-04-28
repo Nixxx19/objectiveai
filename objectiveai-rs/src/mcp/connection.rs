@@ -568,33 +568,38 @@ impl ConnectionInner {
         });
 
         backoff::future::retry(self.backoff(), || async {
+            let url = self.url.clone();
             let response =
-                self.post().json(&body).send().await.map_err(|e| {
-                    backoff::Error::transient(super::Error::Request(e))
+                self.post().json(&body).send().await.map_err(|source| {
+                    backoff::Error::transient(super::Error::Request {
+                        url: url.clone(),
+                        source,
+                    })
                 })?;
 
             if response.status() == reqwest::StatusCode::NOT_FOUND {
                 return Err(backoff::Error::permanent(
-                    super::Error::SessionExpired,
+                    super::Error::SessionExpired { url: url.clone() },
                 ));
             }
             if !response.status().is_success() {
                 let code = response.status();
                 let body = response.text().await.unwrap_or_default();
                 return Err(backoff::Error::transient(
-                    super::Error::BadStatus { code, body },
+                    super::Error::BadStatus { url: url.clone(), code, body },
                 ));
             }
 
             let rpc_response: super::JsonRpcResponse<R> =
-                response.json().await.map_err(|e| {
-                    backoff::Error::transient(super::Error::Request(e))
-                })?;
+                super::parse_streamable_http_response(&url, response)
+                    .await
+                    .map_err(backoff::Error::transient)?;
 
             match rpc_response {
                 super::JsonRpcResponse::Success { result, .. } => Ok(result),
                 super::JsonRpcResponse::Error { error, .. } => {
                     Err(backoff::Error::permanent(super::Error::JsonRpc {
+                        url: url.clone(),
                         code: error.code,
                         message: error.message,
                         data: error.data,
@@ -623,15 +628,22 @@ impl ConnectionInner {
             .json(&body)
             .send()
             .await
-            .map_err(super::Error::Request)?;
+            .map_err(|source| super::Error::Request {
+                url: self.url.clone(),
+                source,
+            })?;
 
         if response.status() == reqwest::StatusCode::NOT_FOUND {
-            return Err(super::Error::SessionExpired);
+            return Err(super::Error::SessionExpired { url: self.url.clone() });
         }
         if !response.status().is_success() {
             let code = response.status();
             let body = response.text().await.unwrap_or_default();
-            return Err(super::Error::BadStatus { code, body });
+            return Err(super::Error::BadStatus {
+                url: self.url.clone(),
+                code,
+                body,
+            });
         }
 
         Ok(())

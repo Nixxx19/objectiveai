@@ -3019,8 +3019,8 @@ where
                     },
                 ),
                 None,
-                None,
-                None,
+                None, // disable_tools
+                vec![], // extra_mcp_servers
                 None,
                 false,
                 None,

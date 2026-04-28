@@ -1311,8 +1311,8 @@ async fn create_agent_completion(
                 ctx,
                 Arc::new(body),
                 None,
-                None,
-                None,
+                None, // disable_tools
+                vec![], // extra_mcp_servers
                 None,
                 true,
                 None,
@@ -1348,8 +1348,8 @@ async fn create_agent_completion(
                 ctx,
                 Arc::new(body),
                 None,
-                None,
-                None,
+                None, // disable_tools
+                vec![], // extra_mcp_servers
                 None,
                 true,
                 None,

@@ -137,14 +137,21 @@ fn make_client() -> super::Client<
             String::new(),
             String::new(),
             String::new(),
-            Duration::from_millis(1),
+            // connect_timeout/call_timeout = 10s wait limits; tests do
+            // real localhost I/O via the ProxySpawner. All backoff knobs
+            // below are zero so a first-try failure surfaces as a bug
+            // instead of being masked by retries.
+            Duration::from_secs(10),
             Duration::ZERO,
             Duration::ZERO,
             0.0,
-            1.0,
+            0.0,
             Duration::ZERO,
             Duration::ZERO,
-            Duration::from_millis(1),
+            Duration::from_secs(10),
+        )),
+        Arc::new(crate::agent::completions::ProxySpawner::new(
+            objectiveai_mcp_proxy::ConfigBuilder::default,
         )),
         None, // mcp_authorization
         Arc::new(crate::retrieval::retrieve::Router::new(
@@ -170,8 +177,9 @@ fn make_client() -> super::Client<
         1.0,
         Duration::ZERO,
         Duration::ZERO,
-        Duration::from_millis(1),
-        Duration::from_millis(1),
+        // first_chunk_timeout / other_chunk_timeout are wait limits.
+        Duration::from_secs(10),
+        Duration::from_secs(10),
     )
 }
 
@@ -274,7 +282,7 @@ async fn test_basic_mock_agent_seed_42() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("create_streaming should succeed");
 
@@ -307,7 +315,7 @@ async fn test_basic_mock_agent_seed_123() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("create_streaming should succeed");
 
@@ -340,14 +348,14 @@ async fn test_deterministic_with_same_seed() {
 
     let client_a = make_client();
     let stream_a = client_a
-        .create_streaming(make_ctx(), params.clone(), None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params.clone(), None, None, vec![], None, false, None, None, None, None)
         .await
         .unwrap();
     let completion_a = normalize(run_and_check(Box::pin(stream_a)).await);
 
     let client_b = make_client();
     let stream_b = client_b
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .unwrap();
     let completion_b = normalize(run_and_check(Box::pin(stream_b)).await);
@@ -395,14 +403,14 @@ async fn test_different_seeds_differ() {
 
     let client_a = make_client();
     let stream_a = client_a
-        .create_streaming(make_ctx(), params_a, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params_a, None, None, vec![], None, false, None, None, None, None)
         .await
         .unwrap();
     let completion_a = normalize(run_and_check(Box::pin(stream_a)).await);
 
     let client_b = make_client();
     let stream_b = client_b
-        .create_streaming(make_ctx(), params_b, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params_b, None, None, vec![], None, false, None, None, None, None)
         .await
         .unwrap();
     let completion_b = normalize(run_and_check(Box::pin(stream_b)).await);
@@ -447,7 +455,7 @@ async fn test_mock_agent_with_error() {
     });
 
     let result = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await;
     assert!(result.is_err(), "error agent should fail");
 }
@@ -475,7 +483,7 @@ async fn test_with_single_user_message() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("should succeed with user message");
 
@@ -517,7 +525,7 @@ async fn test_with_developer_and_user_messages() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("should succeed with developer+user messages");
 
@@ -550,7 +558,7 @@ async fn test_json_object_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("JsonObject should succeed");
 
@@ -591,7 +599,7 @@ async fn test_json_schema_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("JsonSchema should succeed");
 
@@ -624,7 +632,7 @@ async fn test_text_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("Text should succeed");
 
@@ -659,7 +667,7 @@ async fn test_grammar_response_format_rejected() {
     });
 
     let result = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await;
     assert!(result.is_err(), "Grammar should be rejected");
 }
@@ -684,7 +692,7 @@ async fn test_python_response_format_rejected() {
     });
 
     let result = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await;
     assert!(result.is_err(), "Python should be rejected");
 }
@@ -719,7 +727,7 @@ async fn test_required_tool_call_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("required ToolCall should succeed");
 
@@ -763,7 +771,7 @@ async fn test_optional_tool_call_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("optional ToolCall should succeed");
 
@@ -777,166 +785,10 @@ async fn test_optional_tool_call_response_format() {
 }
 
 /// With invention tools provided.
-#[tokio::test]
-async fn test_with_invention_tools() {
-    let client = make_client();
-    let inv1 = objectiveai::functions::inventions::InventionTool {
-        name: "execute_code",
-        description: "Execute code in a sandbox",
-        parameters: indexmap::indexmap! {
-            "type".into() => serde_json::json!("object"),
-            "properties".into() => serde_json::json!({
-                "language": {"type": "string"},
-                "code": {"type": "string"},
-            }),
-        },
-        call: Arc::new(|_| Box::pin(async { Ok("executed".into()) })),
-    };
-    let inv2 = objectiveai::functions::inventions::InventionTool {
-        name: "read_file",
-        description: "Read a file from disk",
-        parameters: indexmap::indexmap! {
-            "type".into() => serde_json::json!("object"),
-            "properties".into() => serde_json::json!({
-                "path": {"type": "string"},
-            }),
-        },
-        call: Arc::new(|_| Box::pin(async { Ok("file contents".into()) })),
-    };
-
-    let params = Arc::new(AgentCompletionCreateParams {
-        messages: vec![Message::User(UserMessage {
-            content: RichContent::Text("Run some code".into()),
-            name: None,
-        })],
-        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
-            objectiveai::agent::InlineAgentBaseWithFallbacks {
-                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
-                fallbacks: None,
-            },
-        ),
-        provider: None,
-        response_format: None,
-        seed: Some(88),
-        stream: None,
-        continuation: None,
-    });
-
-    let stream = client
-        .create_streaming(make_ctx(), params, None, Some(vec![inv1, inv2]), None, None, false, None, None, None, None)
-        .await
-        .expect("should succeed with invention tools");
-
-    let completion = normalize(run_and_check(Box::pin(stream)).await);
-
-    let json = serde_json::to_string_pretty(&completion).unwrap();
-    assert_snapshot(
-        &json,
-        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_with_invention_tools.json"),
-        include_str!("../../../assets/agent/completions/client_tests/test_with_invention_tools.json"),
-    );
-}
 
 /// With invention tools and ToolCall response format.
-#[tokio::test]
-async fn test_invention_tools_with_tool_call_response_format() {
-    let client = make_client();
-    let inv = objectiveai::functions::inventions::InventionTool {
-        name: "validate",
-        description: "Validate data",
-        parameters: indexmap::indexmap! {
-            "type".into() => serde_json::json!("object"),
-            "properties".into() => serde_json::json!({
-                "data": {"type": "string"},
-            }),
-        },
-        call: Arc::new(|_| Box::pin(async { Ok("valid".into()) })),
-    };
-
-    let params = Arc::new(AgentCompletionCreateParams {
-        messages: vec![],
-        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
-            objectiveai::agent::InlineAgentBaseWithFallbacks {
-                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
-                fallbacks: None,
-            },
-        ),
-        provider: None,
-        response_format: Some(ResponseFormatParam::Single(ResponseFormat::ToolCall {
-            name: "submit".into(),
-            description: "Submit".into(),
-            schema: indexmap::indexmap! {
-                "type".into() => serde_json::json!("object"),
-                "properties".into() => serde_json::json!({
-                    "result": {"type": "string"},
-                }),
-            },
-            required: None,
-        })),
-        seed: Some(150),
-        stream: None,
-        continuation: None,
-    });
-
-    let stream = client
-        .create_streaming(make_ctx(), params, None, Some(vec![inv]), None, None, false, None, None, None, None)
-        .await
-        .expect("should succeed with invention tools and response format");
-
-    let completion = normalize(run_and_check(Box::pin(stream)).await);
-
-    let json = serde_json::to_string_pretty(&completion).unwrap();
-    assert_snapshot(
-        &json,
-        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_invention_tools_with_tool_call_response_format.json"),
-        include_str!("../../../assets/agent/completions/client_tests/test_invention_tools_with_tool_call_response_format.json"),
-    );
-}
 
 /// Single invention tool that returns an error.
-#[tokio::test]
-async fn test_invention_tool_returns_error() {
-    let client = make_client();
-    let inv = objectiveai::functions::inventions::InventionTool {
-        name: "failing_tool",
-        description: "A tool that always fails",
-        parameters: indexmap::indexmap! {
-            "type".into() => serde_json::json!("object"),
-            "properties".into() => serde_json::json!({
-                "input": {"type": "string"},
-            }),
-        },
-        call: Arc::new(|_| Box::pin(async { Err("tool execution failed".into()) })),
-    };
-
-    let params = Arc::new(AgentCompletionCreateParams {
-        messages: vec![],
-        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
-            objectiveai::agent::InlineAgentBaseWithFallbacks {
-                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase::default()),
-                fallbacks: None,
-            },
-        ),
-        provider: None,
-        response_format: None,
-        seed: Some(88),
-        stream: None,
-        continuation: None,
-    });
-
-    let stream = client
-        .create_streaming(make_ctx(), params, None, Some(vec![inv]), None, None, false, None, None, None, None)
-        .await
-        .expect("should succeed even with failing invention tool");
-
-    let completion = normalize(run_and_check(Box::pin(stream)).await);
-    let json = serde_json::to_string_pretty(&completion).unwrap();
-    assert_snapshot(
-        &json,
-        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_invention_tool_returns_error.json"),
-        include_str!("../../../assets/agent/completions/client_tests/test_invention_tool_returns_error.json"),
-    );
-}
 
 /// Multiple user messages in a conversation.
 #[tokio::test]
@@ -967,7 +819,7 @@ async fn test_multiple_user_messages() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("should succeed with multiple user messages");
 
@@ -1003,7 +855,7 @@ async fn test_mock_agent_error_false_succeeds() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("error=false should succeed");
 
@@ -1036,7 +888,7 @@ async fn test_final_item_is_mock_continuation() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .unwrap();
 
@@ -1078,7 +930,7 @@ async fn test_per_agent_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("PerAgent response format should succeed");
 
@@ -1117,7 +969,7 @@ async fn test_per_agent_response_format_unknown_id() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("PerAgent with unknown ID should succeed (no format applied)");
 
@@ -1172,7 +1024,7 @@ async fn test_json_schema_nested_object() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("nested JsonSchema should succeed");
 
@@ -1210,7 +1062,7 @@ async fn test_fallback_agent_on_error() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("fallback agent should succeed when primary errors");
 
@@ -1251,7 +1103,7 @@ async fn test_all_agents_error() {
     });
 
     let result = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await;
     assert!(result.is_err(), "all agents erroring should fail");
 }
@@ -1285,7 +1137,7 @@ async fn test_multiple_fallback_agents() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("third agent should succeed");
 
@@ -1327,11 +1179,11 @@ async fn test_with_mock_continuation() {
                 },
             ),
         ],
-        mcp_connections: Arc::new(vec![]),
+        mcp_connection: None,
     };
 
     let stream = client
-        .create_streaming(make_ctx(), params, Some(continuation), None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, Some(continuation), None, vec![], None, false, None, None, None, None)
         .await
         .expect("should succeed with continuation");
 
@@ -1364,7 +1216,7 @@ async fn test_stream_yields_chunks_before_state() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .unwrap();
 
@@ -1397,7 +1249,7 @@ async fn test_large_seed_value() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("large seed should succeed");
 
@@ -1430,7 +1282,7 @@ async fn test_seed_zero() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("seed 0 should succeed");
 
@@ -1505,7 +1357,7 @@ async fn test_logprobs_basic_seed_42() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("logprobs basic should succeed");
 
@@ -1559,7 +1411,7 @@ async fn test_logprobs_json_schema_nested() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("logprobs json_schema nested should succeed");
 
@@ -1585,69 +1437,6 @@ async fn test_logprobs_json_schema_nested() {
 }
 
 /// Logprobs with invention tools — agent loop runs tool calls then content.
-#[tokio::test]
-async fn test_logprobs_with_invention_tools() {
-    let client = make_client();
-    let inv = objectiveai::functions::inventions::InventionTool {
-        name: "lookup",
-        description: "Look up a value",
-        parameters: indexmap::indexmap! {
-            "type".into() => serde_json::json!("object"),
-            "properties".into() => serde_json::json!({
-                "key": {"type": "string"},
-            }),
-        },
-        call: Arc::new(|_| Box::pin(async { Ok("found it".into()) })),
-    };
-
-    let params = Arc::new(AgentCompletionCreateParams {
-        messages: vec![Message::User(UserMessage {
-            content: RichContent::Text("Look up foo".into()),
-            name: None,
-        })],
-        agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
-            objectiveai::agent::InlineAgentBaseWithFallbacks {
-                inner: objectiveai::agent::InlineAgentBase::Mock(MockAgentBase {
-                    top_logprobs: Some(3),
-                    ..Default::default()
-                }),
-                fallbacks: None,
-            },
-        ),
-        provider: None,
-        response_format: None,
-        seed: Some(88),
-        stream: None,
-        continuation: None,
-    });
-
-    let stream = client
-        .create_streaming(make_ctx(), params, None, Some(vec![inv]), None, None, false, None, None, None, None)
-        .await
-        .expect("logprobs with invention tools should succeed");
-
-    let completion = normalize(run_and_check(Box::pin(stream)).await);
-
-    // Assistant messages with content should have logprobs; those with
-    // only tool_calls should not.
-    for msg in &completion.messages {
-        if let UnaryMessage::Assistant(asst) = msg {
-            if asst.content.is_some() {
-                assert!(asst.logprobs.is_some(), "content message missing logprobs");
-            }
-            if asst.tool_calls.is_some() && asst.content.is_none() {
-                assert!(asst.logprobs.is_none(), "tool_call-only message has logprobs");
-            }
-        }
-    }
-
-    let json = serde_json::to_string_pretty(&completion).unwrap();
-    assert_snapshot(
-        &json,
-        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_logprobs_with_invention_tools.json"),
-        include_str!("../../../assets/agent/completions/client_tests/test_logprobs_with_invention_tools.json"),
-    );
-}
 
 /// Logprobs survive through the continuation flow.
 #[tokio::test]
@@ -1696,11 +1485,11 @@ async fn test_logprobs_with_continuation() {
                 },
             ),
         ],
-        mcp_connections: Arc::new(vec![]),
+        mcp_connection: None,
     };
 
     let stream = client
-        .create_streaming(make_ctx(), params, Some(continuation), None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, Some(continuation), None, vec![], None, false, None, None, None, None)
         .await
         .expect("logprobs with continuation should succeed");
 
@@ -1743,7 +1532,7 @@ async fn test_logprobs_fallback_agent() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("fallback with logprobs should succeed");
 
@@ -1790,7 +1579,7 @@ async fn test_logprobs_per_agent_json_object() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None, None, None, false, None, None, None, None)
+        .create_streaming(make_ctx(), params, None, None, vec![], None, false, None, None, None, None)
         .await
         .expect("logprobs per-agent json_object should succeed");
 
@@ -1827,189 +1616,5 @@ fn error_prob_50_remote() -> objectiveai::agent::InlineAgentBaseWithFallbacksOrR
     )
 }
 
-#[tokio::test]
-async fn test_error_probability_remote_seed_2() {
-    let client = make_client();
-    let params = Arc::new(AgentCompletionCreateParams {
-        messages: vec![Message::User(UserMessage {
-            content: RichContent::Text("Analyze this dataset and summarize findings".into()),
-            name: None,
-        })],
-        agent: error_prob_50_remote(),
-        provider: None,
-        response_format: None,
-        seed: Some(2),
-        stream: None,
-        continuation: None,
-    });
-    let tools = vec![
-        objectiveai::functions::inventions::InventionTool {
-            name: "query_database",
-            description: "Run a SQL query against the database",
-            parameters: indexmap::indexmap! {
-                "type".into() => serde_json::json!("object"),
-                "properties".into() => serde_json::json!({
-                    "sql": {"type": "string"},
-                    "database": {"type": "string"},
-                }),
-            },
-            call: Arc::new(|_| Box::pin(async { Ok("rows: [{id: 1, value: 42}]".into()) })),
-        },
-        objectiveai::functions::inventions::InventionTool {
-            name: "plot_chart",
-            description: "Generate a chart from data",
-            parameters: indexmap::indexmap! {
-                "type".into() => serde_json::json!("object"),
-                "properties".into() => serde_json::json!({
-                    "data": {"type": "string"},
-                    "chart_type": {"type": "string"},
-                }),
-            },
-            call: Arc::new(|_| Box::pin(async { Ok("chart://bar_chart_001.png".into()) })),
-        },
-    ];
-    let stream = client
-        .create_streaming(make_ctx(), params, None, Some(tools), None, None, false, None, None, None, None)
-        .await
-        .expect("create_streaming should succeed");
-    let completion = normalize(run_and_check(Box::pin(stream)).await);
-    let json = serde_json::to_string_pretty(&completion).unwrap();
-    assert_snapshot(
-        &json,
-        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_error_probability_remote_seed_2.json"),
-        include_str!("../../../assets/agent/completions/client_tests/test_error_probability_remote_seed_2.json"),
-    );
-}
 
-#[tokio::test]
-async fn test_error_probability_remote_seed_10() {
-    let client = make_client();
-    let params = Arc::new(AgentCompletionCreateParams {
-        messages: vec![Message::User(UserMessage {
-            content: RichContent::Text("Write a web scraper for news articles".into()),
-            name: None,
-        })],
-        agent: error_prob_50_remote(),
-        provider: None,
-        response_format: None,
-        seed: Some(10),
-        stream: None,
-        continuation: None,
-    });
-    let tools = vec![
-        objectiveai::functions::inventions::InventionTool {
-            name: "fetch_url",
-            description: "Fetch the contents of a URL",
-            parameters: indexmap::indexmap! {
-                "type".into() => serde_json::json!("object"),
-                "properties".into() => serde_json::json!({
-                    "url": {"type": "string"},
-                }),
-            },
-            call: Arc::new(|_| Box::pin(async { Ok("<html>news article</html>".into()) })),
-        },
-        objectiveai::functions::inventions::InventionTool {
-            name: "save_file",
-            description: "Save content to a file",
-            parameters: indexmap::indexmap! {
-                "type".into() => serde_json::json!("object"),
-                "properties".into() => serde_json::json!({
-                    "path": {"type": "string"},
-                    "content": {"type": "string"},
-                }),
-            },
-            call: Arc::new(|_| Box::pin(async { Ok("saved".into()) })),
-        },
-        objectiveai::functions::inventions::InventionTool {
-            name: "parse_html",
-            description: "Extract structured data from HTML",
-            parameters: indexmap::indexmap! {
-                "type".into() => serde_json::json!("object"),
-                "properties".into() => serde_json::json!({
-                    "html": {"type": "string"},
-                    "selector": {"type": "string"},
-                }),
-            },
-            call: Arc::new(|_| Box::pin(async { Ok("title: Breaking News".into()) })),
-        },
-    ];
-    let stream = client
-        .create_streaming(make_ctx(), params, None, Some(tools), None, None, false, None, None, None, None)
-        .await
-        .expect("create_streaming should succeed");
-    let completion = normalize(run_and_check(Box::pin(stream)).await);
-    let json = serde_json::to_string_pretty(&completion).unwrap();
-    assert_snapshot(
-        &json,
-        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_error_probability_remote_seed_10.json"),
-        include_str!("../../../assets/agent/completions/client_tests/test_error_probability_remote_seed_10.json"),
-    );
-}
 
-#[tokio::test]
-async fn test_error_probability_remote_seed_15() {
-    let client = make_client();
-    let params = Arc::new(AgentCompletionCreateParams {
-        messages: vec![Message::User(UserMessage {
-            content: RichContent::Text("Deploy the application to production".into()),
-            name: None,
-        })],
-        agent: error_prob_50_remote(),
-        provider: None,
-        response_format: None,
-        seed: Some(15),
-        stream: None,
-        continuation: Some(objectiveai::agent::Continuation::Mock(
-            objectiveai::agent::mock::Continuation {
-                upstream: objectiveai::agent::mock::Upstream::Mock,
-                messages: vec![
-                    Message::User(UserMessage {
-                        content: RichContent::Text("Build the project first".into()),
-                        name: None,
-                    }),
-                    Message::Assistant(objectiveai::agent::completions::message::AssistantMessage {
-                        content: Some(RichContent::Text("Build succeeded.".into())),
-                        name: None, refusal: None, tool_calls: None, reasoning: None,
-                    }),
-                ],
-                mcp_sessions: indexmap::IndexMap::new(),
-            },
-        ).to_string()),
-    });
-    let tools = vec![
-        objectiveai::functions::inventions::InventionTool {
-            name: "run_tests",
-            description: "Run the test suite",
-            parameters: indexmap::indexmap! {
-                "type".into() => serde_json::json!("object"),
-                "properties".into() => serde_json::json!({
-                    "suite": {"type": "string"},
-                }),
-            },
-            call: Arc::new(|_| Box::pin(async { Ok("all 42 tests passed".into()) })),
-        },
-        objectiveai::functions::inventions::InventionTool {
-            name: "deploy",
-            description: "Deploy to a target environment",
-            parameters: indexmap::indexmap! {
-                "type".into() => serde_json::json!("object"),
-                "properties".into() => serde_json::json!({
-                    "environment": {"type": "string"},
-                    "version": {"type": "string"},
-                }),
-            },
-            call: Arc::new(|_| Box::pin(async { Ok("deployed v2.1.0 to production".into()) })),
-        },
-    ];
-    let stream = client
-        .create_streaming(make_ctx(), params, None, Some(tools), None, None, false, None, None, None, None)
-        .await
-        .expect("create_streaming should succeed");
-    let completion = normalize(run_and_check(Box::pin(stream)).await);
-    let json = serde_json::to_string_pretty(&completion).unwrap();
-    assert_snapshot(
-        &json,
-        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_error_probability_remote_seed_15.json"),
-        include_str!("../../../assets/agent/completions/client_tests/test_error_probability_remote_seed_15.json"),
-    );
-}

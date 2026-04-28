@@ -188,8 +188,8 @@ where
                 MOCK::State,
             >,
         >,
-        invention_tools: Option<Vec<objectiveai::functions::inventions::InventionTool>>,
-        invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
+        disable_tools: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
+        extra_mcp_servers: Vec<String>,
         transform_messages: Option<Arc<TransformMessages>>,
         viewer: bool,
         invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
@@ -204,7 +204,7 @@ where
             objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
         > = None;
         let mut stream = self
-            .create_streaming_handle_usage(ctx, params, continuation, invention_tools, invention_done, transform_messages, viewer, invention_type, invention_step, invention_tasks_min, invention_input_schema)
+            .create_streaming_handle_usage(ctx, params, continuation, disable_tools, extra_mcp_servers, transform_messages, viewer, invention_type, invention_step, invention_tasks_min, invention_input_schema)
             .await?;
         while let Some(item) = stream.next().await {
             match item {
@@ -230,8 +230,8 @@ where
                 MOCK::State,
             >,
         >,
-        invention_tools: Option<Vec<objectiveai::functions::inventions::InventionTool>>,
-        invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
+        disable_tools: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
+        extra_mcp_servers: Vec<String>,
         transform_messages: Option<Arc<TransformMessages>>,
         viewer: bool,
         invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
@@ -255,7 +255,7 @@ where
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
         let _ = tokio::spawn(async move {
             let stream = match self
-                .create_streaming(ctx.clone(), params.clone(), continuation, invention_tools, invention_done, transform_messages, viewer, invention_type, invention_step, invention_tasks_min, invention_input_schema)
+                .create_streaming(ctx.clone(), params.clone(), continuation, disable_tools, extra_mcp_servers, transform_messages, viewer, invention_type, invention_step, invention_tasks_min, invention_input_schema)
                 .await
             {
                 Ok(stream) => stream,
@@ -315,8 +315,13 @@ where
                 MOCK::State,
             >,
         >,
-        invention_tools: Option<Vec<objectiveai::functions::inventions::InventionTool>>,
-        invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
+        disable_tools: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
+        // URLs to fold into every per-agent `X-MCP-Servers` header
+        // *without* mutating the agent's own `mcp_servers` config — used
+        // by the function-inventions orchestrator to plumb its per-step
+        // InventionServer URL through the proxy without affecting the
+        // agent's content-derived ID.
+        extra_mcp_servers: Vec<String>,
         transform_messages: Option<Arc<TransformMessages>>,
         viewer: bool,
         invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
@@ -429,19 +434,7 @@ where
             self.mcp_authorization.as_deref(),
         );
 
-        // 5. Spawn the invention server (if applicable) so its URL can
-        //    be added to every per-agent proxy `X-MCP-Servers` list.
-        //    Held on the stack for the rest of `create_streaming`'s
-        //    lifetime; its `Drop` aborts the in-process server task.
-        let invention_server = match invention_tools.as_ref() {
-            Some(tools) if !tools.is_empty() => {
-                Some(super::InventionServer::new(tools.clone()).await)
-            }
-            _ => None,
-        };
-        let invention_url = invention_server.as_ref().map(|s| s.url());
-
-        // 6. Boot the in-process proxy (idempotent — first call wins,
+        // 5. Boot the in-process proxy (idempotent — first call wins,
         //    subsequent calls reuse the same handle) and kick off one
         //    connect per agent in parallel. Awaiting each `JoinHandle`
         //    inside the per-agent branch later means the round-trips
@@ -466,17 +459,20 @@ where
         > = filtered_agents
             .iter()
             .map(|agent| {
-                // Build the per-agent X-MCP-* header set.
+                // Build the per-agent X-MCP-* header set: the agent's
+                // declared `mcp_servers` plus any caller-supplied
+                // `extra_mcp_servers` (e.g. the function-inventions
+                // orchestrator's per-step InventionServer URL — kept
+                // out of the agent's own config so its content-hashed
+                // ID stays stable across runs).
                 let mut urls: Vec<String> = agent
                     .base()
                     .mcp_servers()
                     .map(|s| s.iter().map(|s| s.url.clone()).collect())
                     .unwrap_or_default();
-                if let Some(u) = &invention_url {
-                    urls.push(u.clone());
-                }
+                urls.extend(extra_mcp_servers.iter().cloned());
 
-                // No MCP servers and no invention server → no proxy
+                // No MCP servers → no proxy
                 // connection needed for this agent. Skipping the spawn
                 // also keeps the per-agent proxy session out of the
                 // response continuation's `mcp_sessions` map for
@@ -590,7 +586,7 @@ where
                 // session needed); only skip when the agent declared
                 // servers and the connect failed.
                 let agent_needs_mcp = attempt.agent.base().mcp_servers().is_some()
-                    || invention_url.is_some();
+                    || !extra_mcp_servers.is_empty();
                 let mcp_connection: Option<objectiveai::mcp::Connection> =
                     attempt_connections[idx].clone();
                 if agent_needs_mcp && mcp_connection.is_none() {
@@ -627,7 +623,7 @@ where
                                 },
                                 |e| super::Error::UpstreamOpenrouter(Box::new(e)),
                                 objectiveai::agent::InlineAgentRef::Openrouter(&or_agent.base),
-                                invention_done.clone(),
+                                disable_tools.clone(),
                                 agent_transform,
                                 make_is_cancelled(),
                                 invention_type,
@@ -663,7 +659,7 @@ where
                                 },
                                 |e| super::Error::UpstreamClaudeAgentSdk(Box::new(e)),
                                 objectiveai::agent::InlineAgentRef::ClaudeAgentSdk(&cas_agent.base),
-                                invention_done.clone(),
+                                disable_tools.clone(),
                                 agent_transform,
                                 make_is_cancelled(),
                                 invention_type,
@@ -699,7 +695,7 @@ where
                                 },
                                 |e| super::Error::UpstreamMock(Box::new(e)),
                                 objectiveai::agent::InlineAgentRef::Mock(&mock_agent.base),
-                                invention_done.clone(),
+                                disable_tools.clone(),
                                 agent_transform,
                                 make_is_cancelled(),
                                 invention_type,
@@ -720,6 +716,11 @@ where
                                 Err(e) => e,
                             }
                         }
+                        // CodexSdk has no upstream client wired up at this
+                        // layer yet — surface as an unsupported-upstream
+                        // error so the BYOK loop falls through to the
+                        // next agent / retry.
+                        _ => super::Error::NoAgentsResolved,
                     };
                     errors.push(err);
                 }
@@ -768,7 +769,7 @@ where
         wrap_continuation: impl FnOnce(Vec<super::ContinuationItem<U::State>>) -> CONT + Send + 'static,
         map_upstream_err: impl Fn(U::Error) -> super::Error + Send + 'static,
         agent_base: objectiveai::agent::InlineAgentRef<'_>,
-        invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
+        disable_tools: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         transform_messages: Option<&(dyn Fn(Vec<objectiveai::agent::completions::message::Message>) -> Vec<objectiveai::agent::completions::message::Message> + Send + Sync)>,
         is_cancelled: impl Fn() -> bool + Send + Sync + 'static,
         invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
@@ -987,14 +988,15 @@ where
                     }
                 }
 
-                // `invention_done` is the sentinel the invention client
-                // hands us to signal "the model produced enough invention
-                // tasks; let it close out with a free-form response next
-                // turn". We can't tell from here whether any of the tools
-                // we just dispatched were invention tools (the proxy
-                // hides that), so we let the sentinel decide on its own.
+                // `disable_tools` is the sentinel the orchestrator hands
+                // us to signal "the model has produced what we needed;
+                // run the next continuation with tools off so it closes
+                // out with a free-form response". We can't tell from
+                // here whether any of the tools we just dispatched were
+                // invention tools (the proxy hides that), so we let the
+                // sentinel decide on its own.
                 let _ = &any_invention_tool_called;
-                let tools_enabled = !invention_done.as_ref().is_some_and(|f| f());
+                let tools_enabled = !disable_tools.as_ref().is_some_and(|f| f());
 
                 if had_error {
                     break;

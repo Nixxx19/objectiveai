@@ -141,32 +141,51 @@ impl Client {
             request = request.header(name, value);
         }
 
-        let response =
-            request.send().await.map_err(super::Error::Connection)?;
+        let response = request.send().await.map_err(|source| super::Error::Connection {
+            url: url.clone(),
+            source,
+        })?;
 
         if !response.status().is_success() {
             let code = response.status();
             let body = response.text().await.unwrap_or_default();
-            return Err(super::Error::BadStatus { code, body });
+            return Err(super::Error::BadStatus {
+                url: url.clone(),
+                code,
+                body,
+            });
         }
 
         // Extract session ID from response header.
-        let session_id = response
+        let session_id = match response
             .headers()
             .get("Mcp-Session-Id")
             .and_then(|v| v.to_str().ok())
             .map(String::from)
-            .ok_or(super::Error::NoSessionId)?;
+        {
+            Some(s) => s,
+            None => {
+                let body = response.text().await.unwrap_or_default();
+                return Err(super::Error::NoSessionId {
+                    url: url.clone(),
+                    body: body.chars().take(800).collect(),
+                });
+            }
+        };
 
-        // Parse the initialize result.
+        // Parse the initialize result. Streamable-HTTP servers (any rmcp
+        // implementation, for example) wrap the JSON-RPC response in an
+        // SSE `text/event-stream` envelope; tolerate both that and a
+        // bare-JSON body.
         let rpc_response: super::JsonRpcResponse<
             super::initialize_result::InitializeResult,
-        > = response.json().await.map_err(super::Error::Request)?;
+        > = super::parse_streamable_http_response(&url, response).await?;
 
         let initialize_result = match rpc_response {
             super::JsonRpcResponse::Success { result, .. } => result,
             super::JsonRpcResponse::Error { error, .. } => {
                 return Err(super::Error::JsonRpc {
+                    url: url.clone(),
                     code: error.code,
                     message: error.message,
                     data: error.data,
@@ -193,9 +212,11 @@ impl Client {
             initialize_result,
         );
 
-        // Send the initialized notification.
+        // Send the initialized notification. Per the MCP spec the method
+        // name is the fully-qualified `notifications/initialized` — rmcp
+        // strictly requires the prefix.
         connection
-            .notify("initialized", &serde_json::json!({}))
+            .notify("notifications/initialized", &serde_json::json!({}))
             .await?;
 
         Ok(connection)

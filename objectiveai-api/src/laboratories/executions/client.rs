@@ -62,6 +62,9 @@ fn inject_mcp_server(agent: &mut objectiveai::agent::InlineAgentBase, mcp_url: S
         objectiveai::agent::InlineAgentBase::ClaudeAgentSdk(b) => {
             b.mcp_servers.get_or_insert_with(Vec::new).push(server);
         }
+        objectiveai::agent::InlineAgentBase::CodexSdk(b) => {
+            b.mcp_servers.get_or_insert_with(Vec::new).push(server);
+        }
         objectiveai::agent::InlineAgentBase::Mock(b) => {
             b.mcp_servers.get_or_insert_with(Vec::new).push(server);
         }
@@ -231,7 +234,7 @@ where
 
                 Box::pin(async_stream::stream! {
                     let stream_result = agent_client
-                        .create_streaming(ctx, params, None, None, None, None, false, None, None, None, None)
+                        .create_streaming(ctx, params, None, None, vec![], None, false, None, None, None, None)
                         .await;
 
                     match stream_result {
@@ -436,8 +439,8 @@ where
                         ctx.clone(),
                         params.clone(),
                         continuation.take(),
-                        None,
-                        None,
+                        None, // disable_tools
+                        vec![], // extra_mcp_servers
                         None,
                         false,
                         None,
