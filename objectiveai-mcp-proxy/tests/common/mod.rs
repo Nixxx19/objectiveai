@@ -9,7 +9,7 @@
 //! binary is computed from `CARGO_MANIFEST_DIR` — you must run
 //! `cargo build --workspace` (or equivalently
 //! `cargo build -p test-upstream`) before `cargo test`, or use
-//! `scripts/test-all.sh` which handles both.
+//! `objectiveai-mcp-proxy/test.sh` which handles both.
 
 #![allow(dead_code)] // Each integration test only uses a subset of helpers.
 
@@ -320,7 +320,7 @@ fn test_upstream_binary() -> PathBuf {
     }
     panic!(
         "could not find {bin_name} under {}/target/{{debug,release}}/. \
-         Run `cargo build --workspace` first, or use scripts/test-all.sh.",
+         Run `cargo build --workspace` first, or use objectiveai-mcp-proxy/test.sh.",
         workspace.display()
     );
 }

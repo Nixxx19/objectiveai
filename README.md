@@ -192,8 +192,7 @@ objectiveai/
 ├── objectiveai-go/             # Go SDK
 ├── objectiveai-dotnet/         # .NET SDK (in progress)
 ├── objectiveai-rs-cffi/        # C FFI bindings (foundation for other langs)
-├── objectiveai-json-schema/    # Generated JSON Schema files
-└── objectiveai-scripts/        # Utility scripts
+└── objectiveai-json-schema/    # Generated JSON Schema files
 ```
 
 ## Related

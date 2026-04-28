@@ -6,7 +6,7 @@
 // custom session-init headers the test wants.
 //
 // Run `cargo build --release -p objectiveai-mcp-proxy -p test-upstream`
-// (or `scripts/test-all.sh`) before `pnpm test`.
+// (or `objectiveai-mcp-proxy/test.sh`) before `pnpm test`.
 
 import { spawn, type ChildProcess } from 'node:child_process';
 import { createServer } from 'node:net';
