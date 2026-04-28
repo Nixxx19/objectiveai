@@ -110,7 +110,7 @@ impl Client {
             "id": 1,
             "method": "initialize",
             "params": {
-                "protocolVersion": "2025-11-25",
+                "protocolVersion": "2025-06-18",
                 "capabilities": {},
                 "clientInfo": {
                     "name": "objectiveai",

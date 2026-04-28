@@ -33,7 +33,7 @@ use crate::upstream::{BadInit, connect_all};
 
 /// MCP protocol version this proxy speaks. Pinned — there is only one
 /// supported version, and we reject any other.
-const PROTOCOL_VERSION: &str = "2025-11-25";
+const PROTOCOL_VERSION: &str = "2025-06-18";
 
 /// JSON-RPC error codes we use.
 const PARSE_ERROR: i64 = -32700;
@@ -269,10 +269,7 @@ async fn handle_initialize(
         protocol_version: PROTOCOL_VERSION.into(),
         capabilities: server_capabilities(),
         server_info: server_info(),
-        instructions: Some(
-            "ObjectiveAI MCP proxy. Multiplexes one client connection over many upstream MCP servers."
-                .into(),
-        ),
+        instructions: None,
         _meta: None,
     };
 
@@ -638,13 +635,11 @@ fn server_capabilities() -> ServerCapabilities {
 
 fn server_info() -> Implementation {
     Implementation {
-        name: "objectiveai-mcp-proxy".into(),
-        title: Some("ObjectiveAI MCP Proxy".into()),
+        name: "objectiveai-proxy".into(),
+        title: None,
         version: env!("CARGO_PKG_VERSION").into(),
         website_url: None,
-        description: Some(
-            "ObjectiveAI MCP proxy — multiplexes one client connection over many upstream MCP servers.".into(),
-        ),
+        description: None,
         icons: None,
     }
 }

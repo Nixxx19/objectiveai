@@ -145,19 +145,6 @@ impl InventionServer {
     pub fn url(&self) -> String {
         format!("http://127.0.0.1:{}/mcp", self.port)
     }
-
-    /// Transitional helper for callers still wiring this server directly
-    /// into Claude Agent SDK / Claude Code mcp configs. Will be removed
-    /// once those callers are migrated to the proxy connection.
-    pub fn mcp_server_config(
-        &self,
-    ) -> super::claude_agent_sdk::mcp_server_config::McpHttpServerConfig {
-        super::claude_agent_sdk::mcp_server_config::McpHttpServerConfig {
-            r#type: super::claude_agent_sdk::mcp_server_config::McpHttpServerConfigType::Http,
-            url: self.url(),
-            headers: None,
-        }
-    }
 }
 
 impl Drop for InventionServer {
