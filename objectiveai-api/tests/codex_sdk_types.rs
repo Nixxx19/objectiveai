@@ -541,3 +541,161 @@ fn turn_round_trips() {
     assert!(parsed.usage.is_some());
     assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
 }
+
+// ---------------------------------------------------------------------------
+// Input — Python's `Union[str, List[Union[UserInput, Dict[str, Any]]]]`
+// ---------------------------------------------------------------------------
+
+#[test]
+fn input_string_round_trips() {
+    let wire = json!("hello");
+    let parsed: Input = serde_json::from_value(wire.clone()).unwrap();
+    assert!(matches!(&parsed, Input::String(s) if s == "hello"));
+    assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
+}
+
+#[test]
+fn input_list_of_typed_user_inputs_round_trips() {
+    let wire = json!([
+        {"type": "text", "text": "first"},
+        {"type": "local_image", "path": "/tmp/x.png"},
+    ]);
+    let parsed: Input = serde_json::from_value(wire.clone()).unwrap();
+    let Input::List(items) = &parsed else { panic!("expected List variant") };
+    assert_eq!(items.len(), 2);
+    assert!(matches!(&items[0], UserInputOrJson::Typed(UserInput::Text(_))));
+    assert!(matches!(&items[1], UserInputOrJson::Typed(UserInput::LocalImage(_))));
+    assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
+}
+
+#[test]
+fn input_list_accepts_raw_json_dicts() {
+    // Python's `List[Union[UserInput, Dict[str, Any]]]` lets callers pass raw
+    // dicts that didn't go through TextInput/LocalImageInput construction.
+    let wire = json!([{"type": "future_input_kind", "blob": [1, 2, 3]}]);
+    let parsed: Input = serde_json::from_value(wire.clone()).unwrap();
+    let Input::List(items) = &parsed else { panic!("expected List variant") };
+    assert!(matches!(&items[0], UserInputOrJson::Raw(_)));
+    assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
+}
+
+// ---------------------------------------------------------------------------
+// CodexInstallResult — `install.py:19-23`
+// ---------------------------------------------------------------------------
+
+#[test]
+fn codex_install_result_constructs() {
+    let r = CodexInstallResult {
+        codex_path: "/usr/local/bin/codex".into(),
+        installed: true,
+    };
+    assert_eq!(r.codex_path, "/usr/local/bin/codex");
+    assert!(r.installed);
+}
+
+// ---------------------------------------------------------------------------
+// OutputSchemaFile — `output_schema_file.py:13-39`
+// ---------------------------------------------------------------------------
+
+#[test]
+fn output_schema_file_constructs_with_path() {
+    let f = OutputSchemaFile {
+        schema_path: Some("/tmp/codex-output-schema-abc/schema.json".into()),
+        dir: Some("/tmp/codex-output-schema-abc".into()),
+    };
+    assert!(f.schema_path.is_some());
+    assert!(f.dir.is_some());
+}
+
+#[test]
+fn output_schema_file_constructs_when_no_schema() {
+    // Mirrors `OutputSchemaFile(schema_path=None, _dir=None)` from
+    // `create_output_schema_file(schema=None)` in the Python SDK.
+    let f = OutputSchemaFile { schema_path: None, dir: None };
+    assert!(f.schema_path.is_none());
+    assert!(f.dir.is_none());
+}
+
+// ---------------------------------------------------------------------------
+// Abort family — pure data definitions, never serialized.
+// ---------------------------------------------------------------------------
+
+#[test]
+fn abort_signal_default_is_unset() {
+    let s = AbortSignal::default();
+    assert!(!s.aborted);
+    assert!(s.reason.is_none());
+}
+
+#[test]
+fn abort_signal_carries_arbitrary_reason() {
+    let s = AbortSignal {
+        aborted: true,
+        reason: Some(json!({"code": 408, "message": "user cancelled"})),
+    };
+    assert!(s.aborted);
+    assert_eq!(s.reason.as_ref().unwrap()["code"], 408);
+}
+
+#[test]
+fn abort_controller_owns_signal() {
+    let c = AbortController::default();
+    assert!(!c.signal.aborted);
+}
+
+#[test]
+fn abort_reason_constructs() {
+    let r = AbortReason { message: "user requested cancellation".into() };
+    assert_eq!(r.message, "user requested cancellation");
+}
+
+#[test]
+fn abort_error_implements_std_error() {
+    let e = AbortError { message: "Operation aborted".into() };
+    let as_err: &dyn std::error::Error = &e;
+    assert_eq!(as_err.to_string(), "Operation aborted");
+}
+
+// ---------------------------------------------------------------------------
+// TurnOptions.signal — `#[serde(skip)]`, never crosses the wire.
+// ---------------------------------------------------------------------------
+
+#[test]
+fn turn_options_signal_does_not_serialize() {
+    let opts = TurnOptions {
+        output_schema: Some(json!({"type": "object"})),
+        signal: Some(AbortSignal::default()),
+    };
+    let wire = serde_json::to_value(&opts).unwrap();
+    assert!(wire.get("signal").is_none(), "signal must be skipped on serialize");
+    assert_eq!(wire["output_schema"]["type"], "object");
+}
+
+#[test]
+fn turn_options_deserialize_ignores_signal_and_keeps_deny_unknown_fields() {
+    // signal is #[serde(skip)] — the wire must not contain it. Confirm a
+    // payload with NO signal still parses cleanly (regression check that
+    // skip didn't break round-trip), and a payload with an unknown OTHER
+    // field still gets rejected by deny_unknown_fields.
+    let ok: TurnOptions = serde_json::from_value(json!({"output_schema": {}})).unwrap();
+    assert!(ok.signal.is_none());
+
+    let err: Result<TurnOptions, _> =
+        serde_json::from_value(json!({"output_schema": {}, "rogue": 1}));
+    assert!(err.is_err(), "deny_unknown_fields still rejects unrecognised keys");
+}
+
+// ---------------------------------------------------------------------------
+// Error enum — full Python parity check.
+// ---------------------------------------------------------------------------
+
+#[test]
+fn error_variants_cover_all_codex_sdk_error_subclasses() {
+    // Exercise each variant's Display so nothing rots silently.
+    let parse: Error = serde_json::from_str::<serde_json::Value>("{").unwrap_err().into();
+    assert!(parse.to_string().contains("failed to parse"));
+    assert!(Error::Exec("nope".into()).to_string().contains("codex exec failed"));
+    assert!(Error::ThreadRun("boom".into()).to_string().contains("thread run error"));
+    assert!(Error::Install("nope".into()).to_string().contains("codex install failed"));
+    assert!(Error::Auth("nope".into()).to_string().contains("codex auth failed"));
+}
