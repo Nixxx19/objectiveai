@@ -19,6 +19,7 @@ import argparse
 import asyncio
 import json
 import sys
+import tempfile
 from typing import Any
 
 from openai_codex_sdk import (
@@ -185,29 +186,43 @@ async def run(args: argparse.Namespace) -> int:
     if not args.resume and not args.model:
         raise ValueError("--model is required unless --resume is given")
 
-    codex = Codex()
+    # Hardcoded sandboxing posture for headless / untrusted operation:
+    # - working_directory: a fresh empty temp dir so the codex binary has
+    #   somewhere to "live" without touching anything real. Cleaned up via
+    #   `tempfile.TemporaryDirectory`'s context-manager exit, which acts as
+    #   the trap on stream-end (normal exit, exception, or task cancel).
+    # - sandbox_mode = "read-only": no filesystem mutations.
+    # - approval_policy = "untrusted": codex never auto-approves anything.
+    # - skip_git_repo_check = True: the temp dir isn't a git repo and
+    #   shouldn't need to be.
+    with tempfile.TemporaryDirectory(prefix="objectiveai-codex-runner-") as tmpdir:
+        codex = Codex()
 
-    thread_options = _only_set({
-        "model": args.model,
-        "model_reasoning_effort": args.effort,
-        "web_search_enabled": args.web_search_enabled,
-    })
+        thread_options = _only_set({
+            "model": args.model,
+            "model_reasoning_effort": args.effort,
+            "web_search_enabled": args.web_search_enabled,
+            "working_directory": tmpdir,
+            "sandbox_mode": "read-only",
+            "approval_policy": "untrusted",
+            "skip_git_repo_check": True,
+        })
 
-    if args.resume:
-        thread = codex.resume_thread(args.resume, thread_options)
-    else:
-        thread = codex.start_thread(thread_options)
+        if args.resume:
+            thread = codex.resume_thread(args.resume, thread_options)
+        else:
+            thread = codex.start_thread(thread_options)
 
-    streamed = await thread.run_streamed(input_)
+        streamed = await thread.run_streamed(input_)
 
-    exit_code = 0
-    async for event in streamed.events:
-        _emit(_serialize_event(event))
-        event_type = getattr(event, "type", None)
-        if event_type == "turn.failed" or event_type == "error":
-            exit_code = 1
+        exit_code = 0
+        async for event in streamed.events:
+            _emit(_serialize_event(event))
+            event_type = getattr(event, "type", None)
+            if event_type == "turn.failed" or event_type == "error":
+                exit_code = 1
 
-    return exit_code
+        return exit_code
 
 
 def _silence_proactor_pipe_warnings() -> None:

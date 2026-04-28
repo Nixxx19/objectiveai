@@ -27,13 +27,6 @@ pub struct AgentBase {
     #[schemars(extend("omitempty" = true))]
     pub web_search_enabled: Option<bool>,
 
-    /// System prompt — concatenated into the input by the prompt builder.
-    /// Codex doesn't have a native system role; the api-side prompt step
-    /// renders this into the input string.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[schemars(extend("omitempty" = true))]
-    pub system_prompt: Option<String>,
-
     /// Rich content prepended to the user's prompt.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
@@ -59,10 +52,6 @@ impl AgentBase {
         };
         self.web_search_enabled = match self.web_search_enabled {
             Some(false) => None,
-            other => other,
-        };
-        self.system_prompt = match self.system_prompt.take() {
-            Some(system_prompt) if system_prompt.is_empty() => None,
             other => other,
         };
         self.prefix_content = match self.prefix_content.take() {
@@ -101,26 +90,18 @@ impl AgentBase {
         Ok(())
     }
 
-    /// Returns system prompt (if set) as a system message, then prefix content
-    /// (if set) as a user message, then the provided messages, then suffix
-    /// content (if set) as a user message.
+    /// Returns prefix content (if set) as a user message, then the provided
+    /// messages, then suffix content (if set) as a user message. Codex has
+    /// no native system role; system-prompt-style instructions belong on
+    /// the user message itself or in the calling layer's input rendering.
     pub fn merged_messages(
         &self,
         messages: Vec<super::super::completions::message::Message>,
     ) -> Vec<super::super::completions::message::Message> {
-        use super::super::completions::message::{
-            Message, SystemMessage, SimpleContent, UserMessage,
-        };
-        let system_len = if self.system_prompt.is_some() { 1 } else { 0 };
+        use super::super::completions::message::{Message, UserMessage};
         let prefix_len = if self.prefix_content.is_some() { 1 } else { 0 };
         let suffix_len = if self.suffix_content.is_some() { 1 } else { 0 };
-        let mut merged = Vec::with_capacity(system_len + prefix_len + messages.len() + suffix_len);
-        if let Some(system_prompt) = &self.system_prompt {
-            merged.push(Message::System(SystemMessage {
-                content: SimpleContent::Text(system_prompt.clone()),
-                name: None,
-            }));
-        }
+        let mut merged = Vec::with_capacity(prefix_len + messages.len() + suffix_len);
         let mut prefix_inserted = self.prefix_content.is_none();
         for msg in messages {
             if !prefix_inserted {
