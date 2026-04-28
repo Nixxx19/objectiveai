@@ -10,7 +10,7 @@ import (
 // A tool call request from an assistant.
 type McpToolToolUseContent struct {
 	// Extension metadata.
-	Meta *OrderedMap[string,JsonValue] `json:"_meta"`
+	Meta *OrderedMap[string,JsonValue] `json:"_meta,omitempty"`
 	// Unique identifier for this tool call.
 	ID string `json:"id"`
 	// Arguments to pass to the tool.

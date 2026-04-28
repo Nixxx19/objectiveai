@@ -6,13 +6,13 @@ import { McpSharedAnnotationsSchema } from "../shared/annotations";
 import { McpSharedIconSchema } from "../shared/icon";
 
 export const McpToolResourceLinkSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
-  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").optional(),
-  description: z.string().nullable().describe("A description of what this resource represents.").optional(),
-  icons: z.array(McpSharedIconSchema).nullable().describe("Icons for the resource link.").optional(),
-  mimeType: z.string().nullable().describe("The MIME type of this resource, if known.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").meta({ omitempty: true }).optional(),
+  description: z.string().nullable().describe("A description of what this resource represents.").meta({ omitempty: true }).optional(),
+  icons: z.array(McpSharedIconSchema).nullable().describe("Icons for the resource link.").meta({ omitempty: true }).optional(),
+  mimeType: z.string().nullable().describe("The MIME type of this resource, if known.").meta({ omitempty: true }).optional(),
   name: z.string().describe("The programmatic name of the resource."),
-  title: z.string().nullable().describe("A human-readable display name.").optional(),
+  title: z.string().nullable().describe("A human-readable display name.").meta({ omitempty: true }).optional(),
   uri: z.string().describe("The URI of this resource."),
 }).describe("A resource link included in a prompt or tool call result.").meta({ title: "mcp.tool.ResourceLink" });
 export type McpToolResourceLink = z.infer<typeof McpToolResourceLinkSchema>;

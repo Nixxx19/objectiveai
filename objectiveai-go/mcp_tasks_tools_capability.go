@@ -5,7 +5,7 @@ package objectiveai
 // Task capabilities for tool requests.
 type McpTasksToolsCapability struct {
 	// Present if tools/call supports task creation.
-	Call *McpTasksToolsCallCapability `json:"call"`
+	Call *McpTasksToolsCallCapability `json:"call,omitempty"`
 }
 
 func (McpTasksToolsCapability) SchemaTitle() string { return "mcp.TasksToolsCapability" }

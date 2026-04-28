@@ -10,7 +10,7 @@ import (
 // The server's response to a `resources/read` request.
 type McpResourceReadResourceResult struct {
 	// Extension metadata.
-	Meta *OrderedMap[string,JsonValue] `json:"_meta"`
+	Meta *OrderedMap[string,JsonValue] `json:"_meta,omitempty"`
 	// The contents of the resource.
 	Contents []McpSharedResourceContentsUnion `json:"contents"`
 }

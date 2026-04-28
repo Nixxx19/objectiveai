@@ -10,12 +10,12 @@ import { McpTasksCapabilitySchema } from "./tasksCapability";
 import { McpToolsCapabilitySchema } from "./toolsCapability";
 
 export const McpServerCapabilitiesSchema = z.object({
-  completions: McpCompletionsCapabilitySchema.nullable().describe("Completions support. Presence indicates the server supports completions.").optional(),
-  experimental: z.record(z.string(), JsonValueSchema).nullable().describe("Non-standard experimental capabilities.").optional(),
-  logging: McpLoggingCapabilitySchema.nullable().describe("Logging support. Presence indicates the server supports sending log messages.").optional(),
-  prompts: McpPromptsCapabilitySchema.nullable().describe("Prompt template capabilities.").optional(),
-  resources: McpResourcesCapabilitySchema.nullable().describe("Resource capabilities.").optional(),
-  tasks: McpTasksCapabilitySchema.nullable().describe("Task capabilities.").optional(),
-  tools: McpToolsCapabilitySchema.nullable().describe("Tool capabilities.").optional(),
+  completions: McpCompletionsCapabilitySchema.nullable().describe("Completions support. Presence indicates the server supports completions.").meta({ omitempty: true }).optional(),
+  experimental: z.record(z.string(), JsonValueSchema).nullable().describe("Non-standard experimental capabilities.").meta({ omitempty: true }).optional(),
+  logging: McpLoggingCapabilitySchema.nullable().describe("Logging support. Presence indicates the server supports sending log messages.").meta({ omitempty: true }).optional(),
+  prompts: McpPromptsCapabilitySchema.nullable().describe("Prompt template capabilities.").meta({ omitempty: true }).optional(),
+  resources: McpResourcesCapabilitySchema.nullable().describe("Resource capabilities.").meta({ omitempty: true }).optional(),
+  tasks: McpTasksCapabilitySchema.nullable().describe("Task capabilities.").meta({ omitempty: true }).optional(),
+  tools: McpToolsCapabilitySchema.nullable().describe("Tool capabilities.").meta({ omitempty: true }).optional(),
 }).describe("Capabilities that an MCP server may support.").meta({ title: "mcp.ServerCapabilities" });
 export type McpServerCapabilities = z.infer<typeof McpServerCapabilitiesSchema>;

@@ -12,9 +12,9 @@ class InitializeResult(BaseModel):
     """The server's response to an `initialize` request."""
     model_config = ConfigDict(title='mcp.InitializeResult')
 
-    _meta: Optional[dict[str, JsonValue]] = Field(None, description='Extension metadata.')
+    _meta: Optional[dict[str, JsonValue]] = Field(None, description='Extension metadata.', json_schema_extra={'omitempty': True})
     capabilities: ServerCapabilities = Field(..., description="The server's supported capabilities.")
-    instructions: Optional[str] = Field(None, description='Optional instructions for LLM integration.')
+    instructions: Optional[str] = Field(None, description='Optional instructions for LLM integration.', json_schema_extra={'omitempty': True})
     protocol_version: str = Field(..., alias='protocolVersion', description='The MCP protocol version the server wants to use.')
     server_info: Implementation = Field(..., alias='serverInfo', description='Information about the server implementation.')
 

@@ -10,9 +10,9 @@ import (
 // The contents of a resource, embedded into a prompt or tool call result.
 type McpToolEmbeddedResource struct {
 	// Extension metadata.
-	Meta *OrderedMap[string,JsonValue] `json:"_meta"`
+	Meta *OrderedMap[string,JsonValue] `json:"_meta,omitempty"`
 	// Optional annotations for the client.
-	Annotations *McpSharedAnnotations `json:"annotations"`
+	Annotations *McpSharedAnnotations `json:"annotations,omitempty"`
 	// The embedded resource contents.
 	Resource McpSharedResourceContentsUnion `json:"resource"`
 }

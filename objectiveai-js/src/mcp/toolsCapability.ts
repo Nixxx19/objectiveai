@@ -3,6 +3,6 @@
 import { z } from "zod";
 
 export const McpToolsCapabilitySchema = z.object({
-  listChanged: z.boolean().nullable().describe("Whether the server emits notifications when the tool list changes.").optional(),
+  listChanged: z.boolean().nullable().describe("Whether the server emits notifications when the tool list changes.").meta({ omitempty: true }).optional(),
 }).describe("Capabilities for tools.").meta({ title: "mcp.ToolsCapability" });
 export type McpToolsCapability = z.infer<typeof McpToolsCapabilitySchema>;

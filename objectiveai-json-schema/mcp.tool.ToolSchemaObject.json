@@ -4,13 +4,17 @@
   "type": "object",
   "properties": {
     "properties": {
-      "additionalProperties": true,
       "description": "Property definitions.",
-      "omitempty": true,
-      "type": [
-        "object",
-        "null"
-      ]
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": true
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
     },
     "required": {
       "description": "Required property names.",

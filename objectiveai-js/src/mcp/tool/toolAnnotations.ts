@@ -3,10 +3,10 @@
 import { z } from "zod";
 
 export const McpToolToolAnnotationsSchema = z.object({
-  destructiveHint: z.boolean().nullable().describe("If true, the tool may perform destructive updates.").optional(),
-  idempotentHint: z.boolean().nullable().describe("If true, calling the tool repeatedly with the same arguments\nhas no additional effect.").optional(),
-  openWorldHint: z.boolean().nullable().describe("If true, the tool interacts with the external world.").optional(),
-  readOnlyHint: z.boolean().nullable().describe("If true, the tool does not modify its environment.").optional(),
-  title: z.string().nullable().describe("A human-readable title for the tool.").optional(),
+  destructiveHint: z.boolean().nullable().describe("If true, the tool may perform destructive updates.").meta({ omitempty: true }).optional(),
+  idempotentHint: z.boolean().nullable().describe("If true, calling the tool repeatedly with the same arguments\nhas no additional effect.").meta({ omitempty: true }).optional(),
+  openWorldHint: z.boolean().nullable().describe("If true, the tool interacts with the external world.").meta({ omitempty: true }).optional(),
+  readOnlyHint: z.boolean().nullable().describe("If true, the tool does not modify its environment.").meta({ omitempty: true }).optional(),
+  title: z.string().nullable().describe("A human-readable title for the tool.").meta({ omitempty: true }).optional(),
 }).describe("Additional metadata about a tool to help clients decide how to display\nor control its use.").meta({ title: "mcp.tool.ToolAnnotations" });
 export type McpToolToolAnnotations = z.infer<typeof McpToolToolAnnotationsSchema>;

@@ -20,6 +20,7 @@ public partial class Implementation
     /// </summary>
     [Description("Optional description.")]
     [JsonPropertyName("description")]
+    [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
     public string? Description { get; set; } = null;
 
@@ -28,6 +29,7 @@ public partial class Implementation
     /// </summary>
     [Description("Optional icons for UI display.")]
     [JsonPropertyName("icons")]
+    [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
     public List<Icon>? Icons { get; set; } = null;
 
@@ -43,6 +45,7 @@ public partial class Implementation
     /// </summary>
     [Description("Human-readable title.")]
     [JsonPropertyName("title")]
+    [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
     public string? Title { get; set; } = null;
 
@@ -58,6 +61,7 @@ public partial class Implementation
     /// </summary>
     [Description("Optional website URL.")]
     [JsonPropertyName("websiteUrl")]
+    [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
     public string? WebsiteUrl { get; set; } = null;
 }

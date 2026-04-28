@@ -6,8 +6,8 @@ import { McpSharedAnnotationsSchema } from "../shared/annotations";
 import { McpSharedResourceContentsUnionSchema } from "../shared/resourceContentsUnion";
 
 export const McpToolEmbeddedResourceSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
-  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").meta({ omitempty: true }).optional(),
   resource: McpSharedResourceContentsUnionSchema.describe("The embedded resource contents."),
 }).describe("The contents of a resource, embedded into a prompt or tool call result.").meta({ title: "mcp.tool.EmbeddedResource" });
 export type McpToolEmbeddedResource = z.infer<typeof McpToolEmbeddedResourceSchema>;

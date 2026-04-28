@@ -4,9 +4,9 @@ import { z } from "zod";
 import { JsonValueSchema } from "../../jsonValue";
 
 export const McpSharedBlobResourceContentsSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
   blob: z.string().describe("A base64-encoded string representing the binary data."),
-  mimeType: z.string().nullable().describe("The MIME type of this resource, if known.").optional(),
+  mimeType: z.string().nullable().describe("The MIME type of this resource, if known.").meta({ omitempty: true }).optional(),
   uri: z.string().describe("The URI of this resource."),
 }).describe("Binary resource contents (base64-encoded).").meta({ title: "mcp.shared.BlobResourceContents" });
 export type McpSharedBlobResourceContents = z.infer<typeof McpSharedBlobResourceContentsSchema>;

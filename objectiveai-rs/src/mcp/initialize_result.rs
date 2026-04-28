@@ -127,13 +127,13 @@ pub struct ToolsCapability {
 /// Marker capability for logging support. Presence indicates the server
 /// supports sending log messages to the client.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "mcp.LoggingCapability")]
+#[schemars(rename = "mcp.LoggingCapability", extend("additionalProperties" = false))]
 pub struct LoggingCapability {}
 
 /// Marker capability for completions support. Presence indicates the server
 /// supports argument value completions.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "mcp.CompletionsCapability")]
+#[schemars(rename = "mcp.CompletionsCapability", extend("additionalProperties" = false))]
 pub struct CompletionsCapability {}
 
 /// Capabilities for task creation and management.
@@ -156,12 +156,12 @@ pub struct TasksCapability {
 
 /// Marker capability for task listing support.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "mcp.TasksListCapability")]
+#[schemars(rename = "mcp.TasksListCapability", extend("additionalProperties" = false))]
 pub struct TasksListCapability {}
 
 /// Marker capability for task cancellation support.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "mcp.TasksCancelCapability")]
+#[schemars(rename = "mcp.TasksCancelCapability", extend("additionalProperties" = false))]
 pub struct TasksCancelCapability {}
 
 /// Task creation capabilities scoped to request types.
@@ -186,5 +186,5 @@ pub struct TasksToolsCapability {
 
 /// Marker capability for tools/call task creation support.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "mcp.TasksToolsCallCapability")]
+#[schemars(rename = "mcp.TasksToolsCallCapability", extend("additionalProperties" = false))]
 pub struct TasksToolsCallCapability {}

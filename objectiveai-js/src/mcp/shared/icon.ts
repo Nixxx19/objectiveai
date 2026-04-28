@@ -4,9 +4,9 @@ import { z } from "zod";
 import { McpSharedIconThemeSchema } from "./iconTheme";
 
 export const McpSharedIconSchema = z.object({
-  mimeType: z.string().nullable().describe("MIME type for the icon.").optional(),
-  sizes: z.array(z.string()).nullable().describe("Sizes at which the icon can be used (e.g., \"48x48\", \"96x96\", \"any\").").optional(),
+  mimeType: z.string().nullable().describe("MIME type for the icon.").meta({ omitempty: true }).optional(),
+  sizes: z.array(z.string()).nullable().describe("Sizes at which the icon can be used (e.g., \"48x48\", \"96x96\", \"any\").").meta({ omitempty: true }).optional(),
   src: z.string().describe("URL or data URI for the icon."),
-  theme: McpSharedIconThemeSchema.nullable().describe("Theme this icon is intended for.").optional(),
+  theme: McpSharedIconThemeSchema.nullable().describe("Theme this icon is intended for.").meta({ omitempty: true }).optional(),
 }).describe("An icon that can be displayed in a user interface.").meta({ title: "mcp.shared.Icon" });
 export type McpSharedIcon = z.infer<typeof McpSharedIconSchema>;

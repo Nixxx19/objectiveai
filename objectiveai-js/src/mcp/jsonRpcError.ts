@@ -5,7 +5,7 @@ import { JsonValueSchema } from "../jsonValue";
 
 export const McpJsonRpcErrorSchema = z.object({
   code: z.number().int().min(-9223372036854776000).max(9223372036854776000),
-  data: JsonValueSchema,
+  data: JsonValueSchema.meta({ omitempty: true }),
   message: z.string(),
 }).describe("JSON-RPC 2.0 error object.").meta({ title: "mcp.JsonRpcError" });
 export type McpJsonRpcError = z.infer<typeof McpJsonRpcErrorSchema>;

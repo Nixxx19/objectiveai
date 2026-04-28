@@ -21,6 +21,7 @@ public partial class InitializeResult
     [Description("Extension metadata.")]
     [JsonPropertyName("_meta")]
     [JsonSchemaAdditionalPropertiesSchema("true")]
+    [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
     public Dictionary<string, JsonElement>? Meta { get; set; } = null;
 
@@ -36,6 +37,7 @@ public partial class InitializeResult
     /// </summary>
     [Description("Optional instructions for LLM integration.")]
     [JsonPropertyName("instructions")]
+    [JsonSchemaOmitEmpty]
     [JsonSchemaNullable]
     public string? Instructions { get; set; } = null;
 

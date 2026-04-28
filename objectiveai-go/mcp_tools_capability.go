@@ -5,7 +5,7 @@ package objectiveai
 // Capabilities for tools.
 type McpToolsCapability struct {
 	// Whether the server emits notifications when the tool list changes.
-	ListChanged *bool `json:"listChanged"`
+	ListChanged *bool `json:"listChanged,omitempty"`
 }
 
 func (McpToolsCapability) SchemaTitle() string { return "mcp.ToolsCapability" }

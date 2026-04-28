@@ -5,9 +5,9 @@ package objectiveai
 // Capabilities for resources.
 type McpResourcesCapability struct {
 	// Whether the server emits notifications when the resource list changes.
-	ListChanged *bool `json:"listChanged"`
+	ListChanged *bool `json:"listChanged,omitempty"`
 	// Whether the server supports resource subscriptions.
-	Subscribe *bool `json:"subscribe"`
+	Subscribe *bool `json:"subscribe,omitempty"`
 }
 
 func (McpResourcesCapability) SchemaTitle() string { return "mcp.ResourcesCapability" }

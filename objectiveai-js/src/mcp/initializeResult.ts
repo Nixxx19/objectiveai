@@ -6,9 +6,9 @@ import { McpImplementationSchema } from "./implementation";
 import { McpServerCapabilitiesSchema } from "./serverCapabilities";
 
 export const McpInitializeResultSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
   capabilities: McpServerCapabilitiesSchema.describe("The server's supported capabilities."),
-  instructions: z.string().nullable().describe("Optional instructions for LLM integration.").optional(),
+  instructions: z.string().nullable().describe("Optional instructions for LLM integration.").meta({ omitempty: true }).optional(),
   protocolVersion: z.string().describe("The MCP protocol version the server wants to use."),
   serverInfo: McpImplementationSchema.describe("Information about the server implementation."),
 }).describe("The server's response to an `initialize` request.").meta({ title: "mcp.InitializeResult" });

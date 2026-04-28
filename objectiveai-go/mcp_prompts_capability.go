@@ -5,7 +5,7 @@ package objectiveai
 // Capabilities for prompt templates.
 type McpPromptsCapability struct {
 	// Whether the server emits notifications when the prompt list changes.
-	ListChanged *bool `json:"listChanged"`
+	ListChanged *bool `json:"listChanged,omitempty"`
 }
 
 func (McpPromptsCapability) SchemaTitle() string { return "mcp.PromptsCapability" }

@@ -5,7 +5,7 @@ package objectiveai
 // Task creation capabilities scoped to request types.
 type McpTasksRequestsCapability struct {
 	// Task support for tool-related requests.
-	Tools *McpTasksToolsCapability `json:"tools"`
+	Tools *McpTasksToolsCapability `json:"tools,omitempty"`
 }
 
 func (McpTasksRequestsCapability) SchemaTitle() string { return "mcp.TasksRequestsCapability" }

@@ -10,13 +10,13 @@ import (
 // Parameters for a `tools/call` request.
 type McpToolCallToolRequestParams struct {
 	// Extension metadata.
-	Meta *OrderedMap[string,JsonValue] `json:"_meta"`
+	Meta *OrderedMap[string,JsonValue] `json:"_meta,omitempty"`
 	// Arguments to pass to the tool.
-	Arguments *OrderedMap[string,JsonValue] `json:"arguments"`
+	Arguments *OrderedMap[string,JsonValue] `json:"arguments,omitempty"`
 	// The name of the tool to call.
 	Name string `json:"name"`
 	// If specified, the caller is requesting task-augmented execution.
-	Task *McpToolTaskMetadata `json:"task"`
+	Task *McpToolTaskMetadata `json:"task,omitempty"`
 }
 
 func (McpToolCallToolRequestParams) SchemaTitle() string { return "mcp.tool.CallToolRequestParams" }

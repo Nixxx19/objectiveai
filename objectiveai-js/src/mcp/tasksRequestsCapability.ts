@@ -4,6 +4,6 @@ import { z } from "zod";
 import { McpTasksToolsCapabilitySchema } from "./tasksToolsCapability";
 
 export const McpTasksRequestsCapabilitySchema = z.object({
-  tools: McpTasksToolsCapabilitySchema.nullable().describe("Task support for tool-related requests.").optional(),
+  tools: McpTasksToolsCapabilitySchema.nullable().describe("Task support for tool-related requests.").meta({ omitempty: true }).optional(),
 }).describe("Task creation capabilities scoped to request types.").meta({ title: "mcp.TasksRequestsCapability" });
 export type McpTasksRequestsCapability = z.infer<typeof McpTasksRequestsCapabilitySchema>;

@@ -6,6 +6,6 @@ import { JsonValueSchema } from "../jsonValue";
 export const McpJsonRpcNotificationSchema = z.object({
   jsonrpc: z.string(),
   method: z.string(),
-  params: JsonValueSchema,
+  params: JsonValueSchema.meta({ omitempty: true }),
 }).describe("JSON-RPC 2.0 notification (no `id` field).").meta({ title: "mcp.JsonRpcNotification" });
 export type McpJsonRpcNotification = z.infer<typeof McpJsonRpcNotificationSchema>;

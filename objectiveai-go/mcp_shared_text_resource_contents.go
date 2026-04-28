@@ -10,9 +10,9 @@ import (
 // Text resource contents.
 type McpSharedTextResourceContents struct {
 	// Extension metadata.
-	Meta *OrderedMap[string,JsonValue] `json:"_meta"`
+	Meta *OrderedMap[string,JsonValue] `json:"_meta,omitempty"`
 	// The MIME type of this resource, if known.
-	MimeType *string `json:"mimeType"`
+	MimeType *string `json:"mimeType,omitempty"`
 	// The text of the item.
 	Text string `json:"text"`
 	// The URI of this resource.

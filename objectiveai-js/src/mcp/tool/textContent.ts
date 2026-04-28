@@ -5,8 +5,8 @@ import { JsonValueSchema } from "../../jsonValue";
 import { McpSharedAnnotationsSchema } from "../shared/annotations";
 
 export const McpToolTextContentSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
-  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").meta({ omitempty: true }).optional(),
   text: z.string().describe("The text content of the message."),
 }).describe("Text content.").meta({ title: "mcp.tool.TextContent" });
 export type McpToolTextContent = z.infer<typeof McpToolTextContentSchema>;

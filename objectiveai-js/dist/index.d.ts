@@ -93625,13 +93625,13 @@ declare const McpToolListToolsResultSchema: z.ZodObject<{
             theme: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"light">, z.ZodLiteral<"dark">]>>>;
         }, z.core.$strip>>>>;
         inputSchema: z.ZodObject<{
-            properties: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+            properties: z.ZodOptional<z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>>>>;
             required: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodString>>>;
             type: z.ZodLiteral<"object">;
         }, z.core.$strip>;
         name: z.ZodString;
         outputSchema: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            properties: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+            properties: z.ZodOptional<z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>>>>;
             required: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodString>>>;
             type: z.ZodLiteral<"object">;
         }, z.core.$strip>>>;
@@ -93700,13 +93700,13 @@ declare const McpToolToolSchema: z.ZodObject<{
         theme: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"light">, z.ZodLiteral<"dark">]>>>;
     }, z.core.$strip>>>>;
     inputSchema: z.ZodObject<{
-        properties: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+        properties: z.ZodOptional<z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>>>>;
         required: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodString>>>;
         type: z.ZodLiteral<"object">;
     }, z.core.$strip>;
     name: z.ZodString;
     outputSchema: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-        properties: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+        properties: z.ZodOptional<z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>>>>;
         required: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodString>>>;
         type: z.ZodLiteral<"object">;
     }, z.core.$strip>>>;
@@ -93810,7 +93810,7 @@ declare const McpToolToolResultContentSchema: z.ZodObject<{
 type McpToolToolResultContent = z.infer<typeof McpToolToolResultContentSchema>;
 
 declare const McpToolToolSchemaObjectSchema: z.ZodObject<{
-    properties: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+    properties: z.ZodOptional<z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>>>>;
     required: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodString>>>;
     type: z.ZodLiteral<"object">;
 }, z.core.$strip>;
@@ -93827,7 +93827,7 @@ declare const McpToolToolUseContentSchema: z.ZodObject<{
 }, z.core.$strip>;
 type McpToolToolUseContent = z.infer<typeof McpToolToolUseContentSchema>;
 
-declare const McpCompletionsCapabilitySchema: z.ZodObject<{}, z.core.$strip>;
+declare const McpCompletionsCapabilitySchema: z.ZodObject<{}, z.core.$strict>;
 type McpCompletionsCapability = z.infer<typeof McpCompletionsCapabilitySchema>;
 
 declare const McpImplementationSchema: z.ZodObject<{
@@ -93848,9 +93848,9 @@ type McpImplementation = z.infer<typeof McpImplementationSchema>;
 declare const McpInitializeResultSchema: z.ZodObject<{
     _meta: z.ZodOptional<z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>>>>;
     capabilities: z.ZodObject<{
-        completions: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strip>>>;
+        completions: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strict>>>;
         experimental: z.ZodOptional<z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>>>>;
-        logging: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strip>>>;
+        logging: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strict>>>;
         prompts: z.ZodOptional<z.ZodNullable<z.ZodObject<{
             listChanged: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         }, z.core.$strip>>>;
@@ -93859,11 +93859,11 @@ declare const McpInitializeResultSchema: z.ZodObject<{
             subscribe: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         }, z.core.$strip>>>;
         tasks: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            cancel: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strip>>>;
-            list: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strip>>>;
+            cancel: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strict>>>;
+            list: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strict>>>;
             requests: z.ZodOptional<z.ZodNullable<z.ZodObject<{
                 tools: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                    call: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strip>>>;
+                    call: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strict>>>;
                 }, z.core.$strip>>>;
             }, z.core.$strip>>>;
         }, z.core.$strip>>>;
@@ -93911,7 +93911,7 @@ declare const McpJsonRpcRequestSchema: z.ZodObject<{
 }, z.core.$strip>;
 type McpJsonRpcRequest = z.infer<typeof McpJsonRpcRequestSchema>;
 
-declare const McpLoggingCapabilitySchema: z.ZodObject<{}, z.core.$strip>;
+declare const McpLoggingCapabilitySchema: z.ZodObject<{}, z.core.$strict>;
 type McpLoggingCapability = z.infer<typeof McpLoggingCapabilitySchema>;
 
 declare const McpPromptsCapabilitySchema: z.ZodObject<{
@@ -93926,9 +93926,9 @@ declare const McpResourcesCapabilitySchema: z.ZodObject<{
 type McpResourcesCapability = z.infer<typeof McpResourcesCapabilitySchema>;
 
 declare const McpServerCapabilitiesSchema: z.ZodObject<{
-    completions: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strip>>>;
+    completions: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strict>>>;
     experimental: z.ZodOptional<z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>>>>;
-    logging: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strip>>>;
+    logging: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strict>>>;
     prompts: z.ZodOptional<z.ZodNullable<z.ZodObject<{
         listChanged: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     }, z.core.$strip>>>;
@@ -93937,11 +93937,11 @@ declare const McpServerCapabilitiesSchema: z.ZodObject<{
         subscribe: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     }, z.core.$strip>>>;
     tasks: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-        cancel: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strip>>>;
-        list: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strip>>>;
+        cancel: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strict>>>;
+        list: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strict>>>;
         requests: z.ZodOptional<z.ZodNullable<z.ZodObject<{
             tools: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                call: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strip>>>;
+                call: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strict>>>;
             }, z.core.$strip>>>;
         }, z.core.$strip>>>;
     }, z.core.$strip>>>;
@@ -93951,35 +93951,35 @@ declare const McpServerCapabilitiesSchema: z.ZodObject<{
 }, z.core.$strip>;
 type McpServerCapabilities = z.infer<typeof McpServerCapabilitiesSchema>;
 
-declare const McpTasksCancelCapabilitySchema: z.ZodObject<{}, z.core.$strip>;
+declare const McpTasksCancelCapabilitySchema: z.ZodObject<{}, z.core.$strict>;
 type McpTasksCancelCapability = z.infer<typeof McpTasksCancelCapabilitySchema>;
 
 declare const McpTasksCapabilitySchema: z.ZodObject<{
-    cancel: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strip>>>;
-    list: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strip>>>;
+    cancel: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strict>>>;
+    list: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strict>>>;
     requests: z.ZodOptional<z.ZodNullable<z.ZodObject<{
         tools: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            call: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strip>>>;
+            call: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strict>>>;
         }, z.core.$strip>>>;
     }, z.core.$strip>>>;
 }, z.core.$strip>;
 type McpTasksCapability = z.infer<typeof McpTasksCapabilitySchema>;
 
-declare const McpTasksListCapabilitySchema: z.ZodObject<{}, z.core.$strip>;
+declare const McpTasksListCapabilitySchema: z.ZodObject<{}, z.core.$strict>;
 type McpTasksListCapability = z.infer<typeof McpTasksListCapabilitySchema>;
 
 declare const McpTasksRequestsCapabilitySchema: z.ZodObject<{
     tools: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-        call: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strip>>>;
+        call: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strict>>>;
     }, z.core.$strip>>>;
 }, z.core.$strip>;
 type McpTasksRequestsCapability = z.infer<typeof McpTasksRequestsCapabilitySchema>;
 
-declare const McpTasksToolsCallCapabilitySchema: z.ZodObject<{}, z.core.$strip>;
+declare const McpTasksToolsCallCapabilitySchema: z.ZodObject<{}, z.core.$strict>;
 type McpTasksToolsCallCapability = z.infer<typeof McpTasksToolsCallCapabilitySchema>;
 
 declare const McpTasksToolsCapabilitySchema: z.ZodObject<{
-    call: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strip>>>;
+    call: z.ZodOptional<z.ZodNullable<z.ZodObject<{}, z.core.$strict>>>;
 }, z.core.$strip>;
 type McpTasksToolsCapability = z.infer<typeof McpTasksToolsCapabilitySchema>;
 

@@ -8,14 +8,14 @@ import { McpToolToolExecutionSchema } from "./toolExecution";
 import { McpToolToolSchemaObjectSchema } from "./toolSchemaObject";
 
 export const McpToolToolSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
-  annotations: McpToolToolAnnotationsSchema.nullable().describe("Additional tool metadata.").optional(),
-  description: z.string().nullable().describe("A human-readable description of the tool.").optional(),
-  execution: McpToolToolExecutionSchema.nullable().describe("Execution-related properties.").optional(),
-  icons: z.array(McpSharedIconSchema).nullable().describe("Icons for the tool.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  annotations: McpToolToolAnnotationsSchema.nullable().describe("Additional tool metadata.").meta({ omitempty: true }).optional(),
+  description: z.string().nullable().describe("A human-readable description of the tool.").meta({ omitempty: true }).optional(),
+  execution: McpToolToolExecutionSchema.nullable().describe("Execution-related properties.").meta({ omitempty: true }).optional(),
+  icons: z.array(McpSharedIconSchema).nullable().describe("Icons for the tool.").meta({ omitempty: true }).optional(),
   inputSchema: McpToolToolSchemaObjectSchema.describe("JSON Schema defining the expected input parameters.\nMust have `type: \"object\"` at the root level."),
   name: z.string().describe("The programmatic name of the tool."),
-  outputSchema: McpToolToolSchemaObjectSchema.nullable().describe("JSON Schema defining the structure of the tool's output\n(returned in `structuredContent`).").optional(),
-  title: z.string().nullable().describe("A human-readable display name.").optional(),
+  outputSchema: McpToolToolSchemaObjectSchema.nullable().describe("JSON Schema defining the structure of the tool's output\n(returned in `structuredContent`).").meta({ omitempty: true }).optional(),
+  title: z.string().nullable().describe("A human-readable display name.").meta({ omitempty: true }).optional(),
 }).describe("A tool that an MCP server exposes for invocation.").meta({ title: "mcp.tool.Tool" });
 export type McpToolTool = z.infer<typeof McpToolToolSchema>;

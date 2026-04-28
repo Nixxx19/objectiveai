@@ -10,9 +10,9 @@ import (
 // Text content.
 type McpToolTextContent struct {
 	// Extension metadata.
-	Meta *OrderedMap[string,JsonValue] `json:"_meta"`
+	Meta *OrderedMap[string,JsonValue] `json:"_meta,omitempty"`
 	// Optional annotations for the client.
-	Annotations *McpSharedAnnotations `json:"annotations"`
+	Annotations *McpSharedAnnotations `json:"annotations,omitempty"`
 	// The text content of the message.
 	Text string `json:"text"`
 }

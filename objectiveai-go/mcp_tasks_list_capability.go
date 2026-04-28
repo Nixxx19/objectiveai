@@ -3,6 +3,8 @@
 package objectiveai
 
 // Marker capability for task listing support.
-type McpTasksListCapability OrderedMap[string,JsonValue]
+type McpTasksListCapability struct{}
 
 func (McpTasksListCapability) SchemaTitle() string { return "mcp.TasksListCapability" }
+
+func (McpTasksListCapability) AdditionalProperties() bool { return false }

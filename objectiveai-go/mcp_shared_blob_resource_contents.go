@@ -10,11 +10,11 @@ import (
 // Binary resource contents (base64-encoded).
 type McpSharedBlobResourceContents struct {
 	// Extension metadata.
-	Meta *OrderedMap[string,JsonValue] `json:"_meta"`
+	Meta *OrderedMap[string,JsonValue] `json:"_meta,omitempty"`
 	// A base64-encoded string representing the binary data.
 	Blob string `json:"blob"`
 	// The MIME type of this resource, if known.
-	MimeType *string `json:"mimeType"`
+	MimeType *string `json:"mimeType,omitempty"`
 	// The URI of this resource.
 	URI string `json:"uri"`
 }

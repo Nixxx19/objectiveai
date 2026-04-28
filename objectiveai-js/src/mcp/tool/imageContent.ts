@@ -5,8 +5,8 @@ import { JsonValueSchema } from "../../jsonValue";
 import { McpSharedAnnotationsSchema } from "../shared/annotations";
 
 export const McpToolImageContentSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
-  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").meta({ omitempty: true }).optional(),
   data: z.string().describe("The base64-encoded image data."),
   mimeType: z.string().describe("The MIME type of the image."),
 }).describe("Image content (base64-encoded).").meta({ title: "mcp.tool.ImageContent" });

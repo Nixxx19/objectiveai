@@ -5,11 +5,11 @@ package objectiveai
 // Capabilities for task creation and management.
 type McpTasksCapability struct {
 	// Present if the server supports cancelling tasks.
-	Cancel *McpTasksCancelCapability `json:"cancel"`
+	Cancel *McpTasksCancelCapability `json:"cancel,omitempty"`
 	// Present if the server supports listing tasks.
-	List *McpTasksListCapability `json:"list"`
+	List *McpTasksListCapability `json:"list,omitempty"`
 	// Task creation capabilities for specific request types.
-	Requests *McpTasksRequestsCapability `json:"requests"`
+	Requests *McpTasksRequestsCapability `json:"requests,omitempty"`
 }
 
 func (McpTasksCapability) SchemaTitle() string { return "mcp.TasksCapability" }

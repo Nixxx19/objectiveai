@@ -4,6 +4,6 @@ import { z } from "zod";
 import { McpToolTaskSupportSchema } from "./taskSupport";
 
 export const McpToolToolExecutionSchema = z.object({
-  taskSupport: McpToolTaskSupportSchema.nullable().describe("Indicates the tool's preference for task-augmented execution.\nDefaults to \"forbidden\" if not present.").optional(),
+  taskSupport: McpToolTaskSupportSchema.nullable().describe("Indicates the tool's preference for task-augmented execution.\nDefaults to \"forbidden\" if not present.").meta({ omitempty: true }).optional(),
 }).describe("Execution-related properties for a tool.").meta({ title: "mcp.tool.ToolExecution" });
 export type McpToolToolExecution = z.infer<typeof McpToolToolExecutionSchema>;

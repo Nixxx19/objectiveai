@@ -16,6 +16,7 @@ Marker capability for completions support. Presence indicates the server
 supports argument value completions.
 """)]
 [JsonSchemaTitle("mcp.CompletionsCapability")]
+[JsonSchemaAdditionalProperties(false)]
 public partial class CompletionsCapability
 {
 }

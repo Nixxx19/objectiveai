@@ -3,6 +3,8 @@
 package objectiveai
 
 // Marker capability for tools/call task creation support.
-type McpTasksToolsCallCapability OrderedMap[string,JsonValue]
+type McpTasksToolsCallCapability struct{}
 
 func (McpTasksToolsCallCapability) SchemaTitle() string { return "mcp.TasksToolsCallCapability" }
+
+func (McpTasksToolsCallCapability) AdditionalProperties() bool { return false }

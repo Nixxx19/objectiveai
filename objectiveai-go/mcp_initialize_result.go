@@ -10,11 +10,11 @@ import (
 // The server's response to an `initialize` request.
 type McpInitializeResult struct {
 	// Extension metadata.
-	Meta *OrderedMap[string,JsonValue] `json:"_meta"`
+	Meta *OrderedMap[string,JsonValue] `json:"_meta,omitempty"`
 	// The server's supported capabilities.
 	Capabilities McpServerCapabilities `json:"capabilities"`
 	// Optional instructions for LLM integration.
-	Instructions *string `json:"instructions"`
+	Instructions *string `json:"instructions,omitempty"`
 	// The MCP protocol version the server wants to use.
 	ProtocolVersion string `json:"protocolVersion"`
 	// Information about the server implementation.

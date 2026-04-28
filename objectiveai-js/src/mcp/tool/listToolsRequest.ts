@@ -3,6 +3,6 @@
 import { z } from "zod";
 
 export const McpToolListToolsRequestSchema = z.object({
-  cursor: z.string().nullable().describe("An opaque cursor for pagination.").optional(),
+  cursor: z.string().nullable().describe("An opaque cursor for pagination.").meta({ omitempty: true }).optional(),
 }).describe("Parameters for a `tools/list` request.").meta({ title: "mcp.tool.ListToolsRequest" });
 export type McpToolListToolsRequest = z.infer<typeof McpToolListToolsRequestSchema>;

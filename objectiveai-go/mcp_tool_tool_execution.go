@@ -6,7 +6,7 @@ package objectiveai
 type McpToolToolExecution struct {
 	// Indicates the tool's preference for task-augmented execution.
 	// Defaults to "forbidden" if not present.
-	TaskSupport *McpToolTaskSupport `json:"taskSupport"`
+	TaskSupport *McpToolTaskSupport `json:"taskSupport,omitempty"`
 }
 
 func (McpToolToolExecution) SchemaTitle() string { return "mcp.tool.ToolExecution" }

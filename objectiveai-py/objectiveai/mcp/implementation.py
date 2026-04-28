@@ -10,10 +10,10 @@ class Implementation(BaseModel):
     """Information about a client or server implementation."""
     model_config = ConfigDict(title='mcp.Implementation')
 
-    description: Optional[str] = Field(None, description='Optional description.')
-    icons: Optional[list[Icon]] = Field(None, description='Optional icons for UI display.')
+    description: Optional[str] = Field(None, description='Optional description.', json_schema_extra={'omitempty': True})
+    icons: Optional[list[Icon]] = Field(None, description='Optional icons for UI display.', json_schema_extra={'omitempty': True})
     name: str = Field(..., description='The implementation name.')
-    title: Optional[str] = Field(None, description='Human-readable title.')
+    title: Optional[str] = Field(None, description='Human-readable title.', json_schema_extra={'omitempty': True})
     version: str = Field(..., description='The implementation version.')
-    website_url: Optional[str] = Field(None, alias='websiteUrl', description='Optional website URL.')
+    website_url: Optional[str] = Field(None, alias='websiteUrl', description='Optional website URL.', json_schema_extra={'omitempty': True})
 

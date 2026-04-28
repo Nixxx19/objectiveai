@@ -4,6 +4,8 @@ package objectiveai
 
 // Marker capability for completions support. Presence indicates the server
 // supports argument value completions.
-type McpCompletionsCapability OrderedMap[string,JsonValue]
+type McpCompletionsCapability struct{}
 
 func (McpCompletionsCapability) SchemaTitle() string { return "mcp.CompletionsCapability" }
+
+func (McpCompletionsCapability) AdditionalProperties() bool { return false }

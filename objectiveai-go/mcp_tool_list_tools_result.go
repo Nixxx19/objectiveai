@@ -10,9 +10,9 @@ import (
 // The server's response to a `tools/list` request.
 type McpToolListToolsResult struct {
 	// Extension metadata.
-	Meta *OrderedMap[string,JsonValue] `json:"_meta"`
+	Meta *OrderedMap[string,JsonValue] `json:"_meta,omitempty"`
 	// An opaque cursor for fetching the next page.
-	NextCursor *string `json:"nextCursor"`
+	NextCursor *string `json:"nextCursor,omitempty"`
 	// The list of tools available on the server.
 	Tools []McpToolTool `json:"tools"`
 }

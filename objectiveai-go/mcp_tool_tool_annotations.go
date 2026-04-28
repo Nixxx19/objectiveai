@@ -6,16 +6,16 @@ package objectiveai
 // or control its use.
 type McpToolToolAnnotations struct {
 	// If true, the tool may perform destructive updates.
-	DestructiveHint *bool `json:"destructiveHint"`
+	DestructiveHint *bool `json:"destructiveHint,omitempty"`
 	// If true, calling the tool repeatedly with the same arguments
 	// has no additional effect.
-	IdempotentHint *bool `json:"idempotentHint"`
+	IdempotentHint *bool `json:"idempotentHint,omitempty"`
 	// If true, the tool interacts with the external world.
-	OpenWorldHint *bool `json:"openWorldHint"`
+	OpenWorldHint *bool `json:"openWorldHint,omitempty"`
 	// If true, the tool does not modify its environment.
-	ReadOnlyHint *bool `json:"readOnlyHint"`
+	ReadOnlyHint *bool `json:"readOnlyHint,omitempty"`
 	// A human-readable title for the tool.
-	Title *string `json:"title"`
+	Title *string `json:"title,omitempty"`
 }
 
 func (McpToolToolAnnotations) SchemaTitle() string { return "mcp.tool.ToolAnnotations" }

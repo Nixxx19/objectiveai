@@ -473,7 +473,11 @@ where
         let internal_conn_for_resume = internal_conn.clone();
 
         let connect_handles: Vec<
-            tokio::task::JoinHandle<Result<objectiveai::mcp::Connection, objectiveai::mcp::Error>>,
+            Option<
+                tokio::task::JoinHandle<
+                    Result<objectiveai::mcp::Connection, objectiveai::mcp::Error>,
+                >,
+            >,
         > = filtered_agents
             .iter()
             .map(|agent| {
@@ -485,6 +489,15 @@ where
                     .unwrap_or_default();
                 if let Some(u) = &invention_url {
                     urls.push(u.clone());
+                }
+
+                // No MCP servers and no invention server → no proxy
+                // connection needed for this agent. Skipping the spawn
+                // also keeps the per-agent proxy session out of the
+                // response continuation's `mcp_sessions` map for
+                // requests that don't use MCP at all.
+                if urls.is_empty() {
+                    return None;
                 }
 
                 let mut auth_map: indexmap::IndexMap<String, String> =
@@ -526,21 +539,24 @@ where
                 let session_id = internal_conn_for_resume
                     .as_ref()
                     .map(|c| c.session_id.clone());
-                tokio::spawn(async move {
+                Some(tokio::spawn(async move {
                     mcp_client
                         .connect(proxy_url, None, session_id, extra_headers)
                         .await
-                })
+                }))
             })
             .collect();
 
         // 7. Build agent attempts. Each holds its own connect-handle
-        //    JoinHandle index; the actual `await` happens inside the
-        //    per-agent branch in step 8 below.
+        //    JoinHandle (or None when the agent has no MCP work);
+        //    the actual `await` happens inside the per-agent branch
+        //    in step 8 below.
         struct AgentAttempt {
             agent: objectiveai::agent::InlineAgent,
-            connect_handle: tokio::task::JoinHandle<
-                Result<objectiveai::mcp::Connection, objectiveai::mcp::Error>,
+            connect_handle: Option<
+                tokio::task::JoinHandle<
+                    Result<objectiveai::mcp::Connection, objectiveai::mcp::Error>,
+                >,
             >,
         }
         let mut attempts: Vec<AgentAttempt> = filtered_agents
@@ -577,21 +593,11 @@ where
                 // handles here is cheap on later retry iterations.
                 if !attempt_connect_done[idx] {
                     attempt_connect_done[idx] = true;
-                    // We need to take the JoinHandle out (can't await
-                    // through `&mut`). Replace with a dummy spawn — only
-                    // ever awaited again if `attempt_connect_done` was
-                    // somehow flipped back, which we never do.
-                    let handle = std::mem::replace(
-                        &mut attempt.connect_handle,
-                        tokio::spawn(async {
-                            Err(objectiveai::mcp::Error::MissingAuthorization(
-                                "<consumed>".into(),
-                            ))
-                        }),
-                    );
-                    match handle.await.unwrap() {
-                        Ok(conn) => attempt_connections[idx] = Some(conn),
-                        Err(e) => errors.push(super::Error::McpConnection(e)),
+                    if let Some(handle) = attempt.connect_handle.take() {
+                        match handle.await.unwrap() {
+                            Ok(conn) => attempt_connections[idx] = Some(conn),
+                            Err(e) => errors.push(super::Error::McpConnection(e)),
+                        }
                     }
                 }
                 // An agent whose declared MCP servers are empty has no

@@ -10,17 +10,17 @@ import (
 // Information about a client or server implementation.
 type McpImplementation struct {
 	// Optional description.
-	Description *string `json:"description"`
+	Description *string `json:"description,omitempty"`
 	// Optional icons for UI display.
-	Icons *[]McpSharedIcon `json:"icons"`
+	Icons *[]McpSharedIcon `json:"icons,omitempty"`
 	// The implementation name.
 	Name string `json:"name"`
 	// Human-readable title.
-	Title *string `json:"title"`
+	Title *string `json:"title,omitempty"`
 	// The implementation version.
 	Version string `json:"version"`
 	// Optional website URL.
-	WebsiteUrl *string `json:"websiteUrl"`
+	WebsiteUrl *string `json:"websiteUrl,omitempty"`
 }
 
 func (McpImplementation) SchemaTitle() string { return "mcp.Implementation" }

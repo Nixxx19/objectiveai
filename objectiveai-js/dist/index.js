@@ -5007,56 +5007,56 @@ function laboratoriesExecutionsCreateLaboratoryExecution(client, body, options) 
   );
 }
 var McpResourceListResourcesRequestSchema = z.object({
-  cursor: z.string().nullable().describe("An opaque cursor for pagination.").optional()
+  cursor: z.string().nullable().describe("An opaque cursor for pagination.").meta({ omitempty: true }).optional()
 }).describe("Parameters for a `resources/list` request.").meta({ title: "mcp.resource.ListResourcesRequest" });
 var McpSharedRoleSchema = z.union([z.literal("user").meta({ "variantTitle": "User" }), z.literal("assistant").meta({ "variantTitle": "Assistant" })]).describe("The role of a message sender.").meta({ title: "mcp.shared.Role" });
 
 // src/mcp/shared/annotations.ts
 var McpSharedAnnotationsSchema = z.object({
-  audience: z.array(McpSharedRoleSchema).nullable().describe("Intended audience(s) for the content.").optional(),
-  lastModified: z.string().nullable().describe("ISO 8601 timestamp for the most recent modification.").optional(),
-  priority: z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Importance hint, from 0 (least) to 1 (most).").optional()
+  audience: z.array(McpSharedRoleSchema).nullable().describe("Intended audience(s) for the content.").meta({ omitempty: true }).optional(),
+  lastModified: z.string().nullable().describe("ISO 8601 timestamp for the most recent modification.").meta({ omitempty: true }).optional(),
+  priority: z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Importance hint, from 0 (least) to 1 (most).").meta({ omitempty: true }).optional()
 }).describe("Optional annotations providing clients additional context about content.").meta({ title: "mcp.shared.Annotations" });
 var McpSharedIconThemeSchema = z.union([z.literal("light").meta({ "variantTitle": "Light" }), z.literal("dark").meta({ "variantTitle": "Dark" })]).describe("Theme preference for an icon.").meta({ title: "mcp.shared.IconTheme" });
 
 // src/mcp/shared/icon.ts
 var McpSharedIconSchema = z.object({
-  mimeType: z.string().nullable().describe("MIME type for the icon.").optional(),
-  sizes: z.array(z.string()).nullable().describe('Sizes at which the icon can be used (e.g., "48x48", "96x96", "any").').optional(),
+  mimeType: z.string().nullable().describe("MIME type for the icon.").meta({ omitempty: true }).optional(),
+  sizes: z.array(z.string()).nullable().describe('Sizes at which the icon can be used (e.g., "48x48", "96x96", "any").').meta({ omitempty: true }).optional(),
   src: z.string().describe("URL or data URI for the icon."),
-  theme: McpSharedIconThemeSchema.nullable().describe("Theme this icon is intended for.").optional()
+  theme: McpSharedIconThemeSchema.nullable().describe("Theme this icon is intended for.").meta({ omitempty: true }).optional()
 }).describe("An icon that can be displayed in a user interface.").meta({ title: "mcp.shared.Icon" });
 
 // src/mcp/resource/resource.ts
 var McpResourceResourceSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
-  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").optional(),
-  description: z.string().nullable().describe("A description of what this resource represents.").optional(),
-  icons: z.array(McpSharedIconSchema).nullable().describe("Icons for the resource.").optional(),
-  mimeType: z.string().nullable().describe("The MIME type of this resource, if known.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").meta({ omitempty: true }).optional(),
+  description: z.string().nullable().describe("A description of what this resource represents.").meta({ omitempty: true }).optional(),
+  icons: z.array(McpSharedIconSchema).nullable().describe("Icons for the resource.").meta({ omitempty: true }).optional(),
+  mimeType: z.string().nullable().describe("The MIME type of this resource, if known.").meta({ omitempty: true }).optional(),
   name: z.string().describe("The programmatic name of the resource."),
-  title: z.string().nullable().describe("A human-readable display name.").optional(),
+  title: z.string().nullable().describe("A human-readable display name.").meta({ omitempty: true }).optional(),
   uri: z.string().describe("The URI of this resource.")
 }).describe("A known resource that the server is capable of reading.").meta({ title: "mcp.resource.Resource" });
 
 // src/mcp/resource/listResourcesResult.ts
 var McpResourceListResourcesResultSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
-  nextCursor: z.string().nullable().describe("An opaque cursor for fetching the next page.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  nextCursor: z.string().nullable().describe("An opaque cursor for fetching the next page.").meta({ omitempty: true }).optional(),
   resources: z.array(McpResourceResourceSchema).describe("The list of resources available on the server.")
 }).describe("The server's response to a `resources/list` request.").meta({ title: "mcp.resource.ListResourcesResult" });
 var McpResourceReadResourceRequestParamsSchema = z.object({
   uri: z.string().describe("The URI of the resource to read.")
 }).describe("Parameters for a `resources/read` request.").meta({ title: "mcp.resource.ReadResourceRequestParams" });
 var McpSharedBlobResourceContentsSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
   blob: z.string().describe("A base64-encoded string representing the binary data."),
-  mimeType: z.string().nullable().describe("The MIME type of this resource, if known.").optional(),
+  mimeType: z.string().nullable().describe("The MIME type of this resource, if known.").meta({ omitempty: true }).optional(),
   uri: z.string().describe("The URI of this resource.")
 }).describe("Binary resource contents (base64-encoded).").meta({ title: "mcp.shared.BlobResourceContents" });
 var McpSharedTextResourceContentsSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
-  mimeType: z.string().nullable().describe("The MIME type of this resource, if known.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  mimeType: z.string().nullable().describe("The MIME type of this resource, if known.").meta({ omitempty: true }).optional(),
   text: z.string().describe("The text of the item."),
   uri: z.string().describe("The URI of this resource.")
 }).describe("Text resource contents.").meta({ title: "mcp.shared.TextResourceContents" });
@@ -5066,55 +5066,55 @@ var McpSharedResourceContentsUnionSchema = z.union([McpSharedTextResourceContent
 
 // src/mcp/resource/readResourceResult.ts
 var McpResourceReadResourceResultSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
   contents: z.array(McpSharedResourceContentsUnionSchema).describe("The contents of the resource.")
 }).describe("The server's response to a `resources/read` request.").meta({ title: "mcp.resource.ReadResourceResult" });
 var McpSharedResourceContentsSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
-  mimeType: z.string().nullable().describe("The MIME type of this resource, if known.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  mimeType: z.string().nullable().describe("The MIME type of this resource, if known.").meta({ omitempty: true }).optional(),
   uri: z.string().describe("The URI of this resource.")
 }).describe("Base fields shared by all resource contents.").meta({ title: "mcp.shared.ResourceContents" });
 var McpToolAudioContentSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
-  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").meta({ omitempty: true }).optional(),
   data: z.string().describe("The base64-encoded audio data."),
   mimeType: z.string().describe("The MIME type of the audio.")
 }).describe("Audio content (base64-encoded).").meta({ title: "mcp.tool.AudioContent" });
 var McpToolTaskMetadataSchema = z.object({
-  ttl: z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Time-to-live for the task, in seconds.").optional()
+  ttl: z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Time-to-live for the task, in seconds.").meta({ omitempty: true }).optional()
 }).describe("Metadata for a long-running task.").meta({ title: "mcp.tool.TaskMetadata" });
 
 // src/mcp/tool/callToolRequestParams.ts
 var McpToolCallToolRequestParamsSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
-  arguments: z.record(z.string(), JsonValueSchema).nullable().describe("Arguments to pass to the tool.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  arguments: z.record(z.string(), JsonValueSchema).nullable().describe("Arguments to pass to the tool.").meta({ omitempty: true }).optional(),
   name: z.string().describe("The name of the tool to call."),
-  task: McpToolTaskMetadataSchema.nullable().describe("If specified, the caller is requesting task-augmented execution.").optional()
+  task: McpToolTaskMetadataSchema.nullable().describe("If specified, the caller is requesting task-augmented execution.").meta({ omitempty: true }).optional()
 }).describe("Parameters for a `tools/call` request.").meta({ title: "mcp.tool.CallToolRequestParams" });
 var McpToolEmbeddedResourceSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
-  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").meta({ omitempty: true }).optional(),
   resource: McpSharedResourceContentsUnionSchema.describe("The embedded resource contents.")
 }).describe("The contents of a resource, embedded into a prompt or tool call result.").meta({ title: "mcp.tool.EmbeddedResource" });
 var McpToolImageContentSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
-  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").meta({ omitempty: true }).optional(),
   data: z.string().describe("The base64-encoded image data."),
   mimeType: z.string().describe("The MIME type of the image.")
 }).describe("Image content (base64-encoded).").meta({ title: "mcp.tool.ImageContent" });
 var McpToolResourceLinkSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
-  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").optional(),
-  description: z.string().nullable().describe("A description of what this resource represents.").optional(),
-  icons: z.array(McpSharedIconSchema).nullable().describe("Icons for the resource link.").optional(),
-  mimeType: z.string().nullable().describe("The MIME type of this resource, if known.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").meta({ omitempty: true }).optional(),
+  description: z.string().nullable().describe("A description of what this resource represents.").meta({ omitempty: true }).optional(),
+  icons: z.array(McpSharedIconSchema).nullable().describe("Icons for the resource link.").meta({ omitempty: true }).optional(),
+  mimeType: z.string().nullable().describe("The MIME type of this resource, if known.").meta({ omitempty: true }).optional(),
   name: z.string().describe("The programmatic name of the resource."),
-  title: z.string().nullable().describe("A human-readable display name.").optional(),
+  title: z.string().nullable().describe("A human-readable display name.").meta({ omitempty: true }).optional(),
   uri: z.string().describe("The URI of this resource.")
 }).describe("A resource link included in a prompt or tool call result.").meta({ title: "mcp.tool.ResourceLink" });
 var McpToolTextContentSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
-  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").meta({ omitempty: true }).optional(),
   text: z.string().describe("The text content of the message.")
 }).describe("Text content.").meta({ title: "mcp.tool.TextContent" });
 
@@ -5133,138 +5133,138 @@ var McpToolContentBlockSchema = z.union([McpToolTextContentSchema.and(z.object({
 
 // src/mcp/tool/callToolResult.ts
 var McpToolCallToolResultSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
   content: z.array(McpToolContentBlockSchema).default([]).describe("Content blocks representing the result of the tool call."),
-  isError: z.boolean().nullable().describe("Whether the tool call ended in an error.").optional(),
-  structuredContent: z.record(z.string(), JsonValueSchema).nullable().describe("Structured tool output matching the tool's `outputSchema`.").optional()
+  isError: z.boolean().nullable().describe("Whether the tool call ended in an error.").meta({ omitempty: true }).optional(),
+  structuredContent: z.record(z.string(), JsonValueSchema).nullable().describe("Structured tool output matching the tool's `outputSchema`.").meta({ omitempty: true }).optional()
 }).describe("The server's response to a `tools/call` request.").meta({ title: "mcp.tool.CallToolResult" });
 var McpToolListToolsRequestSchema = z.object({
-  cursor: z.string().nullable().describe("An opaque cursor for pagination.").optional()
+  cursor: z.string().nullable().describe("An opaque cursor for pagination.").meta({ omitempty: true }).optional()
 }).describe("Parameters for a `tools/list` request.").meta({ title: "mcp.tool.ListToolsRequest" });
 var McpToolToolAnnotationsSchema = z.object({
-  destructiveHint: z.boolean().nullable().describe("If true, the tool may perform destructive updates.").optional(),
-  idempotentHint: z.boolean().nullable().describe("If true, calling the tool repeatedly with the same arguments\nhas no additional effect.").optional(),
-  openWorldHint: z.boolean().nullable().describe("If true, the tool interacts with the external world.").optional(),
-  readOnlyHint: z.boolean().nullable().describe("If true, the tool does not modify its environment.").optional(),
-  title: z.string().nullable().describe("A human-readable title for the tool.").optional()
+  destructiveHint: z.boolean().nullable().describe("If true, the tool may perform destructive updates.").meta({ omitempty: true }).optional(),
+  idempotentHint: z.boolean().nullable().describe("If true, calling the tool repeatedly with the same arguments\nhas no additional effect.").meta({ omitempty: true }).optional(),
+  openWorldHint: z.boolean().nullable().describe("If true, the tool interacts with the external world.").meta({ omitempty: true }).optional(),
+  readOnlyHint: z.boolean().nullable().describe("If true, the tool does not modify its environment.").meta({ omitempty: true }).optional(),
+  title: z.string().nullable().describe("A human-readable title for the tool.").meta({ omitempty: true }).optional()
 }).describe("Additional metadata about a tool to help clients decide how to display\nor control its use.").meta({ title: "mcp.tool.ToolAnnotations" });
 var McpToolTaskSupportSchema = z.union([z.literal("required").describe("Clients MUST invoke the tool as a task.").meta({ "variantTitle": "Required" }), z.literal("optional").describe("Clients MAY invoke the tool as a task or normal request.").meta({ "variantTitle": "Optional" }), z.literal("forbidden").describe("Clients MUST NOT attempt to invoke the tool as a task.").meta({ "variantTitle": "Forbidden" })]).describe("The tool's preference for task-augmented execution.").meta({ title: "mcp.tool.TaskSupport" });
 
 // src/mcp/tool/toolExecution.ts
 var McpToolToolExecutionSchema = z.object({
   taskSupport: McpToolTaskSupportSchema.nullable().describe(`Indicates the tool's preference for task-augmented execution.
-Defaults to "forbidden" if not present.`).optional()
+Defaults to "forbidden" if not present.`).meta({ omitempty: true }).optional()
 }).describe("Execution-related properties for a tool.").meta({ title: "mcp.tool.ToolExecution" });
 var McpToolToolSchemaTypeSchema = z.literal("object").describe("The type of a JSON Schema used by MCP tools.").meta({ title: "mcp.tool.ToolSchemaType" });
 
 // src/mcp/tool/toolSchemaObject.ts
 var McpToolToolSchemaObjectSchema = z.object({
-  properties: JsonValueSchema.describe("Property definitions."),
-  required: z.array(z.string()).nullable().describe("Required property names.").optional(),
+  properties: z.record(z.string(), JsonValueSchema).nullable().describe("Property definitions.").meta({ omitempty: true }).optional(),
+  required: z.array(z.string()).nullable().describe("Required property names.").meta({ omitempty: true }).optional(),
   type: McpToolToolSchemaTypeSchema.describe('Always "object".')
 }).describe('JSON Schema for tool input/output. Must have `type: "object"`.').meta({ title: "mcp.tool.ToolSchemaObject" });
 
 // src/mcp/tool/tool.ts
 var McpToolToolSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
-  annotations: McpToolToolAnnotationsSchema.nullable().describe("Additional tool metadata.").optional(),
-  description: z.string().nullable().describe("A human-readable description of the tool.").optional(),
-  execution: McpToolToolExecutionSchema.nullable().describe("Execution-related properties.").optional(),
-  icons: z.array(McpSharedIconSchema).nullable().describe("Icons for the tool.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  annotations: McpToolToolAnnotationsSchema.nullable().describe("Additional tool metadata.").meta({ omitempty: true }).optional(),
+  description: z.string().nullable().describe("A human-readable description of the tool.").meta({ omitempty: true }).optional(),
+  execution: McpToolToolExecutionSchema.nullable().describe("Execution-related properties.").meta({ omitempty: true }).optional(),
+  icons: z.array(McpSharedIconSchema).nullable().describe("Icons for the tool.").meta({ omitempty: true }).optional(),
   inputSchema: McpToolToolSchemaObjectSchema.describe('JSON Schema defining the expected input parameters.\nMust have `type: "object"` at the root level.'),
   name: z.string().describe("The programmatic name of the tool."),
-  outputSchema: McpToolToolSchemaObjectSchema.nullable().describe("JSON Schema defining the structure of the tool's output\n(returned in `structuredContent`).").optional(),
-  title: z.string().nullable().describe("A human-readable display name.").optional()
+  outputSchema: McpToolToolSchemaObjectSchema.nullable().describe("JSON Schema defining the structure of the tool's output\n(returned in `structuredContent`).").meta({ omitempty: true }).optional(),
+  title: z.string().nullable().describe("A human-readable display name.").meta({ omitempty: true }).optional()
 }).describe("A tool that an MCP server exposes for invocation.").meta({ title: "mcp.tool.Tool" });
 
 // src/mcp/tool/listToolsResult.ts
 var McpToolListToolsResultSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
-  nextCursor: z.string().nullable().describe("An opaque cursor for fetching the next page.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  nextCursor: z.string().nullable().describe("An opaque cursor for fetching the next page.").meta({ omitempty: true }).optional(),
   tools: z.array(McpToolToolSchema).describe("The list of tools available on the server.")
 }).describe("The server's response to a `tools/list` request.").meta({ title: "mcp.tool.ListToolsResult" });
 var McpToolToolResultContentSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
   content: z.array(McpToolContentBlockSchema).default([]).describe("Content blocks from the tool result."),
-  isError: z.boolean().nullable().describe("Whether this result represents an error.").optional(),
-  structuredContent: z.record(z.string(), JsonValueSchema).nullable().describe("Structured content from the tool result.").optional(),
+  isError: z.boolean().nullable().describe("Whether this result represents an error.").meta({ omitempty: true }).optional(),
+  structuredContent: z.record(z.string(), JsonValueSchema).nullable().describe("Structured content from the tool result.").meta({ omitempty: true }).optional(),
   toolUseId: z.string().describe("The unique identifier for the corresponding tool call.")
 }).describe("The result of a tool invocation.").meta({ title: "mcp.tool.ToolResultContent" });
 var McpToolToolUseContentSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
   id: z.string().describe("Unique identifier for this tool call."),
   input: z.record(z.string(), JsonValueSchema).describe("Arguments to pass to the tool."),
   name: z.string().describe("The name of the tool to invoke.")
 }).describe("A tool call request from an assistant.").meta({ title: "mcp.tool.ToolUseContent" });
-var McpCompletionsCapabilitySchema = z.object({}).describe("Marker capability for completions support. Presence indicates the server\nsupports argument value completions.").meta({ title: "mcp.CompletionsCapability" });
+var McpCompletionsCapabilitySchema = z.object({}).strict().describe("Marker capability for completions support. Presence indicates the server\nsupports argument value completions.").meta({ title: "mcp.CompletionsCapability" });
 var McpImplementationSchema = z.object({
-  description: z.string().nullable().describe("Optional description.").optional(),
-  icons: z.array(McpSharedIconSchema).nullable().describe("Optional icons for UI display.").optional(),
+  description: z.string().nullable().describe("Optional description.").meta({ omitempty: true }).optional(),
+  icons: z.array(McpSharedIconSchema).nullable().describe("Optional icons for UI display.").meta({ omitempty: true }).optional(),
   name: z.string().describe("The implementation name."),
-  title: z.string().nullable().describe("Human-readable title.").optional(),
+  title: z.string().nullable().describe("Human-readable title.").meta({ omitempty: true }).optional(),
   version: z.string().describe("The implementation version."),
-  websiteUrl: z.string().nullable().describe("Optional website URL.").optional()
+  websiteUrl: z.string().nullable().describe("Optional website URL.").meta({ omitempty: true }).optional()
 }).describe("Information about a client or server implementation.").meta({ title: "mcp.Implementation" });
-var McpLoggingCapabilitySchema = z.object({}).describe("Marker capability for logging support. Presence indicates the server\nsupports sending log messages to the client.").meta({ title: "mcp.LoggingCapability" });
+var McpLoggingCapabilitySchema = z.object({}).strict().describe("Marker capability for logging support. Presence indicates the server\nsupports sending log messages to the client.").meta({ title: "mcp.LoggingCapability" });
 var McpPromptsCapabilitySchema = z.object({
-  listChanged: z.boolean().nullable().describe("Whether the server emits notifications when the prompt list changes.").optional()
+  listChanged: z.boolean().nullable().describe("Whether the server emits notifications when the prompt list changes.").meta({ omitempty: true }).optional()
 }).describe("Capabilities for prompt templates.").meta({ title: "mcp.PromptsCapability" });
 var McpResourcesCapabilitySchema = z.object({
-  listChanged: z.boolean().nullable().describe("Whether the server emits notifications when the resource list changes.").optional(),
-  subscribe: z.boolean().nullable().describe("Whether the server supports resource subscriptions.").optional()
+  listChanged: z.boolean().nullable().describe("Whether the server emits notifications when the resource list changes.").meta({ omitempty: true }).optional(),
+  subscribe: z.boolean().nullable().describe("Whether the server supports resource subscriptions.").meta({ omitempty: true }).optional()
 }).describe("Capabilities for resources.").meta({ title: "mcp.ResourcesCapability" });
-var McpTasksCancelCapabilitySchema = z.object({}).describe("Marker capability for task cancellation support.").meta({ title: "mcp.TasksCancelCapability" });
-var McpTasksListCapabilitySchema = z.object({}).describe("Marker capability for task listing support.").meta({ title: "mcp.TasksListCapability" });
-var McpTasksToolsCallCapabilitySchema = z.object({}).describe("Marker capability for tools/call task creation support.").meta({ title: "mcp.TasksToolsCallCapability" });
+var McpTasksCancelCapabilitySchema = z.object({}).strict().describe("Marker capability for task cancellation support.").meta({ title: "mcp.TasksCancelCapability" });
+var McpTasksListCapabilitySchema = z.object({}).strict().describe("Marker capability for task listing support.").meta({ title: "mcp.TasksListCapability" });
+var McpTasksToolsCallCapabilitySchema = z.object({}).strict().describe("Marker capability for tools/call task creation support.").meta({ title: "mcp.TasksToolsCallCapability" });
 
 // src/mcp/tasksToolsCapability.ts
 var McpTasksToolsCapabilitySchema = z.object({
-  call: McpTasksToolsCallCapabilitySchema.nullable().describe("Present if tools/call supports task creation.").optional()
+  call: McpTasksToolsCallCapabilitySchema.nullable().describe("Present if tools/call supports task creation.").meta({ omitempty: true }).optional()
 }).describe("Task capabilities for tool requests.").meta({ title: "mcp.TasksToolsCapability" });
 
 // src/mcp/tasksRequestsCapability.ts
 var McpTasksRequestsCapabilitySchema = z.object({
-  tools: McpTasksToolsCapabilitySchema.nullable().describe("Task support for tool-related requests.").optional()
+  tools: McpTasksToolsCapabilitySchema.nullable().describe("Task support for tool-related requests.").meta({ omitempty: true }).optional()
 }).describe("Task creation capabilities scoped to request types.").meta({ title: "mcp.TasksRequestsCapability" });
 
 // src/mcp/tasksCapability.ts
 var McpTasksCapabilitySchema = z.object({
-  cancel: McpTasksCancelCapabilitySchema.nullable().describe("Present if the server supports cancelling tasks.").optional(),
-  list: McpTasksListCapabilitySchema.nullable().describe("Present if the server supports listing tasks.").optional(),
-  requests: McpTasksRequestsCapabilitySchema.nullable().describe("Task creation capabilities for specific request types.").optional()
+  cancel: McpTasksCancelCapabilitySchema.nullable().describe("Present if the server supports cancelling tasks.").meta({ omitempty: true }).optional(),
+  list: McpTasksListCapabilitySchema.nullable().describe("Present if the server supports listing tasks.").meta({ omitempty: true }).optional(),
+  requests: McpTasksRequestsCapabilitySchema.nullable().describe("Task creation capabilities for specific request types.").meta({ omitempty: true }).optional()
 }).describe("Capabilities for task creation and management.").meta({ title: "mcp.TasksCapability" });
 var McpToolsCapabilitySchema = z.object({
-  listChanged: z.boolean().nullable().describe("Whether the server emits notifications when the tool list changes.").optional()
+  listChanged: z.boolean().nullable().describe("Whether the server emits notifications when the tool list changes.").meta({ omitempty: true }).optional()
 }).describe("Capabilities for tools.").meta({ title: "mcp.ToolsCapability" });
 
 // src/mcp/serverCapabilities.ts
 var McpServerCapabilitiesSchema = z.object({
-  completions: McpCompletionsCapabilitySchema.nullable().describe("Completions support. Presence indicates the server supports completions.").optional(),
-  experimental: z.record(z.string(), JsonValueSchema).nullable().describe("Non-standard experimental capabilities.").optional(),
-  logging: McpLoggingCapabilitySchema.nullable().describe("Logging support. Presence indicates the server supports sending log messages.").optional(),
-  prompts: McpPromptsCapabilitySchema.nullable().describe("Prompt template capabilities.").optional(),
-  resources: McpResourcesCapabilitySchema.nullable().describe("Resource capabilities.").optional(),
-  tasks: McpTasksCapabilitySchema.nullable().describe("Task capabilities.").optional(),
-  tools: McpToolsCapabilitySchema.nullable().describe("Tool capabilities.").optional()
+  completions: McpCompletionsCapabilitySchema.nullable().describe("Completions support. Presence indicates the server supports completions.").meta({ omitempty: true }).optional(),
+  experimental: z.record(z.string(), JsonValueSchema).nullable().describe("Non-standard experimental capabilities.").meta({ omitempty: true }).optional(),
+  logging: McpLoggingCapabilitySchema.nullable().describe("Logging support. Presence indicates the server supports sending log messages.").meta({ omitempty: true }).optional(),
+  prompts: McpPromptsCapabilitySchema.nullable().describe("Prompt template capabilities.").meta({ omitempty: true }).optional(),
+  resources: McpResourcesCapabilitySchema.nullable().describe("Resource capabilities.").meta({ omitempty: true }).optional(),
+  tasks: McpTasksCapabilitySchema.nullable().describe("Task capabilities.").meta({ omitempty: true }).optional(),
+  tools: McpToolsCapabilitySchema.nullable().describe("Tool capabilities.").meta({ omitempty: true }).optional()
 }).describe("Capabilities that an MCP server may support.").meta({ title: "mcp.ServerCapabilities" });
 
 // src/mcp/initializeResult.ts
 var McpInitializeResultSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
   capabilities: McpServerCapabilitiesSchema.describe("The server's supported capabilities."),
-  instructions: z.string().nullable().describe("Optional instructions for LLM integration.").optional(),
+  instructions: z.string().nullable().describe("Optional instructions for LLM integration.").meta({ omitempty: true }).optional(),
   protocolVersion: z.string().describe("The MCP protocol version the server wants to use."),
   serverInfo: McpImplementationSchema.describe("Information about the server implementation.")
 }).describe("The server's response to an `initialize` request.").meta({ title: "mcp.InitializeResult" });
 var McpJsonRpcErrorSchema = z.object({
   code: z.number().int().min(-9223372036854776e3).max(9223372036854776e3),
-  data: JsonValueSchema,
+  data: JsonValueSchema.meta({ omitempty: true }),
   message: z.string()
 }).describe("JSON-RPC 2.0 error object.").meta({ title: "mcp.JsonRpcError" });
 var McpJsonRpcNotificationSchema = z.object({
   jsonrpc: z.string(),
   method: z.string(),
-  params: JsonValueSchema
+  params: JsonValueSchema.meta({ omitempty: true })
 }).describe("JSON-RPC 2.0 notification (no `id` field).").meta({ title: "mcp.JsonRpcNotification" });
 var McpJsonRpcRequestSchema = z.object({
   id: JsonValueSchema,

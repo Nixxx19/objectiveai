@@ -4,6 +4,6 @@ import { z } from "zod";
 import { McpTasksToolsCallCapabilitySchema } from "./tasksToolsCallCapability";
 
 export const McpTasksToolsCapabilitySchema = z.object({
-  call: McpTasksToolsCallCapabilitySchema.nullable().describe("Present if tools/call supports task creation.").optional(),
+  call: McpTasksToolsCallCapabilitySchema.nullable().describe("Present if tools/call supports task creation.").meta({ omitempty: true }).optional(),
 }).describe("Task capabilities for tool requests.").meta({ title: "mcp.TasksToolsCapability" });
 export type McpTasksToolsCapability = z.infer<typeof McpTasksToolsCapabilitySchema>;

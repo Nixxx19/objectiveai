@@ -5,7 +5,7 @@ package objectiveai
 // Parameters for a `tools/list` request.
 type McpToolListToolsRequest struct {
 	// An opaque cursor for pagination.
-	Cursor *string `json:"cursor"`
+	Cursor *string `json:"cursor,omitempty"`
 }
 
 func (McpToolListToolsRequest) SchemaTitle() string { return "mcp.tool.ListToolsRequest" }

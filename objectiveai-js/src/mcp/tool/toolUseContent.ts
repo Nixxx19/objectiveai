@@ -4,7 +4,7 @@ import { z } from "zod";
 import { JsonValueSchema } from "../../jsonValue";
 
 export const McpToolToolUseContentSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
   id: z.string().describe("Unique identifier for this tool call."),
   input: z.record(z.string(), JsonValueSchema).describe("Arguments to pass to the tool."),
   name: z.string().describe("The name of the tool to invoke."),

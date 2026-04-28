@@ -7,5 +7,5 @@ from pydantic import BaseModel, ConfigDict
 class CompletionsCapability(BaseModel):
     """Marker capability for completions support. Presence indicates the server
 supports argument value completions."""
-    model_config = ConfigDict(title='mcp.CompletionsCapability')
+    model_config = ConfigDict(title='mcp.CompletionsCapability', extra='forbid')
 

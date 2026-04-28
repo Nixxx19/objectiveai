@@ -4,8 +4,8 @@ import { z } from "zod";
 import { JsonValueSchema } from "../../jsonValue";
 
 export const McpSharedResourceContentsSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
-  mimeType: z.string().nullable().describe("The MIME type of this resource, if known.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  mimeType: z.string().nullable().describe("The MIME type of this resource, if known.").meta({ omitempty: true }).optional(),
   uri: z.string().describe("The URI of this resource."),
 }).describe("Base fields shared by all resource contents.").meta({ title: "mcp.shared.ResourceContents" });
 export type McpSharedResourceContents = z.infer<typeof McpSharedResourceContentsSchema>;

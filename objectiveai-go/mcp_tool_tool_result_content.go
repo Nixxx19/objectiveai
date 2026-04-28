@@ -10,13 +10,13 @@ import (
 // The result of a tool invocation.
 type McpToolToolResultContent struct {
 	// Extension metadata.
-	Meta *OrderedMap[string,JsonValue] `json:"_meta"`
+	Meta *OrderedMap[string,JsonValue] `json:"_meta,omitempty"`
 	// Content blocks from the tool result.
 	Content []McpToolContentBlock `json:"content" default:"[]"`
 	// Whether this result represents an error.
-	IsError *bool `json:"isError"`
+	IsError *bool `json:"isError,omitempty"`
 	// Structured content from the tool result.
-	StructuredContent *OrderedMap[string,JsonValue] `json:"structuredContent"`
+	StructuredContent *OrderedMap[string,JsonValue] `json:"structuredContent,omitempty"`
 	// The unique identifier for the corresponding tool call.
 	ToolUseId string `json:"toolUseId"`
 }

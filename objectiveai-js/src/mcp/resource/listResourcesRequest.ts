@@ -3,6 +3,6 @@
 import { z } from "zod";
 
 export const McpResourceListResourcesRequestSchema = z.object({
-  cursor: z.string().nullable().describe("An opaque cursor for pagination.").optional(),
+  cursor: z.string().nullable().describe("An opaque cursor for pagination.").meta({ omitempty: true }).optional(),
 }).describe("Parameters for a `resources/list` request.").meta({ title: "mcp.resource.ListResourcesRequest" });
 export type McpResourceListResourcesRequest = z.infer<typeof McpResourceListResourcesRequestSchema>;

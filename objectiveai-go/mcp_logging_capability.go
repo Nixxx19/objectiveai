@@ -4,6 +4,8 @@ package objectiveai
 
 // Marker capability for logging support. Presence indicates the server
 // supports sending log messages to the client.
-type McpLoggingCapability OrderedMap[string,JsonValue]
+type McpLoggingCapability struct{}
 
 func (McpLoggingCapability) SchemaTitle() string { return "mcp.LoggingCapability" }
+
+func (McpLoggingCapability) AdditionalProperties() bool { return false }

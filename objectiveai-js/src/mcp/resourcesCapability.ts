@@ -3,7 +3,7 @@
 import { z } from "zod";
 
 export const McpResourcesCapabilitySchema = z.object({
-  listChanged: z.boolean().nullable().describe("Whether the server emits notifications when the resource list changes.").optional(),
-  subscribe: z.boolean().nullable().describe("Whether the server supports resource subscriptions.").optional(),
+  listChanged: z.boolean().nullable().describe("Whether the server emits notifications when the resource list changes.").meta({ omitempty: true }).optional(),
+  subscribe: z.boolean().nullable().describe("Whether the server supports resource subscriptions.").meta({ omitempty: true }).optional(),
 }).describe("Capabilities for resources.").meta({ title: "mcp.ResourcesCapability" });
 export type McpResourcesCapability = z.infer<typeof McpResourcesCapabilitySchema>;

@@ -9,6 +9,7 @@ import (
 
 // JSON-RPC 2.0 inbound request.
 type McpJsonRpcRequest struct {
+	ID JsonValue `json:"id"`
 	Jsonrpc string `json:"jsonrpc"`
 	Method string `json:"method"`
 	Params JsonValue `json:"params" default:"null"`

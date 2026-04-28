@@ -6,8 +6,8 @@ import { McpTasksListCapabilitySchema } from "./tasksListCapability";
 import { McpTasksRequestsCapabilitySchema } from "./tasksRequestsCapability";
 
 export const McpTasksCapabilitySchema = z.object({
-  cancel: McpTasksCancelCapabilitySchema.nullable().describe("Present if the server supports cancelling tasks.").optional(),
-  list: McpTasksListCapabilitySchema.nullable().describe("Present if the server supports listing tasks.").optional(),
-  requests: McpTasksRequestsCapabilitySchema.nullable().describe("Task creation capabilities for specific request types.").optional(),
+  cancel: McpTasksCancelCapabilitySchema.nullable().describe("Present if the server supports cancelling tasks.").meta({ omitempty: true }).optional(),
+  list: McpTasksListCapabilitySchema.nullable().describe("Present if the server supports listing tasks.").meta({ omitempty: true }).optional(),
+  requests: McpTasksRequestsCapabilitySchema.nullable().describe("Task creation capabilities for specific request types.").meta({ omitempty: true }).optional(),
 }).describe("Capabilities for task creation and management.").meta({ title: "mcp.TasksCapability" });
 export type McpTasksCapability = z.infer<typeof McpTasksCapabilitySchema>;

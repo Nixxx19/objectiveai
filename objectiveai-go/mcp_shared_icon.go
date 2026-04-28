@@ -10,13 +10,13 @@ import (
 // An icon that can be displayed in a user interface.
 type McpSharedIcon struct {
 	// MIME type for the icon.
-	MimeType *string `json:"mimeType"`
+	MimeType *string `json:"mimeType,omitempty"`
 	// Sizes at which the icon can be used (e.g., "48x48", "96x96", "any").
-	Sizes *[]string `json:"sizes"`
+	Sizes *[]string `json:"sizes,omitempty"`
 	// URL or data URI for the icon.
 	Src string `json:"src"`
 	// Theme this icon is intended for.
-	Theme *McpSharedIconTheme `json:"theme"`
+	Theme *McpSharedIconTheme `json:"theme,omitempty"`
 }
 
 func (McpSharedIcon) SchemaTitle() string { return "mcp.shared.Icon" }

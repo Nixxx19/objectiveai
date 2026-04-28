@@ -10,19 +10,19 @@ import (
 // A known resource that the server is capable of reading.
 type McpResourceResource struct {
 	// Extension metadata.
-	Meta *OrderedMap[string,JsonValue] `json:"_meta"`
+	Meta *OrderedMap[string,JsonValue] `json:"_meta,omitempty"`
 	// Optional annotations for the client.
-	Annotations *McpSharedAnnotations `json:"annotations"`
+	Annotations *McpSharedAnnotations `json:"annotations,omitempty"`
 	// A description of what this resource represents.
-	Description *string `json:"description"`
+	Description *string `json:"description,omitempty"`
 	// Icons for the resource.
-	Icons *[]McpSharedIcon `json:"icons"`
+	Icons *[]McpSharedIcon `json:"icons,omitempty"`
 	// The MIME type of this resource, if known.
-	MimeType *string `json:"mimeType"`
+	MimeType *string `json:"mimeType,omitempty"`
 	// The programmatic name of the resource.
 	Name string `json:"name"`
 	// A human-readable display name.
-	Title *string `json:"title"`
+	Title *string `json:"title,omitempty"`
 	// The URI of this resource.
 	URI string `json:"uri"`
 }

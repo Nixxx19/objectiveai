@@ -5,7 +5,7 @@ import { JsonValueSchema } from "../../jsonValue";
 import { McpSharedResourceContentsUnionSchema } from "../shared/resourceContentsUnion";
 
 export const McpResourceReadResourceResultSchema = z.object({
-  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").optional(),
+  _meta: z.record(z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
   contents: z.array(McpSharedResourceContentsUnionSchema).describe("The contents of the resource."),
 }).describe("The server's response to a `resources/read` request.").meta({ title: "mcp.resource.ReadResourceResult" });
 export type McpResourceReadResourceResult = z.infer<typeof McpResourceReadResourceResultSchema>;

@@ -4,11 +4,11 @@ import { z } from "zod";
 import { McpSharedIconSchema } from "./shared/icon";
 
 export const McpImplementationSchema = z.object({
-  description: z.string().nullable().describe("Optional description.").optional(),
-  icons: z.array(McpSharedIconSchema).nullable().describe("Optional icons for UI display.").optional(),
+  description: z.string().nullable().describe("Optional description.").meta({ omitempty: true }).optional(),
+  icons: z.array(McpSharedIconSchema).nullable().describe("Optional icons for UI display.").meta({ omitempty: true }).optional(),
   name: z.string().describe("The implementation name."),
-  title: z.string().nullable().describe("Human-readable title.").optional(),
+  title: z.string().nullable().describe("Human-readable title.").meta({ omitempty: true }).optional(),
   version: z.string().describe("The implementation version."),
-  websiteUrl: z.string().nullable().describe("Optional website URL.").optional(),
+  websiteUrl: z.string().nullable().describe("Optional website URL.").meta({ omitempty: true }).optional(),
 }).describe("Information about a client or server implementation.").meta({ title: "mcp.Implementation" });
 export type McpImplementation = z.infer<typeof McpImplementationSchema>;

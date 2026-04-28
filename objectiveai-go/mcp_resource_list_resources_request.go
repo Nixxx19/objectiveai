@@ -5,7 +5,7 @@ package objectiveai
 // Parameters for a `resources/list` request.
 type McpResourceListResourcesRequest struct {
 	// An opaque cursor for pagination.
-	Cursor *string `json:"cursor"`
+	Cursor *string `json:"cursor,omitempty"`
 }
 
 func (McpResourceListResourcesRequest) SchemaTitle() string { return "mcp.resource.ListResourcesRequest" }

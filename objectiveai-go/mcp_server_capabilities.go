@@ -5,19 +5,19 @@ package objectiveai
 // Capabilities that an MCP server may support.
 type McpServerCapabilities struct {
 	// Completions support. Presence indicates the server supports completions.
-	Completions *McpCompletionsCapability `json:"completions"`
+	Completions *McpCompletionsCapability `json:"completions,omitempty"`
 	// Non-standard experimental capabilities.
-	Experimental *OrderedMap[string,JsonValue] `json:"experimental"`
+	Experimental *OrderedMap[string,JsonValue] `json:"experimental,omitempty"`
 	// Logging support. Presence indicates the server supports sending log messages.
-	Logging *McpLoggingCapability `json:"logging"`
+	Logging *McpLoggingCapability `json:"logging,omitempty"`
 	// Prompt template capabilities.
-	Prompts *McpPromptsCapability `json:"prompts"`
+	Prompts *McpPromptsCapability `json:"prompts,omitempty"`
 	// Resource capabilities.
-	Resources *McpResourcesCapability `json:"resources"`
+	Resources *McpResourcesCapability `json:"resources,omitempty"`
 	// Task capabilities.
-	Tasks *McpTasksCapability `json:"tasks"`
+	Tasks *McpTasksCapability `json:"tasks,omitempty"`
 	// Tool capabilities.
-	Tools *McpToolsCapability `json:"tools"`
+	Tools *McpToolsCapability `json:"tools,omitempty"`
 }
 
 func (McpServerCapabilities) SchemaTitle() string { return "mcp.ServerCapabilities" }

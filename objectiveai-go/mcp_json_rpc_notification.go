@@ -11,6 +11,7 @@ import (
 type McpJsonRpcNotification struct {
 	Jsonrpc string `json:"jsonrpc"`
 	Method string `json:"method"`
+	Params JsonValue `json:"params,omitempty"`
 }
 
 func (McpJsonRpcNotification) SchemaTitle() string { return "mcp.JsonRpcNotification" }
@@ -23,7 +24,7 @@ func (v *McpJsonRpcNotification) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	for _, key := range []string{"jsonrpc", "method"} {
+	for _, key := range []string{"jsonrpc", "method", "params"} {
 		if _, ok := raw[key]; !ok {
 			return fmt.Errorf("McpJsonRpcNotification: missing required field %q", key)
 		}

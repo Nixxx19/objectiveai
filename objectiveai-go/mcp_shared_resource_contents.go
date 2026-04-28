@@ -10,9 +10,9 @@ import (
 // Base fields shared by all resource contents.
 type McpSharedResourceContents struct {
 	// Extension metadata.
-	Meta *OrderedMap[string,JsonValue] `json:"_meta"`
+	Meta *OrderedMap[string,JsonValue] `json:"_meta,omitempty"`
 	// The MIME type of this resource, if known.
-	MimeType *string `json:"mimeType"`
+	MimeType *string `json:"mimeType,omitempty"`
 	// The URI of this resource.
 	URI string `json:"uri"`
 }

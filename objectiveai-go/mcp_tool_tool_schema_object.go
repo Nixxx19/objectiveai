@@ -10,12 +10,14 @@ import (
 // JSON Schema for tool input/output. Must have `type: "object"`.
 type McpToolToolSchemaObject struct {
 	// Property definitions.
-	Properties JsonValue `json:"properties"`
+	Properties *OrderedMap[string,JsonValue] `json:"properties,omitempty"`
 	// Required property names.
-	Required *[]string `json:"required"`
+	Required *[]string `json:"required,omitempty"`
 	// Always "object".
 	Type McpToolToolSchemaType `json:"type"`
 }
+
+func (McpToolToolSchemaObject) AdditionalProperties() bool { return true }
 
 func (McpToolToolSchemaObject) SchemaTitle() string { return "mcp.tool.ToolSchemaObject" }
 func (v McpToolToolSchemaObject) Validate() error {
@@ -27,7 +29,7 @@ func (v *McpToolToolSchemaObject) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	for _, key := range []string{"properties", "type"} {
+	for _, key := range []string{"type"} {
 		if _, ok := raw[key]; !ok {
 			return fmt.Errorf("McpToolToolSchemaObject: missing required field %q", key)
 		}

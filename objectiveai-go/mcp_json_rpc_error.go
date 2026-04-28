@@ -10,6 +10,7 @@ import (
 // JSON-RPC 2.0 error object.
 type McpJsonRpcError struct {
 	Code int64 `json:"code" validate:"min=-9223372036854775808,max=9223372036854775807"`
+	Data JsonValue `json:"data,omitempty"`
 	Message string `json:"message"`
 }
 
@@ -23,7 +24,7 @@ func (v *McpJsonRpcError) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	for _, key := range []string{"code", "message"} {
+	for _, key := range []string{"code", "data", "message"} {
 		if _, ok := raw[key]; !ok {
 			return fmt.Errorf("McpJsonRpcError: missing required field %q", key)
 		}

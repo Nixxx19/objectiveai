@@ -5,8 +5,8 @@ import { JsonValueSchema } from "../../jsonValue";
 import { McpToolToolSchemaTypeSchema } from "./toolSchemaType";
 
 export const McpToolToolSchemaObjectSchema = z.object({
-  properties: JsonValueSchema.describe("Property definitions."),
-  required: z.array(z.string()).nullable().describe("Required property names.").optional(),
+  properties: z.record(z.string(), JsonValueSchema).nullable().describe("Property definitions.").meta({ omitempty: true }).optional(),
+  required: z.array(z.string()).nullable().describe("Required property names.").meta({ omitempty: true }).optional(),
   type: McpToolToolSchemaTypeSchema.describe("Always \"object\"."),
 }).describe("JSON Schema for tool input/output. Must have `type: \"object\"`.").meta({ title: "mcp.tool.ToolSchemaObject" });
 export type McpToolToolSchemaObject = z.infer<typeof McpToolToolSchemaObjectSchema>;

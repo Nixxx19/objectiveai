@@ -3,6 +3,8 @@
 package objectiveai
 
 // Marker capability for task cancellation support.
-type McpTasksCancelCapability OrderedMap[string,JsonValue]
+type McpTasksCancelCapability struct{}
 
 func (McpTasksCancelCapability) SchemaTitle() string { return "mcp.TasksCancelCapability" }
+
+func (McpTasksCancelCapability) AdditionalProperties() bool { return false }

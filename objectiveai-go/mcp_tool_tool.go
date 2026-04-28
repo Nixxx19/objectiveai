@@ -10,15 +10,15 @@ import (
 // A tool that an MCP server exposes for invocation.
 type McpToolTool struct {
 	// Extension metadata.
-	Meta *OrderedMap[string,JsonValue] `json:"_meta"`
+	Meta *OrderedMap[string,JsonValue] `json:"_meta,omitempty"`
 	// Additional tool metadata.
-	Annotations *McpToolToolAnnotations `json:"annotations"`
+	Annotations *McpToolToolAnnotations `json:"annotations,omitempty"`
 	// A human-readable description of the tool.
-	Description *string `json:"description"`
+	Description *string `json:"description,omitempty"`
 	// Execution-related properties.
-	Execution *McpToolToolExecution `json:"execution"`
+	Execution *McpToolToolExecution `json:"execution,omitempty"`
 	// Icons for the tool.
-	Icons *[]McpSharedIcon `json:"icons"`
+	Icons *[]McpSharedIcon `json:"icons,omitempty"`
 	// JSON Schema defining the expected input parameters.
 	// Must have `type: "object"` at the root level.
 	InputSchema McpToolToolSchemaObject `json:"inputSchema"`
@@ -26,9 +26,9 @@ type McpToolTool struct {
 	Name string `json:"name"`
 	// JSON Schema defining the structure of the tool's output
 	// (returned in `structuredContent`).
-	OutputSchema *McpToolToolSchemaObject `json:"outputSchema"`
+	OutputSchema *McpToolToolSchemaObject `json:"outputSchema,omitempty"`
 	// A human-readable display name.
-	Title *string `json:"title"`
+	Title *string `json:"title,omitempty"`
 }
 
 func (McpToolTool) SchemaTitle() string { return "mcp.tool.Tool" }

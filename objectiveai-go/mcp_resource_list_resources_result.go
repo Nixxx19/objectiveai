@@ -10,9 +10,9 @@ import (
 // The server's response to a `resources/list` request.
 type McpResourceListResourcesResult struct {
 	// Extension metadata.
-	Meta *OrderedMap[string,JsonValue] `json:"_meta"`
+	Meta *OrderedMap[string,JsonValue] `json:"_meta,omitempty"`
 	// An opaque cursor for fetching the next page.
-	NextCursor *string `json:"nextCursor"`
+	NextCursor *string `json:"nextCursor,omitempty"`
 	// The list of resources available on the server.
 	Resources []McpResourceResource `json:"resources"`
 }

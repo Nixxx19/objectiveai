@@ -10,13 +10,13 @@ import (
 // The server's response to a `tools/call` request.
 type McpToolCallToolResult struct {
 	// Extension metadata.
-	Meta *OrderedMap[string,JsonValue] `json:"_meta"`
+	Meta *OrderedMap[string,JsonValue] `json:"_meta,omitempty"`
 	// Content blocks representing the result of the tool call.
 	Content []McpToolContentBlock `json:"content" default:"[]"`
 	// Whether the tool call ended in an error.
-	IsError *bool `json:"isError"`
+	IsError *bool `json:"isError,omitempty"`
 	// Structured tool output matching the tool's `outputSchema`.
-	StructuredContent *OrderedMap[string,JsonValue] `json:"structuredContent"`
+	StructuredContent *OrderedMap[string,JsonValue] `json:"structuredContent,omitempty"`
 }
 
 func (McpToolCallToolResult) SchemaTitle() string { return "mcp.tool.CallToolResult" }
