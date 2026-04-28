@@ -1,6 +1,5 @@
 mod client;
 pub mod claude_agent_sdk;
-pub mod claude_code;
 mod error;
 pub mod mock;
 pub mod openrouter;

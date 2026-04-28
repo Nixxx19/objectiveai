@@ -54,7 +54,7 @@ fn filter_agents(
 
 // ---------------------------------------------------------------------------
 
-pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, RETRF, RETRM, CUSG> {
+pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> {
     /// MCP Client
     pub mcp_client: Arc<objectiveai::mcp::Client>,
     /// Lazy in-process mcp-proxy used for every per-agent MCP connection.
@@ -69,8 +69,6 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, R
     pub openrouter: Arc<OPENROUTER>,
     /// Upstream client for Claude Agent SDK agents.
     pub claude_agent_sdk: Arc<CLAUDEAGENTSDK>,
-    /// Upstream client for Claude Code agents.
-    pub claude_code: Arc<CLAUDECODE>,
     /// Upstream client for Mock agents.
     pub mock: Arc<MOCK>,
     /// Viewer client for streaming telemetry.
@@ -95,7 +93,7 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, R
     _marker: std::marker::PhantomData<CTXEXT>,
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, RETRF, RETRM, CUSG> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, RETRF, RETRM, CUSG> {
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> {
     pub fn new(
         mcp_client: Arc<objectiveai::mcp::Client>,
         proxy_spawner: Arc<super::ProxySpawner>,
@@ -104,7 +102,6 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, RETRF, RETRM, 
         usage_handler: Arc<CUSG>,
         openrouter: Arc<OPENROUTER>,
         claude_agent_sdk: Arc<CLAUDEAGENTSDK>,
-        claude_code: Arc<CLAUDECODE>,
         mock: Arc<MOCK>,
         viewer_client: Arc<crate::viewer::Client<CTXEXT>>,
         backoff_current_interval: Duration,
@@ -124,7 +121,6 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, RETRF, RETRM, 
             usage_handler,
             openrouter,
             claude_agent_sdk,
-            claude_code,
             mock,
             viewer_client,
             backoff_current_interval,
@@ -140,8 +136,8 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, RETRF, RETRM, 
     }
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, RETRF, RETRM, CUSG> Clone
-    for Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, RETRF, RETRM, CUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> Clone
+    for Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG>
 {
     fn clone(&self) -> Self {
         Self {
@@ -152,7 +148,6 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, RETRF, RETRM, 
             usage_handler: self.usage_handler.clone(),
             openrouter: self.openrouter.clone(),
             claude_agent_sdk: self.claude_agent_sdk.clone(),
-            claude_code: self.claude_code.clone(),
             mock: self.mock.clone(),
             viewer_client: self.viewer_client.clone(),
             backoff_current_interval: self.backoff_current_interval,
@@ -168,12 +163,11 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, RETRF, RETRM, 
     }
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, RETRF, RETRM, CUSG> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK, RETRG, RETRF, RETRM, CUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
     OPENROUTER: super::UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation> + Send + Sync + 'static,
     CLAUDEAGENTSDK: super::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation> + Send + Sync + 'static,
-    CLAUDECODE: super::UpstreamClient<objectiveai::agent::claude_code::Agent, objectiveai::agent::claude_code::Continuation> + Send + Sync + 'static,
     MOCK: super::UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation> + Send + Sync + 'static,
     RETRG: crate::retrieval::retrieve::Client<CTXEXT>,
     RETRF: crate::retrieval::retrieve::Client<CTXEXT>,
@@ -191,7 +185,6 @@ where
             super::Continuation<
                 OPENROUTER::State,
                 CLAUDEAGENTSDK::State,
-                CLAUDECODE::State,
                 MOCK::State,
             >,
         >,
@@ -234,7 +227,6 @@ where
             super::Continuation<
                 OPENROUTER::State,
                 CLAUDEAGENTSDK::State,
-                CLAUDECODE::State,
                 MOCK::State,
             >,
         >,
@@ -252,7 +244,6 @@ where
                 super::Continuation<
                     OPENROUTER::State,
                     CLAUDEAGENTSDK::State,
-                    CLAUDECODE::State,
                     MOCK::State,
                 >,
             >,
@@ -321,7 +312,6 @@ where
             super::Continuation<
                 OPENROUTER::State,
                 CLAUDEAGENTSDK::State,
-                CLAUDECODE::State,
                 MOCK::State,
             >,
         >,
@@ -339,7 +329,6 @@ where
                 super::Continuation<
                     OPENROUTER::State,
                     CLAUDEAGENTSDK::State,
-                    CLAUDECODE::State,
                     MOCK::State,
                 >,
             >,
@@ -400,23 +389,19 @@ where
         let (
             mut cont_items_or,
             mut cont_items_cas,
-            mut cont_items_cc,
             mut cont_items_mock,
             internal_conn,
         ) = match continuation {
             Some(super::Continuation::Openrouter { items, mcp_connection }) => {
-                (items, vec![], vec![], vec![], mcp_connection)
+                (items, vec![], vec![], mcp_connection)
             }
             Some(super::Continuation::ClaudeAgentSdk { items, mcp_connection }) => {
-                (vec![], items, vec![], vec![], mcp_connection)
-            }
-            Some(super::Continuation::ClaudeCode { items, mcp_connection }) => {
-                (vec![], vec![], items, vec![], mcp_connection)
+                (vec![], items, vec![], mcp_connection)
             }
             Some(super::Continuation::Mock { items, mcp_connection }) => {
-                (vec![], vec![], vec![], items, mcp_connection)
+                (vec![], vec![], items, mcp_connection)
             }
-            None => (vec![], vec![], vec![], vec![], None),
+            None => (vec![], vec![], vec![], None),
         };
 
         // 3. Always resolve agents from params.agent.
@@ -678,42 +663,6 @@ where
                                 },
                                 |e| super::Error::UpstreamClaudeAgentSdk(Box::new(e)),
                                 objectiveai::agent::InlineAgentRef::ClaudeAgentSdk(&cas_agent.base),
-                                invention_done.clone(),
-                                agent_transform,
-                                make_is_cancelled(),
-                                invention_type,
-                                invention_step,
-                                invention_tasks_min,
-                                invention_input_schema.clone(),
-                            ).await {
-                                Ok(stream) => {
-                                    if !viewer { return Ok(stream); }
-                                    let vc = self.viewer_client.clone();
-                                    let vctx = ctx.clone();
-                                    return Ok(Box::pin(futures::StreamExt::inspect(stream, move |item| {
-                                        if let super::StreamItem::Chunk(chunk) = item {
-                                            vc.send_agent_completion_continue(vctx.clone(), chunk.clone());
-                                        }
-                                    })));
-                                }
-                                Err(e) => e,
-                            }
-                        }
-                        objectiveai::agent::InlineAgent::ClaudeCode(cc_agent) => {
-                            let c = mcp_connection.clone();
-                            let rc = match &request_continuation {
-                                Some(objectiveai::agent::Continuation::ClaudeCode(c)) => Some(c),
-                                _ => None,
-                            };
-                            match self.run_agent_loop(
-                                self.claude_code.clone(), cc_agent, rc, &params, mcp_connection.clone(),
-                                &mut cont_items_cc, &id, created,
-                                *byok_attempt, ctx.cost_multiplier,
-                                move |items| super::Continuation::ClaudeCode {
-                                    items, mcp_connection: c,
-                                },
-                                |e| super::Error::UpstreamClaudeCode(Box::new(e)),
-                                objectiveai::agent::InlineAgentRef::ClaudeCode(&cc_agent.base),
                                 invention_done.clone(),
                                 agent_transform,
                                 make_is_cancelled(),

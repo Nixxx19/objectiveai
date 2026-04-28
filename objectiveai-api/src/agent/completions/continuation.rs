@@ -1,7 +1,7 @@
 use objectiveai::mcp;
 
 #[derive(Debug, Clone)]
-pub enum Continuation<OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK> {
+pub enum Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK> {
     Openrouter {
         items: Vec<ContinuationItem<OPENROUTER>>,
         mcp_connection: Option<mcp::Connection>,
@@ -10,22 +10,17 @@ pub enum Continuation<OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK> {
         items: Vec<ContinuationItem<CLAUDEAGENTSDK>>,
         mcp_connection: Option<mcp::Connection>,
     },
-    ClaudeCode {
-        items: Vec<ContinuationItem<CLAUDECODE>>,
-        mcp_connection: Option<mcp::Connection>,
-    },
     Mock {
         items: Vec<ContinuationItem<MOCK>>,
         mcp_connection: Option<mcp::Connection>,
     },
 }
 
-impl<OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK> Continuation<OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK> {
+impl<OPENROUTER, CLAUDEAGENTSDK, MOCK> Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK> {
     pub fn push_user_message(&mut self, message: objectiveai::agent::completions::message::UserMessage) {
         match self {
             Self::Openrouter { items, .. } => items.push(ContinuationItem::UserMessage(message)),
             Self::ClaudeAgentSdk { items, .. } => items.push(ContinuationItem::UserMessage(message)),
-            Self::ClaudeCode { items, .. } => items.push(ContinuationItem::UserMessage(message)),
             Self::Mock { items, .. } => items.push(ContinuationItem::UserMessage(message)),
         }
     }
@@ -34,7 +29,6 @@ impl<OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK> Continuation<OPENROUTER, CLAU
         match self {
             Self::Openrouter { items, .. } => items.push(ContinuationItem::ToolMessage(message)),
             Self::ClaudeAgentSdk { items, .. } => items.push(ContinuationItem::ToolMessage(message)),
-            Self::ClaudeCode { items, .. } => items.push(ContinuationItem::ToolMessage(message)),
             Self::Mock { items, .. } => items.push(ContinuationItem::ToolMessage(message)),
         }
     }
@@ -43,7 +37,6 @@ impl<OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK> Continuation<OPENROUTER, CLAU
         match self {
             Self::Openrouter { .. } => objectiveai::agent::Upstream::Openrouter,
             Self::ClaudeAgentSdk { .. } => objectiveai::agent::Upstream::ClaudeAgentSdk,
-            Self::ClaudeCode { .. } => objectiveai::agent::Upstream::ClaudeCode,
             Self::Mock { .. } => objectiveai::agent::Upstream::Mock,
         }
     }
@@ -54,7 +47,6 @@ impl<OPENROUTER, CLAUDEAGENTSDK, CLAUDECODE, MOCK> Continuation<OPENROUTER, CLAU
         match self {
             Self::Openrouter { mcp_connection, .. }
             | Self::ClaudeAgentSdk { mcp_connection, .. }
-            | Self::ClaudeCode { mcp_connection, .. }
             | Self::Mock { mcp_connection, .. } => mcp_connection.as_ref(),
         }
     }

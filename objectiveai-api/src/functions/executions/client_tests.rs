@@ -191,7 +191,6 @@ type TestClient = super::Client<
     ctx::DefaultContextExt,
     UnimplementedUpstreamClient,
     UnimplementedUpstreamClient,
-    UnimplementedUpstreamClient,
     crate::agent::completions::mock::Client,
     StubAgentUsageHandler,
     StubCompletionVotesFetcher,
@@ -227,7 +226,6 @@ fn make_client() -> Arc<TestClient> {
         None, // mcp_authorization
         retrieve_router.clone(),
         Arc::new(StubAgentUsageHandler),
-        Arc::new(UnimplementedUpstreamClient),
         Arc::new(UnimplementedUpstreamClient),
         Arc::new(UnimplementedUpstreamClient),
         Arc::new(crate::agent::completions::mock::Client {

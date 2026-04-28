@@ -132,7 +132,6 @@ type TestInventionClient = crate::functions::inventions::Client<
     ctx::DefaultContextExt,
     UnimplementedUpstreamClient,
     UnimplementedUpstreamClient,
-    UnimplementedUpstreamClient,
     crate::agent::completions::mock::Client,
     StubRetrieveClient,
     StubRetrieveClient,
@@ -146,7 +145,6 @@ type TestInventionClient = crate::functions::inventions::Client<
 
 type TestClient = super::Client<
     ctx::DefaultContextExt,
-    UnimplementedUpstreamClient,
     UnimplementedUpstreamClient,
     UnimplementedUpstreamClient,
     crate::agent::completions::mock::Client,
@@ -185,7 +183,6 @@ fn make_client() -> Arc<TestClient> {
         None, // mcp_authorization
         retrieve_router.clone(),
         Arc::new(StubAgentUsageHandler),
-        Arc::new(UnimplementedUpstreamClient),
         Arc::new(UnimplementedUpstreamClient),
         Arc::new(UnimplementedUpstreamClient),
         Arc::new(crate::agent::completions::mock::Client {
