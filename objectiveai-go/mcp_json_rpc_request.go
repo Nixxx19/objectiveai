@@ -25,7 +25,7 @@ func (v *McpJsonRpcRequest) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	for _, key := range []string{"jsonrpc", "method", "params"} {
+	for _, key := range []string{"id", "jsonrpc", "method", "params"} {
 		if _, ok := raw[key]; !ok {
 			return fmt.Errorf("McpJsonRpcRequest: missing required field %q", key)
 		}
