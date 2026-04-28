@@ -51,21 +51,6 @@ impl Tool {
         }
     }
 
-    /// Creates a Tool from an invention tool definition with a resolved name.
-    pub fn new_from_invention(
-        name: String,
-        tool: &objectiveai::functions::inventions::InventionTool,
-    ) -> Self {
-        Self::Function {
-            function: FunctionTool {
-                name,
-                description: Some(tool.description.to_string()),
-                parameters: Some(tool.parameters.clone()),
-                strict: None,
-            },
-        }
-    }
-
     /// Creates a Tool from a response format ToolCall definition with a resolved name.
     pub fn new_from_response_format(
         name: String,

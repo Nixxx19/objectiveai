@@ -7,7 +7,7 @@ pub mod openrouter;
 mod continuation;
 mod invention_server;
 mod proxy;
-mod tool;
+mod resolved_tool;
 mod upstream_client;
 pub mod usage_handler;
 
@@ -17,7 +17,7 @@ pub use error::*;
 pub use invention_server::*;
 pub use proxy::*;
 pub use upstream_client::*;
-pub use tool::*;
+pub use resolved_tool::*;
 
 #[cfg(test)]
 mod client_tests;

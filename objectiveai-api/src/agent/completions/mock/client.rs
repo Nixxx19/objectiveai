@@ -187,23 +187,18 @@ impl UpstreamClient<objectiveai::agent::mock::Agent, objectiveai::agent::mock::C
             // Source MCP tools from the per-agent proxy connection (if any)
             // and merge with the response-format ToolCall name. The proxy
             // fans out to the agent's declared upstream MCP servers and
-            // the invention server, so a single list_tools() returns the
-            // union — no separate invention_tools path.
-            let mcp_tools = match mcp_connection.as_ref() {
-                Some(conn) => Some(conn.list_tools().await.map_err(|error| {
-                    super::Error::McpListTools {
-                        url: conn.url.clone(),
-                        error,
-                    }
-                })?),
-                None => None,
-            };
-            let (tool_names, tool_map) = super::super::tool::resolve_tools(
+            // the invention server, so a single list_tools() (inside
+            // resolve_tools) returns the union — no separate invention_tools
+            // path.
+            let (tool_names, tool_map) = super::super::resolved_tool::resolve_tools(
                 mcp_connection.as_ref(),
-                mcp_tools.as_ref(),
-                None,
                 response_format.as_ref(),
-            );
+            )
+            .await
+            .map_err(|e| super::Error::McpListTools {
+                url: e.url,
+                error: e.error,
+            })?;
 
             // Hash full prompt + tool names so that adding/removing tools
             // produces a different deterministic output.
@@ -733,11 +728,6 @@ pub(super) fn generate_tool_arguments(
                 );
             }
             Some(serde_json::Value::Object(map))
-        }
-        Some(ResolvedTool::InventionTool(inv)) => {
-            Some(serde_json::Value::Object(
-                inv.parameters.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
-            ))
         }
         Some(ResolvedTool::ResponseFormat { schema, .. }) => {
             Some(serde_json::Value::Object(

@@ -278,31 +278,26 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent, objectiveai::agent::o
                 }
             }
 
-            // Source MCP tools from the per-agent proxy connection (if any).
-            // The proxy fans out to the agent's declared upstream MCP
-            // servers and the invention server, so a single list_tools()
-            // here returns the union — no separate invention_tools path.
-            let mcp_tools = match mcp_connection.as_ref() {
-                Some(conn) => Some(conn.list_tools().await.map_err(|error| {
-                    super::Error::Mcp {
-                        url: conn.url.clone(),
-                        error,
-                    }
-                })?),
-                None => None,
-            };
             use objectiveai::agent::completions::request::ResponseFormatParam;
             let response_format = match params.response_format.as_ref() {
                 Some(ResponseFormatParam::Single(rf)) => Some(rf.clone()),
                 Some(ResponseFormatParam::PerAgent(map)) => map.get(&agent.id).cloned(),
                 None => None,
             };
-            let (tool_names, tool_map) = super::super::tool::resolve_tools(
+            // Source MCP tools from the per-agent proxy connection (if any).
+            // The proxy fans out to the agent's declared upstream MCP
+            // servers and the invention server, so a single list_tools()
+            // (inside resolve_tools) returns the union — no separate
+            // invention_tools path.
+            let (tool_names, tool_map) = super::super::resolved_tool::resolve_tools(
                 mcp_connection.as_ref(),
-                mcp_tools.as_ref(),
-                None,
                 response_format.as_ref(),
-            );
+            )
+            .await
+            .map_err(|e| super::Error::Mcp {
+                url: e.url,
+                error: e.error,
+            })?;
 
             let request =
                 super::request::ChatCompletionCreateParams::new(
