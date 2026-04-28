@@ -16,7 +16,7 @@ fn thread_started_event_round_trips() {
     let parsed: ThreadEvent = serde_json::from_value(wire.clone()).unwrap();
     assert!(matches!(
         &parsed,
-        ThreadEvent::ThreadStarted(e) if e.thread_id == "thr-abc"
+        ThreadEvent::Known(KnownThreadEvent::ThreadStarted(e)) if e.thread_id == "thr-abc"
     ));
     assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
 }
@@ -25,7 +25,7 @@ fn thread_started_event_round_trips() {
 fn turn_started_event_round_trips() {
     let wire = json!({"type": "turn.started"});
     let parsed: ThreadEvent = serde_json::from_value(wire.clone()).unwrap();
-    assert!(matches!(parsed, ThreadEvent::TurnStarted(_)));
+    assert!(matches!(parsed, ThreadEvent::Known(KnownThreadEvent::TurnStarted(_))));
     assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
 }
 
@@ -40,7 +40,7 @@ fn turn_completed_event_round_trips() {
         },
     });
     let parsed: ThreadEvent = serde_json::from_value(wire.clone()).unwrap();
-    let ThreadEvent::TurnCompleted(e) = &parsed else { panic!("wrong variant") };
+    let ThreadEvent::Known(KnownThreadEvent::TurnCompleted(e)) = &parsed else { panic!("wrong variant") };
     assert_eq!(e.usage.input_tokens, 100);
     assert_eq!(e.usage.cached_input_tokens, 20);
     assert_eq!(e.usage.output_tokens, 50);
@@ -54,7 +54,7 @@ fn turn_failed_event_round_trips() {
         "error": {"message": "boom"},
     });
     let parsed: ThreadEvent = serde_json::from_value(wire.clone()).unwrap();
-    let ThreadEvent::TurnFailed(e) = &parsed else { panic!("wrong variant") };
+    let ThreadEvent::Known(KnownThreadEvent::TurnFailed(e)) = &parsed else { panic!("wrong variant") };
     assert_eq!(e.error.message, "boom");
     assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
 }
@@ -70,8 +70,8 @@ fn item_started_event_with_agent_message_round_trips() {
         },
     });
     let parsed: ThreadEvent = serde_json::from_value(wire.clone()).unwrap();
-    let ThreadEvent::ItemStarted(e) = &parsed else { panic!("wrong variant") };
-    let ThreadItem::AgentMessage(item) = &e.item else { panic!("wrong item variant") };
+    let ThreadEvent::Known(KnownThreadEvent::ItemStarted(e)) = &parsed else { panic!("wrong variant") };
+    let ThreadItem::Known(KnownThreadItem::AgentMessage(item)) = &e.item else { panic!("wrong item variant") };
     assert_eq!(item.id, "item-1");
     assert_eq!(item.text, "hello");
     assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
@@ -90,7 +90,7 @@ fn item_updated_event_with_command_execution_round_trips() {
         },
     });
     let parsed: ThreadEvent = serde_json::from_value(wire.clone()).unwrap();
-    assert!(matches!(parsed, ThreadEvent::ItemUpdated(_)));
+    assert!(matches!(parsed, ThreadEvent::Known(KnownThreadEvent::ItemUpdated(_))));
     assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
 }
 
@@ -108,8 +108,8 @@ fn item_completed_event_with_command_execution_with_exit_code_round_trips() {
         },
     });
     let parsed: ThreadEvent = serde_json::from_value(wire.clone()).unwrap();
-    let ThreadEvent::ItemCompleted(e) = &parsed else { panic!("wrong variant") };
-    let ThreadItem::CommandExecution(item) = &e.item else { panic!("wrong item variant") };
+    let ThreadEvent::Known(KnownThreadEvent::ItemCompleted(e)) = &parsed else { panic!("wrong variant") };
+    let ThreadItem::Known(KnownThreadItem::CommandExecution(item)) = &e.item else { panic!("wrong item variant") };
     assert_eq!(item.exit_code, Some(0));
     assert_eq!(item.status, CommandExecutionStatus::Completed);
     assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
@@ -119,16 +119,60 @@ fn item_completed_event_with_command_execution_with_exit_code_round_trips() {
 fn thread_error_event_round_trips() {
     let wire = json!({"type": "error", "message": "something broke"});
     let parsed: ThreadEvent = serde_json::from_value(wire.clone()).unwrap();
-    let ThreadEvent::Error(e) = &parsed else { panic!("wrong variant") };
+    let ThreadEvent::Known(KnownThreadEvent::Error(e)) = &parsed else { panic!("wrong variant") };
     assert_eq!(e.message, "something broke");
     assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
 }
 
 #[test]
-fn unknown_event_type_fails_to_parse() {
-    let wire = json!({"type": "thread.something_new", "thread_id": "x"});
-    let result: Result<ThreadEvent, _> = serde_json::from_value(wire);
-    assert!(result.is_err(), "unknown event type must be a parse error");
+fn unknown_event_type_falls_back() {
+    let wire = json!({
+        "type": "thread.something_new",
+        "thread_id": "x",
+        "extra_field": 42,
+    });
+    let parsed: ThreadEvent = serde_json::from_value(wire).unwrap();
+    let ThreadEvent::Unknown(unknown) = &parsed else { panic!("expected Unknown") };
+    assert_eq!(unknown.r#type, "thread.something_new");
+    // Re-serialization keeps only the discriminator — extras are discarded.
+    assert_eq!(
+        serde_json::to_value(&parsed).unwrap(),
+        json!({"type": "thread.something_new"}),
+    );
+}
+
+#[test]
+fn unknown_item_type_falls_back() {
+    let wire = json!({
+        "type": "future_item",
+        "id": "i-1",
+        "novel_field": "value",
+    });
+    let parsed: ThreadItem = serde_json::from_value(wire).unwrap();
+    let ThreadItem::Unknown(unknown) = &parsed else { panic!("expected Unknown") };
+    assert_eq!(unknown.r#type, "future_item");
+    assert_eq!(unknown.id, "i-1");
+    assert_eq!(
+        serde_json::to_value(&parsed).unwrap(),
+        json!({"id": "i-1", "type": "future_item"}),
+    );
+}
+
+#[test]
+fn item_event_with_unknown_inner_item_falls_back() {
+    let wire = json!({
+        "type": "item.completed",
+        "item": {
+            "type": "future_item",
+            "id": "i-2",
+            "weird": true,
+        },
+    });
+    let parsed: ThreadEvent = serde_json::from_value(wire).unwrap();
+    let ThreadEvent::Known(KnownThreadEvent::ItemCompleted(e)) = &parsed else { panic!("wrong variant") };
+    let ThreadItem::Unknown(item) = &e.item else { panic!("expected Unknown inner item") };
+    assert_eq!(item.r#type, "future_item");
+    assert_eq!(item.id, "i-2");
 }
 
 // ---------------------------------------------------------------------------
@@ -139,7 +183,7 @@ fn unknown_event_type_fails_to_parse() {
 fn agent_message_item_round_trips() {
     let wire = json!({"type": "agent_message", "id": "i", "text": "hi"});
     let parsed: ThreadItem = serde_json::from_value(wire.clone()).unwrap();
-    assert!(matches!(parsed, ThreadItem::AgentMessage(_)));
+    assert!(matches!(parsed, ThreadItem::Known(KnownThreadItem::AgentMessage(_))));
     assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
 }
 
@@ -147,7 +191,7 @@ fn agent_message_item_round_trips() {
 fn reasoning_item_round_trips() {
     let wire = json!({"type": "reasoning", "id": "r", "text": "thinking..."});
     let parsed: ThreadItem = serde_json::from_value(wire.clone()).unwrap();
-    assert!(matches!(parsed, ThreadItem::Reasoning(_)));
+    assert!(matches!(parsed, ThreadItem::Known(KnownThreadItem::Reasoning(_))));
     assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
 }
 
@@ -164,7 +208,7 @@ fn file_change_item_round_trips() {
         "status": "completed",
     });
     let parsed: ThreadItem = serde_json::from_value(wire.clone()).unwrap();
-    let ThreadItem::FileChange(item) = &parsed else { panic!("wrong variant") };
+    let ThreadItem::Known(KnownThreadItem::FileChange(item)) = &parsed else { panic!("wrong variant") };
     assert_eq!(item.changes.len(), 3);
     assert_eq!(item.changes[0].kind, PatchChangeKind::Add);
     assert_eq!(item.changes[1].kind, PatchChangeKind::Update);
@@ -184,7 +228,7 @@ fn mcp_tool_call_item_with_arbitrary_arguments_round_trips() {
         "status": "in_progress",
     });
     let parsed: ThreadItem = serde_json::from_value(wire.clone()).unwrap();
-    let ThreadItem::McpToolCall(item) = &parsed else { panic!("wrong variant") };
+    let ThreadItem::Known(KnownThreadItem::McpToolCall(item)) = &parsed else { panic!("wrong variant") };
     assert_eq!(item.server, "fs");
     assert_eq!(item.tool, "read_file");
     assert_eq!(item.arguments["path"], "/tmp/x");
@@ -207,7 +251,7 @@ fn mcp_tool_call_item_with_result_round_trips() {
         "status": "completed",
     });
     let parsed: ThreadItem = serde_json::from_value(wire.clone()).unwrap();
-    let ThreadItem::McpToolCall(item) = &parsed else { panic!("wrong variant") };
+    let ThreadItem::Known(KnownThreadItem::McpToolCall(item)) = &parsed else { panic!("wrong variant") };
     let result = item.result.as_ref().unwrap();
     assert_eq!(result.content.len(), 1);
     assert_eq!(result.structured_content["size"], 9);
@@ -218,7 +262,7 @@ fn mcp_tool_call_item_with_result_round_trips() {
 fn web_search_item_round_trips() {
     let wire = json!({"type": "web_search", "id": "w", "query": "rustlang"});
     let parsed: ThreadItem = serde_json::from_value(wire.clone()).unwrap();
-    assert!(matches!(parsed, ThreadItem::WebSearch(_)));
+    assert!(matches!(parsed, ThreadItem::Known(KnownThreadItem::WebSearch(_))));
     assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
 }
 
@@ -233,7 +277,7 @@ fn todo_list_item_round_trips() {
         ],
     });
     let parsed: ThreadItem = serde_json::from_value(wire.clone()).unwrap();
-    let ThreadItem::TodoList(item) = &parsed else { panic!("wrong variant") };
+    let ThreadItem::Known(KnownThreadItem::TodoList(item)) = &parsed else { panic!("wrong variant") };
     assert_eq!(item.items.len(), 2);
     assert!(item.items[0].completed);
     assert!(!item.items[1].completed);
@@ -244,7 +288,7 @@ fn todo_list_item_round_trips() {
 fn error_item_round_trips() {
     let wire = json!({"type": "error", "id": "e", "message": "nope"});
     let parsed: ThreadItem = serde_json::from_value(wire.clone()).unwrap();
-    assert!(matches!(parsed, ThreadItem::Error(_)));
+    assert!(matches!(parsed, ThreadItem::Known(KnownThreadItem::Error(_))));
     assert_eq!(serde_json::to_value(&parsed).unwrap(), wire);
 }
 
@@ -420,6 +464,42 @@ fn exec_args_env_layers_base_url_and_api_key() {
     assert_eq!(env.get("PATH").map(String::as_str), Some("/usr/bin"));
     assert_eq!(env.get("OPENAI_BASE_URL").map(String::as_str), Some("https://example.test"));
     assert_eq!(env.get("CODEX_API_KEY").map(String::as_str), Some("secret"));
+    assert_eq!(
+        env.get("CODEX_INTERNAL_ORIGINATOR_OVERRIDE").map(String::as_str),
+        Some("codex_sdk_rs"),
+    );
+}
+
+#[test]
+fn exec_args_env_does_not_clobber_existing_originator() {
+    use indexmap::IndexMap;
+    let args = CodexExecArgs { input: "p".into(), ..Default::default() };
+    let mut base = IndexMap::new();
+    base.insert("CODEX_INTERNAL_ORIGINATOR_OVERRIDE".into(), "test_harness".into());
+    let env = args.to_env(base);
+    assert_eq!(
+        env.get("CODEX_INTERNAL_ORIGINATOR_OVERRIDE").map(String::as_str),
+        Some("test_harness"),
+        "caller-supplied originator must win over the SDK default",
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Strict input parsing — TextInput / LocalImageInput have extra="forbid".
+// ---------------------------------------------------------------------------
+
+#[test]
+fn text_input_rejects_unknown_fields() {
+    let wire = json!({"type": "text", "text": "hi", "rogue": 1});
+    let result: Result<UserInput, _> = serde_json::from_value(wire);
+    assert!(result.is_err(), "unknown fields on TextInput must be rejected");
+}
+
+#[test]
+fn local_image_input_rejects_unknown_fields() {
+    let wire = json!({"type": "local_image", "path": "/tmp/x", "rogue": 1});
+    let result: Result<UserInput, _> = serde_json::from_value(wire);
+    assert!(result.is_err(), "unknown fields on LocalImageInput must be rejected");
 }
 
 // ---------------------------------------------------------------------------

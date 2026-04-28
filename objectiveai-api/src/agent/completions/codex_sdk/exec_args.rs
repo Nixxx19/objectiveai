@@ -111,9 +111,15 @@ impl CodexExecArgs {
     }
 
     /// Build the environment for the child process. `base` is the inherited
-    /// environment from the caller; `base_url` and `api_key` are layered on
-    /// top, mirroring `_build_env` in `exec.py:102-118`.
+    /// environment from the caller; the originator marker, `base_url`, and
+    /// `api_key` are layered on top, mirroring `_build_env` in
+    /// `exec.py:102-118`.
     pub fn to_env(&self, mut base: IndexMap<String, String>) -> IndexMap<String, String> {
+        // exec.py:109-110 — set the originator marker if the caller hasn't
+        // overridden it. Identifies us as the Rust SDK in upstream telemetry.
+        base.entry(INTERNAL_ORIGINATOR_ENV.into())
+            .or_insert_with(|| RUST_SDK_ORIGINATOR.into());
+
         if let Some(url) = &self.base_url {
             base.insert("OPENAI_BASE_URL".into(), url.clone());
         }
@@ -123,6 +129,13 @@ impl CodexExecArgs {
         base
     }
 }
+
+/// Mirrors `INTERNAL_ORIGINATOR_ENV` in `exec.py:16`.
+const INTERNAL_ORIGINATOR_ENV: &str = "CODEX_INTERNAL_ORIGINATOR_OVERRIDE";
+
+/// Originator marker. Python uses `codex_sdk_py`; we use `codex_sdk_rs` so
+/// upstream can distinguish Rust callers.
+const RUST_SDK_ORIGINATOR: &str = "codex_sdk_rs";
 
 fn bool_lit(value: bool) -> &'static str {
     if value { "true" } else { "false" }
