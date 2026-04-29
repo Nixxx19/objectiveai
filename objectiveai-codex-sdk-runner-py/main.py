@@ -1,26 +1,61 @@
 #!/usr/bin/env python3
-"""ObjectiveAI Codex SDK Runner.
+"""ObjectiveAI Codex SDK Runner — stdio NDJSON server.
 
-Runs the official OpenAI Codex Python SDK (``openai-codex-sdk``) and streams
-thread events to stdout as NDJSON. Designed to be spawned as a subprocess by
-``objectiveai-api``.
+A long-lived process that accepts multiple concurrent Codex SDK runs
+over a single stdin/stdout/stderr pair. The caller multiplexes by
+attaching a string ``id`` to every request; every line emitted on
+stdout and stderr carries that same ``id`` so the caller can
+demultiplex events from N concurrent streams.
 
-Authentication is inherited from the user's ``~/.codex/auth.json`` (written
-by ``codex login``). The SDK shells out to the ``codex`` binary which reads
-that file — we do nothing special for auth. The ``codex`` binary is found
-either by the SDK's vendored bundle or via system PATH.
+Authentication is inherited from the user's ``~/.codex/auth.json``
+(written by ``codex login``). The SDK shells out to the ``codex``
+binary which reads that file — we do nothing special for auth.
+
+Spawn with no arguments:
+
+  $ runner
+
+The runner has no built-in concurrency cap. The Rust caller
+(objectiveai-api) enforces a FIFO ``query_limit`` on its side via a
+``tokio::sync::Semaphore``, so surplus requests never reach this
+process — they wait for a slot before the ``run`` line is sent.
+
+Wire protocol — NDJSON, one JSON object per line, UTF-8, terminated by
+``\\n``:
+
+  Inbound (stdin):
+    {"type":"run","id":"<id>","params":{...}}        # start a stream
+
+  Outbound (stdout):
+    {"type":"event","id":"<id>","event":{...}}       # one ThreadEvent
+    {"type":"end","id":"<id>","status":"ok"}
+    {"type":"end","id":"<id>","status":"error","error":"<msg>"}
+
+  Outbound (stderr) during operation:
+    {"type":"diag","id":"<id>","level":"warn","message":"..."}
+
+  Outbound (stderr) before main_loop is up — process-fatal only:
+    {"type":"fatal","message":"..."}                 # untagged carve-out
+
+EOF on stdin = drain every in-flight task, exit 0. There is no
+``cancel`` message — codex's ``Thread`` doesn't expose a stop point
+that doesn't leave a billing event unaccounted for, so we run every
+accepted ``run`` to natural completion.
+
+Concurrency: every emit on stdout (and on stderr) is serialized
+through one ``asyncio.Lock``. This keeps line bytes from interleaving
+across coroutines. The caller MUST drain stdout promptly or the OS
+pipe buffer fills and ALL in-flight runs block.
 """
 
 from __future__ import annotations
 
 __version__ = "2.0.0"
 
-import argparse
 import asyncio
 import json
 import sys
-import tempfile
-from typing import Any
+from typing import Any, BinaryIO, Optional
 
 from openai_codex_sdk import (
     Codex,
@@ -32,7 +67,7 @@ from openai_codex_sdk import (
 # ---------------------------------------------------------------------------
 # Input parsing
 # ---------------------------------------------------------------------------
-# ``--input`` is a JSON object representing a single user message. Shape:
+# `params.input` is a JSON object representing a single user message:
 #
 #   {
 #     "content": "string"                     # plain text content, OR
@@ -45,18 +80,18 @@ from openai_codex_sdk import (
 #   }
 
 
-def _parse_input(raw: Any) -> list[Any]:
-    """Parse a single user message JSON object into Codex SDK input items."""
+def _parse_input_payload(raw: Any) -> list[Any]:
+    """Translate the run-line ``params.input`` value into Codex SDK input items."""
     if not isinstance(raw, dict):
-        raise ValueError("--input must be a JSON object representing a user message")
+        raise ValueError("params.input must be an object representing a user message")
 
     name = raw.get("name")
     if name is not None and not isinstance(name, str):
-        raise ValueError("--input.name must be a string")
+        raise ValueError("params.input.name must be a string")
 
     content = raw.get("content")
     if content is None:
-        raise ValueError("--input is missing required field: content")
+        raise ValueError("params.input is missing required field: content")
 
     items: list[Any] = []
 
@@ -70,7 +105,7 @@ def _parse_input(raw: Any) -> list[Any]:
         for idx, part in enumerate(content):
             if not isinstance(part, dict) or "type" not in part:
                 raise ValueError(
-                    f"--input.content[{idx}] must be an object with a 'type' field"
+                    f"params.input.content[{idx}] must be an object with a 'type' field"
                 )
             t = part["type"]
             try:
@@ -82,27 +117,82 @@ def _parse_input(raw: Any) -> list[Any]:
                     )
                 else:
                     raise ValueError(
-                        f"--input.content[{idx}] has unknown type: {t!r}"
+                        f"params.input.content[{idx}] has unknown type: {t!r}"
                     )
             except KeyError as e:
                 raise ValueError(
-                    f"--input.content[{idx}] missing required field: {e.args[0]}"
+                    f"params.input.content[{idx}] missing required field: {e.args[0]}"
                 )
     else:
-        raise ValueError("--input.content must be a string or an array of parts")
+        raise ValueError("params.input.content must be a string or an array of parts")
 
     return items
 
 
 # ---------------------------------------------------------------------------
+# Stream writer (atomic, lock-serialized line emission)
+# ---------------------------------------------------------------------------
+
+
+class Writer:
+    """Serializes async writes to one binary stream.
+
+    Every emit is a single UTF-8 line ending in ``\\n``, written-and-flushed
+    under one ``asyncio.Lock`` so concurrent coroutines never interleave
+    bytes mid-line. We go through ``raw.write`` on the binary buffer
+    (``sys.stdout.buffer`` / ``sys.stderr.buffer``) to bypass Python's
+    text-mode ``\\n``→``\\r\\n`` translation on Windows.
+    """
+
+    def __init__(self, raw: BinaryIO) -> None:
+        self._raw = raw
+        self._lock = asyncio.Lock()
+
+    async def emit(self, payload: dict) -> None:
+        line = json.dumps(payload, separators=(",", ":"), ensure_ascii=False) + "\n"
+        data = line.encode("utf-8")
+        async with self._lock:
+            self._raw.write(data)
+            self._raw.flush()
+
+    # --- stdout helpers ---
+
+    async def emit_event(self, request_id: str, event: dict) -> None:
+        await self.emit({"type": "event", "id": request_id, "event": event})
+
+    async def emit_end(
+        self,
+        request_id: str,
+        status: str,
+        error: Optional[str] = None,
+    ) -> None:
+        payload: dict[str, Any] = {
+            "type": "end",
+            "id": request_id,
+            "status": status,
+        }
+        if error is not None:
+            payload["error"] = error
+        await self.emit(payload)
+
+    # --- stderr helper ---
+
+    async def emit_diag(self, request_id: str, level: str, message: str) -> None:
+        await self.emit({
+            "type": "diag",
+            "id": request_id,
+            "level": level,
+            "message": message,
+        })
+
+
+# ---------------------------------------------------------------------------
 # Event serialization
 # ---------------------------------------------------------------------------
-# Each ThreadEvent from the SDK is a pydantic model. We emit it as NDJSON
-# using the model's own dump (camelCase via alias-aware mode is not needed
-# here — the SDK's wire format is already snake_case on the event layer).
 
 
 def _serialize_event(event: Any) -> dict[str, Any]:
+    """Convert a typed Codex SDK ThreadEvent to the wire-format dict."""
     if hasattr(event, "model_dump"):
         return event.model_dump(mode="json", by_alias=False, exclude_none=False)
     if isinstance(event, dict):
@@ -110,119 +200,247 @@ def _serialize_event(event: Any) -> dict[str, Any]:
     return {"_repr": repr(event)}
 
 
-def _emit(obj: dict[str, Any]) -> None:
-    sys.stdout.write(json.dumps(obj) + "\n")
-    sys.stdout.flush()
-
-
 # ---------------------------------------------------------------------------
-# CLI argument parsing
+# Per-request handler
 # ---------------------------------------------------------------------------
 
 
-def _truthy_flag(parser: argparse.ArgumentParser, name: str, help_text: str) -> None:
-    """Add a tri-state flag: --name / --no-name / absent (None)."""
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument(
-        f"--{name}",
-        dest=name.replace("-", "_"),
-        action="store_const",
-        const=True,
-        default=None,
-        help=help_text,
-    )
-    group.add_argument(
-        f"--no-{name}",
-        dest=name.replace("-", "_"),
-        action="store_const",
-        const=False,
-        help=f"Disable: {help_text}",
-    )
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Run the OpenAI Codex Python SDK and stream events as NDJSON to stdout.",
-    )
-    parser.add_argument(
-        "--model",
-        default=None,
-        help="Codex model identifier (e.g. gpt-5). Optional if --resume is used.",
-    )
-    parser.add_argument(
-        "--input",
-        required=True,
-        help='Turn input: a JSON object representing a single user message. '
-        'Shape: {"content": "..." | [{"type":"text","text":"..."},'
-        '{"type":"local_image","path":"..."}], "name": "optional-name"}',
-    )
-    parser.add_argument(
-        "--effort",
-        choices=["minimal", "low", "medium", "high"],
-        default=None,
-        help="Model reasoning effort.",
-    )
-    parser.add_argument(
-        "--resume",
-        default=None,
-        help="Thread id to resume instead of starting a new thread.",
-    )
-    _truthy_flag(parser, "web-search-enabled", "Allow the agent to use web search.")
-    return parser.parse_args()
-
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
+def _one_line(msg: str) -> str:
+    """Flatten an error message to a single line for safe NDJSON embedding."""
+    return " ".join(msg.split())
 
 
 def _only_set(d: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in d.items() if v is not None}
 
 
-async def run(args: argparse.Namespace) -> int:
-    input_ = _parse_input(json.loads(args.input))
+async def handle_run(
+    codex: Codex,
+    request_id: str,
+    params: dict[str, Any],
+    stdout_writer: Writer,
+    stderr_writer: Writer,
+) -> None:
+    """Run one Codex SDK turn, tagging every emit with ``request_id``.
 
-    if not args.resume and not args.model:
-        raise ValueError("--model is required unless --resume is given")
-
-    # Hardcoded sandboxing posture for headless / untrusted operation:
-    # - working_directory: a fresh empty temp dir so the codex binary has
-    #   somewhere to "live" without touching anything real. Cleaned up via
-    #   `tempfile.TemporaryDirectory`'s context-manager exit, which acts as
-    #   the trap on stream-end (normal exit, exception, or task cancel).
-    # - sandbox_mode = "read-only": no filesystem mutations.
-    # - approval_policy = "untrusted": codex never auto-approves anything.
-    # - skip_git_repo_check = True: the temp dir isn't a git repo and
-    #   shouldn't need to be.
-    with tempfile.TemporaryDirectory(prefix="objectiveai-codex-runner-") as tmpdir:
-        codex = Codex()
-
+    Always emits exactly one terminal ``end`` line via ``asyncio.shield``
+    even on cancellation.
+    """
+    status: str = "ok"
+    error: Optional[str] = None
+    try:
+        # Hardcoded sandboxing posture for headless / untrusted operation:
+        # - working_directory: provided by the caller via params.cwd. The
+        #   Rust client owns the tempdir lifecycle so any image inputs it
+        #   materialized stay alive for the run.
+        # - sandbox_mode = "read-only": no filesystem mutations.
+        # - approval_policy = "untrusted": codex never auto-approves anything.
+        # - skip_git_repo_check = True: the cwd isn't a git repo and
+        #   shouldn't need to be.
         thread_options = _only_set({
-            "model": args.model,
-            "model_reasoning_effort": args.effort,
-            "web_search_enabled": args.web_search_enabled,
-            "working_directory": tmpdir,
+            "model": params.get("model"),
+            "model_reasoning_effort": params.get("effort"),
+            "web_search_enabled": params.get("web_search_enabled"),
+            "working_directory": params.get("cwd"),
             "sandbox_mode": "read-only",
             "approval_policy": "untrusted",
             "skip_git_repo_check": True,
         })
 
-        if args.resume:
-            thread = codex.resume_thread(args.resume, thread_options)
+        # NOTE(MCP): params.get("mcp_servers") is intentionally ignored
+        # for now — the codex Python SDK Thread API has no MCP knob.
+        # The Rust side plumbs this field through end-to-end so the wire
+        # protocol is stable; wiring it into Codex.Thread is a follow-up.
+
+        if params.get("resume"):
+            thread = codex.resume_thread(params["resume"], thread_options)
         else:
             thread = codex.start_thread(thread_options)
 
+        input_ = _parse_input_payload(params.get("input"))
         streamed = await thread.run_streamed(input_)
 
-        exit_code = 0
         async for event in streamed.events:
-            _emit(_serialize_event(event))
+            await stdout_writer.emit_event(request_id, _serialize_event(event))
             event_type = getattr(event, "type", None)
             if event_type == "turn.failed" or event_type == "error":
-                exit_code = 1
+                status = "error"
+                error = _one_line(
+                    f"thread run {event_type}: "
+                    + getattr(getattr(event, "error", None), "message", "")
+                    or getattr(event, "message", "")
+                    or event_type
+                )
+                # Don't break — let the SDK finish its event stream so
+                # any trailing usage event is preserved. The terminal
+                # `end` line will carry the error.
+    except asyncio.CancelledError:
+        # Reachable only on subprocess SIGTERM during the drain phase.
+        # In-flight cancellation isn't part of the wire protocol.
+        status = "error"
+        error = "cancelled"
+        raise
+    except Exception as e:
+        status = "error"
+        error = _one_line(str(e) or e.__class__.__name__)
+    finally:
+        # Shield the terminal emit so that a second cancel arriving
+        # while the SDK is unwinding doesn't suppress it.
+        try:
+            await asyncio.shield(stdout_writer.emit_end(request_id, status, error))
+        except Exception:
+            pass
 
-        return exit_code
+
+# ---------------------------------------------------------------------------
+# Stdin reader
+# ---------------------------------------------------------------------------
+
+
+async def read_one_line_from_stdin() -> Optional[str]:
+    """Read one line from stdin without blocking the event loop.
+
+    Uses a thread-pool executor instead of ``loop.connect_read_pipe`` because
+    ProactorEventLoop on Windows does not handle stdin-as-pipe reliably. The
+    blocking ``readline`` runs on a worker thread; on EOF the thread returns
+    naturally and the next iteration sees ``None``.
+    """
+    loop = asyncio.get_running_loop()
+    raw = await loop.run_in_executor(None, sys.stdin.buffer.readline)
+    if not raw:
+        return None
+    return raw.decode("utf-8", errors="replace")
+
+
+# ---------------------------------------------------------------------------
+# Dispatcher
+# ---------------------------------------------------------------------------
+
+
+_REQUIRED_PARAMS = ("model", "input", "cwd")
+
+
+def _validate_run_params(params: Any) -> Optional[str]:
+    """Return None if params is acceptable, else a one-line error string."""
+    if not isinstance(params, dict):
+        return "params must be an object"
+    for key in _REQUIRED_PARAMS:
+        if key not in params:
+            return f"missing required field '{key}'"
+    if not isinstance(params["model"], str) or not params["model"]:
+        return "'model' must be a non-empty string"
+    if not isinstance(params["input"], dict):
+        return "'input' must be an object"
+    if not isinstance(params["cwd"], str) or not params["cwd"]:
+        return "'cwd' must be a non-empty string"
+    return None
+
+
+async def _dispatch(
+    codex: Codex,
+    msg: dict,
+    tasks: dict[str, asyncio.Task],
+    stdout_writer: Writer,
+    stderr_writer: Writer,
+) -> None:
+    msg_type = msg.get("type")
+    request_id = msg.get("id")
+
+    if msg_type == "run":
+        # No id — drop silently (no tag to attach output to).
+        if not isinstance(request_id, str) or not request_id:
+            return
+        if request_id in tasks:
+            await stdout_writer.emit_end(request_id, "error", "duplicate-id")
+            return
+        params = msg.get("params")
+        validation_error = _validate_run_params(params)
+        if validation_error is not None:
+            await stdout_writer.emit_end(
+                request_id, "error", f"invalid-params: {validation_error}"
+            )
+            return
+        task = asyncio.create_task(
+            handle_run(
+                codex,
+                request_id,
+                params,
+                stdout_writer,
+                stderr_writer,
+            )
+        )
+        tasks[request_id] = task
+
+        def _done(t: asyncio.Task, _id: str = request_id) -> None:
+            tasks.pop(_id, None)
+            if not t.cancelled():
+                exc = t.exception()
+                if exc is not None and not isinstance(exc, asyncio.CancelledError):
+                    try:
+                        loop = asyncio.get_event_loop()
+                        loop.create_task(
+                            stderr_writer.emit_diag(
+                                _id,
+                                "error",
+                                f"internal task error: {_one_line(str(exc))}",
+                            )
+                        )
+                    except Exception:
+                        pass
+
+        task.add_done_callback(_done)
+        return
+
+    # Note: no `cancel` handler. In-flight cancellation isn't supported.
+
+    # Unknown type — emit a tagged error if we have an id; otherwise drop.
+    if isinstance(request_id, str) and request_id:
+        await stdout_writer.emit_end(
+            request_id, "error", f"unknown-type: {msg_type!r}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Main loop
+# ---------------------------------------------------------------------------
+
+
+async def main_loop() -> None:
+    stdout_writer = Writer(sys.stdout.buffer)
+    stderr_writer = Writer(sys.stderr.buffer)
+    tasks: dict[str, asyncio.Task] = {}
+
+    # One Codex client shared across every in-flight request — it's a
+    # thin wrapper around the codex binary; instantiation is cheap but
+    # not free, and concurrent threads can be created from one Codex.
+    codex = Codex()
+
+    while True:
+        line = await read_one_line_from_stdin()
+        if line is None:
+            break  # EOF → drain phase
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            msg = json.loads(line)
+        except json.JSONDecodeError:
+            # Process is alive and not dying — silently drop. Untagged
+            # output is forbidden during normal operation.
+            continue
+        if not isinstance(msg, dict):
+            continue
+        await _dispatch(codex, msg, tasks, stdout_writer, stderr_writer)
+
+    # Drain phase: every in-flight task emits its own end line as it
+    # finishes or is cancelled.
+    if tasks:
+        await asyncio.gather(*list(tasks.values()), return_exceptions=True)
+
+
+# ---------------------------------------------------------------------------
+# Windows asyncio shutdown shim
+# ---------------------------------------------------------------------------
 
 
 def _silence_proactor_pipe_warnings() -> None:
@@ -278,18 +496,39 @@ def _silence_proactor_pipe_warnings() -> None:
         pass
 
 
-def main() -> None:
-    # Suppress the cosmetic Windows asyncio shutdown warning before we
-    # start the loop, so even crashes-during-cleanup don't leak it.
-    _silence_proactor_pipe_warnings()
+# ---------------------------------------------------------------------------
+# Process entrypoint
+# ---------------------------------------------------------------------------
 
-    args = parse_args()
+
+def _emit_pre_startup_fatal(message: str) -> None:
+    """Untagged stderr line — used ONLY when the process is about to exit
+    non-zero before the main loop can come up. The ``"type":"fatal"``
+    discriminator lets the caller distinguish this from per-request
+    diagnostics."""
+    line = json.dumps(
+        {"type": "fatal", "message": _one_line(message)}, ensure_ascii=False
+    ) + "\n"
     try:
-        code = asyncio.run(run(args))
-    except Exception as e:  # noqa: BLE001 - surface everything to stderr
-        sys.stderr.write(f"{type(e).__name__}: {e}\n")
+        sys.stderr.buffer.write(line.encode("utf-8"))
+        sys.stderr.buffer.flush()
+    except Exception:
+        pass
+
+
+def main() -> None:
+    try:
+        _silence_proactor_pipe_warnings()
+    except Exception as e:
+        _emit_pre_startup_fatal(f"startup: {e}")
         sys.exit(1)
-    sys.exit(code)
+
+    try:
+        asyncio.run(main_loop())
+    except Exception as e:
+        _emit_pre_startup_fatal(f"main_loop: {e}")
+        sys.exit(1)
+    sys.exit(0)
 
 
 if __name__ == "__main__":

@@ -160,7 +160,7 @@ fn make_retrieve_router() -> Arc<crate::retrieval::retrieve::Router<StubRetrieve
 
 fn make_agent_client(
     retrieve_router: &Arc<crate::retrieval::retrieve::Router<StubRetrieveClient, StubRetrieveClient, crate::retrieval::retrieve::mock::MockClient, ctx::DefaultContextExt>>,
-) -> Arc<crate::agent::completions::Client<ctx::DefaultContextExt, UnimplementedUpstreamClient, UnimplementedUpstreamClient, crate::agent::completions::mock::Client, StubRetrieveClient, StubRetrieveClient, crate::retrieval::retrieve::mock::MockClient, StubAgentUsageHandler>> {
+) -> Arc<crate::agent::completions::Client<ctx::DefaultContextExt, UnimplementedUpstreamClient, UnimplementedUpstreamClient, UnimplementedUpstreamClient, crate::agent::completions::mock::Client, StubRetrieveClient, StubRetrieveClient, crate::retrieval::retrieve::mock::MockClient, StubAgentUsageHandler>> {
     Arc::new(crate::agent::completions::Client::new(
         Arc::new(objectiveai::mcp::Client::new(
             reqwest::Client::new(),
@@ -189,6 +189,7 @@ fn make_agent_client(
         Arc::new(StubAgentUsageHandler),
         Arc::new(UnimplementedUpstreamClient),
         Arc::new(UnimplementedUpstreamClient),
+        Arc::new(UnimplementedUpstreamClient),
         Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
             max_tool_calls: 1000,
@@ -212,6 +213,7 @@ fn make_agent_client(
 
 type TestVectorClient = super::Client<
     ctx::DefaultContextExt,
+    UnimplementedUpstreamClient,
     UnimplementedUpstreamClient,
     UnimplementedUpstreamClient,
     crate::agent::completions::mock::Client,

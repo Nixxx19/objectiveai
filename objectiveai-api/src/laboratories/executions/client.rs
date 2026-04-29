@@ -15,13 +15,16 @@ type EvaluationChunk =
 type Object = objectiveai::laboratories::executions::response::streaming::Object;
 type Params = objectiveai::laboratories::executions::request::LaboratoryExecutionCreateParams;
 
-type Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK> =
+type Continuation<OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK> =
     crate::agent::completions::Continuation<
         <OPENROUTER as crate::agent::completions::UpstreamClient<
             objectiveai::agent::openrouter::Agent, objectiveai::agent::openrouter::Continuation,
         >>::State,
         <CLAUDEAGENTSDK as crate::agent::completions::UpstreamClient<
             objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
+        >>::State,
+        <CODEXSDK as crate::agent::completions::UpstreamClient<
+            objectiveai::agent::codex_sdk::Agent, objectiveai::agent::codex_sdk::Continuation,
         >>::State,
         <MOCK as crate::agent::completions::UpstreamClient<
             objectiveai::agent::mock::Agent, objectiveai::agent::mock::Continuation,
@@ -36,10 +39,10 @@ pub fn response_id(created: u64) -> String {
 /// Laboratory client that runs builder agents in orchestrated environments
 /// (Docker containers, GCP instances, etc.) with the embedded
 /// objectiveai-mcp-filesystem binary.
-pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, LUSG, ORCH> {
+pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK, RETRG, RETRF, RETRM, CUSG, LUSG, ORCH> {
     pub agent_client: Arc<
         crate::agent::completions::Client<
-            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG,
+            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK, RETRG, RETRF, RETRM, CUSG,
         >,
     >,
     pub retrieve_router:
@@ -71,8 +74,8 @@ fn inject_mcp_server(agent: &mut objectiveai::agent::InlineAgentBase, mcp_url: S
     }
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, LUSG, ORCH>
-    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, RETRG, RETRF, RETRM, CUSG, LUSG, ORCH>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK, RETRG, RETRF, RETRM, CUSG, LUSG, ORCH>
+    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK, RETRG, RETRF, RETRM, CUSG, LUSG, ORCH>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
     OPENROUTER: crate::agent::completions::UpstreamClient<
@@ -82,6 +85,11 @@ where
         + 'static,
     CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<
             objectiveai::agent::claude_agent_sdk::Agent, objectiveai::agent::claude_agent_sdk::Continuation,
+        > + Send
+        + Sync
+        + 'static,
+    CODEXSDK: crate::agent::completions::UpstreamClient<
+            objectiveai::agent::codex_sdk::Agent, objectiveai::agent::codex_sdk::Continuation,
         > + Send
         + Sync
         + 'static,
@@ -429,7 +437,7 @@ where
         );
 
         async_stream::stream! {
-            let mut continuation: Option<Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK>> = None;
+            let mut continuation: Option<Continuation<OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK>> = None;
             let mut retries = 0u32;
 
             loop {
