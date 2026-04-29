@@ -94,6 +94,24 @@ impl Client {
     /// every subsequent RPC. They are applied *after* the fixed headers
     /// so callers can't accidentally clobber `Mcp-Session-Id`,
     /// `Content-Type`, etc.
+    ///
+    /// ## SSE handoff
+    ///
+    /// `Accept` is `text/event-stream, application/json` — stream first
+    /// — so the server is encouraged to keep the underlying connection
+    /// open. If the response comes back as SSE we read the initialize
+    /// event off the stream and hand the *still-open* line reader to the
+    /// returned [`Connection`]'s list-changed listener. The listener
+    /// starts reading from that pre-opened stream immediately, which
+    /// closes the race where a peer (e.g. an in-process rmcp upstream)
+    /// would broadcast `notifications/tools/list_changed` before our
+    /// listener had managed to open its own GET `/` SSE.
+    ///
+    /// If the response is unary JSON and the server advertises either
+    /// `tools.list_changed` or `resources.list_changed`, we proactively
+    /// open a GET `/` SSE stream *before returning* and hand it to the
+    /// listener for the same reason. If neither capability is set, no
+    /// listener is needed and we return without touching SSE.
     pub async fn connect(
         &self,
         url: String,
@@ -124,7 +142,7 @@ impl Client {
             .post(&url)
             .timeout(self.connect_timeout)
             .header("Content-Type", "application/json")
-            .header("Accept", "application/json, text/event-stream")
+            .header("Accept", "text/event-stream, application/json")
             .json(&init_request);
 
         if let Some(sid) = &session_id {
@@ -173,25 +191,113 @@ impl Client {
             }
         };
 
-        // Parse the initialize result. Streamable-HTTP servers (any rmcp
-        // implementation, for example) wrap the JSON-RPC response in an
-        // SSE `text/event-stream` envelope; tolerate both that and a
-        // bare-JSON body.
-        let rpc_response: super::JsonRpcResponse<
-            super::initialize_result::InitializeResult,
-        > = super::parse_streamable_http_response(&url, response).await?;
+        // Did the server return SSE or unary JSON? rmcp's
+        // `StreamableHttpService` always returns SSE; many other servers
+        // reply with bare JSON.
+        let is_sse = response
+            .headers()
+            .get(reqwest::header::CONTENT_TYPE)
+            .and_then(|v| v.to_str().ok())
+            .map(|v| v.starts_with("text/event-stream"))
+            .unwrap_or(false);
 
-        let initialize_result = match rpc_response {
-            super::JsonRpcResponse::Success { result, .. } => result,
-            super::JsonRpcResponse::Error { error, .. } => {
-                return Err(super::Error::JsonRpc {
-                    url: url.clone(),
-                    code: error.code,
-                    message: error.message,
-                    data: error.data,
-                });
-            }
+        // Parse the initialize response. SSE path consumes one event
+        // from the stream and keeps the rest of the stream alive for
+        // the listener; unary path consumes the whole body.
+        let (initialize_result, mut initial_sse_lines) = if is_sse {
+            let mut lines = super::lines_from_response(response);
+            let rpc_response: super::JsonRpcResponse<
+                super::initialize_result::InitializeResult,
+            > = super::read_next_sse_event(&url, &mut lines).await?;
+            let result = match rpc_response {
+                super::JsonRpcResponse::Success { result, .. } => result,
+                super::JsonRpcResponse::Error { error, .. } => {
+                    return Err(super::Error::JsonRpc {
+                        url: url.clone(),
+                        code: error.code,
+                        message: error.message,
+                        data: error.data,
+                    });
+                }
+            };
+            (result, Some(lines))
+        } else {
+            let rpc_response: super::JsonRpcResponse<
+                super::initialize_result::InitializeResult,
+            > = super::parse_streamable_http_response(&url, response).await?;
+            let result = match rpc_response {
+                super::JsonRpcResponse::Success { result, .. } => result,
+                super::JsonRpcResponse::Error { error, .. } => {
+                    return Err(super::Error::JsonRpc {
+                        url: url.clone(),
+                        code: error.code,
+                        message: error.message,
+                        data: error.data,
+                    });
+                }
+            };
+            (result, None)
         };
+
+        // If the server advertises list-changed for tools or resources,
+        // always open a dedicated GET `/` SSE stream now — before
+        // returning — so the listener has somewhere to read
+        // notifications from synchronously, regardless of what shape
+        // the `initialize` response was. The init-response stream (when
+        // the server replied with SSE) is unreliable for this purpose:
+        // some servers (rmcp's `StreamableHttpService` among them) make
+        // it a single-event response that ends after the initialize
+        // result, with notifications routed to the GET-side standalone
+        // stream instead. The init stream we kept around still serves
+        // as a "first iteration" buffer for the listener — when it
+        // ends, the listener falls through to the GET stream we open
+        // here and continues without a reconnect-via-GET race.
+        //
+        // This is the only spot where capabilities matter; the
+        // connection itself is naive about them.
+        let needs_sse = initialize_result
+            .capabilities
+            .tools
+            .as_ref()
+            .and_then(|t| t.list_changed)
+            .unwrap_or(false)
+            || initialize_result
+                .capabilities
+                .resources
+                .as_ref()
+                .and_then(|r| r.list_changed)
+                .unwrap_or(false);
+        if needs_sse {
+            let mut get_request = self
+                .http_client
+                .get(&url)
+                .timeout(self.connect_timeout)
+                .header("Accept", "text/event-stream")
+                .header("Mcp-Session-Id", &session_id);
+            if let Some(auth) = &authorization {
+                get_request = get_request.header("Authorization", auth);
+            }
+            get_request = get_request
+                .header("User-Agent", &self.user_agent)
+                .header("X-Title", &self.x_title)
+                .header("Referer", &self.http_referer)
+                .header("HTTP-Referer", &self.http_referer);
+            for (name, value) in &extra_headers {
+                get_request = get_request.header(name, value);
+            }
+            let get_response = get_request.send().await.map_err(|source| {
+                super::Error::Connection { url: url.clone(), source }
+            })?;
+            if !get_response.status().is_success() {
+                let code = get_response.status();
+                let body = get_response.text().await.unwrap_or_default();
+                return Err(super::Error::BadStatus { url: url.clone(), code, body });
+            }
+            // The GET stream is the canonical notification channel —
+            // overwrite any init-side stream so the listener latches
+            // onto the one that actually receives notifications.
+            initial_sse_lines = Some(super::lines_from_response(get_response));
+        }
 
         let connection = super::Connection::new(
             self.http_client.clone(),
@@ -210,6 +316,7 @@ impl Client {
             self.backoff_max_elapsed_time,
             self.call_timeout,
             initialize_result,
+            initial_sse_lines,
         );
 
         // Send the initialized notification. Per the MCP spec the method

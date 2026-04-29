@@ -114,6 +114,7 @@ impl Connection {
         backoff_max_elapsed_time: Duration,
         call_timeout: Duration,
         initialize_result: super::initialize_result::InitializeResult,
+        initial_sse_lines: Option<super::LinesStream>,
     ) -> Self {
         let inner = ConnectionInner::new(
             http_client,
@@ -132,6 +133,7 @@ impl Connection {
             backoff_max_elapsed_time,
             call_timeout,
             initialize_result,
+            initial_sse_lines,
         );
         Self { inner }
     }
@@ -408,6 +410,14 @@ impl ConnectionInner {
     /// Creates a new connection and spawns background tasks to paginate
     /// all tools and resources. Called internally by
     /// [`Client::connect`](super::Client::connect) (via [`Connection::new`]).
+    ///
+    /// `initial_sse_lines`, if `Some`, is a pre-opened SSE line reader
+    /// that the list-changed listener will read from immediately on its
+    /// first iteration, instead of opening its own GET `/`. The caller
+    /// is responsible for arranging for one of these to exist whenever
+    /// the upstream advertises `tools.list_changed` or
+    /// `resources.list_changed` — see
+    /// [`Client::connect`](super::Client::connect).
     fn new(
         http_client: reqwest::Client,
         url: String,
@@ -425,6 +435,7 @@ impl ConnectionInner {
         backoff_max_elapsed_time: Duration,
         call_timeout: Duration,
         initialize_result: super::initialize_result::InitializeResult,
+        initial_sse_lines: Option<super::LinesStream>,
     ) -> Arc<Self> {
         let conn = Arc::new(Self {
             http_client,
@@ -471,43 +482,28 @@ impl ConnectionInner {
             });
         }
 
-        // Spawn listener for list_changed notifications if supported.
-        {
-            let tools_list_changed = conn
-                .initialize_result
-                .capabilities
-                .tools
-                .and_then(|t| t.list_changed)
-                .unwrap_or(false);
-            let resources_list_changed = conn
-                .initialize_result
-                .capabilities
-                .resources
-                .and_then(|r| r.list_changed)
-                .unwrap_or(false);
-
-            if tools_list_changed || resources_list_changed {
-                // Hand the listener a `Weak` so it can self-cancel once
-                // every external strong reference to this Connection is
-                // dropped. If we cloned an `Arc` instead, the spawned task
-                // would itself keep the Connection alive forever.
-                //
-                // Also clone the `external_dropped` Notify so the listener
-                // wakes up *immediately* when an external wrapper around
-                // `Arc<Connection>` is dropped — see
-                // `listen_for_list_changes` doc.
-                let weak = Arc::downgrade(&conn);
-                let external_dropped = Arc::clone(&conn.external_dropped);
-                tokio::spawn(async move {
-                    Self::listen_for_list_changes(
-                        weak,
-                        external_dropped,
-                        tools_list_changed,
-                        resources_list_changed,
-                    )
+        // Spawn the list-changed listener iff the caller handed us a
+        // pre-opened SSE stream. The connection is naive about
+        // `tools.list_changed` / `resources.list_changed` capabilities —
+        // [`Client::connect`](super::Client::connect) translates them
+        // into "did or didn't open a stream for us." If we get a stream,
+        // we listen on it; if we don't, there's nothing to listen for.
+        if let Some(initial_lines) = initial_sse_lines {
+            // Hand the listener a `Weak` so it can self-cancel once
+            // every external strong reference to this Connection is
+            // dropped. If we cloned an `Arc` instead, the spawned task
+            // would itself keep the Connection alive forever.
+            //
+            // Also clone the `external_dropped` Notify so the listener
+            // wakes up *immediately* when an external wrapper around
+            // `Arc<Connection>` is dropped — see
+            // `listen_for_list_changes` doc.
+            let weak = Arc::downgrade(&conn);
+            let external_dropped = Arc::clone(&conn.external_dropped);
+            tokio::spawn(async move {
+                Self::listen_for_list_changes(weak, external_dropped, initial_lines)
                     .await;
-                });
-            }
+            });
         }
 
         conn
@@ -981,11 +977,15 @@ impl ConnectionInner {
         request
     }
 
-    /// Opens a GET SSE stream to the MCP endpoint and listens for
-    /// `notifications/tools/list_changed` and
-    /// `notifications/resources/list_changed`. On each notification,
-    /// write-locks and re-fetches the full list. Reconnects on
-    /// disconnection with a brief delay.
+    /// Listens for `notifications/tools/list_changed` and
+    /// `notifications/resources/list_changed` on an SSE stream. On each
+    /// notification, write-locks and re-fetches the full list.
+    ///
+    /// `initial_lines` is the pre-opened SSE line reader handed in by
+    /// [`Client::connect`](super::Client::connect) — that stream is
+    /// consumed first. When it ends (or any later GET reconnect ends),
+    /// we sleep `backoff_initial_interval` and open a fresh GET `/` SSE
+    /// stream.
     ///
     /// Takes a [`Weak<Self>`] (not `Arc<Self>`) so the spawned task
     /// doesn't itself keep the [`Connection`] alive.
@@ -1006,32 +1006,32 @@ impl ConnectionInner {
     async fn listen_for_list_changes(
         weak: Weak<Self>,
         external_dropped: Arc<Notify>,
-        tools: bool,
-        resources: bool,
+        initial_lines: super::LinesStream,
     ) {
-        use futures_util::TryStreamExt;
-        use tokio::io::AsyncBufReadExt;
-        use tokio_util::io::StreamReader;
+        // First iteration: use the pre-opened SSE stream the client
+        // handed us. After that, fall back to opening fresh GET / SSE
+        // streams as the upstream connection cycles.
+        let mut next_lines: Option<super::LinesStream> = Some(initial_lines);
 
         loop {
             // Layer 1: between-reconnect liveness check.
             let Some(this) = weak.upgrade() else { return };
             let backoff_delay = this.backoff_initial_interval;
 
-            let response = match this.get().send().await {
-                Ok(r) if r.status().is_success() => r,
-                _ => {
-                    drop(this);
-                    tokio::time::sleep(backoff_delay).await;
-                    continue;
+            let mut lines = match next_lines.take() {
+                Some(l) => l,
+                None => {
+                    let response = match this.get().send().await {
+                        Ok(r) if r.status().is_success() => r,
+                        _ => {
+                            drop(this);
+                            tokio::time::sleep(backoff_delay).await;
+                            continue;
+                        }
+                    };
+                    super::lines_from_response(response)
                 }
             };
-
-            let stream = response
-                .bytes_stream()
-                .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e));
-            let reader = StreamReader::new(stream);
-            let mut lines = reader.lines();
 
             'inner: loop {
                 // Layer 3: race-window backup. If a drop fired between
@@ -1054,7 +1054,7 @@ impl ConnectionInner {
                                     Err(_) => continue 'inner,
                                 };
                                 match method.as_str() {
-                                    "notifications/tools/list_changed" if tools => {
+                                    "notifications/tools/list_changed" => {
                                         // refresh_tools fires the
                                         // callback after taking the
                                         // write lock but before the
@@ -1068,7 +1068,7 @@ impl ConnectionInner {
                                         )
                                         .await;
                                     }
-                                    "notifications/resources/list_changed" if resources => {
+                                    "notifications/resources/list_changed" => {
                                         this.refresh_resources(
                                             this.on_resources_list_changed.get(),
                                         )
