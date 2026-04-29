@@ -347,7 +347,7 @@ async fn test_multiple_invention_tools_no_conflicts() {
         tools: Some(vec![
             Tool::Function {
                 function: FunctionTool {
-                    name: "calculate".into(),
+                    name: "test_calculate".into(),
                     description: Some("Evaluate a math expression".into()),
                     parameters: Some(calculate_params),
                     strict: None,
@@ -355,7 +355,7 @@ async fn test_multiple_invention_tools_no_conflicts() {
             },
             Tool::Function {
                 function: FunctionTool {
-                    name: "search".into(),
+                    name: "test_search".into(),
                     description: Some("Search the web".into()),
                     parameters: Some(search_params),
                     strict: None,
@@ -363,7 +363,7 @@ async fn test_multiple_invention_tools_no_conflicts() {
             },
             Tool::Function {
                 function: FunctionTool {
-                    name: "translate".into(),
+                    name: "test_translate".into(),
                     description: Some("Translate text to another language".into()),
                     parameters: Some(translate_params),
                     strict: None,
@@ -591,7 +591,7 @@ async fn test_invention_tool_parameters_preserved() {
         tools: Some(vec![
             super::Tool::Function {
                 function: super::FunctionTool {
-                    name: "analyze".to_string(),
+                    name: "test_analyze".to_string(),
                     description: Some("Analyze data".to_string()),
                     parameters: Some(inv_params),
                     strict: None,
@@ -1586,15 +1586,15 @@ async fn test_three_mcp_servers_fifteen_tools_all_unique() {
     ];
 
     let server1 = crate::test_mcp_server::spawn(
-        "test",
+        "fs",
         tools1.into_iter().map(crate::test_mcp_server::TestTool::noop).collect(),
     ).await;
     let server2 = crate::test_mcp_server::spawn(
-        "test",
+        "db",
         tools2.into_iter().map(crate::test_mcp_server::TestTool::noop).collect(),
     ).await;
     let server3 = crate::test_mcp_server::spawn(
-        "test",
+        "web",
         tools3.into_iter().map(crate::test_mcp_server::TestTool::noop).collect(),
     ).await;
     let conn = crate::test_mcp_server::connect_through_proxy(&[&server1, &server2, &server3]).await;
@@ -1639,7 +1639,7 @@ async fn test_three_mcp_servers_fifteen_tools_all_unique() {
         tool_choice: Some(super::tool_choice::ToolChoice::Auto),
         tools: Some(vec![
             super::Tool::Function { function: super::FunctionTool {
-                name: "delete".into(),
+                name: "db_delete".into(),
                 description: Some("Delete rows".into()),
                 parameters: Some(indexmap::indexmap! {
                     "type".into() => serde_json::json!("object"),
@@ -1652,56 +1652,7 @@ async fn test_three_mcp_servers_fifteen_tools_all_unique() {
                 strict: None,
             }},
             super::Tool::Function { function: super::FunctionTool {
-                name: "delete_file".into(),
-                description: None,
-                parameters: Some(indexmap::indexmap! {
-                    "type".into() => serde_json::json!("object"),
-                    "properties".into() => serde_json::Value::Object(vec![
-                        ("path".into(), serde_json::json!({"type": "string"})),
-                    ].into_iter().collect()),
-                    "required".into() => serde_json::json!(["path"]),
-                }),
-                strict: None,
-            }},
-            super::Tool::Function { function: super::FunctionTool {
-                name: "dns_lookup".into(),
-                description: Some("DNS lookup".into()),
-                parameters: Some(indexmap::indexmap! {
-                    "type".into() => serde_json::json!("object"),
-                    "properties".into() => serde_json::Value::Object(vec![
-                        ("hostname".into(), serde_json::json!({"type": "string"})),
-                    ].into_iter().collect()),
-                    "required".into() => serde_json::json!(["hostname"]),
-                }),
-                strict: None,
-            }},
-            super::Tool::Function { function: super::FunctionTool {
-                name: "fetch_url".into(),
-                description: Some("Fetch a URL".into()),
-                parameters: Some(indexmap::indexmap! {
-                    "type".into() => serde_json::json!("object"),
-                    "properties".into() => serde_json::Value::Object(vec![
-                        ("url".into(), serde_json::json!({"type": "string", "format": "uri"})),
-                        ("method".into(), serde_json::json!({"type": "string", "enum": ["GET", "POST", "PUT", "DELETE"]})),
-                        ("headers".into(), serde_json::json!({"type": "object"})),
-                    ].into_iter().collect()),
-                    "required".into() => serde_json::json!(["url"]),
-                }),
-                strict: None,
-            }},
-            super::Tool::Function { function: super::FunctionTool {
-                name: "file_info".into(),
-                description: Some("Get file metadata".into()),
-                parameters: Some(indexmap::indexmap! {
-                    "type".into() => serde_json::json!("object"),
-                    "properties".into() => serde_json::Value::Object(vec![
-                        ("path".into(), serde_json::json!({"type": "string"})),
-                    ].into_iter().collect()),
-                }),
-                strict: None,
-            }},
-            super::Tool::Function { function: super::FunctionTool {
-                name: "insert".into(),
+                name: "db_insert".into(),
                 description: Some("Insert a row".into()),
                 parameters: Some(indexmap::indexmap! {
                     "type".into() => serde_json::json!("object"),
@@ -1714,20 +1665,7 @@ async fn test_three_mcp_servers_fifteen_tools_all_unique() {
                 strict: None,
             }},
             super::Tool::Function { function: super::FunctionTool {
-                name: "list_dir".into(),
-                description: Some("List files in a directory".into()),
-                parameters: Some(indexmap::indexmap! {
-                    "type".into() => serde_json::json!("object"),
-                    "properties".into() => serde_json::Value::Object(vec![
-                        ("path".into(), serde_json::json!({"type": "string"})),
-                        ("recursive".into(), serde_json::json!({"type": "boolean", "default": false})),
-                    ].into_iter().collect()),
-                    "required".into() => serde_json::json!(["path"]),
-                }),
-                strict: None,
-            }},
-            super::Tool::Function { function: super::FunctionTool {
-                name: "list_tables".into(),
+                name: "db_list_tables".into(),
                 description: Some("List all tables".into()),
                 parameters: Some(indexmap::indexmap! {
                     "type".into() => serde_json::json!("object"),
@@ -1735,20 +1673,7 @@ async fn test_three_mcp_servers_fifteen_tools_all_unique() {
                 strict: None,
             }},
             super::Tool::Function { function: super::FunctionTool {
-                name: "parse_html".into(),
-                description: Some("Parse HTML and extract text".into()),
-                parameters: Some(indexmap::indexmap! {
-                    "type".into() => serde_json::json!("object"),
-                    "properties".into() => serde_json::Value::Object(vec![
-                        ("html".into(), serde_json::json!({"type": "string"})),
-                        ("selector".into(), serde_json::json!({"type": "string"})),
-                    ].into_iter().collect()),
-                    "required".into() => serde_json::json!(["html"]),
-                }),
-                strict: None,
-            }},
-            super::Tool::Function { function: super::FunctionTool {
-                name: "query".into(),
+                name: "db_query".into(),
                 description: Some("Run a SQL query".into()),
                 parameters: Some(indexmap::indexmap! {
                     "type".into() => serde_json::json!("object"),
@@ -1762,33 +1687,7 @@ async fn test_three_mcp_servers_fifteen_tools_all_unique() {
                 strict: None,
             }},
             super::Tool::Function { function: super::FunctionTool {
-                name: "read_file".into(),
-                description: Some("Read a file from disk".into()),
-                parameters: Some(indexmap::indexmap! {
-                    "type".into() => serde_json::json!("object"),
-                    "properties".into() => serde_json::Value::Object(vec![
-                        ("path".into(), serde_json::json!({"type": "string"})),
-                    ].into_iter().collect()),
-                    "required".into() => serde_json::json!(["path"]),
-                }),
-                strict: None,
-            }},
-            super::Tool::Function { function: super::FunctionTool {
-                name: "screenshot".into(),
-                description: Some("Take a screenshot of a webpage".into()),
-                parameters: Some(indexmap::indexmap! {
-                    "type".into() => serde_json::json!("object"),
-                    "properties".into() => serde_json::Value::Object(vec![
-                        ("url".into(), serde_json::json!({"type": "string"})),
-                        ("width".into(), serde_json::json!({"type": "integer", "default": 1280})),
-                        ("height".into(), serde_json::json!({"type": "integer", "default": 720})),
-                    ].into_iter().collect()),
-                    "required".into() => serde_json::json!(["url"]),
-                }),
-                strict: None,
-            }},
-            super::Tool::Function { function: super::FunctionTool {
-                name: "update".into(),
+                name: "db_update".into(),
                 description: Some("Update rows".into()),
                 parameters: Some(indexmap::indexmap! {
                     "type".into() => serde_json::json!("object"),
@@ -1802,19 +1701,55 @@ async fn test_three_mcp_servers_fifteen_tools_all_unique() {
                 strict: None,
             }},
             super::Tool::Function { function: super::FunctionTool {
-                name: "whois".into(),
+                name: "fs_delete_file".into(),
                 description: None,
                 parameters: Some(indexmap::indexmap! {
                     "type".into() => serde_json::json!("object"),
                     "properties".into() => serde_json::Value::Object(vec![
-                        ("domain".into(), serde_json::json!({"type": "string"})),
+                        ("path".into(), serde_json::json!({"type": "string"})),
                     ].into_iter().collect()),
-                    "required".into() => serde_json::json!(["domain"]),
+                    "required".into() => serde_json::json!(["path"]),
                 }),
                 strict: None,
             }},
             super::Tool::Function { function: super::FunctionTool {
-                name: "write_file".into(),
+                name: "fs_file_info".into(),
+                description: Some("Get file metadata".into()),
+                parameters: Some(indexmap::indexmap! {
+                    "type".into() => serde_json::json!("object"),
+                    "properties".into() => serde_json::Value::Object(vec![
+                        ("path".into(), serde_json::json!({"type": "string"})),
+                    ].into_iter().collect()),
+                }),
+                strict: None,
+            }},
+            super::Tool::Function { function: super::FunctionTool {
+                name: "fs_list_dir".into(),
+                description: Some("List files in a directory".into()),
+                parameters: Some(indexmap::indexmap! {
+                    "type".into() => serde_json::json!("object"),
+                    "properties".into() => serde_json::Value::Object(vec![
+                        ("path".into(), serde_json::json!({"type": "string"})),
+                        ("recursive".into(), serde_json::json!({"type": "boolean", "default": false})),
+                    ].into_iter().collect()),
+                    "required".into() => serde_json::json!(["path"]),
+                }),
+                strict: None,
+            }},
+            super::Tool::Function { function: super::FunctionTool {
+                name: "fs_read_file".into(),
+                description: Some("Read a file from disk".into()),
+                parameters: Some(indexmap::indexmap! {
+                    "type".into() => serde_json::json!("object"),
+                    "properties".into() => serde_json::Value::Object(vec![
+                        ("path".into(), serde_json::json!({"type": "string"})),
+                    ].into_iter().collect()),
+                    "required".into() => serde_json::json!(["path"]),
+                }),
+                strict: None,
+            }},
+            super::Tool::Function { function: super::FunctionTool {
+                name: "fs_write_file".into(),
                 description: Some("Write content to a file".into()),
                 parameters: Some(indexmap::indexmap! {
                     "type".into() => serde_json::json!("object"),
@@ -1823,6 +1758,71 @@ async fn test_three_mcp_servers_fifteen_tools_all_unique() {
                         ("content".into(), serde_json::json!({"type": "string"})),
                     ].into_iter().collect()),
                     "required".into() => serde_json::json!(["path", "content"]),
+                }),
+                strict: None,
+            }},
+            super::Tool::Function { function: super::FunctionTool {
+                name: "web_dns_lookup".into(),
+                description: Some("DNS lookup".into()),
+                parameters: Some(indexmap::indexmap! {
+                    "type".into() => serde_json::json!("object"),
+                    "properties".into() => serde_json::Value::Object(vec![
+                        ("hostname".into(), serde_json::json!({"type": "string"})),
+                    ].into_iter().collect()),
+                    "required".into() => serde_json::json!(["hostname"]),
+                }),
+                strict: None,
+            }},
+            super::Tool::Function { function: super::FunctionTool {
+                name: "web_fetch_url".into(),
+                description: Some("Fetch a URL".into()),
+                parameters: Some(indexmap::indexmap! {
+                    "type".into() => serde_json::json!("object"),
+                    "properties".into() => serde_json::Value::Object(vec![
+                        ("url".into(), serde_json::json!({"type": "string", "format": "uri"})),
+                        ("method".into(), serde_json::json!({"type": "string", "enum": ["GET", "POST", "PUT", "DELETE"]})),
+                        ("headers".into(), serde_json::json!({"type": "object"})),
+                    ].into_iter().collect()),
+                    "required".into() => serde_json::json!(["url"]),
+                }),
+                strict: None,
+            }},
+            super::Tool::Function { function: super::FunctionTool {
+                name: "web_parse_html".into(),
+                description: Some("Parse HTML and extract text".into()),
+                parameters: Some(indexmap::indexmap! {
+                    "type".into() => serde_json::json!("object"),
+                    "properties".into() => serde_json::Value::Object(vec![
+                        ("html".into(), serde_json::json!({"type": "string"})),
+                        ("selector".into(), serde_json::json!({"type": "string"})),
+                    ].into_iter().collect()),
+                    "required".into() => serde_json::json!(["html"]),
+                }),
+                strict: None,
+            }},
+            super::Tool::Function { function: super::FunctionTool {
+                name: "web_screenshot".into(),
+                description: Some("Take a screenshot of a webpage".into()),
+                parameters: Some(indexmap::indexmap! {
+                    "type".into() => serde_json::json!("object"),
+                    "properties".into() => serde_json::Value::Object(vec![
+                        ("url".into(), serde_json::json!({"type": "string"})),
+                        ("width".into(), serde_json::json!({"type": "integer", "default": 1280})),
+                        ("height".into(), serde_json::json!({"type": "integer", "default": 720})),
+                    ].into_iter().collect()),
+                    "required".into() => serde_json::json!(["url"]),
+                }),
+                strict: None,
+            }},
+            super::Tool::Function { function: super::FunctionTool {
+                name: "web_whois".into(),
+                description: None,
+                parameters: Some(indexmap::indexmap! {
+                    "type".into() => serde_json::json!("object"),
+                    "properties".into() => serde_json::Value::Object(vec![
+                        ("domain".into(), serde_json::json!({"type": "string"})),
+                    ].into_iter().collect()),
+                    "required".into() => serde_json::json!(["domain"]),
                 }),
                 strict: None,
             }},
