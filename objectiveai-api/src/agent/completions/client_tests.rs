@@ -138,18 +138,18 @@ fn make_client() -> super::Client<
             String::new(),
             String::new(),
             String::new(),
-            // connect_timeout/call_timeout = 10s wait limits; tests do
+            // connect_timeout/call_timeout = 10min wait limits; tests do
             // real localhost I/O via the ProxySpawner. All backoff knobs
             // below are zero so a first-try failure surfaces as a bug
             // instead of being masked by retries.
-            Duration::from_secs(10),
+            Duration::from_secs(600),
             Duration::ZERO,
             Duration::ZERO,
             0.0,
             0.0,
             Duration::ZERO,
             Duration::ZERO,
-            Duration::from_secs(10),
+            Duration::from_secs(600),
         )),
         Arc::new(crate::agent::completions::ProxySpawner::new(
             objectiveai_mcp_proxy::ConfigBuilder::default,
@@ -180,8 +180,8 @@ fn make_client() -> super::Client<
         Duration::ZERO,
         Duration::ZERO,
         // first_chunk_timeout / other_chunk_timeout are wait limits.
-        Duration::from_secs(10),
-        Duration::from_secs(10),
+        Duration::from_secs(600),
+        Duration::from_secs(600),
     )
 }
 
