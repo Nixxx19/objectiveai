@@ -51,6 +51,12 @@ pub enum BadInit {
 /// - `X-MCP-Authorization`: JSON `{url: string}` per-URL `Authorization`
 ///   value. Overrides whatever `X-MCP-Headers` would have sent for that URL.
 ///
+/// `resume_sessions` is an optional per-upstream-URL map of session ids
+/// to resume. When the proxy receives a continuation that names known
+/// upstreams, the orchestrator passes those ids in so each upstream
+/// connect carries the right `Mcp-Session-Id` header instead of opening
+/// a fresh session.
+///
 /// Duplicate URLs in `X-MCP-Servers` are ignored (first-occurrence wins).
 /// If any upstream fails to connect, the first such failure is returned
 /// as `BadInit::UpstreamConnectFailed` and the remaining in-flight
@@ -59,14 +65,16 @@ pub enum BadInit {
 pub async fn connect_all(
     client: &Client,
     http_headers: &HeaderMap,
+    resume_sessions: &IndexMap<String, String>,
 ) -> Result<Vec<Connection>, BadInit> {
     let specs = parse_init_headers(http_headers)?;
 
     let attempts = specs.into_iter().map(|spec| {
         let url = spec.url.clone();
+        let resume = resume_sessions.get(&spec.url).cloned();
         async move {
             client
-                .connect(spec.url, spec.authorization, None, spec.extra_headers)
+                .connect(spec.url, spec.authorization, resume, spec.extra_headers)
                 .await
                 .map_err(|source| BadInit::UpstreamConnectFailed { url, source })
         }

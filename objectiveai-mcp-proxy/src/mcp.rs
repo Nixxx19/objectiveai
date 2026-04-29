@@ -253,7 +253,52 @@ async fn handle_initialize(
         }
     }
 
-    let connections = match connect_all(&state.client, headers).await {
+    // Proxy session ids are self-describing: each id is the base62
+    // encoding of a JSON-serialized `IndexMap<upstream_url,
+    // upstream_session_id>`. The map's iteration order matches the
+    // connection order at the time the id was minted — so when a
+    // client hands us back a previously-minted id and every upstream
+    // resumes successfully without rotating its session, the new id
+    // we mint is byte-identical to the input. If any upstream rotates
+    // its session during resume, the new id differs at exactly that
+    // entry, telling the client at a glance that something changed.
+    //
+    // Lookup proceeds in three branches:
+    //   1. id present + alive in our session map → reuse, no upstream
+    //      contact at all.
+    //   2. id present but unknown to us → decode it to recover the
+    //      upstream URL/session map and resume each upstream from
+    //      that map. If decoding fails (bad base62, bad JSON, wrong
+    //      shape) → 401, matching rmcp's wording for unknown
+    //      sessions on regular requests.
+    //   3. id absent → connect from scratch, no resume.
+    let provided_session_id = headers
+        .get(SESSION_ID_HEADER)
+        .and_then(|v| v.to_str().ok())
+        .map(str::to_owned);
+
+    let resume_sessions: indexmap::IndexMap<String, String> =
+        if let Some(sid) = &provided_session_id {
+            if let Some(_session) = state.sessions.get(sid) {
+                // Branch 1: alive in-memory — reuse the same id.
+                return reuse_session_response(request.id, sid);
+            }
+            // Branch 2: not in memory — try to decode.
+            match crate::session_manager::decode_session_id(sid) {
+                Some(map) => map,
+                None => {
+                    return (
+                        StatusCode::UNAUTHORIZED,
+                        format!("Unauthorized: Session not found ({sid:?})"),
+                    )
+                        .into_response();
+                }
+            }
+        } else {
+            indexmap::IndexMap::new()
+        };
+
+    let connections = match connect_all(&state.client, headers, &resume_sessions).await {
         Ok(c) => c,
         Err(e @ (BadInit::NotUtf8 { .. } | BadInit::NotJson { .. })) => {
             return invalid_request_response(request.id, e.to_string());
@@ -660,6 +705,37 @@ fn json_rpc_error_response(
         },
     };
     (status, Json(body)).into_response()
+}
+
+/// Build a "session reused" `initialize` response: the JSON-RPC body is
+/// a normal success, and the response's `Mcp-Session-Id` header carries
+/// the unchanged id so the client knows it's still talking to the same
+/// session.
+fn reuse_session_response(request_id: serde_json::Value, session_id: &str) -> Response {
+    let result = InitializeResult {
+        protocol_version: PROTOCOL_VERSION.into(),
+        capabilities: server_capabilities(),
+        server_info: server_info(),
+        instructions: None,
+        _meta: None,
+    };
+    let body: JsonRpcResponse<InitializeResult> = JsonRpcResponse::Success {
+        jsonrpc: "2.0".into(),
+        id: request_id,
+        result,
+    };
+    let mut headers = HeaderMap::new();
+    let header_value = match HeaderValue::from_str(session_id) {
+        Ok(v) => v,
+        Err(_) => {
+            return internal_error_response(
+                serde_json::Value::Null,
+                format!("session id is not a valid header value: {session_id}"),
+            );
+        }
+    };
+    headers.insert(SESSION_ID_HEADER, header_value);
+    (StatusCode::OK, headers, Json(body)).into_response()
 }
 
 fn parse_error_response(message: String) -> Response {
