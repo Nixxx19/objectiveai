@@ -534,6 +534,15 @@ where
         let params = T::params(&state);
         let object = T::object();
 
+        // One InventionServer for the whole invention. The tool set is
+        // swapped between steps via `set_tools`, which broadcasts a
+        // `tools/list_changed` notification so the proxy refetches
+        // `tools/list` and the agent on the next step sees the new tools.
+        let invention_server = Arc::new(
+            super::InventionServer::new(T::essay_tools(&state)).await,
+        );
+        let invention_url = invention_server.url();
+
         let state_chunk = |state: &Arc<Mutex<T>>, id: &str, created, object| {
             FunctionInventionChunk {
                 id: id.to_string(),
@@ -566,9 +575,11 @@ where
         let essay_validate = Arc::new({ let s = state.clone(); move || T::validate_essay(&s) });
         if essay_validate().is_err() {
         errored = false;
+        // Server was already constructed with `essay_tools` above — no swap
+        // needed before step 0.
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
-            prompts.essay.clone(), T::essay_tools(&state),
+            prompts.essay.clone(), invention_url.clone(),
             essay_validate,
             id.clone(), created, object, continuation.take(), completion_index,
             T::prompt_type(), 0, prompts.tasks_min, None,
@@ -603,9 +614,10 @@ where
         let input_schema_validate = Arc::new({ let s = state.clone(); move || T::validate_input_schema(&s) });
         if input_schema_validate().is_err() {
         errored = false;
+        invention_server.set_tools(T::input_schema_tools(&state)).await;
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
-            prompts.input_schema.clone(), T::input_schema_tools(&state),
+            prompts.input_schema.clone(), invention_url.clone(),
             input_schema_validate,
             id.clone(), created, object, continuation.take(), completion_index,
             T::prompt_type(), 1, prompts.tasks_min, None,
@@ -640,9 +652,10 @@ where
         let essay_tasks_validate = Arc::new({ let s = state.clone(); move || T::validate_essay_tasks(&s) });
         if essay_tasks_validate().is_err() {
         errored = false;
+        invention_server.set_tools(T::essay_tasks_tools(&state)).await;
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
-            prompts.essay_tasks.clone(), T::essay_tasks_tools(&state),
+            prompts.essay_tasks.clone(), invention_url.clone(),
             essay_tasks_validate,
             id.clone(), created, object, continuation.take(), completion_index,
             T::prompt_type(), 2, prompts.tasks_min, None,
@@ -680,9 +693,10 @@ where
         let tasks_validate = Arc::new({ let s = state.clone(); move || T::validate_function(&s) });
         if tasks_validate().is_err() {
         errored = false;
+        invention_server.set_tools(T::tasks_tools(&state)).await;
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
-            prompts.tasks.clone(), T::tasks_tools(&state),
+            prompts.tasks.clone(), invention_url.clone(),
             tasks_validate,
             id.clone(), created, object, continuation.take(), completion_index,
             T::prompt_type(), 3, prompts.tasks_min, T::input_schema_json(&state),
@@ -717,9 +731,10 @@ where
         let description_validate = Arc::new({ let s = state.clone(); move || T::validate_description(&s) });
         if description_validate().is_err() {
         errored = false;
+        invention_server.set_tools(T::description_tools(&state)).await;
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
-            prompts.description.clone(), T::description_tools(&state),
+            prompts.description.clone(), invention_url.clone(),
             description_validate,
             id.clone(), created, object, continuation.take(), completion_index,
             T::prompt_type(), 4, prompts.tasks_min, None,
@@ -932,7 +947,7 @@ fn run_step<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK, RETRG, RETRF, RE
     ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
     request: Arc<objectiveai::functions::inventions::request::FunctionInventionCreateParams>,
     prompt: String,
-    tools: Vec<objectiveai::functions::inventions::InventionTool>,
+    invention_url: String,
     validate: Arc<dyn Fn() -> Result<(), String> + Send + Sync>,
     id: String,
     created: u64,
@@ -980,13 +995,12 @@ where
         let validate_for_done = validate.clone();
         let max_step_retries = request.max_step_retries.unwrap_or(3);
 
-        // Spawn the InventionServer for this step. It hosts the
-        // step-specific tools the agent will call, lives for the duration
-        // of `run_step`, and gets aborted on drop. As long as we drop it
-        // *after* draining every agent stream below, the proxy's open
-        // upstream connections to it remain valid.
-        let invention_server = super::InventionServer::new(tools).await;
-        let invention_url = invention_server.url();
+        // The InventionServer is owned by the parent `run_all_steps` and
+        // shared across every step of this invention. The parent has already
+        // swapped in this step's tool set and broadcast a
+        // `tools/list_changed` notification before we get here, so the proxy
+        // refetches `tools/list` on the next agent request and the agent
+        // sees the right tools.
 
         // The messages array on the request is fixed after the very first
         // step. If we have a continuation (i.e. this is not the first step),
