@@ -138,6 +138,7 @@ impl Connection {
         Self { inner }
     }
 
+
     pub(super) fn new_mock(url: String) -> Self {
         Self { inner: ConnectionInner::new_mock(url) }
     }

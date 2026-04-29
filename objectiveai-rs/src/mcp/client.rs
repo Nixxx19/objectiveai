@@ -239,22 +239,7 @@ impl Client {
             (result, None)
         };
 
-        // If the server advertises list-changed for tools or resources,
-        // always open a dedicated GET `/` SSE stream now — before
-        // returning — so the listener has somewhere to read
-        // notifications from synchronously, regardless of what shape
-        // the `initialize` response was. The init-response stream (when
-        // the server replied with SSE) is unreliable for this purpose:
-        // some servers (rmcp's `StreamableHttpService` among them) make
-        // it a single-event response that ends after the initialize
-        // result, with notifications routed to the GET-side standalone
-        // stream instead. The init stream we kept around still serves
-        // as a "first iteration" buffer for the listener — when it
-        // ends, the listener falls through to the GET stream we open
-        // here and continues without a reconnect-via-GET race.
-        //
-        // This is the only spot where capabilities matter; the
-        // connection itself is naive about them.
+        // Whether we need a notification SSE channel at all.
         let needs_sse = initialize_result
             .capabilities
             .tools
@@ -267,7 +252,70 @@ impl Client {
                 .as_ref()
                 .and_then(|r| r.list_changed)
                 .unwrap_or(false);
-        if needs_sse {
+
+        // Send `notifications/initialized` BEFORE any other request.
+        // rmcp's per-session worker is in `expect_notification("initialized")`
+        // at this point — anything else (a `tools/list`, an opportunistic
+        // GET `/`) that lands during that window pushes a non-notification
+        // through the worker, makes `serve_server_with_ct_inner` return
+        // `Err(ExpectedInitializedNotification(...))`, drops the
+        // WorkerTransport, cancels the worker via its drop_guard, and
+        // tears the whole session down. Every later POST then 500s with
+        // "Session service terminated."
+        //
+        // We don't have a `Connection` yet — building one would spawn
+        // `refresh_tools` / `refresh_resources` background tasks that
+        // race with this notification, which is exactly the bug we're
+        // avoiding. We therefore POST inline here.
+        let init_notification_body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "method": "notifications/initialized",
+            "params": {},
+        });
+        let mut notify_request = self
+            .http_client
+            .post(&url)
+            .timeout(self.call_timeout)
+            .header("Content-Type", "application/json")
+            .header("Accept", "application/json, text/event-stream")
+            .header("Mcp-Session-Id", &session_id);
+        if let Some(auth) = &authorization {
+            notify_request = notify_request.header("Authorization", auth);
+        }
+        notify_request = notify_request
+            .header("User-Agent", &self.user_agent)
+            .header("X-Title", &self.x_title)
+            .header("Referer", &self.http_referer)
+            .header("HTTP-Referer", &self.http_referer);
+        for (name, value) in &extra_headers {
+            notify_request = notify_request.header(name, value);
+        }
+        let notify_response = notify_request
+            .json(&init_notification_body)
+            .send()
+            .await
+            .map_err(|source| super::Error::Request {
+                url: url.clone(),
+                source,
+            })?;
+        if !notify_response.status().is_success() {
+            let code = notify_response.status();
+            let body = notify_response.text().await.unwrap_or_default();
+            return Err(super::Error::BadStatus { url, code, body });
+        }
+
+        // Now safe to drop the init-side SSE stream; rmcp's session
+        // worker is past the init handshake and we have no further use
+        // for it (notifications come on the GET / stream below).
+        drop(initial_sse_lines.take());
+
+        // Now that the server's session worker is past the
+        // `expect_notification` gate, it's safe to open the proactive
+        // GET `/` SSE stream the listener will read
+        // `notifications/{tools,resources}/list_changed` from. Capability
+        // inspection only gates whether we open this stream; the
+        // `Connection` itself is naive about capabilities.
+        let initial_sse_lines: Option<super::LinesStream> = if needs_sse {
             let mut get_request = self
                 .http_client
                 .get(&url)
@@ -293,12 +341,16 @@ impl Client {
                 let body = get_response.text().await.unwrap_or_default();
                 return Err(super::Error::BadStatus { url: url.clone(), code, body });
             }
-            // The GET stream is the canonical notification channel —
-            // overwrite any init-side stream so the listener latches
-            // onto the one that actually receives notifications.
-            initial_sse_lines = Some(super::lines_from_response(get_response));
-        }
+            Some(super::lines_from_response(get_response))
+        } else {
+            None
+        };
 
+        // Construct the Connection at the very end. This is the only
+        // place in `connect` where the listener task and the
+        // `refresh_tools` / `refresh_resources` background tasks get
+        // spawned — by now the upstream is fully past its init
+        // handshake, so any of those POSTs land safely.
         let connection = super::Connection::new(
             self.http_client.clone(),
             url,
@@ -318,13 +370,6 @@ impl Client {
             initialize_result,
             initial_sse_lines,
         );
-
-        // Send the initialized notification. Per the MCP spec the method
-        // name is the fully-qualified `notifications/initialized` — rmcp
-        // strictly requires the prefix.
-        connection
-            .notify("notifications/initialized", &serde_json::json!({}))
-            .await?;
 
         Ok(connection)
     }
