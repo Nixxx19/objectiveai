@@ -97,7 +97,7 @@ impl Deref for Connection {
 }
 
 impl Connection {
-    pub(super) fn new(
+    pub(super) async fn new(
         http_client: reqwest::Client,
         url: String,
         session_id: String,
@@ -134,7 +134,8 @@ impl Connection {
             call_timeout,
             initialize_result,
             initial_sse_lines,
-        );
+        )
+        .await;
         Self { inner }
     }
 
@@ -419,7 +420,7 @@ impl ConnectionInner {
     /// the upstream advertises `tools.list_changed` or
     /// `resources.list_changed` — see
     /// [`Client::connect`](super::Client::connect).
-    fn new(
+    async fn new(
         http_client: reqwest::Client,
         url: String,
         session_id: String,
@@ -465,22 +466,39 @@ impl ConnectionInner {
         });
 
         // Spawn background tool lister if the server supports tools.
-        // Initial population happens before any callback could be
-        // registered, so pass `None` — there's no list-change to signal
-        // for the very first fetch.
+        //
+        // We don't return until the spawned task has acquired the write
+        // lock. Otherwise a caller that immediately reads `list_tools()`
+        // could race the writer — `tokio::spawn` only queues the task,
+        // and a fast reader can acquire the read lock before the writer
+        // has run its first instruction. The reader would then see the
+        // initial empty `Vec` and return that, even though a full
+        // populate is in flight.
+        //
+        // The `RwLockWriteGuard` itself isn't `Send`-friendly enough to
+        // pass back, so we use a oneshot to signal "I'm holding the
+        // lock now"; once we receive that, the cache is exclusively
+        // owned by the writer and any subsequent `read().await` from
+        // the caller is guaranteed to wait for the populate to finish.
         if conn.initialize_result.capabilities.tools.is_some() {
             let conn = Arc::clone(&conn);
+            let (lock_held_tx, lock_held_rx) = tokio::sync::oneshot::channel();
             tokio::spawn(async move {
-                conn.refresh_tools(None).await;
+                conn.refresh_tools_signaling(lock_held_tx, None).await;
             });
+            // Wait for the writer to hold the lock before returning.
+            let _ = lock_held_rx.await;
         }
 
-        // Spawn background resource lister if the server supports resources.
+        // Spawn background resource lister if the server supports
+        // resources. Same lock-handoff contract as tools above.
         if conn.initialize_result.capabilities.resources.is_some() {
             let conn = Arc::clone(&conn);
+            let (lock_held_tx, lock_held_rx) = tokio::sync::oneshot::channel();
             tokio::spawn(async move {
-                conn.refresh_resources(None).await;
+                conn.refresh_resources_signaling(lock_held_tx, None).await;
             });
+            let _ = lock_held_rx.await;
         }
 
         // Spawn the list-changed listener iff the caller handed us a
@@ -910,7 +928,22 @@ impl ConnectionInner {
     /// re-emit `notifications/tools/list_changed` to its downstream client
     /// at the moment the staleness window opens.
     async fn refresh_tools(&self, on_change: Option<ListChangedCallback>) {
+        let (tx, _rx) = tokio::sync::oneshot::channel();
+        self.refresh_tools_signaling(tx, on_change).await;
+    }
+
+    /// Same as [`Self::refresh_tools`] but fires `lock_held` once the
+    /// write lock has been acquired so the caller can synchronise on
+    /// "writer is in possession of the cache" before returning. Used by
+    /// `ConnectionInner::new` to prevent a fast reader from acquiring
+    /// the read lock before this writer has even started.
+    async fn refresh_tools_signaling(
+        &self,
+        lock_held: tokio::sync::oneshot::Sender<()>,
+        on_change: Option<ListChangedCallback>,
+    ) {
         let mut guard = self.tools.write().await;
+        let _ = lock_held.send(());
         if let Some(cb) = on_change {
             cb();
         }
@@ -935,7 +968,18 @@ impl ConnectionInner {
     /// See [`ConnectionInner::refresh_tools`] for the callback timing
     /// contract.
     async fn refresh_resources(&self, on_change: Option<ListChangedCallback>) {
+        let (tx, _rx) = tokio::sync::oneshot::channel();
+        self.refresh_resources_signaling(tx, on_change).await;
+    }
+
+    /// Resource counterpart of [`Self::refresh_tools_signaling`].
+    async fn refresh_resources_signaling(
+        &self,
+        lock_held: tokio::sync::oneshot::Sender<()>,
+        on_change: Option<ListChangedCallback>,
+    ) {
         let mut guard = self.resources.write().await;
+        let _ = lock_held.send(());
         if let Some(cb) = on_change {
             cb();
         }

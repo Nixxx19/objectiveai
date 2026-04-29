@@ -369,7 +369,8 @@ impl Client {
             self.call_timeout,
             initialize_result,
             initial_sse_lines,
-        );
+        )
+        .await;
 
         Ok(connection)
     }
