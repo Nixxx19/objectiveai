@@ -35,6 +35,29 @@ pub(super) fn invert_and_l1_normalize(mut xs: Vec<Decimal>) -> Vec<Decimal> {
     }
     xs
 }
+
+#[cfg(test)]
+mod invert_and_l1_normalize_tests {
+    use super::invert_and_l1_normalize;
+    use rust_decimal::dec;
+
+    #[test]
+    fn example() {
+        let v = vec![dec!(0.75), dec!(0.25), dec!(0.0)];
+        let out = invert_and_l1_normalize(v);
+        assert_eq!(out, vec![dec!(0.125), dec!(0.375), dec!(0.5)]);
+    }
+
+    #[test]
+    fn uniform_when_all_ones() {
+        let v = vec![dec!(1.0), dec!(1.0), dec!(1.0), dec!(1.0)];
+        let out = invert_and_l1_normalize(v);
+        assert_eq!(
+            out,
+            vec![dec!(0.25), dec!(0.25), dec!(0.25), dec!(0.25)]
+        );
+    }
+}
 /// Client for creating vector completions.
 ///
 /// Orchestrates multiple LLM agent completions to vote on response options,
