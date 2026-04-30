@@ -54,11 +54,28 @@ run() {
     fi
   }
 
-  install_if_missing "$SCRIPT_DIR/requirements.txt"
+  # Install requirements with the objectiveai pin redirected to the sibling
+  # source. requirements.txt declares `objectiveai==X.Y.Z` (canonical pin
+  # used when this package is published to PyPI), but for local dev we want
+  # the sibling source so changes there are picked up immediately and we
+  # don't depend on the PyPI wheel being available. We do this by feeding
+  # install_if_missing a temp file that strips the objectiveai line, then
+  # editable-install ../objectiveai-py separately.
+  REQS_FILTERED=$(mktemp)
+  grep -v '^objectiveai[[:space:]]*==' "$SCRIPT_DIR/requirements.txt" > "$REQS_FILTERED" || true
+  install_if_missing "$REQS_FILTERED"
+  rm -f "$REQS_FILTERED"
 
   if ! "$PYTHON" -c "import pytest" 2>/dev/null; then
     echo "Installing dev requirements..."
     "$PIP" install -r "$SCRIPT_DIR/requirements-dev.txt" --quiet
+  fi
+
+  # Editable install of sibling objectiveai-py (overrides the PyPI pin for
+  # local dev). maturin compiles the bundled _pyo3 extension into this venv.
+  if ! "$PYTHON" -c "import objectiveai" 2>/dev/null; then
+    echo "Installing objectiveai from sibling source ($REPO_ROOT/objectiveai-py)..."
+    "$PIP" install -e "$REPO_ROOT/objectiveai-py" --quiet
   fi
 }
 

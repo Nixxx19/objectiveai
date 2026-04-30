@@ -4,10 +4,16 @@ ObjectiveAI integration for [cocoindex](https://github.com/cocoindex-io/cocoinde
 
 ## Dependencies
 
-- `cocoindex` — installed via pip into the venv.
-- `../objectiveai-py` — sibling maturin package, pip-installed from source via
-  `requirements.txt`. Maturin compiles the bundled Rust extension (`objectiveai._pyo3`)
-  into the cocoindex venv at install time, so a Rust toolchain must be available.
+- `cocoindex` — installed from PyPI into the venv.
+- `objectiveai==X.Y.Z` — pinned in `requirements.txt` so this package
+  declares a clean PyPI dependency when published. Version is bumped by
+  `bash version.sh <new-version>` (entry in `REQUIREMENTS_TXTS`).
+- For local dev, `build.sh` filters the `objectiveai==` line out of the
+  install and editable-installs `../objectiveai-py` instead. This means
+  changes in the sibling SDK are picked up immediately, and the cocoindex
+  build doesn't depend on a published PyPI wheel existing yet. Maturin
+  compiles `objectiveai._pyo3` into the cocoindex venv on first install,
+  so a Rust toolchain must be available locally.
 
 ## Virtual Environment
 
