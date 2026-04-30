@@ -40,7 +40,7 @@ parse_summary() {
   TOTAL=$(( ${PASSED:-0} + ${FAILED:-0} ))
 }
 
-if PYTHONPATH="$SCRIPT_DIR${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON" -m pytest "$SCRIPT_DIR/tests/" -v --tb=long "${PYTEST_ARGS[@]}" >> "$LOG_FILE" 2>&1; then
+if PYTHONPATH="$SCRIPT_DIR:$REPO_ROOT/objectiveai-py${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON" -m pytest "$SCRIPT_DIR/tests/" -v --tb=long "${PYTEST_ARGS[@]}" >> "$LOG_FILE" 2>&1; then
   parse_summary
   if [ "$TOTAL" -gt 0 ]; then
     echo "$MODULE: PASS ${PASSED:-0}/$TOTAL"
