@@ -133,6 +133,17 @@ set_csproj_version() {
     "<Version>$NEW_VERSION</Version>"
 }
 
+# `objectiveai==X.Y.Z` lines in a pip requirements.txt. Other entries in the
+# file (including non-pinned ones, comments, and unrelated packages) pass
+# through untouched. Spec stays `==NEW_VERSION`.
+set_requirements_objectiveai_pin() {
+  local file="$1"
+  inline_substitute "$file" \
+    '^objectiveai[[:space:]]*==' \
+    '==[0-9][^[:space:]]*' \
+    "==$NEW_VERSION"
+}
+
 # __version__ = "..." in a Python file. If absent, insert one right after
 # `from __future__ import annotations` (every runner has that line) with a
 # blank line before it for PEP 8 readability.
@@ -197,6 +208,11 @@ PY_RUNNER_MAINS=(
   objectiveai-codex-sdk-runner/main.py
 )
 
+# pip requirements.txt files that pin `objectiveai==X.Y.Z`.
+REQUIREMENTS_TXTS=(
+  objectiveai-cocoindex/requirements.txt
+)
+
 # ---------------------------------------------------------------------------
 # Apply
 # ---------------------------------------------------------------------------
@@ -230,6 +246,9 @@ update() {
     pyrun)
       ensure_py_module_version "$file"
       ;;
+    reqs)
+      set_requirements_objectiveai_pin "$file"
+      ;;
   esac
 }
 
@@ -240,6 +259,7 @@ for rel in "${PYPROJECT_TOMLS[@]}";        do update pypro  "$rel"; done
 for rel in "${PACKAGE_JSONS[@]}";          do update pkg    "$rel"; done
 for rel in "${CSPROJS[@]}";                do update csproj "$rel"; done
 for rel in "${PY_RUNNER_MAINS[@]}";        do update pyrun  "$rel"; done
+for rel in "${REQUIREMENTS_TXTS[@]}";       do update reqs   "$rel"; done
 
 echo
 echo "Done. Cargo.lock and pnpm-lock.yaml will refresh on next build."
