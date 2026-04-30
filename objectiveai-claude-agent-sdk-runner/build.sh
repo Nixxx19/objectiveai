@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Builds objectiveai-codex-sdk-runner-py and places the binary in embed/<target>/<profile>/.
+# Builds objectiveai-claude-agent-sdk-runner and places the binary in embed/<target>/<profile>/.
 # Skips the build if the source fingerprint hasn't changed.
-# Output is captured to .logs/build/objectiveai-codex-sdk-runner-py.txt.
+# Output is captured to .logs/build/objectiveai-claude-agent-sdk-runner.txt.
 #
 # Usage:
-#   bash objectiveai-codex-sdk-runner-py/build.sh [--release] [--target <triple>]
+#   bash objectiveai-claude-agent-sdk-runner/build.sh [--release] [--target <triple>]
 
 set -euo pipefail
 
-MODULE="objectiveai-codex-sdk-runner-py"
+MODULE="objectiveai-claude-agent-sdk-runner"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 VENV_DIR="$SCRIPT_DIR/venv"
@@ -44,14 +44,9 @@ run() {
     local missing=false
     while IFS= read -r line; do
       [[ -z "$line" || "$line" == \#* || "$line" == -r* || "$line" == ../* ]] && continue
-      # Strip URL spec ('pkg @ url'), version spec, and whitespace.
       local pkg
-      pkg=$(echo "$line" | sed -E 's/[[:space:]]*@.*//; s/[><=!~].*//' | xargs)
-      if [ -z "$pkg" ]; then
-        continue
-      fi
-      # pip show is the single source of truth: works for PyPI and URL installs.
-      if ! "$PIP" show "$pkg" >/dev/null 2>&1; then
+      pkg=$(echo "$line" | sed 's/[><=!].*//' | tr '-' '_')
+      if ! "$PYTHON" -c "import $pkg" 2>/dev/null; then
         missing=true
         break
       fi

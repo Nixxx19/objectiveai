@@ -193,8 +193,8 @@ CSPROJS=(
 )
 
 PY_RUNNER_MAINS=(
-  objectiveai-claude-agent-sdk-runner-py/main.py
-  objectiveai-codex-sdk-runner-py/main.py
+  objectiveai-claude-agent-sdk-runner/main.py
+  objectiveai-codex-sdk-runner/main.py
 )
 
 # ---------------------------------------------------------------------------

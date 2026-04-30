@@ -48,8 +48,8 @@ CLI_PID=$!
 # path dep, so its build is folded into the api's own cargo build.
 bash "$REPO_ROOT/objectiveai-mcp-filesystem/build.sh" --target "$(uname -m)-unknown-linux-musl" &
 MCP_FILESYSTEM_PID=$!
-bash "$REPO_ROOT/objectiveai-claude-agent-sdk-runner-py/build.sh" &
-SDK_RUNNER_PY_PID=$!
+bash "$REPO_ROOT/objectiveai-claude-agent-sdk-runner/build.sh" &
+SDK_RUNNER_PID=$!
 
 # Phase 2: wasm + pyo3 + cffi (need build tools from phase 1)
 run_phase objectiveai-rs-wasm-js/build.sh objectiveai-rs-pyo3/build.sh objectiveai-rs-cffi/build.sh
@@ -59,7 +59,7 @@ run_phase objectiveai-js/build.sh objectiveai-py/build.sh objectiveai-go/build.s
 
 # Wait for background builds before running viewer (viewer depends on objectiveai-js)
 FAILED=false
-for pid in $CLI_PID $MCP_FILESYSTEM_PID $SDK_RUNNER_PY_PID; do
+for pid in $CLI_PID $MCP_FILESYSTEM_PID $SDK_RUNNER_PID; do
   if ! wait "$pid"; then
     FAILED=true
   fi

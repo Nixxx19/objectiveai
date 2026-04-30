@@ -1,4 +1,4 @@
-//! Wire types for the `objectiveai-codex-sdk-runner-py` stdio NDJSON
+//! Wire types for the `objectiveai-codex-sdk-runner` stdio NDJSON
 //! protocol. Mirrors `claude_agent_sdk::stdio` exactly — one long-lived
 //! Python subprocess multiplexes N concurrent codex `Thread.run_streamed`
 //! calls over a single (stdin, stdout, stderr) triple. The caller tags

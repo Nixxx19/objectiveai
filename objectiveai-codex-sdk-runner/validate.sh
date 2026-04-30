@@ -2,7 +2,7 @@
 # Validates that embed/<target>/<profile>/ exists and its fingerprint matches.
 #
 # Usage:
-#   bash objectiveai-codex-sdk-runner-py/validate.sh [--target <triple>] [--release]
+#   bash objectiveai-codex-sdk-runner/validate.sh [--target <triple>] [--release]
 
 set -euo pipefail
 
