@@ -87,50 +87,6 @@ pub(crate) async fn read_next_sse_event<T: serde::de::DeserializeOwned>(
     }
 }
 
-/// Returns `true` if the error chain bottoms out in a transient
-/// connection-level I/O failure (`ConnectionAborted` / `ConnectionReset`
-/// / `ConnectionRefused`). These show up under heavy parallel load on
-/// platforms with tight ephemeral-port budgets (Windows loopback in
-/// particular) when the OS tears down a socket mid-handshake.
-fn is_transient_connection_error(err: &reqwest::Error) -> bool {
-    let mut source: Option<&dyn std::error::Error> = Some(err);
-    while let Some(e) = source {
-        if let Some(io_err) = e.downcast_ref::<std::io::Error>() {
-            return matches!(
-                io_err.kind(),
-                std::io::ErrorKind::ConnectionAborted
-                    | std::io::ErrorKind::ConnectionReset
-                    | std::io::ErrorKind::ConnectionRefused,
-            );
-        }
-        source = e.source();
-    }
-    false
-}
-
-/// Send `request` and, on a transient connection-level error, try one
-/// more time immediately. We don't apply real backoff here — for genuine
-/// remote failures we want to fail fast — but a one-shot retry covers
-/// the case where the local TCP stack killed the socket between our
-/// `connect()` and our first byte going out (common on Windows loopback
-/// when many concurrent tests are open at once).
-pub(crate) async fn send_with_transient_retry(
-    request: reqwest::RequestBuilder,
-) -> Result<reqwest::Response, reqwest::Error> {
-    let cloned = request.try_clone();
-    match request.send().await {
-        Ok(r) => Ok(r),
-        Err(e) if is_transient_connection_error(&e) => {
-            if let Some(retry) = cloned {
-                retry.send().await
-            } else {
-                Err(e)
-            }
-        }
-        Err(e) => Err(e),
-    }
-}
-
 /// Parses a JSON-RPC response from a streamable-HTTP `Response` *body*,
 /// consuming the entire body. Accepts either a bare JSON body or an SSE
 /// envelope; in the SSE case every `data:` line is concatenated and

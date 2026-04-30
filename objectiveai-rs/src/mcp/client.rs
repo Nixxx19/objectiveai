@@ -124,6 +124,51 @@ impl Client {
             return Ok(super::Connection::new_mock(url));
         }
 
+        // One outer backoff retry around all three handshake steps —
+        // initialize POST, notifications/initialized POST, GET / SSE
+        // (when capabilities require it). On a failure of any step we
+        // restart from scratch: a partial handshake leaves server-side
+        // session state we can't reuse, so retrying just the failed
+        // step would reference a session the server already discarded.
+        // Every error is treated as transient — the loop only gives up
+        // when the backoff's `max_elapsed_time` is exceeded.
+        let mut backoff = backoff::ExponentialBackoff {
+            current_interval: self.backoff_current_interval,
+            initial_interval: self.backoff_initial_interval,
+            randomization_factor: self.backoff_randomization_factor,
+            multiplier: self.backoff_multiplier,
+            max_interval: self.backoff_max_interval,
+            start_time: std::time::Instant::now(),
+            max_elapsed_time: Some(self.backoff_max_elapsed_time),
+            clock: backoff::SystemClock::default(),
+        };
+
+        loop {
+            match self
+                .connect_once(&url, authorization.as_deref(), session_id.as_deref(), &extra_headers)
+                .await
+            {
+                Ok(conn) => return Ok(conn),
+                Err(e) => {
+                    use backoff::backoff::Backoff;
+                    match backoff.next_backoff() {
+                        Some(d) => tokio::time::sleep(d).await,
+                        None => return Err(e),
+                    }
+                }
+            }
+        }
+    }
+
+    /// One pass through the full Streamable-HTTP handshake. Caller
+    /// applies the outer backoff retry loop in [`Self::connect`].
+    async fn connect_once(
+        &self,
+        url: &str,
+        authorization: Option<&str>,
+        session_id: Option<&str>,
+        extra_headers: &IndexMap<String, String>,
+    ) -> Result<super::Connection, super::Error> {
         let init_request = serde_json::json!({
             "jsonrpc": "2.0",
             "id": 1,
@@ -140,45 +185,43 @@ impl Client {
 
         let mut request = self
             .http_client
-            .post(&url)
+            .post(url)
             .timeout(self.connect_timeout)
             .header("Content-Type", "application/json")
             .header("Accept", "text/event-stream, application/json")
             .json(&init_request);
 
-        if let Some(sid) = &session_id {
+        if let Some(sid) = session_id {
             request = request.header("Mcp-Session-Id", sid);
         }
-        if let Some(auth) = &authorization {
+        if let Some(auth) = authorization {
             request = request.header("Authorization", auth);
         }
         request = request.header("User-Agent", &self.user_agent);
         request = request.header("X-Title", &self.x_title);
         request = request.header("Referer", &self.http_referer);
         request = request.header("HTTP-Referer", &self.http_referer);
-        for (name, value) in &extra_headers {
+        for (name, value) in extra_headers {
             request = request.header(name, value);
         }
 
-        let response = super::send_with_transient_retry(request)
-            .await
-            .map_err(|source| super::Error::Connection {
-                url: url.clone(),
-                source,
-            })?;
+        let response = request.send().await.map_err(|source| super::Error::Connection {
+            url: url.to_string(),
+            source,
+        })?;
 
         if !response.status().is_success() {
             let code = response.status();
             let body = response.text().await.unwrap_or_default();
             return Err(super::Error::BadStatus {
-                url: url.clone(),
+                url: url.to_string(),
                 code,
                 body,
             });
         }
 
         // Extract session ID from response header.
-        let session_id = match response
+        let resolved_session_id = match response
             .headers()
             .get("Mcp-Session-Id")
             .and_then(|v| v.to_str().ok())
@@ -188,7 +231,7 @@ impl Client {
             None => {
                 let body = response.text().await.unwrap_or_default();
                 return Err(super::Error::NoSessionId {
-                    url: url.clone(),
+                    url: url.to_string(),
                     body: body.chars().take(800).collect(),
                 });
             }
@@ -211,12 +254,12 @@ impl Client {
             let mut lines = super::lines_from_response(response);
             let rpc_response: super::JsonRpcResponse<
                 super::initialize_result::InitializeResult,
-            > = super::read_next_sse_event(&url, &mut lines).await?;
+            > = super::read_next_sse_event(url, &mut lines).await?;
             let result = match rpc_response {
                 super::JsonRpcResponse::Success { result, .. } => result,
                 super::JsonRpcResponse::Error { error, .. } => {
                     return Err(super::Error::JsonRpc {
-                        url: url.clone(),
+                        url: url.to_string(),
                         code: error.code,
                         message: error.message,
                         data: error.data,
@@ -227,12 +270,12 @@ impl Client {
         } else {
             let rpc_response: super::JsonRpcResponse<
                 super::initialize_result::InitializeResult,
-            > = super::parse_streamable_http_response(&url, response).await?;
+            > = super::parse_streamable_http_response(url, response).await?;
             let result = match rpc_response {
                 super::JsonRpcResponse::Success { result, .. } => result,
                 super::JsonRpcResponse::Error { error, .. } => {
                     return Err(super::Error::JsonRpc {
-                        url: url.clone(),
+                        url: url.to_string(),
                         code: error.code,
                         message: error.message,
                         data: error.data,
@@ -277,12 +320,12 @@ impl Client {
         });
         let mut notify_request = self
             .http_client
-            .post(&url)
+            .post(url)
             .timeout(self.call_timeout)
             .header("Content-Type", "application/json")
             .header("Accept", "application/json, text/event-stream")
-            .header("Mcp-Session-Id", &session_id);
-        if let Some(auth) = &authorization {
+            .header("Mcp-Session-Id", &resolved_session_id);
+        if let Some(auth) = authorization {
             notify_request = notify_request.header("Authorization", auth);
         }
         notify_request = notify_request
@@ -290,21 +333,25 @@ impl Client {
             .header("X-Title", &self.x_title)
             .header("Referer", &self.http_referer)
             .header("HTTP-Referer", &self.http_referer);
-        for (name, value) in &extra_headers {
+        for (name, value) in extra_headers {
             notify_request = notify_request.header(name, value);
         }
-        let notify_response = super::send_with_transient_retry(
-            notify_request.json(&init_notification_body),
-        )
-        .await
-        .map_err(|source| super::Error::Request {
-            url: url.clone(),
-            source,
-        })?;
+        let notify_response = notify_request
+            .json(&init_notification_body)
+            .send()
+            .await
+            .map_err(|source| super::Error::Request {
+                url: url.to_string(),
+                source,
+            })?;
         if !notify_response.status().is_success() {
             let code = notify_response.status();
             let body = notify_response.text().await.unwrap_or_default();
-            return Err(super::Error::BadStatus { url, code, body });
+            return Err(super::Error::BadStatus {
+                url: url.to_string(),
+                code,
+                body,
+            });
         }
 
         // Now safe to drop the init-side SSE stream; rmcp's session
@@ -321,11 +368,11 @@ impl Client {
         let initial_sse_lines: Option<super::LinesStream> = if needs_sse {
             let mut get_request = self
                 .http_client
-                .get(&url)
+                .get(url)
                 .timeout(self.connect_timeout)
                 .header("Accept", "text/event-stream")
-                .header("Mcp-Session-Id", &session_id);
-            if let Some(auth) = &authorization {
+                .header("Mcp-Session-Id", &resolved_session_id);
+            if let Some(auth) = authorization {
                 get_request = get_request.header("Authorization", auth);
             }
             get_request = get_request
@@ -333,19 +380,23 @@ impl Client {
                 .header("X-Title", &self.x_title)
                 .header("Referer", &self.http_referer)
                 .header("HTTP-Referer", &self.http_referer);
-            for (name, value) in &extra_headers {
+            for (name, value) in extra_headers {
                 get_request = get_request.header(name, value);
             }
-            let get_response = super::send_with_transient_retry(get_request)
-                .await
-                .map_err(|source| super::Error::Connection {
-                    url: url.clone(),
+            let get_response = get_request.send().await.map_err(|source| {
+                super::Error::Connection {
+                    url: url.to_string(),
                     source,
-                })?;
+                }
+            })?;
             if !get_response.status().is_success() {
                 let code = get_response.status();
                 let body = get_response.text().await.unwrap_or_default();
-                return Err(super::Error::BadStatus { url: url.clone(), code, body });
+                return Err(super::Error::BadStatus {
+                    url: url.to_string(),
+                    code,
+                    body,
+                });
             }
             Some(super::lines_from_response(get_response))
         } else {
@@ -359,13 +410,13 @@ impl Client {
         // handshake, so any of those POSTs land safely.
         let connection = super::Connection::new(
             self.http_client.clone(),
-            url,
-            session_id,
-            authorization,
+            url.to_string(),
+            resolved_session_id,
+            authorization.map(String::from),
             self.user_agent.clone(),
             self.x_title.clone(),
             self.http_referer.clone(),
-            extra_headers,
+            extra_headers.clone(),
             self.backoff_current_interval,
             self.backoff_initial_interval,
             self.backoff_randomization_factor,
@@ -381,3 +432,4 @@ impl Client {
         Ok(connection)
     }
 }
+

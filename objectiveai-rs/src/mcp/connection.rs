@@ -567,8 +567,10 @@ impl ConnectionInner {
 
     /// Sends a JSON-RPC request with exponential backoff retries.
     ///
-    /// Network errors and non-success HTTP status codes are retried.
-    /// Session expiration (404) and JSON-RPC errors are permanent failures.
+    /// Every error — network, HTTP status, malformed body, JSON-RPC
+    /// error, session expiration — is treated as transient and
+    /// retried. The loop gives up only when the backoff's
+    /// `max_elapsed_time` is exceeded.
     async fn rpc<P: serde::Serialize, R: serde::de::DeserializeOwned>(
         &self,
         method: &str,
@@ -584,17 +586,15 @@ impl ConnectionInner {
 
         backoff::future::retry(self.backoff(), || async {
             let url = self.url.clone();
-            let response = super::send_with_transient_retry(self.post().json(&body))
-                .await
-                .map_err(|source| {
-                    backoff::Error::transient(super::Error::Request {
-                        url: url.clone(),
-                        source,
-                    })
-                })?;
+            let response = self.post().json(&body).send().await.map_err(|source| {
+                backoff::Error::transient(super::Error::Request {
+                    url: url.clone(),
+                    source,
+                })
+            })?;
 
             if response.status() == reqwest::StatusCode::NOT_FOUND {
-                return Err(backoff::Error::permanent(
+                return Err(backoff::Error::transient(
                     super::Error::SessionExpired { url: url.clone() },
                 ));
             }
@@ -614,7 +614,7 @@ impl ConnectionInner {
             match rpc_response {
                 super::JsonRpcResponse::Success { result, .. } => Ok(result),
                 super::JsonRpcResponse::Error { error, .. } => {
-                    Err(backoff::Error::permanent(super::Error::JsonRpc {
+                    Err(backoff::Error::transient(super::Error::JsonRpc {
                         url: url.clone(),
                         code: error.code,
                         message: error.message,
@@ -626,7 +626,10 @@ impl ConnectionInner {
         .await
     }
 
-    /// Sends a JSON-RPC notification (no response expected, no retries).
+    /// Sends a JSON-RPC notification (no response expected) with the
+    /// same exponential-backoff retry policy as [`Self::rpc`]. Every
+    /// error is transient; the loop gives up only when the backoff's
+    /// `max_elapsed_time` is exceeded.
     async fn notify<P: serde::Serialize>(
         &self,
         method: &str,
@@ -639,27 +642,31 @@ impl ConnectionInner {
             "params": params,
         });
 
-        let response = super::send_with_transient_retry(self.post().json(&body))
-            .await
-            .map_err(|source| super::Error::Request {
-                url: self.url.clone(),
-                source,
+        backoff::future::retry(self.backoff(), || async {
+            let url = self.url.clone();
+            let response = self.post().json(&body).send().await.map_err(|source| {
+                backoff::Error::transient(super::Error::Request {
+                    url: url.clone(),
+                    source,
+                })
             })?;
 
-        if response.status() == reqwest::StatusCode::NOT_FOUND {
-            return Err(super::Error::SessionExpired { url: self.url.clone() });
-        }
-        if !response.status().is_success() {
-            let code = response.status();
-            let body = response.text().await.unwrap_or_default();
-            return Err(super::Error::BadStatus {
-                url: self.url.clone(),
-                code,
-                body,
-            });
-        }
+            if response.status() == reqwest::StatusCode::NOT_FOUND {
+                return Err(backoff::Error::transient(
+                    super::Error::SessionExpired { url: url.clone() },
+                ));
+            }
+            if !response.status().is_success() {
+                let code = response.status();
+                let body = response.text().await.unwrap_or_default();
+                return Err(backoff::Error::transient(
+                    super::Error::BadStatus { url: url.clone(), code, body },
+                ));
+            }
 
-        Ok(())
+            Ok(())
+        })
+        .await
     }
 
     /// Returns a key identifying this connection for tool namespacing.
