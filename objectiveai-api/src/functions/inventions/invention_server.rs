@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 use std::sync::{Arc, Mutex, RwLock};
 
+use dashmap::DashMap;
 use futures::{FutureExt, Stream};
 use rmcp::{
     Peer, RoleServer, ServerHandler,
@@ -22,42 +23,198 @@ use rmcp::{
 };
 use serde_json::Value;
 use tokio::net::TcpListener;
-use tokio_util::sync::CancellationToken;
+use tokio::sync::OnceCell;
+use tokio_util::sync::{CancellationToken, DropGuard};
 
 use objectiveai::functions::inventions::InventionTool;
 
-/// In-process MCP HTTP server that wraps a set of `InventionTool` callables.
-///
-/// The server lives for the duration of an entire invention. The orchestrator
-/// calls [`InventionServer::set_tools`] between invention steps to swap in the
-/// tool set for the next step; each swap broadcasts a
-/// `notifications/tools/list_changed` to every live MCP session so the proxy
-/// invalidates its cache and the next `tools/list` from the agent reflects the
-/// new tools.
-pub struct InventionServer {
-    port: u16,
-    _cancel: CancellationToken,
-    server_handle: tokio::task::AbortHandle,
-    /// Shared with every per-session [`InventionMcp`] handler clone — see
-    /// `StreamableHttpService::new`'s factory closure. Holding it here lets
-    /// [`InventionServer::set_tools`] swap the tool set without rebuilding the
-    /// HTTP server.
+/// Custom HTTP header carrying the tenant id from the orchestrator
+/// through the proxy to this server. The agent client adds it to its
+/// `X-MCP-Headers` map; the proxy forwards it on every upstream
+/// request; the server uses it to look up the right tenant's tool set
+/// for each MCP request.
+pub const TENANT_HEADER: &str = "X-Invention-Session-Id";
+
+/// One in-flight invention's slot inside the shared server. Holds its
+/// own tool router and its own list of rmcp peers so per-step
+/// `tools/list_changed` broadcasts only reach the inventions that
+/// actually need to refresh.
+#[derive(Clone)]
+struct Tenant {
     tool_router: Arc<RwLock<ToolRouter<InventionMcp>>>,
-    /// Per-session [`Peer`] handles registered by `InventionMcp::initialize`.
-    /// `set_tools` walks these to push `tools/list_changed` notifications.
-    /// Sessions that have closed return `TransportClosed` from `send_notification`;
-    /// we prune those entries lazily on each broadcast.
     peers: Arc<Mutex<Vec<Peer<RoleServer>>>>,
 }
 
+impl Tenant {
+    fn new(tools: Vec<InventionTool>) -> Self {
+        Self {
+            tool_router: Arc::new(RwLock::new(build_router(tools))),
+            peers: Arc::new(Mutex::new(Vec::new())),
+        }
+    }
+}
+
+/// Process-wide lazy spawner for the shared invention MCP server. Mirrors
+/// [`crate::agent::completions::ProxySpawner`] — first caller to
+/// [`Self::get`] races on the `OnceCell` and binds a single TCP port +
+/// spawns one tokio task; everyone else piggybacks on the same handle.
+pub struct InventionServerSpawner {
+    cell: OnceCell<Arc<InventionServerHandle>>,
+}
+
+impl Default for InventionServerSpawner {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl InventionServerSpawner {
+    pub fn new() -> Self {
+        Self {
+            cell: OnceCell::new(),
+        }
+    }
+
+    /// Boot the shared server on first call; return the existing handle
+    /// on every subsequent call.
+    pub async fn get(&self) -> std::io::Result<Arc<InventionServerHandle>> {
+        self.cell
+            .get_or_try_init(|| async { InventionServerHandle::spawn().await })
+            .await
+            .map(Arc::clone)
+    }
+}
+
+/// The live, single-port-per-process invention MCP server. Each
+/// in-flight invention gets a [`Tenant`] entry in `tenants`; per-tenant
+/// tool sets are routed by reading the [`TENANT_HEADER`] header off the
+/// inbound HTTP request inside the rmcp [`ServerHandler`].
+pub struct InventionServerHandle {
+    url: String,
+    tenants: Arc<DashMap<String, Tenant>>,
+    _shutdown: DropGuard,
+    _server_handle: tokio::task::AbortHandle,
+}
+
+impl InventionServerHandle {
+    async fn spawn() -> std::io::Result<Arc<Self>> {
+        let ct = CancellationToken::new();
+        let tenants: Arc<DashMap<String, Tenant>> = Arc::new(DashMap::new());
+
+        let mcp = InventionMcp {
+            tenants: tenants.clone(),
+        };
+
+        let (port_rx, server_handle) = build_and_spawn_server(mcp, ct.clone());
+        let port = port_rx
+            .await
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+
+        Ok(Arc::new(Self {
+            url: format!("http://127.0.0.1:{}/mcp", port),
+            tenants,
+            _shutdown: ct.drop_guard(),
+            _server_handle: server_handle,
+        }))
+    }
+
+    /// Register a new invention tenant on the shared server. Returns a
+    /// session token; drop the token when the invention completes to
+    /// free the tenant slot.
+    pub fn register(self: &Arc<Self>, initial_tools: Vec<InventionTool>) -> InventionSession {
+        let id = format!("inv-{}", uuid::Uuid::new_v4().simple());
+        self.tenants.insert(id.clone(), Tenant::new(initial_tools));
+        InventionSession {
+            id,
+            handle: Arc::clone(self),
+        }
+    }
+}
+
+/// Per-invention session token. Owns one [`Tenant`] slot inside the
+/// shared [`InventionServerHandle`]; [`Drop`] removes the slot.
+pub struct InventionSession {
+    id: String,
+    handle: Arc<InventionServerHandle>,
+}
+
+impl InventionSession {
+    /// The shared server's URL — the same string for every tenant.
+    /// Tenants are disambiguated server-side via the [`TENANT_HEADER`]
+    /// the agent client forwards.
+    pub fn url(&self) -> String {
+        self.handle.url.clone()
+    }
+
+    /// Tenant id; the orchestrator forwards this through the proxy
+    /// using `X-MCP-Headers` so the InventionServer can look up the
+    /// right tool set on every request.
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+
+    /// Replace this tenant's tool set and broadcast
+    /// `notifications/tools/list_changed` to its rmcp peers only.
+    /// Other tenants are unaffected. Dead peers are pruned lazily.
+    pub async fn set_tools(&self, tools: Vec<InventionTool>) {
+        // Snapshot the tenant under DashMap's read guard, then drop
+        // the guard before any await to avoid holding it across one.
+        let tenant = match self.handle.tenants.get(&self.id) {
+            Some(e) => e.value().clone(),
+            None => return, // tenant removed concurrently
+        };
+
+        // Swap the router first so any list_tools racing the broadcast
+        // still sees fresh tools.
+        *tenant.tool_router.write().unwrap() = build_router(tools);
+
+        let peers: Vec<Peer<RoleServer>> = {
+            let g = tenant.peers.lock().unwrap();
+            g.clone()
+        };
+        let mut alive: Vec<Peer<RoleServer>> = Vec::with_capacity(peers.len());
+        for peer in peers {
+            let result = peer
+                .send_notification(ServerNotification::ToolListChangedNotification(
+                    ToolListChangedNotification::default(),
+                ))
+                .await;
+            if result.is_ok() {
+                alive.push(peer);
+            }
+        }
+        // Prune dead peers.
+        *tenant.peers.lock().unwrap() = alive;
+    }
+}
+
+impl Drop for InventionSession {
+    fn drop(&mut self) {
+        self.handle.tenants.remove(&self.id);
+    }
+}
+
+/// rmcp [`ServerHandler`] for the shared invention server. One clone
+/// per HTTP session (rmcp's `StreamableHttpService::new` factory pattern);
+/// every clone references the same `tenants` map and routes inbound
+/// requests by the [`TENANT_HEADER`] HTTP header.
 #[derive(Clone)]
 struct InventionMcp {
-    /// Routes get swapped under this lock by [`InventionServer::set_tools`].
-    /// Critical sections are short — clone the router under the lock and run
-    /// the call after release so the read guard never spans an `.await`.
-    tool_router: Arc<RwLock<ToolRouter<Self>>>,
-    /// Shared peer registry; appended to in `initialize`.
-    peers: Arc<Mutex<Vec<Peer<RoleServer>>>>,
+    tenants: Arc<DashMap<String, Tenant>>,
+}
+
+impl InventionMcp {
+    /// Look up the tenant for this request from the [`TENANT_HEADER`]
+    /// header (injected into request extensions by rmcp's
+    /// `streamable_http_server::tower::handle_post`). Returns `None`
+    /// if the header is missing, malformed, or names an unknown
+    /// tenant — the handler will produce an empty / no-op response in
+    /// that case rather than 500.
+    fn tenant_for(&self, context: &RequestContext<RoleServer>) -> Option<Tenant> {
+        let parts = context.extensions.get::<axum::http::request::Parts>()?;
+        let id = parts.headers.get(TENANT_HEADER)?.to_str().ok()?;
+        self.tenants.get(id).map(|e| e.value().clone())
+    }
 }
 
 /// `LocalSessionManager` wrapper whose `close_session` is a no-op so rmcp's
@@ -65,13 +222,12 @@ struct InventionMcp {
 /// `service.waiting().await` returns) doesn't drop the session table
 /// entry when the SSE transport briefly idles between agent step calls.
 ///
-/// The InventionServer needs sessions to outlive transient stream gaps
-/// that can happen between successive `create_streaming` invocations.
-/// rmcp's default behavior would tear down the session as soon as the
-/// per-request stream task ends, even though the upstream proxy
-/// connection (and therefore the session id) is still in use. All other
-/// methods delegate. The session table is freed wholesale when the
-/// `InventionServer` task is aborted on `Drop`.
+/// Sessions need to outlive transient stream gaps that happen between
+/// successive `create_streaming` invocations. rmcp's default behavior
+/// would tear down the session as soon as the per-request stream task
+/// ends, even though the upstream proxy connection is still in use.
+/// All other methods delegate. Sessions are freed wholesale when the
+/// `InventionServerHandle` task is aborted on `Drop`.
 #[derive(Default)]
 struct NoCloseSessionManager {
     inner: LocalSessionManager,
@@ -144,7 +300,7 @@ impl SessionManager for NoCloseSessionManager {
 }
 
 /// Build a fresh [`ToolRouter`] from a list of [`InventionTool`]s. Used by
-/// both initial construction and tool-set swap.
+/// both initial tenant construction and per-step tool-set swaps.
 #[inline(never)]
 fn build_router(tools: Vec<InventionTool>) -> ToolRouter<InventionMcp> {
     let mut tool_router = ToolRouter::<InventionMcp>::new();
@@ -215,21 +371,30 @@ impl ServerHandler for InventionMcp {
         context: RequestContext<RoleServer>,
     ) -> impl std::future::Future<Output = Result<InitializeResult, rmcp::ErrorData>> + Send + '_
     {
-        // Mirror the default impl's peer_info handling, then capture the
-        // peer for later `tools/list_changed` notifications.
+        // Mirror the default impl's peer_info handling.
         if context.peer.peer_info().is_none() {
             context.peer.set_peer_info(request);
         }
-        self.peers.lock().unwrap().push(context.peer.clone());
+        // Capture the peer for this tenant's later `tools/list_changed`
+        // notifications. If no tenant matches the header, the peer is
+        // dropped — we still return a healthy InitializeResult so rmcp's
+        // session lifecycle isn't disrupted, but tool routing for this
+        // session will produce empty / not-found responses.
+        if let Some(tenant) = self.tenant_for(&context) {
+            tenant.peers.lock().unwrap().push(context.peer.clone());
+        }
         std::future::ready(Ok(self.get_info()))
     }
 
     async fn list_tools(
         &self,
         _request: Option<rmcp::model::PaginatedRequestParams>,
-        _context: RequestContext<RoleServer>,
+        context: RequestContext<RoleServer>,
     ) -> Result<rmcp::model::ListToolsResult, rmcp::ErrorData> {
-        let tools = self.tool_router.read().unwrap().list_all();
+        let tools = match self.tenant_for(&context) {
+            Some(tenant) => tenant.tool_router.read().unwrap().list_all(),
+            None => Vec::new(),
+        };
         Ok(rmcp::model::ListToolsResult {
             tools,
             meta: None,
@@ -242,15 +407,30 @@ impl ServerHandler for InventionMcp {
         request: CallToolRequestParams,
         context: RequestContext<RoleServer>,
     ) -> Result<CallToolResult, rmcp::ErrorData> {
-        // Clone the router under the read lock so the lock guard never spans
-        // the `.call(...).await` below — guards are not Send.
-        let router = self.tool_router.read().unwrap().clone();
+        let tenant = match self.tenant_for(&context) {
+            Some(t) => t,
+            None => {
+                return Err(rmcp::ErrorData::invalid_params(
+                    "no invention tenant header on request",
+                    None,
+                ));
+            }
+        };
+        // Clone the router under the read lock so the lock guard never
+        // spans the `.call(...).await` below — guards are not Send.
+        let router = tenant.tool_router.read().unwrap().clone();
         let tcc = ToolCallContext::new(self, request, context);
         router.call(tcc).await
     }
 
     fn get_tool(&self, name: &str) -> Option<Tool> {
-        self.tool_router.read().unwrap().get(name).cloned()
+        // get_tool is sync — we can only consult tenant data we can
+        // reach without &context. None is a safe answer (rmcp's default
+        // also returns None); the tool_handler validation that calls
+        // this is best-effort, and `call_tool` re-routes through
+        // tenant_for anyway.
+        let _ = name;
+        None
     }
 }
 
@@ -285,73 +465,6 @@ fn build_and_spawn_server(
     .abort_handle();
 
     (port_rx, handle)
-}
-
-impl InventionServer {
-    pub async fn new(tools: Vec<InventionTool>) -> Self {
-        let ct = CancellationToken::new();
-
-        let tool_router = Arc::new(RwLock::new(build_router(tools)));
-        let peers: Arc<Mutex<Vec<Peer<RoleServer>>>> = Arc::new(Mutex::new(Vec::new()));
-        let mcp = InventionMcp {
-            tool_router: tool_router.clone(),
-            peers: peers.clone(),
-        };
-
-        let (port_rx, server_handle) = build_and_spawn_server(mcp, ct.clone());
-        let port = port_rx.await.unwrap();
-
-        Self {
-            port,
-            _cancel: ct,
-            server_handle,
-            tool_router,
-            peers,
-        }
-    }
-
-    /// Streamable-HTTP MCP endpoint URL (one entry to add to the proxy's
-    /// `X-MCP-Servers` array).
-    pub fn url(&self) -> String {
-        format!("http://127.0.0.1:{}/mcp", self.port)
-    }
-
-    /// Replace the live tool set with `tools` and broadcast
-    /// `notifications/tools/list_changed` to every connected session.
-    ///
-    /// The router is swapped atomically before notifications fire, so the
-    /// next `tools/list` the proxy issues against this server is guaranteed
-    /// to return the new set. Dead peers (sessions that have closed) are
-    /// pruned from the registry as a side effect.
-    pub async fn set_tools(&self, tools: Vec<InventionTool>) {
-        // Swap the router first so any list_tools racing the broadcast still
-        // sees fresh tools.
-        *self.tool_router.write().unwrap() = build_router(tools);
-
-        let peers: Vec<Peer<RoleServer>> = {
-            let g = self.peers.lock().unwrap();
-            g.clone()
-        };
-        let mut alive: Vec<Peer<RoleServer>> = Vec::with_capacity(peers.len());
-        for peer in peers {
-            let result = peer
-                .send_notification(ServerNotification::ToolListChangedNotification(
-                    ToolListChangedNotification::default(),
-                ))
-                .await;
-            if result.is_ok() {
-                alive.push(peer);
-            }
-        }
-        // Prune dead peers.
-        *self.peers.lock().unwrap() = alive;
-    }
-}
-
-impl Drop for InventionServer {
-    fn drop(&mut self) {
-        self.server_handle.abort();
-    }
 }
 
 #[cfg(test)]

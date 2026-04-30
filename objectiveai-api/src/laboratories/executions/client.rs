@@ -242,7 +242,7 @@ where
 
                 Box::pin(async_stream::stream! {
                     let stream_result = agent_client
-                        .create_streaming(ctx, params, None, None, vec![], None, false, None, None, None, None)
+                        .create_streaming(ctx, params, None, None, vec![], indexmap::IndexMap::new(), None, false, None, None, None, None)
                         .await;
 
                     match stream_result {
@@ -449,6 +449,7 @@ where
                         continuation.take(),
                         None, // disable_tools
                         vec![], // extra_mcp_servers
+                        indexmap::IndexMap::new(), // extra_mcp_headers
                         None,
                         false,
                         None,

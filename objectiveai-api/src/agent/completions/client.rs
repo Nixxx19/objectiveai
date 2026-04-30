@@ -197,6 +197,7 @@ where
         >,
         disable_tools: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         extra_mcp_servers: Vec<String>,
+        extra_mcp_headers: indexmap::IndexMap<String, String>,
         transform_messages: Option<Arc<TransformMessages>>,
         viewer: bool,
         invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
@@ -211,7 +212,7 @@ where
             objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
         > = None;
         let mut stream = self
-            .create_streaming_handle_usage(ctx, params, continuation, disable_tools, extra_mcp_servers, transform_messages, viewer, invention_type, invention_step, invention_tasks_min, invention_input_schema)
+            .create_streaming_handle_usage(ctx, params, continuation, disable_tools, extra_mcp_servers, extra_mcp_headers, transform_messages, viewer, invention_type, invention_step, invention_tasks_min, invention_input_schema)
             .await?;
         while let Some(item) = stream.next().await {
             match item {
@@ -240,6 +241,7 @@ where
         >,
         disable_tools: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         extra_mcp_servers: Vec<String>,
+        extra_mcp_headers: indexmap::IndexMap<String, String>,
         transform_messages: Option<Arc<TransformMessages>>,
         viewer: bool,
         invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
@@ -264,7 +266,7 @@ where
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
         let _ = tokio::spawn(async move {
             let stream = match self
-                .create_streaming(ctx.clone(), params.clone(), continuation, disable_tools, extra_mcp_servers, transform_messages, viewer, invention_type, invention_step, invention_tasks_min, invention_input_schema)
+                .create_streaming(ctx.clone(), params.clone(), continuation, disable_tools, extra_mcp_servers, extra_mcp_headers, transform_messages, viewer, invention_type, invention_step, invention_tasks_min, invention_input_schema)
                 .await
             {
                 Ok(stream) => stream,
@@ -328,10 +330,16 @@ where
         disable_tools: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         // URLs to fold into every per-agent `X-MCP-Servers` header
         // *without* mutating the agent's own `mcp_servers` config — used
-        // by the function-inventions orchestrator to plumb its per-step
+        // by the function-inventions orchestrator to plumb the shared
         // InventionServer URL through the proxy without affecting the
         // agent's content-derived ID.
         extra_mcp_servers: Vec<String>,
+        // Headers to merge into the per-agent `X-MCP-Headers` map. The
+        // proxy forwards these verbatim to every upstream it fans out
+        // to. Used by the function-inventions orchestrator to send its
+        // tenant id (`X-Invention-Session-Id`) to the shared
+        // InventionServer.
+        extra_mcp_headers: indexmap::IndexMap<String, String>,
         transform_messages: Option<Arc<TransformMessages>>,
         viewer: bool,
         invention_type: Option<objectiveai::functions::inventions::prompts::StepPromptType>,
@@ -519,7 +527,14 @@ where
                 // mcp client stamps locally — the proxy re-emits them
                 // on its outbound upstream calls so the upstreams see
                 // the api server, not the proxy, as the originator.
-                let mcp_inner_headers = self.mcp_client.headers();
+                // Caller-supplied `extra_mcp_headers` are merged in
+                // here so the proxy forwards them too (used by the
+                // function-inventions orchestrator to send its tenant
+                // id to the shared InventionServer).
+                let mut mcp_inner_headers = self.mcp_client.headers();
+                for (k, v) in &extra_mcp_headers {
+                    mcp_inner_headers.insert(k.clone(), v.clone());
+                }
 
                 let extra_headers: indexmap::IndexMap<String, String> =
                     indexmap::indexmap! {

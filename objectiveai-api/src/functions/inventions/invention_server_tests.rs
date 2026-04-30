@@ -69,11 +69,30 @@ async fn parse_response(resp: reqwest::Response) -> Value {
         .unwrap_or_else(|e| panic!("failed to parse response as JSON or SSE: {e}\nbody: {body}"))
 }
 
-/// Send initialize + notifications/initialized, return the session ID header.
-async fn init_session(client: &reqwest::Client, base_url: &str) -> String {
+/// Bring up a fresh, isolated multi-tenant server with one tenant
+/// holding `tools`. Returns `(spawner, session, url)`. Tests must keep
+/// the spawner+session alive for the duration of the test (drop frees
+/// the tenant; spawner drop frees the server).
+async fn make_server(
+    tools: Vec<InventionTool>,
+) -> (Arc<InventionServerSpawner>, InventionSession, String) {
+    let spawner = Arc::new(InventionServerSpawner::new());
+    let handle = spawner.get().await.expect("spawn invention server");
+    let session = handle.register(tools);
+    let url = session.url();
+    (spawner, session, url)
+}
+
+/// Send initialize + notifications/initialized, return the rmcp session id header.
+async fn init_session(
+    client: &reqwest::Client,
+    base_url: &str,
+    tenant_id: &str,
+) -> String {
     let resp = client
         .post(base_url)
         .header("Accept", ACCEPT)
+        .header(TENANT_HEADER, tenant_id)
         .json(&init_params())
         .send()
         .await
@@ -89,6 +108,7 @@ async fn init_session(client: &reqwest::Client, base_url: &str) -> String {
         .post(base_url)
         .header("Accept", ACCEPT)
         .header("mcp-session-id", &session_id)
+        .header(TENANT_HEADER, tenant_id)
         .json(&json!({
             "jsonrpc": "2.0",
             "method": "notifications/initialized"
@@ -100,12 +120,19 @@ async fn init_session(client: &reqwest::Client, base_url: &str) -> String {
     session_id
 }
 
-/// Send a JSON-RPC request with session, parse the response.
-async fn rpc(client: &reqwest::Client, url: &str, session_id: &str, body: Value) -> Value {
+/// Send a JSON-RPC request as a particular tenant + rmcp session.
+async fn rpc(
+    client: &reqwest::Client,
+    url: &str,
+    session_id: &str,
+    tenant_id: &str,
+    body: Value,
+) -> Value {
     let resp = client
         .post(url)
         .header("Accept", ACCEPT)
         .header("mcp-session-id", session_id)
+        .header(TENANT_HEADER, tenant_id)
         .json(&body)
         .send()
         .await
@@ -115,11 +142,12 @@ async fn rpc(client: &reqwest::Client, url: &str, session_id: &str, body: Value)
 
 #[tokio::test]
 async fn test_initialize() {
-    let server = InventionServer::new(vec![]).await;
+    let (_spawner, session, url) = make_server(vec![]).await;
     let client = reqwest::Client::new();
     let resp = client
-        .post(&server.url())
+        .post(&url)
         .header("Accept", ACCEPT)
+        .header(TENANT_HEADER, session.id())
         .json(&init_params())
         .send()
         .await
@@ -132,23 +160,23 @@ async fn test_initialize() {
 
 #[tokio::test]
 async fn test_notifications_initialized() {
-    let server = InventionServer::new(vec![]).await;
+    let (_spawner, session, url) = make_server(vec![]).await;
     let client = reqwest::Client::new();
-    let session_id = init_session(&client, &server.url()).await;
+    let session_id = init_session(&client, &url, session.id()).await;
     assert!(!session_id.is_empty());
 }
 
 #[tokio::test]
 async fn test_tools_list() {
-    let server = InventionServer::new(vec![echo_tool()]).await;
+    let (_spawner, session, url) = make_server(vec![echo_tool()]).await;
     let client = reqwest::Client::new();
-    let url = server.url();
-    let session_id = init_session(&client, &url).await;
+    let mcp_session = init_session(&client, &url, session.id()).await;
 
     let resp = rpc(
         &client,
         &url,
-        &session_id,
+        &mcp_session,
+        session.id(),
         json!({
             "jsonrpc": "2.0",
             "id": 2,
@@ -166,15 +194,15 @@ async fn test_tools_list() {
 
 #[tokio::test]
 async fn test_tools_call_success() {
-    let server = InventionServer::new(vec![echo_tool()]).await;
+    let (_spawner, session, url) = make_server(vec![echo_tool()]).await;
     let client = reqwest::Client::new();
-    let url = server.url();
-    let session_id = init_session(&client, &url).await;
+    let mcp_session = init_session(&client, &url, session.id()).await;
 
     let resp = rpc(
         &client,
         &url,
-        &session_id,
+        &mcp_session,
+        session.id(),
         json!({
             "jsonrpc": "2.0",
             "id": 3,
@@ -194,15 +222,15 @@ async fn test_tools_call_success() {
 
 #[tokio::test]
 async fn test_tools_call_error() {
-    let server = InventionServer::new(vec![failing_tool()]).await;
+    let (_spawner, session, url) = make_server(vec![failing_tool()]).await;
     let client = reqwest::Client::new();
-    let url = server.url();
-    let session_id = init_session(&client, &url).await;
+    let mcp_session = init_session(&client, &url, session.id()).await;
 
     let resp = rpc(
         &client,
         &url,
-        &session_id,
+        &mcp_session,
+        session.id(),
         json!({
             "jsonrpc": "2.0",
             "id": 4,
@@ -224,15 +252,15 @@ async fn test_tools_call_error() {
 
 #[tokio::test]
 async fn test_tools_call_not_found() {
-    let server = InventionServer::new(vec![]).await;
+    let (_spawner, session, url) = make_server(vec![]).await;
     let client = reqwest::Client::new();
-    let url = server.url();
-    let session_id = init_session(&client, &url).await;
+    let mcp_session = init_session(&client, &url, session.id()).await;
 
     let resp = rpc(
         &client,
         &url,
-        &session_id,
+        &mcp_session,
+        session.id(),
         json!({
             "jsonrpc": "2.0",
             "id": 5,
@@ -251,23 +279,22 @@ async fn test_tools_call_not_found() {
 
 #[tokio::test]
 async fn test_url() {
-    let server = InventionServer::new(vec![]).await;
-    let url = server.url();
+    let (_spawner, _session, url) = make_server(vec![]).await;
     assert!(url.starts_with("http://127.0.0.1:"));
     assert!(url.ends_with("/mcp"));
 }
 
 #[tokio::test]
 async fn test_unknown_method() {
-    let server = InventionServer::new(vec![]).await;
+    let (_spawner, session, url) = make_server(vec![]).await;
     let client = reqwest::Client::new();
-    let url = server.url();
-    let session_id = init_session(&client, &url).await;
+    let mcp_session = init_session(&client, &url, session.id()).await;
 
     let resp = rpc(
         &client,
         &url,
-        &session_id,
+        &mcp_session,
+        session.id(),
         json!({
             "jsonrpc": "2.0",
             "id": 6,
@@ -279,4 +306,46 @@ async fn test_unknown_method() {
 
     assert!(resp["error"].is_object());
     assert!(resp["error"]["code"].as_i64().unwrap() < 0);
+}
+
+/// Two tenants on the same shared server hold disjoint tool sets and
+/// don't see each other's tools.
+#[tokio::test]
+async fn test_multi_tenant_isolation() {
+    let spawner = Arc::new(InventionServerSpawner::new());
+    let handle = spawner.get().await.expect("spawn invention server");
+    let session_a = handle.register(vec![echo_tool()]);
+    let session_b = handle.register(vec![failing_tool()]);
+    let url = session_a.url();
+    assert_eq!(url, session_b.url(), "tenants share one URL");
+
+    let client = reqwest::Client::new();
+    let mcp_session_a = init_session(&client, &url, session_a.id()).await;
+    let mcp_session_b = init_session(&client, &url, session_b.id()).await;
+
+    let list_a = rpc(
+        &client, &url, &mcp_session_a, session_a.id(),
+        json!({"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}}),
+    )
+    .await;
+    let names_a: Vec<&str> = list_a["result"]["tools"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|t| t["name"].as_str().unwrap())
+        .collect();
+    assert_eq!(names_a, vec!["echo"]);
+
+    let list_b = rpc(
+        &client, &url, &mcp_session_b, session_b.id(),
+        json!({"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}}),
+    )
+    .await;
+    let names_b: Vec<&str> = list_b["result"]["tools"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|t| t["name"].as_str().unwrap())
+        .collect();
+    assert_eq!(names_b, vec!["fail"]);
 }

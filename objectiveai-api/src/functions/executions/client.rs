@@ -3032,6 +3032,7 @@ where
                 None,
                 None, // disable_tools
                 vec![], // extra_mcp_servers
+                indexmap::IndexMap::new(), // extra_mcp_headers
                 None,
                 false,
                 None,

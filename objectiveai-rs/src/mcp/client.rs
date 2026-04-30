@@ -4,6 +4,7 @@ use std::time::Duration;
 
 use indexmap::IndexMap;
 
+
 /// Client for creating MCP connections.
 ///
 /// Holds shared configuration (HTTP client, headers, backoff parameters)
@@ -159,10 +160,12 @@ impl Client {
             request = request.header(name, value);
         }
 
-        let response = request.send().await.map_err(|source| super::Error::Connection {
-            url: url.clone(),
-            source,
-        })?;
+        let response = super::send_with_transient_retry(request)
+            .await
+            .map_err(|source| super::Error::Connection {
+                url: url.clone(),
+                source,
+            })?;
 
         if !response.status().is_success() {
             let code = response.status();
@@ -290,14 +293,14 @@ impl Client {
         for (name, value) in &extra_headers {
             notify_request = notify_request.header(name, value);
         }
-        let notify_response = notify_request
-            .json(&init_notification_body)
-            .send()
-            .await
-            .map_err(|source| super::Error::Request {
-                url: url.clone(),
-                source,
-            })?;
+        let notify_response = super::send_with_transient_retry(
+            notify_request.json(&init_notification_body),
+        )
+        .await
+        .map_err(|source| super::Error::Request {
+            url: url.clone(),
+            source,
+        })?;
         if !notify_response.status().is_success() {
             let code = notify_response.status();
             let body = notify_response.text().await.unwrap_or_default();
@@ -333,9 +336,12 @@ impl Client {
             for (name, value) in &extra_headers {
                 get_request = get_request.header(name, value);
             }
-            let get_response = get_request.send().await.map_err(|source| {
-                super::Error::Connection { url: url.clone(), source }
-            })?;
+            let get_response = super::send_with_transient_retry(get_request)
+                .await
+                .map_err(|source| super::Error::Connection {
+                    url: url.clone(),
+                    source,
+                })?;
             if !get_response.status().is_success() {
                 let code = get_response.status();
                 let body = get_response.text().await.unwrap_or_default();

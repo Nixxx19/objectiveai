@@ -751,6 +751,7 @@ where
                     None,
                     None, // disable_tools
                     vec![],
+                    indexmap::IndexMap::new(),
                     Some(transform_messages.clone()),
                     false,
                     None,
@@ -886,6 +887,7 @@ where
                                 Some(cont),
                                 None, // disable_tools
                                 vec![],
+                                indexmap::IndexMap::new(),
                                 Some(transform_messages.clone()),
                                 false,
                                 None,
@@ -1017,6 +1019,7 @@ where
                                 Some(cont),
                                 None, // disable_tools
                                 vec![],
+                                indexmap::IndexMap::new(),
                                 Some(transform_messages.clone()),
                                 false,
                                 None,

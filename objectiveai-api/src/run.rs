@@ -698,6 +698,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
             filesystem_client.clone(),
             retrieve_router.clone(),
             Arc::new(functions::inventions::usage_handler::LogUsageHandler),
+            Arc::new(functions::inventions::InventionServerSpawner::new()),
             true, // persist
             function_invention_forbid_overwrite,
         ));
@@ -1347,6 +1348,7 @@ async fn create_agent_completion(
                 None,
                 None, // disable_tools
                 vec![], // extra_mcp_servers
+                indexmap::IndexMap::new(), // extra_mcp_headers
                 None,
                 true,
                 None,
@@ -1384,6 +1386,7 @@ async fn create_agent_completion(
                 None,
                 None, // disable_tools
                 vec![], // extra_mcp_servers
+                indexmap::IndexMap::new(), // extra_mcp_headers
                 None,
                 true,
                 None,

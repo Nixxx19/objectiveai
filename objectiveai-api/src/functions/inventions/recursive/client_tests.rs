@@ -245,6 +245,7 @@ fn make_client() -> Arc<TestClient> {
         filesystem_client,
         function_retrieve_router,
         Arc::new(StubInventionUsageHandler),
+        Arc::new(crate::functions::inventions::InventionServerSpawner::new()),
         true,
         false,
     ));

@@ -584,8 +584,9 @@ impl ConnectionInner {
 
         backoff::future::retry(self.backoff(), || async {
             let url = self.url.clone();
-            let response =
-                self.post().json(&body).send().await.map_err(|source| {
+            let response = super::send_with_transient_retry(self.post().json(&body))
+                .await
+                .map_err(|source| {
                     backoff::Error::transient(super::Error::Request {
                         url: url.clone(),
                         source,
@@ -638,10 +639,7 @@ impl ConnectionInner {
             "params": params,
         });
 
-        let response = self
-            .post()
-            .json(&body)
-            .send()
+        let response = super::send_with_transient_retry(self.post().json(&body))
             .await
             .map_err(|source| super::Error::Request {
                 url: self.url.clone(),

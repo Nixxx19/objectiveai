@@ -76,6 +76,7 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK, RETRG, RET
     pub retrieve_router:
         Arc<crate::retrieval::retrieve::Router<FFNG, FFNF, FFNM, CTXEXT>>,
     pub usage_handler: Arc<IUSG>,
+    pub invention_server_spawner: Arc<super::InventionServerSpawner>,
     pub persist: bool,
     pub forbid_overwrite: bool,
 }
@@ -95,6 +96,7 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK, RETRG, RETRF, RETRM, CU
             crate::retrieval::retrieve::Router<FFNG, FFNF, FFNM, CTXEXT>,
         >,
         usage_handler: Arc<IUSG>,
+        invention_server_spawner: Arc<super::InventionServerSpawner>,
         persist: bool,
         forbid_overwrite: bool,
     ) -> Self {
@@ -104,6 +106,7 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK, RETRG, RETRF, RETRM, CU
             filesystem_client,
             retrieve_router,
             usage_handler,
+            invention_server_spawner,
             persist,
             forbid_overwrite,
         }
@@ -375,21 +378,22 @@ where
         let agent_client = self.agent_client.clone();
         let github_client = self.github_client.clone();
         let filesystem_client = self.filesystem_client.clone();
+        let invention_server_spawner = self.invention_server_spawner.clone();
         let persist = self.persist;
 
         let stream: Pin<Box<dyn Stream<Item = FunctionInventionChunk> + Send>> =
             match state {
                 State::AlphaScalarBranch(s) => {
-                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist, compiled_prompts)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, invention_server_spawner, ctx, request, id, created, persist, compiled_prompts)
                 }
                 State::AlphaScalarLeaf(s) => {
-                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist, compiled_prompts)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, invention_server_spawner, ctx, request, id, created, persist, compiled_prompts)
                 }
                 State::AlphaVectorBranch(s) => {
-                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist, compiled_prompts)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, invention_server_spawner, ctx, request, id, created, persist, compiled_prompts)
                 }
                 State::AlphaVectorLeaf(s) => {
-                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist, compiled_prompts)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, invention_server_spawner, ctx, request, id, created, persist, compiled_prompts)
                 }
             };
 
@@ -496,6 +500,7 @@ fn run_all_steps<T, CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK, RETRG, R
     >,
     github_client: Arc<crate::github::Client>,
     filesystem_client: Arc<crate::filesystem::Client>,
+    invention_server_spawner: Arc<super::InventionServerSpawner>,
     ctx: ctx::Context<CTXEXT, impl crate::ctx::persistent_cache::PersistentCacheClient>,
     request: Arc<objectiveai::functions::inventions::request::FunctionInventionCreateParams>,
     id: String,
@@ -534,14 +539,40 @@ where
         let params = T::params(&state);
         let object = T::object();
 
-        // One InventionServer for the whole invention. The tool set is
-        // swapped between steps via `set_tools`, which broadcasts a
-        // `tools/list_changed` notification so the proxy refetches
-        // `tools/list` and the agent on the next step sees the new tools.
-        let invention_server = Arc::new(
-            super::InventionServer::new(T::essay_tools(&state)).await,
+        // Register a tenant on the process-wide shared InventionServer.
+        // The tool set for this invention is swapped between steps via
+        // `set_tools`, which broadcasts a `tools/list_changed`
+        // notification only to this tenant's peers.
+        let invention_handle = match invention_server_spawner.get().await {
+            Ok(h) => h,
+            Err(e) => {
+                yield FunctionInventionChunk {
+                    id: id.to_string(),
+                    completions: vec![],
+                    state: None,
+                    path: None,
+                    function: None,
+                    created,
+                    object,
+                    usage: None,
+                    error: Some(objectiveai::error::ResponseError {
+                        code: 500,
+                        message: serde_json::Value::String(format!(
+                            "InventionServer bootstrap failed: {e}"
+                        )),
+                    }),
+                };
+                return;
+            }
+        };
+        let invention_session = Arc::new(
+            invention_handle.register(T::essay_tools(&state)),
         );
-        let invention_url = invention_server.url();
+        let invention_url = invention_session.url();
+        let invention_session_id_header: indexmap::IndexMap<String, String> =
+            indexmap::indexmap! {
+                super::TENANT_HEADER.to_string() => invention_session.id().to_string(),
+            };
 
         let state_chunk = |state: &Arc<Mutex<T>>, id: &str, created, object| {
             FunctionInventionChunk {
@@ -580,6 +611,7 @@ where
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
             prompts.essay.clone(), invention_url.clone(),
+            invention_session_id_header.clone(),
             essay_validate,
             id.clone(), created, object, continuation.take(), completion_index,
             T::prompt_type(), 0, prompts.tasks_min, None,
@@ -614,10 +646,11 @@ where
         let input_schema_validate = Arc::new({ let s = state.clone(); move || T::validate_input_schema(&s) });
         if input_schema_validate().is_err() {
         errored = false;
-        invention_server.set_tools(T::input_schema_tools(&state)).await;
+        invention_session.set_tools(T::input_schema_tools(&state)).await;
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
             prompts.input_schema.clone(), invention_url.clone(),
+            invention_session_id_header.clone(),
             input_schema_validate,
             id.clone(), created, object, continuation.take(), completion_index,
             T::prompt_type(), 1, prompts.tasks_min, None,
@@ -652,10 +685,11 @@ where
         let essay_tasks_validate = Arc::new({ let s = state.clone(); move || T::validate_essay_tasks(&s) });
         if essay_tasks_validate().is_err() {
         errored = false;
-        invention_server.set_tools(T::essay_tasks_tools(&state)).await;
+        invention_session.set_tools(T::essay_tasks_tools(&state)).await;
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
             prompts.essay_tasks.clone(), invention_url.clone(),
+            invention_session_id_header.clone(),
             essay_tasks_validate,
             id.clone(), created, object, continuation.take(), completion_index,
             T::prompt_type(), 2, prompts.tasks_min, None,
@@ -693,10 +727,11 @@ where
         let tasks_validate = Arc::new({ let s = state.clone(); move || T::validate_function(&s) });
         if tasks_validate().is_err() {
         errored = false;
-        invention_server.set_tools(T::tasks_tools(&state)).await;
+        invention_session.set_tools(T::tasks_tools(&state)).await;
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
             prompts.tasks.clone(), invention_url.clone(),
+            invention_session_id_header.clone(),
             tasks_validate,
             id.clone(), created, object, continuation.take(), completion_index,
             T::prompt_type(), 3, prompts.tasks_min, T::input_schema_json(&state),
@@ -731,10 +766,11 @@ where
         let description_validate = Arc::new({ let s = state.clone(); move || T::validate_description(&s) });
         if description_validate().is_err() {
         errored = false;
-        invention_server.set_tools(T::description_tools(&state)).await;
+        invention_session.set_tools(T::description_tools(&state)).await;
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
             prompts.description.clone(), invention_url.clone(),
+            invention_session_id_header.clone(),
             description_validate,
             id.clone(), created, object, continuation.take(), completion_index,
             T::prompt_type(), 4, prompts.tasks_min, None,
@@ -948,6 +984,7 @@ fn run_step<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK, RETRG, RETRF, RE
     request: Arc<objectiveai::functions::inventions::request::FunctionInventionCreateParams>,
     prompt: String,
     invention_url: String,
+    invention_session_id_header: indexmap::IndexMap<String, String>,
     validate: Arc<dyn Fn() -> Result<(), String> + Send + Sync>,
     id: String,
     created: u64,
@@ -1032,6 +1069,7 @@ where
                 continuation.take(),
                 Some(disable_tools),
                 vec![invention_url.clone()],
+                invention_session_id_header.clone(),
                 None,
                 false,
                 Some(invention_type),
@@ -1129,6 +1167,7 @@ where
                     continuation.take(),
                     Some(disable_tools),
                     vec![invention_url.clone()],
+                    invention_session_id_header.clone(),
                     None,
                     false,
                     Some(invention_type),
