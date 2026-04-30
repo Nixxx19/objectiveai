@@ -56,6 +56,7 @@ fn make_mcp_tool(name: &str) -> objectiveai::mcp::tool::Tool {
 
 #[tokio::test]
 async fn test_tools_not_allowed_with_tools_present() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = default_client();
     let agent = default_agent();
     let params = default_params();
@@ -77,6 +78,7 @@ async fn test_tools_not_allowed_with_tools_present() {
 
 #[tokio::test]
 async fn test_tools_not_allowed_without_tools_proceeds() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = default_client();
     let agent = default_agent();
     let params = default_params();

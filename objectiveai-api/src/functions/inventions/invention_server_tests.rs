@@ -142,6 +142,7 @@ async fn rpc(
 
 #[tokio::test]
 async fn test_initialize() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let (_spawner, session, url) = make_server(vec![]).await;
     let client = reqwest::Client::new();
     let resp = client
@@ -160,6 +161,7 @@ async fn test_initialize() {
 
 #[tokio::test]
 async fn test_notifications_initialized() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let (_spawner, session, url) = make_server(vec![]).await;
     let client = reqwest::Client::new();
     let session_id = init_session(&client, &url, session.id()).await;
@@ -168,6 +170,7 @@ async fn test_notifications_initialized() {
 
 #[tokio::test]
 async fn test_tools_list() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let (_spawner, session, url) = make_server(vec![echo_tool()]).await;
     let client = reqwest::Client::new();
     let mcp_session = init_session(&client, &url, session.id()).await;
@@ -194,6 +197,7 @@ async fn test_tools_list() {
 
 #[tokio::test]
 async fn test_tools_call_success() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let (_spawner, session, url) = make_server(vec![echo_tool()]).await;
     let client = reqwest::Client::new();
     let mcp_session = init_session(&client, &url, session.id()).await;
@@ -222,6 +226,7 @@ async fn test_tools_call_success() {
 
 #[tokio::test]
 async fn test_tools_call_error() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let (_spawner, session, url) = make_server(vec![failing_tool()]).await;
     let client = reqwest::Client::new();
     let mcp_session = init_session(&client, &url, session.id()).await;
@@ -252,6 +257,7 @@ async fn test_tools_call_error() {
 
 #[tokio::test]
 async fn test_tools_call_not_found() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let (_spawner, session, url) = make_server(vec![]).await;
     let client = reqwest::Client::new();
     let mcp_session = init_session(&client, &url, session.id()).await;
@@ -279,6 +285,7 @@ async fn test_tools_call_not_found() {
 
 #[tokio::test]
 async fn test_url() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let (_spawner, _session, url) = make_server(vec![]).await;
     assert!(url.starts_with("http://127.0.0.1:"));
     assert!(url.ends_with("/mcp"));
@@ -286,6 +293,7 @@ async fn test_url() {
 
 #[tokio::test]
 async fn test_unknown_method() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let (_spawner, session, url) = make_server(vec![]).await;
     let client = reqwest::Client::new();
     let mcp_session = init_session(&client, &url, session.id()).await;
@@ -312,6 +320,7 @@ async fn test_unknown_method() {
 /// don't see each other's tools.
 #[tokio::test]
 async fn test_multi_tenant_isolation() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let spawner = Arc::new(InventionServerSpawner::new());
     let handle = spawner.get().await.expect("spawn invention server");
     let session_a = handle.register(vec![echo_tool()]);

@@ -31,6 +31,7 @@ fn response_format_tool(name: &str) -> objectiveai::agent::completions::request:
 
 #[tokio::test]
 async fn test_no_tools() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let (names, map) = resolve_tools(None, None).await.unwrap();
     assert!(names.is_empty());
     assert!(map.is_empty());
@@ -38,6 +39,7 @@ async fn test_no_tools() {
 
 #[tokio::test]
 async fn test_single_mcp_tool() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let server = test_mcp_server::spawn("alpha", vec![TestTool::noop(mcp_tool("search"))]).await;
     let conn = test_mcp_server::connect_through_proxy(&[&server]).await;
 
@@ -52,6 +54,7 @@ async fn test_single_mcp_tool() {
 
 #[tokio::test]
 async fn test_single_response_format_tool() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let rf = response_format_tool("submit");
     let (names, map) = resolve_tools(None, Some(&rf)).await.unwrap();
     assert_eq!(names, vec!["submit"]);
@@ -60,6 +63,7 @@ async fn test_single_response_format_tool() {
 
 #[tokio::test]
 async fn test_response_format_text_yields_no_tool() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let rf = objectiveai::agent::completions::request::ResponseFormat::Text;
     let (names, map) = resolve_tools(None, Some(&rf)).await.unwrap();
     assert!(names.is_empty());
@@ -68,6 +72,7 @@ async fn test_response_format_text_yields_no_tool() {
 
 #[tokio::test]
 async fn test_mcp_and_response_format() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let server = test_mcp_server::spawn("alpha", vec![
         TestTool::noop(mcp_tool("search")),
         TestTool::noop(mcp_tool("list")),
@@ -89,6 +94,7 @@ async fn test_mcp_and_response_format() {
 
 #[tokio::test]
 async fn test_multi_upstream_via_proxy_returns_union() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     // The proxy fans out across multiple upstream MCP servers and prefixes
     // each tool with the upstream's server name. With distinct names we
     // get the bare-prefix form `<name>_<tool>` (no `_<index>` suffix —

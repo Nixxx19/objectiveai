@@ -59,6 +59,7 @@ async fn build_params_with_tools_enabled(
 
 #[tokio::test]
 async fn test_no_tools_empty_params() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = objectiveai::agent::openrouter::Agent::try_from(
         objectiveai::agent::openrouter::AgentBase {
             model: "test-model".into(),
@@ -140,6 +141,7 @@ async fn test_no_tools_empty_params() {
 
 #[tokio::test]
 async fn test_top_logprobs_zero_omits_logprobs() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = objectiveai::agent::openrouter::Agent {
         id: String::new(),
         base: objectiveai::agent::openrouter::AgentBase {
@@ -212,6 +214,7 @@ async fn test_top_logprobs_zero_omits_logprobs() {
 
 #[tokio::test]
 async fn test_multiple_invention_tools_no_conflicts() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = objectiveai::agent::openrouter::Agent::try_from(
         objectiveai::agent::openrouter::AgentBase {
             model: "openai/gpt-4o".into(),
@@ -384,6 +387,7 @@ async fn test_multiple_invention_tools_no_conflicts() {
 
 #[tokio::test]
 async fn test_toolcall_not_required_uses_auto_choice() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = objectiveai::agent::openrouter::Agent::try_from(
         objectiveai::agent::openrouter::AgentBase {
             model: "openai/gpt-4o".into(),
@@ -484,6 +488,7 @@ async fn test_toolcall_not_required_uses_auto_choice() {
 
 #[tokio::test]
 async fn test_invention_tool_parameters_preserved() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = objectiveai::agent::openrouter::Agent::try_from(
         objectiveai::agent::openrouter::AgentBase {
             model: "test-model".into(),
@@ -612,6 +617,7 @@ async fn test_invention_tool_parameters_preserved() {
 
 #[tokio::test]
 async fn test_agent_base_fields_passthrough() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = objectiveai::agent::openrouter::Agent::try_from(
         objectiveai::agent::openrouter::AgentBase {
             model: "openai/gpt-4o".to_string(),
@@ -714,6 +720,7 @@ async fn test_agent_base_fields_passthrough() {
 
 #[tokio::test]
 async fn test_provider_merging_both_sides() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = objectiveai::agent::openrouter::Agent::try_from(
         objectiveai::agent::openrouter::AgentBase {
             model: "openai/gpt-4o".into(),
@@ -827,6 +834,7 @@ async fn test_provider_merging_both_sides() {
 
 #[tokio::test]
 async fn test_per_agent_response_format_miss() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = objectiveai::agent::openrouter::Agent::try_from(
         objectiveai::agent::openrouter::AgentBase {
             model: "gpt-4o".into(),
@@ -908,6 +916,7 @@ async fn test_per_agent_response_format_miss() {
 
 #[tokio::test]
 async fn test_json_schema_response_format_extracts_title() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = objectiveai::agent::openrouter::Agent::try_from(
         objectiveai::agent::openrouter::AgentBase {
             model: "openai/gpt-4o".into(),
@@ -1034,6 +1043,7 @@ async fn test_json_schema_response_format_extracts_title() {
 
 #[tokio::test]
 async fn test_seed_passthrough() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = objectiveai::agent::openrouter::Agent::try_from(
         objectiveai::agent::openrouter::AgentBase {
             model: "openai/gpt-4o".into(),
@@ -1148,6 +1158,7 @@ async fn test_seed_passthrough() {
 
 #[tokio::test]
 async fn test_toolcall_required_forces_function_choice() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = objectiveai::agent::openrouter::Agent::try_from(
         objectiveai::agent::openrouter::AgentBase {
             model: "openai/gpt-4o".into(),
@@ -1256,6 +1267,7 @@ async fn test_toolcall_required_forces_function_choice() {
 
 #[tokio::test]
 async fn test_three_mcp_servers_fifteen_tools_all_unique() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = objectiveai::agent::openrouter::Agent::try_from(
         objectiveai::agent::openrouter::AgentBase {
             model: "anthropic/claude-sonnet-4".into(),
@@ -1845,6 +1857,7 @@ async fn test_three_mcp_servers_fifteen_tools_all_unique() {
 
 #[tokio::test]
 async fn test_continuation_assistant_message_appended() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = objectiveai::agent::openrouter::Agent {
         id: String::new(),
         base: objectiveai::agent::openrouter::AgentBase {
@@ -1959,6 +1972,7 @@ async fn test_continuation_assistant_message_appended() {
 
 #[tokio::test]
 async fn test_continuation_mixed_items() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = objectiveai::agent::openrouter::Agent {
         id: String::new(),
         base: objectiveai::agent::openrouter::AgentBase {
@@ -2120,6 +2134,7 @@ async fn test_continuation_mixed_items() {
 
 #[tokio::test]
 async fn test_tools_disabled_sets_tool_choice_none() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = objectiveai::agent::openrouter::Agent::try_from(
         objectiveai::agent::openrouter::AgentBase {
             model: "test-model".into(),
@@ -2174,6 +2189,7 @@ async fn test_tools_disabled_sets_tool_choice_none() {
 
 #[tokio::test]
 async fn test_tools_disabled_no_tools_no_tool_choice() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = objectiveai::agent::openrouter::Agent::try_from(
         objectiveai::agent::openrouter::AgentBase {
             model: "test-model".into(),
@@ -2208,6 +2224,7 @@ async fn test_tools_disabled_no_tools_no_tool_choice() {
 
 #[tokio::test]
 async fn test_request_continuation_messages_come_first() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     use objectiveai::agent::completions::message::*;
 
     let agent = objectiveai::agent::openrouter::Agent::try_from(

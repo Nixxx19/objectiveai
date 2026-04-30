@@ -301,6 +301,7 @@ fn assert_snapshot(json: &str, path: &str, expected: &str) {
 /// mock-1: Simple scalar leaf, single task, binary classification, seed 42.
 #[tokio::test]
 async fn test_mock_1_scalar_leaf_binary_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "binary-classifier",
@@ -322,6 +323,7 @@ async fn test_mock_1_scalar_leaf_binary_seed_42() {
 /// mock-2: Multi-task scalar with skip condition (include_sentiment=false), seed 42.
 #[tokio::test]
 async fn test_mock_2_scalar_skip_false_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "spam-with-optional-sentiment",
@@ -344,6 +346,7 @@ async fn test_mock_2_scalar_skip_false_seed_42() {
 /// mock-2: Multi-task scalar with skip condition (include_sentiment=true), seed 42.
 #[tokio::test]
 async fn test_mock_2_scalar_skip_true_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "spam-with-optional-sentiment",
@@ -366,6 +369,7 @@ async fn test_mock_2_scalar_skip_true_seed_42() {
 /// mock-3: 5-way classification scalar, seed 42.
 #[tokio::test]
 async fn test_mock_3_scalar_5way_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "five-star-rating",
@@ -387,6 +391,7 @@ async fn test_mock_3_scalar_5way_seed_42() {
 /// mock-4: Simple vector ranker with 3 items, seed 42.
 #[tokio::test]
 async fn test_mock_4_vector_ranker_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "item-ranker",
@@ -412,6 +417,7 @@ async fn test_mock_4_vector_ranker_seed_42() {
 /// mock-5: Vector ranker with context and multiple tasks, seed 42.
 #[tokio::test]
 async fn test_mock_5_vector_context_multi_task_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "contextual-ranker",
@@ -439,6 +445,7 @@ async fn test_mock_5_vector_context_multi_task_seed_42() {
 /// mock-6: Scalar with system message and multi-part user content, seed 42.
 #[tokio::test]
 async fn test_mock_6_scalar_system_message_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "email-importance",
@@ -465,6 +472,7 @@ async fn test_mock_6_scalar_system_message_seed_42() {
 /// mock-7: Vector ranker with 5 scoring criteria, seed 42.
 #[tokio::test]
 async fn test_mock_7_vector_5_criteria_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "five-criteria-ranker",
@@ -490,6 +498,7 @@ async fn test_mock_7_vector_5_criteria_seed_42() {
 /// mock-8: Vector ranker with context, 5 tasks, skip conditions (strict=false), seed 42.
 #[tokio::test]
 async fn test_mock_8_vector_context_skip_false_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "strict-contextual-ranker",
@@ -518,6 +527,7 @@ async fn test_mock_8_vector_context_skip_false_seed_42() {
 /// mock-8: Vector ranker with context, 5 tasks, skip conditions (strict=true), seed 42.
 #[tokio::test]
 async fn test_mock_8_vector_context_skip_true_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "strict-contextual-ranker",
@@ -550,6 +560,7 @@ async fn test_mock_8_vector_context_skip_true_seed_42() {
 /// mock-9: Scalar branch combining spam + importance classifiers, seed 42.
 #[tokio::test]
 async fn test_mock_9_scalar_branch_2_tasks_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "spam-importance-branch",
@@ -572,6 +583,7 @@ async fn test_mock_9_scalar_branch_2_tasks_seed_42() {
 /// mock-10: Scalar branch combining binary, 5-way, importance (one agent errors), seed 42.
 #[tokio::test]
 async fn test_mock_10_scalar_branch_3_tasks_error_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "triple-classifier-branch",
@@ -593,6 +605,7 @@ async fn test_mock_10_scalar_branch_3_tasks_error_seed_42() {
 /// mock-11: Scalar branch with skip condition (include_sentiment=false), seed 42.
 #[tokio::test]
 async fn test_mock_11_scalar_branch_skip_false_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "classifier-with-optional-sentiment",
@@ -615,6 +628,7 @@ async fn test_mock_11_scalar_branch_skip_false_seed_42() {
 /// mock-11: Scalar branch with skip condition (include_sentiment=true), seed 42.
 #[tokio::test]
 async fn test_mock_11_scalar_branch_skip_true_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "classifier-with-optional-sentiment",
@@ -641,6 +655,7 @@ async fn test_mock_11_scalar_branch_skip_true_seed_42() {
 /// mock-12: Vector branch with two vector sub-function rankers, seed 42.
 #[tokio::test]
 async fn test_mock_12_vector_branch_2_vector_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "dual-ranker-branch",
@@ -666,6 +681,7 @@ async fn test_mock_12_vector_branch_2_vector_seed_42() {
 /// mock-13: Vector branch mixing scalar and vector sub-functions, seed 42.
 #[tokio::test]
 async fn test_mock_13_vector_branch_mixed_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "mixed-scalar-vector-branch",
@@ -693,6 +709,7 @@ async fn test_mock_13_vector_branch_mixed_seed_42() {
 /// mock-14: Vector branch with skip on sub-function (include_quality=false), seed 42.
 #[tokio::test]
 async fn test_mock_14_vector_branch_skip_false_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "ranker-with-optional-quality",
@@ -721,6 +738,7 @@ async fn test_mock_14_vector_branch_skip_false_seed_42() {
 /// mock-14: Vector branch with skip on sub-function (include_quality=true), seed 42.
 #[tokio::test]
 async fn test_mock_14_vector_branch_skip_true_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "ranker-with-optional-quality",
@@ -749,6 +767,7 @@ async fn test_mock_14_vector_branch_skip_true_seed_42() {
 /// mock-15: Vector branch with 3 vector sub-functions and high logprobs, seed 42.
 #[tokio::test]
 async fn test_mock_15_vector_branch_3_vector_logprobs_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "triple-ranker-branch",
@@ -773,6 +792,7 @@ async fn test_mock_15_vector_branch_3_vector_logprobs_seed_42() {
 /// mock-16: Vector branch with 4 tasks, error agent, logprobs, seed 42.
 #[tokio::test]
 async fn test_mock_16_vector_branch_4_tasks_error_logprobs_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "four-way-vector-branch",
@@ -801,6 +821,7 @@ async fn test_mock_16_vector_branch_4_tasks_error_logprobs_seed_42() {
 /// mock-17: Vector branch with mixed tasks, skip conditions (deep=false), seed 42.
 #[tokio::test]
 async fn test_mock_17_vector_branch_mixed_skip_false_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "deep-optional-mixed-branch",
@@ -829,6 +850,7 @@ async fn test_mock_17_vector_branch_mixed_skip_false_seed_42() {
 /// mock-17: Vector branch with mixed tasks, skip conditions (deep=true), seed 42.
 #[tokio::test]
 async fn test_mock_17_vector_branch_mixed_skip_true_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "deep-optional-mixed-branch",
@@ -861,6 +883,7 @@ async fn test_mock_17_vector_branch_mixed_skip_true_seed_42() {
 /// mock-18: Scalar super branch, 2 scalar branch sub-functions, seed 42.
 #[tokio::test]
 async fn test_mock_18_scalar_super_branch_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "nested-scalar-super-branch",
@@ -883,6 +906,7 @@ async fn test_mock_18_scalar_super_branch_seed_42() {
 /// mock-19: Scalar super branch with skip (thorough=false), seed 42.
 #[tokio::test]
 async fn test_mock_19_scalar_super_branch_skip_false_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "skipable-nested-scalar-branch",
@@ -906,6 +930,7 @@ async fn test_mock_19_scalar_super_branch_skip_false_seed_42() {
 /// mock-19: Scalar super branch with skip (thorough=true), seed 42.
 #[tokio::test]
 async fn test_mock_19_scalar_super_branch_skip_true_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "skipable-nested-scalar-branch",
@@ -929,6 +954,7 @@ async fn test_mock_19_scalar_super_branch_skip_true_seed_42() {
 /// mock-20: Vector super branch, 2 vector branch sub-functions, seed 42.
 #[tokio::test]
 async fn test_mock_20_vector_super_branch_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "nested-vector-super-branch",
@@ -954,6 +980,7 @@ async fn test_mock_20_vector_super_branch_seed_42() {
 /// mock-21: Vector super branch with context, 3 vector branch sub-functions, seed 42.
 #[tokio::test]
 async fn test_mock_21_vector_super_branch_context_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "contextual-nested-vector-branch",
@@ -985,6 +1012,7 @@ async fn test_mock_21_vector_super_branch_context_seed_42() {
 /// Inline scalar function with only placeholder tasks, inline auto profile.
 #[tokio::test]
 async fn test_inline_scalar_placeholder_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = Arc::new(FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Inline(
@@ -1087,6 +1115,7 @@ async fn test_inline_scalar_placeholder_seed_42() {
 /// mock-25: Remote scalar function with only placeholder tasks, remote swarm profile.
 #[tokio::test]
 async fn test_mock_25_scalar_placeholder_remote_swarm_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = Arc::new(FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
@@ -1129,6 +1158,7 @@ async fn test_mock_25_scalar_placeholder_remote_swarm_seed_42() {
 /// mock-4: Vector ranker with 20 items, SwissSystem with default pool/rounds, seed 7.
 #[tokio::test]
 async fn test_mock_4_vector_swiss_default_20_items_seed_7() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = Arc::new(FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
@@ -1163,6 +1193,7 @@ async fn test_mock_4_vector_swiss_default_20_items_seed_7() {
 /// mock-5: Vector ranker with context and 20 items, SwissSystem pool=5 rounds=3, seed 7.
 #[tokio::test]
 async fn test_mock_5_vector_swiss_pool5_rounds3_20_items_seed_7() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = Arc::new(FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
@@ -1200,6 +1231,7 @@ async fn test_mock_5_vector_swiss_pool5_rounds3_20_items_seed_7() {
 /// mock-7: Vector ranker with 5 criteria and 20 items, SwissSystem pool=4 rounds=3, seed 7.
 #[tokio::test]
 async fn test_mock_7_vector_swiss_pool4_rounds3_20_items_seed_7() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = Arc::new(FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
@@ -1238,6 +1270,7 @@ async fn test_mock_7_vector_swiss_pool4_rounds3_20_items_seed_7() {
 /// mock-22: Scalar mapped branch (2 items) + 2 VCs, seed 42.
 #[tokio::test]
 async fn test_mock_22_scalar_mapped_branch_2_items_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "mapped-branch-with-votes",
@@ -1262,6 +1295,7 @@ async fn test_mock_22_scalar_mapped_branch_2_items_seed_42() {
 /// mock-22: Scalar mapped branch (2 items) + 2 VCs, seed 123.
 #[tokio::test]
 async fn test_mock_22_scalar_mapped_branch_2_items_seed_123() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "mapped-branch-with-votes",
@@ -1286,6 +1320,7 @@ async fn test_mock_22_scalar_mapped_branch_2_items_seed_123() {
 /// mock-23: Scalar mapped branch (3 items) + 3 VCs, seed 42.
 #[tokio::test]
 async fn test_mock_23_scalar_mapped_branch_3_items_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "mapped-branch-with-classifiers",
@@ -1311,6 +1346,7 @@ async fn test_mock_23_scalar_mapped_branch_3_items_seed_42() {
 /// mock-23: Scalar mapped branch (2 items) + 3 VCs, seed 42.
 #[tokio::test]
 async fn test_mock_23_scalar_mapped_branch_2_items_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "mapped-branch-with-classifiers",
@@ -1335,6 +1371,7 @@ async fn test_mock_23_scalar_mapped_branch_2_items_seed_42() {
 /// mock-24: Scalar mapped branch (2 items) + function task + 2 VCs, seed 42.
 #[tokio::test]
 async fn test_mock_24_scalar_mapped_branch_with_func_2_items_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "mapped-branch-mixed-tasks",
@@ -1418,6 +1455,7 @@ async fn run_execution_allow_error(client: &Arc<TestClient>, request: Arc<Functi
 /// 1.1: InvalidRetryToken — garbage retry_token string.
 #[tokio::test]
 async fn test_error_1_1_invalid_retry_token() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request_with_overrides(
         "binary-classifier",
@@ -1436,6 +1474,7 @@ async fn test_error_1_1_invalid_retry_token() {
 /// 1.3: InvalidFunctionForStrategy — scalar function with Swiss strategy.
 #[tokio::test]
 async fn test_error_1_3_scalar_function_swiss_strategy() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request_with_overrides(
         "binary-classifier",
@@ -1454,6 +1493,7 @@ async fn test_error_1_3_scalar_function_swiss_strategy() {
 /// 1.4: InvalidStrategy — Swiss strategy with pool=1.
 #[tokio::test]
 async fn test_error_1_4_invalid_strategy_pool() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request_with_overrides(
         "item-ranker",
@@ -1480,6 +1520,7 @@ async fn test_error_1_4_invalid_strategy_pool() {
 /// 2.1: FunctionNotFound — non-existent mock function repository.
 #[tokio::test]
 async fn test_error_2_1_function_not_found() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request("mock-nonexistent", "solo-instruction", InputValue::Object(indexmap::indexmap! {}), 42);
     let err = expect_err(&client, request, 404).await;
@@ -1489,6 +1530,7 @@ async fn test_error_2_1_function_not_found() {
 /// 2.3: ProfileNotFound — non-existent mock profile repository.
 #[tokio::test]
 async fn test_error_2_3_profile_not_found() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "binary-classifier",
@@ -1505,6 +1547,7 @@ async fn test_error_2_3_profile_not_found() {
 /// 2.5: InputSchemaMismatch — wrong input shape for mock-1.
 #[tokio::test]
 async fn test_error_2_5_input_schema_mismatch() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "binary-classifier",
@@ -1521,6 +1564,7 @@ async fn test_error_2_5_input_schema_mismatch() {
 /// 2.6: InvalidProfile — tasks length mismatch (2 task profiles for 1-task function).
 #[tokio::test]
 async fn test_error_2_6_tasks_length_mismatch() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "binary-classifier",
@@ -1537,6 +1581,7 @@ async fn test_error_2_6_tasks_length_mismatch() {
 /// 2.7: InvalidProfile — weights length mismatch (2 weights for 1-task function).
 #[tokio::test]
 async fn test_error_2_7_weights_length_mismatch() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "binary-classifier",
@@ -1553,6 +1598,7 @@ async fn test_error_2_7_weights_length_mismatch() {
 /// 2.8: InvalidProfile — placeholder for function task.
 #[tokio::test]
 async fn test_error_2_8_placeholder_for_function_task() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "spam-importance-branch",
@@ -1572,6 +1618,7 @@ async fn test_error_2_8_placeholder_for_function_task() {
 /// 2.17: InvalidAppExpression — task expression references missing key.
 #[tokio::test]
 async fn test_error_2_17_bad_task_expression() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "error-missing-input-key",
@@ -1591,6 +1638,7 @@ async fn test_error_2_17_bad_task_expression() {
 /// 2.20: InvalidSwarm — 1 agent but 2 profile weights.
 #[tokio::test]
 async fn test_error_2_20_invalid_swarm() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "binary-classifier",
@@ -1607,6 +1655,7 @@ async fn test_error_2_20_invalid_swarm() {
 /// 2.21: Recursive FunctionNotFound — branch references mock-999.
 #[tokio::test]
 async fn test_error_2_21_recursive_function_not_found() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "error-missing-sub-function",
@@ -1623,6 +1672,7 @@ async fn test_error_2_21_recursive_function_not_found() {
 /// 2.22: Recursive ProfileNotFound — tasks profile references mock-999.
 #[tokio::test]
 async fn test_error_2_22_recursive_profile_not_found() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "spam-importance-branch",
@@ -1640,6 +1690,7 @@ async fn test_error_2_22_recursive_profile_not_found() {
 /// 2.23: CircularDependency — simple cycle A→B→A.
 #[tokio::test]
 async fn test_error_2_23_circular_dependency_simple() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "error-cycle-a",
@@ -1656,6 +1707,7 @@ async fn test_error_2_23_circular_dependency_simple() {
 /// 2.24: CircularDependency — complex cycle A→{B,C}, B→C, C→B.
 #[tokio::test]
 async fn test_error_2_24_circular_dependency_complex() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "error-cycle-abc-a",
@@ -1672,6 +1724,7 @@ async fn test_error_2_24_circular_dependency_complex() {
 /// 2.25: Recursive InputSchemaMismatch — wrong input for sub-function.
 #[tokio::test]
 async fn test_error_2_25_recursive_input_schema_mismatch() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "error-wrong-sub-input",
@@ -1693,6 +1746,7 @@ async fn test_error_2_25_recursive_input_schema_mismatch() {
 /// output is fallback uniform → weighted sum to 0.5.
 #[tokio::test]
 async fn test_error_3_1_all_agents_error() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "binary-classifier",
@@ -1734,6 +1788,7 @@ async fn test_error_3_1_all_agents_error() {
 /// 4.1: Output expression evaluation fails (references nonexistent field).
 #[tokio::test]
 async fn test_error_4_1_output_expression_fails() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "error-bad-output-field",
@@ -1755,6 +1810,7 @@ async fn test_error_4_1_output_expression_fails() {
 /// 4.2: Scalar output out of range (returns -1.0).
 #[tokio::test]
 async fn test_error_4_2_scalar_output_out_of_range() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "error-scalar-out-of-range",
@@ -1776,6 +1832,7 @@ async fn test_error_4_2_scalar_output_out_of_range() {
 /// 4.3: Scalar function got vector output.
 #[tokio::test]
 async fn test_error_4_3_scalar_got_vector() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "error-scalar-returns-vector",
@@ -1797,6 +1854,7 @@ async fn test_error_4_3_scalar_got_vector() {
 /// 4.4: Vector output bad sum (scores doubled).
 #[tokio::test]
 async fn test_error_4_4_vector_output_bad_sum() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "error-vector-bad-sum",
@@ -1821,6 +1879,7 @@ async fn test_error_4_4_vector_output_bad_sum() {
 /// 4.5: Vector function got scalar output.
 #[tokio::test]
 async fn test_error_4_5_vector_got_scalar() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "error-vector-returns-scalar",
@@ -1845,6 +1904,7 @@ async fn test_error_4_5_vector_got_scalar() {
 /// 4.6: Output returns nested list (Vectors variant).
 #[tokio::test]
 async fn test_error_4_6_output_vectors_variant() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "error-nested-list-output",
@@ -1866,6 +1926,7 @@ async fn test_error_4_6_output_vectors_variant() {
 /// 4.7: Output expression returns None (Err value).
 #[tokio::test]
 async fn test_error_4_7_output_returns_none() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         "error-none-output",
@@ -1891,6 +1952,7 @@ async fn test_error_4_7_output_returns_none() {
 /// 6.1: Reasoning agent error — mock agent with error=true.
 #[tokio::test]
 async fn test_error_6_1_reasoning_agent_error() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request_with_overrides(
         "binary-classifier",
@@ -1935,6 +1997,7 @@ async fn test_error_6_1_reasoning_agent_error() {
 /// Split: run scalar binary-classifier on 3 inputs, expect Vector output.
 #[tokio::test]
 async fn test_split_scalar_binary_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = Arc::new(FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
@@ -1986,6 +2049,7 @@ async fn test_split_scalar_binary_seed_42() {
 /// instruction) and equal weights.
 #[tokio::test]
 async fn test_split_tweet_scorer_10_tweets_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let input: InputValue = serde_json::from_str(include_str!(
         "../../../assets/functions/executions/client_tests/inputs/10_tweets.json"
@@ -2074,6 +2138,7 @@ async fn test_split_tweet_scorer_10_tweets_seed_42() {
 /// w/ top_logprobs=3), weights 0.4 / 0.6.
 #[tokio::test]
 async fn test_vector_tweet_ranker_10_tweets_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let items: InputValue = serde_json::from_str(include_str!(
         "../../../assets/functions/executions/client_tests/inputs/10_tweets.json"

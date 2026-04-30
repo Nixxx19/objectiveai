@@ -103,6 +103,7 @@ fn assert_snapshot(json: &str, path: &str, expected: &str) {
 /// Default mock agent, no error.
 #[tokio::test]
 async fn test_basic_mock_agent_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -136,6 +137,7 @@ async fn test_basic_mock_agent_seed_42() {
 /// Default mock agent with seed 123.
 #[tokio::test]
 async fn test_basic_mock_agent_seed_123() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -169,6 +171,7 @@ async fn test_basic_mock_agent_seed_123() {
 /// Same seed produces identical streams.
 #[tokio::test]
 async fn test_deterministic_with_same_seed() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
@@ -210,6 +213,7 @@ async fn test_deterministic_with_same_seed() {
 /// Different seeds produce different streams.
 #[tokio::test]
 async fn test_different_seeds_differ() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let params_a = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::AgentBase(
@@ -273,6 +277,7 @@ async fn test_different_seeds_differ() {
 /// Mock agent with error=true should fail.
 #[tokio::test]
 async fn test_mock_agent_with_error() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -301,6 +306,7 @@ async fn test_mock_agent_with_error() {
 /// Messages: single user message.
 #[tokio::test]
 async fn test_with_single_user_message() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![Message::User(UserMessage {
@@ -337,6 +343,7 @@ async fn test_with_single_user_message() {
 /// Messages: developer + user messages.
 #[tokio::test]
 async fn test_with_developer_and_user_messages() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![
@@ -379,6 +386,7 @@ async fn test_with_developer_and_user_messages() {
 /// Response format: JsonObject.
 #[tokio::test]
 async fn test_json_object_response_format() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -412,6 +420,7 @@ async fn test_json_object_response_format() {
 /// Response format: JsonSchema with object schema.
 #[tokio::test]
 async fn test_json_schema_response_format() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -453,6 +462,7 @@ async fn test_json_schema_response_format() {
 /// Response format: Text.
 #[tokio::test]
 async fn test_text_response_format() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -486,6 +496,7 @@ async fn test_text_response_format() {
 /// Response format: Grammar should be rejected by mock client.
 #[tokio::test]
 async fn test_grammar_response_format_rejected() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -513,6 +524,7 @@ async fn test_grammar_response_format_rejected() {
 /// Response format: Python should be rejected by mock client.
 #[tokio::test]
 async fn test_python_response_format_rejected() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -538,6 +550,7 @@ async fn test_python_response_format_rejected() {
 /// Response format: ToolCall with required=true.
 #[tokio::test]
 async fn test_required_tool_call_response_format() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -581,6 +594,7 @@ async fn test_required_tool_call_response_format() {
 /// Response format: ToolCall with required=None (optional).
 #[tokio::test]
 async fn test_optional_tool_call_response_format() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -631,6 +645,7 @@ async fn test_optional_tool_call_response_format() {
 /// Multiple user messages in a conversation.
 #[tokio::test]
 async fn test_multiple_user_messages() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![
@@ -673,6 +688,7 @@ async fn test_multiple_user_messages() {
 /// Mock agent with error=Some(false) should succeed (normalized to None by prepare).
 #[tokio::test]
 async fn test_mock_agent_error_false_succeeds() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -709,6 +725,7 @@ async fn test_mock_agent_error_false_succeeds() {
 /// Final stream item is always a Continuation::Mock.
 #[tokio::test]
 async fn test_final_item_is_mock_continuation() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -742,6 +759,7 @@ async fn test_final_item_is_mock_continuation() {
 /// PerAgent response format targeting the mock agent's ID.
 #[tokio::test]
 async fn test_per_agent_response_format() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let mock_base = MockAgentBase::default();
     let agent_id = mock_base.id();
 
@@ -784,6 +802,7 @@ async fn test_per_agent_response_format() {
 /// PerAgent response format with unknown agent ID (should fall back to no format).
 #[tokio::test]
 async fn test_per_agent_response_format_unknown_id() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let mut per_agent = indexmap::IndexMap::new();
     per_agent.insert(
@@ -823,6 +842,7 @@ async fn test_per_agent_response_format_unknown_id() {
 /// JsonSchema with nested object schema.
 #[tokio::test]
 async fn test_json_schema_nested_object() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![Message::User(UserMessage {
@@ -878,6 +898,7 @@ async fn test_json_schema_nested_object() {
 /// Fallback agents: primary errors, fallback succeeds.
 #[tokio::test]
 async fn test_fallback_agent_on_error() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -916,6 +937,7 @@ async fn test_fallback_agent_on_error() {
 /// Both primary and fallback agents error — should fail.
 #[tokio::test]
 async fn test_all_agents_error() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -949,6 +971,7 @@ async fn test_all_agents_error() {
 /// Multiple fallback agents — first two error, third succeeds.
 #[tokio::test]
 async fn test_multiple_fallback_agents() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -991,6 +1014,7 @@ async fn test_multiple_fallback_agents() {
 /// With continuation from a previous Mock run.
 #[tokio::test]
 async fn test_with_mock_continuation() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let _mock_agent = objectiveai::agent::mock::Agent::try_from(MockAgentBase::default()).unwrap();
 
     let client = make_client();
@@ -1037,6 +1061,7 @@ async fn test_with_mock_continuation() {
 /// Stream produces chunks before the final state.
 #[tokio::test]
 async fn test_stream_yields_chunks_before_state() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -1070,6 +1095,7 @@ async fn test_stream_yields_chunks_before_state() {
 /// Large seed value.
 #[tokio::test]
 async fn test_large_seed_value() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -1103,6 +1129,7 @@ async fn test_large_seed_value() {
 /// Seed 0.
 #[tokio::test]
 async fn test_seed_zero() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -1172,6 +1199,7 @@ fn assert_completion_logprobs(completion: &AgentCompletion) {
 /// Basic logprobs with plain text, no tools, no response format.
 #[tokio::test]
 async fn test_logprobs_basic_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![Message::User(UserMessage {
@@ -1213,6 +1241,7 @@ async fn test_logprobs_basic_seed_42() {
 /// Logprobs with nested json_schema response format.
 #[tokio::test]
 async fn test_logprobs_json_schema_nested() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -1279,6 +1308,7 @@ async fn test_logprobs_json_schema_nested() {
 /// Logprobs survive through the continuation flow.
 #[tokio::test]
 async fn test_logprobs_with_continuation() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let mock_base = MockAgentBase {
         top_logprobs: Some(7),
         ..Default::default()
@@ -1345,6 +1375,7 @@ async fn test_logprobs_with_continuation() {
 /// Primary agent errors, fallback agent has logprobs enabled.
 #[tokio::test]
 async fn test_logprobs_fallback_agent() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
@@ -1388,6 +1419,7 @@ async fn test_logprobs_fallback_agent() {
 /// Logprobs with PerAgent response format targeting mock agent's ID.
 #[tokio::test]
 async fn test_logprobs_per_agent_json_object() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let mock_base = MockAgentBase {
         top_logprobs: Some(4),
         ..Default::default()

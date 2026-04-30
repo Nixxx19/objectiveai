@@ -144,6 +144,7 @@ fn assert_snapshot(json: &str, path: &str, expected: &str) {
 
 #[tokio::test]
 async fn test_no_tools_no_response_format_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let completion = normalize(run_mock(
         &default_agent(),
         &default_params_with_seed(42),
@@ -159,6 +160,7 @@ async fn test_no_tools_no_response_format_seed_42() {
 
 #[tokio::test]
 async fn test_no_tools_no_response_format_seed_123() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let completion = normalize(run_mock(
         &default_agent(),
         &default_params_with_seed(123),
@@ -174,6 +176,7 @@ async fn test_no_tools_no_response_format_seed_123() {
 
 #[tokio::test]
 async fn test_no_tools_no_response_format_seed_1() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let completion = normalize(run_mock(
         &default_agent(),
         &default_params_with_seed(1),
@@ -189,6 +192,7 @@ async fn test_no_tools_no_response_format_seed_1() {
 
 #[tokio::test]
 async fn test_no_tools_no_response_format_seed_2() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let completion = normalize(run_mock(
         &default_agent(),
         &default_params_with_seed(2),
@@ -204,6 +208,7 @@ async fn test_no_tools_no_response_format_seed_2() {
 
 #[tokio::test]
 async fn test_deterministic_with_same_seed() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = default_agent();
     let params = default_params_with_seed(123);
     let a = normalize(run_mock(&agent, &params, None).await);
@@ -213,6 +218,7 @@ async fn test_deterministic_with_same_seed() {
 
 #[tokio::test]
 async fn test_different_seeds_differ() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = default_agent();
     let a = normalize(run_mock(&agent, &default_params_with_seed(1), None).await);
     let b = normalize(run_mock(&agent, &default_params_with_seed(2), None).await);
@@ -221,6 +227,7 @@ async fn test_different_seeds_differ() {
 
 #[tokio::test]
 async fn test_grammar_response_format_rejected() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = default_client();
     let agent = default_agent();
     let params = params_with_response_format(42, ResponseFormat::Grammar {
@@ -241,6 +248,7 @@ async fn test_grammar_response_format_rejected() {
 
 #[tokio::test]
 async fn test_python_response_format_rejected() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = default_client();
     let agent = default_agent();
     let params = params_with_response_format(42, ResponseFormat::Python);
@@ -259,6 +267,7 @@ async fn test_python_response_format_rejected() {
 
 #[tokio::test]
 async fn test_json_object_response_format() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let completion = normalize(run_mock(
         &default_agent(),
         &params_with_response_format(42, ResponseFormat::JsonObject),
@@ -274,6 +283,7 @@ async fn test_json_object_response_format() {
 
 #[tokio::test]
 async fn test_json_schema_response_format() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let params = params_with_response_format(42, ResponseFormat::JsonSchema {
         schema: indexmap::indexmap! {
             "type".into() => serde_json::json!("object"),
@@ -297,6 +307,7 @@ async fn test_json_schema_response_format() {
 
 #[tokio::test]
 async fn test_text_response_format() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let completion = normalize(run_mock(
         &default_agent(),
         &params_with_response_format(77, ResponseFormat::Text),
@@ -312,6 +323,7 @@ async fn test_text_response_format() {
 
 #[tokio::test]
 async fn test_with_mcp_tools() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let server = test_mcp_server::spawn("test", vec![TestTool::noop(make_mcp_tool(
         "search",
         Some(indexmap::indexmap! {
@@ -335,6 +347,7 @@ async fn test_with_mcp_tools() {
 
 #[tokio::test]
 async fn test_required_tool_call() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let rf = ResponseFormat::ToolCall {
         name: "submit".into(),
         description: "Submit output".into(),
@@ -396,6 +409,7 @@ fn make_mcp_tool(name: &str, properties: Option<indexmap::IndexMap<String, serde
 
 #[tokio::test]
 async fn test_multiple_mcp_tools() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let server_a = test_mcp_server::spawn("test", vec![
         TestTool::noop(make_mcp_tool("get_forecast", Some(indexmap::indexmap! {
             "city".into() => serde_json::json!({"type": "string"}),
@@ -425,6 +439,7 @@ async fn test_multiple_mcp_tools() {
 
 #[tokio::test]
 async fn test_invention_tools_only() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let inv1 = make_invention_tool("execute_code", indexmap::indexmap! {
         "type".into() => serde_json::json!("object"),
         "properties".into() => serde_json::json!({
@@ -459,6 +474,7 @@ async fn test_invention_tools_only() {
 
 #[tokio::test]
 async fn test_mcp_and_invention_no_response_format() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let inv = make_invention_tool("validate", indexmap::indexmap! {
         "type".into() => serde_json::json!("object"),
         "properties".into() => serde_json::json!({
@@ -489,6 +505,7 @@ async fn test_mcp_and_invention_no_response_format() {
 
 #[tokio::test]
 async fn test_mcp_invention_and_response_format() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let inv = make_invention_tool("calculate", indexmap::indexmap! {
         "type".into() => serde_json::json!("object"),
         "properties".into() => serde_json::json!({
@@ -622,6 +639,7 @@ fn assert_logprobs_reconstruct_content(chunks: &[AssistantResponseChunk]) {
 
 #[tokio::test]
 async fn test_logprobs_top_2_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     // top_logprobs=2 is the minimum that survives AgentBase::prepare()
     // (top_logprobs of 0 or 1 get normalized to None).
     let agent = agent_with_top_logprobs(2);
@@ -657,6 +675,7 @@ async fn test_logprobs_top_2_seed_42() {
 
 #[tokio::test]
 async fn test_logprobs_top_5_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = agent_with_top_logprobs(5);
     let params = default_params_with_seed(42);
 
@@ -688,6 +707,7 @@ async fn test_logprobs_top_5_seed_42() {
 
 #[tokio::test]
 async fn test_logprobs_top_20_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = agent_with_top_logprobs(20);
     let params = default_params_with_seed(42);
 
@@ -719,6 +739,7 @@ async fn test_logprobs_top_20_seed_42() {
 
 #[tokio::test]
 async fn test_logprobs_top_3_json_object() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = agent_with_top_logprobs(3);
     let params = params_with_response_format(42, ResponseFormat::JsonObject);
 
@@ -749,6 +770,7 @@ async fn test_logprobs_top_3_json_object() {
 
 #[tokio::test]
 async fn test_logprobs_top_10_json_schema() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let params = params_with_response_format(55, ResponseFormat::JsonSchema {
         schema: indexmap::indexmap! {
             "type".into() => serde_json::json!("object"),
@@ -786,6 +808,7 @@ async fn test_logprobs_top_10_json_schema() {
 
 #[tokio::test]
 async fn test_logprobs_top_5_mcp_tools_seed_99() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = agent_with_top_logprobs(5);
     let params = default_params_with_seed(99);
 
@@ -826,6 +849,7 @@ async fn test_logprobs_top_5_mcp_tools_seed_99() {
 
 #[tokio::test]
 async fn test_logprobs_top_7_required_tool_call() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = agent_with_top_logprobs(7);
     let rf = ResponseFormat::ToolCall {
         name: "submit".into(),
@@ -865,6 +889,7 @@ async fn test_logprobs_top_7_required_tool_call() {
 
 #[tokio::test]
 async fn test_logprobs_top_15_text_seed_33() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = agent_with_top_logprobs(15);
     let params = params_with_response_format(33, ResponseFormat::Text);
 
@@ -901,6 +926,7 @@ async fn test_logprobs_top_15_text_seed_33() {
 
 #[tokio::test]
 async fn test_logprobs_top_4_invention_mcp_response_format() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = agent_with_top_logprobs(4);
 
     let inv = make_invention_tool("summarize", indexmap::indexmap! {
@@ -954,6 +980,7 @@ async fn test_logprobs_top_4_invention_mcp_response_format() {
 
 #[tokio::test]
 async fn test_tools_not_allowed_with_required_tool_call() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = default_client();
     let agent = default_agent();
     let params = params_with_response_format(42, ResponseFormat::ToolCall {
@@ -978,6 +1005,7 @@ async fn test_tools_not_allowed_with_required_tool_call() {
 
 #[tokio::test]
 async fn test_tools_not_allowed_with_optional_tool_call_ok() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = default_client();
     let agent = default_agent();
     let params = params_with_response_format(42, ResponseFormat::ToolCall {
@@ -999,6 +1027,7 @@ async fn test_tools_not_allowed_with_optional_tool_call_ok() {
 
 #[tokio::test]
 async fn test_tools_not_allowed_no_tool_calls_generated() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = default_agent();
     // Use a response-format ToolCall so the mock has a callable tool to choose
     // from; tools_enabled=false should still suppress generation.
@@ -1035,6 +1064,7 @@ async fn test_tools_not_allowed_no_tool_calls_generated() {
 
 #[tokio::test]
 async fn test_invention_agent_without_invention_tools() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = default_client();
     let agent = Agent::try_from(AgentBase {
         mode: Some(objectiveai::agent::mock::Mode::Invention),
@@ -1058,6 +1088,7 @@ async fn test_invention_agent_without_invention_tools() {
 
 #[tokio::test]
 async fn test_invention_agent_with_invention_tools_ok() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let agent = Agent::try_from(AgentBase {
         mode: Some(objectiveai::agent::mock::Mode::Invention),
         ..Default::default()

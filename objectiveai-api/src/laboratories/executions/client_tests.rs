@@ -153,6 +153,7 @@ fn assert_snapshot(json: &str, path: &str, expected: &str) {
 /// Single builder, no evaluation.
 #[tokio::test]
 async fn single_builder_no_eval_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(vec![builder_agent(false, None)], false, 42);
     let result = normalize(run_execution(&client, request).await);
@@ -167,6 +168,7 @@ async fn single_builder_no_eval_seed_42() {
 /// Single builder + evaluation.
 #[tokio::test]
 async fn single_builder_with_eval_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(vec![builder_agent(false, None)], true, 42);
     let result = normalize(run_execution(&client, request).await);
@@ -181,6 +183,7 @@ async fn single_builder_with_eval_seed_42() {
 /// Two builders + evaluation.
 #[tokio::test]
 async fn two_builders_with_eval_seed_99() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         vec![builder_agent(false, None), builder_agent(false, None)],
@@ -199,6 +202,7 @@ async fn two_builders_with_eval_seed_99() {
 /// Builder with 50% error probability + evaluation.
 #[tokio::test]
 async fn builder_error_50_with_eval_seed_10() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(vec![builder_agent(true, Some(50))], true, 10);
     let result = normalize(run_execution(&client, request).await);
@@ -213,6 +217,7 @@ async fn builder_error_50_with_eval_seed_10() {
 /// Two builders, one with 50% error probability, no evaluation.
 #[tokio::test]
 async fn two_builders_one_error_50_no_eval_seed_7() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let request = make_request(
         vec![builder_agent(false, None), builder_agent(true, Some(50))],

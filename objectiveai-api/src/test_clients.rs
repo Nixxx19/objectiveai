@@ -371,6 +371,37 @@ static BACKGROUND_RUNTIME: LazyLock<tokio::runtime::Runtime> = LazyLock::new(|| 
 });
 
 // ---------------------------------------------------------------------------
+// Process-wide cap on how many `#[tokio::test]`s in this crate may be in
+// flight at once. Read from `TOKIO_TEST_PARALLELISM`; default 10. The
+// bound exists because all tests share one in-process MCP proxy and one
+// invention server (the singletons in this file), so they also share the
+// same `(127.0.0.1, proxy_port)` outbound 4-tuple — uncapped parallelism
+// saturates Windows' ephemeral source-port range and surfaces as
+// `WSAEADDRINUSE` (10048). Bound parallelism = bound port churn.
+// ---------------------------------------------------------------------------
+
+static TEST_PARALLELISM_SEMAPHORE: LazyLock<Arc<tokio::sync::Semaphore>> = LazyLock::new(|| {
+    let limit: usize = match std::env::var("TOKIO_TEST_PARALLELISM") {
+        Ok(s) => s.parse().unwrap_or_else(|e| {
+            panic!("TOKIO_TEST_PARALLELISM must parse as a positive integer: {e}");
+        }),
+        Err(_) => 10,
+    };
+    Arc::new(tokio::sync::Semaphore::new(limit))
+});
+
+/// Acquire one permit from the test parallelism semaphore. Hold the
+/// returned guard for the duration of the test; drop it (let it fall
+/// off the end of the function or assign to `_permit`) to release.
+pub(crate) async fn acquire_test_permit() -> tokio::sync::OwnedSemaphorePermit {
+    TEST_PARALLELISM_SEMAPHORE
+        .clone()
+        .acquire_owned()
+        .await
+        .expect("test parallelism semaphore unexpectedly closed")
+}
+
+// ---------------------------------------------------------------------------
 // Singletons. Every accessor returns `Arc::clone` of the same instance —
 // no per-call construction, ever.
 // ---------------------------------------------------------------------------

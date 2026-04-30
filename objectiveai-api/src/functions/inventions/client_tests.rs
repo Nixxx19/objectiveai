@@ -943,6 +943,7 @@ invention_test_10x_schema!(test_vector_branch_schema_noctx,
 
 #[tokio::test]
 async fn test_zero_leaf_width_rejected() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
     let request = make_request(
@@ -959,6 +960,7 @@ async fn test_zero_leaf_width_rejected() {
 
 #[tokio::test]
 async fn test_zero_branch_width_rejected() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
     let request = make_request(
@@ -975,6 +977,7 @@ async fn test_zero_branch_width_rejected() {
 
 #[tokio::test]
 async fn test_min_greater_than_max_rejected() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
     let request = make_request(
@@ -995,6 +998,7 @@ async fn test_min_greater_than_max_rejected() {
 
 #[tokio::test]
 async fn test_completed_state_generates_no_completions() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     // Load a fully completed snapshot and extract its state as ParamsState.
     let snapshot: serde_json::Value = serde_json::from_str(
         include_str!("../../../assets/functions/inventions/client_tests/scalar_leaf_s42_0.json"),
@@ -1018,6 +1022,7 @@ async fn test_completed_state_generates_no_completions() {
 
 #[tokio::test]
 async fn test_name_over_100_bytes_rejected() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
     let long_name = "a".repeat(101);
@@ -1035,6 +1040,7 @@ async fn test_name_over_100_bytes_rejected() {
 
 #[tokio::test]
 async fn test_name_without_path_over_77_bytes_rejected() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
     // 78 bytes, no `-` path segment
@@ -1053,6 +1059,7 @@ async fn test_name_without_path_over_77_bytes_rejected() {
 
 #[tokio::test]
 async fn test_name_without_path_at_77_bytes_accepted() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
     let name = "a".repeat(77);
@@ -1070,6 +1077,7 @@ async fn test_name_without_path_at_77_bytes_accepted() {
 
 #[tokio::test]
 async fn test_name_with_valid_path_over_77_bytes_accepted() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
     // 80 bytes before `-`, then a valid b62 path segment: "1" encodes path [0]
@@ -1088,6 +1096,7 @@ async fn test_name_with_valid_path_over_77_bytes_accepted() {
 
 #[tokio::test]
 async fn test_name_78_bytes_ending_in_dash_rejected() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
     // 77 'a's + '-' = 78 bytes, empty segment after dash is not a valid b62 path
@@ -1107,6 +1116,7 @@ async fn test_name_78_bytes_ending_in_dash_rejected() {
 
 #[tokio::test]
 async fn test_name_100_bytes_ending_in_dash_rejected() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_client();
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
     // 99 'a's + '-' = 100 bytes, empty segment after dash is not a valid b62 path

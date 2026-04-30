@@ -104,6 +104,7 @@ fn assert_snapshot(json: &str, path: &str, expected: &str) {
 /// Single mock agent, 2 responses, instruction mode, seed 42.
 #[tokio::test]
 async fn test_single_agent_2_responses_instruction_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -152,6 +153,7 @@ async fn test_single_agent_2_responses_instruction_seed_42() {
 /// Single mock agent, 3 responses, instruction mode, seed 42.
 #[tokio::test]
 async fn test_single_agent_3_responses_instruction_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -201,6 +203,7 @@ async fn test_single_agent_3_responses_instruction_seed_42() {
 /// Two mock agents with equal weights, seed 42.
 #[tokio::test]
 async fn test_two_agents_equal_weights_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -249,6 +252,7 @@ async fn test_two_agents_equal_weights_seed_42() {
 /// Two different mock agent definitions with unequal weights (0.8 / 0.2), seed 42.
 #[tokio::test]
 async fn test_two_agents_unequal_weights_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -301,6 +305,7 @@ async fn test_two_agents_unequal_weights_seed_42() {
 /// Three agents (via count=3), 4 responses, seed 99.
 #[tokio::test]
 async fn test_three_agents_4_responses_seed_99() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -351,6 +356,7 @@ async fn test_three_agents_4_responses_seed_99() {
 /// Invert vote with single agent, seed 42.
 #[tokio::test]
 async fn test_invert_vote_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -402,6 +408,7 @@ async fn test_invert_vote_seed_42() {
 /// Same seed produces same result (deterministic).
 #[tokio::test]
 async fn test_deterministic_same_seed() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let make_request = || {
         Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
             retry: None,
@@ -452,6 +459,7 @@ async fn test_deterministic_same_seed() {
 /// Different seeds produce different results.
 #[tokio::test]
 async fn test_different_seeds_differ() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let make_request = |seed: i64| {
         Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
@@ -502,6 +510,7 @@ async fn test_different_seeds_differ() {
 /// Many responses (25) to test deep prefix tree, seed 42.
 #[tokio::test]
 async fn test_many_responses_deep_prefix_tree_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let responses: Vec<RichContent> = (0..25)
         .map(|i| RichContent::Text(format!("Response {}", i)))
@@ -550,6 +559,7 @@ async fn test_many_responses_deep_prefix_tree_seed_42() {
 /// Single agent with json_schema output mode, seed 77.
 #[tokio::test]
 async fn test_json_schema_single_agent_seed_77() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -599,6 +609,7 @@ async fn test_json_schema_single_agent_seed_77() {
 /// Single agent with tool_call output mode, seed 55.
 #[tokio::test]
 async fn test_tool_call_single_agent_seed_55() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -647,6 +658,7 @@ async fn test_tool_call_single_agent_seed_55() {
 /// Single error agent — completion should contain an error, no votes.
 #[tokio::test]
 async fn test_error_agent_skipped_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -695,6 +707,7 @@ async fn test_error_agent_skipped_seed_42() {
 /// Mixed output modes: instruction + json_schema + tool_call agents, seed 88.
 #[tokio::test]
 async fn test_mixed_output_modes_seed_88() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -748,6 +761,7 @@ async fn test_mixed_output_modes_seed_88() {
 /// Image responses with instruction mode, seed 33.
 #[tokio::test]
 async fn test_image_responses_instruction_seed_33() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -821,6 +835,7 @@ async fn test_image_responses_instruction_seed_33() {
 /// Video and file responses with json_schema mode, seed 66.
 #[tokio::test]
 async fn test_video_and_file_responses_seed_66() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -908,6 +923,7 @@ async fn test_video_and_file_responses_seed_66() {
 /// Three distinct agent definitions (instruction, json_schema, tool_call), seed 11.
 #[tokio::test]
 async fn test_three_different_agents_seed_11() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -972,6 +988,7 @@ async fn test_three_different_agents_seed_11() {
 /// Json_schema mode with 8 responses, seed 22.
 #[tokio::test]
 async fn test_json_schema_many_responses_seed_22() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -1026,6 +1043,7 @@ async fn test_json_schema_many_responses_seed_22() {
 /// Two tool_call agents with image message, seed 44.
 #[tokio::test]
 async fn test_tool_call_two_agents_seed_44() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -1100,6 +1118,7 @@ async fn test_tool_call_two_agents_seed_44() {
 /// One error agent + two healthy agents (json_schema, instruction), seed 99.
 #[tokio::test]
 async fn test_error_and_healthy_agents_seed_99() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -1185,6 +1204,7 @@ async fn test_error_and_healthy_agents_seed_99() {
 /// Only the final chunk should carry usage; all earlier chunks should have usage: None.
 #[tokio::test]
 async fn test_only_final_chunk_has_usage() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_vector_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -1233,6 +1253,7 @@ fn make_error_test_client() -> Arc<TestVectorClient> {
 /// Zero responses → ExpectedTwoOrMoreRequestVectorResponses(0).
 #[tokio::test]
 async fn test_error_zero_responses() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_error_test_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -1274,6 +1295,7 @@ async fn test_error_zero_responses() {
 /// One response → ExpectedTwoOrMoreRequestVectorResponses(1).
 #[tokio::test]
 async fn test_error_one_response() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_error_test_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -1317,6 +1339,7 @@ async fn test_error_one_response() {
 /// All agents have count=0 → InvalidSwarm (no agents after filtering).
 #[tokio::test]
 async fn test_error_invalid_swarm_all_count_zero() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_error_test_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -1365,6 +1388,7 @@ async fn test_error_invalid_swarm_all_count_zero() {
 /// Empty agents vec → InvalidSwarm.
 #[tokio::test]
 async fn test_error_invalid_swarm_empty_agents() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_error_test_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -1407,6 +1431,7 @@ async fn test_error_invalid_swarm_empty_agents() {
 /// Profile length doesn't match agents length → InvalidSwarm (caught by try_from_with_profile).
 #[tokio::test]
 async fn test_error_invalid_swarm_profile_length_mismatch() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_error_test_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -1454,6 +1479,7 @@ async fn test_error_invalid_swarm_profile_length_mismatch() {
 /// Duplicate agents with conflicting invert flags → InvalidSwarm.
 #[tokio::test]
 async fn test_error_invalid_swarm_conflicting_invert() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_error_test_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -1509,6 +1535,7 @@ async fn test_error_invalid_swarm_conflicting_invert() {
 /// All weights are zero → error during swarm conversion.
 #[tokio::test]
 async fn test_error_invalid_profile_all_zero_weights() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_error_test_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -1557,6 +1584,7 @@ async fn test_error_invalid_profile_all_zero_weights() {
 /// JsonSchema output mode with logprobs, 2 agents, 3 responses.
 #[tokio::test]
 async fn test_logprobs_json_schema_2_agents_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_error_test_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -1609,6 +1637,7 @@ async fn test_logprobs_json_schema_2_agents_seed_42() {
 /// JsonSchema, 3 agents with unequal weights, 4 responses, high top_logprobs.
 #[tokio::test]
 async fn test_logprobs_json_schema_3_agents_unequal_seed_77() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_error_test_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -1664,6 +1693,7 @@ async fn test_logprobs_json_schema_3_agents_unequal_seed_77() {
 /// ToolCall output mode with logprobs, single agent.
 #[tokio::test]
 async fn test_logprobs_tool_call_single_agent_seed_55() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_error_test_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -1711,6 +1741,7 @@ async fn test_logprobs_tool_call_single_agent_seed_55() {
 /// Error primary agent with healthy logprobs-enabled fallback.
 #[tokio::test]
 async fn test_logprobs_error_with_fallback_seed_99() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_error_test_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -1769,6 +1800,7 @@ async fn test_logprobs_error_with_fallback_seed_99() {
 /// Both primary and fallback error — should produce error completion, no votes.
 #[tokio::test]
 async fn test_logprobs_all_errors_seed_42() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_error_test_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -1827,6 +1859,7 @@ async fn test_logprobs_all_errors_seed_42() {
 /// Instruction output mode with logprobs (rare combination).
 #[tokio::test]
 async fn test_logprobs_instruction_seed_33() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_error_test_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
@@ -1874,6 +1907,7 @@ async fn test_logprobs_instruction_seed_33() {
 /// Mixed: response_format + tool_call + instruction agents, one with error+fallback.
 #[tokio::test]
 async fn test_logprobs_mixed_modes_with_fallback_seed_88() {
+    let _permit = crate::test_clients::acquire_test_permit().await;
     let client = make_error_test_client();
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
