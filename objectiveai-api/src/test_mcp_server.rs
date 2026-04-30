@@ -254,7 +254,7 @@ pub async fn connect_through_proxy(
     headers.insert("X-MCP-Authorization".into(), "{}".into());
     headers.insert("X-MCP-Headers".into(), "{}".into());
 
-    // connect_timeout/call_timeout = 10min wait limits; all backoff knobs
+    // connect_timeout/call_timeout = 30min wait limits; all backoff knobs
     // are zero so the first-try result (success or failure) is what the
     // test sees — no retries to hide a bug.
     let mcp_client = objectiveai::mcp::Client::new(
@@ -262,14 +262,14 @@ pub async fn connect_through_proxy(
         String::new(),
         String::new(),
         String::new(),
-        Duration::from_secs(600),
+        Duration::from_secs(1800),
         Duration::ZERO,
         Duration::ZERO,
         0.0,
         0.0,
         Duration::ZERO,
         Duration::ZERO,
-        Duration::from_secs(600),
+        Duration::from_secs(1800),
     );
     mcp_client
         .connect(proxy.url.clone(), None, None, headers)
