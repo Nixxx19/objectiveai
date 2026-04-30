@@ -1,35 +1,33 @@
-//! Tests for function execution client.
+//! Integration tests for the `/functions/executions` endpoint of the
+//! spawned `objectiveai-api` server. Each test POSTs a
+//! `FunctionExecutionCreateParams` body, streams the SSE response, and
+//! snapshots the aggregated `FunctionExecution`.
 
-use std::sync::Arc;
+#![allow(clippy::too_many_arguments)]
 
+use futures::StreamExt;
 use rust_decimal::Decimal;
 
 use objectiveai::functions::executions::request::{
     FunctionExecutionCreateParams, Strategy,
 };
+use objectiveai::functions::executions::response::streaming::FunctionExecutionChunk;
 use objectiveai::functions::executions::response::unary::FunctionExecution;
 use objectiveai::functions::expression::InputValue;
-use objectiveai::error::StatusError;
 
-use crate::ctx;
-
-type TestClient = crate::test_clients::FunctionExecutionsClient;
+mod common;
 
 // ---------------------------------------------------------------------------
-// Client constructor — delegates to the process-wide shared client.
+// Request helpers
 // ---------------------------------------------------------------------------
-
-fn make_client() -> Arc<crate::test_clients::FunctionExecutionsClient> {
-    crate::test_clients::function_executions()
-}
 
 fn make_request(
     function_repo: &str,
     profile_repo: &str,
     input: InputValue,
     seed: i64,
-) -> Arc<FunctionExecutionCreateParams> {
-    Arc::new(FunctionExecutionCreateParams {
+) -> FunctionExecutionCreateParams {
+    FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
             objectiveai::RemotePathCommitOptional::Mock {
                 name: function_repo.to_string(),
@@ -49,9 +47,24 @@ fn make_request(
         invert: None,
         provider: None,
         seed: Some(seed),
-        stream: None,
+        stream: Some(true),
         continuation: None,
-    })
+    }
+}
+
+fn make_request_with_overrides(
+    function_repo: &str,
+    profile_repo: &str,
+    overrides: impl FnOnce(&mut FunctionExecutionCreateParams),
+) -> FunctionExecutionCreateParams {
+    let mut params = make_request(
+        function_repo,
+        profile_repo,
+        InputValue::Object(indexmap::indexmap! {}),
+        42,
+    );
+    overrides(&mut params);
+    params
 }
 
 // ---------------------------------------------------------------------------
@@ -73,17 +86,87 @@ fn check_id(expected: &std::cell::RefCell<Option<String>>, i: usize, id: &str) {
     }
 }
 
-async fn run_execution(client: &Arc<TestClient>, request: Arc<FunctionExecutionCreateParams>) -> FunctionExecution {
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
-    let stream = client
-        .clone()
-        .create_streaming(ctx, request)
+/// POST `params` to `/functions/executions` (streaming) on the spawned
+/// api server and return the resulting `Stream<FunctionExecutionChunk>`.
+async fn post_streaming(
+    params: FunctionExecutionCreateParams,
+) -> impl futures::Stream<Item = FunctionExecutionChunk> + Unpin {
+    let http = common::server::client();
+    let stream = http
+        .send_streaming::<FunctionExecutionChunk, _, _>(
+            reqwest::Method::POST,
+            "/functions/executions",
+            Some(params),
+        )
         .await
-        .expect("create_streaming should succeed");
+        .expect("send_streaming should succeed");
+    Box::pin(stream.map(|item| match item {
+        Ok(chunk) => chunk,
+        Err(e) => panic!("chunk deserialize / stream error: {e:?}"),
+    }))
+}
+
+/// POST `params` and assert the request fails with the given HTTP status
+/// code. The error may surface either as a non-2xx HTTP response from
+/// `send_streaming` or as an in-stream error chunk; both paths return a
+/// debug string that contains the structured error body so callers can
+/// match on the inner `kind`.
+async fn post_expect_err_kind(
+    params: FunctionExecutionCreateParams,
+    expected_status: u16,
+) -> String {
+    let http = common::server::client();
+    let result = http
+        .send_streaming::<FunctionExecutionChunk, _, _>(
+            reqwest::Method::POST,
+            "/functions/executions",
+            Some(params),
+        )
+        .await;
+    let mut stream = match result {
+        Ok(s) => Box::pin(s),
+        Err(e) => {
+            let dbg = format!("{e:?}");
+            assert!(
+                dbg.contains(&format!("code: {expected_status}"))
+                    || dbg.contains(&format!("BadStatus {{ code: {expected_status}")),
+                "expected status {expected_status}, got: {dbg}",
+            );
+            return dbg;
+        }
+    };
+    while let Some(item) = stream.next().await {
+        match item {
+            Ok(chunk) => {
+                if let Some(err) = &chunk.error {
+                    let dbg = format!("{err:?}");
+                    assert_eq!(
+                        err.code, expected_status,
+                        "expected status {expected_status}, got: {dbg}",
+                    );
+                    return dbg;
+                }
+            }
+            Err(e) => {
+                let dbg = format!("{e:?}");
+                assert!(
+                    dbg.contains(&format!("code: {expected_status}"))
+                        || dbg.contains(&format!("BadStatus {{ code: {expected_status}")),
+                    "expected status {expected_status}, got: {dbg}",
+                );
+                return dbg;
+            }
+        }
+    }
+    panic!("expected an error, but stream ended without one");
+}
+
+async fn run_execution(params: FunctionExecutionCreateParams) -> FunctionExecution {
+    let stream = post_streaming(params).await;
     let expected_created = std::cell::Cell::new(None);
     let expected_id = std::cell::RefCell::new(None);
-    let agg = crate::stream_harness::consume_stream(
-        Box::pin(stream),
+    let agg = common::stream_harness::consume_stream(
+        stream,
         |agg, c| agg.push(c),
         |i, chunk| {
             check_id(&expected_id, i, &chunk.id);
@@ -106,9 +189,6 @@ async fn run_execution(client: &Arc<TestClient>, request: Arc<FunctionExecutionC
     FunctionExecution::from(agg)
 }
 
-/// Identifies a sub-execution within a parent function execution stream,
-/// used by the indexed helpers to map each distinct "branch" of execution
-/// to the unique inner `response_id` that must stay stable inside it.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum IndexKey {
     Split(u64),
@@ -124,13 +204,9 @@ impl std::fmt::Display for IndexKey {
     }
 }
 
-/// Asserts a non-terminal chunk from a parallel-strategy stream contains
-/// exactly one `FunctionExecution` task, extracts its `IndexKey`, and
-/// enforces: (a) inner response_id stability within a key, and (b) inner
-/// response_id uniqueness across keys.
 fn check_indexed_task(
     i: usize,
-    chunk: &objectiveai::functions::executions::response::streaming::FunctionExecutionChunk,
+    chunk: &FunctionExecutionChunk,
     key_to_id: &std::cell::RefCell<std::collections::HashMap<IndexKey, String>>,
     extract_key: impl Fn(&objectiveai::functions::executions::response::streaming::FunctionExecutionTaskChunk) -> IndexKey,
 ) {
@@ -166,30 +242,14 @@ fn check_indexed_task(
     }
 }
 
-/// Like [`run_execution`] but with the stricter invariants a split-mode
-/// stream is required to satisfy:
-/// - every non-terminal chunk has exactly one `FunctionExecution` task,
-/// - that task has `split_index: Some` and no Swiss indices,
-/// - each distinct `split_index` maps to a unique, stable inner response_id,
-/// - the root `id` and `created` never change,
-/// - non-terminal chunks have no root-level `output` or `usage`,
-/// - the terminal chunk has zero tasks and a populated `usage`.
-async fn run_execution_split(
-    client: &Arc<TestClient>,
-    request: Arc<FunctionExecutionCreateParams>,
-) -> FunctionExecution {
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
-    let stream = client
-        .clone()
-        .create_streaming(ctx, request)
-        .await
-        .expect("create_streaming should succeed");
+async fn run_execution_split(params: FunctionExecutionCreateParams) -> FunctionExecution {
+    let stream = post_streaming(params).await;
     let expected_created = std::cell::Cell::new(None);
     let expected_id = std::cell::RefCell::new(None);
     let key_to_id: std::cell::RefCell<std::collections::HashMap<IndexKey, String>> =
         std::cell::RefCell::new(std::collections::HashMap::new());
 
-    let check_nonterminal = |i: usize, chunk: &objectiveai::functions::executions::response::streaming::FunctionExecutionChunk| {
+    let check_nonterminal = |i: usize, chunk: &FunctionExecutionChunk| {
         check_id(&expected_id, i, &chunk.id);
         check_created(&expected_created, i, chunk.created);
         assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
@@ -202,8 +262,8 @@ async fn run_execution_split(
         });
     };
 
-    let agg = crate::stream_harness::consume_stream(
-        Box::pin(stream),
+    let agg = common::stream_harness::consume_stream(
+        stream,
         |agg, c| agg.push(c),
         &check_nonterminal,
         &check_nonterminal,
@@ -221,32 +281,14 @@ async fn run_execution_split(
     FunctionExecution::from(agg)
 }
 
-/// Like [`run_execution`] but with the stricter invariants a Swiss-strategy
-/// stream is required to satisfy:
-/// - every non-terminal chunk has exactly one `FunctionExecution` task,
-/// - that task has both `swiss_pool_index: Some` and `swiss_round: Some`
-///   (and no `split_index`),
-/// - each `(swiss_pool_index, swiss_round)` tuple maps to a unique, stable
-///   inner response_id,
-/// - the root `id` and `created` never change,
-/// - non-terminal chunks have no root-level `output` or `usage`,
-/// - the terminal chunk has zero tasks and a populated `usage`.
-async fn run_execution_swiss(
-    client: &Arc<TestClient>,
-    request: Arc<FunctionExecutionCreateParams>,
-) -> FunctionExecution {
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
-    let stream = client
-        .clone()
-        .create_streaming(ctx, request)
-        .await
-        .expect("create_streaming should succeed");
+async fn run_execution_swiss(params: FunctionExecutionCreateParams) -> FunctionExecution {
+    let stream = post_streaming(params).await;
     let expected_created = std::cell::Cell::new(None);
     let expected_id = std::cell::RefCell::new(None);
     let key_to_id: std::cell::RefCell<std::collections::HashMap<IndexKey, String>> =
         std::cell::RefCell::new(std::collections::HashMap::new());
 
-    let check_nonterminal = |i: usize, chunk: &objectiveai::functions::executions::response::streaming::FunctionExecutionChunk| {
+    let check_nonterminal = |i: usize, chunk: &FunctionExecutionChunk| {
         check_id(&expected_id, i, &chunk.id);
         check_created(&expected_created, i, chunk.created);
         assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
@@ -259,8 +301,8 @@ async fn run_execution_swiss(
         });
     };
 
-    let agg = crate::stream_harness::consume_stream(
-        Box::pin(stream),
+    let agg = common::stream_harness::consume_stream(
+        stream,
         |agg, c| agg.push(c),
         &check_nonterminal,
         &check_nonterminal,
@@ -278,6 +320,10 @@ async fn run_execution_swiss(
     FunctionExecution::from(agg)
 }
 
+async fn run_execution_allow_error(params: FunctionExecutionCreateParams) -> FunctionExecution {
+    run_execution(params).await
+}
+
 // ---------------------------------------------------------------------------
 // Snapshot helpers
 // ---------------------------------------------------------------------------
@@ -288,7 +334,7 @@ fn normalize(mut fe: FunctionExecution) -> FunctionExecution {
 }
 
 fn assert_snapshot(json: &str, path: &str, expected: &str) {
-    crate::stream_harness::assert_snapshot(
+    common::stream_harness::assert_snapshot(
         json, path, expected,
         "UPDATE_FUNCTIONS_EXECUTIONS_CLIENT_TESTS_SNAPSHOTS",
     );
@@ -298,11 +344,8 @@ fn assert_snapshot(json: &str, path: &str, expected: &str) {
 // Tests
 // ---------------------------------------------------------------------------
 
-/// mock-1: Simple scalar leaf, single task, binary classification, seed 42.
 #[tokio::test]
 async fn test_mock_1_scalar_leaf_binary_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "binary-classifier",
         "solo-instruction",
@@ -311,20 +354,17 @@ async fn test_mock_1_scalar_leaf_binary_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_1_scalar_leaf_binary_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_1_scalar_leaf_binary_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_1_scalar_leaf_binary_seed_42.json"),
     );
 }
 
-/// mock-2: Multi-task scalar with skip condition (include_sentiment=false), seed 42.
 #[tokio::test]
 async fn test_mock_2_scalar_skip_false_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "spam-with-optional-sentiment",
         "instruction-and-schema",
@@ -334,20 +374,17 @@ async fn test_mock_2_scalar_skip_false_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_2_scalar_skip_false_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_2_scalar_skip_false_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_2_scalar_skip_false_seed_42.json"),
     );
 }
 
-/// mock-2: Multi-task scalar with skip condition (include_sentiment=true), seed 42.
 #[tokio::test]
 async fn test_mock_2_scalar_skip_true_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "spam-with-optional-sentiment",
         "instruction-and-schema",
@@ -357,20 +394,17 @@ async fn test_mock_2_scalar_skip_true_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_2_scalar_skip_true_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_2_scalar_skip_true_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_2_scalar_skip_true_seed_42.json"),
     );
 }
 
-/// mock-3: 5-way classification scalar, seed 42.
 #[tokio::test]
 async fn test_mock_3_scalar_5way_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "five-star-rating",
         "triple-mode",
@@ -379,20 +413,17 @@ async fn test_mock_3_scalar_5way_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_3_scalar_5way_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_3_scalar_5way_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_3_scalar_5way_seed_42.json"),
     );
 }
 
-/// mock-4: Simple vector ranker with 3 items, seed 42.
 #[tokio::test]
 async fn test_mock_4_vector_ranker_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "item-ranker",
         "solo-instruction",
@@ -405,20 +436,17 @@ async fn test_mock_4_vector_ranker_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_4_vector_ranker_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_4_vector_ranker_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_4_vector_ranker_seed_42.json"),
     );
 }
 
-/// mock-5: Vector ranker with context and multiple tasks, seed 42.
 #[tokio::test]
 async fn test_mock_5_vector_context_multi_task_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "contextual-ranker",
         "contextual-duo",
@@ -433,20 +461,17 @@ async fn test_mock_5_vector_context_multi_task_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_5_vector_context_multi_task_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_5_vector_context_multi_task_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_5_vector_context_multi_task_seed_42.json"),
     );
 }
 
-/// mock-6: Scalar with system message and multi-part user content, seed 42.
 #[tokio::test]
 async fn test_mock_6_scalar_system_message_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "email-importance",
         "solo-instruction",
@@ -456,24 +481,17 @@ async fn test_mock_6_scalar_system_message_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_6_scalar_system_message_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_6_scalar_system_message_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_6_scalar_system_message_seed_42.json"),
     );
 }
 
-// ---------------------------------------------------------------------------
-// Vector leaf with 5 tasks
-// ---------------------------------------------------------------------------
-
-/// mock-7: Vector ranker with 5 scoring criteria, seed 42.
 #[tokio::test]
 async fn test_mock_7_vector_5_criteria_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "five-criteria-ranker",
         "schema-heavy-trio",
@@ -486,20 +504,17 @@ async fn test_mock_7_vector_5_criteria_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_7_vector_5_criteria_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_7_vector_5_criteria_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_7_vector_5_criteria_seed_42.json"),
     );
 }
 
-/// mock-8: Vector ranker with context, 5 tasks, skip conditions (strict=false), seed 42.
 #[tokio::test]
 async fn test_mock_8_vector_context_skip_false_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "strict-contextual-ranker",
         "logprobs-and-tool",
@@ -515,20 +530,17 @@ async fn test_mock_8_vector_context_skip_false_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_8_vector_context_skip_false_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_8_vector_context_skip_false_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_8_vector_context_skip_false_seed_42.json"),
     );
 }
 
-/// mock-8: Vector ranker with context, 5 tasks, skip conditions (strict=true), seed 42.
 #[tokio::test]
 async fn test_mock_8_vector_context_skip_true_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "strict-contextual-ranker",
         "logprobs-and-tool",
@@ -544,24 +556,17 @@ async fn test_mock_8_vector_context_skip_true_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_8_vector_context_skip_true_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_8_vector_context_skip_true_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_8_vector_context_skip_true_seed_42.json"),
     );
 }
 
-// ---------------------------------------------------------------------------
-// Scalar branch functions
-// ---------------------------------------------------------------------------
-
-/// mock-9: Scalar branch combining spam + importance classifiers, seed 42.
 #[tokio::test]
 async fn test_mock_9_scalar_branch_2_tasks_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "spam-importance-branch",
         "schema-logprobs-solo",
@@ -571,20 +576,17 @@ async fn test_mock_9_scalar_branch_2_tasks_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_9_scalar_branch_2_tasks_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_9_scalar_branch_2_tasks_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_9_scalar_branch_2_tasks_seed_42.json"),
     );
 }
 
-/// mock-10: Scalar branch combining binary, 5-way, importance (one agent errors), seed 42.
 #[tokio::test]
 async fn test_mock_10_scalar_branch_3_tasks_error_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "triple-classifier-branch",
         "trio-with-error-agent",
@@ -593,20 +595,17 @@ async fn test_mock_10_scalar_branch_3_tasks_error_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_10_scalar_branch_3_tasks_error_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_10_scalar_branch_3_tasks_error_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_10_scalar_branch_3_tasks_error_seed_42.json"),
     );
 }
 
-/// mock-11: Scalar branch with skip condition (include_sentiment=false), seed 42.
 #[tokio::test]
 async fn test_mock_11_scalar_branch_skip_false_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "classifier-with-optional-sentiment",
         "tool-and-schema",
@@ -616,20 +615,17 @@ async fn test_mock_11_scalar_branch_skip_false_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_11_scalar_branch_skip_false_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_11_scalar_branch_skip_false_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_11_scalar_branch_skip_false_seed_42.json"),
     );
 }
 
-/// mock-11: Scalar branch with skip condition (include_sentiment=true), seed 42.
 #[tokio::test]
 async fn test_mock_11_scalar_branch_skip_true_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "classifier-with-optional-sentiment",
         "tool-and-schema",
@@ -639,24 +635,17 @@ async fn test_mock_11_scalar_branch_skip_true_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_11_scalar_branch_skip_true_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_11_scalar_branch_skip_true_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_11_scalar_branch_skip_true_seed_42.json"),
     );
 }
 
-// ---------------------------------------------------------------------------
-// Vector branch functions
-// ---------------------------------------------------------------------------
-
-/// mock-12: Vector branch with two vector sub-function rankers, seed 42.
 #[tokio::test]
 async fn test_mock_12_vector_branch_2_vector_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "dual-ranker-branch",
         "logprobs-duo",
@@ -669,20 +658,17 @@ async fn test_mock_12_vector_branch_2_vector_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_12_vector_branch_2_vector_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_12_vector_branch_2_vector_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_12_vector_branch_2_vector_seed_42.json"),
     );
 }
 
-/// mock-13: Vector branch mixing scalar and vector sub-functions, seed 42.
 #[tokio::test]
 async fn test_mock_13_vector_branch_mixed_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "mixed-scalar-vector-branch",
         "schema-solo",
@@ -697,20 +683,17 @@ async fn test_mock_13_vector_branch_mixed_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_13_vector_branch_mixed_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_13_vector_branch_mixed_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_13_vector_branch_mixed_seed_42.json"),
     );
 }
 
-/// mock-14: Vector branch with skip on sub-function (include_quality=false), seed 42.
 #[tokio::test]
 async fn test_mock_14_vector_branch_skip_false_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "ranker-with-optional-quality",
         "trio-with-error-instruction",
@@ -726,20 +709,17 @@ async fn test_mock_14_vector_branch_skip_false_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_14_vector_branch_skip_false_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_14_vector_branch_skip_false_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_14_vector_branch_skip_false_seed_42.json"),
     );
 }
 
-/// mock-14: Vector branch with skip on sub-function (include_quality=true), seed 42.
 #[tokio::test]
 async fn test_mock_14_vector_branch_skip_true_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "ranker-with-optional-quality",
         "trio-with-error-instruction",
@@ -755,20 +735,17 @@ async fn test_mock_14_vector_branch_skip_true_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_14_vector_branch_skip_true_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_14_vector_branch_skip_true_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_14_vector_branch_skip_true_seed_42.json"),
     );
 }
 
-/// mock-15: Vector branch with 3 vector sub-functions and high logprobs, seed 42.
 #[tokio::test]
 async fn test_mock_15_vector_branch_3_vector_logprobs_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "triple-ranker-branch",
         "high-logprobs-duo",
@@ -780,20 +757,17 @@ async fn test_mock_15_vector_branch_3_vector_logprobs_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_15_vector_branch_3_vector_logprobs_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_15_vector_branch_3_vector_logprobs_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_15_vector_branch_3_vector_logprobs_seed_42.json"),
     );
 }
 
-/// mock-16: Vector branch with 4 tasks, error agent, logprobs, seed 42.
 #[tokio::test]
 async fn test_mock_16_vector_branch_4_tasks_error_logprobs_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "four-way-vector-branch",
         "quad-with-error",
@@ -809,20 +783,17 @@ async fn test_mock_16_vector_branch_4_tasks_error_logprobs_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_16_vector_branch_4_tasks_error_logprobs_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_16_vector_branch_4_tasks_error_logprobs_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_16_vector_branch_4_tasks_error_logprobs_seed_42.json"),
     );
 }
 
-/// mock-17: Vector branch with mixed tasks, skip conditions (deep=false), seed 42.
 #[tokio::test]
 async fn test_mock_17_vector_branch_mixed_skip_false_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "deep-optional-mixed-branch",
         "max-logprobs-duo",
@@ -838,20 +809,17 @@ async fn test_mock_17_vector_branch_mixed_skip_false_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_17_vector_branch_mixed_skip_false_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_17_vector_branch_mixed_skip_false_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_17_vector_branch_mixed_skip_false_seed_42.json"),
     );
 }
 
-/// mock-17: Vector branch with mixed tasks, skip conditions (deep=true), seed 42.
 #[tokio::test]
 async fn test_mock_17_vector_branch_mixed_skip_true_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "deep-optional-mixed-branch",
         "max-logprobs-duo",
@@ -867,24 +835,17 @@ async fn test_mock_17_vector_branch_mixed_skip_true_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_17_vector_branch_mixed_skip_true_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_17_vector_branch_mixed_skip_true_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_17_vector_branch_mixed_skip_true_seed_42.json"),
     );
 }
 
-// ---------------------------------------------------------------------------
-// Super branch tests (branch functions whose tasks are branch functions)
-// ---------------------------------------------------------------------------
-
-/// mock-18: Scalar super branch, 2 scalar branch sub-functions, seed 42.
 #[tokio::test]
 async fn test_mock_18_scalar_super_branch_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "nested-scalar-super-branch",
         "expanded-nested-scalar",
@@ -894,20 +855,17 @@ async fn test_mock_18_scalar_super_branch_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_18_scalar_super_branch_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_18_scalar_super_branch_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_18_scalar_super_branch_seed_42.json"),
     );
 }
 
-/// mock-19: Scalar super branch with skip (thorough=false), seed 42.
 #[tokio::test]
 async fn test_mock_19_scalar_super_branch_skip_false_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "skipable-nested-scalar-branch",
         "mixed-nested-with-skip",
@@ -918,20 +876,17 @@ async fn test_mock_19_scalar_super_branch_skip_false_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_19_scalar_super_branch_skip_false_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_19_scalar_super_branch_skip_false_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_19_scalar_super_branch_skip_false_seed_42.json"),
     );
 }
 
-/// mock-19: Scalar super branch with skip (thorough=true), seed 42.
 #[tokio::test]
 async fn test_mock_19_scalar_super_branch_skip_true_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "skipable-nested-scalar-branch",
         "mixed-nested-with-skip",
@@ -942,20 +897,17 @@ async fn test_mock_19_scalar_super_branch_skip_true_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_19_scalar_super_branch_skip_true_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_19_scalar_super_branch_skip_true_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_19_scalar_super_branch_skip_true_seed_42.json"),
     );
 }
 
-/// mock-20: Vector super branch, 2 vector branch sub-functions, seed 42.
 #[tokio::test]
 async fn test_mock_20_vector_super_branch_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "nested-vector-super-branch",
         "nested-vector-inline-remote",
@@ -968,20 +920,17 @@ async fn test_mock_20_vector_super_branch_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_20_vector_super_branch_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_20_vector_super_branch_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_20_vector_super_branch_seed_42.json"),
     );
 }
 
-/// mock-21: Vector super branch with context, 3 vector branch sub-functions, seed 42.
 #[tokio::test]
 async fn test_mock_21_vector_super_branch_context_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "contextual-nested-vector-branch",
         "deep-nested-vector",
@@ -996,25 +945,18 @@ async fn test_mock_21_vector_super_branch_context_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_21_vector_super_branch_context_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_21_vector_super_branch_context_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_21_vector_super_branch_context_seed_42.json"),
     );
 }
 
-// ---------------------------------------------------------------------------
-// Placeholder function tasks
-// ---------------------------------------------------------------------------
-
-/// Inline scalar function with only placeholder tasks, inline auto profile.
 #[tokio::test]
 async fn test_inline_scalar_placeholder_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
-    let request = Arc::new(FunctionExecutionCreateParams {
+    let request = FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Inline(
             objectiveai::functions::FullInlineFunction::Standard(
                 objectiveai::functions::InlineFunction::Scalar {
@@ -1100,54 +1042,34 @@ async fn test_inline_scalar_placeholder_seed_42() {
         invert: None,
         provider: None,
         seed: Some(42),
-        stream: None,
+        stream: Some(true),
         continuation: None,
-    });
-    let result = normalize(run_execution(&client, request).await);
+    };
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/inline_scalar_placeholder_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/inline_scalar_placeholder_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/inline_scalar_placeholder_seed_42.json"),
     );
 }
 
-/// mock-25: Remote scalar function with only placeholder tasks, remote swarm profile.
 #[tokio::test]
 async fn test_mock_25_scalar_placeholder_remote_swarm_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
-    let request = Arc::new(FunctionExecutionCreateParams {
-        function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional::Mock {
-                name: "dual-placeholder".to_string(),
-            },
-        ),
-        profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional::Mock {
-                name: "schema-and-tool".to_string(),
-            },
-        ),
-        retry_token: None,
-        from_cache: None,
-        reasoning: None,
-        strategy: None,
-        input: InputValue::Object(indexmap::indexmap! {
+    let request = make_request(
+        "dual-placeholder",
+        "schema-and-tool",
+        InputValue::Object(indexmap::indexmap! {
             "text".into() => InputValue::String("Hello world".into()),
         }),
-        split: None,
-        invert: None,
-        provider: None,
-        seed: Some(42),
-        stream: None,
-        continuation: None,
-    });
-    let result = normalize(run_execution(&client, request).await);
+        42,
+    );
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_25_scalar_placeholder_remote_swarm_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_25_scalar_placeholder_remote_swarm_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_25_scalar_placeholder_remote_swarm_seed_42.json"),
     );
 }
 
@@ -1155,123 +1077,75 @@ async fn test_mock_25_scalar_placeholder_remote_swarm_seed_42() {
 // SwissSystem strategy tests
 // ---------------------------------------------------------------------------
 
-/// mock-4: Vector ranker with 20 items, SwissSystem with default pool/rounds, seed 7.
 #[tokio::test]
 async fn test_mock_4_vector_swiss_default_20_items_seed_7() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
-    let request = Arc::new(FunctionExecutionCreateParams {
-        function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional::Mock { name: "item-ranker".to_string() },
-        ),
-        profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional::Mock { name: "solo-instruction".to_string() },
-        ),
-        retry_token: None,
-        from_cache: None,
-        reasoning: None,
-        strategy: Some(Strategy::SwissSystem { pool: None, rounds: None }),
-        input: InputValue::Object(indexmap::indexmap! {
+    let mut request = make_request(
+        "item-ranker",
+        "solo-instruction",
+        InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array((0..20).map(|i| InputValue::String(format!("Item{i}"))).collect()),
         }),
-        split: None,
-        invert: None,
-        provider: None,
-        seed: Some(7),
-        stream: None,
-        continuation: None,
-    });
-    let result = normalize(run_execution_swiss(&client, request).await);
+        7,
+    );
+    request.strategy = Some(Strategy::SwissSystem { pool: None, rounds: None });
+    let result = normalize(run_execution_swiss(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_4_vector_swiss_default_20_items_seed_7.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_4_vector_swiss_default_20_items_seed_7.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_4_vector_swiss_default_20_items_seed_7.json"),
     );
 }
 
-/// mock-5: Vector ranker with context and 20 items, SwissSystem pool=5 rounds=3, seed 7.
 #[tokio::test]
 async fn test_mock_5_vector_swiss_pool5_rounds3_20_items_seed_7() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
-    let request = Arc::new(FunctionExecutionCreateParams {
-        function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional::Mock { name: "contextual-ranker".to_string() },
-        ),
-        profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional::Mock { name: "contextual-duo".to_string() },
-        ),
-        retry_token: None,
-        from_cache: None,
-        reasoning: None,
-        strategy: Some(Strategy::SwissSystem { pool: Some(5), rounds: Some(3) }),
-        input: InputValue::Object(indexmap::indexmap! {
+    let mut request = make_request(
+        "contextual-ranker",
+        "contextual-duo",
+        InputValue::Object(indexmap::indexmap! {
             "context".into() => InputValue::Object(indexmap::indexmap! {
                 "query".into() => InputValue::String("rank these items".into()),
             }),
             "items".into() => InputValue::Array((0..20).map(|i| InputValue::String(format!("Item{i}"))).collect()),
         }),
-        split: None,
-        invert: None,
-        provider: None,
-        seed: Some(7),
-        stream: None,
-        continuation: None,
-    });
-    let result = normalize(run_execution_swiss(&client, request).await);
+        7,
+    );
+    request.strategy = Some(Strategy::SwissSystem { pool: Some(5), rounds: Some(3) });
+    let result = normalize(run_execution_swiss(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_5_vector_swiss_pool5_rounds3_20_items_seed_7.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_5_vector_swiss_pool5_rounds3_20_items_seed_7.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_5_vector_swiss_pool5_rounds3_20_items_seed_7.json"),
     );
 }
 
-/// mock-7: Vector ranker with 5 criteria and 20 items, SwissSystem pool=4 rounds=3, seed 7.
 #[tokio::test]
 async fn test_mock_7_vector_swiss_pool4_rounds3_20_items_seed_7() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
-    let request = Arc::new(FunctionExecutionCreateParams {
-        function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional::Mock { name: "five-criteria-ranker".to_string() },
-        ),
-        profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional::Mock { name: "schema-heavy-trio".to_string() },
-        ),
-        retry_token: None,
-        from_cache: None,
-        reasoning: None,
-        strategy: Some(Strategy::SwissSystem { pool: Some(4), rounds: Some(3) }),
-        input: InputValue::Object(indexmap::indexmap! {
+    let mut request = make_request(
+        "five-criteria-ranker",
+        "schema-heavy-trio",
+        InputValue::Object(indexmap::indexmap! {
             "items".into() => InputValue::Array((0..20).map(|i| InputValue::String(format!("Item{i}"))).collect()),
         }),
-        split: None,
-        invert: None,
-        provider: None,
-        seed: Some(7),
-        stream: None,
-        continuation: None,
-    });
-    let result = normalize(run_execution_swiss(&client, request).await);
+        7,
+    );
+    request.strategy = Some(Strategy::SwissSystem { pool: Some(4), rounds: Some(3) });
+    let result = normalize(run_execution_swiss(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_7_vector_swiss_pool4_rounds3_20_items_seed_7.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_7_vector_swiss_pool4_rounds3_20_items_seed_7.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_7_vector_swiss_pool4_rounds3_20_items_seed_7.json"),
     );
 }
 
 // ---------------------------------------------------------------------------
-// Mapped function tasks (MapFunction) — exercises task_index_len for mapped branches
+// Mapped function tasks
 // ---------------------------------------------------------------------------
 
-/// mock-22: Scalar mapped branch (2 items) + 2 VCs, seed 42.
 #[tokio::test]
 async fn test_mock_22_scalar_mapped_branch_2_items_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "mapped-branch-with-votes",
         "remote-swarm-mapped-branch",
@@ -1283,20 +1157,17 @@ async fn test_mock_22_scalar_mapped_branch_2_items_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_22_scalar_mapped_branch_2_items_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_22_scalar_mapped_branch_2_items_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_22_scalar_mapped_branch_2_items_seed_42.json"),
     );
 }
 
-/// mock-22: Scalar mapped branch (2 items) + 2 VCs, seed 123.
 #[tokio::test]
 async fn test_mock_22_scalar_mapped_branch_2_items_seed_123() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "mapped-branch-with-votes",
         "remote-swarm-mapped-branch",
@@ -1308,20 +1179,17 @@ async fn test_mock_22_scalar_mapped_branch_2_items_seed_123() {
         }),
         123,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_22_scalar_mapped_branch_2_items_seed_123.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_22_scalar_mapped_branch_2_items_seed_123.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_22_scalar_mapped_branch_2_items_seed_123.json"),
     );
 }
 
-/// mock-23: Scalar mapped branch (3 items) + 3 VCs, seed 42.
 #[tokio::test]
 async fn test_mock_23_scalar_mapped_branch_3_items_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "mapped-branch-with-classifiers",
         "remote-swarm-classifiers",
@@ -1334,20 +1202,17 @@ async fn test_mock_23_scalar_mapped_branch_3_items_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_23_scalar_mapped_branch_3_items_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_23_scalar_mapped_branch_3_items_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_23_scalar_mapped_branch_3_items_seed_42.json"),
     );
 }
 
-/// mock-23: Scalar mapped branch (2 items) + 3 VCs, seed 42.
 #[tokio::test]
 async fn test_mock_23_scalar_mapped_branch_2_items_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "mapped-branch-with-classifiers",
         "remote-swarm-classifiers",
@@ -1359,20 +1224,17 @@ async fn test_mock_23_scalar_mapped_branch_2_items_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_23_scalar_mapped_branch_2_items_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_23_scalar_mapped_branch_2_items_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_23_scalar_mapped_branch_2_items_seed_42.json"),
     );
 }
 
-/// mock-24: Scalar mapped branch (2 items) + function task + 2 VCs, seed 42.
 #[tokio::test]
 async fn test_mock_24_scalar_mapped_branch_with_func_2_items_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "mapped-branch-mixed-tasks",
         "remote-swarm-classifiers",
@@ -1384,12 +1246,12 @@ async fn test_mock_24_scalar_mapped_branch_with_func_2_items_seed_42() {
         }),
         42,
     );
-    let result = normalize(run_execution(&client, request).await);
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_24_scalar_mapped_branch_with_func_2_items_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/mock_24_scalar_mapped_branch_with_func_2_items_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/mock_24_scalar_mapped_branch_with_func_2_items_seed_42.json"),
     );
 }
 
@@ -1397,66 +1259,8 @@ async fn test_mock_24_scalar_mapped_branch_with_func_2_items_seed_42() {
 // Error tests
 // ===========================================================================
 
-/// Helper: create a request with custom fields.
-fn make_request_with_overrides(
-    function_repo: &str,
-    profile_repo: &str,
-    overrides: impl FnOnce(&mut FunctionExecutionCreateParams),
-) -> Arc<FunctionExecutionCreateParams> {
-    let mut params = FunctionExecutionCreateParams {
-        function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional::Mock {
-                name: function_repo.to_string(),
-            },
-        ),
-        profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Remote(
-            objectiveai::RemotePathCommitOptional::Mock {
-                name: profile_repo.to_string(),
-            },
-        ),
-        retry_token: None,
-        from_cache: None,
-        reasoning: None,
-        strategy: None,
-        input: InputValue::Object(indexmap::indexmap! {}),
-        split: None,
-        invert: None,
-        provider: None,
-        seed: Some(42),
-        stream: None,
-        continuation: None,
-    };
-    overrides(&mut params);
-    Arc::new(params)
-}
-
-/// Helper: expect create_streaming to return Err with a specific status code.
-async fn expect_err(client: &Arc<TestClient>, request: Arc<FunctionExecutionCreateParams>, expected_status: u16) -> super::Error {
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient), Decimal::ONE, false, &axum::http::HeaderMap::new());
-    match client.clone().create_streaming(ctx, request).await {
-        Ok(_) => panic!("expected create_streaming to fail, but it succeeded"),
-        Err(err) => {
-            assert_eq!(err.status(), expected_status, "error: {err}");
-            err
-        }
-    }
-}
-
-/// Helper: run execution and return the aggregated result (for tests where
-/// the stream succeeds but the response contains error fields).
-async fn run_execution_allow_error(client: &Arc<TestClient>, request: Arc<FunctionExecutionCreateParams>) -> FunctionExecution {
-    run_execution(client, request).await
-}
-
-// ---------------------------------------------------------------------------
-// 1. Pre-Execution Errors
-// ---------------------------------------------------------------------------
-
-/// 1.1: InvalidRetryToken — garbage retry_token string.
 #[tokio::test]
 async fn test_error_1_1_invalid_retry_token() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request_with_overrides(
         "binary-classifier",
         "solo-instruction",
@@ -1467,15 +1271,12 @@ async fn test_error_1_1_invalid_retry_token() {
             });
         },
     );
-    let err = expect_err(&client, request, 400).await;
-    assert!(matches!(err, super::Error::InvalidRetryToken), "expected InvalidRetryToken, got: {err}");
+    let body = post_expect_err_kind(request, 400).await;
+    assert!(body.contains("invalid_retry_token"), "unexpected error: {body}");
 }
 
-/// 1.3: InvalidFunctionForStrategy — scalar function with Swiss strategy.
 #[tokio::test]
 async fn test_error_1_3_scalar_function_swiss_strategy() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request_with_overrides(
         "binary-classifier",
         "solo-instruction",
@@ -1486,15 +1287,12 @@ async fn test_error_1_3_scalar_function_swiss_strategy() {
             });
         },
     );
-    let err = expect_err(&client, request, 400).await;
-    assert!(matches!(err, super::Error::InvalidFunctionForStrategy(_)), "expected InvalidFunctionForStrategy, got: {err}");
+    let body = post_expect_err_kind(request, 400).await;
+    assert!(body.contains("invalid_function_for_strategy"), "unexpected error: {body}");
 }
 
-/// 1.4: InvalidStrategy — Swiss strategy with pool=1.
 #[tokio::test]
 async fn test_error_1_4_invalid_strategy_pool() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request_with_overrides(
         "item-ranker",
         "solo-instruction",
@@ -1509,29 +1307,19 @@ async fn test_error_1_4_invalid_strategy_pool() {
             });
         },
     );
-    let err = expect_err(&client, request, 400).await;
-    assert!(matches!(err, super::Error::InvalidStrategy(_)), "expected InvalidStrategy, got: {err}");
+    let body = post_expect_err_kind(request, 400).await;
+    assert!(body.contains("invalid_strategy"), "unexpected error: {body}");
 }
 
-// ---------------------------------------------------------------------------
-// 2. Flat Task Profile Fetch Errors
-// ---------------------------------------------------------------------------
-
-/// 2.1: FunctionNotFound — non-existent mock function repository.
 #[tokio::test]
 async fn test_error_2_1_function_not_found() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request("mock-nonexistent", "solo-instruction", InputValue::Object(indexmap::indexmap! {}), 42);
-    let err = expect_err(&client, request, 404).await;
-    assert!(matches!(err, super::Error::FetchFunction(_)), "expected FetchFunction, got: {err}");
+    let body = post_expect_err_kind(request, 404).await;
+    assert!(body.contains("fetch_function") || body.contains("function_not_found"), "unexpected error: {body}");
 }
 
-/// 2.3: ProfileNotFound — non-existent mock profile repository.
 #[tokio::test]
 async fn test_error_2_3_profile_not_found() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "binary-classifier",
         "mock-nonexistent",
@@ -1540,15 +1328,12 @@ async fn test_error_2_3_profile_not_found() {
         }),
         42,
     );
-    let err = expect_err(&client, request, 404).await;
-    assert!(matches!(err, super::Error::FetchProfile(_)), "expected FetchProfile, got: {err}");
+    let body = post_expect_err_kind(request, 404).await;
+    assert!(body.contains("fetch_profile") || body.contains("profile_not_found"), "unexpected error: {body}");
 }
 
-/// 2.5: InputSchemaMismatch — wrong input shape for mock-1.
 #[tokio::test]
 async fn test_error_2_5_input_schema_mismatch() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "binary-classifier",
         "solo-instruction",
@@ -1557,15 +1342,12 @@ async fn test_error_2_5_input_schema_mismatch() {
         }),
         42,
     );
-    let err = expect_err(&client, request, 400).await;
-    assert!(matches!(err, super::Error::InputSchemaMismatch), "expected InputSchemaMismatch, got: {err}");
+    let body = post_expect_err_kind(request, 400).await;
+    assert!(body.contains("input_schema_mismatch"), "unexpected error: {body}");
 }
 
-/// 2.6: InvalidProfile — tasks length mismatch (2 task profiles for 1-task function).
 #[tokio::test]
 async fn test_error_2_6_tasks_length_mismatch() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "binary-classifier",
         "two-task-tasks",
@@ -1574,15 +1356,12 @@ async fn test_error_2_6_tasks_length_mismatch() {
         }),
         42,
     );
-    let err = expect_err(&client, request, 400).await;
-    assert!(matches!(err, super::Error::InvalidProfile(_)), "expected InvalidProfile, got: {err}");
+    let body = post_expect_err_kind(request, 400).await;
+    assert!(body.contains("invalid_profile"), "unexpected error: {body}");
 }
 
-/// 2.7: InvalidProfile — weights length mismatch (2 weights for 1-task function).
 #[tokio::test]
 async fn test_error_2_7_weights_length_mismatch() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "binary-classifier",
         "error-weights-length-mismatch",
@@ -1591,15 +1370,12 @@ async fn test_error_2_7_weights_length_mismatch() {
         }),
         42,
     );
-    let err = expect_err(&client, request, 400).await;
-    assert!(matches!(err, super::Error::InvalidProfile(_)), "expected InvalidProfile, got: {err}");
+    let body = post_expect_err_kind(request, 400).await;
+    assert!(body.contains("invalid_profile"), "unexpected error: {body}");
 }
 
-/// 2.8: InvalidProfile — placeholder for function task.
 #[tokio::test]
 async fn test_error_2_8_placeholder_for_function_task() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "spam-importance-branch",
         "placeholder-and-remote-tasks",
@@ -1609,17 +1385,12 @@ async fn test_error_2_8_placeholder_for_function_task() {
         }),
         42,
     );
-    let err = expect_err(&client, request, 400).await;
-    assert!(matches!(err, super::Error::InvalidProfile(_)), "expected InvalidProfile, got: {err}");
+    let body = post_expect_err_kind(request, 400).await;
+    assert!(body.contains("invalid_profile"), "unexpected error: {body}");
 }
 
-// 2.9: Removed — Remote profile for VC task is now supported (resolves via swarm fallback).
-
-/// 2.17: InvalidAppExpression — task expression references missing key.
 #[tokio::test]
 async fn test_error_2_17_bad_task_expression() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "error-missing-input-key",
         "baseline-auto",
@@ -1628,18 +1399,12 @@ async fn test_error_2_17_bad_task_expression() {
         }),
         42,
     );
-    let err = expect_err(&client, request, 400).await;
-    assert!(matches!(err, super::Error::InvalidAppExpression(_)), "expected InvalidAppExpression, got: {err}");
+    let body = post_expect_err_kind(request, 400).await;
+    assert!(body.contains("invalid_expression"), "unexpected error: {body}");
 }
 
-// 2.19: FetchSwarm — removed. Remote swarm references within profiles no longer exist;
-// swarm is always inline on the profile (RemoteSwarmBase).
-
-/// 2.20: InvalidSwarm — 1 agent but 2 profile weights.
 #[tokio::test]
 async fn test_error_2_20_invalid_swarm() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "binary-classifier",
         "error-weight-count-mismatch",
@@ -1648,15 +1413,12 @@ async fn test_error_2_20_invalid_swarm() {
         }),
         42,
     );
-    let err = expect_err(&client, request, 400).await;
-    assert!(matches!(err, super::Error::InvalidSwarm(_)), "expected InvalidSwarm, got: {err}");
+    let body = post_expect_err_kind(request, 400).await;
+    assert!(body.contains("invalid_swarm"), "unexpected error: {body}");
 }
 
-/// 2.21: Recursive FunctionNotFound — branch references mock-999.
 #[tokio::test]
 async fn test_error_2_21_recursive_function_not_found() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "error-missing-sub-function",
         "baseline-tasks",
@@ -1665,15 +1427,12 @@ async fn test_error_2_21_recursive_function_not_found() {
         }),
         42,
     );
-    let err = expect_err(&client, request, 404).await;
-    assert!(matches!(err, super::Error::FetchFunction(_)), "expected FetchFunction, got: {err}");
+    let body = post_expect_err_kind(request, 404).await;
+    assert!(body.contains("fetch_function") || body.contains("function_not_found"), "unexpected error: {body}");
 }
 
-/// 2.22: Recursive ProfileNotFound — tasks profile references mock-999.
 #[tokio::test]
 async fn test_error_2_22_recursive_profile_not_found() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "spam-importance-branch",
         "dangling-and-valid-tasks",
@@ -1683,15 +1442,12 @@ async fn test_error_2_22_recursive_profile_not_found() {
         }),
         42,
     );
-    let err = expect_err(&client, request, 404).await;
-    assert!(matches!(err, super::Error::FetchProfile(_)), "expected FetchProfile, got: {err}");
+    let body = post_expect_err_kind(request, 404).await;
+    assert!(body.contains("fetch_profile") || body.contains("profile_not_found"), "unexpected error: {body}");
 }
 
-/// 2.23: CircularDependency — simple cycle A→B→A.
 #[tokio::test]
 async fn test_error_2_23_circular_dependency_simple() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "error-cycle-a",
         "baseline-auto",
@@ -1700,15 +1456,12 @@ async fn test_error_2_23_circular_dependency_simple() {
         }),
         42,
     );
-    let err = expect_err(&client, request, 400).await;
-    assert!(matches!(err, super::Error::CircularDependency(_)), "expected CircularDependency, got: {err}");
+    let body = post_expect_err_kind(request, 400).await;
+    assert!(body.contains("circular_dependency"), "unexpected error: {body}");
 }
 
-/// 2.24: CircularDependency — complex cycle A→{B,C}, B→C, C→B.
 #[tokio::test]
 async fn test_error_2_24_circular_dependency_complex() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "error-cycle-abc-a",
         "baseline-auto",
@@ -1717,15 +1470,12 @@ async fn test_error_2_24_circular_dependency_complex() {
         }),
         42,
     );
-    let err = expect_err(&client, request, 400).await;
-    assert!(matches!(err, super::Error::CircularDependency(_)), "expected CircularDependency, got: {err}");
+    let body = post_expect_err_kind(request, 400).await;
+    assert!(body.contains("circular_dependency"), "unexpected error: {body}");
 }
 
-/// 2.25: Recursive InputSchemaMismatch — wrong input for sub-function.
 #[tokio::test]
 async fn test_error_2_25_recursive_input_schema_mismatch() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "error-wrong-sub-input",
         "baseline-tasks",
@@ -1734,20 +1484,12 @@ async fn test_error_2_25_recursive_input_schema_mismatch() {
         }),
         42,
     );
-    let err = expect_err(&client, request, 400).await;
-    assert!(matches!(err, super::Error::InputSchemaMismatch), "expected InputSchemaMismatch, got: {err}");
+    let body = post_expect_err_kind(request, 400).await;
+    assert!(body.contains("input_schema_mismatch"), "unexpected error: {body}");
 }
 
-// ---------------------------------------------------------------------------
-// 3. Vector Completion Errors (execution-time)
-// ---------------------------------------------------------------------------
-
-/// 3.1: All agents error — VC agents fail, completions have error finish_reason,
-/// output is fallback uniform → weighted sum to 0.5.
 #[tokio::test]
 async fn test_error_3_1_all_agents_error() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "binary-classifier",
         "error-all-agents-fail",
@@ -1756,15 +1498,13 @@ async fn test_error_3_1_all_agents_error() {
         }),
         42,
     );
-    let result = run_execution_allow_error(&client, request).await;
+    let result = run_execution_allow_error(request).await;
     assert_eq!(result.tasks.len(), 1);
     match &result.tasks[0] {
         objectiveai::functions::executions::response::unary::Task::VectorCompletion(vt) => {
-            // The task itself should not have an error (VC "succeeds" with fallback).
             assert!(vt.error.is_none(), "expected no task-level error, got: {:?}", vt.error);
             assert!(!vt.inner.completions.is_empty(), "expected at least one completion");
             for completion in &vt.inner.completions {
-                // Each agent completion should have an error set.
                 assert!(
                     completion.inner.error.is_some(),
                     "expected error on agent completion, got None",
@@ -1773,7 +1513,6 @@ async fn test_error_3_1_all_agents_error() {
         }
         other => panic!("expected VectorCompletion task, got: {other:?}"),
     }
-    // Output is the fallback weighted sum of uniform distribution.
     assert!(
         matches!(&result.output.output, objectiveai::functions::expression::TaskOutputOwned::Scalar(s) if *s == rust_decimal::dec!(0.5)),
         "expected Scalar(0.5) fallback, got: {:?}",
@@ -1781,15 +1520,8 @@ async fn test_error_3_1_all_agents_error() {
     );
 }
 
-// ---------------------------------------------------------------------------
-// 4. Task Output Expression Errors (execution-time)
-// ---------------------------------------------------------------------------
-
-/// 4.1: Output expression evaluation fails (references nonexistent field).
 #[tokio::test]
 async fn test_error_4_1_output_expression_fails() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "error-bad-output-field",
         "baseline-auto",
@@ -1798,7 +1530,7 @@ async fn test_error_4_1_output_expression_fails() {
         }),
         42,
     );
-    let result = run_execution_allow_error(&client, request).await;
+    let result = run_execution_allow_error(request).await;
     assert!(result.error.is_some(), "expected error on response");
     assert!(
         matches!(result.output.output, objectiveai::functions::expression::TaskOutputOwned::Err(_)),
@@ -1807,11 +1539,8 @@ async fn test_error_4_1_output_expression_fails() {
     );
 }
 
-/// 4.2: Scalar output out of range (returns -1.0).
 #[tokio::test]
 async fn test_error_4_2_scalar_output_out_of_range() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "error-scalar-out-of-range",
         "baseline-auto",
@@ -1820,7 +1549,7 @@ async fn test_error_4_2_scalar_output_out_of_range() {
         }),
         42,
     );
-    let result = run_execution_allow_error(&client, request).await;
+    let result = run_execution_allow_error(request).await;
     assert!(result.error.is_some(), "expected error on response");
     assert!(
         matches!(result.output.output, objectiveai::functions::expression::TaskOutputOwned::Err(_)),
@@ -1829,11 +1558,8 @@ async fn test_error_4_2_scalar_output_out_of_range() {
     );
 }
 
-/// 4.3: Scalar function got vector output.
 #[tokio::test]
 async fn test_error_4_3_scalar_got_vector() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "error-scalar-returns-vector",
         "baseline-auto",
@@ -1842,7 +1568,7 @@ async fn test_error_4_3_scalar_got_vector() {
         }),
         42,
     );
-    let result = run_execution_allow_error(&client, request).await;
+    let result = run_execution_allow_error(request).await;
     assert!(result.error.is_some(), "expected error on response");
     assert!(
         matches!(result.output.output, objectiveai::functions::expression::TaskOutputOwned::Err(_)),
@@ -1851,11 +1577,8 @@ async fn test_error_4_3_scalar_got_vector() {
     );
 }
 
-/// 4.4: Vector output bad sum (scores doubled).
 #[tokio::test]
 async fn test_error_4_4_vector_output_bad_sum() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "error-vector-bad-sum",
         "baseline-auto",
@@ -1867,7 +1590,7 @@ async fn test_error_4_4_vector_output_bad_sum() {
         }),
         42,
     );
-    let result = run_execution_allow_error(&client, request).await;
+    let result = run_execution_allow_error(request).await;
     assert!(result.error.is_some(), "expected error on response");
     assert!(
         matches!(result.output.output, objectiveai::functions::expression::TaskOutputOwned::Err(_)),
@@ -1876,11 +1599,8 @@ async fn test_error_4_4_vector_output_bad_sum() {
     );
 }
 
-/// 4.5: Vector function got scalar output.
 #[tokio::test]
 async fn test_error_4_5_vector_got_scalar() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "error-vector-returns-scalar",
         "baseline-auto",
@@ -1892,7 +1612,7 @@ async fn test_error_4_5_vector_got_scalar() {
         }),
         42,
     );
-    let result = run_execution_allow_error(&client, request).await;
+    let result = run_execution_allow_error(request).await;
     assert!(result.error.is_some(), "expected error on response");
     assert!(
         matches!(result.output.output, objectiveai::functions::expression::TaskOutputOwned::Err(_)),
@@ -1901,11 +1621,8 @@ async fn test_error_4_5_vector_got_scalar() {
     );
 }
 
-/// 4.6: Output returns nested list (Vectors variant).
 #[tokio::test]
 async fn test_error_4_6_output_vectors_variant() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "error-nested-list-output",
         "baseline-auto",
@@ -1914,7 +1631,7 @@ async fn test_error_4_6_output_vectors_variant() {
         }),
         42,
     );
-    let result = run_execution_allow_error(&client, request).await;
+    let result = run_execution_allow_error(request).await;
     assert!(result.error.is_some(), "expected error on response");
     assert!(
         matches!(result.output.output, objectiveai::functions::expression::TaskOutputOwned::Err(_)),
@@ -1923,11 +1640,8 @@ async fn test_error_4_6_output_vectors_variant() {
     );
 }
 
-/// 4.7: Output expression returns None (Err value).
 #[tokio::test]
 async fn test_error_4_7_output_returns_none() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request(
         "error-none-output",
         "baseline-auto",
@@ -1936,7 +1650,7 @@ async fn test_error_4_7_output_returns_none() {
         }),
         42,
     );
-    let result = run_execution_allow_error(&client, request).await;
+    let result = run_execution_allow_error(request).await;
     assert!(result.error.is_some(), "expected error on response");
     assert!(
         matches!(result.output.output, objectiveai::functions::expression::TaskOutputOwned::Err(_)),
@@ -1945,15 +1659,8 @@ async fn test_error_4_7_output_returns_none() {
     );
 }
 
-// ---------------------------------------------------------------------------
-// 6. Reasoning Errors
-// ---------------------------------------------------------------------------
-
-/// 6.1: Reasoning agent error — mock agent with error=true.
 #[tokio::test]
 async fn test_error_6_1_reasoning_agent_error() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let request = make_request_with_overrides(
         "binary-classifier",
         "solo-instruction",
@@ -1979,10 +1686,7 @@ async fn test_error_6_1_reasoning_agent_error() {
             });
         },
     );
-    // The stream succeeds but the reasoning chunk will have an error.
-    let result = run_execution_allow_error(&client, request).await;
-    // The execution itself should succeed (output is valid).
-    // The reasoning should have an error.
+    let result = run_execution_allow_error(request).await;
     assert!(
         result.reasoning.as_ref().is_some_and(|r| r.error.is_some()),
         "expected reasoning error, got: {:?}",
@@ -1994,12 +1698,9 @@ async fn test_error_6_1_reasoning_agent_error() {
 // Split tests
 // ===========================================================================
 
-/// Split: run scalar binary-classifier on 3 inputs, expect Vector output.
 #[tokio::test]
 async fn test_split_scalar_binary_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
-    let request = Arc::new(FunctionExecutionCreateParams {
+    let request = FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
             objectiveai::RemotePathCommitOptional::Mock {
                 name: "binary-classifier".to_string(),
@@ -2029,83 +1730,83 @@ async fn test_split_scalar_binary_seed_42() {
         invert: None,
         provider: None,
         seed: Some(42),
-        stream: None,
+        stream: Some(true),
         continuation: None,
-    });
-    let result = normalize(run_execution_split(&client, request).await);
+    };
+    let result = normalize(run_execution_split(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/split_scalar_binary_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/split_scalar_binary_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/split_scalar_binary_seed_42.json"),
     );
 }
 
-/// Split: tweet-scorer over 10 real tweets (input loaded from
-/// `inputs/10_tweets.json`), seed 42. Exercises the split-mode
-/// parallelization with a modest fan-out and a nested scalar
-/// branch function wrapping three leaf sub-functions. Uses an inline
-/// profile with two mock agents (one with top_logprobs=6, one plain
-/// instruction) and equal weights.
+fn ten_tweet_swarm_two_agents(top_logprobs_first: Option<u64>, top_logprobs_second: Option<u64>, output_mode_first: objectiveai::agent::mock::OutputMode, output_mode_second: objectiveai::agent::mock::OutputMode, weights: Vec<Decimal>) -> objectiveai::swarm::InlineSwarmBase {
+    objectiveai::swarm::InlineSwarmBase {
+        agents: vec![
+            objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
+                count: 1,
+                inner: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
+                    objectiveai::agent::InlineAgentBaseWithFallbacks {
+                        inner: objectiveai::agent::InlineAgentBase::Mock(
+                            objectiveai::agent::mock::AgentBase {
+                                upstream: objectiveai::agent::mock::Upstream::Mock,
+                                output_mode: output_mode_first,
+                                top_logprobs: top_logprobs_first,
+                                error: None,
+                                error_probability: None,
+                                mode: None,
+                                mcp_servers: None,
+                            },
+                        ),
+                        fallbacks: None,
+                    },
+                ),
+            },
+            objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
+                count: 1,
+                inner: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
+                    objectiveai::agent::InlineAgentBaseWithFallbacks {
+                        inner: objectiveai::agent::InlineAgentBase::Mock(
+                            objectiveai::agent::mock::AgentBase {
+                                upstream: objectiveai::agent::mock::Upstream::Mock,
+                                output_mode: output_mode_second,
+                                top_logprobs: top_logprobs_second,
+                                error: None,
+                                error_probability: None,
+                                mode: None,
+                                mcp_servers: None,
+                            },
+                        ),
+                        fallbacks: None,
+                    },
+                ),
+            },
+        ],
+        weights: Some(objectiveai::Weights::Weights(weights)),
+    }
+}
+
 #[tokio::test]
 async fn test_split_tweet_scorer_10_tweets_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let input: InputValue = serde_json::from_str(include_str!(
-        "../../../assets/functions/executions/client_tests/inputs/10_tweets.json"
+        "../assets/functions/executions/client_tests/inputs/10_tweets.json"
     )).expect("10_tweets.json must parse as InputValue");
-    let request = Arc::new(FunctionExecutionCreateParams {
+    let request = FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
             objectiveai::RemotePathCommitOptional::Mock {
                 name: "tweet-scorer".to_string(),
             },
         ),
         profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Inline(
-            objectiveai::functions::InlineProfile::Auto(
-                objectiveai::swarm::InlineSwarmBase {
-                    agents: vec![
-                        objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
-                            count: 1,
-                            inner: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
-                                objectiveai::agent::InlineAgentBaseWithFallbacks {
-                                    inner: objectiveai::agent::InlineAgentBase::Mock(
-                                        objectiveai::agent::mock::AgentBase {
-                                            upstream: objectiveai::agent::mock::Upstream::Mock,
-                                            output_mode: objectiveai::agent::mock::OutputMode::Instruction,
-                                            top_logprobs: Some(6),
-                                            error: None,
-                                            error_probability: None,
-                                            mode: None,
-                                            mcp_servers: None,
-                                        },
-                                    ),
-                                    fallbacks: None,
-                                },
-                            ),
-                        },
-                        objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
-                            count: 1,
-                            inner: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
-                                objectiveai::agent::InlineAgentBaseWithFallbacks {
-                                    inner: objectiveai::agent::InlineAgentBase::Mock(
-                                        objectiveai::agent::mock::AgentBase {
-                                            upstream: objectiveai::agent::mock::Upstream::Mock,
-                                            output_mode: objectiveai::agent::mock::OutputMode::Instruction,
-                                            top_logprobs: None,
-                                            error: None,
-                                            error_probability: None,
-                                            mode: None,
-                                            mcp_servers: None,
-                                        },
-                                    ),
-                                    fallbacks: None,
-                                },
-                            ),
-                        },
-                    ],
-                    weights: Some(objectiveai::Weights::Weights(vec![Decimal::ONE, Decimal::ONE])),
-                },
-            ),
+            objectiveai::functions::InlineProfile::Auto(ten_tweet_swarm_two_agents(
+                Some(6),
+                None,
+                objectiveai::agent::mock::OutputMode::Instruction,
+                objectiveai::agent::mock::OutputMode::Instruction,
+                vec![Decimal::ONE, Decimal::ONE],
+            )),
         ),
         retry_token: None,
         from_cache: None,
@@ -2116,88 +1817,37 @@ async fn test_split_tweet_scorer_10_tweets_seed_42() {
         invert: None,
         provider: None,
         seed: Some(42),
-        stream: None,
+        stream: Some(true),
         continuation: None,
-    });
-    let result = normalize(run_execution_split(&client, request).await);
+    };
+    let result = normalize(run_execution_split(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/split_tweet_scorer_10_tweets_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/split_tweet_scorer_10_tweets_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/split_tweet_scorer_10_tweets_seed_42.json"),
     );
 }
 
-/// Vector: tweet-ranker over 10 real tweets (input loaded from
-/// `inputs/10_tweets.json`), seed 42. Exercises the alpha-vector branch
-/// function with a mapped scalar sub-task — task[1] uses `input['items'][map]`
-/// to pick out the current element, which is the code path that regressed
-/// when the transpiler started unconditionally binding `map`.
-///
-/// Inline profile: two mock agents (tool_call w/o logprobs and json_schema
-/// w/ top_logprobs=3), weights 0.4 / 0.6.
 #[tokio::test]
 async fn test_vector_tweet_ranker_10_tweets_seed_42() {
-    let _permit = crate::test_clients::acquire_test_permit().await;
-    let client = make_client();
     let items: InputValue = serde_json::from_str(include_str!(
-        "../../../assets/functions/executions/client_tests/inputs/10_tweets.json"
+        "../assets/functions/executions/client_tests/inputs/10_tweets.json"
     )).expect("10_tweets.json must parse as InputValue");
-    let request = Arc::new(FunctionExecutionCreateParams {
+    let request = FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
             objectiveai::RemotePathCommitOptional::Mock {
                 name: "tweet-ranker".to_string(),
             },
         ),
         profile: objectiveai::functions::InlineProfileOrRemoteCommitOptional::Inline(
-            objectiveai::functions::InlineProfile::Auto(
-                objectiveai::swarm::InlineSwarmBase {
-                    agents: vec![
-                        objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
-                            count: 1,
-                            inner: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
-                                objectiveai::agent::InlineAgentBaseWithFallbacks {
-                                    inner: objectiveai::agent::InlineAgentBase::Mock(
-                                        objectiveai::agent::mock::AgentBase {
-                                            upstream: objectiveai::agent::mock::Upstream::Mock,
-                                            output_mode: objectiveai::agent::mock::OutputMode::ToolCall,
-                                            top_logprobs: None,
-                                            error: None,
-                                            error_probability: None,
-                                            mode: None,
-                                            mcp_servers: None,
-                                        },
-                                    ),
-                                    fallbacks: None,
-                                },
-                            ),
-                        },
-                        objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
-                            count: 1,
-                            inner: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
-                                objectiveai::agent::InlineAgentBaseWithFallbacks {
-                                    inner: objectiveai::agent::InlineAgentBase::Mock(
-                                        objectiveai::agent::mock::AgentBase {
-                                            upstream: objectiveai::agent::mock::Upstream::Mock,
-                                            output_mode: objectiveai::agent::mock::OutputMode::JsonSchema,
-                                            top_logprobs: Some(3),
-                                            error: None,
-                                            error_probability: None,
-                                            mode: None,
-                                            mcp_servers: None,
-                                        },
-                                    ),
-                                    fallbacks: None,
-                                },
-                            ),
-                        },
-                    ],
-                    weights: Some(objectiveai::Weights::Weights(vec![
-                        Decimal::new(4, 1),
-                        Decimal::new(6, 1),
-                    ])),
-                },
-            ),
+            objectiveai::functions::InlineProfile::Auto(ten_tweet_swarm_two_agents(
+                None,
+                Some(3),
+                objectiveai::agent::mock::OutputMode::ToolCall,
+                objectiveai::agent::mock::OutputMode::JsonSchema,
+                vec![Decimal::new(4, 1), Decimal::new(6, 1)],
+            )),
         ),
         retry_token: None,
         from_cache: None,
@@ -2210,14 +1860,14 @@ async fn test_vector_tweet_ranker_10_tweets_seed_42() {
         invert: None,
         provider: None,
         seed: Some(42),
-        stream: None,
+        stream: Some(true),
         continuation: None,
-    });
-    let result = normalize(run_execution(&client, request).await);
+    };
+    let result = normalize(run_execution(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/vector_tweet_ranker_10_tweets_seed_42.json"),
-        include_str!("../../../assets/functions/executions/client_tests/vector_tweet_ranker_10_tweets_seed_42.json"),
+        include_str!("../assets/functions/executions/client_tests/vector_tweet_ranker_10_tweets_seed_42.json"),
     );
 }
