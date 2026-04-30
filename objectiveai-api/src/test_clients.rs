@@ -468,9 +468,23 @@ static MCP_CLIENT: LazyLock<Arc<objectiveai::mcp::Client>> = LazyLock::new(|| {
 });
 
 static PROXY_SPAWNER: LazyLock<Arc<crate::agent::completions::ProxySpawner>> = LazyLock::new(|| {
+    // Match the singleton MCP_CLIENT below: 30-min wait limits on
+    // connect/call, every backoff knob zero / 1.0 so a real first-try
+    // failure surfaces as a bug instead of being masked by retries
+    // inside the in-process proxy.
     Arc::new(crate::agent::completions::ProxySpawner::new_with_handle(
         BACKGROUND_RUNTIME.handle().clone(),
-        objectiveai_mcp_proxy::ConfigBuilder::default,
+        || objectiveai_mcp_proxy::ConfigBuilder {
+            mcp_connect_timeout: Some(1_800_000),
+            mcp_call_timeout: Some(1_800_000),
+            mcp_backoff_current_interval: Some(0),
+            mcp_backoff_initial_interval: Some(0),
+            mcp_backoff_randomization_factor: Some(0.0),
+            mcp_backoff_multiplier: Some(1.0),
+            mcp_backoff_max_interval: Some(0),
+            mcp_backoff_max_elapsed_time: Some(0),
+            ..Default::default()
+        },
     ))
 });
 

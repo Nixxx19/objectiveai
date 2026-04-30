@@ -121,14 +121,17 @@ impl ConfigBuilder {
             x_title: self
                 .x_title
                 .unwrap_or_else(|| "ObjectiveAI MCP Proxy".to_string()),
+            // Defaults match `objectiveai-api/src/run.rs` so the same
+            // env vars produce the same effective config when read by
+            // either binary independently.
             mcp_connect_timeout: self.mcp_connect_timeout.unwrap_or(30000),
             mcp_call_timeout: self.mcp_call_timeout.unwrap_or(30000),
-            mcp_backoff_current_interval: self.mcp_backoff_current_interval.unwrap_or(500),
-            mcp_backoff_initial_interval: self.mcp_backoff_initial_interval.unwrap_or(500),
+            mcp_backoff_current_interval: self.mcp_backoff_current_interval.unwrap_or(100),
+            mcp_backoff_initial_interval: self.mcp_backoff_initial_interval.unwrap_or(100),
             mcp_backoff_randomization_factor: self.mcp_backoff_randomization_factor.unwrap_or(0.5),
             mcp_backoff_multiplier: self.mcp_backoff_multiplier.unwrap_or(1.5),
-            mcp_backoff_max_interval: self.mcp_backoff_max_interval.unwrap_or(60_000),
-            mcp_backoff_max_elapsed_time: self.mcp_backoff_max_elapsed_time.unwrap_or(900_000),
+            mcp_backoff_max_interval: self.mcp_backoff_max_interval.unwrap_or(1000),
+            mcp_backoff_max_elapsed_time: self.mcp_backoff_max_elapsed_time.unwrap_or(40000),
             suppress_output: self.suppress_output.unwrap_or(false),
         }
     }

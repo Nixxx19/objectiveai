@@ -614,9 +614,25 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
     // Lazy in-process mcp-proxy. Each per-agent MCP connection goes
     // through this; it boots on the first request that needs it and
     // lives for the rest of the program.
-    let proxy_spawner = Arc::new(agent::completions::ProxySpawner::new(
-        objectiveai_mcp_proxy::ConfigBuilder::default,
-    ));
+    //
+    // Propagate the api's loaded MCP config into the in-process proxy's
+    // ConfigBuilder so the proxy honours the same env vars
+    // (`MCP_CONNECT_TIMEOUT`, `MCP_CALL_TIMEOUT`, `MCP_BACKOFF_*`) the
+    // api itself reads — without this the proxy would fall back to its
+    // own crate-internal defaults.
+    let proxy_spawner = Arc::new(agent::completions::ProxySpawner::new(move || {
+        objectiveai_mcp_proxy::ConfigBuilder {
+            mcp_connect_timeout: Some(mcp_connect_timeout),
+            mcp_call_timeout: Some(mcp_call_timeout),
+            mcp_backoff_current_interval: Some(mcp_backoff_current_interval),
+            mcp_backoff_initial_interval: Some(mcp_backoff_initial_interval),
+            mcp_backoff_randomization_factor: Some(mcp_backoff_randomization_factor),
+            mcp_backoff_multiplier: Some(mcp_backoff_multiplier),
+            mcp_backoff_max_interval: Some(mcp_backoff_max_interval),
+            mcp_backoff_max_elapsed_time: Some(mcp_backoff_max_elapsed_time),
+            ..Default::default()
+        }
+    }));
 
     // Agent Completions Client
     let agent_completions_client = Arc::new(agent::completions::Client::new(
