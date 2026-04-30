@@ -35,6 +35,16 @@ while [[ $# -gt 0 ]]; do
 done
 
 run() {
+  # ── load .env (auto-export every assignment so subprocesses inherit) ────────────
+  # Gitignored via the repo-root .gitignore (.env*).
+  if [ -f "$SCRIPT_DIR/.env" ]; then
+    echo "Loading $SCRIPT_DIR/.env"
+    set -a
+    # shellcheck disable=SC1091
+    source "$SCRIPT_DIR/.env"
+    set +a
+  fi
+
   # ── ensure venv + codegen via build.sh ──────────────────────────────────────────
   bash "$SCRIPT_DIR/build.sh"
 
