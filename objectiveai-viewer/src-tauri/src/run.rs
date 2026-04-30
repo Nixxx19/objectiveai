@@ -48,8 +48,6 @@ struct EnvConfigBuilder {
     github_authorization: Option<String>,
     #[envconfig(from = "MCP_AUTHORIZATION")]
     mcp_authorization: Option<String>,
-    #[envconfig(from = "VIEWER_ADDRESS")]
-    viewer_address: Option<String>,
     #[envconfig(from = "VIEWER_SIGNATURE")]
     viewer_signature: Option<String>,
     #[envconfig(from = "USER_AGENT")]
@@ -81,7 +79,6 @@ impl EnvConfigBuilder {
             openrouter_authorization: self.openrouter_authorization,
             github_authorization: self.github_authorization,
             mcp_authorization: self.mcp_authorization,
-            viewer_address: self.viewer_address,
             viewer_signature: self.viewer_signature,
             user_agent: self.user_agent,
             http_referer: self.http_referer,
@@ -106,7 +103,6 @@ pub struct ConfigBuilder {
     pub openrouter_authorization: Option<String>,
     pub github_authorization: Option<String>,
     pub mcp_authorization: Option<String>,
-    pub viewer_address: Option<String>,
     pub viewer_signature: Option<String>,
     pub user_agent: Option<String>,
     pub http_referer: Option<String>,
@@ -145,7 +141,6 @@ impl ConfigBuilder {
             openrouter_authorization: self.openrouter_authorization,
             github_authorization: self.github_authorization,
             mcp_authorization: self.mcp_authorization,
-            viewer_address: self.viewer_address,
             viewer_signature: self.viewer_signature,
             user_agent: self.user_agent,
             http_referer: self.http_referer,
@@ -169,7 +164,6 @@ pub struct Config {
     pub openrouter_authorization: Option<String>,
     pub github_authorization: Option<String>,
     pub mcp_authorization: Option<String>,
-    pub viewer_address: Option<String>,
     pub viewer_signature: Option<String>,
     pub user_agent: Option<String>,
     pub http_referer: Option<String>,
@@ -190,6 +184,9 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
     let mcp_authorization: Option<std::collections::HashMap<String, String>> =
         config.mcp_authorization.and_then(|s| serde_json::from_str(&s).ok());
 
+    let listener = tokio::net::TcpListener::bind(format!("{}:{}", config.address, config.port)).await?;
+    let viewer_address = format!("http://{}", listener.local_addr()?);
+
     let http_client = HttpClient::new(
         reqwest::Client::new(),
         config.objectiveai_address,
@@ -201,7 +198,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         config.openrouter_authorization,
         mcp_authorization,
         config.viewer_signature,
-        config.viewer_address,
+        Some(viewer_address),
         config.commit_author_name,
         config.commit_author_email,
     );
@@ -248,8 +245,6 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
             }),
         )
         .layer(middleware::from_fn_with_state(secret, signature_middleware));
-
-    let listener = tokio::net::TcpListener::bind(format!("{}:{}", config.address, config.port)).await?;
 
     Ok((listener, app, rx, http_client))
 }
