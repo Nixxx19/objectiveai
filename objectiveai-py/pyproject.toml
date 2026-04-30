@@ -1,11 +1,11 @@
 [build-system]
-requires = ["hatchling>=1.27"]
-build-backend = "hatchling.build"
+requires = ["maturin>=1.12,<2.0"]
+build-backend = "maturin"
 
 [project]
 name = "objectiveai"
 version = "2.0.0"
-description = "Python SDK for the ObjectiveAI API."
+description = "ObjectiveAI SDK"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -24,13 +24,13 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Rust",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
   "pydantic>=2.12,<3",
   "httpx>=0.28,<1",
   "httpx-sse>=0.4,<1",
-  "objectiveai_pyo3>=2.0,<3",
 ]
 
 [project.urls]
@@ -38,13 +38,7 @@ Homepage = "https://objectiveai.dev"
 Repository = "https://github.com/ObjectiveAI/objectiveai"
 Issues = "https://github.com/ObjectiveAI/objectiveai/issues"
 
-[tool.hatch.build.targets.wheel]
-packages = ["objectiveai"]
-
-[tool.hatch.build.targets.sdist]
-include = [
-  "objectiveai/",
-  "README.md",
-  "LICENSE",
-  "pyproject.toml",
-]
+[tool.maturin]
+python-source = "python"
+module-name = "objectiveai._pyo3"
+features = ["pyo3/extension-module"]

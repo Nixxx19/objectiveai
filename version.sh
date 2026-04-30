@@ -173,14 +173,13 @@ CARGO_TOMLS=(
   objectiveai-rs/Cargo.toml
   objectiveai-rs-cffi/Cargo.toml
   objectiveai-rs-macros/Cargo.toml
-  objectiveai-rs-pyo3/Cargo.toml
+  objectiveai-py/Cargo.toml
   objectiveai-rs-wasm-js/Cargo.toml
   objectiveai-viewer/src-tauri/Cargo.toml
 )
 
 PYPROJECT_TOMLS=(
   objectiveai-py/pyproject.toml
-  objectiveai-rs-pyo3/pyproject.toml
 )
 
 PACKAGE_JSONS=(
