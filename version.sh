@@ -173,7 +173,7 @@ CARGO_TOMLS=(
   objectiveai-rs/Cargo.toml
   objectiveai-rs-cffi/Cargo.toml
   objectiveai-rs-macros/Cargo.toml
-  objectiveai-py/Cargo.toml
+  objectiveai-rs-pyo3/Cargo.toml
   objectiveai-rs-wasm-js/Cargo.toml
   objectiveai-viewer/src-tauri/Cargo.toml
 )

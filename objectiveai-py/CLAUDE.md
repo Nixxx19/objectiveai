@@ -4,11 +4,12 @@ Python SDK for ObjectiveAI. Published to PyPI as `objectiveai`.
 
 ## Layout (maturin mixed Python/Rust)
 
+The Rust crate lives in the sibling `../objectiveai-rs-pyo3/` directory and
+is referenced from `pyproject.toml` via `[tool.maturin] manifest-path`.
+
 ```
 objectiveai-py/
-├── Cargo.toml              # Rust crate (compiles into objectiveai._pyo3)
-├── src/lib.rs              # PyO3 bindings — #[pymodule] fn _pyo3(...)
-├── pyproject.toml          # build-backend = "maturin"
+├── pyproject.toml          # build-backend = "maturin", manifest-path → ../objectiveai-rs-pyo3/Cargo.toml
 ├── python/
 │   └── objectiveai/        # pure-Python sources
 │       ├── __init__.py
@@ -19,6 +20,10 @@ objectiveai-py/
 ├── tests/
 ├── build.sh, test.sh, publish.sh
 └── requirements.txt, requirements-dev.txt
+
+../objectiveai-rs-pyo3/
+├── Cargo.toml              # workspace member, [lib] crate-type = ["cdylib"], name = "_pyo3"
+└── src/lib.rs              # #[pymodule] fn _pyo3(...) with all #[pyfunction] entries
 ```
 
 The Rust extension is bundled into the same wheel as the pure-Python sources — no separate `objectiveai_pyo3` PyPI package. `maturin develop` builds the extension and editable-installs the package into the venv.

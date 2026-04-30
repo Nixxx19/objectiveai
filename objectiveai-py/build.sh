@@ -78,7 +78,13 @@ run() {
   # maturin auto-discovers a virtualenv named .venv, but ours is named venv,
   # so we point it explicitly via VIRTUAL_ENV.
 
-  VIRTUAL_ENV="$VENV_DIR" "$PYTHON" -m maturin develop --release --manifest-path "$SCRIPT_DIR/Cargo.toml"
+  # The Rust crate lives in sibling objectiveai-rs-pyo3/. maturin reads its
+  # location from `[tool.maturin] manifest-path` in pyproject.toml. Run from
+  # this directory so maturin picks up *our* pyproject.toml (which provides
+  # the `objectiveai` package name + manifest-path); passing --manifest-path
+  # to the sibling crate would make maturin think it's building that crate
+  # standalone (no pyproject.toml → wrong package name).
+  ( cd "$SCRIPT_DIR" && VIRTUAL_ENV="$VENV_DIR" "$PYTHON" -m maturin develop --release )
 }
 
 if run > "$LOG_FILE" 2>&1; then
