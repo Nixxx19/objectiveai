@@ -437,15 +437,21 @@ static FILESYSTEM_CLIENT: LazyLock<Arc<crate::filesystem::Client>> = LazyLock::n
     ))
 });
 
+// MCP backoff + timeout config used by both the singleton MCP client
+// (api → proxy) and the in-process proxy spawner (proxy → upstream).
+// Values match `objectiveai-api/src/run.rs::ConfigBuilder::build`'s
+// production defaults — i.e. the "no env vars set" steady state — so
+// tests exercise the same retry policy operators see by default.
+const MCP_CONNECT_TIMEOUT_MS: u64 = 30_000;
+const MCP_CALL_TIMEOUT_MS: u64 = 30_000;
+const MCP_BACKOFF_CURRENT_INTERVAL_MS: u64 = 100;
+const MCP_BACKOFF_INITIAL_INTERVAL_MS: u64 = 100;
+const MCP_BACKOFF_RANDOMIZATION_FACTOR: f64 = 0.5;
+const MCP_BACKOFF_MULTIPLIER: f64 = 1.5;
+const MCP_BACKOFF_MAX_INTERVAL_MS: u64 = 1_000;
+const MCP_BACKOFF_MAX_ELAPSED_TIME_MS: u64 = 40_000;
+
 static MCP_CLIENT: LazyLock<Arc<objectiveai::mcp::Client>> = LazyLock::new(|| {
-    // Default pool config (keep-alive). Disabling the pool exhausts
-    // Windows' ephemeral source-port range under the test suite's call
-    // volume (WSAEADDRINUSE 10048). Tests that share the singleton MCP
-    // client therefore depend on the pool reusing connections; the
-    // runtime-anchor fix on the proxy listener (BACKGROUND_RUNTIME)
-    // already keeps the listener alive, and reqwest's pool entries
-    // self-recover when their dispatch task dies (it just opens a new
-    // connection on the next request).
     let reqwest = reqwest::Client::builder()
         .build()
         .expect("build reqwest::Client");
@@ -454,35 +460,29 @@ static MCP_CLIENT: LazyLock<Arc<objectiveai::mcp::Client>> = LazyLock::new(|| {
         String::new(),
         String::new(),
         String::new(),
-        // 30-min wait limits; backoff knobs all zero so a real first-try
-        // failure surfaces as a bug instead of being masked by retries.
-        Duration::from_secs(1800),
-        Duration::ZERO,
-        Duration::ZERO,
-        0.0,
-        0.0,
-        Duration::ZERO,
-        Duration::ZERO,
-        Duration::from_secs(1800),
+        Duration::from_millis(MCP_CONNECT_TIMEOUT_MS),
+        Duration::from_millis(MCP_BACKOFF_CURRENT_INTERVAL_MS),
+        Duration::from_millis(MCP_BACKOFF_INITIAL_INTERVAL_MS),
+        MCP_BACKOFF_RANDOMIZATION_FACTOR,
+        MCP_BACKOFF_MULTIPLIER,
+        Duration::from_millis(MCP_BACKOFF_MAX_INTERVAL_MS),
+        Duration::from_millis(MCP_BACKOFF_MAX_ELAPSED_TIME_MS),
+        Duration::from_millis(MCP_CALL_TIMEOUT_MS),
     ))
 });
 
 static PROXY_SPAWNER: LazyLock<Arc<crate::agent::completions::ProxySpawner>> = LazyLock::new(|| {
-    // Match the singleton MCP_CLIENT below: 30-min wait limits on
-    // connect/call, every backoff knob zero / 1.0 so a real first-try
-    // failure surfaces as a bug instead of being masked by retries
-    // inside the in-process proxy.
     Arc::new(crate::agent::completions::ProxySpawner::new_with_handle(
         BACKGROUND_RUNTIME.handle().clone(),
         || objectiveai_mcp_proxy::ConfigBuilder {
-            mcp_connect_timeout: Some(1_800_000),
-            mcp_call_timeout: Some(1_800_000),
-            mcp_backoff_current_interval: Some(0),
-            mcp_backoff_initial_interval: Some(0),
-            mcp_backoff_randomization_factor: Some(0.0),
-            mcp_backoff_multiplier: Some(1.0),
-            mcp_backoff_max_interval: Some(0),
-            mcp_backoff_max_elapsed_time: Some(0),
+            mcp_connect_timeout: Some(MCP_CONNECT_TIMEOUT_MS),
+            mcp_call_timeout: Some(MCP_CALL_TIMEOUT_MS),
+            mcp_backoff_current_interval: Some(MCP_BACKOFF_CURRENT_INTERVAL_MS),
+            mcp_backoff_initial_interval: Some(MCP_BACKOFF_INITIAL_INTERVAL_MS),
+            mcp_backoff_randomization_factor: Some(MCP_BACKOFF_RANDOMIZATION_FACTOR),
+            mcp_backoff_multiplier: Some(MCP_BACKOFF_MULTIPLIER),
+            mcp_backoff_max_interval: Some(MCP_BACKOFF_MAX_INTERVAL_MS),
+            mcp_backoff_max_elapsed_time: Some(MCP_BACKOFF_MAX_ELAPSED_TIME_MS),
             ..Default::default()
         },
     ))
