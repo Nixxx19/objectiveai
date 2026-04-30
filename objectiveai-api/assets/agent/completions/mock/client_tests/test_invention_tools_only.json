@@ -9,11 +9,51 @@
       "agent": "425mMcWqssOpPRrsDrjB0B",
       "model": "mock",
       "upstream_id": "",
-      "reasoning": "o5BzEk0vy5DKN4N0Ljx7FUqrhFlA8kjSnX3KsL0wspQkNWKYrUnBsBiXtgJg24SbHDTsORZ6L90oU7Nq3yOIw5gvVUv6ix2YQHuf9HsYAO8tk4XVJkSYNzCb1XMtZZynQcUye1ar16ABuYCPASVPV s3uYuEg Q3u4HpaDwncDnOW1GPeNFybUztbhOdhRNPSKwJb2xpH6pWAmbeKMtZhR9jNjsYQq9dPEBEIwDQHklZxZPYG9U kRBaUzMUDZMer1ifEsncJ4MSeg7AqpqnMg5a4GWW2bMdpoU5802jtzbiM1Ytf 0M47S9iGgHACSPibjb3TaPgijpMU1tP51wtOgMqcqfkMFd0txvDE9kdesuOb8hqPzsVncLQNhIcSo8TXZTTlHrqcYoFqS14YQrf7wWZOJxVj4cIq9BwfFui0sHjTS9iNzI7MXQdo2iLqv9npng6M0mEp9g",
-      "tool_calls": null,
-      "content": "b6k0heb32Ggq7xoX1RUnlTja4Ges9MFPyc7muH0Rc zxxPZsH9mZ coDMr15ZiLPnU2IlCcwA1",
+      "tool_calls": [
+        {
+          "type": "function",
+          "id": "call_mock_7863163989674437613",
+          "function": {
+            "name": "test_read_file",
+            "arguments": "{\"path\":\"6HIwIH0CqF5\"}"
+          }
+        },
+        {
+          "type": "function",
+          "id": "call_mock_864435108812969169",
+          "function": {
+            "name": "test_execute_code",
+            "arguments": "{\"language\":\"Yyr16b3VQGzm\",\"code\":\"d4DmvGRhJ5LTTP0nMH03XyN\"}"
+          }
+        },
+        {
+          "type": "function",
+          "id": "call_mock_429128779022405816",
+          "function": {
+            "name": "test_read_file",
+            "arguments": "{\"path\":\"L8WxluvsMwvGtZ2txErSbN0Cl\"}"
+          }
+        },
+        {
+          "type": "function",
+          "id": "call_mock_12581301277488708883",
+          "function": {
+            "name": "test_execute_code",
+            "arguments": "{\"language\":\"FarS\",\"code\":\"r\"}"
+          }
+        },
+        {
+          "type": "function",
+          "id": "call_mock_1147910007715670934",
+          "function": {
+            "name": "test_execute_code",
+            "arguments": "{\"language\":\"ICePk9eMIw6L2N8qN1t1GrgT\",\"code\":\"znlObK3CW\"}"
+          }
+        }
+      ],
+      "content": null,
       "refusal": null,
-      "finish_reason": "stop",
+      "finish_reason": "tool_calls",
       "logprobs": null,
       "usage": {
         "completion_tokens": 0,
