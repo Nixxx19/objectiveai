@@ -1,157 +1,20 @@
 use std::sync::Arc;
-use std::time::Duration;
 
 use rust_decimal::Decimal;
 
-use crate::agent::completions::UnimplementedUpstreamClient;
 use crate::ctx;
 
 type Params = objectiveai::laboratories::executions::request::LaboratoryExecutionCreateParams;
 type LaboratoryExecution = objectiveai::laboratories::executions::response::unary::LaboratoryExecution;
 type LaboratoryExecutionChunk = objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk;
+type TestClient = crate::test_clients::LaboratoryClient;
 
 // ---------------------------------------------------------------------------
-// Stubs
+// Client constructor — delegates to the process-wide shared client.
 // ---------------------------------------------------------------------------
-
-struct StubRetrieveClient;
-
-#[async_trait::async_trait]
-impl crate::retrieval::retrieve::Client<ctx::DefaultContextExt> for StubRetrieveClient {
-    async fn get_agent<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
-        &self, _ctx: &ctx::Context<ctx::DefaultContextExt, PC>, _path: &objectiveai::RemotePath,
-    ) -> Result<Option<objectiveai::agent::RemoteAgentBaseWithFallbacks>, objectiveai::error::ResponseError> {
-        unimplemented!()
-    }
-    async fn get_swarm<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
-        &self, _ctx: &ctx::Context<ctx::DefaultContextExt, PC>, _path: &objectiveai::RemotePath,
-    ) -> Result<Option<objectiveai::swarm::RemoteSwarmBase>, objectiveai::error::ResponseError> {
-        unimplemented!()
-    }
-    async fn get_function<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
-        &self, _ctx: &ctx::Context<ctx::DefaultContextExt, PC>, _path: &objectiveai::RemotePath,
-    ) -> Result<Option<objectiveai::functions::FullRemoteFunction>, objectiveai::error::ResponseError> {
-        unimplemented!()
-    }
-    async fn get_profile<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
-        &self, _ctx: &ctx::Context<ctx::DefaultContextExt, PC>, _path: &objectiveai::RemotePath,
-    ) -> Result<Option<objectiveai::functions::RemoteProfile>, objectiveai::error::ResponseError> {
-        unimplemented!()
-    }
-    async fn get_prompt<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
-        &self, _ctx: &ctx::Context<ctx::DefaultContextExt, PC>, _path: &objectiveai::RemotePath,
-    ) -> Result<Option<objectiveai::functions::inventions::prompts::RemotePrompt>, objectiveai::error::ResponseError> {
-        unimplemented!()
-    }
-    async fn get_function_invention_state_file<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
-        &self, _ctx: &ctx::Context<ctx::DefaultContextExt, PC>, _path: &objectiveai::RemotePath, _filename: &'static str,
-    ) -> Result<Option<String>, objectiveai::error::ResponseError> {
-        unimplemented!()
-    }
-    async fn resolve_latest<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
-        &self, _ctx: &ctx::Context<ctx::DefaultContextExt, PC>, _kind: crate::retrieval::Kind, _path: &objectiveai::RemotePathCommitOptional,
-    ) -> Result<Option<objectiveai::RemotePath>, objectiveai::error::ResponseError> {
-        unimplemented!()
-    }
-}
-
-struct StubAgentUsageHandler;
-
-impl crate::agent::completions::usage_handler::UsageHandler<ctx::DefaultContextExt>
-    for StubAgentUsageHandler
-{
-    fn handle_usage(
-        &self,
-        _ctx: ctx::Context<ctx::DefaultContextExt, impl crate::ctx::persistent_cache::PersistentCacheClient>,
-        _request: Arc<objectiveai::agent::completions::request::AgentCompletionCreateParams>,
-        _response: objectiveai::agent::completions::response::unary::AgentCompletion,
-    ) -> impl std::future::Future<Output = ()> + Send + 'static {
-        async {}
-    }
-}
-
-struct StubLabUsageHandler;
-
-#[async_trait::async_trait]
-impl crate::laboratories::executions::usage_handler::UsageHandler<ctx::DefaultContextExt>
-    for StubLabUsageHandler
-{
-    async fn handle_usage<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
-        &self,
-        _ctx: ctx::Context<ctx::DefaultContextExt, PC>,
-        _request: Arc<Params>,
-        _response: LaboratoryExecution,
-    ) {
-    }
-}
-
-// ---------------------------------------------------------------------------
-// Client construction
-// ---------------------------------------------------------------------------
-
-type TestClient = super::Client<
-    ctx::DefaultContextExt,
-    UnimplementedUpstreamClient,
-    UnimplementedUpstreamClient,
-    UnimplementedUpstreamClient,
-    crate::agent::completions::mock::Client,
-    StubRetrieveClient,
-    StubRetrieveClient,
-    crate::retrieval::retrieve::mock::MockClient,
-    StubAgentUsageHandler,
-    StubLabUsageHandler,
-    crate::laboratories::orchestrator::mock::Orchestrator,
->;
 
 fn make_client() -> Arc<TestClient> {
-    let retrieve_router = Arc::new(crate::retrieval::retrieve::Router::new(
-        Arc::new(StubRetrieveClient),
-        Arc::new(StubRetrieveClient),
-        Arc::new(crate::retrieval::retrieve::mock::MockClient),
-    ));
-    let agent_client = Arc::new(crate::agent::completions::Client::new(
-        Arc::new(objectiveai::mcp::Client::new(
-            reqwest::Client::new(),
-            String::new(), String::new(), String::new(),
-            // connect_timeout/call_timeout = 30min wait limits; all
-            // backoff knobs zero so first-try failures surface as bugs.
-            Duration::from_secs(1800), Duration::ZERO, Duration::ZERO,
-            0.0, 0.0, Duration::ZERO, Duration::ZERO, Duration::from_secs(1800),
-        )),
-        Arc::new(crate::agent::completions::ProxySpawner::new(
-            objectiveai_mcp_proxy::ConfigBuilder::default,
-        )),
-        None,
-        retrieve_router.clone(),
-        Arc::new(StubAgentUsageHandler),
-        Arc::new(UnimplementedUpstreamClient),
-        Arc::new(UnimplementedUpstreamClient),
-        Arc::new(UnimplementedUpstreamClient),
-        Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        Arc::new(crate::viewer::Client::new(
-            reqwest::Client::new(), None, None,
-            Duration::ZERO, Duration::ZERO, 0.0, 1.0,
-            Duration::ZERO, Duration::from_millis(1),
-        )),
-        Duration::ZERO, Duration::ZERO, 0.0, 1.0,
-        Duration::ZERO, Duration::ZERO,
-        // first_chunk_timeout / other_chunk_timeout are wait limits.
-        Duration::from_secs(1800), Duration::from_secs(1800),
-    ));
-    Arc::new(super::Client {
-        agent_client,
-        retrieve_router,
-        usage_handler: Arc::new(StubLabUsageHandler),
-        viewer: Arc::new(crate::viewer::Client::new(
-            reqwest::Client::new(), None, None,
-            Duration::ZERO, Duration::ZERO, 0.0, 1.0,
-            Duration::ZERO, Duration::from_millis(1),
-        )),
-        orchestrator: Arc::new(crate::laboratories::orchestrator::mock::Orchestrator),
-    })
+    crate::test_clients::laboratory()
 }
 
 // ---------------------------------------------------------------------------

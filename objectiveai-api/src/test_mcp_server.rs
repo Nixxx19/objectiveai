@@ -237,12 +237,10 @@ impl Drop for TestMcpServer {
 pub async fn connect_through_proxy(
     servers: &[&TestMcpServer],
 ) -> objectiveai::mcp::Connection {
-    let proxy = Arc::new(crate::agent::completions::ProxySpawner::new(
-        objectiveai_mcp_proxy::ConfigBuilder::default,
-    ))
-    .get()
-    .await
-    .expect("proxy bootstrap");
+    let proxy = crate::test_clients::proxy_spawner()
+        .get()
+        .await
+        .expect("proxy bootstrap");
 
     let urls: Vec<String> = servers.iter().map(|s| s.url.clone()).collect();
 
@@ -254,24 +252,12 @@ pub async fn connect_through_proxy(
     headers.insert("X-MCP-Authorization".into(), "{}".into());
     headers.insert("X-MCP-Headers".into(), "{}".into());
 
-    // connect_timeout/call_timeout = 30min wait limits; all backoff knobs
-    // are zero so the first-try result (success or failure) is what the
-    // test sees — no retries to hide a bug.
-    let mcp_client = objectiveai::mcp::Client::new(
-        reqwest::Client::new(),
-        String::new(),
-        String::new(),
-        String::new(),
-        Duration::from_secs(1800),
-        Duration::ZERO,
-        Duration::ZERO,
-        0.0,
-        0.0,
-        Duration::ZERO,
-        Duration::ZERO,
-        Duration::from_secs(1800),
-    );
-    mcp_client
+    // Reuse the process-wide MCP client singleton. Its underlying
+    // reqwest::Client is built with `pool_max_idle_per_host(0)` so each
+    // request opens a fresh connection on the calling test's runtime —
+    // no shared connection-pool task that could be tied to a dropped
+    // per-test runtime.
+    crate::test_clients::mcp_client()
         .connect(proxy.url.clone(), None, None, headers)
         .await
         .expect("connect through proxy")

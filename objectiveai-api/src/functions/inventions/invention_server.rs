@@ -60,6 +60,11 @@ impl Tenant {
 /// spawns one tokio task; everyone else piggybacks on the same handle.
 pub struct InventionServerSpawner {
     cell: OnceCell<Arc<InventionServerHandle>>,
+    /// Optional runtime handle anchoring the server task. `None` =
+    /// `tokio::spawn` against the ambient runtime (production: one
+    /// long-lived runtime). `Some` is for tests where the ambient
+    /// runtime is per-`#[tokio::test]` and would drop the task.
+    handle: Option<tokio::runtime::Handle>,
 }
 
 impl Default for InventionServerSpawner {
@@ -72,6 +77,18 @@ impl InventionServerSpawner {
     pub fn new() -> Self {
         Self {
             cell: OnceCell::new(),
+            handle: None,
+        }
+    }
+
+    /// Same as `new`, but the server's listener task is spawned on the
+    /// supplied runtime handle so it survives even after the caller's
+    /// runtime drops. Required in `#[tokio::test]` harnesses where each
+    /// test owns its own runtime.
+    pub fn new_with_handle(handle: tokio::runtime::Handle) -> Self {
+        Self {
+            cell: OnceCell::new(),
+            handle: Some(handle),
         }
     }
 
@@ -79,7 +96,9 @@ impl InventionServerSpawner {
     /// on every subsequent call.
     pub async fn get(&self) -> std::io::Result<Arc<InventionServerHandle>> {
         self.cell
-            .get_or_try_init(|| async { InventionServerHandle::spawn().await })
+            .get_or_try_init(|| async {
+                InventionServerHandle::spawn(self.handle.clone()).await
+            })
             .await
             .map(Arc::clone)
     }
@@ -97,7 +116,7 @@ pub struct InventionServerHandle {
 }
 
 impl InventionServerHandle {
-    async fn spawn() -> std::io::Result<Arc<Self>> {
+    async fn spawn(handle: Option<tokio::runtime::Handle>) -> std::io::Result<Arc<Self>> {
         let ct = CancellationToken::new();
         let tenants: Arc<DashMap<String, Tenant>> = Arc::new(DashMap::new());
 
@@ -105,7 +124,7 @@ impl InventionServerHandle {
             tenants: tenants.clone(),
         };
 
-        let (port_rx, server_handle) = build_and_spawn_server(mcp, ct.clone());
+        let (port_rx, server_handle) = build_and_spawn_server(mcp, ct.clone(), handle);
         let port = port_rx
             .await
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
@@ -439,11 +458,12 @@ impl ServerHandler for InventionMcp {
 fn build_and_spawn_server(
     mcp: InventionMcp,
     ct: CancellationToken,
+    runtime_handle: Option<tokio::runtime::Handle>,
 ) -> (tokio::sync::oneshot::Receiver<u16>, tokio::task::AbortHandle) {
     let (port_tx, port_rx) = tokio::sync::oneshot::channel();
     let ct_child = ct.child_token();
 
-    let handle = tokio::spawn(async move {
+    let task = async move {
         let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
         let port = listener.local_addr().unwrap().port();
         let _ = port_tx.send(port);
@@ -461,8 +481,12 @@ fn build_and_spawn_server(
 
         let router = axum::Router::new().fallback_service(service);
         axum::serve(listener, router).await.ok();
-    })
-    .abort_handle();
+    };
+
+    let handle = match runtime_handle {
+        Some(h) => h.spawn(task).abort_handle(),
+        None => tokio::spawn(task).abort_handle(),
+    };
 
     (port_rx, handle)
 }

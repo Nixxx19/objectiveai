@@ -1,7 +1,6 @@
 //! Tests for function invention client.
 
 use std::sync::Arc;
-use std::time::Duration;
 
 use rust_decimal::Decimal;
 
@@ -20,207 +19,16 @@ use objectiveai::functions::inventions::state::{
 };
 use objectiveai::functions::alpha_vector::expression::VectorFunctionInputSchema;
 
-use crate::agent::completions::UnimplementedUpstreamClient;
 use crate::ctx;
 
-// ---------------------------------------------------------------------------
-// Stubs
-// ---------------------------------------------------------------------------
-
-struct StubRetrieveClient;
-
-#[async_trait::async_trait]
-impl crate::retrieval::retrieve::Client<ctx::DefaultContextExt> for StubRetrieveClient {
-    async fn get_agent<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
-        &self,
-        _ctx: &ctx::Context<ctx::DefaultContextExt, PC>,
-        _path: &objectiveai::RemotePath,
-    ) -> Result<Option<objectiveai::agent::RemoteAgentBaseWithFallbacks>, objectiveai::error::ResponseError> {
-        unimplemented!()
-    }
-    async fn get_swarm<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
-        &self,
-        _ctx: &ctx::Context<ctx::DefaultContextExt, PC>,
-        _path: &objectiveai::RemotePath,
-    ) -> Result<Option<objectiveai::swarm::RemoteSwarmBase>, objectiveai::error::ResponseError> {
-        unimplemented!()
-    }
-    async fn get_function<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
-        &self,
-        _ctx: &ctx::Context<ctx::DefaultContextExt, PC>,
-        _path: &objectiveai::RemotePath,
-    ) -> Result<Option<objectiveai::functions::FullRemoteFunction>, objectiveai::error::ResponseError> {
-        unimplemented!()
-    }
-    async fn get_profile<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
-        &self,
-        _ctx: &ctx::Context<ctx::DefaultContextExt, PC>,
-        _path: &objectiveai::RemotePath,
-    ) -> Result<Option<objectiveai::functions::RemoteProfile>, objectiveai::error::ResponseError> {
-        unimplemented!()
-    }
-    async fn get_prompt<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
-        &self,
-        _ctx: &ctx::Context<ctx::DefaultContextExt, PC>,
-        _path: &objectiveai::RemotePath,
-    ) -> Result<Option<objectiveai::functions::inventions::prompts::RemotePrompt>, objectiveai::error::ResponseError> {
-        unimplemented!()
-    }
-    async fn get_function_invention_state_file<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
-        &self,
-        _ctx: &ctx::Context<ctx::DefaultContextExt, PC>,
-        _path: &objectiveai::RemotePath,
-        _filename: &'static str,
-    ) -> Result<Option<String>, objectiveai::error::ResponseError> {
-        unimplemented!()
-    }
-
-    async fn resolve_latest<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
-        &self,
-        _ctx: &ctx::Context<ctx::DefaultContextExt, PC>,
-        _kind: crate::retrieval::Kind,
-        _path: &objectiveai::RemotePathCommitOptional,
-    ) -> Result<Option<objectiveai::RemotePath>, objectiveai::error::ResponseError> {
-        unimplemented!()
-    }
-}
-
-struct StubAgentUsageHandler;
-
-impl crate::agent::completions::usage_handler::UsageHandler<ctx::DefaultContextExt>
-    for StubAgentUsageHandler
-{
-    fn handle_usage(
-        &self,
-        _ctx: ctx::Context<ctx::DefaultContextExt, impl crate::ctx::persistent_cache::PersistentCacheClient>,
-        _request: Arc<objectiveai::agent::completions::request::AgentCompletionCreateParams>,
-        _response: objectiveai::agent::completions::response::unary::AgentCompletion,
-    ) -> impl std::future::Future<Output = ()> + Send + 'static {
-        async {}
-    }
-}
-
-struct StubInventionUsageHandler;
-
-#[async_trait::async_trait]
-impl super::usage_handler::UsageHandler<ctx::DefaultContextExt> for StubInventionUsageHandler {
-    async fn handle_usage<PC: crate::ctx::persistent_cache::PersistentCacheClient>(
-        &self,
-        _ctx: ctx::Context<ctx::DefaultContextExt, PC>,
-        _request: Arc<FunctionInventionCreateParams>,
-        _response: FunctionInvention,
-    ) {
-    }
-}
+type TestClient = crate::test_clients::FunctionInventionsClient;
 
 // ---------------------------------------------------------------------------
-// Client construction
+// Client constructor — delegates to the process-wide shared client.
 // ---------------------------------------------------------------------------
-
-type TestClient = super::Client<
-    ctx::DefaultContextExt,
-    UnimplementedUpstreamClient,
-    UnimplementedUpstreamClient,
-    UnimplementedUpstreamClient,
-    crate::agent::completions::mock::Client,
-    StubRetrieveClient,
-    StubRetrieveClient,
-    crate::retrieval::retrieve::mock::MockClient,
-    StubAgentUsageHandler,
-    StubInventionUsageHandler,
-    crate::retrieval::retrieve::mock::MockClient,
-    crate::retrieval::retrieve::mock::MockClient,
-    crate::retrieval::retrieve::mock::MockClient,
->;
 
 fn make_client() -> Arc<TestClient> {
-    let retrieve_router = Arc::new(crate::retrieval::retrieve::Router::new(
-        Arc::new(StubRetrieveClient),
-        Arc::new(StubRetrieveClient),
-        Arc::new(crate::retrieval::retrieve::mock::MockClient),
-    ));
-    let agent_client = Arc::new(crate::agent::completions::Client::new(
-        Arc::new(objectiveai::mcp::Client::new(
-            reqwest::Client::new(),
-            String::new(),
-            String::new(),
-            String::new(),
-            // connect_timeout: tests do real localhost I/O via the
-            // ProxySpawner; 30min is the wait limit before treating it as
-            // a bug. All retry/backoff knobs below are zero so a real
-            // first-try failure surfaces immediately instead of being
-            // masked by retries.
-            Duration::from_secs(1800),
-            Duration::ZERO,
-            Duration::ZERO,
-            0.0,
-            0.0,
-            Duration::ZERO,
-            Duration::ZERO,
-            Duration::from_secs(1800),
-        )),
-        Arc::new(crate::agent::completions::ProxySpawner::new(
-            objectiveai_mcp_proxy::ConfigBuilder::default,
-        )),
-        None, // mcp_authorization
-        retrieve_router.clone(),
-        Arc::new(StubAgentUsageHandler),
-        Arc::new(UnimplementedUpstreamClient),
-        Arc::new(UnimplementedUpstreamClient),
-        Arc::new(UnimplementedUpstreamClient),
-        Arc::new(crate::agent::completions::mock::Client {
-            delay: Duration::ZERO,
-            max_tool_calls: 1000,
-        }),
-        Arc::new(crate::viewer::Client::new(
-            reqwest::Client::new(), None, None,
-            std::time::Duration::ZERO, std::time::Duration::ZERO, 0.0, 1.0,
-            std::time::Duration::ZERO, std::time::Duration::from_millis(1),
-        )),
-        Duration::ZERO,
-        Duration::ZERO,
-        0.0,
-        1.0,
-        Duration::ZERO,
-        Duration::ZERO,
-        // first_chunk_timeout / other_chunk_timeout are wait limits.
-        Duration::from_secs(1800),
-        Duration::from_secs(1800),
-    ));
-    let github_client = Arc::new(crate::github::Client::new(
-        reqwest::Client::new(),
-        None,
-        false,
-        String::new(),
-        String::new(),
-        String::new(),
-        Duration::ZERO,
-        Duration::ZERO,
-        0.0,
-        1.0,
-        Duration::ZERO,
-        Duration::ZERO,
-    ));
-    let filesystem_client = Arc::new(crate::filesystem::Client::new(
-        std::path::PathBuf::from("/tmp/objectiveai-test"),
-        "ObjectiveAI".to_string(),
-        "noreply@objectiveai.dev".to_string(),
-    ));
-    let function_retrieve_router = Arc::new(crate::retrieval::retrieve::Router::new(
-        Arc::new(crate::retrieval::retrieve::mock::MockClient),
-        Arc::new(crate::retrieval::retrieve::mock::MockClient),
-        Arc::new(crate::retrieval::retrieve::mock::MockClient),
-    ));
-    Arc::new(super::Client::new(
-        agent_client,
-        github_client,
-        filesystem_client,
-        function_retrieve_router,
-        Arc::new(StubInventionUsageHandler),
-        Arc::new(super::InventionServerSpawner::new()),
-        true,
-        false,
-    ))
+    crate::test_clients::function_inventions()
 }
 
 fn make_request(state: ParamsState, seed: i64) -> Arc<FunctionInventionCreateParams> {

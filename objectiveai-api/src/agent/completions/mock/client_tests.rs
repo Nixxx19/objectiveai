@@ -13,7 +13,6 @@ use objectiveai::agent::completions::response::streaming::{
 use objectiveai::agent::completions::response::unary::AgentCompletion;
 use objectiveai::agent::mock::{Agent, AgentBase};
 
-use super::Client;
 use crate::agent::completions::upstream_client::UpstreamClient;
 use crate::test_mcp_server::{self, TestTool};
 
@@ -53,11 +52,8 @@ fn params_with_response_format(seed: i64, rf: ResponseFormat) -> AgentCompletion
     }
 }
 
-fn default_client() -> Client {
-    Client {
-        delay: Duration::ZERO,
-        max_tool_calls: 1000,
-    }
+fn default_client() -> std::sync::Arc<super::Client> {
+    crate::test_clients::mock_upstream()
 }
 
 /// Runs the mock client to completion, accumulates all chunks, and returns AgentCompletion.
