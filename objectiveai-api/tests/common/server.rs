@@ -89,11 +89,14 @@ mod kill_on_parent_exit {
     }
 }
 
-/// Per-test-binary handle to a spawned api server. Holds the child
-/// process and a configured [`HttpClient`] pointing at it.
+/// Per-test-binary handle to the spawned api server's bound URL.
+/// `client()` builds a fresh `HttpClient` (and its reqwest pool) per
+/// call so each `#[tokio::test]` runtime owns its own hyper dispatch
+/// tasks — sharing a single reqwest pool across multiple per-test
+/// runtimes panics with `runtime dropped the dispatch task` once the
+/// first runtime drops its tasks.
 pub struct ServerHandle {
     pub base_url: String,
-    pub http: Arc<HttpClient>,
     child: Mutex<Option<Child>>,
 }
 
@@ -108,11 +111,30 @@ impl Drop for ServerHandle {
 
 static SERVER: LazyLock<ServerHandle> = LazyLock::new(spawn_server);
 
-/// Returns the shared `HttpClient` pointing at the spawned api server,
-/// booting the server on first call. Subsequent calls reuse the cached
-/// handle.
+/// Returns a fresh `HttpClient` pointing at the spawned api server.
+/// Boots the server on first call. The returned client owns its own
+/// reqwest pool — the calling test's runtime is the one that hosts
+/// hyper's dispatch tasks, so when the test runtime drops at end of
+/// test, those tasks shut down with it. Sharing one client across
+/// multiple per-test runtimes deadlocks once the first runtime drops
+/// its tasks.
 pub fn client() -> Arc<HttpClient> {
-    SERVER.http.clone()
+    let base_url = SERVER.base_url.clone();
+    Arc::new(HttpClient::new(
+        reqwest::Client::new(),
+        Some(base_url),
+        None::<String>,
+        None::<String>,
+        None::<String>,
+        None::<String>,
+        None::<String>,
+        None::<String>,
+        None,
+        None::<String>,
+        None::<String>,
+        None::<String>,
+        None::<String>,
+    ))
 }
 
 /// The spawned server's base URL, e.g. `http://127.0.0.1:53241`.
@@ -206,25 +228,8 @@ fn spawn_server() -> ServerHandle {
 
     let base_url = format!("http://{addr}");
 
-    let http = Arc::new(HttpClient::new(
-        reqwest::Client::new(),
-        Some(base_url.clone()),
-        None::<String>,
-        None::<String>,
-        None::<String>,
-        None::<String>,
-        None::<String>,
-        None::<String>,
-        None,
-        None::<String>,
-        None::<String>,
-        None::<String>,
-        None::<String>,
-    ));
-
     ServerHandle {
         base_url,
-        http,
         child: Mutex::new(Some(child)),
     }
 }

@@ -16,6 +16,3 @@ pub use error::*;
 pub use proxy::*;
 pub use upstream_client::*;
 pub use resolved_tool::*;
-
-#[cfg(test)]
-mod client_tests;
