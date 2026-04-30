@@ -179,6 +179,7 @@ CARGO_TOMLS=(
 )
 
 PYPROJECT_TOMLS=(
+  objectiveai-py/pyproject.toml
   objectiveai-rs-pyo3/pyproject.toml
 )
 
