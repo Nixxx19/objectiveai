@@ -1068,13 +1068,25 @@ async fn test_invention_agent_with_invention_tools_ok() {
     })
     .unwrap();
     let params = default_params_with_seed(42);
-    let inv = make_invention_tool("execute_code", indexmap::indexmap! {
+    // The mock's invention dispatch (`mock::invention::pick_invention_tool`)
+    // matches against the proxy-prefixed tool names that the
+    // `objectiveai-function-invention` server emits. To exercise the
+    // step-0 essay path here, we mount a tool whose final
+    // proxy-prefixed name matches what the dispatcher expects: the
+    // upstream server is named `objectiveai-function-invention`, and the
+    // bare tool name is `WriteEssay`, so the prefix is
+    // `objectiveai-function-invention_WriteEssay`.
+    let inv = make_invention_tool("WriteEssay", indexmap::indexmap! {
         "type".into() => serde_json::json!("object"),
         "properties".into() => serde_json::json!({
-            "code": {"type": "string"},
+            "essay": {"type": "string"},
         }),
     });
-    let server = test_mcp_server::spawn("test", vec![TestTool::from_invention(inv)]).await;
+    let server = test_mcp_server::spawn(
+        "objectiveai-function-invention",
+        vec![TestTool::from_invention(inv)],
+    )
+    .await;
     let conn = test_mcp_server::connect_through_proxy(&[&server]).await;
 
     // With invention tools provided through the proxy, should succeed.
