@@ -144,6 +144,19 @@ set_requirements_objectiveai_pin() {
     "==$NEW_VERSION"
 }
 
+# `"objectiveai==X.Y.Z"` entries inside a pyproject.toml [project.dependencies]
+# array (or any line that quotes an objectiveai pin). The token regex stops at
+# the closing quote/comma so trailing TOML punctuation isn't consumed. Lines
+# without an objectiveai pin pass through untouched, including unrelated deps
+# like `objectiveai-foo==X` (the `-foo` breaks the `objectiveai==` boundary).
+set_pyproject_objectiveai_dep_pin() {
+  local file="$1"
+  inline_substitute "$file" \
+    'objectiveai[[:space:]]*==' \
+    '==[0-9][^",[:space:]]*' \
+    "==$NEW_VERSION"
+}
+
 # __version__ = "..." in a Python file. If absent, insert one right after
 # `from __future__ import annotations` (every runner has that line) with a
 # blank line before it for PEP 8 readability.
@@ -191,6 +204,7 @@ CARGO_TOMLS=(
 
 PYPROJECT_TOMLS=(
   objectiveai-py/pyproject.toml
+  objectiveai-cocoindex/pyproject.toml
 )
 
 PACKAGE_JSONS=(
@@ -233,6 +247,7 @@ update() {
       ;;
     pypro)
       set_toml_package_version "$file"
+      set_pyproject_objectiveai_dep_pin "$file"
       ;;
     pkg)
       set_package_json_version "$file"
