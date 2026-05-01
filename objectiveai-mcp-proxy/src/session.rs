@@ -7,8 +7,9 @@
 //! `Arc<Session>`s lives in [`crate::session_manager`].
 
 use dashmap::DashMap;
-use futures::future::join_all;
+use futures::future::try_join_all;
 use indexmap::IndexMap;
+use std::sync::Arc;
 use objectiveai::mcp::{
     Connection, JsonRpcNotification,
     resource::{ListResourcesResult, ReadResourceResult, Resource},
@@ -159,75 +160,69 @@ impl Session {
 
     /// Fan `tools/list` out to every upstream in parallel, prefix each
     /// tool's name with `<server-name>_`, concatenate the per-upstream
-    /// lists, and return the union. Per-upstream failures are logged and
-    /// the upstream is dropped from the result — one bad server can't
-    /// poison the whole listing.
-    pub async fn list_tools(&self) -> ListToolsResult {
+    /// lists, and return the union sorted by name. Fails fast: the
+    /// first upstream error short-circuits via `try_join_all` and is
+    /// returned to the caller — we don't paper over a broken upstream.
+    ///
+    /// Sorting by name guarantees a stable order across calls regardless
+    /// of upstream `HashMap` iteration order or per-upstream return
+    /// order; downstream consumers (e.g. seeded mock agents) rely on
+    /// this for deterministic output.
+    pub async fn list_tools(&self) -> Result<ListToolsResult, Arc<objectiveai::mcp::Error>> {
         let names: Vec<&String> = self.connections.keys().collect();
-        let results = join_all(
+        let results = try_join_all(
             self.connections
                 .values()
                 .map(|c| async move { c.list_tools().await }),
         )
-        .await;
+        .await?;
 
         let mut tools: Vec<Tool> = Vec::new();
-        for (server_name, result) in names.into_iter().zip(results) {
-            match result {
-                Ok(arc) => {
-                    for tool in arc.iter() {
-                        let mut prefixed = tool.clone();
-                        prefixed.name = prefix_name(server_name, &tool.name);
-                        tools.push(prefixed);
-                    }
-                }
-                Err(e) => {
-                    tracing::warn!(error = %e, upstream = %server_name, "list_tools failed")
-                }
+        for (server_name, arc) in names.into_iter().zip(results) {
+            for tool in arc.iter() {
+                let mut prefixed = tool.clone();
+                prefixed.name = prefix_name(server_name, &tool.name);
+                tools.push(prefixed);
             }
         }
+        tools.sort_by(|a, b| a.name.cmp(&b.name));
 
-        ListToolsResult {
+        Ok(ListToolsResult {
             tools,
             next_cursor: None,
             _meta: None,
-        }
+        })
     }
 
-    /// Fan `resources/list` out to every upstream in parallel, prefix each
-    /// URI with `<server-name>_`, concatenate the per-upstream lists, and
-    /// return the union. Same best-effort failure semantics as
-    /// [`Session::list_tools`].
-    pub async fn list_resources(&self) -> ListResourcesResult {
+    /// Fan `resources/list` out to every upstream in parallel, prefix
+    /// each URI with `<server-name>_`, concatenate the per-upstream
+    /// lists, and return the union sorted by URI. Same fail-fast
+    /// semantics as [`Session::list_tools`] — the first upstream error
+    /// short-circuits and is returned to the caller.
+    pub async fn list_resources(&self) -> Result<ListResourcesResult, Arc<objectiveai::mcp::Error>> {
         let names: Vec<&String> = self.connections.keys().collect();
-        let results = join_all(
+        let results = try_join_all(
             self.connections
                 .values()
                 .map(|c| async move { c.list_resources().await }),
         )
-        .await;
+        .await?;
 
         let mut resources: Vec<Resource> = Vec::new();
-        for (server_name, result) in names.into_iter().zip(results) {
-            match result {
-                Ok(arc) => {
-                    for resource in arc.iter() {
-                        let mut prefixed = resource.clone();
-                        prefixed.uri = prefix_name(server_name, &resource.uri);
-                        resources.push(prefixed);
-                    }
-                }
-                Err(e) => {
-                    tracing::warn!(error = %e, upstream = %server_name, "list_resources failed")
-                }
+        for (server_name, arc) in names.into_iter().zip(results) {
+            for resource in arc.iter() {
+                let mut prefixed = resource.clone();
+                prefixed.uri = prefix_name(server_name, &resource.uri);
+                resources.push(prefixed);
             }
         }
+        resources.sort_by(|a, b| a.uri.cmp(&b.uri));
 
-        ListResourcesResult {
+        Ok(ListResourcesResult {
             resources,
             next_cursor: None,
             _meta: None,
-        }
+        })
     }
 
     /// Forward `tools/call` to whichever upstream owns the named tool.

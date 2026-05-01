@@ -20,6 +20,7 @@
 
 #![allow(dead_code)]
 
+pub mod inventions;
 pub mod mcp_server;
 pub mod server;
 pub mod stream_harness;

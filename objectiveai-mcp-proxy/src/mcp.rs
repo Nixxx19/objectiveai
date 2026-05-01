@@ -363,13 +363,17 @@ async fn handle_tools_list(
         None => return unknown_session_response(),
     };
 
-    let result = session.list_tools().await;
-    let body = JsonRpcResponse::Success {
-        jsonrpc: "2.0".into(),
-        id: request.id,
-        result,
-    };
-    (StatusCode::OK, Json(body)).into_response()
+    match session.list_tools().await {
+        Ok(result) => {
+            let body = JsonRpcResponse::Success {
+                jsonrpc: "2.0".into(),
+                id: request.id,
+                result,
+            };
+            (StatusCode::OK, Json(body)).into_response()
+        }
+        Err(e) => internal_error_response(request.id, format!("list_tools: {e}")),
+    }
 }
 
 async fn handle_tools_call(
@@ -504,13 +508,17 @@ async fn handle_resources_list(
         None => return unknown_session_response(),
     };
 
-    let result = session.list_resources().await;
-    let body = JsonRpcResponse::Success {
-        jsonrpc: "2.0".into(),
-        id: request.id,
-        result,
-    };
-    (StatusCode::OK, Json(body)).into_response()
+    match session.list_resources().await {
+        Ok(result) => {
+            let body = JsonRpcResponse::Success {
+                jsonrpc: "2.0".into(),
+                id: request.id,
+                result,
+            };
+            (StatusCode::OK, Json(body)).into_response()
+        }
+        Err(e) => internal_error_response(request.id, format!("list_resources: {e}")),
+    }
 }
 
 async fn handle_resources_read(
