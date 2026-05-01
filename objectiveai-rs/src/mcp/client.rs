@@ -71,17 +71,27 @@ impl Client {
         }
     }
 
-    /// Returns the innate headers this client stamps on every request
-    /// (`User-Agent`, `X-Title`, `Referer`, `HTTP-Referer`). Useful for
-    /// callers that need to forward the same identity through a proxy
-    /// without hardcoding which fields the proxy expects.
-    pub fn headers(&self) -> IndexMap<String, String> {
-        let mut headers = IndexMap::new();
-        headers.insert("User-Agent".to_string(), self.user_agent.clone());
-        headers.insert("X-Title".to_string(), self.x_title.clone());
-        headers.insert("Referer".to_string(), self.http_referer.clone());
-        headers.insert("HTTP-Referer".to_string(), self.http_referer.clone());
-        headers
+    /// Build the canonical header map that the client stamps on every
+    /// request opened under this client / connection. The supplied
+    /// caller map (if any) wins on conflict — defaults are inserted
+    /// only when the caller didn't already provide them. The merged
+    /// map is computed once at the top of `connect_once` and reused
+    /// across all three handshake requests + handed to the resulting
+    /// [`Connection`] for every later RPC.
+    fn headers(
+        &self,
+        supplied: Option<IndexMap<String, String>>,
+    ) -> IndexMap<String, String> {
+        let mut out = supplied.unwrap_or_default();
+        out.entry("User-Agent".to_string())
+            .or_insert_with(|| self.user_agent.clone());
+        out.entry("X-Title".to_string())
+            .or_insert_with(|| self.x_title.clone());
+        out.entry("Referer".to_string())
+            .or_insert_with(|| self.http_referer.clone());
+        out.entry("HTTP-Referer".to_string())
+            .or_insert_with(|| self.http_referer.clone());
+        out
     }
 
     /// Connects to an MCP server using the Streamable HTTP transport.
@@ -90,11 +100,15 @@ impl Client {
     /// the `Mcp-Session-Id` from the response. Returns a [`Connection`]
     /// that can be used to list/call tools and list/read resources.
     ///
-    /// `extra_headers` are forwarded on every request this connection
-    /// makes to the upstream — both the initial `initialize` POST and
-    /// every subsequent RPC. They are applied *after* the fixed headers
-    /// so callers can't accidentally clobber `Mcp-Session-Id`,
-    /// `Content-Type`, etc.
+    /// `headers` are forwarded on every request this connection makes
+    /// to the upstream — both the initial `initialize` POST and every
+    /// subsequent RPC. The client merges its own defaults
+    /// (`User-Agent`, `X-Title`, `Referer`, `HTTP-Referer`) into this
+    /// map, but caller-supplied values for any of those win on
+    /// conflict. `Authorization` (when needed) is just another entry
+    /// in `headers`. The `Mcp-Session-Id` header is reserved — pass it
+    /// via `session_id` instead so the explicit argument can never be
+    /// clobbered by the headers map.
     ///
     /// ## SSE handoff
     ///
@@ -116,13 +130,18 @@ impl Client {
     pub async fn connect(
         &self,
         url: String,
-        authorization: Option<String>,
         session_id: Option<String>,
-        extra_headers: IndexMap<String, String>,
+        headers: Option<IndexMap<String, String>>,
     ) -> Result<super::Connection, super::Error> {
         if url == "mock" {
             return Ok(super::Connection::new_mock(url));
         }
+
+        // Merge the caller's headers with the client's defaults once,
+        // then reuse the same merged map across every retry of the
+        // handshake AND hand it to the resulting Connection for every
+        // later RPC. Caller-supplied headers always win over defaults.
+        let headers = self.headers(headers);
 
         // One outer backoff retry around all three handshake steps —
         // initialize POST, notifications/initialized POST, GET / SSE
@@ -145,7 +164,7 @@ impl Client {
 
         loop {
             match self
-                .connect_once(&url, authorization.as_deref(), session_id.as_deref(), &extra_headers)
+                .connect_once(&url, session_id.as_deref(), &headers)
                 .await
             {
                 Ok(conn) => return Ok(conn),
@@ -162,12 +181,15 @@ impl Client {
 
     /// One pass through the full Streamable-HTTP handshake. Caller
     /// applies the outer backoff retry loop in [`Self::connect`].
+    /// `headers` is the already-merged map (defaults + caller overrides
+    /// from [`Self::headers`]), reused on every request without further
+    /// processing. `Mcp-Session-Id` is applied AFTER the headers loop
+    /// so it always wins over any same-named entry in `headers`.
     async fn connect_once(
         &self,
         url: &str,
-        authorization: Option<&str>,
         session_id: Option<&str>,
-        extra_headers: &IndexMap<String, String>,
+        headers: &IndexMap<String, String>,
     ) -> Result<super::Connection, super::Error> {
         let init_request = serde_json::json!({
             "jsonrpc": "2.0",
@@ -191,18 +213,13 @@ impl Client {
             .header("Accept", "text/event-stream, application/json")
             .json(&init_request);
 
+        for (name, value) in headers {
+            request = request.header(name, value);
+        }
+        // Mcp-Session-Id is applied last so the explicit `session_id`
+        // argument always wins over any same-named entry in `headers`.
         if let Some(sid) = session_id {
             request = request.header("Mcp-Session-Id", sid);
-        }
-        if let Some(auth) = authorization {
-            request = request.header("Authorization", auth);
-        }
-        request = request.header("User-Agent", &self.user_agent);
-        request = request.header("X-Title", &self.x_title);
-        request = request.header("Referer", &self.http_referer);
-        request = request.header("HTTP-Referer", &self.http_referer);
-        for (name, value) in extra_headers {
-            request = request.header(name, value);
         }
 
         let response = request.send().await.map_err(|source| super::Error::Connection {
@@ -323,19 +340,11 @@ impl Client {
             .post(url)
             .timeout(self.call_timeout)
             .header("Content-Type", "application/json")
-            .header("Accept", "application/json, text/event-stream")
-            .header("Mcp-Session-Id", &resolved_session_id);
-        if let Some(auth) = authorization {
-            notify_request = notify_request.header("Authorization", auth);
-        }
-        notify_request = notify_request
-            .header("User-Agent", &self.user_agent)
-            .header("X-Title", &self.x_title)
-            .header("Referer", &self.http_referer)
-            .header("HTTP-Referer", &self.http_referer);
-        for (name, value) in extra_headers {
+            .header("Accept", "application/json, text/event-stream");
+        for (name, value) in headers {
             notify_request = notify_request.header(name, value);
         }
+        notify_request = notify_request.header("Mcp-Session-Id", &resolved_session_id);
         let notify_response = notify_request
             .json(&init_notification_body)
             .send()
@@ -370,19 +379,11 @@ impl Client {
                 .http_client
                 .get(url)
                 .timeout(self.connect_timeout)
-                .header("Accept", "text/event-stream")
-                .header("Mcp-Session-Id", &resolved_session_id);
-            if let Some(auth) = authorization {
-                get_request = get_request.header("Authorization", auth);
-            }
-            get_request = get_request
-                .header("User-Agent", &self.user_agent)
-                .header("X-Title", &self.x_title)
-                .header("Referer", &self.http_referer)
-                .header("HTTP-Referer", &self.http_referer);
-            for (name, value) in extra_headers {
+                .header("Accept", "text/event-stream");
+            for (name, value) in headers {
                 get_request = get_request.header(name, value);
             }
+            get_request = get_request.header("Mcp-Session-Id", &resolved_session_id);
             let get_response = get_request.send().await.map_err(|source| {
                 super::Error::Connection {
                     url: url.to_string(),
@@ -412,11 +413,7 @@ impl Client {
             self.http_client.clone(),
             url.to_string(),
             resolved_session_id,
-            authorization.map(String::from),
-            self.user_agent.clone(),
-            self.x_title.clone(),
-            self.http_referer.clone(),
-            extra_headers.clone(),
+            headers.clone(),
             self.backoff_current_interval,
             self.backoff_initial_interval,
             self.backoff_randomization_factor,

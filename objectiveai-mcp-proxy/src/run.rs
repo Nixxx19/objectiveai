@@ -2,7 +2,7 @@
 //!
 //! Multiplexes a downstream MCP client across one or more upstream MCP
 //! servers selected per-request via `X-MCP-Servers` /
-//! `X-MCP-Authorization` / `X-MCP-Headers`.
+//! `X-MCP-Headers`.
 //!
 //! Mirrors the `objectiveai-api` `run.rs` shape so other crates can
 //! `use objectiveai_mcp_proxy::{ConfigBuilder, run}` and spawn the

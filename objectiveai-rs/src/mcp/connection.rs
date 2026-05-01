@@ -101,11 +101,7 @@ impl Connection {
         http_client: reqwest::Client,
         url: String,
         session_id: String,
-        authorization: Option<String>,
-        user_agent: String,
-        x_title: String,
-        http_referer: String,
-        extra_headers: IndexMap<String, String>,
+        headers: IndexMap<String, String>,
         backoff_current_interval: Duration,
         backoff_initial_interval: Duration,
         backoff_randomization_factor: f64,
@@ -120,11 +116,7 @@ impl Connection {
             http_client,
             url,
             session_id,
-            authorization,
-            user_agent,
-            x_title,
-            http_referer,
-            extra_headers,
+            headers,
             backoff_current_interval,
             backoff_initial_interval,
             backoff_randomization_factor,
@@ -255,14 +247,12 @@ pub struct ConnectionInner {
     pub http_client: reqwest::Client,
     pub url: String,
     pub session_id: String,
-    pub authorization: Option<String>,
-    pub user_agent: String,
-    pub x_title: String,
-    pub http_referer: String,
-    /// Extra HTTP headers forwarded on every POST and GET this connection
-    /// makes. Applied *after* the fixed headers above (`Content-Type`,
-    /// `Mcp-Session-Id`, `User-Agent`, etc.) so the fixed set always wins.
-    pub extra_headers: IndexMap<String, String>,
+    /// All HTTP headers stamped on every POST / GET this connection
+    /// makes — the same merged map (defaults + caller overrides) the
+    /// `Client` built once during connect. `Mcp-Session-Id`,
+    /// `Content-Type`, and `Accept` are still set by the request
+    /// builders and override anything in `headers`.
+    pub headers: IndexMap<String, String>,
 
     pub backoff_current_interval: Duration,
     pub backoff_initial_interval: Duration,
@@ -313,11 +303,7 @@ impl ConnectionInner {
             http_client: reqwest::Client::new(),
             url,
             session_id: String::new(),
-            authorization: None,
-            user_agent: String::new(),
-            x_title: String::new(),
-            http_referer: String::new(),
-            extra_headers: IndexMap::new(),
+            headers: IndexMap::new(),
             backoff_current_interval: Duration::ZERO,
             backoff_initial_interval: Duration::ZERO,
             backoff_randomization_factor: 0.0,
@@ -364,11 +350,7 @@ impl ConnectionInner {
             http_client: reqwest::Client::new(),
             url,
             session_id: String::new(),
-            authorization: None,
-            user_agent: String::new(),
-            x_title: String::new(),
-            http_referer: String::new(),
-            extra_headers: IndexMap::new(),
+            headers: IndexMap::new(),
             backoff_current_interval: Duration::from_millis(500),
             backoff_initial_interval: Duration::from_millis(500),
             backoff_randomization_factor: 0.5,
@@ -424,11 +406,7 @@ impl ConnectionInner {
         http_client: reqwest::Client,
         url: String,
         session_id: String,
-        authorization: Option<String>,
-        user_agent: String,
-        x_title: String,
-        http_referer: String,
-        extra_headers: IndexMap<String, String>,
+        headers: IndexMap<String, String>,
         backoff_current_interval: Duration,
         backoff_initial_interval: Duration,
         backoff_randomization_factor: f64,
@@ -443,11 +421,7 @@ impl ConnectionInner {
             http_client,
             url,
             session_id,
-            authorization,
-            user_agent,
-            x_title,
-            http_referer,
-            extra_headers,
+            headers,
             backoff_current_interval,
             backoff_initial_interval,
             backoff_randomization_factor,
@@ -549,19 +523,14 @@ impl ConnectionInner {
             .post(&self.url)
             .timeout(self.call_timeout)
             .header("Content-Type", "application/json")
-            .header("Accept", "application/json, text/event-stream")
-            .header("Mcp-Session-Id", &self.session_id);
-
-        if let Some(auth) = &self.authorization {
-            request = request.header("Authorization", auth);
-        }
-        request = request.header("User-Agent", &self.user_agent);
-        request = request.header("X-Title", &self.x_title);
-        request = request.header("Referer", &self.http_referer);
-        request = request.header("HTTP-Referer", &self.http_referer);
-        for (name, value) in &self.extra_headers {
+            .header("Accept", "application/json, text/event-stream");
+        for (name, value) in &self.headers {
             request = request.header(name, value);
         }
+        // Mcp-Session-Id is applied last so a same-named entry in
+        // `headers` (e.g. the proxy's encoded session id) can never
+        // override the connection's own session id.
+        request = request.header("Mcp-Session-Id", &self.session_id);
         request
     }
 
@@ -1011,19 +980,12 @@ impl ConnectionInner {
         let mut request = self
             .http_client
             .get(&self.url)
-            .header("Accept", "text/event-stream")
-            .header("Mcp-Session-Id", &self.session_id);
-
-        if let Some(auth) = &self.authorization {
-            request = request.header("Authorization", auth);
-        }
-        request = request.header("User-Agent", &self.user_agent);
-        request = request.header("X-Title", &self.x_title);
-        request = request.header("Referer", &self.http_referer);
-        request = request.header("HTTP-Referer", &self.http_referer);
-        for (name, value) in &self.extra_headers {
+            .header("Accept", "text/event-stream");
+        for (name, value) in &self.headers {
             request = request.header(name, value);
         }
+        // Mcp-Session-Id last so it always wins over `headers`.
+        request = request.header("Mcp-Session-Id", &self.session_id);
         request
     }
 

@@ -264,22 +264,20 @@ async fn handle_initialize(
     //   1. id provided + alive in `state.sessions` → cheap-path: reuse
     //      the live in-memory `Session`, re-mint its id from its
     //      stored payload. The new request's `X-MCP-Servers` /
-    //      `X-MCP-Headers` / `X-MCP-Authorization` are IGNORED — the
-    //      encoded id is the sole source of truth for what's
-    //      connected and how. This is the "one id = one connection
-    //      state" guarantee.
+    //      `X-MCP-Headers` are IGNORED — the encoded id is the sole
+    //      source of truth for what's connected and how. This is the
+    //      "one id = one connection state" guarantee.
     //   2. id provided but not in memory → decrypt-and-decode it. If
-    //      decryption fails under every key, or decoding fails →
-    //      401. Otherwise reconnect to every URL in the decoded
-    //      payload using its stored headers (same ignore-the-request
-    //      semantics as branch 1). The `Mcp-Session-Id` and
-    //      `Authorization` headers come ONLY from the encoded id;
-    //      anything the request snuck into `X-MCP-Headers` is
-    //      ignored.
-    //   3. no id → fresh init. `X-MCP-Servers` / `X-MCP-Headers` /
-    //      `X-MCP-Authorization` build the spec list, every URL
-    //      connects from scratch, the resulting `(Connection,
-    //      headers)` set encodes into a brand-new id.
+    //      decryption fails, or decoding fails → 401. Otherwise
+    //      reconnect to every URL in the decoded payload using its
+    //      stored headers (same ignore-the-request semantics as
+    //      branch 1). The `Mcp-Session-Id` and `Authorization`
+    //      headers come ONLY from the encoded id; anything the
+    //      request snuck into `X-MCP-Headers` is ignored.
+    //   3. no id → fresh init. `X-MCP-Servers` / `X-MCP-Headers`
+    //      build the spec list, every URL connects from scratch, the
+    //      resulting `(Connection, headers)` set encodes into a
+    //      brand-new id.
     let provided_session_id = headers
         .get(SESSION_ID_HEADER)
         .and_then(|v| v.to_str().ok())

@@ -196,7 +196,7 @@ where
             >,
         >,
         disable_tools: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
-        extra_mcp_servers: Vec<String>,
+        extra_mcp_servers: Vec<super::ExtraMcpServer>,
         extra_mcp_headers: indexmap::IndexMap<String, String>,
         transform_messages: Option<Arc<TransformMessages>>,
         viewer: bool,
@@ -240,7 +240,7 @@ where
             >,
         >,
         disable_tools: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
-        extra_mcp_servers: Vec<String>,
+        extra_mcp_servers: Vec<super::ExtraMcpServer>,
         extra_mcp_headers: indexmap::IndexMap<String, String>,
         transform_messages: Option<Arc<TransformMessages>>,
         viewer: bool,
@@ -333,7 +333,7 @@ where
         // by the function-inventions orchestrator to plumb the shared
         // InventionServer URL through the proxy without affecting the
         // agent's content-derived ID.
-        extra_mcp_servers: Vec<String>,
+        extra_mcp_servers: Vec<super::ExtraMcpServer>,
         // Headers to merge into the per-agent `X-MCP-Headers` map. The
         // proxy forwards these verbatim to every upstream it fans out
         // to. Used by the function-inventions orchestrator to send its
@@ -493,7 +493,7 @@ where
                     .mcp_servers()
                     .map(|s| s.iter().map(|s| s.url.clone()).collect())
                     .unwrap_or_default();
-                urls.extend(extra_mcp_servers.iter().cloned());
+                urls.extend(extra_mcp_servers.iter().map(|s| s.url.clone()));
 
                 // No MCP servers → no proxy
                 // connection needed for this agent. Skipping the spawn
@@ -504,10 +504,23 @@ where
                     return None;
                 }
 
-                let mut auth_map: indexmap::IndexMap<String, String> =
-                    indexmap::IndexMap::new();
+                // Build the per-URL header map sent as `X-MCP-Headers`
+                // to the proxy. For each agent-declared server URL,
+                // start from the orchestrator-supplied `extra_mcp_headers`
+                // (e.g. the function-inventions tenant id) and layer on
+                // any configured `Authorization` for that URL. For each
+                // entry in `extra_mcp_servers`, start from
+                // `extra_mcp_headers` and layer on its own per-server
+                // headers (which win on conflict). The proxy stamps
+                // each per-URL header set on every outbound request
+                // to that upstream.
+                let mut per_url_headers: indexmap::IndexMap<
+                    String,
+                    indexmap::IndexMap<String, String>,
+                > = indexmap::IndexMap::new();
                 if let Some(servers) = agent.base().mcp_servers() {
                     for s in servers {
+                        let mut h = extra_mcp_headers.clone();
                         if let Some(v) = request_mcp_auth_owned
                             .as_deref()
                             .and_then(|m| m.get(&s.url))
@@ -517,30 +530,26 @@ where
                                     .and_then(|m| m.get(&s.url))
                             })
                         {
-                            auth_map.insert(s.url.clone(), v.clone());
+                            h.insert("Authorization".to_string(), v.clone());
+                        }
+                        per_url_headers.insert(s.url.clone(), h);
+                    }
+                }
+                for s in &extra_mcp_servers {
+                    let entry = per_url_headers
+                        .entry(s.url.clone())
+                        .or_insert_with(|| extra_mcp_headers.clone());
+                    if let Some(server_headers) = &s.headers {
+                        for (k, v) in server_headers {
+                            entry.insert(k.clone(), v.clone());
                         }
                     }
                 }
 
-                // Forward the same innate identity headers
-                // (User-Agent / X-Title / Referer / HTTP-Referer) the
-                // mcp client stamps locally — the proxy re-emits them
-                // on its outbound upstream calls so the upstreams see
-                // the api server, not the proxy, as the originator.
-                // Caller-supplied `extra_mcp_headers` are merged in
-                // here so the proxy forwards them too (used by the
-                // function-inventions orchestrator to send its tenant
-                // id to the shared InventionServer).
-                let mut mcp_inner_headers = self.mcp_client.headers();
-                for (k, v) in &extra_mcp_headers {
-                    mcp_inner_headers.insert(k.clone(), v.clone());
-                }
-
-                let extra_headers: indexmap::IndexMap<String, String> =
+                let proxy_request_headers: indexmap::IndexMap<String, String> =
                     indexmap::indexmap! {
                         "X-MCP-Servers".to_string() => serde_json::to_string(&urls).unwrap(),
-                        "X-MCP-Authorization".to_string() => serde_json::to_string(&auth_map).unwrap(),
-                        "X-MCP-Headers".to_string() => serde_json::to_string(&mcp_inner_headers).unwrap(),
+                        "X-MCP-Headers".to_string() => serde_json::to_string(&per_url_headers).unwrap(),
                     };
 
                 let mcp_client = self.mcp_client.clone();
@@ -552,7 +561,7 @@ where
                     .map(|c| c.session_id.clone());
                 Some(tokio::spawn(async move {
                     mcp_client
-                        .connect(proxy_url, None, session_id, extra_headers)
+                        .connect(proxy_url, session_id, Some(proxy_request_headers))
                         .await
                 }))
             })

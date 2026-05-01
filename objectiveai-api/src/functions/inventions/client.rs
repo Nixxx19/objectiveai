@@ -566,7 +566,7 @@ where
             }
         };
         let invention_session = Arc::new(
-            invention_handle.register(T::essay_tools(&state)),
+            invention_handle.register(id.clone(), T::essay_tools(&state)),
         );
         let invention_url = invention_session.url();
         let invention_session_id_header: indexmap::IndexMap<String, String> =
@@ -1068,7 +1068,7 @@ where
                 agent_params.clone(),
                 continuation.take(),
                 Some(disable_tools),
-                vec![invention_url.clone()],
+                vec![crate::agent::completions::ExtraMcpServer::new(invention_url.clone())],
                 invention_session_id_header.clone(),
                 None,
                 false,
@@ -1166,7 +1166,7 @@ where
                     agent_params.clone(),
                     continuation.take(),
                     Some(disable_tools),
-                    vec![invention_url.clone()],
+                    vec![crate::agent::completions::ExtraMcpServer::new(invention_url.clone())],
                     invention_session_id_header.clone(),
                     None,
                     false,

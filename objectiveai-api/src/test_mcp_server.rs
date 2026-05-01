@@ -249,7 +249,8 @@ pub async fn connect_through_proxy(
         "X-MCP-Servers".into(),
         serde_json::to_string(&urls).expect("serialize X-MCP-Servers"),
     );
-    headers.insert("X-MCP-Authorization".into(), "{}".into());
+    // X-MCP-Headers is a per-URL `{url: {header: value}}` map. Empty
+    // map → no per-upstream headers to apply.
     headers.insert("X-MCP-Headers".into(), "{}".into());
 
     // Reuse the process-wide MCP client singleton. Its underlying
@@ -258,7 +259,7 @@ pub async fn connect_through_proxy(
     // no shared connection-pool task that could be tied to a dropped
     // per-test runtime.
     crate::test_clients::mcp_client()
-        .connect(proxy.url.clone(), None, None, headers)
+        .connect(proxy.url.clone(), None, Some(headers))
         .await
         .expect("connect through proxy")
 }
