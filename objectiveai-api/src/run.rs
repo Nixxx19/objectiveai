@@ -155,6 +155,8 @@ struct EnvConfigBuilder {
     docker_timeout: Option<u64>,
     #[envconfig(from = "FUNCTION_INVENTION_FORBID_OVERWRITE")]
     function_invention_forbid_overwrite: Option<String>,
+    #[envconfig(from = "FUNCTIONS_INVENTIONS_SUBSCRIBE_TOOLS_TIMEOUT")]
+    functions_inventions_subscribe_tools_timeout: Option<u64>,
     #[envconfig(from = "ADDRESS")]
     address: Option<String>,
     #[envconfig(from = "PORT")]
@@ -225,6 +227,7 @@ impl EnvConfigBuilder {
             mock_max_tool_calls: self.mock_max_tool_calls,
             docker_timeout: self.docker_timeout,
             function_invention_forbid_overwrite: self.function_invention_forbid_overwrite.map(|s| parse_bool(&s)),
+            functions_inventions_subscribe_tools_timeout: self.functions_inventions_subscribe_tools_timeout,
             address: self.address,
             port: self.port,
             suppress_output: None,
@@ -291,6 +294,7 @@ pub struct ConfigBuilder {
     pub mock_max_tool_calls: Option<u32>,
     pub docker_timeout: Option<u64>,
     pub function_invention_forbid_overwrite: Option<bool>,
+    pub functions_inventions_subscribe_tools_timeout: Option<u64>,
     pub address: Option<String>,
     pub port: Option<u16>,
     pub suppress_output: Option<bool>,
@@ -376,6 +380,7 @@ impl ConfigBuilder {
             mock_max_tool_calls: self.mock_max_tool_calls.unwrap_or(1000),
             docker_timeout: self.docker_timeout.unwrap_or(30),
             function_invention_forbid_overwrite: self.function_invention_forbid_overwrite.unwrap_or(false),
+            functions_inventions_subscribe_tools_timeout: self.functions_inventions_subscribe_tools_timeout.unwrap_or(30_000),
             address: self.address.unwrap_or_else(|| "0.0.0.0".to_string()),
             port: self.port.unwrap_or(5000),
             suppress_output: self.suppress_output.unwrap_or(false),
@@ -444,6 +449,7 @@ pub struct Config {
     pub mock_max_tool_calls: u32,
     pub docker_timeout: u64,
     pub function_invention_forbid_overwrite: bool,
+    pub functions_inventions_subscribe_tools_timeout: u64,
     pub address: String,
     pub port: u16,
     pub suppress_output: bool,
@@ -508,6 +514,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         mock_max_tool_calls,
         docker_timeout,
         function_invention_forbid_overwrite,
+        functions_inventions_subscribe_tools_timeout,
         address,
         port,
         suppress_output,
@@ -737,6 +744,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
             Arc::new(functions::inventions::InventionServerSpawner::new()),
             true, // persist
             function_invention_forbid_overwrite,
+            std::time::Duration::from_millis(functions_inventions_subscribe_tools_timeout),
         ));
 
     // Function Inventions Recursive Client

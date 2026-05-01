@@ -612,6 +612,7 @@ static FUNCTION_INVENTIONS: LazyLock<Arc<FunctionInventionsClient>> = LazyLock::
         INVENTION_SERVER_SPAWNER.clone(),
         true,
         false,
+        std::time::Duration::from_secs(30),
     ))
 });
 

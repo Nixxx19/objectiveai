@@ -8,7 +8,7 @@ use objectiveai::functions::inventions::InventionTool;
 
 fn echo_tool() -> InventionTool {
     InventionTool {
-        name: "echo",
+        name: "echo".to_string(),
         description: "Echoes back the input",
         parameters: {
             let mut m = IndexMap::new();
@@ -32,7 +32,7 @@ fn echo_tool() -> InventionTool {
 
 fn failing_tool() -> InventionTool {
     InventionTool {
-        name: "fail",
+        name: "fail".to_string(),
         description: "Always fails",
         parameters: IndexMap::new(),
         call: Arc::new(|_| Box::pin(async { Err("something went wrong".to_string()) })),

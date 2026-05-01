@@ -277,19 +277,19 @@ async fn test_multiple_invention_tools_no_conflicts() {
 
     let invention_tools = vec![
         objectiveai::functions::inventions::InventionTool {
-            name: "search",
+            name: "search".to_string(),
             description: "Search the web",
             parameters: search_params.clone(),
             call: Arc::new(|_| Box::pin(async { Ok("".into()) })),
         },
         objectiveai::functions::inventions::InventionTool {
-            name: "calculate",
+            name: "calculate".to_string(),
             description: "Evaluate a math expression",
             parameters: calculate_params.clone(),
             call: Arc::new(|_| Box::pin(async { Ok("".into()) })),
         },
         objectiveai::functions::inventions::InventionTool {
-            name: "translate",
+            name: "translate".to_string(),
             description: "Translate text to another language",
             parameters: translate_params.clone(),
             call: Arc::new(|_| Box::pin(async { Ok("".into()) })),
@@ -548,7 +548,7 @@ async fn test_invention_tool_parameters_preserved() {
 
     let invention_tools = vec![
         objectiveai::functions::inventions::InventionTool {
-            name: "analyze",
+            name: "analyze".to_string(),
             description: "Analyze data",
             parameters: inv_params.clone(),
             call: Arc::new(|_| Box::pin(async { Ok("ok".into()) })),

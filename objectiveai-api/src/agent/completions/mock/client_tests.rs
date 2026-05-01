@@ -379,7 +379,7 @@ fn make_invention_tool(
     schema: indexmap::IndexMap<String, serde_json::Value>,
 ) -> objectiveai::functions::inventions::InventionTool {
     objectiveai::functions::inventions::InventionTool {
-        name,
+        name: name.to_string(),
         description: "test",
         parameters: schema,
         call: std::sync::Arc::new(|_| Box::pin(async { Ok("ok".into()) })),
