@@ -720,9 +720,17 @@ def _generate_field_line(
     # Strip leading characters that are invalid in Python identifiers
     if field_name and not field_name[0].isalpha() and field_name[0] != "_":
         field_name = field_name.lstrip("$")
+    # Pydantic forbids leading-underscore field names — those are reserved for
+    # private attributes. Strip the underscore and re-route serialization via
+    # an alias so the wire format keeps the original name (e.g. `_meta`).
+    needs_underscore_alias = field_name.startswith("_")
+    if needs_underscore_alias:
+        field_name = field_name.lstrip("_") or "field"
     if field_name in ("from", "type", "class", "import", "in", "is", "not", "and", "or"):
         alias = prop_name
         field_name = field_name + "_"
+    elif needs_underscore_alias:
+        alias = prop_name
     else:
         alias = prop_name if prop_name != field_name else None
 
