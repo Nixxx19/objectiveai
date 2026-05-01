@@ -1,51 +1,47 @@
 use std::borrow::Cow;
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::Arc;
 
 use dashmap::DashMap;
-use futures::{FutureExt, Stream};
+use futures::FutureExt;
+use rmcp::serve_server;
+use rmcp::transport::TransportAdapterIdentity;
+use rmcp::transport::WorkerTransport;
+use rmcp::transport::streamable_http_server::session::SessionId;
+use rmcp::transport::streamable_http_server::session::local::{
+    LocalSessionManager, create_local_session,
+};
 use rmcp::{
     Peer, RoleServer, ServerHandler,
     handler::server::router::tool::{ToolRoute, ToolRouter},
     handler::server::tool::ToolCallContext,
     model::{
-        CallToolRequestParams, CallToolResult, ClientJsonRpcMessage, Content, Implementation,
-        InitializeRequestParams, InitializeResult, ProtocolVersion, ServerCapabilities,
-        ServerInfo, ServerJsonRpcMessage, ServerNotification, Tool, ToolListChangedNotification,
+        CallToolRequestParams, CallToolResult, ClientCapabilities, ClientJsonRpcMessage,
+        ClientNotification, ClientRequest, Content, Implementation, InitializeRequest,
+        InitializeRequestParams, InitializeResult, InitializedNotification, NumberOrString,
+        ProtocolVersion, RequestId, ServerCapabilities, ServerInfo, ServerNotification, Tool,
+        ToolListChangedNotification,
     },
     service::RequestContext,
-    transport::streamable_http_server::{
-        StreamableHttpServerConfig, StreamableHttpService,
-        session::{
-            ServerSseMessage, SessionId, SessionManager,
-            local::{LocalSessionManager, LocalSessionManagerError},
-        },
-    },
+    transport::streamable_http_server::{StreamableHttpServerConfig, StreamableHttpService},
 };
 use serde_json::Value;
 use tokio::net::TcpListener;
 use tokio::sync::OnceCell;
+use tokio::sync::{Mutex, RwLock};
 use tokio_util::sync::{CancellationToken, DropGuard};
 
 use objectiveai::functions::inventions::InventionTool;
 
-/// Custom HTTP header carrying the tenant id from the orchestrator
-/// through the proxy to this server. The agent client adds it to its
-/// `X-MCP-Headers` map; the proxy forwards it on every upstream
-/// request; the server uses it to look up the right tenant's tool set
-/// for each MCP request.
-pub const TENANT_HEADER: &str = "X-Invention-Session-Id";
-
-/// One in-flight invention's slot inside the shared server. Holds its
-/// own tool router and its own list of rmcp peers so per-step
-/// `tools/list_changed` broadcasts only reach the inventions that
-/// actually need to refresh.
+/// Per-rmcp-session state inside the shared invention server. Tools
+/// and rmcp peers are now keyed directly by rmcp's `Mcp-Session-Id`,
+/// not by a parallel custom tenant id.
 #[derive(Clone)]
-struct Tenant {
+struct SessionState {
     tool_router: Arc<RwLock<ToolRouter<InventionMcp>>>,
     peers: Arc<Mutex<Vec<Peer<RoleServer>>>>,
 }
 
-impl Tenant {
+impl SessionState {
     fn new(tools: Vec<InventionTool>) -> Self {
         Self {
             tool_router: Arc::new(RwLock::new(build_router(tools))),
@@ -105,44 +101,161 @@ impl InventionServerSpawner {
 }
 
 /// The live, single-port-per-process invention MCP server. Each
-/// in-flight invention gets a [`Tenant`] entry in `tenants`; per-tenant
-/// tool sets are routed by reading the [`TENANT_HEADER`] header off the
-/// inbound HTTP request inside the rmcp [`ServerHandler`].
+/// in-flight invention pre-mints an rmcp session via
+/// [`InventionServerHandle::register`]; the returned [`InventionSession`]
+/// carries that session id, which the orchestrator stamps as
+/// `Mcp-Session-Id` on the proxy → InventionServer hop. The session id
+/// also keys [`Self::sessions`] so [`InventionMcp`] can look up the
+/// session's tool router on every MCP request.
 pub struct InventionServerHandle {
     url: String,
-    tenants: Arc<DashMap<String, Tenant>>,
+    sessions: Arc<DashMap<SessionId, SessionState>>,
+    /// Owned alongside (and shared with) the rmcp tower's
+    /// [`StreamableHttpService`], so [`Self::register`] can pre-seed
+    /// session entries and [`InventionSession::Drop`] can close them.
+    rmcp_session_manager: Arc<LocalSessionManager>,
+    /// Runtime to anchor per-session `serve_server` tasks. `None` →
+    /// `tokio::spawn` against the ambient runtime.
+    runtime_handle: Option<tokio::runtime::Handle>,
     _shutdown: DropGuard,
     _server_handle: tokio::task::AbortHandle,
 }
 
 impl InventionServerHandle {
-    async fn spawn(handle: Option<tokio::runtime::Handle>) -> std::io::Result<Arc<Self>> {
+    async fn spawn(
+        runtime_handle: Option<tokio::runtime::Handle>,
+    ) -> std::io::Result<Arc<Self>> {
         let ct = CancellationToken::new();
-        let tenants: Arc<DashMap<String, Tenant>> = Arc::new(DashMap::new());
+        let sessions: Arc<DashMap<SessionId, SessionState>> = Arc::new(DashMap::new());
+        let rmcp_session_manager = Arc::new(LocalSessionManager::default());
 
-        let mcp = InventionMcp {
-            tenants: tenants.clone(),
-        };
-
-        let (port_rx, server_handle) = build_and_spawn_server(mcp, ct.clone(), handle);
+        let (port_rx, server_handle) = build_and_spawn_server(
+            Arc::clone(&sessions),
+            Arc::clone(&rmcp_session_manager),
+            ct.clone(),
+            runtime_handle.clone(),
+        );
         let port = port_rx
             .await
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
 
         Ok(Arc::new(Self {
             url: format!("http://127.0.0.1:{}/mcp", port),
-            tenants,
+            sessions,
+            rmcp_session_manager,
+            runtime_handle,
             _shutdown: ct.drop_guard(),
             _server_handle: server_handle,
         }))
     }
 
-    /// Register a new invention tenant on the shared server. Returns a
-    /// session token; drop the token when the invention completes to
-    /// free the tenant slot.
-    pub fn register(self: &Arc<Self>, initial_tools: Vec<InventionTool>) -> InventionSession {
-        let id = format!("inv-{}", uuid::Uuid::new_v4().simple());
-        self.tenants.insert(id.clone(), Tenant::new(initial_tools));
+    /// Pre-mint an rmcp session inside the InventionServer linked to
+    /// `initial_tools`. Returns an [`InventionSession`] whose id is the
+    /// rmcp session id; the orchestrator forwards that id to the proxy
+    /// as the per-server `Mcp-Session-Id` header so when the proxy
+    /// initializes against the InventionServer, rmcp's tower finds the
+    /// alive session and dispatches normally. Tools live in
+    /// [`Self::sessions`] keyed by the same id.
+    pub async fn register(
+        self: &Arc<Self>,
+        initial_tools: Vec<InventionTool>,
+    ) -> InventionSession {
+        let id: SessionId = rmcp::transport::common::server_side_http::session_id();
+
+        // 1. Per-session tool/peer state.
+        self.sessions
+            .insert(id.clone(), SessionState::new(initial_tools));
+
+        // 2. Pre-seed rmcp's session table so the proxy's initialize
+        //    POST (which carries `Mcp-Session-Id: <our id>`) doesn't
+        //    401 on `has_session`. We mirror the work rmcp's tower
+        //    would otherwise do on the no-session-id branch:
+        //    create_local_session + insert handle + spawn serve_server.
+        let (handle, worker) = create_local_session(
+            id.clone(),
+            self.rmcp_session_manager.session_config.clone(),
+        );
+        self.rmcp_session_manager
+            .sessions
+            .write()
+            .await
+            .insert(id.clone(), handle.clone());
+
+        // 3. Per-session serve_server task. The shared `InventionMcp`
+        //    looks up its session's tools/peers in `self.sessions` via
+        //    the `Mcp-Session-Id` header on the inbound request Parts.
+        let mcp = InventionMcp {
+            sessions: Arc::clone(&self.sessions),
+        };
+        let transport = WorkerTransport::spawn(worker);
+        let task = async move {
+            // Keep the `RunningService` alive for the lifetime of the
+            // session — its `Drop` impl cancels the worker's
+            // cancellation token, which would otherwise tear down the
+            // session immediately after `serve_server` returns from the
+            // initialize handshake. `waiting()` parks until the service
+            // task itself terminates.
+            if let Ok(service) =
+                serve_server::<_, _, _, TransportAdapterIdentity>(mcp, transport).await
+            {
+                let _ = service.waiting().await;
+            }
+        };
+        match &self.runtime_handle {
+            Some(h) => {
+                h.spawn(task);
+            }
+            None => {
+                tokio::spawn(task);
+            }
+        }
+
+        // 4. Drive the MCP initialize handshake ourselves. The
+        //    `LocalSessionWorker` and `serve_server` both *require* a
+        //    standard initialize → initialize-response → initialized
+        //    notification cycle before they will route any other
+        //    request. The proxy's first POST will arrive carrying a
+        //    `Mcp-Session-Id` (since we pre-seeded it server-side),
+        //    which rmcp's tower routes via `create_stream` instead of
+        //    `initialize_session` — that path assumes the session is
+        //    already past initialize. So we synthesize the handshake
+        //    here.
+        //
+        //    A subsequent re-initialize from the proxy is still
+        //    handled gracefully: `serve_inner` is in its main request
+        //    loop and routes the second `initialize` to our handler,
+        //    whose impl is idempotent (`peer_info().is_none()` short-
+        //    circuits the second call).
+        let init_req = ClientJsonRpcMessage::request(
+            ClientRequest::InitializeRequest(InitializeRequest {
+                method: Default::default(),
+                params: InitializeRequestParams {
+                    meta: None,
+                    protocol_version: ProtocolVersion::V_2025_06_18,
+                    capabilities: ClientCapabilities::default(),
+                    client_info: Implementation {
+                        name: "objectiveai-invention-preseed".into(),
+                        title: None,
+                        version: env!("CARGO_PKG_VERSION").into(),
+                        description: None,
+                        icons: None,
+                        website_url: None,
+                    },
+                },
+                extensions: Default::default(),
+            }),
+            RequestId::Number(0),
+        );
+        let _ = handle.initialize(init_req).await;
+
+        let initialized = ClientJsonRpcMessage::notification(
+            ClientNotification::InitializedNotification(InitializedNotification {
+                method: Default::default(),
+                extensions: Default::default(),
+            }),
+        );
+        let _ = handle.push_message(initialized, None).await;
+
         InventionSession {
             id,
             handle: Arc::clone(self),
@@ -150,176 +263,114 @@ impl InventionServerHandle {
     }
 }
 
-/// Per-invention session token. Owns one [`Tenant`] slot inside the
-/// shared [`InventionServerHandle`]; [`Drop`] removes the slot.
+/// Per-invention session token. Owns one [`SessionState`] slot inside
+/// the shared [`InventionServerHandle`]; [`Drop`] removes both that
+/// slot and the matching rmcp session.
 pub struct InventionSession {
-    id: String,
+    id: SessionId,
     handle: Arc<InventionServerHandle>,
 }
 
 impl InventionSession {
-    /// The shared server's URL — the same string for every tenant.
-    /// Tenants are disambiguated server-side via the [`TENANT_HEADER`]
-    /// the agent client forwards.
+    /// The shared server's URL — the same string for every session.
+    /// Sessions are disambiguated server-side via the `Mcp-Session-Id`
+    /// header rmcp inserts into request extensions on every request.
     pub fn url(&self) -> String {
         self.handle.url.clone()
     }
 
-    /// Tenant id; the orchestrator forwards this through the proxy
-    /// using `X-MCP-Headers` so the InventionServer can look up the
-    /// right tool set on every request.
+    /// rmcp session id; the orchestrator forwards this through the
+    /// proxy as the per-server `Mcp-Session-Id` header so the
+    /// InventionServer recognises the session and dispatches tool
+    /// routing on it.
     pub fn id(&self) -> &str {
         &self.id
     }
 
-    /// Replace this tenant's tool set and broadcast
-    /// `notifications/tools/list_changed` to its rmcp peers only.
-    /// Other tenants are unaffected. Dead peers are pruned lazily.
+    /// Replace this session's tool set and fan out a
+    /// `notifications/tools/list_changed` to every rmcp peer in
+    /// parallel. Per-invention there is normally exactly one peer
+    /// (one rmcp session against the shared InventionServer for the
+    /// whole invention, since the proxy reuses its upstream
+    /// connection across all 5 step calls), so the broadcast is small
+    /// and fast. Dead peers — those whose `send_notification` returns
+    /// `Err` — are pruned from the alive list.
     pub async fn set_tools(&self, tools: Vec<InventionTool>) {
-        // Snapshot the tenant under DashMap's read guard, then drop
-        // the guard before any await to avoid holding it across one.
-        let tenant = match self.handle.tenants.get(&self.id) {
+        let state = match self.handle.sessions.get(&self.id) {
             Some(e) => e.value().clone(),
-            None => return, // tenant removed concurrently
+            None => return, // session removed concurrently
         };
 
-        // Swap the router first so any list_tools racing the broadcast
-        // still sees fresh tools.
-        *tenant.tool_router.write().unwrap() = build_router(tools);
+        *state.tool_router.write().await = build_router(tools);
 
-        let peers: Vec<Peer<RoleServer>> = {
-            let g = tenant.peers.lock().unwrap();
-            g.clone()
-        };
-        let mut alive: Vec<Peer<RoleServer>> = Vec::with_capacity(peers.len());
-        for peer in peers {
-            let result = peer
-                .send_notification(ServerNotification::ToolListChangedNotification(
-                    ToolListChangedNotification::default(),
-                ))
-                .await;
-            if result.is_ok() {
-                alive.push(peer);
-            }
-        }
-        // Prune dead peers.
-        *tenant.peers.lock().unwrap() = alive;
+        let peers: Vec<Peer<RoleServer>> = state.peers.lock().await.clone();
+        let results = futures::future::join_all(peers.iter().map(|peer| {
+            peer.send_notification(ServerNotification::ToolListChangedNotification(
+                ToolListChangedNotification::default(),
+            ))
+        }))
+        .await;
+
+        let alive: Vec<Peer<RoleServer>> = peers
+            .into_iter()
+            .zip(results)
+            .filter_map(|(peer, result)| result.ok().map(|()| peer))
+            .collect();
+        *state.peers.lock().await = alive;
     }
 }
 
 impl Drop for InventionSession {
     fn drop(&mut self) {
-        self.handle.tenants.remove(&self.id);
+        // Remove the per-session tool/peer state.
+        self.handle.sessions.remove(&self.id);
+        // Tell rmcp to close the session: removes the LocalSessionHandle
+        // from LocalSessionManager.sessions (drops its event_tx → the
+        // session worker's event_rx returns None → worker quits → the
+        // spawned `serve_server` task naturally exits).
+        let mgr = Arc::clone(&self.handle.rmcp_session_manager);
+        let id = self.id.clone();
+        let task = async move {
+            use rmcp::transport::streamable_http_server::session::SessionManager;
+            let _ = mgr.close_session(&id).await;
+        };
+        match &self.handle.runtime_handle {
+            Some(h) => {
+                h.spawn(task);
+            }
+            None => {
+                tokio::spawn(task);
+            }
+        }
     }
 }
 
 /// rmcp [`ServerHandler`] for the shared invention server. One clone
-/// per HTTP session (rmcp's `StreamableHttpService::new` factory pattern);
-/// every clone references the same `tenants` map and routes inbound
-/// requests by the [`TENANT_HEADER`] HTTP header.
+/// per session lives inside that session's `serve_server` task; every
+/// clone shares the same `sessions` map and looks up its own session's
+/// state via `Mcp-Session-Id` on the inbound request Parts.
 #[derive(Clone)]
 struct InventionMcp {
-    tenants: Arc<DashMap<String, Tenant>>,
+    sessions: Arc<DashMap<SessionId, SessionState>>,
 }
 
 impl InventionMcp {
-    /// Look up the tenant for this request from the [`TENANT_HEADER`]
-    /// header (injected into request extensions by rmcp's
-    /// `streamable_http_server::tower::handle_post`). Returns `None`
-    /// if the header is missing, malformed, or names an unknown
-    /// tenant — the handler will produce an empty / no-op response in
-    /// that case rather than 500.
-    fn tenant_for(&self, context: &RequestContext<RoleServer>) -> Option<Tenant> {
+    /// Look up the per-session state for this request from the
+    /// `Mcp-Session-Id` header (injected into request extensions by
+    /// rmcp's `streamable_http_server::tower::handle_post`). Returns
+    /// `None` if the header is missing, malformed, or names an
+    /// unknown session — the handler will produce an empty / no-op
+    /// response in that case rather than 500.
+    fn session_state_for(&self, context: &RequestContext<RoleServer>) -> Option<SessionState> {
         let parts = context.extensions.get::<axum::http::request::Parts>()?;
-        let id = parts.headers.get(TENANT_HEADER)?.to_str().ok()?;
-        self.tenants.get(id).map(|e| e.value().clone())
-    }
-}
-
-/// `LocalSessionManager` wrapper whose `close_session` is a no-op so rmcp's
-/// auto-cleanup (in `streamable_http_server::tower::handle_post`, after
-/// `service.waiting().await` returns) doesn't drop the session table
-/// entry when the SSE transport briefly idles between agent step calls.
-///
-/// Sessions need to outlive transient stream gaps that happen between
-/// successive `create_streaming` invocations. rmcp's default behavior
-/// would tear down the session as soon as the per-request stream task
-/// ends, even though the upstream proxy connection is still in use.
-/// All other methods delegate. Sessions are freed wholesale when the
-/// `InventionServerHandle` task is aborted on `Drop`.
-#[derive(Default)]
-struct NoCloseSessionManager {
-    inner: LocalSessionManager,
-}
-
-impl SessionManager for NoCloseSessionManager {
-    type Error = LocalSessionManagerError;
-    type Transport = <LocalSessionManager as SessionManager>::Transport;
-
-    fn create_session(
-        &self,
-    ) -> impl std::future::Future<Output = Result<(SessionId, Self::Transport), Self::Error>> + Send
-    {
-        self.inner.create_session()
-    }
-    fn initialize_session(
-        &self,
-        id: &SessionId,
-        message: ClientJsonRpcMessage,
-    ) -> impl std::future::Future<Output = Result<ServerJsonRpcMessage, Self::Error>> + Send
-    {
-        self.inner.initialize_session(id, message)
-    }
-    fn has_session(
-        &self,
-        id: &SessionId,
-    ) -> impl std::future::Future<Output = Result<bool, Self::Error>> + Send {
-        self.inner.has_session(id)
-    }
-    fn close_session(
-        &self,
-        _id: &SessionId,
-    ) -> impl std::future::Future<Output = Result<(), Self::Error>> + Send {
-        // Intentional no-op — see type-level docs.
-        std::future::ready(Ok(()))
-    }
-    fn create_stream(
-        &self,
-        id: &SessionId,
-        message: ClientJsonRpcMessage,
-    ) -> impl std::future::Future<
-        Output = Result<impl Stream<Item = ServerSseMessage> + Send + Sync + 'static, Self::Error>,
-    > + Send {
-        self.inner.create_stream(id, message)
-    }
-    fn accept_message(
-        &self,
-        id: &SessionId,
-        message: ClientJsonRpcMessage,
-    ) -> impl std::future::Future<Output = Result<(), Self::Error>> + Send {
-        self.inner.accept_message(id, message)
-    }
-    fn create_standalone_stream(
-        &self,
-        id: &SessionId,
-    ) -> impl std::future::Future<
-        Output = Result<impl Stream<Item = ServerSseMessage> + Send + Sync + 'static, Self::Error>,
-    > + Send {
-        self.inner.create_standalone_stream(id)
-    }
-    fn resume(
-        &self,
-        id: &SessionId,
-        last_event_id: String,
-    ) -> impl std::future::Future<
-        Output = Result<impl Stream<Item = ServerSseMessage> + Send + Sync + 'static, Self::Error>,
-    > + Send {
-        self.inner.resume(id, last_event_id)
+        let id_str = parts.headers.get("mcp-session-id")?.to_str().ok()?;
+        let id: SessionId = id_str.into();
+        self.sessions.get(&id).map(|e| e.value().clone())
     }
 }
 
 /// Build a fresh [`ToolRouter`] from a list of [`InventionTool`]s. Used by
-/// both initial tenant construction and per-step tool-set swaps.
+/// both initial session construction and per-step tool-set swaps.
 #[inline(never)]
 fn build_router(tools: Vec<InventionTool>) -> ToolRouter<InventionMcp> {
     let mut tool_router = ToolRouter::<InventionMcp>::new();
@@ -390,19 +441,22 @@ impl ServerHandler for InventionMcp {
         context: RequestContext<RoleServer>,
     ) -> impl std::future::Future<Output = Result<InitializeResult, rmcp::ErrorData>> + Send + '_
     {
-        // Mirror the default impl's peer_info handling.
-        if context.peer.peer_info().is_none() {
-            context.peer.set_peer_info(request);
+        async move {
+            // Mirror the default impl's peer_info handling.
+            if context.peer.peer_info().is_none() {
+                context.peer.set_peer_info(request);
+            }
+            // Capture the peer for this session's later
+            // `tools/list_changed` notifications. If no session matches
+            // the header, the peer is dropped — we still return a
+            // healthy InitializeResult so rmcp's session lifecycle
+            // isn't disrupted, but tool routing for this session will
+            // produce empty / not-found responses.
+            if let Some(state) = self.session_state_for(&context) {
+                state.peers.lock().await.push(context.peer.clone());
+            }
+            Ok(self.get_info())
         }
-        // Capture the peer for this tenant's later `tools/list_changed`
-        // notifications. If no tenant matches the header, the peer is
-        // dropped — we still return a healthy InitializeResult so rmcp's
-        // session lifecycle isn't disrupted, but tool routing for this
-        // session will produce empty / not-found responses.
-        if let Some(tenant) = self.tenant_for(&context) {
-            tenant.peers.lock().unwrap().push(context.peer.clone());
-        }
-        std::future::ready(Ok(self.get_info()))
     }
 
     async fn list_tools(
@@ -410,8 +464,8 @@ impl ServerHandler for InventionMcp {
         _request: Option<rmcp::model::PaginatedRequestParams>,
         context: RequestContext<RoleServer>,
     ) -> Result<rmcp::model::ListToolsResult, rmcp::ErrorData> {
-        let tools = match self.tenant_for(&context) {
-            Some(tenant) => tenant.tool_router.read().unwrap().list_all(),
+        let tools = match self.session_state_for(&context) {
+            Some(state) => state.tool_router.read().await.list_all(),
             None => Vec::new(),
         };
         Ok(rmcp::model::ListToolsResult {
@@ -426,28 +480,28 @@ impl ServerHandler for InventionMcp {
         request: CallToolRequestParams,
         context: RequestContext<RoleServer>,
     ) -> Result<CallToolResult, rmcp::ErrorData> {
-        let tenant = match self.tenant_for(&context) {
-            Some(t) => t,
+        let state = match self.session_state_for(&context) {
+            Some(s) => s,
             None => {
                 return Err(rmcp::ErrorData::invalid_params(
-                    "no invention tenant header on request",
+                    "no Mcp-Session-Id matches a registered invention session",
                     None,
                 ));
             }
         };
         // Clone the router under the read lock so the lock guard never
         // spans the `.call(...).await` below — guards are not Send.
-        let router = tenant.tool_router.read().unwrap().clone();
+        let router = state.tool_router.read().await.clone();
         let tcc = ToolCallContext::new(self, request, context);
         router.call(tcc).await
     }
 
     fn get_tool(&self, name: &str) -> Option<Tool> {
-        // get_tool is sync — we can only consult tenant data we can
+        // get_tool is sync — we can only consult session data we can
         // reach without &context. None is a safe answer (rmcp's default
         // also returns None); the tool_handler validation that calls
         // this is best-effort, and `call_tool` re-routes through
-        // tenant_for anyway.
+        // session_state_for anyway.
         let _ = name;
         None
     }
@@ -456,7 +510,8 @@ impl ServerHandler for InventionMcp {
 /// Separate function to prevent rmcp generics from inflating the caller.
 #[inline(never)]
 fn build_and_spawn_server(
-    mcp: InventionMcp,
+    sessions: Arc<DashMap<SessionId, SessionState>>,
+    rmcp_session_manager: Arc<LocalSessionManager>,
     ct: CancellationToken,
     runtime_handle: Option<tokio::runtime::Handle>,
 ) -> (tokio::sync::oneshot::Receiver<u16>, tokio::task::AbortHandle) {
@@ -468,10 +523,22 @@ fn build_and_spawn_server(
         let port = listener.local_addr().unwrap().port();
         let _ = port_tx.send(port);
 
-        let service: StreamableHttpService<InventionMcp, NoCloseSessionManager> =
+        // The service factory handles ad-hoc inbound sessions (any
+        // initialize POST that arrives without a pre-registered
+        // `Mcp-Session-Id`). Those still get routed to a fresh
+        // `InventionMcp` clone, but with no session state pre-seeded
+        // their `session_state_for` lookups return None → empty tool
+        // lists. Real invention traffic only ever uses pre-registered
+        // session ids.
+        let factory_sessions = Arc::clone(&sessions);
+        let service: StreamableHttpService<InventionMcp, LocalSessionManager> =
             StreamableHttpService::new(
-                move || Ok(mcp.clone()),
-                Default::default(),
+                move || {
+                    Ok(InventionMcp {
+                        sessions: Arc::clone(&factory_sessions),
+                    })
+                },
+                Arc::clone(&rmcp_session_manager),
                 StreamableHttpServerConfig {
                     stateful_mode: true,
                     cancellation_token: ct_child,

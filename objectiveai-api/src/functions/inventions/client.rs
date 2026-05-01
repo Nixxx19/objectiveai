@@ -566,12 +566,18 @@ where
             }
         };
         let invention_session = Arc::new(
-            invention_handle.register(id.clone(), T::essay_tools(&state)),
+            invention_handle.register(T::essay_tools(&state)).await,
         );
         let invention_url = invention_session.url();
-        let invention_session_id_header: indexmap::IndexMap<String, String> =
+        // The orchestrator stamps the InventionServer's pre-minted
+        // rmcp session id as `Mcp-Session-Id` on every proxy → upstream
+        // request to that URL. The InventionServer's tower then finds
+        // an alive session and dispatches into the per-session
+        // `serve_server` task, where `InventionMcp` looks up its tool
+        // router by the same id.
+        let invention_server_headers: indexmap::IndexMap<String, String> =
             indexmap::indexmap! {
-                super::TENANT_HEADER.to_string() => invention_session.id().to_string(),
+                "Mcp-Session-Id".to_string() => invention_session.id().to_string(),
             };
 
         let state_chunk = |state: &Arc<Mutex<T>>, id: &str, created, object| {
@@ -611,7 +617,7 @@ where
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
             prompts.essay.clone(), invention_url.clone(),
-            invention_session_id_header.clone(),
+            invention_server_headers.clone(),
             essay_validate,
             id.clone(), created, object, continuation.take(), completion_index,
             T::prompt_type(), 0, prompts.tasks_min, None,
@@ -650,7 +656,7 @@ where
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
             prompts.input_schema.clone(), invention_url.clone(),
-            invention_session_id_header.clone(),
+            invention_server_headers.clone(),
             input_schema_validate,
             id.clone(), created, object, continuation.take(), completion_index,
             T::prompt_type(), 1, prompts.tasks_min, None,
@@ -689,7 +695,7 @@ where
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
             prompts.essay_tasks.clone(), invention_url.clone(),
-            invention_session_id_header.clone(),
+            invention_server_headers.clone(),
             essay_tasks_validate,
             id.clone(), created, object, continuation.take(), completion_index,
             T::prompt_type(), 2, prompts.tasks_min, None,
@@ -731,7 +737,7 @@ where
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
             prompts.tasks.clone(), invention_url.clone(),
-            invention_session_id_header.clone(),
+            invention_server_headers.clone(),
             tasks_validate,
             id.clone(), created, object, continuation.take(), completion_index,
             T::prompt_type(), 3, prompts.tasks_min, T::input_schema_json(&state),
@@ -770,7 +776,7 @@ where
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
             prompts.description.clone(), invention_url.clone(),
-            invention_session_id_header.clone(),
+            invention_server_headers.clone(),
             description_validate,
             id.clone(), created, object, continuation.take(), completion_index,
             T::prompt_type(), 4, prompts.tasks_min, None,
@@ -984,7 +990,7 @@ fn run_step<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK, RETRG, RETRF, RE
     request: Arc<objectiveai::functions::inventions::request::FunctionInventionCreateParams>,
     prompt: String,
     invention_url: String,
-    invention_session_id_header: indexmap::IndexMap<String, String>,
+    invention_server_headers: indexmap::IndexMap<String, String>,
     validate: Arc<dyn Fn() -> Result<(), String> + Send + Sync>,
     id: String,
     created: u64,
@@ -1068,8 +1074,11 @@ where
                 agent_params.clone(),
                 continuation.take(),
                 Some(disable_tools),
-                vec![crate::agent::completions::ExtraMcpServer::new(invention_url.clone())],
-                invention_session_id_header.clone(),
+                vec![crate::agent::completions::ExtraMcpServer {
+                    url: invention_url.clone(),
+                    headers: Some(invention_server_headers.clone()),
+                }],
+                indexmap::IndexMap::new(),
                 None,
                 false,
                 Some(invention_type),
@@ -1167,7 +1176,7 @@ where
                     continuation.take(),
                     Some(disable_tools),
                     vec![crate::agent::completions::ExtraMcpServer::new(invention_url.clone())],
-                    invention_session_id_header.clone(),
+                    invention_server_headers.clone(),
                     None,
                     false,
                     Some(invention_type),

@@ -69,46 +69,47 @@ async fn parse_response(resp: reqwest::Response) -> Value {
         .unwrap_or_else(|e| panic!("failed to parse response as JSON or SSE: {e}\nbody: {body}"))
 }
 
-/// Bring up a fresh, isolated multi-tenant server with one tenant
+/// Bring up a fresh, isolated multi-tenant server with one session
 /// holding `tools`. Returns `(spawner, session, url)`. Tests must keep
 /// the spawner+session alive for the duration of the test (drop frees
-/// the tenant; spawner drop frees the server).
+/// the session; spawner drop frees the server).
 async fn make_server(
     tools: Vec<InventionTool>,
 ) -> (Arc<InventionServerSpawner>, InventionSession, String) {
     let spawner = Arc::new(InventionServerSpawner::new());
     let handle = spawner.get().await.expect("spawn invention server");
-    let session = handle.register(tools);
+    let session = handle.register(tools).await;
     let url = session.url();
     (spawner, session, url)
 }
 
-/// Send initialize + notifications/initialized, return the rmcp session id header.
+/// Send initialize + notifications/initialized using the pre-seeded
+/// rmcp session id. Returns the session id (the same one that was
+/// passed in — the server reuses our pre-seeded id).
 async fn init_session(
     client: &reqwest::Client,
     base_url: &str,
-    tenant_id: &str,
+    session_id: &str,
 ) -> String {
     let resp = client
         .post(base_url)
         .header("Accept", ACCEPT)
-        .header(TENANT_HEADER, tenant_id)
+        .header("mcp-session-id", session_id)
         .json(&init_params())
         .send()
         .await
         .unwrap();
-    let session_id = resp
+    let returned = resp
         .headers()
         .get("mcp-session-id")
         .map(|v| v.to_str().unwrap().to_string())
-        .unwrap_or_default();
+        .unwrap_or_else(|| session_id.to_string());
     let _body = parse_response(resp).await;
 
     client
         .post(base_url)
         .header("Accept", ACCEPT)
-        .header("mcp-session-id", &session_id)
-        .header(TENANT_HEADER, tenant_id)
+        .header("mcp-session-id", &returned)
         .json(&json!({
             "jsonrpc": "2.0",
             "method": "notifications/initialized"
@@ -117,22 +118,20 @@ async fn init_session(
         .await
         .unwrap();
 
-    session_id
+    returned
 }
 
-/// Send a JSON-RPC request as a particular tenant + rmcp session.
+/// Send a JSON-RPC request as a particular rmcp session.
 async fn rpc(
     client: &reqwest::Client,
     url: &str,
     session_id: &str,
-    tenant_id: &str,
     body: Value,
 ) -> Value {
     let resp = client
         .post(url)
         .header("Accept", ACCEPT)
         .header("mcp-session-id", session_id)
-        .header(TENANT_HEADER, tenant_id)
         .json(&body)
         .send()
         .await
@@ -148,7 +147,7 @@ async fn test_initialize() {
     let resp = client
         .post(&url)
         .header("Accept", ACCEPT)
-        .header(TENANT_HEADER, session.id())
+        .header("mcp-session-id", session.id())
         .json(&init_params())
         .send()
         .await
@@ -179,7 +178,6 @@ async fn test_tools_list() {
         &client,
         &url,
         &mcp_session,
-        session.id(),
         json!({
             "jsonrpc": "2.0",
             "id": 2,
@@ -206,7 +204,6 @@ async fn test_tools_call_success() {
         &client,
         &url,
         &mcp_session,
-        session.id(),
         json!({
             "jsonrpc": "2.0",
             "id": 3,
@@ -235,7 +232,6 @@ async fn test_tools_call_error() {
         &client,
         &url,
         &mcp_session,
-        session.id(),
         json!({
             "jsonrpc": "2.0",
             "id": 4,
@@ -266,7 +262,6 @@ async fn test_tools_call_not_found() {
         &client,
         &url,
         &mcp_session,
-        session.id(),
         json!({
             "jsonrpc": "2.0",
             "id": 5,
@@ -302,7 +297,6 @@ async fn test_unknown_method() {
         &client,
         &url,
         &mcp_session,
-        session.id(),
         json!({
             "jsonrpc": "2.0",
             "id": 6,
@@ -316,24 +310,24 @@ async fn test_unknown_method() {
     assert!(resp["error"]["code"].as_i64().unwrap() < 0);
 }
 
-/// Two tenants on the same shared server hold disjoint tool sets and
+/// Two sessions on the same shared server hold disjoint tool sets and
 /// don't see each other's tools.
 #[tokio::test]
 async fn test_multi_tenant_isolation() {
     let _permit = crate::test_clients::acquire_test_permit().await;
     let spawner = Arc::new(InventionServerSpawner::new());
     let handle = spawner.get().await.expect("spawn invention server");
-    let session_a = handle.register(vec![echo_tool()]);
-    let session_b = handle.register(vec![failing_tool()]);
+    let session_a = handle.register(vec![echo_tool()]).await;
+    let session_b = handle.register(vec![failing_tool()]).await;
     let url = session_a.url();
-    assert_eq!(url, session_b.url(), "tenants share one URL");
+    assert_eq!(url, session_b.url(), "sessions share one URL");
 
     let client = reqwest::Client::new();
     let mcp_session_a = init_session(&client, &url, session_a.id()).await;
     let mcp_session_b = init_session(&client, &url, session_b.id()).await;
 
     let list_a = rpc(
-        &client, &url, &mcp_session_a, session_a.id(),
+        &client, &url, &mcp_session_a,
         json!({"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}}),
     )
     .await;
@@ -346,7 +340,7 @@ async fn test_multi_tenant_isolation() {
     assert_eq!(names_a, vec!["echo"]);
 
     let list_b = rpc(
-        &client, &url, &mcp_session_b, session_b.id(),
+        &client, &url, &mcp_session_b,
         json!({"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}}),
     )
     .await;
