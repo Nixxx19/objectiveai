@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 SCHEMA_DIR = Path(__file__).resolve().parent.parent.parent / "objectiveai-json-schema"
-SRC_DIR = Path(__file__).resolve().parent.parent / "python" / "objectiveai"
+SRC_DIR = Path(__file__).resolve().parent.parent / "objectiveai"
 TESTS_DIR = Path(__file__).resolve().parent.parent / "tests"
 
 GENERATED_HEADER = (

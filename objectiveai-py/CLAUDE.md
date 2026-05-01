@@ -10,12 +10,11 @@ is referenced from `pyproject.toml` via `[tool.maturin] manifest-path`.
 ```
 objectiveai-py/
 ├── pyproject.toml          # build-backend = "maturin", manifest-path → ../objectiveai-rs-pyo3/Cargo.toml
-├── python/
-│   └── objectiveai/        # pure-Python sources
-│       ├── __init__.py
-│       ├── client.py
-│       ├── ...
-│       └── _pyo3.<abi>.pyd # built by maturin into the package at install/develop time
+├── objectiveai/            # pure-Python sources
+│   ├── __init__.py
+│   ├── client.py
+│   ├── ...
+│   └── _pyo3.<abi>.pyd     # built by maturin into the package at install/develop time
 ├── scripts/install_pydantic.py
 ├── tests/
 ├── build.sh, test.sh, publish.sh
@@ -50,11 +49,11 @@ objectiveai-py/venv/Scripts/python.exe -m pytest objectiveai-py/tests/ <args>
 bash objectiveai-py/build.sh
 ```
 
-The flow: venv setup → install requirements → `install_pydantic.py` (codegen → `python/objectiveai/`) → `maturin develop --release` (compiles Rust extension and installs editable).
+The flow: venv setup → install requirements → `install_pydantic.py` (codegen → `objectiveai/`) → `maturin develop --release` (compiles Rust extension and installs editable).
 
 ## Code Generation
 
-Pydantic types under `python/objectiveai/` are auto-generated from `../objectiveai-json-schema/`. Do not edit files containing the `THIS FILE IS AUTO-GENERATED` header.
+Pydantic types under `objectiveai/` are auto-generated from `../objectiveai-json-schema/`. Do not edit files containing the `THIS FILE IS AUTO-GENERATED` header.
 
 ```bash
 objectiveai-py/venv/Scripts/python.exe objectiveai-py/scripts/install_pydantic.py
