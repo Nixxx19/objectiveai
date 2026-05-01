@@ -143,6 +143,8 @@ struct EnvConfigBuilder {
     mcp_connect_timeout: Option<u64>,
     #[envconfig(from = "MCP_CALL_TIMEOUT")]
     mcp_call_timeout: Option<u64>,
+    #[envconfig(from = "MCP_ENCRYPTION_KEY")]
+    mcp_encryption_key: Option<String>,
     #[envconfig(from = "CONFIG_BASE_DIR")]
     config_base_dir: Option<String>,
     #[envconfig(from = "MOCK_DELAY_MS")]
@@ -217,6 +219,7 @@ impl EnvConfigBuilder {
             agent_completions_other_chunk_timeout: self.agent_completions_other_chunk_timeout,
             mcp_connect_timeout: self.mcp_connect_timeout,
             mcp_call_timeout: self.mcp_call_timeout,
+            mcp_encryption_key: self.mcp_encryption_key,
             config_base_dir: self.config_base_dir,
             mock_delay_ms: self.mock_delay_ms,
             mock_max_tool_calls: self.mock_max_tool_calls,
@@ -282,6 +285,7 @@ pub struct ConfigBuilder {
     pub agent_completions_other_chunk_timeout: Option<u64>,
     pub mcp_connect_timeout: Option<u64>,
     pub mcp_call_timeout: Option<u64>,
+    pub mcp_encryption_key: Option<String>,
     pub config_base_dir: Option<String>,
     pub mock_delay_ms: Option<u64>,
     pub mock_max_tool_calls: Option<u32>,
@@ -361,6 +365,7 @@ impl ConfigBuilder {
             agent_completions_other_chunk_timeout: self.agent_completions_other_chunk_timeout.unwrap_or(30000),
             mcp_connect_timeout: self.mcp_connect_timeout.unwrap_or(30000),
             mcp_call_timeout: self.mcp_call_timeout.unwrap_or(30000),
+            mcp_encryption_key: self.mcp_encryption_key,
             config_base_dir: match self.config_base_dir {
                 Some(dir) => std::path::PathBuf::from(dir),
                 None => dirs::home_dir()
@@ -430,6 +435,10 @@ pub struct Config {
     pub agent_completions_other_chunk_timeout: u64,
     pub mcp_connect_timeout: u64,
     pub mcp_call_timeout: u64,
+    /// Base64-encoded 32-byte key. Forwarded to the spawned proxy as
+    /// `MCP_ENCRYPTION_KEY`. Unset → proxy generates an ephemeral key
+    /// per process.
+    pub mcp_encryption_key: Option<String>,
     pub config_base_dir: std::path::PathBuf,
     pub mock_delay_ms: u64,
     pub mock_max_tool_calls: u32,
@@ -493,6 +502,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         agent_completions_other_chunk_timeout,
         mcp_connect_timeout,
         mcp_call_timeout,
+        mcp_encryption_key,
         config_base_dir,
         mock_delay_ms,
         mock_max_tool_calls,
@@ -620,6 +630,15 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
     // (`MCP_CONNECT_TIMEOUT`, `MCP_CALL_TIMEOUT`, `MCP_BACKOFF_*`) the
     // api itself reads — without this the proxy would fall back to its
     // own crate-internal defaults.
+    let proxy_encryption_key: Option<[u8; 32]> = mcp_encryption_key
+        .as_deref()
+        .and_then(|s| match objectiveai_mcp_proxy::parse_key_env(s) {
+            Ok(opt) => opt,
+            Err(e) => {
+                eprintln!("MCP_ENCRYPTION_KEY parse failed; falling back to ephemeral key in proxy: {e}");
+                None
+            }
+        });
     let proxy_spawner = Arc::new(agent::completions::ProxySpawner::new(move || {
         objectiveai_mcp_proxy::ConfigBuilder {
             mcp_connect_timeout: Some(mcp_connect_timeout),
@@ -630,6 +649,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
             mcp_backoff_multiplier: Some(mcp_backoff_multiplier),
             mcp_backoff_max_interval: Some(mcp_backoff_max_interval),
             mcp_backoff_max_elapsed_time: Some(mcp_backoff_max_elapsed_time),
+            mcp_encryption_key: proxy_encryption_key,
             ..Default::default()
         }
     }));

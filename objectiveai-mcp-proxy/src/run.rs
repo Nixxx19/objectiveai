@@ -45,6 +45,20 @@ struct EnvConfigBuilder {
     mcp_backoff_max_interval: Option<u64>,
     #[envconfig(from = "MCP_BACKOFF_MAX_ELAPSED_TIME")]
     mcp_backoff_max_elapsed_time: Option<u64>,
+    /// Base64-encoded 32-byte key. Used to AEAD-encrypt the proxy
+    /// session id payload (per-upstream `Mcp-Session-Id` +
+    /// `Authorization` + custom headers).
+    ///
+    /// Rotation: set a new key, restart the proxy. All outstanding
+    /// session ids minted under the old key become 401s; clients
+    /// re-initialize.
+    ///
+    /// Unset → the proxy generates one ephemeral 32-byte key on
+    /// startup. Sessions minted by such a process can't be decoded by
+    /// any other process or after a restart — which is fine for tests
+    /// and dev but bad for production.
+    #[envconfig(from = "MCP_ENCRYPTION_KEY")]
+    mcp_encryption_key: Option<String>,
     #[envconfig(from = "SUPPRESS_OUTPUT")]
     suppress_output: Option<String>,
 }
@@ -65,6 +79,16 @@ impl EnvConfigBuilder {
             mcp_backoff_multiplier: self.mcp_backoff_multiplier,
             mcp_backoff_max_interval: self.mcp_backoff_max_interval,
             mcp_backoff_max_elapsed_time: self.mcp_backoff_max_elapsed_time,
+            mcp_encryption_key: match self.mcp_encryption_key.as_deref() {
+                Some(s) => match crate::session_manager::parse_key_env(s) {
+                    Ok(opt) => opt,
+                    Err(e) => {
+                        tracing::error!(error = %e, "MCP_ENCRYPTION_KEY parse failed; falling back to ephemeral key");
+                        None
+                    }
+                },
+                None => None,
+            },
             suppress_output: self.suppress_output.map(|v| {
                 matches!(v.to_ascii_lowercase().as_str(), "1" | "true" | "yes" | "on")
             }),
@@ -87,6 +111,10 @@ pub struct ConfigBuilder {
     pub mcp_backoff_multiplier: Option<f64>,
     pub mcp_backoff_max_interval: Option<u64>,
     pub mcp_backoff_max_elapsed_time: Option<u64>,
+    /// 256-bit AEAD key. `None` → the proxy generates one ephemeral
+    /// key per process. See [`EnvConfigBuilder`]'s `mcp_encryption_key`
+    /// doc.
+    pub mcp_encryption_key: Option<[u8; 32]>,
     pub suppress_output: Option<bool>,
 }
 
@@ -132,6 +160,7 @@ impl ConfigBuilder {
             mcp_backoff_multiplier: self.mcp_backoff_multiplier.unwrap_or(1.5),
             mcp_backoff_max_interval: self.mcp_backoff_max_interval.unwrap_or(1000),
             mcp_backoff_max_elapsed_time: self.mcp_backoff_max_elapsed_time.unwrap_or(40000),
+            mcp_encryption_key: self.mcp_encryption_key,
             suppress_output: self.suppress_output.unwrap_or(false),
         }
     }
@@ -151,6 +180,8 @@ pub struct Config {
     pub mcp_backoff_multiplier: f64,
     pub mcp_backoff_max_interval: u64,
     pub mcp_backoff_max_elapsed_time: u64,
+    /// `None` → caller / proxy will generate one ephemeral key.
+    pub mcp_encryption_key: Option<[u8; 32]>,
     pub suppress_output: bool,
 }
 
@@ -169,6 +200,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         mcp_backoff_multiplier,
         mcp_backoff_max_interval,
         mcp_backoff_max_elapsed_time,
+        mcp_encryption_key,
         suppress_output: _,
     } = config;
 
@@ -187,8 +219,12 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         Duration::from_millis(mcp_call_timeout),
     );
 
+    let sessions = match mcp_encryption_key {
+        Some(key) => SessionManager::new(key),
+        None => SessionManager::with_ephemeral_key(),
+    };
     let state = AppState {
-        sessions: Arc::new(SessionManager::new()),
+        sessions: Arc::new(sessions),
         client: Arc::new(client),
     };
 

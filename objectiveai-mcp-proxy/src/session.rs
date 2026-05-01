@@ -74,10 +74,20 @@ pub struct Session {
     /// block pair) on the next `tools/call` response so the model picks
     /// the message up at its next natural inspection point.
     pending_notifications: Mutex<Vec<ContentBlock>>,
+    /// The canonical `URL → header_map` payload that was encoded into
+    /// this session's id. Used by `handle_initialize`'s
+    /// alive-in-memory branch to re-mint an id from the same byte-
+    /// stable shape that was originally encoded — so even if the live
+    /// `Connection`s rotated their internal state, the id remains
+    /// derivable from the immutable per-upstream header set.
+    pub payload: crate::session_manager::SessionPayload,
 }
 
 impl Session {
-    pub(crate) fn new(connections: IndexMap<String, Connection>) -> Self {
+    pub(crate) fn new(
+        connections: IndexMap<String, Connection>,
+        payload: crate::session_manager::SessionPayload,
+    ) -> Self {
         let (outbound, _) = broadcast::channel(OUTBOUND_CAPACITY);
 
         // Wire each upstream's list_changed callbacks to publish a
@@ -111,6 +121,7 @@ impl Session {
             outbound,
             in_flight: DashMap::new(),
             pending_notifications: Mutex::new(Vec::new()),
+            payload,
         }
     }
 

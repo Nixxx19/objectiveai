@@ -29,7 +29,7 @@ use tokio::sync::broadcast;
 use crate::AppState;
 use crate::session::{CallToolError, ReadResourceError, Session};
 use crate::session_manager::SessionManager;
-use crate::upstream::{BadInit, connect_all};
+use crate::upstream::BadInit;
 
 /// MCP protocol version this proxy speaks. Pinned — there is only one
 /// supported version, and we reject any other.
@@ -253,63 +253,88 @@ async fn handle_initialize(
         }
     }
 
-    // Proxy session ids are self-describing: each id is the base62
-    // encoding of a JSON-serialized `IndexMap<upstream_url,
-    // upstream_session_id>`. The map's iteration order matches the
-    // connection order at the time the id was minted — so when a
-    // client hands us back a previously-minted id and every upstream
-    // resumes successfully without rotating its session, the new id
-    // we mint is byte-identical to the input. If any upstream rotates
-    // its session during resume, the new id differs at exactly that
-    // entry, telling the client at a glance that something changed.
+    // Proxy session ids are AEAD-encrypted, base62-encoded envelopes
+    // wrapping a `URL → header_map` payload. The header map is the
+    // full set of HTTP headers needed to reconnect that upstream —
+    // `Mcp-Session-Id`, `Authorization`, plus any custom `X-*`. The
+    // upstream session id is uniform with every other header, no
+    // dedicated field. See `session_manager::SessionPayload`.
     //
-    // Lookup proceeds in three branches:
-    //   1. id present + alive in our session map → reuse, no upstream
-    //      contact at all.
-    //   2. id present but unknown to us → decode it to recover the
-    //      upstream URL/session map and resume each upstream from
-    //      that map. If decoding fails (bad base62, bad JSON, wrong
-    //      shape) → 401, matching rmcp's wording for unknown
-    //      sessions on regular requests.
-    //   3. id absent → connect from scratch, no resume.
+    // Three branches:
+    //   1. id provided + alive in `state.sessions` → cheap-path: reuse
+    //      the live in-memory `Session`, re-mint its id from its
+    //      stored payload. The new request's `X-MCP-Servers` /
+    //      `X-MCP-Headers` / `X-MCP-Authorization` are IGNORED — the
+    //      encoded id is the sole source of truth for what's
+    //      connected and how. This is the "one id = one connection
+    //      state" guarantee.
+    //   2. id provided but not in memory → decrypt-and-decode it. If
+    //      decryption fails under every key, or decoding fails →
+    //      401. Otherwise reconnect to every URL in the decoded
+    //      payload using its stored headers (same ignore-the-request
+    //      semantics as branch 1). The `Mcp-Session-Id` and
+    //      `Authorization` headers come ONLY from the encoded id;
+    //      anything the request snuck into `X-MCP-Headers` is
+    //      ignored.
+    //   3. no id → fresh init. `X-MCP-Servers` / `X-MCP-Headers` /
+    //      `X-MCP-Authorization` build the spec list, every URL
+    //      connects from scratch, the resulting `(Connection,
+    //      headers)` set encodes into a brand-new id.
     let provided_session_id = headers
         .get(SESSION_ID_HEADER)
         .and_then(|v| v.to_str().ok())
         .map(str::to_owned);
 
-    let resume_sessions: indexmap::IndexMap<String, String> =
-        if let Some(sid) = &provided_session_id {
-            if let Some(_session) = state.sessions.get(sid) {
-                // Branch 1: alive in-memory — reuse the same id.
-                return reuse_session_response(request.id, sid);
-            }
-            // Branch 2: not in memory — try to decode.
-            match crate::session_manager::decode_session_id(sid) {
-                Some(map) => map,
-                None => {
-                    return (
-                        StatusCode::UNAUTHORIZED,
-                        format!("Unauthorized: Session not found ({sid:?})"),
-                    )
-                        .into_response();
+    let connections_with_headers = if let Some(sid) = &provided_session_id {
+        if let Some(session) = state.sessions.get(sid) {
+            // Branch 1 — alive in-memory. Re-mint and return without
+            // re-running connect_all.
+            let new_id = state.sessions.mint_id(&session.payload);
+            return ok_response_with_id(request.id, new_id);
+        }
+        // Branch 2 — decrypt and reconnect strictly from the payload.
+        match state.sessions.decode_session_id(sid) {
+            Some(payload) => {
+                match crate::upstream::reconnect_from_payload(&state.client, &payload).await {
+                    Ok(pairs) => pairs,
+                    Err(e @ BadInit::UpstreamConnectFailed { .. }) => {
+                        return internal_error_response(request.id, e.to_string());
+                    }
+                    Err(e) => {
+                        // NotUtf8 / NotJson can't fire on this path
+                        // (no header parsing) but exhaustively handled.
+                        return internal_error_response(request.id, e.to_string());
+                    }
                 }
             }
-        } else {
-            indexmap::IndexMap::new()
-        };
-
-    let connections = match connect_all(&state.client, headers, &resume_sessions).await {
-        Ok(c) => c,
-        Err(e @ (BadInit::NotUtf8 { .. } | BadInit::NotJson { .. })) => {
-            return invalid_request_response(request.id, e.to_string());
+            None => {
+                return (
+                    StatusCode::UNAUTHORIZED,
+                    format!("Unauthorized: Session not found ({sid:?})"),
+                )
+                    .into_response();
+            }
         }
-        Err(e @ BadInit::UpstreamConnectFailed { .. }) => {
-            return internal_error_response(request.id, e.to_string());
+    } else {
+        // Branch 3 — fresh init.
+        match crate::upstream::connect_all_fresh(&state.client, headers).await {
+            Ok(pairs) => pairs,
+            Err(e @ (BadInit::NotUtf8 { .. } | BadInit::NotJson { .. })) => {
+                return invalid_request_response(request.id, e.to_string());
+            }
+            Err(e @ BadInit::UpstreamConnectFailed { .. }) => {
+                return internal_error_response(request.id, e.to_string());
+            }
         }
     };
 
-    let session_id = state.sessions.add(connections);
+    let session_id = state.sessions.add(connections_with_headers);
+    ok_response_with_id(request.id, session_id)
+}
 
+/// Build the standard `initialize` 200 response with the proxy's
+/// declared protocol version + capabilities + `Mcp-Session-Id` header.
+fn ok_response_with_id(request_id: serde_json::Value, session_id: String) -> Response {
     let result = InitializeResult {
         protocol_version: PROTOCOL_VERSION.into(),
         capabilities: server_capabilities(),
@@ -317,13 +342,11 @@ async fn handle_initialize(
         instructions: None,
         _meta: None,
     };
-
     let body: JsonRpcResponse<InitializeResult> = JsonRpcResponse::Success {
         jsonrpc: "2.0".into(),
-        id: request.id,
+        id: request_id,
         result,
     };
-
     let mut headers = HeaderMap::new();
     let header_value = match HeaderValue::from_str(&session_id) {
         Ok(v) => v,
@@ -335,7 +358,6 @@ async fn handle_initialize(
         }
     };
     headers.insert(SESSION_ID_HEADER, header_value);
-
     (StatusCode::OK, headers, Json(body)).into_response()
 }
 
@@ -715,36 +737,6 @@ fn json_rpc_error_response(
     (status, Json(body)).into_response()
 }
 
-/// Build a "session reused" `initialize` response: the JSON-RPC body is
-/// a normal success, and the response's `Mcp-Session-Id` header carries
-/// the unchanged id so the client knows it's still talking to the same
-/// session.
-fn reuse_session_response(request_id: serde_json::Value, session_id: &str) -> Response {
-    let result = InitializeResult {
-        protocol_version: PROTOCOL_VERSION.into(),
-        capabilities: server_capabilities(),
-        server_info: server_info(),
-        instructions: None,
-        _meta: None,
-    };
-    let body: JsonRpcResponse<InitializeResult> = JsonRpcResponse::Success {
-        jsonrpc: "2.0".into(),
-        id: request_id,
-        result,
-    };
-    let mut headers = HeaderMap::new();
-    let header_value = match HeaderValue::from_str(session_id) {
-        Ok(v) => v,
-        Err(_) => {
-            return internal_error_response(
-                serde_json::Value::Null,
-                format!("session id is not a valid header value: {session_id}"),
-            );
-        }
-    };
-    headers.insert(SESSION_ID_HEADER, header_value);
-    (StatusCode::OK, headers, Json(body)).into_response()
-}
 
 fn parse_error_response(message: String) -> Response {
     json_rpc_error_response(

@@ -1,54 +1,116 @@
 //! Session registry.
 //!
 //! Maps session ids to [`Session`]s. A proxy session id is the base62
-//! encoding of a JSON-serialized `IndexMap<upstream_url, upstream_session_id>`.
-//! Because `IndexMap` preserves insertion order and `serde_json` walks
-//! the map in that order, the id is fully determined by the (ordered)
-//! contents — so re-serializing after a successful all-upstreams resume
-//! produces the byte-identical id, while any rotated upstream session
-//! produces a different id. Clients can therefore tell at a glance
-//! whether anything changed during resume.
+//! encoding of an authenticated-encrypted, versioned envelope wrapping a
+//! JSON-serialized `IndexMap<upstream_url, IndexMap<header_name,
+//! header_value>>`. Each upstream's value is the full set of HTTP
+//! headers needed to reconnect: `Mcp-Session-Id`, `Authorization`, plus
+//! any custom headers the original initialize request supplied.
+//!
+//! Stable encoding: URLs sort alphabetically; headers within each
+//! per-URL map sort alphabetically. So two requests with the same
+//! `{url → {header → value}}` content always encode to the same id
+//! (modulo the random AEAD nonce, which makes ciphertexts non-equal —
+//! intentional, prevents an attacker from recognizing replayed
+//! payloads). Authentication tag covers the version byte + nonce +
+//! ciphertext, so any tampering produces a decryption failure.
+//!
+//! Wire format (pre-base62):
+//! ```text
+//! [ 1B version (0x01) | 24B XChaCha20 nonce | ciphertext... | 16B Poly1305 tag ]
+//! ```
+//!
+//! Encryption uses one 256-bit key threaded in via
+//! [`SessionManager::new`]. Operators rotate by setting the new key in
+//! `MCP_ENCRYPTION_KEY` and restarting the proxy — every outstanding
+//! session id minted under the old key becomes invalid (a 401 on
+//! resume), which forces clients to re-initialize.
 //!
 //! All per-session dispatch (list, call, read) lives on [`Session`]
 //! itself; this file only cares about computing/minting ids, packing
-//! connections into a [`Session`], and looking sessions back up.
+//! connections + their canonical headers into a [`Session`], and
+//! looking sessions back up.
 
 use std::sync::Arc;
+
+use base64::Engine;
+use chacha20poly1305::aead::{Aead, KeyInit};
+use chacha20poly1305::{Key, XChaCha20Poly1305, XNonce};
 use dashmap::DashMap;
 use indexmap::IndexMap;
 use objectiveai::mcp::Connection;
+use rand::RngCore;
 
 use crate::session::Session;
 
-/// Maps a session id to its [`Session`] state.
-#[derive(Debug, Default)]
+/// Per-session encoded payload: `URL → header_map`. The header_map is
+/// the full set of HTTP headers used to reconnect this upstream
+/// (`Mcp-Session-Id`, `Authorization`, custom `X-*`). The session id is
+/// uniform with every other header — there's no separate session-id
+/// field. URLs sort alphabetically when encoding for stable ids; the
+/// per-URL header map sorts the same way.
+pub type SessionPayload = IndexMap<String, IndexMap<String, String>>;
+
+/// Current envelope version byte. Bumping this lets future shape
+/// changes be distinguished from old ids that happen to decrypt under
+/// the same key set. Decoders that see an unrecognized version return
+/// `None`.
+const VERSION: u8 = 0x01;
+const NONCE_LEN: usize = 24; // XChaCha20-Poly1305 nonce
+const TAG_LEN: usize = 16; // Poly1305 tag (handled internally by `Aead::encrypt`)
+
+/// Maps a session id to its [`Session`] state. Owns the encryption
+/// key used for minting and decoding ids.
+#[derive(Debug)]
 pub struct SessionManager {
     sessions: DashMap<String, Arc<Session>>,
+    /// 256-bit AEAD key. Sessions minted under one key cannot be
+    /// decrypted by another — to rotate, set a new key on the
+    /// proxy and restart it; outstanding ids become 401s.
+    key: [u8; 32],
 }
 
 impl SessionManager {
-    pub fn new() -> Self {
-        Self::default()
+    pub fn new(key: [u8; 32]) -> Self {
+        Self {
+            sessions: DashMap::new(),
+            key,
+        }
     }
 
-    /// Register a session whose id is computed from the upstream
-    /// connections in their iteration order. Returns the id.
+    /// Build a manager with a fresh random 256-bit key. Sessions
+    /// minted by the resulting manager only decode within the same
+    /// process — useful for tests and for operators who haven't yet
+    /// configured `MCP_ENCRYPTION_KEY`.
+    pub fn with_ephemeral_key() -> Self {
+        let mut key = [0u8; 32];
+        rand::rng().fill_bytes(&mut key);
+        Self::new(key)
+    }
+
+    /// Register a session whose id is computed from the per-upstream
+    /// header set. `connections_with_headers` carries each upstream's
+    /// live `Connection` plus the canonical header map that was used
+    /// to open it — `extra_headers` ∪ `Authorization` (if present)
+    /// ∪ `Mcp-Session-Id` (always — that's the upstream sid the
+    /// proxy must replay on resume).
     ///
-    /// The id is `base62(JSON({ url: upstream_session_id, ... }))` with
-    /// keys in the order the connections appear in the `Vec`. If a later
-    /// `add` is called with the same URLs in the same order resolving to
-    /// the same upstream session ids, the returned id is byte-identical
-    /// to the previous one — that's the property the orchestrator relies
-    /// on to detect "no upstream rotated during resume."
-    ///
-    /// Connections are keyed inside the [`Session`] by their upstream
-    /// `server_info.name`. Duplicate names get `_<index>` suffixes so
-    /// downstream tool routing stays unambiguous.
-    pub fn add(&self, connections: Vec<Connection>) -> String {
-        let id = compute_session_id(&connections);
+    /// Returns the encoded session id. If the same upstream set is
+    /// re-registered with byte-identical headers, the returned id is
+    /// byte-identical too (modulo the random AEAD nonce, which makes
+    /// the ciphertext different each time — intentional, prevents
+    /// payload-recognition attacks).
+    pub fn add(
+        &self,
+        connections_with_headers: Vec<(Connection, IndexMap<String, String>)>,
+    ) -> String {
+        let payload = build_payload(&connections_with_headers);
+        let id = encrypt_and_encode(&payload, &self.key);
+        let connections: Vec<Connection> =
+            connections_with_headers.into_iter().map(|(c, _)| c).collect();
         let by_name = build_by_name_map(connections);
         self.sessions
-            .insert(id.clone(), Arc::new(Session::new(by_name)));
+            .insert(id.clone(), Arc::new(Session::new(by_name, payload)));
         id
     }
 
@@ -70,44 +132,131 @@ impl SessionManager {
     pub fn remove(&self, session_id: &str) -> Option<Arc<Session>> {
         self.sessions.remove(session_id).map(|(_, session)| session)
     }
-}
 
-/// Decode an incoming session id back into the URL→upstream-session-id
-/// map it encodes. `None` on any decode failure (bad base62, bad JSON,
-/// wrong shape).
-pub fn decode_session_id(id: &str) -> Option<IndexMap<String, String>> {
-    let bytes = base62_decode_bytes(id)?;
-    serde_json::from_slice(&bytes).ok()
-}
-
-/// Build an `IndexMap<url, upstream_session_id>` in connection order,
-/// JSON-serialize it, and base62-encode the bytes for transport. The
-/// ordering is what guarantees byte-stable ids on idempotent resumes.
-pub fn compute_session_id(connections: &[Connection]) -> String {
-    let mut map: IndexMap<String, String> =
-        IndexMap::with_capacity(connections.len());
-    for c in connections {
-        map.insert(c.url.clone(), c.session_id.clone());
+    /// Decrypt an incoming session id back into the URL → header_map
+    /// payload it encodes. `None` on any decode failure (bad base62,
+    /// unknown version, AEAD failure, bad JSON, wrong shape).
+    pub fn decode_session_id(&self, id: &str) -> Option<SessionPayload> {
+        decode_with_key(id, &self.key)
     }
-    let json = serde_json::to_vec(&map).expect("IndexMap<String,String> serializes");
-    base62_encode_bytes(&json)
+
+    /// Re-mint the encoded id for a payload that's already canonical —
+    /// used by the alive-in-memory branch in `handle_initialize` to
+    /// hand back the same id the client sent (the encrypt step
+    /// produces a different ciphertext each call due to the random
+    /// nonce, so technically the caller will see a fresh id, not the
+    /// byte-equal old one; the new id decrypts to the same payload
+    /// either way).
+    pub fn mint_id(&self, payload: &SessionPayload) -> String {
+        encrypt_and_encode(payload, &self.key)
+    }
+}
+
+/// Build a canonical (url-sorted, header-sorted) `SessionPayload`
+/// from a list of `(Connection, raw_header_map)` pairs.
+///
+/// The raw header map is normalized:
+///   - keys lowercased? **No** — HTTP headers are case-insensitive on
+///     the wire but we keep the casing the upstream sees. Sorting is
+///     done case-sensitively on the bytes; deterministic regardless.
+///   - sorted alphabetically.
+fn build_payload(
+    pairs: &[(Connection, IndexMap<String, String>)],
+) -> SessionPayload {
+    // Collect (url, sorted headers) pairs, then sort by URL.
+    let mut url_entries: Vec<(String, IndexMap<String, String>)> = pairs
+        .iter()
+        .map(|(c, headers)| {
+            let mut sorted: Vec<(&str, &str)> = headers
+                .iter()
+                .map(|(k, v)| (k.as_str(), v.as_str()))
+                .collect();
+            sorted.sort_by(|a, b| a.0.cmp(b.0));
+            let inner: IndexMap<String, String> = sorted
+                .into_iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect();
+            (c.url.clone(), inner)
+        })
+        .collect();
+    url_entries.sort_by(|a, b| a.0.cmp(&b.0));
+
+    let mut payload: SessionPayload = IndexMap::with_capacity(url_entries.len());
+    for (url, headers) in url_entries {
+        payload.insert(url, headers);
+    }
+    payload
+}
+
+/// JSON-serialize the payload, AEAD-encrypt, prepend version + nonce,
+/// base62-encode the whole envelope.
+fn encrypt_and_encode(payload: &SessionPayload, key: &[u8; 32]) -> String {
+    let plaintext =
+        serde_json::to_vec(payload).expect("SessionPayload serializes");
+
+    let cipher = XChaCha20Poly1305::new(Key::from_slice(key));
+    let mut nonce_bytes = [0u8; NONCE_LEN];
+    rand::rng().fill_bytes(&mut nonce_bytes);
+    let nonce = XNonce::from_slice(&nonce_bytes);
+    let ciphertext_with_tag = cipher
+        .encrypt(nonce, plaintext.as_ref())
+        .expect("XChaCha20-Poly1305 encrypt is infallible for valid key/nonce");
+
+    let mut envelope = Vec::with_capacity(1 + NONCE_LEN + ciphertext_with_tag.len());
+    envelope.push(VERSION);
+    envelope.extend_from_slice(&nonce_bytes);
+    envelope.extend_from_slice(&ciphertext_with_tag);
+    base62_encode_bytes(&envelope)
+}
+
+/// Reverse of [`encrypt_and_encode`]. AEAD failure → `None`.
+fn decode_with_key(id: &str, key: &[u8; 32]) -> Option<SessionPayload> {
+    let envelope = base62_decode_bytes(id)?;
+    if envelope.len() < 1 + NONCE_LEN + TAG_LEN {
+        return None;
+    }
+    if envelope[0] != VERSION {
+        return None;
+    }
+    let nonce = XNonce::from_slice(&envelope[1..1 + NONCE_LEN]);
+    let ciphertext = &envelope[1 + NONCE_LEN..];
+    let cipher = XChaCha20Poly1305::new(Key::from_slice(key));
+    let plaintext = cipher.decrypt(nonce, ciphertext).ok()?;
+    serde_json::from_slice(&plaintext).ok()
+}
+
+/// Parse an `MCP_ENCRYPTION_KEY` env-var value: a single base64-encoded
+/// 32-byte key. Empty string → `None`. Malformed → `Err`.
+pub fn parse_key_env(s: &str) -> Result<Option<[u8; 32]>, String> {
+    let trimmed = s.trim();
+    if trimmed.is_empty() {
+        return Ok(None);
+    }
+    let decoded = base64::engine::general_purpose::STANDARD
+        .decode(trimmed)
+        .map_err(|e| format!("MCP_ENCRYPTION_KEY: not valid base64: {e}"))?;
+    let key: [u8; 32] = decoded.try_into().map_err(|got: Vec<u8>| {
+        format!(
+            "MCP_ENCRYPTION_KEY: expected 32 bytes after base64-decode, got {}",
+            got.len(),
+        )
+    })?;
+    Ok(Some(key))
 }
 
 /// Byte-level base62. The off-the-shelf `base62` crate only encodes
-/// `u128`s; we need variable-length input for JSON-encoded session
-/// maps. Encoding interprets the bytes as a big-endian unsigned
-/// big-integer and prints it in base62 with `0..9 a..z A..Z` digits;
-/// leading zero bytes are encoded as a `0` digit each so they survive
-/// the round-trip.
+/// `u128`s; we need variable-length input for our envelope. Encoding
+/// interprets the bytes as a big-endian unsigned big-integer and
+/// prints it in base62 with `0..9 a..z A..Z` digits; leading zero
+/// bytes are encoded as a `0` digit each so they survive the
+/// round-trip.
 fn base62_encode_bytes(bytes: &[u8]) -> String {
     if bytes.is_empty() {
         return String::new();
     }
     const ALPHABET: &[u8; 62] =
         b"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    // Count leading zeros so we can re-emit them on decode.
     let leading_zeros = bytes.iter().take_while(|b| **b == 0).count();
-    // Convert bytes to a vector of base-62 digits (most significant first).
     let mut digits: Vec<u8> = Vec::with_capacity(bytes.len() * 2);
     let mut num: Vec<u32> = bytes[leading_zeros..].iter().map(|b| *b as u32).collect();
     while !num.is_empty() {
@@ -171,28 +320,6 @@ fn base62_decode_bytes(s: &str) -> Option<Vec<u8>> {
     Some(out)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn base62_round_trip() {
-        for sample in [
-            &b""[..],
-            &b"a"[..],
-            &b"\x00\x01\x02"[..],
-            &b"hello world"[..],
-            br#"{"http://127.0.0.1:1234":"abc123"}"#,
-            &(0..=255u16).map(|b| b as u8).collect::<Vec<_>>()[..],
-        ] {
-            let encoded = base62_encode_bytes(sample);
-            assert!(encoded.bytes().all(|b| (0x21..=0x7E).contains(&b)));
-            let decoded = base62_decode_bytes(&encoded).expect("decode");
-            assert_eq!(decoded, sample, "round-trip failed for {sample:?}");
-        }
-    }
-}
-
 fn build_by_name_map(
     connections: Vec<Connection>,
 ) -> IndexMap<String, Connection> {
@@ -223,4 +350,126 @@ fn build_by_name_map(
         by_name.insert(key, connection);
     }
     by_name
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn sample_payload() -> SessionPayload {
+        let mut p: SessionPayload = IndexMap::new();
+        let mut h_a: IndexMap<String, String> = IndexMap::new();
+        h_a.insert("Authorization".into(), "Bearer secret-A".into());
+        h_a.insert("Mcp-Session-Id".into(), "sid-A".into());
+        h_a.insert("X-Tenant".into(), "tenant-1".into());
+        p.insert("https://upstream-a.example/mcp".into(), h_a);
+        let mut h_b: IndexMap<String, String> = IndexMap::new();
+        h_b.insert("Mcp-Session-Id".into(), "sid-B".into());
+        p.insert("https://upstream-b.example/mcp".into(), h_b);
+        p
+    }
+
+    #[test]
+    fn base62_round_trip() {
+        for sample in [
+            &b""[..],
+            &b"a"[..],
+            &b"\x00\x01\x02"[..],
+            &b"hello world"[..],
+            br#"{"http://127.0.0.1:1234":"abc123"}"#,
+            &(0..=255u16).map(|b| b as u8).collect::<Vec<_>>()[..],
+        ] {
+            let encoded = base62_encode_bytes(sample);
+            assert!(encoded.bytes().all(|b| (0x21..=0x7E).contains(&b)));
+            let decoded = base62_decode_bytes(&encoded).expect("decode");
+            assert_eq!(decoded, sample, "round-trip failed for {sample:?}");
+        }
+    }
+
+    #[test]
+    fn encrypt_decrypt_round_trip() {
+        let key = [0x42u8; 32];
+        let payload = sample_payload();
+        let id = encrypt_and_encode(&payload, &key);
+        let decoded = decode_with_key(&id, &key).expect("decode under same key");
+        assert_eq!(decoded, payload);
+    }
+
+    #[test]
+    fn decode_with_wrong_key_returns_none() {
+        let key_a = [0x11u8; 32];
+        let key_b = [0x22u8; 32];
+        let id = encrypt_and_encode(&sample_payload(), &key_a);
+        assert!(decode_with_key(&id, &key_b).is_none());
+    }
+
+    #[test]
+    fn decode_garbage_returns_none() {
+        let key = [0x55u8; 32];
+        // Random base62 string, certainly not a valid envelope.
+        assert!(decode_with_key("ABCdef123", &key).is_none());
+        // Empty.
+        assert!(decode_with_key("", &key).is_none());
+        // Too short to even hold version + nonce + tag.
+        assert!(decode_with_key("0", &key).is_none());
+    }
+
+    #[test]
+    fn payload_roundtrip_preserves_canonical_order() {
+        // Build "the same" payload with shuffled URL and header order;
+        // after `build_payload` they should be equal byte-for-byte.
+        let conn_a_url = "https://b.example/mcp".to_string();
+        let conn_b_url = "https://a.example/mcp".to_string();
+
+        let mut h_unsorted: IndexMap<String, String> = IndexMap::new();
+        h_unsorted.insert("Z-Header".into(), "z".into());
+        h_unsorted.insert("Authorization".into(), "Bearer".into());
+
+        // We can't easily synthesize Connection without spinning a
+        // real server, so test build_payload's canonicalization
+        // through an inline helper that mirrors what add() builds.
+        let pairs_unsorted: Vec<(String, IndexMap<String, String>)> =
+            vec![(conn_a_url.clone(), h_unsorted.clone()), (conn_b_url.clone(), h_unsorted.clone())];
+
+        let mut payload: SessionPayload = IndexMap::new();
+        let mut url_entries: Vec<(String, IndexMap<String, String>)> = pairs_unsorted
+            .into_iter()
+            .map(|(url, headers)| {
+                let mut sorted: Vec<(&str, &str)> =
+                    headers.iter().map(|(k, v)| (k.as_str(), v.as_str())).collect();
+                sorted.sort_by(|a, b| a.0.cmp(b.0));
+                let inner: IndexMap<String, String> = sorted
+                    .into_iter()
+                    .map(|(k, v)| (k.to_string(), v.to_string()))
+                    .collect();
+                (url, inner)
+            })
+            .collect();
+        url_entries.sort_by(|a, b| a.0.cmp(&b.0));
+        for (u, h) in url_entries {
+            payload.insert(u, h);
+        }
+
+        let urls: Vec<&String> = payload.keys().collect();
+        assert_eq!(urls, vec![&conn_b_url, &conn_a_url]); // a.example before b.example
+        let inner = &payload[&conn_b_url];
+        let inner_keys: Vec<&String> = inner.keys().collect();
+        assert_eq!(inner_keys, vec!["Authorization", "Z-Header"]); // alphabetical
+    }
+
+    #[test]
+    fn parse_key_env_round_trip() {
+        let key = [0xAAu8; 32];
+        let env = base64::engine::general_purpose::STANDARD.encode(key);
+        let parsed = parse_key_env(&env).expect("parse").expect("Some");
+        assert_eq!(parsed, key);
+
+        assert!(parse_key_env("").unwrap().is_none());
+        assert!(parse_key_env("   ").unwrap().is_none());
+        assert!(parse_key_env("not-base64!@#").is_err());
+        // Wrong-length payload (16 bytes after b64 decode):
+        let short =
+            base64::engine::general_purpose::STANDARD.encode(&[0u8; 16][..]);
+        assert!(parse_key_env(&short).is_err());
+    }
 }
