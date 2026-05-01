@@ -195,6 +195,31 @@ impl Connection {
         self.inner.list_resources().await
     }
 
+    /// Returns the cached tool list as soon as it differs from `current`,
+    /// or waits up to `timeout` for the next `notifications/tools/list_changed`
+    /// from the upstream server before re-reading.
+    ///
+    /// Wakes the moment a refresh writer takes the cache write lock, so
+    /// the post-wake `read` is guaranteed to observe the new list rather
+    /// than racing against the install. Safe to call from any number of
+    /// tasks concurrently.
+    pub async fn subscribe_tools(
+        &self,
+        current: &[super::tool::Tool],
+        timeout: Duration,
+    ) -> Result<Arc<Vec<super::tool::Tool>>, Arc<super::Error>> {
+        self.inner.subscribe_tools(current, timeout).await
+    }
+
+    /// Resource counterpart of [`Connection::subscribe_tools`].
+    pub async fn subscribe_resources(
+        &self,
+        current: &[super::resource::Resource],
+        timeout: Duration,
+    ) -> Result<Arc<Vec<super::resource::Resource>>, Arc<super::Error>> {
+        self.inner.subscribe_resources(current, timeout).await
+    }
+
     /// Reads a resource from the upstream server.
     pub async fn read_resource(
         &self,
@@ -293,6 +318,16 @@ pub struct ConnectionInner {
     /// `notifications/resources/list_changed`.
     /// Set via [`Connection::set_on_resources_list_changed`].
     on_resources_list_changed: CallbackSlot,
+
+    /// Wakes any task awaiting in [`Connection::subscribe_tools`]. Fired
+    /// from inside `refresh_tools_signaling` the moment the writer
+    /// acquires the cache write lock — *before* the new list is
+    /// installed. A woken subscriber's next `read().await` blocks behind
+    /// the writer's guard, so it always observes the post-swap state.
+    tools_changed: Notify,
+
+    /// Resource counterpart of [`Self::tools_changed`].
+    resources_changed: Notify,
 }
 
 impl ConnectionInner {
@@ -340,6 +375,8 @@ impl ConnectionInner {
             external_dropped: Arc::new(Notify::new()),
             on_tools_list_changed: CallbackSlot::new(),
             on_resources_list_changed: CallbackSlot::new(),
+            tools_changed: Notify::new(),
+            resources_changed: Notify::new(),
         })
     }
 
@@ -388,6 +425,8 @@ impl ConnectionInner {
             external_dropped: Arc::new(Notify::new()),
             on_tools_list_changed: CallbackSlot::new(),
             on_resources_list_changed: CallbackSlot::new(),
+            tools_changed: Notify::new(),
+            resources_changed: Notify::new(),
         })
     }
 
@@ -437,6 +476,8 @@ impl ConnectionInner {
             external_dropped: Arc::new(Notify::new()),
             on_tools_list_changed: CallbackSlot::new(),
             on_resources_list_changed: CallbackSlot::new(),
+            tools_changed: Notify::new(),
+            resources_changed: Notify::new(),
         });
 
         // Spawn background tool lister if the server supports tools.
@@ -879,6 +920,61 @@ impl ConnectionInner {
         self.resources.read().await.clone()
     }
 
+    /// Returns the cached tool list as soon as it differs from `current`,
+    /// or — if it equals `current` right now — waits up to `timeout` for
+    /// the cache to change and then returns whatever it sees.
+    ///
+    /// An `Err` cache is treated as "different from any caller snapshot"
+    /// and returned immediately.
+    ///
+    /// Concurrency-safe: any number of concurrent subscribers wait on
+    /// independent `Notified` futures and read the cache through the
+    /// shared `RwLock`. A timeout that fires alone is not an error — we
+    /// re-read the cache and return whatever's there.
+    async fn subscribe_tools(
+        &self,
+        current: &[super::tool::Tool],
+        timeout: Duration,
+    ) -> Result<Arc<Vec<super::tool::Tool>>, Arc<super::Error>> {
+        // Arm BEFORE reading. `enable()` registers the future in the
+        // wait queue without polling, so a `notify_waiters` racing
+        // between our read and our await still wakes us.
+        let notified = self.tools_changed.notified();
+        tokio::pin!(notified);
+        notified.as_mut().enable();
+
+        let initial = self.tools.read().await.clone();
+        match &initial {
+            Ok(arc) if arc.as_slice() == current => {}
+            _ => return initial,
+        }
+
+        let _ = tokio::time::timeout(timeout, notified).await;
+
+        self.tools.read().await.clone()
+    }
+
+    /// Resource counterpart of [`Self::subscribe_tools`].
+    async fn subscribe_resources(
+        &self,
+        current: &[super::resource::Resource],
+        timeout: Duration,
+    ) -> Result<Arc<Vec<super::resource::Resource>>, Arc<super::Error>> {
+        let notified = self.resources_changed.notified();
+        tokio::pin!(notified);
+        notified.as_mut().enable();
+
+        let initial = self.resources.read().await.clone();
+        match &initial {
+            Ok(arc) if arc.as_slice() == current => {}
+            _ => return initial,
+        }
+
+        let _ = tokio::time::timeout(timeout, notified).await;
+
+        self.resources.read().await.clone()
+    }
+
     /// Reads a resource from the MCP server.
     async fn read_resource(
         &self,
@@ -917,6 +1013,12 @@ impl ConnectionInner {
         on_change: Option<ListChangedCallback>,
     ) {
         let mut guard = self.tools.write().await;
+        // Fire `tools_changed` while we hold the write lock and *before*
+        // installing the new list. Any subscriber woken now must take a
+        // read lock to observe the result, and that read lock is queued
+        // behind this write guard — so they always see the post-swap
+        // state, never mid-swap.
+        self.tools_changed.notify_waiters();
         let _ = lock_held.send(());
         if let Some(cb) = on_change {
             cb();
@@ -953,6 +1055,10 @@ impl ConnectionInner {
         on_change: Option<ListChangedCallback>,
     ) {
         let mut guard = self.resources.write().await;
+        // See `refresh_tools_signaling` — fire under the write lock,
+        // before install, so subscribers' next read sees the post-swap
+        // state.
+        self.resources_changed.notify_waiters();
         let _ = lock_held.send(());
         if let Some(cb) = on_change {
             cb();
@@ -1110,3 +1216,153 @@ impl ConnectionInner {
     }
 }
 
+#[cfg(test)]
+mod subscribe_tests {
+    use super::*;
+    use crate::mcp::tool::{Tool, ToolSchemaObject, ToolSchemaType};
+
+    fn tool(name: &str) -> Tool {
+        Tool {
+            name: name.to_string(),
+            title: None,
+            description: None,
+            icons: None,
+            input_schema: ToolSchemaObject {
+                r#type: ToolSchemaType::Object,
+                properties: None,
+                required: None,
+                extra: IndexMap::new(),
+            },
+            output_schema: None,
+            annotations: None,
+            execution: None,
+            _meta: None,
+        }
+    }
+
+    /// First read shows a different list — return immediately, never wait.
+    #[tokio::test]
+    async fn subscribe_tools_returns_immediately_when_cache_differs() {
+        let conn = Connection::new_for_test("t".into(), "http://x".into());
+        *conn.inner.tools.write().await = Ok(Arc::new(vec![tool("a")]));
+
+        let start = std::time::Instant::now();
+        let got = conn
+            .subscribe_tools(&[tool("b")], Duration::from_secs(5))
+            .await
+            .unwrap();
+        assert!(start.elapsed() < Duration::from_millis(100));
+        assert_eq!(got.as_slice(), &[tool("a")]);
+    }
+
+    /// Cached `Err` is treated as "different from any caller snapshot."
+    #[tokio::test]
+    async fn subscribe_tools_returns_err_immediately() {
+        let conn = Connection::new_for_test("t".into(), "http://x".into());
+        let err = super::super::Error::NoSessionId {
+            url: "http://x".into(),
+            body: String::new(),
+        };
+        *conn.inner.tools.write().await = Err(Arc::new(err));
+
+        let start = std::time::Instant::now();
+        let got = conn
+            .subscribe_tools(&[], Duration::from_secs(5))
+            .await;
+        assert!(start.elapsed() < Duration::from_millis(100));
+        assert!(got.is_err());
+    }
+
+    /// Cache equals snapshot, then a writer fires the notify under the
+    /// write lock and installs a new list. The subscriber wakes, then its
+    /// re-read blocks behind the writer's guard, observes the new list.
+    #[tokio::test]
+    async fn subscribe_tools_wakes_on_change_and_reads_post_swap() {
+        let conn = Connection::new_for_test("t".into(), "http://x".into());
+        *conn.inner.tools.write().await = Ok(Arc::new(vec![tool("a")]));
+
+        let conn_for_subscriber = conn.clone();
+        let subscriber = tokio::spawn(async move {
+            conn_for_subscriber
+                .subscribe_tools(&[tool("a")], Duration::from_secs(5))
+                .await
+                .unwrap()
+        });
+
+        // Give the subscriber a moment to arm `notified()` and finish
+        // its first read so it's parked on the timeout.
+        tokio::time::sleep(Duration::from_millis(50)).await;
+
+        // Simulate `refresh_tools_signaling`: take the write lock, fire
+        // `tools_changed` *while holding* the write lock, then install
+        // the new value before releasing. This is exactly the ordering
+        // that the real refresh path uses.
+        {
+            let mut guard = conn.inner.tools.write().await;
+            conn.inner.tools_changed.notify_waiters();
+            // Hold briefly to make absolutely sure the subscriber is
+            // racing the read lock against our drop.
+            tokio::time::sleep(Duration::from_millis(20)).await;
+            *guard = Ok(Arc::new(vec![tool("b")]));
+        }
+
+        let got = tokio::time::timeout(Duration::from_secs(2), subscriber)
+            .await
+            .expect("subscriber returned in time")
+            .expect("subscriber didn't panic");
+        assert_eq!(got.as_slice(), &[tool("b")]);
+    }
+
+    /// Cache equals snapshot, no notification arrives — timeout, return
+    /// the still-equal list (not an error).
+    #[tokio::test]
+    async fn subscribe_tools_times_out_and_returns_unchanged_list() {
+        let conn = Connection::new_for_test("t".into(), "http://x".into());
+        *conn.inner.tools.write().await = Ok(Arc::new(vec![tool("a")]));
+
+        let start = std::time::Instant::now();
+        let got = conn
+            .subscribe_tools(&[tool("a")], Duration::from_millis(50))
+            .await
+            .unwrap();
+        let elapsed = start.elapsed();
+        assert!(elapsed >= Duration::from_millis(40), "elapsed: {elapsed:?}");
+        assert!(elapsed < Duration::from_millis(500), "elapsed: {elapsed:?}");
+        assert_eq!(got.as_slice(), &[tool("a")]);
+    }
+
+    /// Two concurrent subscribers both wake on a single notify_waiters
+    /// and both observe the post-swap list.
+    #[tokio::test]
+    async fn subscribe_tools_supports_concurrent_subscribers() {
+        let conn = Connection::new_for_test("t".into(), "http://x".into());
+        *conn.inner.tools.write().await = Ok(Arc::new(vec![tool("a")]));
+
+        let c1 = conn.clone();
+        let c2 = conn.clone();
+        let s1 = tokio::spawn(async move {
+            c1.subscribe_tools(&[tool("a")], Duration::from_secs(5))
+                .await
+                .unwrap()
+        });
+        let s2 = tokio::spawn(async move {
+            c2.subscribe_tools(&[tool("a")], Duration::from_secs(5))
+                .await
+                .unwrap()
+        });
+
+        tokio::time::sleep(Duration::from_millis(50)).await;
+
+        {
+            let mut guard = conn.inner.tools.write().await;
+            conn.inner.tools_changed.notify_waiters();
+            *guard = Ok(Arc::new(vec![tool("c")]));
+        }
+
+        let (r1, r2) = tokio::join!(s1, s2);
+        let r1 = r1.unwrap();
+        let r2 = r2.unwrap();
+        assert_eq!(r1.as_slice(), &[tool("c")]);
+        assert_eq!(r2.as_slice(), &[tool("c")]);
+    }
+}
