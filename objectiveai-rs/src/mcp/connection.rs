@@ -1180,8 +1180,13 @@ impl ConnectionInner {
             // the `is_reconnect` doc-comment above for the
             // refresh-AFTER-resubscribe rationale.
             if is_reconnect {
-                this.refresh_tools(this.on_tools_list_changed.get()).await;
-                this.refresh_resources(this.on_resources_list_changed.get()).await;
+                // tools and resources are independent locks; run the
+                // catch-up refreshes concurrently so disconnect
+                // recovery isn't sequential.
+                let _ = tokio::join!(
+                    this.refresh_tools(this.on_tools_list_changed.get()),
+                    this.refresh_resources(this.on_resources_list_changed.get()),
+                );
             }
             is_reconnect = true;
 
