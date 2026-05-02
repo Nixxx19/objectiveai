@@ -83,8 +83,19 @@ pub async fn connect_all_fresh(
         let url = spec.url.clone();
         let headers_for_payload = spec.headers.clone();
         async move {
+            // Hoist any caller-supplied `Mcp-Session-Id` out of the
+            // header bag and pass it as the dedicated `session_id` arg.
+            // Otherwise the upstream sees a session-id header but the
+            // mcp client treats the connection as brand-new and
+            // expects the server to mint a fresh id in the response;
+            // when the upstream is already a pre-seeded rmcp session
+            // (existing-session branch in rmcp's tower) the response
+            // does NOT echo `Mcp-Session-Id`, so the client errors with
+            // `NoSessionId` and retries forever.
+            let mut headers = spec.headers;
+            let session_id = headers.shift_remove(MCP_SESSION_ID_KEY);
             let conn = client
-                .connect(spec.url, None, Some(spec.headers))
+                .connect(spec.url, session_id, Some(headers))
                 .await
                 .map_err(|source| BadInit::UpstreamConnectFailed {
                     url: url.clone(),
