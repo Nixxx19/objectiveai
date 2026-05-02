@@ -1130,13 +1130,29 @@ impl ConnectionInner {
         // handed us. After that, fall back to opening fresh GET / SSE
         // streams as the upstream connection cycles.
         let mut next_lines: Option<super::LinesStream> = Some(initial_lines);
-        // Tracks whether the current iteration is opening a *fresh*
-        // SSE stream (true) vs consuming the caller's pre-opened one
-        // (false). On a fresh open we proactively refresh tools and
-        // resources to catch up on any list-changed notifications the
-        // upstream may have fired during our disconnect window — the
-        // upstream's broadcast (especially through a proxy) is lossy
-        // for moments when this listener has zero active subscribers.
+        // One-shot guard for the catch-up refresh: false on the very
+        // first iteration (the caller's pre-opened SSE stream — its
+        // associated cache was just populated by `Client::connect`'s
+        // initial pagination, so re-fetching there would just be a
+        // wasted round-trip), true thereafter. Every stream end —
+        // whether `Ok(None)` (clean close) or `Err(_)` (read failure)
+        // — drops back here, which we treat as an implicit
+        // list-changed notification: the upstream's broadcast (in
+        // particular the proxy's per-session `tokio::broadcast`) is
+        // lossy for moments when this listener has zero active
+        // subscribers, so anything that fired during our disconnect
+        // window may have been dropped.
+        //
+        // ORDER MATTERS. The refresh must run AFTER we've re-opened
+        // the GET / SSE stream — i.e. after we're a subscriber again
+        // — and BEFORE we enter the inner read loop. If we refreshed
+        // before the resubscribe, a notification that fired between
+        // our refresh-completion and our subscribe would be lost the
+        // same way as the original disconnect-window drops; doing it
+        // after means a notification fired DURING the refresh lands
+        // in the new subscriber's buffer (broadcast::Sender::send
+        // backs onto each receiver's channel-capacity slot) and gets
+        // consumed by the inner loop on its next read.
         let mut is_reconnect = false;
 
         loop {
@@ -1159,9 +1175,10 @@ impl ConnectionInner {
                 }
             };
 
-            // Catch-up refresh on every reconnect (not the very first
-            // iteration with the pre-opened stream — that one's caller
-            // just initialised the cache).
+            // Catch-up refresh on every reconnect — the implicit
+            // list-changed treatment for the just-failed stream. See
+            // the `is_reconnect` doc-comment above for the
+            // refresh-AFTER-resubscribe rationale.
             if is_reconnect {
                 this.refresh_tools(this.on_tools_list_changed.get()).await;
                 this.refresh_resources(this.on_resources_list_changed.get()).await;
