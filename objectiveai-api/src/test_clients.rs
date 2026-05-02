@@ -483,9 +483,19 @@ const MCP_BACKOFF_MAX_INTERVAL_MS: u64 = 1_000;
 const MCP_BACKOFF_MAX_ELAPSED_TIME_MS: u64 = 40_000;
 
 static MCP_CLIENT: LazyLock<Arc<objectiveai::mcp::Client>> = LazyLock::new(|| {
+    // Construct reqwest::Client inside the BACKGROUND_RUNTIME so the
+    // hyper connection-pool dispatch tasks live forever. Constructing
+    // it on a per-`#[tokio::test]` runtime binds the client's HTTP
+    // connection pool to that runtime — once the test ends and its
+    // runtime drops, every cached connection's dispatch task dies and
+    // subsequent tests using this `LazyLock` see
+    // `runtime dropped the dispatch task` errors on POSTs to the
+    // proxy, which manifest as parallel-only invention test flakes.
+    let _guard = BACKGROUND_RUNTIME.handle().enter();
     let reqwest = reqwest::Client::builder()
         .build()
         .expect("build reqwest::Client");
+    drop(_guard);
     Arc::new(objectiveai::mcp::Client::new(
         reqwest,
         String::new(),
@@ -612,6 +622,18 @@ static FUNCTION_INVENTIONS: LazyLock<Arc<FunctionInventionsClient>> = LazyLock::
         INVENTION_SERVER_SPAWNER.clone(),
         true,
         false,
+        // Test override matching production default. The earlier 5 s
+        // value relied on quiet test conditions to make a hang surface
+        // as a clean `ToolSubscriptionTimeout`, but under the full
+        // suite's parallel load (recursive inventions × ≤10
+        // concurrent tests × 5 sub-inventions per recursive depth)
+        // BG_RUNTIME's 2 workers are oversubscribed and the listener
+        // task can be delayed past 5 s, surfacing as snapshot
+        // mismatches because step 2 (Input Schema) bails with
+        // `ToolSubscriptionTimeout` after only step 1 (Essay)
+        // completes. Lifting to the production default eliminates
+        // load-induced false-timeout flakes; a real hang still surfaces
+        // within a single test's wall-clock budget.
         std::time::Duration::from_secs(30),
     ))
 });
@@ -645,6 +667,21 @@ pub(crate) fn mock_upstream() -> Arc<crate::agent::completions::mock::Client> {
 
 pub(crate) fn proxy_spawner() -> Arc<crate::agent::completions::ProxySpawner> {
     PROXY_SPAWNER.clone()
+}
+
+/// Drive `fut` on the long-lived `BACKGROUND_RUNTIME` instead of a per-
+/// `#[test]` runtime. Required for any test that exercises the
+/// proxy/invention pipeline because reqwest's hyper connection pool
+/// spawns its dispatch tasks on whatever runtime is current when a
+/// connection is established and reused. A short-lived per-test runtime
+/// drops mid-flight, killing pooled dispatch tasks the instant another
+/// test (or even a later step of the same test running on a different
+/// thread) tries to send on those connections — surfacing as a
+/// "request error … client error (SendRequest): dispatch task is gone:
+/// runtime dropped the dispatch task" error and producing parallel-only
+/// flakes that disappear under solo execution.
+pub(crate) fn run_test<F: std::future::Future>(fut: F) -> F::Output {
+    BACKGROUND_RUNTIME.block_on(fut)
 }
 
 pub(crate) fn invention_server_spawner() -> Arc<crate::functions::inventions::InventionServerSpawner> {

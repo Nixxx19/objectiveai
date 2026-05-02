@@ -179,8 +179,7 @@ macro_rules! invention_test_10x {
             }
 
             fn run_snapshot(offset: i64, path: &str, expected: &str) {
-                let rt = tokio::runtime::Runtime::new().unwrap();
-                rt.block_on(async {
+                crate::test_clients::run_test(async {
                     let client = make_client();
                     let (state, seed) = make_state(offset);
                     let request = make_request(state, seed);
@@ -316,8 +315,7 @@ macro_rules! invention_test_10x_schema {
             }
 
             fn run_snapshot(offset: i64, path: &str, expected: &str) {
-                let rt = tokio::runtime::Runtime::new().unwrap();
-                rt.block_on(async {
+                crate::test_clients::run_test(async {
                     let client = make_client();
                     let (state, seed) = make_state(offset);
                     let request = make_request(state, seed);

@@ -156,8 +156,7 @@ macro_rules! recursive_test_3x {
             }
 
             fn run_snapshot(offset: i64, path: &str, expected: &str) {
-                let rt = tokio::runtime::Runtime::new().unwrap();
-                rt.block_on(async {
+                crate::test_clients::run_test(async {
                     let client = make_client();
                     let (state, seed) = make_state(offset);
                     let request = make_request(state, seed);
@@ -221,8 +220,7 @@ macro_rules! recursive_test_3x_unrouted {
             }
 
             fn run_snapshot(offset: i64, path: &str, expected: &str) {
-                let rt = tokio::runtime::Runtime::new().unwrap();
-                rt.block_on(async {
+                crate::test_clients::run_test(async {
                     let client = make_client();
                     let (state, seed) = make_state(offset);
                     let request = make_request(state, seed);
@@ -538,8 +536,7 @@ fn valid_vector_leaf_task() -> alpha_vector::LeafTaskExpression {
 #[test]
 fn test_invalid_scalar_input_schema() {
     // Scalar leaf with an invalid input schema (only 1 permutation) and no tasks.
-    let rt = tokio::runtime::Runtime::new().unwrap();
-    rt.block_on(async {
+    crate::test_clients::run_test(async {
         let client = make_client();
         let state = ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
             params: params("inv-bad-schema", 0, 1, 1, 2, 4),
@@ -565,8 +562,7 @@ fn test_invalid_scalar_input_schema() {
 #[test]
 fn test_valid_schema_invalid_tasks_scalar_leaf() {
     // Scalar leaf with a valid input schema but tasks that don't use the input.
-    let rt = tokio::runtime::Runtime::new().unwrap();
-    rt.block_on(async {
+    crate::test_clients::run_test(async {
         let client = make_client();
         let state = ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
             params: params("inv-bad-tasks", 0, 1, 1, 2, 4),
@@ -595,8 +591,7 @@ fn test_valid_schema_valid_tasks_scalar_leaf() {
     // fail CV29 validation ("compiled response must be an array of content
     // parts, not a plain string"). The invention errors out during
     // validate_initial_state. The snapshot captures this expected error.
-    let rt = tokio::runtime::Runtime::new().unwrap();
-    rt.block_on(async {
+    crate::test_clients::run_test(async {
         let client = make_client();
         let state = ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
             params: params("inv-good-sl", 0, 1, 1, 2, 4),
@@ -626,8 +621,7 @@ fn test_valid_schema_valid_tasks_scalar_leaf() {
 #[test]
 fn test_valid_vector_schema_valid_tasks() {
     // Vector leaf with valid schema and tasks — should succeed.
-    let rt = tokio::runtime::Runtime::new().unwrap();
-    rt.block_on(async {
+    crate::test_clients::run_test(async {
         let client = make_client();
         let state = ParamsState::AlphaVectorLeaf(AlphaVectorLeafState {
             params: params("inv-good-vl", 0, 1, 1, 2, 4),
@@ -657,8 +651,7 @@ fn test_valid_vector_schema_valid_tasks() {
 #[test]
 fn test_predicted_tasks_length_too_low() {
     // tasks_length = 0, but min_leaf_width = 2 — should fail.
-    let rt = tokio::runtime::Runtime::new().unwrap();
-    rt.block_on(async {
+    crate::test_clients::run_test(async {
         let client = make_client();
         let state = ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
             params: params("inv-tl-low", 0, 1, 1, 2, 4),
@@ -683,8 +676,7 @@ fn test_predicted_tasks_length_too_low() {
 #[test]
 fn test_predicted_tasks_length_too_high() {
     // tasks_length = 99, but max_leaf_width = 4 — should fail.
-    let rt = tokio::runtime::Runtime::new().unwrap();
-    rt.block_on(async {
+    crate::test_clients::run_test(async {
         let client = make_client();
         let state = ParamsState::AlphaVectorLeaf(AlphaVectorLeafState {
             params: params("inv-tl-high", 0, 1, 1, 2, 4),
@@ -709,8 +701,7 @@ fn test_predicted_tasks_length_too_high() {
 #[test]
 fn test_predicted_tasks_length_too_high_branch() {
     // Branch with tasks_length = 50, but max_branch_width = 5 — should fail.
-    let rt = tokio::runtime::Runtime::new().unwrap();
-    rt.block_on(async {
+    crate::test_clients::run_test(async {
         let client = make_client();
         let state = ParamsState::AlphaScalarBranch(AlphaScalarBranchState {
             params: params("inv-tl-branch", 1, 3, 5, 2, 4),
@@ -735,8 +726,7 @@ fn test_predicted_tasks_length_too_high_branch() {
 #[test]
 fn test_predicted_tasks_length_below_branch_min() {
     // Vector branch with tasks_length = 1, but min_branch_width = 3.
-    let rt = tokio::runtime::Runtime::new().unwrap();
-    rt.block_on(async {
+    crate::test_clients::run_test(async {
         let client = make_client();
         let state = ParamsState::AlphaVectorBranch(AlphaVectorBranchState {
             params: params("inv-tl-vb-low", 1, 3, 8, 2, 4),
@@ -761,8 +751,7 @@ fn test_predicted_tasks_length_below_branch_min() {
 #[test]
 fn test_valid_schema_no_tasks_with_essay() {
     // Valid schema, essay present, no tasks — should succeed (normal invention flow).
-    let rt = tokio::runtime::Runtime::new().unwrap();
-    rt.block_on(async {
+    crate::test_clients::run_test(async {
         let client = make_client();
         let state = ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
             params: params("inv-schema-only", 0, 1, 1, 2, 4),
@@ -789,8 +778,7 @@ fn test_valid_schema_no_tasks_with_essay() {
 #[test]
 fn test_invalid_schema_with_tasks_and_description() {
     // Invalid schema + tasks + description — should fail on schema validation.
-    let rt = tokio::runtime::Runtime::new().unwrap();
-    rt.block_on(async {
+    crate::test_clients::run_test(async {
         let client = make_client();
         let state = ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
             params: params("inv-full-bad", 0, 1, 1, 2, 4),
