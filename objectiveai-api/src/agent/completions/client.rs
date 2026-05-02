@@ -1001,42 +1001,48 @@ where
                     continuation_items.push(super::ContinuationItem::State(state));
                 }
 
-                // Fan all tool calls in this turn out to the proxy in
-                // parallel; the proxy itself multiplexes onto its
-                // upstreams. Sequential `.await` per call would stack
-                // RPC latencies. `join_all` keeps the order so we yield
-                // tool messages in the same order the assistant called
-                // them — the proxy's per-call latency dominates the
-                // turn rather than the sum.
+                // TODO: return to concurrent dispatch (`join_all`) once
+                // we have a way to keep the per-call response order
+                // deterministic. The blocker is invention tools that
+                // mutate shared state and return order-sensitive values
+                // (`AppendTask` returns the new tasks length, etc.):
+                // when those run in parallel, the tokio scheduler
+                // decides which acquires the state mutex first,
+                // shuffling each call's return value and propagating
+                // through to the next step's prompt-id-derived mock
+                // seed. Possible avenues — server-side ordering by
+                // call_id, idempotent-only tools, agent-side
+                // parallel-then-canonicalize — all need design.
+                //
+                // Dispatch tool calls in this turn SEQUENTIALLY in the
+                // meantime. We used to `join_all` for latency, but
+                // serialising fixes the race by construction. The
+                // proxy's per-call latency dominates anyway (the
+                // InventionServer's session worker is a single-event
+                // loop, so it would have serialised them server-side
+                // regardless).
                 let conn = mcp_connection
                     .as_ref()
                     .expect("callable extraction returns empty without a connection")
                     .clone();
-                let dispatch_futs = callable
-                    .iter()
-                    .map(|(call_id, name, args)| {
-                        let conn = conn.clone();
-                        let call_id = call_id.clone();
-                        let name = name.clone();
-                        let args_json = args.clone();
-                        async move {
-                            let arguments: Option<
-                                indexmap::IndexMap<String, serde_json::Value>,
-                            > = serde_json::from_str(&args_json).ok();
-                            conn.call_tool_as_message(
-                                &objectiveai::mcp::tool::CallToolRequestParams {
-                                    name,
-                                    arguments,
-                                    _meta: None,
-                                    task: None,
-                                },
-                                call_id,
-                            )
-                            .await
-                        }
-                    })
-                    .collect::<Vec<_>>();
-                let results = futures::future::join_all(dispatch_futs).await;
+                let mut results = Vec::with_capacity(callable.len());
+                for (call_id, name, args) in &callable {
+                    let arguments: Option<
+                        indexmap::IndexMap<String, serde_json::Value>,
+                    > = serde_json::from_str(args).ok();
+                    let res = conn
+                        .call_tool_as_message(
+                            &objectiveai::mcp::tool::CallToolRequestParams {
+                                name: name.clone(),
+                                arguments,
+                                _meta: None,
+                                task: None,
+                            },
+                            call_id.clone(),
+                        )
+                        .await;
+                    results.push(res);
+                }
 
                 let mut any_invention_tool_called = false;
                 for result in results {
