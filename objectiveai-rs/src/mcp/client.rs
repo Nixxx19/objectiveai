@@ -238,6 +238,14 @@ impl Client {
         }
 
         // Extract session ID from response header.
+        //
+        // For *new* sessions the server must mint and return a session
+        // id. For *existing* sessions (caller passed `session_id` in)
+        // many servers — including rmcp's `StreamableHttpService` on
+        // its existing-session branch — don't echo the header back
+        // because nothing changed. When the caller already knew the
+        // session id, fall back to it instead of erroring; that's the
+        // value we'll be stamping on every subsequent request anyway.
         let resolved_session_id = match response
             .headers()
             .get("Mcp-Session-Id")
@@ -245,13 +253,16 @@ impl Client {
             .map(String::from)
         {
             Some(s) => s,
-            None => {
-                let body = response.text().await.unwrap_or_default();
-                return Err(super::Error::NoSessionId {
-                    url: url.to_string(),
-                    body: body.chars().take(800).collect(),
-                });
-            }
+            None => match session_id {
+                Some(provided) => provided.to_string(),
+                None => {
+                    let body = response.text().await.unwrap_or_default();
+                    return Err(super::Error::NoSessionId {
+                        url: url.to_string(),
+                        body: body.chars().take(800).collect(),
+                    });
+                }
+            },
         };
 
         // Did the server return SSE or unary JSON? rmcp's
