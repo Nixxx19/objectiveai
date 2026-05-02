@@ -1130,6 +1130,14 @@ impl ConnectionInner {
         // handed us. After that, fall back to opening fresh GET / SSE
         // streams as the upstream connection cycles.
         let mut next_lines: Option<super::LinesStream> = Some(initial_lines);
+        // Tracks whether the current iteration is opening a *fresh*
+        // SSE stream (true) vs consuming the caller's pre-opened one
+        // (false). On a fresh open we proactively refresh tools and
+        // resources to catch up on any list-changed notifications the
+        // upstream may have fired during our disconnect window — the
+        // upstream's broadcast (especially through a proxy) is lossy
+        // for moments when this listener has zero active subscribers.
+        let mut is_reconnect = false;
 
         loop {
             // Layer 1: between-reconnect liveness check.
@@ -1150,6 +1158,15 @@ impl ConnectionInner {
                     super::lines_from_response(response)
                 }
             };
+
+            // Catch-up refresh on every reconnect (not the very first
+            // iteration with the pre-opened stream — that one's caller
+            // just initialised the cache).
+            if is_reconnect {
+                this.refresh_tools(this.on_tools_list_changed.get()).await;
+                this.refresh_resources(this.on_resources_list_changed.get()).await;
+            }
+            is_reconnect = true;
 
             'inner: loop {
                 // Layer 3: race-window backup. If a drop fired between
