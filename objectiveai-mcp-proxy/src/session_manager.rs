@@ -8,12 +8,17 @@
 //! any custom headers the original initialize request supplied.
 //!
 //! Stable encoding: URLs sort alphabetically; headers within each
-//! per-URL map sort alphabetically. So two requests with the same
-//! `{url → {header → value}}` content always encode to the same id
-//! (modulo the random AEAD nonce, which makes ciphertexts non-equal —
-//! intentional, prevents an attacker from recognizing replayed
-//! payloads). Authentication tag covers the version byte + nonce +
-//! ciphertext, so any tampering produces a decryption failure.
+//! per-URL map sort alphabetically, AND the AEAD nonce is derived
+//! deterministically from a BLAKE3 keyed hash of the canonical
+//! plaintext. So two requests with the same `{url → {header → value}}`
+//! content always encode to the *same* base62 id, byte-for-byte. That
+//! lets `handle_initialize`'s alive-in-memory branch hand the original
+//! id straight back to the caller — re-minting was previously producing
+//! a fresh ciphertext (random nonce) that didn't match any key in
+//! `state.sessions`, so the agent's next POST 404'd. Same payload now
+//! always lives at the same id. Authentication tag covers the version
+//! byte + nonce + ciphertext, so any tampering produces a decryption
+//! failure.
 //!
 //! Wire format (pre-base62):
 //! ```text
@@ -188,15 +193,34 @@ fn build_payload(
     payload
 }
 
-/// JSON-serialize the payload, AEAD-encrypt, prepend version + nonce,
-/// base62-encode the whole envelope.
+/// JSON-serialize the payload, AEAD-encrypt with a *deterministic*
+/// nonce derived from a BLAKE3 keyed hash of the plaintext, prepend
+/// version + nonce, base62-encode the whole envelope.
+///
+/// Why deterministic: `handle_initialize`'s alive-in-memory branch
+/// needs to mint the same id the caller already holds, so the id
+/// remains a key in `state.sessions`. With a random nonce we'd
+/// generate a different ciphertext for the same payload every time.
+///
+/// Safety of nonce reuse: AEAD only breaks under nonce reuse when the
+/// SAME nonce is paired with TWO DIFFERENT plaintexts. Here the nonce
+/// is a function of the plaintext (and key), so distinct plaintexts
+/// get distinct nonces; identical plaintexts get identical nonces and
+/// identical ciphertexts, which is exactly what we want.
 fn encrypt_and_encode(payload: &SessionPayload, key: &[u8; 32]) -> String {
     let plaintext =
         serde_json::to_vec(payload).expect("SessionPayload serializes");
 
-    let cipher = XChaCha20Poly1305::new(Key::from_slice(key));
+    // Derive the 24-byte XChaCha20 nonce from BLAKE3(key, plaintext).
+    // BLAKE3's keyed hash is a PRF, so this is indistinguishable from
+    // random for any attacker who doesn't know `key`, but it's stable
+    // for the (key, plaintext) pair.
+    let mut hasher = blake3::Hasher::new_keyed(key);
+    hasher.update(&plaintext);
     let mut nonce_bytes = [0u8; NONCE_LEN];
-    rand::rng().fill_bytes(&mut nonce_bytes);
+    nonce_bytes.copy_from_slice(&hasher.finalize().as_bytes()[..NONCE_LEN]);
+
+    let cipher = XChaCha20Poly1305::new(Key::from_slice(key));
     let nonce = XNonce::from_slice(&nonce_bytes);
     let ciphertext_with_tag = cipher
         .encrypt(nonce, plaintext.as_ref())

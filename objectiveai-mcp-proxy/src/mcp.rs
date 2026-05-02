@@ -286,7 +286,11 @@ async fn handle_initialize(
     let connections_with_headers = if let Some(sid) = &provided_session_id {
         if let Some(session) = state.sessions.get(sid) {
             // Branch 1 — alive in-memory. Re-mint and return without
-            // re-running connect_all.
+            // re-running connect_all. With deterministic
+            // (BLAKE3-keyed-hash) nonce derivation in
+            // `session_manager::encrypt_and_encode`, the re-mint is
+            // byte-identical to the id the caller already holds, so
+            // it stays a key in `state.sessions`.
             let new_id = state.sessions.mint_id(&session.payload);
             return ok_response_with_id(request.id, new_id);
         }
