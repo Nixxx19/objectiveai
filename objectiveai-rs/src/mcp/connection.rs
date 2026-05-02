@@ -1,10 +1,12 @@
 //! MCP connection for communicating with an MCP server.
 //!
 //! [`Connection`] is a cheaply-clonable handle around an internal
-//! [`ConnectionInner`]. Cloning bumps the inner refcount; dropping fires
-//! `external_dropped.notify_waiters()` so the long-lived background SSE
-//! listener wakes up and can re-check liveness immediately, exiting once
-//! it observes that no external `Connection` handle remains.
+//! [`ConnectionInner`]. The last drop of the inner `Arc` runs
+//! [`ConnectionInner`]'s `Drop`, which cancels the listener task's
+//! [`tokio_util::sync::CancellationToken`] (held in `_listener_cancel_guard`
+//! as a [`tokio_util::sync::DropGuard`]) — the SSE listener exits the
+//! instant any in-flight reconnect, sleep, or read is cancelled, with no
+//! zombie 401 retries against a now-dead proxy session.
 
 use std::ops::Deref;
 use std::sync::{Arc, RwLock as StdRwLock, Weak};
@@ -13,6 +15,7 @@ use std::time::Duration;
 
 use indexmap::IndexMap;
 use tokio::sync::{Notify, RwLock};
+use tokio_util::sync::{CancellationToken, DropGuard};
 
 /// Callback fired by [`Connection`] when the upstream MCP server emits
 /// `notifications/tools/list_changed` or `notifications/resources/list_changed`.
@@ -57,11 +60,12 @@ impl std::fmt::Debug for CallbackSlot {
 
 /// An active connection to an MCP server using the Streamable HTTP transport.
 ///
-/// Cheaply clonable (one `Arc` bump). Dropping any handle fires the
-/// internal `external_dropped` `Notify` so the upstream SSE listener task
-/// wakes immediately and can re-check `Arc::strong_count(&inner)`. When
-/// the listener sees only itself holding the inner Arc, it exits and the
-/// upstream HTTP session closes.
+/// Cheaply clonable (one `Arc` bump). When the last clone is dropped, the
+/// inner `Arc` ref count hits zero, [`ConnectionInner::Drop`] runs, the
+/// listener-cancel `DropGuard` is dropped, and the SSE listener task is
+/// cancelled — exiting any in-flight `lines.next_line()`, reconnect
+/// `send()`, or backoff `sleep` *immediately* without retrying against
+/// the now-dead proxy session.
 ///
 /// Use the public methods (`list_tools`, `call_tool`, `list_resources`,
 /// `read_resource`, `call_tool_as_message`, `tool_key`) for the upstream
@@ -80,14 +84,9 @@ impl Clone for Connection {
     }
 }
 
-impl Drop for Connection {
-    fn drop(&mut self) {
-        // Wake the upstream SSE listener so it can re-check liveness
-        // without waiting for the upstream's keepalive interval. Cheap:
-        // just notifies wakers, returns immediately.
-        self.inner.external_dropped.notify_waiters();
-    }
-}
+// No `Drop` for `Connection`: cancellation happens deterministically
+// when the last `Arc<ConnectionInner>` clone is dropped, which runs
+// `ConnectionInner::drop` and releases the cancel-token DropGuard.
 
 impl Deref for Connection {
     type Target = ConnectionInner;
@@ -302,11 +301,19 @@ pub struct ConnectionInner {
     resources:
         RwLock<Result<Arc<Vec<super::resource::Resource>>, Arc<super::Error>>>,
 
-    /// Wakeup signal for the long-lived `listen_for_list_changes` task.
-    /// Fired by [`Connection`]'s `Drop` impl on every external handle drop
-    /// so the listener can re-check `Arc::strong_count` immediately and
-    /// exit when no external handle remains.
-    external_dropped: Arc<Notify>,
+    /// Cancellation token for the long-lived `listen_for_list_changes`
+    /// task. The listener selects this against every blocking await
+    /// (read, reconnect-send, backoff-sleep) and returns the instant it
+    /// fires.
+    ///
+    /// Held inside the connection as a [`DropGuard`] so that the moment
+    /// the last `Arc<ConnectionInner>` clone is dropped — i.e. the
+    /// moment no external `Connection` handle remains — `Drop` runs on
+    /// the guard, the token cancels, and the listener task tears down.
+    /// The listener itself holds a sibling `CancellationToken` (clone),
+    /// not the guard, so its task does not extend the connection's
+    /// lifetime.
+    _listener_cancel_guard: Option<DropGuard>,
 
     /// Optional callback fired *after* the listener has refreshed the
     /// tool cache in response to an upstream `notifications/tools/list_changed`.
@@ -372,7 +379,7 @@ impl ConnectionInner {
             next_id: AtomicU64::new(2),
             tools: RwLock::new(Ok(Arc::new(Vec::new()))),
             resources: RwLock::new(Ok(Arc::new(Vec::new()))),
-            external_dropped: Arc::new(Notify::new()),
+            _listener_cancel_guard: None,
             on_tools_list_changed: CallbackSlot::new(),
             on_resources_list_changed: CallbackSlot::new(),
             tools_changed: Notify::new(),
@@ -422,7 +429,7 @@ impl ConnectionInner {
             next_id: AtomicU64::new(2),
             tools: RwLock::new(Ok(Arc::new(Vec::new()))),
             resources: RwLock::new(Ok(Arc::new(Vec::new()))),
-            external_dropped: Arc::new(Notify::new()),
+            _listener_cancel_guard: None,
             on_tools_list_changed: CallbackSlot::new(),
             on_resources_list_changed: CallbackSlot::new(),
             tools_changed: Notify::new(),
@@ -456,6 +463,13 @@ impl ConnectionInner {
         initialize_result: super::initialize_result::InitializeResult,
         initial_sse_lines: Option<super::LinesStream>,
     ) -> Arc<Self> {
+        // Cancel-the-listener machinery: store the DropGuard inside the
+        // inner so the cancellation fires deterministically when the
+        // last external `Arc<ConnectionInner>` clone drops. Hand the
+        // listener task a sibling clone (no guard) — that way the
+        // listener task's lifetime does not extend the connection.
+        let listener_cancel = CancellationToken::new();
+        let listener_cancel_for_task = listener_cancel.clone();
         let conn = Arc::new(Self {
             http_client,
             url,
@@ -473,7 +487,7 @@ impl ConnectionInner {
             next_id: AtomicU64::new(2),
             tools: RwLock::new(Ok(Arc::new(Vec::new()))),
             resources: RwLock::new(Ok(Arc::new(Vec::new()))),
-            external_dropped: Arc::new(Notify::new()),
+            _listener_cancel_guard: Some(listener_cancel.drop_guard()),
             on_tools_list_changed: CallbackSlot::new(),
             on_resources_list_changed: CallbackSlot::new(),
             tools_changed: Notify::new(),
@@ -523,20 +537,21 @@ impl ConnectionInner {
         // into "did or didn't open a stream for us." If we get a stream,
         // we listen on it; if we don't, there's nothing to listen for.
         if let Some(initial_lines) = initial_sse_lines {
-            // Hand the listener a `Weak` so it can self-cancel once
-            // every external strong reference to this Connection is
-            // dropped. If we cloned an `Arc` instead, the spawned task
-            // would itself keep the Connection alive forever.
-            //
-            // Also clone the `external_dropped` Notify so the listener
-            // wakes up *immediately* when an external wrapper around
-            // `Arc<Connection>` is dropped — see
-            // `listen_for_list_changes` doc.
+            // Hand the listener a `Weak` so the spawned task itself does
+            // not keep the connection alive. `listener_cancel_for_task`
+            // is a sibling clone of the connection's own
+            // `_listener_cancel_guard` token — when the last external
+            // `Arc<ConnectionInner>` clone is dropped, the inner's Drop
+            // releases the guard and the listener wakes from any
+            // pending await (read, send, sleep) and exits immediately.
             let weak = Arc::downgrade(&conn);
-            let external_dropped = Arc::clone(&conn.external_dropped);
             tokio::spawn(async move {
-                Self::listen_for_list_changes(weak, external_dropped, initial_lines)
-                    .await;
+                Self::listen_for_list_changes(
+                    weak,
+                    listener_cancel_for_task,
+                    initial_lines,
+                )
+                .await;
             });
         }
 
@@ -575,16 +590,29 @@ impl ConnectionInner {
         request
     }
 
-    /// Sends a JSON-RPC request with exponential backoff retries.
+    /// Sends a JSON-RPC request, retrying transient errors when
+    /// `idempotent` is `true`.
     ///
-    /// Every error — network, HTTP status, malformed body, JSON-RPC
-    /// error, session expiration — is treated as transient and
-    /// retried. The loop gives up only when the backoff's
-    /// `max_elapsed_time` is exceeded.
+    /// Idempotent methods (`tools/list`, `resources/list`,
+    /// `resources/read`, etc.) retry every transient error — network,
+    /// HTTP status, malformed body, JSON-RPC error, session expiration —
+    /// until the backoff's `max_elapsed_time` is exceeded.
+    ///
+    /// Non-idempotent methods (`tools/call`) make exactly one attempt.
+    /// Retrying a `tools/call` is unsafe: a tool may have mutated remote
+    /// state during the first attempt before the response was lost, and
+    /// re-firing the call would mutate state again. Each retry of
+    /// `AppendTask` advances `state.tasks.len()` an extra step, so the
+    /// agent sees a different return value than expected and the
+    /// pid-derived mock seed at the next step diverges. See
+    /// `objectiveai-api/src/agent/completions/client.rs` (sequential
+    /// dispatch) and `mock/client.rs::mock.seed_derive` for the
+    /// downstream consequence.
     async fn rpc<P: serde::Serialize, R: serde::de::DeserializeOwned>(
         &self,
         method: &str,
         params: &P,
+        idempotent: bool,
     ) -> Result<R, super::Error> {
         let id = self.next_id.fetch_add(1, Ordering::Relaxed);
         let body = serde_json::json!({
@@ -594,7 +622,7 @@ impl ConnectionInner {
             "params": params,
         });
 
-        backoff::future::retry(self.backoff(), || async {
+        let attempt_one = || async {
             let url = self.url.clone();
             let response = self.post().json(&body).send().await.map_err(|source| {
                 backoff::Error::transient(super::Error::Request {
@@ -632,8 +660,15 @@ impl ConnectionInner {
                     }))
                 }
             }
-        })
-        .await
+        };
+
+        if idempotent {
+            backoff::future::retry(self.backoff(), attempt_one).await
+        } else {
+            attempt_one().await.map_err(|e| match e {
+                backoff::Error::Permanent(err) | backoff::Error::Transient { err, .. } => err,
+            })
+        }
     }
 
     /// Sends a JSON-RPC notification (no response expected) with the
@@ -699,6 +734,7 @@ impl ConnectionInner {
             &super::tool::ListToolsRequest {
                 cursor: cursor.map(String::from),
             },
+            true,
         )
         .await
     }
@@ -730,7 +766,7 @@ impl ConnectionInner {
                 _meta: None,
             });
         }
-        self.rpc("tools/call", params).await
+        self.rpc("tools/call", params, false).await
     }
 
     /// Calls a tool and converts the result into a [`ToolMessage`].
@@ -906,6 +942,7 @@ impl ConnectionInner {
             &super::resource::ListResourcesRequest {
                 cursor: cursor.map(String::from),
             },
+            true,
         )
         .await
     }
@@ -985,6 +1022,7 @@ impl ConnectionInner {
             &super::resource::ReadResourceRequestParams {
                 uri: uri.to_string(),
             },
+            true,
         )
         .await
     }
@@ -998,8 +1036,57 @@ impl ConnectionInner {
     /// re-emit `notifications/tools/list_changed` to its downstream client
     /// at the moment the staleness window opens.
     async fn refresh_tools(&self, on_change: Option<ListChangedCallback>) {
-        let (tx, _rx) = tokio::sync::oneshot::channel();
-        self.refresh_tools_signaling(tx, on_change).await;
+        // Listener-driven refresh. Visibility contract: any caller
+        // that issues `list_tools()` after a `tools/list_changed`
+        // notification has been observed must see the post-swap
+        // value, not stale data — so the write lock has to gate
+        // readers across the upstream paginate.
+        //
+        // Performance contract: don't serialise paginate *behind*
+        // lock-acquisition latency. We start `tools.write()` and the
+        // upstream paginate **concurrently** with `tokio::join!`. The
+        // write-lock acquire blocks new `list_tools()` readers
+        // immediately (preserving visibility) and runs in parallel
+        // with whatever drain time the in-flight readers need; the
+        // paginate runs alongside. Total wall-clock is
+        // `max(drain_time, paginate_time)` instead of the sum.
+        //
+        // `notify_waiters` and `on_change` fire under the write
+        // guard, *after* `*guard = result`, so anyone awoken by them
+        // queues on the read lock, waits for the guard to drop, and
+        // observes the post-swap state.
+        let (mut guard, result) = tokio::join!(
+            self.tools.write(),
+            self.paginate_tools(),
+        );
+        *guard = result;
+        self.tools_changed.notify_waiters();
+        if let Some(cb) = on_change {
+            cb();
+        }
+    }
+
+    /// Page-by-page fetch of the upstream tool list, no locks held.
+    /// Shared between the `_signaling` (initial-populate, holds lock
+    /// for the original "block fast readers" contract) and `refresh_*`
+    /// (listener-driven, lock-only-around-install) variants.
+    async fn paginate_tools(
+        &self,
+    ) -> Result<Arc<Vec<super::tool::Tool>>, Arc<super::Error>> {
+        let mut all_tools = Vec::new();
+        let mut cursor: Option<String> = None;
+        loop {
+            match self.rpc_list_tools(cursor.as_deref()).await {
+                Ok(page) => {
+                    all_tools.extend(page.tools);
+                    cursor = page.next_cursor;
+                    if cursor.is_none() {
+                        return Ok(Arc::new(all_tools));
+                    }
+                }
+                Err(e) => return Err(Arc::new(e)),
+            }
+        }
     }
 
     /// Same as [`Self::refresh_tools`] but fires `lock_held` once the
@@ -1044,8 +1131,37 @@ impl ConnectionInner {
     /// See [`ConnectionInner::refresh_tools`] for the callback timing
     /// contract.
     async fn refresh_resources(&self, on_change: Option<ListChangedCallback>) {
-        let (tx, _rx) = tokio::sync::oneshot::channel();
-        self.refresh_resources_signaling(tx, on_change).await;
+        // Same paginate-while-acquiring-the-write-lock pattern as
+        // `refresh_tools` — see that comment for the visibility +
+        // performance rationale.
+        let (mut guard, result) = tokio::join!(
+            self.resources.write(),
+            self.paginate_resources(),
+        );
+        *guard = result;
+        self.resources_changed.notify_waiters();
+        if let Some(cb) = on_change {
+            cb();
+        }
+    }
+
+    async fn paginate_resources(
+        &self,
+    ) -> Result<Arc<Vec<super::resource::Resource>>, Arc<super::Error>> {
+        let mut all_resources = Vec::new();
+        let mut cursor: Option<String> = None;
+        loop {
+            match self.rpc_list_resources(cursor.as_deref()).await {
+                Ok(page) => {
+                    all_resources.extend(page.resources);
+                    cursor = page.next_cursor;
+                    if cursor.is_none() {
+                        return Ok(Arc::new(all_resources));
+                    }
+                }
+                Err(e) => return Err(Arc::new(e)),
+            }
+        }
     }
 
     /// Resource counterpart of [`Self::refresh_tools_signaling`].
@@ -1106,24 +1222,16 @@ impl ConnectionInner {
     /// stream.
     ///
     /// Takes a [`Weak<Self>`] (not `Arc<Self>`) so the spawned task
-    /// doesn't itself keep the [`Connection`] alive.
-    ///
-    /// Cancellation is event-driven, not poll-based:
-    ///
-    /// 1. At the top of every outer-loop iteration we upgrade the weak;
-    ///    if every external strong reference is gone, the task returns.
-    /// 2. While parked inside the SSE read loop, we [`tokio::select!`]
-    ///    the line reader against `external_dropped.notified()`. External
-    ///    wrappers around `Arc<Connection>` fire `notify_waiters()` from
-    ///    their `Drop` impl; when that fires, we re-check
-    ///    `Arc::strong_count(&this) == 1` and exit immediately if no
-    ///    external holder remains.
-    /// 3. As a backup for the race where a drop fires *between* iterations
-    ///    (we missed the notify because we weren't yet registered), the
-    ///    top of every inner-loop iteration also checks the strong count.
+    /// doesn't itself keep the [`Connection`] alive, and a
+    /// [`CancellationToken`] sibling clone of the connection's
+    /// [`DropGuard`] so the task tears down the instant the last
+    /// external `Arc<ConnectionInner>` clone is dropped — every
+    /// blocking await (line read, reconnect send, backoff sleep) is
+    /// raced against `cancel.cancelled()` and exits without any zombie
+    /// retries against a now-dead session.
     async fn listen_for_list_changes(
         weak: Weak<Self>,
-        external_dropped: Arc<Notify>,
+        cancel: CancellationToken,
         initial_lines: super::LinesStream,
     ) {
         // First iteration: use the pre-opened SSE stream the client
@@ -1156,18 +1264,44 @@ impl ConnectionInner {
         let mut is_reconnect = false;
 
         loop {
-            // Layer 1: between-reconnect liveness check.
+            // The token cancels deterministically when the last
+            // `Arc<ConnectionInner>` clone is dropped (see
+            // `_listener_cancel_guard`). Check once per outer
+            // iteration, but the real protection is the cancel arms in
+            // every blocking await below — those exit immediately on
+            // cancel.
+            if cancel.is_cancelled() {
+                return;
+            }
             let Some(this) = weak.upgrade() else { return };
             let backoff_delay = this.backoff_initial_interval;
 
             let mut lines = match next_lines.take() {
                 Some(l) => l,
                 None => {
-                    let response = match this.get().send().await {
+                    // Race the upstream GET against cancellation — if
+                    // the connection drops mid-reconnect, exit
+                    // immediately rather than waiting for the request
+                    // to complete or time out (otherwise produces a
+                    // burst of 401 retries against a now-dead session
+                    // under heavy churn).
+                    let send_outcome = tokio::select! {
+                        out = this.get().send() => out,
+                        _ = cancel.cancelled() => {
+                            drop(this);
+                            return;
+                        }
+                    };
+                    let response = match send_outcome {
                         Ok(r) if r.status().is_success() => r,
                         _ => {
                             drop(this);
-                            tokio::time::sleep(backoff_delay).await;
+                            // Sleep with cancel-arm: instant exit on
+                            // drop, no zombie retries.
+                            tokio::select! {
+                                _ = tokio::time::sleep(backoff_delay) => {}
+                                _ = cancel.cancelled() => return,
+                            }
                             continue;
                         }
                     };
@@ -1191,13 +1325,6 @@ impl ConnectionInner {
             is_reconnect = true;
 
             'inner: loop {
-                // Layer 3: race-window backup. If a drop fired between
-                // our last `notified()` registration and this one, the
-                // notify is gone — but the strong count tells us.
-                if Arc::strong_count(&this) == 1 {
-                    return;
-                }
-
                 tokio::select! {
                     line_result = lines.next_line() => {
                         match line_result {
@@ -1213,10 +1340,9 @@ impl ConnectionInner {
                                 match method.as_str() {
                                     "notifications/tools/list_changed" => {
                                         // refresh_tools fires the
-                                        // callback after taking the
-                                        // write lock but before the
-                                        // network paginate, so the
-                                        // proxy's downstream
+                                        // callback after the cache is
+                                        // installed, so the proxy's
+                                        // downstream
                                         // notifications/tools/list_changed
                                         // emission lines up with the
                                         // staleness window opening.
@@ -1240,17 +1366,22 @@ impl ConnectionInner {
                             _ => break 'inner,
                         }
                     }
-                    // Layer 2: an external wrapper just fired notify_waiters
-                    // from its Drop. Loop back; the strong-count check at
-                    // the top decides whether to exit.
-                    _ = external_dropped.notified() => {}
+                    // Cancellation: the connection's last clone has
+                    // dropped. Tear down immediately.
+                    _ = cancel.cancelled() => {
+                        drop(this);
+                        return;
+                    }
                 }
             }
 
             // Stream ended — drop the strong ref before sleeping so the
             // next iteration's weak-upgrade can detect liveness honestly.
             drop(this);
-            tokio::time::sleep(backoff_delay).await;
+            tokio::select! {
+                _ = tokio::time::sleep(backoff_delay) => {}
+                _ = cancel.cancelled() => return,
+            }
         }
     }
 }
