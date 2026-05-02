@@ -11,6 +11,3 @@ pub use invention_server::*;
 pub(crate) use client::{
     extract_description, publish_filesystem, publish_github,
 };
-
-#[cfg(test)]
-mod client_tests;
