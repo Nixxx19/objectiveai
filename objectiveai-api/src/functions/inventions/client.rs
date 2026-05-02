@@ -62,10 +62,12 @@ fn validate_name(name: &str) -> Result<(), super::Error> {
 // ---------------------------------------------------------------------------
 
 /// Prefix the proxy stamps onto every tool name from the InventionServer
-/// upstream. Either `objectiveai-invention_<name>` (single upstream) or
-/// `objectiveai-invention_<digits>_<name>` (proxy collision-disambiguated
-/// when the same prefix would otherwise collide with another upstream).
-const PROXY_INVENTION_PREFIX: &str = "objectiveai-invention_";
+/// upstream. Either `objectiveai-function-invention_<name>` (single upstream)
+/// or `objectiveai-function-invention_<digits>_<name>` (proxy collision-
+/// disambiguated when the same prefix would otherwise collide with another
+/// upstream). The prefix string itself is the InventionServer's rmcp
+/// `server_info.name` — see `invention_server.rs::InventionMcp::get_info`.
+const PROXY_INVENTION_PREFIX: &str = "objectiveai-function-invention_";
 
 /// Wait until every name in `expected` is present in the agent's MCP
 /// view of available tools, observing through the agent's existing MCP
@@ -96,9 +98,11 @@ async fn wait_for_tools_visible(
         let remaining = match overall_timeout.checked_sub(elapsed) {
             Some(r) if !r.is_zero() => r,
             _ => {
+                let observed: Vec<String> =
+                    current.iter().map(|t| t.name.clone()).collect();
                 return Err(super::Error::ToolSubscriptionTimeout {
                     expected: expected.to_vec(),
-                    observed: current.iter().map(|t| t.name.clone()).collect(),
+                    observed,
                 });
             }
         };
@@ -746,22 +750,26 @@ where
         if input_schema_validate().is_err() {
         errored = false;
         invention_session.set_tools(T::input_schema_tools(&state)).await;
-        if let Err(e) = wait_for_tools_visible(
-            continuation.as_ref().expect("invention always has a continuation after step 1")
-                .mcp_connection().expect("invention always uses MCP"),
-            &T::input_schema_tool_names(&state),
-            subscribe_tools_timeout,
-        ).await {
-            yield FunctionInventionChunk {
-                id: id.to_string(), completions: vec![], state: None,
-                path: None, function: None, created, object,
-                usage: Some(accumulated_usage),
-                error: Some(objectiveai::error::ResponseError {
-                    code: e.status(),
-                    message: e.message().unwrap_or(serde_json::Value::String(e.to_string())),
-                }),
-            };
-            return;
+        if let Some(observer) = continuation
+            .as_ref()
+            .and_then(|c| c.mcp_connection())
+        {
+            if let Err(e) = wait_for_tools_visible(
+                observer,
+                &T::input_schema_tool_names(&state),
+                subscribe_tools_timeout,
+            ).await {
+                yield FunctionInventionChunk {
+                    id: id.to_string(), completions: vec![], state: None,
+                    path: None, function: None, created, object,
+                    usage: Some(accumulated_usage),
+                    error: Some(objectiveai::error::ResponseError {
+                        code: e.status(),
+                        message: e.message().unwrap_or(serde_json::Value::String(e.to_string())),
+                    }),
+                };
+                return;
+            }
         }
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
@@ -802,22 +810,26 @@ where
         if essay_tasks_validate().is_err() {
         errored = false;
         invention_session.set_tools(T::essay_tasks_tools(&state)).await;
-        if let Err(e) = wait_for_tools_visible(
-            continuation.as_ref().expect("invention always has a continuation after step 1")
-                .mcp_connection().expect("invention always uses MCP"),
-            &T::essay_tasks_tool_names(&state),
-            subscribe_tools_timeout,
-        ).await {
-            yield FunctionInventionChunk {
-                id: id.to_string(), completions: vec![], state: None,
-                path: None, function: None, created, object,
-                usage: Some(accumulated_usage),
-                error: Some(objectiveai::error::ResponseError {
-                    code: e.status(),
-                    message: e.message().unwrap_or(serde_json::Value::String(e.to_string())),
-                }),
-            };
-            return;
+        if let Some(observer) = continuation
+            .as_ref()
+            .and_then(|c| c.mcp_connection())
+        {
+            if let Err(e) = wait_for_tools_visible(
+                observer,
+                &T::essay_tasks_tool_names(&state),
+                subscribe_tools_timeout,
+            ).await {
+                yield FunctionInventionChunk {
+                    id: id.to_string(), completions: vec![], state: None,
+                    path: None, function: None, created, object,
+                    usage: Some(accumulated_usage),
+                    error: Some(objectiveai::error::ResponseError {
+                        code: e.status(),
+                        message: e.message().unwrap_or(serde_json::Value::String(e.to_string())),
+                    }),
+                };
+                return;
+            }
         }
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
@@ -861,22 +873,26 @@ where
         if tasks_validate().is_err() {
         errored = false;
         invention_session.set_tools(T::tasks_tools(&state)).await;
-        if let Err(e) = wait_for_tools_visible(
-            continuation.as_ref().expect("invention always has a continuation after step 1")
-                .mcp_connection().expect("invention always uses MCP"),
-            &T::tasks_tool_names(&state),
-            subscribe_tools_timeout,
-        ).await {
-            yield FunctionInventionChunk {
-                id: id.to_string(), completions: vec![], state: None,
-                path: None, function: None, created, object,
-                usage: Some(accumulated_usage),
-                error: Some(objectiveai::error::ResponseError {
-                    code: e.status(),
-                    message: e.message().unwrap_or(serde_json::Value::String(e.to_string())),
-                }),
-            };
-            return;
+        if let Some(observer) = continuation
+            .as_ref()
+            .and_then(|c| c.mcp_connection())
+        {
+            if let Err(e) = wait_for_tools_visible(
+                observer,
+                &T::tasks_tool_names(&state),
+                subscribe_tools_timeout,
+            ).await {
+                yield FunctionInventionChunk {
+                    id: id.to_string(), completions: vec![], state: None,
+                    path: None, function: None, created, object,
+                    usage: Some(accumulated_usage),
+                    error: Some(objectiveai::error::ResponseError {
+                        code: e.status(),
+                        message: e.message().unwrap_or(serde_json::Value::String(e.to_string())),
+                    }),
+                };
+                return;
+            }
         }
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
@@ -917,22 +933,26 @@ where
         if description_validate().is_err() {
         errored = false;
         invention_session.set_tools(T::description_tools(&state)).await;
-        if let Err(e) = wait_for_tools_visible(
-            continuation.as_ref().expect("invention always has a continuation after step 1")
-                .mcp_connection().expect("invention always uses MCP"),
-            &T::description_tool_names(&state),
-            subscribe_tools_timeout,
-        ).await {
-            yield FunctionInventionChunk {
-                id: id.to_string(), completions: vec![], state: None,
-                path: None, function: None, created, object,
-                usage: Some(accumulated_usage),
-                error: Some(objectiveai::error::ResponseError {
-                    code: e.status(),
-                    message: e.message().unwrap_or(serde_json::Value::String(e.to_string())),
-                }),
-            };
-            return;
+        if let Some(observer) = continuation
+            .as_ref()
+            .and_then(|c| c.mcp_connection())
+        {
+            if let Err(e) = wait_for_tools_visible(
+                observer,
+                &T::description_tool_names(&state),
+                subscribe_tools_timeout,
+            ).await {
+                yield FunctionInventionChunk {
+                    id: id.to_string(), completions: vec![], state: None,
+                    path: None, function: None, created, object,
+                    usage: Some(accumulated_usage),
+                    error: Some(objectiveai::error::ResponseError {
+                        code: e.status(),
+                        message: e.message().unwrap_or(serde_json::Value::String(e.to_string())),
+                    }),
+                };
+                return;
+            }
         }
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
