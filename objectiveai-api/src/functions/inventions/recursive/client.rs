@@ -454,6 +454,23 @@ where
 
         for (i, child_state) in children.into_iter().enumerate() {
             let child_native = base_native + i;
+            // Each sub-invention gets a deterministic seed that is
+            // distinct from its siblings, derived from the parent
+            // seed XOR `child_native`. Without this, every child
+            // would inherit `request.seed` verbatim and the only
+            // axis differentiating one sibling from another in the
+            // mock RNG seed would be `tool_names` — which is read
+            // from the agent's connection cache at the moment
+            // `resolve_tools` is called and is therefore vulnerable
+            // to listener-driven cache-refresh timing under load.
+            // Mixing in `child_native` makes each sibling's RNG
+            // input independent of cache snapshot timing, so a
+            // load-induced perturbation that happens to flip one
+            // sibling's `tool_names` snapshot does not propagate
+            // into a different mock seed and a different output.
+            let child_seed = request
+                .seed
+                .map(|s| s ^ (child_native as i64));
 
             // Build the child's recursive request with the child's state wrapped in Inline.
             let child_request = Arc::new(
@@ -464,7 +481,7 @@ where
                     provider: request.provider.clone(),
                     agent: request.agent.clone(),
                     prompt: request.prompt.clone(),
-                    seed: request.seed,
+                    seed: child_seed,
                     stream: request.stream,
                     max_step_retries: request.max_step_retries,
                     continuation: request.continuation.clone(),
