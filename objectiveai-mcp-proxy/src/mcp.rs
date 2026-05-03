@@ -31,9 +31,17 @@ use crate::session::{CallToolError, ReadResourceError, Session};
 use crate::session_manager::SessionManager;
 use crate::upstream::BadInit;
 
-/// MCP protocol version this proxy speaks. Pinned — there is only one
-/// supported version, and we reject any other.
-const PROTOCOL_VERSION: &str = "2025-11-25";
+/// MCP protocol version the proxy advertises in its `initialize`
+/// response. Pinned — the proxy implements 2025-06-18 semantics.
+const PROTOCOL_VERSION: &str = "2025-06-18";
+
+/// Versions the proxy is willing to accept on incoming `initialize`
+/// requests. Per the MCP spec, the server picks one of these (the
+/// proxy's pinned [`PROTOCOL_VERSION`]) and the client downgrades. The
+/// `@modelcontextprotocol/sdk` TypeScript client defaults to
+/// `2025-11-25`; including it here lets that client connect without
+/// needing the SDK to pre-negotiate.
+const ACCEPTED_PROTOCOL_VERSIONS: &[&str] = &["2025-06-18", "2025-11-25"];
 
 /// JSON-RPC error codes we use.
 const PARSE_ERROR: i64 = -32700;
@@ -229,12 +237,15 @@ async fn handle_initialize(
     // don't change our routing or our advertised feature set.
     match request.params.as_ref().and_then(|p| p.get("protocolVersion")) {
         Some(v) => match v.as_str() {
-            Some(version) if version == PROTOCOL_VERSION => {}
+            Some(version) if ACCEPTED_PROTOCOL_VERSIONS.contains(&version) => {
+                // Accepted; the response will downgrade to PROTOCOL_VERSION
+                // and a spec-compliant client adopts it.
+            }
             Some(other) => {
                 return invalid_request_response(
                     request.id,
                     format!(
-                        "unsupported protocolVersion {other:?}; this proxy only speaks {PROTOCOL_VERSION}",
+                        "unsupported protocolVersion {other:?}; this proxy accepts {ACCEPTED_PROTOCOL_VERSIONS:?}",
                     ),
                 );
             }

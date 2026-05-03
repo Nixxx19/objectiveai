@@ -95,7 +95,7 @@ async fn wrong_header_fails_initialize() {
 
 fn client_info_for_test() -> rmcp::model::ClientInfo {
     let value = serde_json::json!({
-        "protocolVersion": "2025-11-25",
+        "protocolVersion": "2025-06-18",
         "capabilities": {},
         "clientInfo": { "name": "header-test", "version": "0.1.0" },
     });
