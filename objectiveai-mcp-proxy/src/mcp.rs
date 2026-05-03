@@ -33,7 +33,7 @@ use crate::upstream::BadInit;
 
 /// MCP protocol version this proxy speaks. Pinned — there is only one
 /// supported version, and we reject any other.
-const PROTOCOL_VERSION: &str = "2025-06-18";
+const PROTOCOL_VERSION: &str = "2025-11-25";
 
 /// JSON-RPC error codes we use.
 const PARSE_ERROR: i64 = -32700;

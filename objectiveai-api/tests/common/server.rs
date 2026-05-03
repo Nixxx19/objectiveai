@@ -209,6 +209,11 @@ fn spawn_server() -> ServerHandle {
         .env("AGENT_COMPLETIONS_BACKOFF_MULTIPLIER", "1")
         .env("AGENT_COMPLETIONS_BACKOFF_MAX_INTERVAL", "0")
         .env("AGENT_COMPLETIONS_BACKOFF_MAX_ELAPSED_TIME", "0")
+        // Bump invention tool-subscription wait from the 30s default to
+        // 60s so contention-induced flakes (e.g. listener task pile-up
+        // during parallel-suite load) don't surface as
+        // `tool_subscription_timeout` errors.
+        .env("FUNCTIONS_INVENTIONS_SUBSCRIBE_TOOLS_TIMEOUT", "60000")
         .stdout(Stdio::null())
         .stderr(Stdio::piped());
 
