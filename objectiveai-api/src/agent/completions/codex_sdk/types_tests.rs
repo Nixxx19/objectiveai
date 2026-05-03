@@ -1,9 +1,7 @@
 //! Round-trip tests for the Codex SDK type definitions in
-//! `objectiveai_api::agent::completions::codex_sdk`. Lives as an integration
-//! test so it doesn't share a build target with the lib's `#[cfg(test)]`
-//! suite — those break independently when in-progress refactors land.
+//! `crate::agent::completions::codex_sdk`.
 
-use objectiveai_api::agent::completions::codex_sdk::*;
+use super::*;
 use serde_json::json;
 
 // ---------------------------------------------------------------------------

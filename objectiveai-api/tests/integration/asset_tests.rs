@@ -2,7 +2,8 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
 /// Asserts that every JSON file in `assets/` (excluding `assets/mock/`)
-/// lives in a directory whose name ends with `client_tests`.
+/// lives in a directory whose name ends with `client_tests` — or in
+/// any nested subdirectory of one (e.g. `*client_tests/inputs/`).
 #[test]
 fn asset_json_files_live_in_client_tests_dir() {
     let assets_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("assets");
@@ -11,39 +12,51 @@ fn asset_json_files_live_in_client_tests_dir() {
     let mut violations = Vec::new();
 
     for path in json_files(&assets_dir, &mock_dir) {
-        let parent_name = path
-            .parent()
-            .and_then(|p| p.file_name())
-            .and_then(|n| n.to_str())
-            .unwrap_or("");
+        // Walk up the file's ancestors and accept the path if any
+        // ancestor's directory name ends with `client_tests`.
+        let mut ok = false;
+        for ancestor in path.ancestors() {
+            if !ancestor.starts_with(&assets_dir) {
+                break;
+            }
+            if let Some(name) = ancestor.file_name().and_then(|n| n.to_str()) {
+                if name.ends_with("client_tests") {
+                    ok = true;
+                    break;
+                }
+            }
+        }
 
-        if !parent_name.ends_with("client_tests") {
+        if !ok {
             violations.push(path.strip_prefix(&assets_dir).unwrap().to_path_buf());
         }
     }
 
     assert!(
         violations.is_empty(),
-        "JSON files not in a `*client_tests/` directory:\n{}",
+        "JSON files not under a `*client_tests/` directory:\n{}",
         format_paths(&violations),
     );
 }
 
 /// Asserts that every JSON file in `assets/` (excluding `assets/mock/`)
-/// is referenced by an `include_str!` somewhere in `src/`.
+/// is referenced by an `include_str!` somewhere in `src/` *or* `tests/`.
 ///
-/// Extracts all `include_str!` literal paths from source files, resolves
-/// them to absolute paths, and checks every asset file is in that set.
-/// For macro-generated paths using `concat!("prefix", $base, "_N.json")`,
-/// expands by finding `$base` values at call sites.
+/// Extracts all `include_str!` literal paths from source files,
+/// resolves them to absolute paths, and checks every asset file is in
+/// that set. For macro-generated paths using
+/// `concat!("prefix", $base, "_N.json")`, expands by finding `$base`
+/// values at call sites.
 #[test]
 fn asset_json_files_included_in_src() {
     let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
     let assets_dir = manifest_dir.join("assets");
     let mock_dir = assets_dir.join("mock");
     let src_dir = manifest_dir.join("src");
+    let tests_dir = manifest_dir.join("tests");
 
-    let included = collect_include_str_paths(&src_dir, manifest_dir);
+    let mut included = collect_include_str_paths(&src_dir, manifest_dir);
+    included.extend(collect_include_str_paths(&tests_dir, manifest_dir));
 
     let mut missing = Vec::new();
 
@@ -56,7 +69,7 @@ fn asset_json_files_included_in_src() {
 
     assert!(
         missing.is_empty(),
-        "Asset JSON files not referenced by include_str! in src/:\n{}",
+        "Asset JSON files not referenced by include_str! in src/ or tests/:\n{}",
         format_paths(&missing),
     );
 }
@@ -80,9 +93,11 @@ fn json_files(assets_dir: &Path, mock_dir: &Path) -> Vec<PathBuf> {
 /// - `include_str!("relative/path.json")` — resolved relative to the source file.
 /// - `include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/path.json"))` — resolved
 ///   relative to the manifest directory.
-/// - `include_str!(concat!("prefix/", $base, "_N.json"))` inside macro definitions
-///   — expanded by finding `$base` string literal values at each macro call site
-///   and generating `_0` through `_9` suffixes.
+/// - `include_str!(concat!("prefix/", $base, "_N.json"))` /
+///   `include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/prefix/", $base, "_N.json"))`
+///   inside macro definitions — expanded by finding `$base` string
+///   literal values at each macro call site (anywhere in the scanned
+///   tree) and generating `_0` through `_9` suffixes.
 fn collect_include_str_paths(src_dir: &Path, manifest_dir: &Path) -> HashSet<PathBuf> {
     let mut paths = HashSet::new();
 
@@ -95,15 +110,43 @@ fn collect_include_str_paths(src_dir: &Path, manifest_dir: &Path) -> HashSet<Pat
     )
     .unwrap();
 
-    // Pattern inside macro_rules!: include_str!(concat!("prefix", $base, "_N.json"))
-    // We extract the prefix and suffix template, then expand at call sites.
+    // Pattern inside macro_rules!:
+    //   include_str!(concat!("prefix", $base, "_N.json"))
+    // We extract (prefix, suffix_template, base_relative_to: file_dir).
     let macro_concat_re = regex::Regex::new(
         r#"include_str!\(\s*concat!\(\s*"([^"]+)"\s*,\s*\$base\s*,\s*"([^"]+)"\s*\)\s*\)"#,
     )
     .unwrap();
 
+    // Pattern inside macro_rules!:
+    //   include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/prefix", $base, "_N.json"))
+    // We extract (prefix, suffix_template, base_relative_to: manifest_dir).
+    let macro_manifest_concat_re = regex::Regex::new(
+        r#"include_str!\(\s*concat!\(\s*env!\("CARGO_MANIFEST_DIR"\)\s*,\s*"([^"]+)"\s*,\s*\$base\s*,\s*"([^"]+)"\s*\)\s*\)"#,
+    )
+    .unwrap();
+
     // Pattern: macro_rules! name { ... }
     let macro_def_re = regex::Regex::new(r"macro_rules!\s+(\w+)").unwrap();
+
+    /// (prefix, suffix_template, base_dir): when expanding `prefix +
+    /// base + suffix_template`, resolve the resulting relative path
+    /// relative to `base_dir`.
+    enum Anchor {
+        FileDir,
+        Manifest,
+    }
+    struct Template {
+        macro_name: String,
+        prefix: String,
+        suffix_template: String,
+        anchor: Anchor,
+    }
+
+    // First pass: scan every .rs file, collecting direct include_strs
+    // (resolved immediately) and macro template definitions (deferred).
+    let mut templates: Vec<(PathBuf, Template)> = Vec::new();
+    let mut all_files: Vec<(PathBuf, String)> = Vec::new();
 
     for entry in walkdir::WalkDir::new(src_dir)
         .into_iter()
@@ -118,7 +161,8 @@ fn collect_include_str_paths(src_dir: &Path, manifest_dir: &Path) -> HashSet<Pat
             Ok(c) => c,
             Err(_) => continue,
         };
-        let file_dir = path.parent().unwrap();
+        let file_dir = path.parent().unwrap().to_path_buf();
+        let path_buf = path.to_path_buf();
 
         // Direct include_str!("...")
         for cap in direct_re.captures_iter(&content) {
@@ -136,57 +180,97 @@ fn collect_include_str_paths(src_dir: &Path, manifest_dir: &Path) -> HashSet<Pat
             }
         }
 
-        // Macro-generated concat!("prefix", $base, "_N.json") patterns.
-        // Collect unique (prefix, suffix_template) pairs from macro bodies.
-        let macro_names: Vec<String> = macro_def_re
+        // Macro template patterns. Tag each template with the macro
+        // name it sits inside so we can match it to invocations later.
+        let macro_def_starts: Vec<(String, usize)> = macro_def_re
             .captures_iter(&content)
-            .map(|c| c[1].to_string())
+            .map(|c| (c[1].to_string(), c.get(0).unwrap().start()))
             .collect();
+        let nearest_macro_name = |idx: usize| -> Option<String> {
+            macro_def_starts
+                .iter()
+                .filter(|(_, start)| *start < idx)
+                .max_by_key(|(_, start)| *start)
+                .map(|(name, _)| name.clone())
+        };
 
-        let concat_templates: Vec<(String, String)> = macro_concat_re
-            .captures_iter(&content)
-            .map(|c| (c[1].to_string(), c[2].to_string()))
-            .collect();
-
-        if macro_names.is_empty() || concat_templates.is_empty() {
-            continue;
+        for cap in macro_concat_re.captures_iter(&content) {
+            let m_idx = cap.get(0).unwrap().start();
+            if let Some(macro_name) = nearest_macro_name(m_idx) {
+                templates.push((
+                    path_buf.clone(),
+                    Template {
+                        macro_name,
+                        prefix: cap[1].to_string(),
+                        suffix_template: cap[2].to_string(),
+                        anchor: Anchor::FileDir,
+                    },
+                ));
+            }
+        }
+        for cap in macro_manifest_concat_re.captures_iter(&content) {
+            let m_idx = cap.get(0).unwrap().start();
+            if let Some(macro_name) = nearest_macro_name(m_idx) {
+                templates.push((
+                    path_buf.clone(),
+                    Template {
+                        macro_name,
+                        prefix: cap[1].to_string(),
+                        suffix_template: cap[2].to_string(),
+                        anchor: Anchor::Manifest,
+                    },
+                ));
+            }
         }
 
-        // Find invocations of these macros across ALL source files and extract
-        // the $base string literal argument. We search the current file since
-        // macro invocations are typically in the same file as the definition.
-        //
-        // Invocation pattern: macro_name!(test_name, ..., "base_value", ...);
-        // The $base is the last quoted string before the closing ");".
-        for macro_name in &macro_names {
-            let call_re = regex::Regex::new(&format!(
-                r#"(?s){}!\((.+?)\);"#,
-                regex::escape(macro_name),
-            )).unwrap();
+        all_files.push((path_buf, content));
+    }
 
-            for call_cap in call_re.captures_iter(&content) {
+    if templates.is_empty() {
+        return paths;
+    }
+
+    // Second pass: for each (template, file) cross product, find the
+    // template's macro invocations in the file and expand.
+    let lit_re = regex::Regex::new(r#""([^"]+)""#).unwrap();
+    for (_def_path, tmpl) in &templates {
+        let call_re = regex::Regex::new(&format!(
+            r#"(?s){}!\((.+?)\);"#,
+            regex::escape(&tmpl.macro_name),
+        ))
+        .unwrap();
+
+        for (call_path, call_content) in &all_files {
+            let call_dir = call_path.parent().unwrap();
+            for call_cap in call_re.captures_iter(call_content) {
                 let args = &call_cap[1];
-                // Extract all string literals from the invocation args.
-                let lit_re = regex::Regex::new(r#""([^"]+)""#).unwrap();
                 let literals: Vec<String> = lit_re
                     .captures_iter(args)
                     .map(|c| c[1].to_string())
                     .collect();
 
-                // The $base is typically the last string literal in the invocation.
+                // The $base is typically the last string literal in
+                // the invocation argument list.
                 let Some(base) = literals.last() else { continue };
 
-                for (prefix, suffix_template) in &concat_templates {
-                    // suffix_template is like "_0.json" — extract the extension
-                    // part after the digit to build _0.json through _9.json.
-                    let ext_start = suffix_template.find('.').unwrap_or(suffix_template.len());
-                    let ext = &suffix_template[ext_start..]; // ".json"
-                    for i in 0..10 {
-                        let full = format!("{}{}_{}{}", prefix, base, i, ext);
-                        let resolved = file_dir.join(&full);
-                        if let Ok(c) = dunce::canonicalize(&resolved) {
-                            paths.insert(c);
+                let ext_start = tmpl
+                    .suffix_template
+                    .find('.')
+                    .unwrap_or(tmpl.suffix_template.len());
+                let ext = &tmpl.suffix_template[ext_start..]; // ".json"
+                for i in 0..10 {
+                    let full = format!(
+                        "{}{}_{}{}",
+                        tmpl.prefix, base, i, ext,
+                    );
+                    let resolved = match tmpl.anchor {
+                        Anchor::FileDir => call_dir.join(&full),
+                        Anchor::Manifest => {
+                            manifest_dir.join(full.trim_start_matches('/'))
                         }
+                    };
+                    if let Ok(c) = dunce::canonicalize(&resolved) {
+                        paths.insert(c);
                     }
                 }
             }

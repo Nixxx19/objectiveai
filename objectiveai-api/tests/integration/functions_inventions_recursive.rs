@@ -1,20 +1,15 @@
-//! Integration tests for `/functions/inventions/recursive` — depth-1
-//! and deeper recursive snapshot tests, plus the initial-state
-//! validation tests. Split out from the per-shape inventions binaries
-//! for the same MCP-tenant-budget reason: see
-//! `functions_inventions_scalar.rs` for the rationale.
+//! Recursive function-invention snapshot tests (depth 0/1/2/3) plus
+//! initial-state validation checks for the recursive client. ~84
+//! tests.
 
-#![allow(clippy::too_many_arguments)]
-
+use crate::{recursive_test_3x, recursive_test_3x_unrouted};
 use objectiveai::functions::inventions::state::{
     AlphaScalarBranchState, AlphaScalarLeafState, AlphaScalarState,
     AlphaVectorBranchState, AlphaVectorLeafState, AlphaVectorState,
     ParamsState,
 };
 
-mod common;
-
-use common::inventions::{
+use crate::common::inventions::{
     invalid_scalar_leaf_task, invalid_scalar_schema, make_recursive_request,
     normalize_recursive, params, post_recursive_expect_err,
     run_recursive_invention, valid_scalar_leaf_task, valid_scalar_schema,
@@ -22,7 +17,7 @@ use common::inventions::{
 };
 
 // ---------------------------------------------------------------------------
-// Leaf tests (depth=0) — just 2, since recursive is wasteful at depth 0.
+// Depth-0 leaf snapshot tests (just 2; recursive is wasteful at d0)
 // ---------------------------------------------------------------------------
 
 recursive_test_3x!(test_scalar_leaf_d0,
@@ -36,7 +31,7 @@ recursive_test_3x!(test_vector_leaf_d0,
     "vector_leaf_d0");
 
 // ---------------------------------------------------------------------------
-// Depth 1 — scalar (diverse widths and configs)
+// Depth-1 scalar (diverse widths and configs)
 // ---------------------------------------------------------------------------
 
 recursive_test_3x!(test_scalar_d1_min,
@@ -70,7 +65,7 @@ recursive_test_3x_unrouted!(test_scalar_d1_unrouted,
     "scalar_d1_unrouted");
 
 // ---------------------------------------------------------------------------
-// Depth 1 — vector (diverse widths and configs)
+// Depth-1 vector (diverse widths and configs)
 // ---------------------------------------------------------------------------
 
 recursive_test_3x!(test_vector_d1_min,
@@ -109,7 +104,7 @@ recursive_test_3x!(test_vector_d1_wide_range,
     "vector_d1_wide_range");
 
 // ---------------------------------------------------------------------------
-// Depth 2 — scalar and vector
+// Depth-2 scalar and vector
 // ---------------------------------------------------------------------------
 
 recursive_test_3x!(test_scalar_d2_narrow,
@@ -138,7 +133,7 @@ recursive_test_3x_unrouted!(test_scalar_d2_unrouted,
     "scalar_d2_unrouted");
 
 // ---------------------------------------------------------------------------
-// Depth 3 — just one (expensive)
+// Depth-3 (just one, expensive)
 // ---------------------------------------------------------------------------
 
 recursive_test_3x!(test_scalar_d3_min,
@@ -147,11 +142,11 @@ recursive_test_3x!(test_scalar_d3_min,
     "scalar_d3_min");
 
 // ---------------------------------------------------------------------------
-// Initial state validation tests
+// Initial-state validation tests
 // ---------------------------------------------------------------------------
 
 #[tokio::test]
-async fn test_invalid_scalar_input_schema() {
+async fn test_recursive_invalid_scalar_input_schema() {
     let state = ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
         params: params("inv-bad-schema", 0, 1, 1, 2, 4),
         essay: Some("An essay about feelings.".to_string()),
@@ -169,7 +164,7 @@ async fn test_invalid_scalar_input_schema() {
 }
 
 #[tokio::test]
-async fn test_valid_schema_invalid_tasks_scalar_leaf() {
+async fn test_recursive_valid_schema_invalid_tasks_scalar_leaf() {
     let state = ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
         params: params("inv-bad-tasks", 0, 1, 1, 2, 4),
         essay: Some("An essay about scoring sentiment.".to_string()),
@@ -187,7 +182,7 @@ async fn test_valid_schema_invalid_tasks_scalar_leaf() {
 }
 
 #[tokio::test]
-async fn test_valid_schema_valid_tasks_scalar_leaf() {
+async fn test_recursive_valid_schema_valid_tasks_scalar_leaf() {
     let state = ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
         params: params("inv-good-sl", 0, 1, 1, 2, 4),
         essay: None,
@@ -202,15 +197,15 @@ async fn test_valid_schema_valid_tasks_scalar_leaf() {
     let request = make_recursive_request(state, 5300);
     let result = normalize_recursive(run_recursive_invention(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
-    common::inventions::assert_recursive_snapshot(
+    crate::common::inventions::assert_recursive_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/recursive_client_tests/valid_schema_valid_tasks_scalar_leaf.json"),
-        include_str!("../assets/functions/inventions/recursive_client_tests/valid_schema_valid_tasks_scalar_leaf.json"),
+        include_str!("../../assets/functions/inventions/recursive_client_tests/valid_schema_valid_tasks_scalar_leaf.json"),
     );
 }
 
 #[tokio::test]
-async fn test_valid_vector_schema_valid_tasks() {
+async fn test_recursive_valid_vector_schema_valid_tasks() {
     let state = ParamsState::AlphaVectorLeaf(AlphaVectorLeafState {
         params: params("inv-good-vl", 0, 1, 1, 2, 4),
         essay: Some("Ranking things.".to_string()),
@@ -225,15 +220,15 @@ async fn test_valid_vector_schema_valid_tasks() {
     let request = make_recursive_request(state, 5400);
     let result = normalize_recursive(run_recursive_invention(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
-    common::inventions::assert_recursive_snapshot(
+    crate::common::inventions::assert_recursive_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/recursive_client_tests/valid_vector_schema_valid_tasks.json"),
-        include_str!("../assets/functions/inventions/recursive_client_tests/valid_vector_schema_valid_tasks.json"),
+        include_str!("../../assets/functions/inventions/recursive_client_tests/valid_vector_schema_valid_tasks.json"),
     );
 }
 
 #[tokio::test]
-async fn test_predicted_tasks_length_too_low() {
+async fn test_recursive_predicted_tasks_length_too_low() {
     let state = ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
         params: params("inv-tl-low", 0, 1, 1, 2, 4),
         essay: Some("Writing an essay.".to_string()),
@@ -254,7 +249,7 @@ async fn test_predicted_tasks_length_too_low() {
 }
 
 #[tokio::test]
-async fn test_predicted_tasks_length_too_high() {
+async fn test_recursive_predicted_tasks_length_too_high() {
     let state = ParamsState::AlphaVectorLeaf(AlphaVectorLeafState {
         params: params("inv-tl-high", 0, 1, 1, 2, 4),
         essay: None,
@@ -275,7 +270,7 @@ async fn test_predicted_tasks_length_too_high() {
 }
 
 #[tokio::test]
-async fn test_predicted_tasks_length_too_high_branch() {
+async fn test_recursive_predicted_tasks_length_too_high_branch() {
     let state = ParamsState::AlphaScalarBranch(AlphaScalarBranchState {
         params: params("inv-tl-branch", 1, 3, 5, 2, 4),
         essay: Some("Branch essay.".to_string()),
@@ -296,7 +291,7 @@ async fn test_predicted_tasks_length_too_high_branch() {
 }
 
 #[tokio::test]
-async fn test_predicted_tasks_length_below_branch_min() {
+async fn test_recursive_predicted_tasks_length_below_branch_min() {
     let state = ParamsState::AlphaVectorBranch(AlphaVectorBranchState {
         params: params("inv-tl-vb-low", 1, 3, 8, 2, 4),
         essay: None,
@@ -317,7 +312,7 @@ async fn test_predicted_tasks_length_below_branch_min() {
 }
 
 #[tokio::test]
-async fn test_valid_schema_no_tasks_with_essay() {
+async fn test_recursive_valid_schema_no_tasks_with_essay() {
     let state = ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
         params: params("inv-schema-only", 0, 1, 1, 2, 4),
         essay: Some("A great essay about things.".to_string()),
@@ -332,15 +327,15 @@ async fn test_valid_schema_no_tasks_with_essay() {
     let request = make_recursive_request(state, 5900);
     let result = normalize_recursive(run_recursive_invention(request).await);
     let json = serde_json::to_string_pretty(&result).unwrap();
-    common::inventions::assert_recursive_snapshot(
+    crate::common::inventions::assert_recursive_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/recursive_client_tests/valid_schema_no_tasks_with_essay.json"),
-        include_str!("../assets/functions/inventions/recursive_client_tests/valid_schema_no_tasks_with_essay.json"),
+        include_str!("../../assets/functions/inventions/recursive_client_tests/valid_schema_no_tasks_with_essay.json"),
     );
 }
 
 #[tokio::test]
-async fn test_invalid_schema_with_tasks_and_description() {
+async fn test_recursive_invalid_schema_with_tasks_and_description() {
     let state = ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
         params: params("inv-full-bad", 0, 1, 1, 2, 4),
         essay: Some("An elaborate essay.".to_string()),

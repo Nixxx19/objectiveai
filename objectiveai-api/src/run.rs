@@ -768,16 +768,31 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         ));
 
     // Laboratory Executions Client
-    #[cfg(feature = "orchestrator-bollard")]
-    let laboratory_orchestrator = Arc::new(
-        crate::laboratories::orchestrator::bollard::Orchestrator {
-            docker_timeout,
-        },
-    );
-    #[cfg(not(feature = "orchestrator-bollard"))]
-    let laboratory_orchestrator = Arc::new(
-        crate::laboratories::orchestrator::unimplemented::Orchestrator,
-    );
+    //
+    // Wrapped in `DispatchedOrchestrator` so the
+    // `LABORATORY_USE_MOCK_ORCHESTRATOR=1` env var (set by integration
+    // tests) can swap in the mock orchestrator at startup without
+    // talking to a real Docker daemon.
+    let use_mock_orchestrator =
+        std::env::var("LABORATORY_USE_MOCK_ORCHESTRATOR").as_deref() == Ok("1");
+    let laboratory_orchestrator = Arc::new(if use_mock_orchestrator {
+        crate::laboratories::orchestrator::dispatch::DispatchedOrchestrator::Mock(
+            crate::laboratories::orchestrator::mock::Orchestrator,
+        )
+    } else {
+        #[cfg(feature = "orchestrator-bollard")]
+        {
+            crate::laboratories::orchestrator::dispatch::DispatchedOrchestrator::Bollard(
+                crate::laboratories::orchestrator::bollard::Orchestrator { docker_timeout },
+            )
+        }
+        #[cfg(not(feature = "orchestrator-bollard"))]
+        {
+            crate::laboratories::orchestrator::dispatch::DispatchedOrchestrator::Unimplemented(
+                crate::laboratories::orchestrator::unimplemented::Orchestrator,
+            )
+        }
+    });
     let laboratory_executions_client = Arc::new(crate::laboratories::executions::Client {
         agent_client: agent_completions_client.clone(),
         retrieve_router: retrieve_router.clone(),

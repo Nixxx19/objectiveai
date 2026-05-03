@@ -1,17 +1,11 @@
-//! Integration tests for `/functions/inventions` — validation/error
-//! checks + the "completed state generates no completions" snapshot
-//! sanity test. See `functions_inventions_scalar.rs` for the
-//! split-binary rationale.
-
-#![allow(clippy::too_many_arguments)]
+//! Validation / error-path checks for `/functions/inventions` and the
+//! "completed state generates no completions" snapshot sanity test.
 
 use objectiveai::functions::inventions::state::{
     AlphaScalarBranchState, AlphaScalarLeafState, AlphaVectorLeafState, ParamsState,
 };
 
-mod common;
-
-use common::inventions::{make_request, params, post_expect_err, post_streaming, run_invention};
+use crate::common::inventions::{make_request, params, post_expect_err, post_streaming, run_invention};
 
 #[tokio::test]
 async fn test_zero_leaf_width_rejected() {
@@ -55,7 +49,7 @@ async fn test_min_greater_than_max_rejected() {
 #[tokio::test]
 async fn test_completed_state_generates_no_completions() {
     let snapshot: serde_json::Value = serde_json::from_str(
-        include_str!("../assets/functions/inventions/client_tests/scalar_leaf_s42_0.json"),
+        include_str!("../../assets/functions/inventions/client_tests/scalar_leaf_s42_0.json"),
     ).unwrap();
     let state: ParamsState = serde_json::from_value(snapshot["state"].clone()).unwrap();
 

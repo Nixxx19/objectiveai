@@ -15,7 +15,7 @@ use objectiveai::functions::executions::response::streaming::FunctionExecutionCh
 use objectiveai::functions::executions::response::unary::FunctionExecution;
 use objectiveai::functions::expression::InputValue;
 
-mod common;
+use crate::common;
 
 // ---------------------------------------------------------------------------
 // Request helpers
@@ -359,7 +359,7 @@ async fn test_mock_1_scalar_leaf_binary_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_1_scalar_leaf_binary_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_1_scalar_leaf_binary_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_1_scalar_leaf_binary_seed_42.json"),
     );
 }
 
@@ -379,7 +379,7 @@ async fn test_mock_2_scalar_skip_false_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_2_scalar_skip_false_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_2_scalar_skip_false_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_2_scalar_skip_false_seed_42.json"),
     );
 }
 
@@ -399,7 +399,7 @@ async fn test_mock_2_scalar_skip_true_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_2_scalar_skip_true_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_2_scalar_skip_true_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_2_scalar_skip_true_seed_42.json"),
     );
 }
 
@@ -418,7 +418,7 @@ async fn test_mock_3_scalar_5way_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_3_scalar_5way_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_3_scalar_5way_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_3_scalar_5way_seed_42.json"),
     );
 }
 
@@ -441,7 +441,7 @@ async fn test_mock_4_vector_ranker_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_4_vector_ranker_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_4_vector_ranker_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_4_vector_ranker_seed_42.json"),
     );
 }
 
@@ -466,7 +466,7 @@ async fn test_mock_5_vector_context_multi_task_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_5_vector_context_multi_task_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_5_vector_context_multi_task_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_5_vector_context_multi_task_seed_42.json"),
     );
 }
 
@@ -486,7 +486,7 @@ async fn test_mock_6_scalar_system_message_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_6_scalar_system_message_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_6_scalar_system_message_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_6_scalar_system_message_seed_42.json"),
     );
 }
 
@@ -509,7 +509,7 @@ async fn test_mock_7_vector_5_criteria_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_7_vector_5_criteria_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_7_vector_5_criteria_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_7_vector_5_criteria_seed_42.json"),
     );
 }
 
@@ -535,7 +535,7 @@ async fn test_mock_8_vector_context_skip_false_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_8_vector_context_skip_false_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_8_vector_context_skip_false_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_8_vector_context_skip_false_seed_42.json"),
     );
 }
 
@@ -561,7 +561,7 @@ async fn test_mock_8_vector_context_skip_true_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_8_vector_context_skip_true_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_8_vector_context_skip_true_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_8_vector_context_skip_true_seed_42.json"),
     );
 }
 
@@ -581,7 +581,7 @@ async fn test_mock_9_scalar_branch_2_tasks_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_9_scalar_branch_2_tasks_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_9_scalar_branch_2_tasks_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_9_scalar_branch_2_tasks_seed_42.json"),
     );
 }
 
@@ -600,7 +600,7 @@ async fn test_mock_10_scalar_branch_3_tasks_error_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_10_scalar_branch_3_tasks_error_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_10_scalar_branch_3_tasks_error_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_10_scalar_branch_3_tasks_error_seed_42.json"),
     );
 }
 
@@ -620,7 +620,7 @@ async fn test_mock_11_scalar_branch_skip_false_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_11_scalar_branch_skip_false_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_11_scalar_branch_skip_false_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_11_scalar_branch_skip_false_seed_42.json"),
     );
 }
 
@@ -640,7 +640,7 @@ async fn test_mock_11_scalar_branch_skip_true_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_11_scalar_branch_skip_true_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_11_scalar_branch_skip_true_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_11_scalar_branch_skip_true_seed_42.json"),
     );
 }
 
@@ -663,7 +663,7 @@ async fn test_mock_12_vector_branch_2_vector_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_12_vector_branch_2_vector_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_12_vector_branch_2_vector_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_12_vector_branch_2_vector_seed_42.json"),
     );
 }
 
@@ -688,7 +688,7 @@ async fn test_mock_13_vector_branch_mixed_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_13_vector_branch_mixed_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_13_vector_branch_mixed_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_13_vector_branch_mixed_seed_42.json"),
     );
 }
 
@@ -714,7 +714,7 @@ async fn test_mock_14_vector_branch_skip_false_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_14_vector_branch_skip_false_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_14_vector_branch_skip_false_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_14_vector_branch_skip_false_seed_42.json"),
     );
 }
 
@@ -740,7 +740,7 @@ async fn test_mock_14_vector_branch_skip_true_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_14_vector_branch_skip_true_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_14_vector_branch_skip_true_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_14_vector_branch_skip_true_seed_42.json"),
     );
 }
 
@@ -762,7 +762,7 @@ async fn test_mock_15_vector_branch_3_vector_logprobs_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_15_vector_branch_3_vector_logprobs_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_15_vector_branch_3_vector_logprobs_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_15_vector_branch_3_vector_logprobs_seed_42.json"),
     );
 }
 
@@ -788,7 +788,7 @@ async fn test_mock_16_vector_branch_4_tasks_error_logprobs_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_16_vector_branch_4_tasks_error_logprobs_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_16_vector_branch_4_tasks_error_logprobs_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_16_vector_branch_4_tasks_error_logprobs_seed_42.json"),
     );
 }
 
@@ -814,7 +814,7 @@ async fn test_mock_17_vector_branch_mixed_skip_false_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_17_vector_branch_mixed_skip_false_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_17_vector_branch_mixed_skip_false_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_17_vector_branch_mixed_skip_false_seed_42.json"),
     );
 }
 
@@ -840,7 +840,7 @@ async fn test_mock_17_vector_branch_mixed_skip_true_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_17_vector_branch_mixed_skip_true_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_17_vector_branch_mixed_skip_true_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_17_vector_branch_mixed_skip_true_seed_42.json"),
     );
 }
 
@@ -860,7 +860,7 @@ async fn test_mock_18_scalar_super_branch_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_18_scalar_super_branch_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_18_scalar_super_branch_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_18_scalar_super_branch_seed_42.json"),
     );
 }
 
@@ -881,7 +881,7 @@ async fn test_mock_19_scalar_super_branch_skip_false_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_19_scalar_super_branch_skip_false_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_19_scalar_super_branch_skip_false_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_19_scalar_super_branch_skip_false_seed_42.json"),
     );
 }
 
@@ -902,7 +902,7 @@ async fn test_mock_19_scalar_super_branch_skip_true_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_19_scalar_super_branch_skip_true_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_19_scalar_super_branch_skip_true_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_19_scalar_super_branch_skip_true_seed_42.json"),
     );
 }
 
@@ -925,7 +925,7 @@ async fn test_mock_20_vector_super_branch_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_20_vector_super_branch_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_20_vector_super_branch_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_20_vector_super_branch_seed_42.json"),
     );
 }
 
@@ -950,7 +950,7 @@ async fn test_mock_21_vector_super_branch_context_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_21_vector_super_branch_context_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_21_vector_super_branch_context_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_21_vector_super_branch_context_seed_42.json"),
     );
 }
 
@@ -1050,7 +1050,7 @@ async fn test_inline_scalar_placeholder_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/inline_scalar_placeholder_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/inline_scalar_placeholder_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/inline_scalar_placeholder_seed_42.json"),
     );
 }
 
@@ -1069,7 +1069,7 @@ async fn test_mock_25_scalar_placeholder_remote_swarm_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_25_scalar_placeholder_remote_swarm_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_25_scalar_placeholder_remote_swarm_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_25_scalar_placeholder_remote_swarm_seed_42.json"),
     );
 }
 
@@ -1093,7 +1093,7 @@ async fn test_mock_4_vector_swiss_default_20_items_seed_7() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_4_vector_swiss_default_20_items_seed_7.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_4_vector_swiss_default_20_items_seed_7.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_4_vector_swiss_default_20_items_seed_7.json"),
     );
 }
 
@@ -1116,7 +1116,7 @@ async fn test_mock_5_vector_swiss_pool5_rounds3_20_items_seed_7() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_5_vector_swiss_pool5_rounds3_20_items_seed_7.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_5_vector_swiss_pool5_rounds3_20_items_seed_7.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_5_vector_swiss_pool5_rounds3_20_items_seed_7.json"),
     );
 }
 
@@ -1136,7 +1136,7 @@ async fn test_mock_7_vector_swiss_pool4_rounds3_20_items_seed_7() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_7_vector_swiss_pool4_rounds3_20_items_seed_7.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_7_vector_swiss_pool4_rounds3_20_items_seed_7.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_7_vector_swiss_pool4_rounds3_20_items_seed_7.json"),
     );
 }
 
@@ -1162,7 +1162,7 @@ async fn test_mock_22_scalar_mapped_branch_2_items_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_22_scalar_mapped_branch_2_items_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_22_scalar_mapped_branch_2_items_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_22_scalar_mapped_branch_2_items_seed_42.json"),
     );
 }
 
@@ -1184,7 +1184,7 @@ async fn test_mock_22_scalar_mapped_branch_2_items_seed_123() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_22_scalar_mapped_branch_2_items_seed_123.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_22_scalar_mapped_branch_2_items_seed_123.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_22_scalar_mapped_branch_2_items_seed_123.json"),
     );
 }
 
@@ -1207,7 +1207,7 @@ async fn test_mock_23_scalar_mapped_branch_3_items_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_23_scalar_mapped_branch_3_items_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_23_scalar_mapped_branch_3_items_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_23_scalar_mapped_branch_3_items_seed_42.json"),
     );
 }
 
@@ -1229,7 +1229,7 @@ async fn test_mock_23_scalar_mapped_branch_2_items_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_23_scalar_mapped_branch_2_items_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_23_scalar_mapped_branch_2_items_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_23_scalar_mapped_branch_2_items_seed_42.json"),
     );
 }
 
@@ -1251,7 +1251,7 @@ async fn test_mock_24_scalar_mapped_branch_with_func_2_items_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_24_scalar_mapped_branch_with_func_2_items_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/mock_24_scalar_mapped_branch_with_func_2_items_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/mock_24_scalar_mapped_branch_with_func_2_items_seed_42.json"),
     );
 }
 
@@ -1738,7 +1738,7 @@ async fn test_split_scalar_binary_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/split_scalar_binary_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/split_scalar_binary_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/split_scalar_binary_seed_42.json"),
     );
 }
 
@@ -1791,7 +1791,7 @@ fn ten_tweet_swarm_two_agents(top_logprobs_first: Option<u64>, top_logprobs_seco
 #[tokio::test]
 async fn test_split_tweet_scorer_10_tweets_seed_42() {
     let input: InputValue = serde_json::from_str(include_str!(
-        "../assets/functions/executions/client_tests/inputs/10_tweets.json"
+        "../../assets/functions/executions/client_tests/inputs/10_tweets.json"
     )).expect("10_tweets.json must parse as InputValue");
     let request = FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
@@ -1825,14 +1825,14 @@ async fn test_split_tweet_scorer_10_tweets_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/split_tweet_scorer_10_tweets_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/split_tweet_scorer_10_tweets_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/split_tweet_scorer_10_tweets_seed_42.json"),
     );
 }
 
 #[tokio::test]
 async fn test_vector_tweet_ranker_10_tweets_seed_42() {
     let items: InputValue = serde_json::from_str(include_str!(
-        "../assets/functions/executions/client_tests/inputs/10_tweets.json"
+        "../../assets/functions/executions/client_tests/inputs/10_tweets.json"
     )).expect("10_tweets.json must parse as InputValue");
     let request = FunctionExecutionCreateParams {
         function: objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional::Remote(
@@ -1868,6 +1868,6 @@ async fn test_vector_tweet_ranker_10_tweets_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/vector_tweet_ranker_10_tweets_seed_42.json"),
-        include_str!("../assets/functions/executions/client_tests/vector_tweet_ranker_10_tweets_seed_42.json"),
+        include_str!("../../assets/functions/executions/client_tests/vector_tweet_ranker_10_tweets_seed_42.json"),
     );
 }

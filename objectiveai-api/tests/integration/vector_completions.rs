@@ -16,7 +16,7 @@ use objectiveai::vector::completions::request::VectorCompletionCreateParams;
 use objectiveai::vector::completions::response::streaming::VectorCompletionChunk;
 use objectiveai::vector::completions::response::unary::VectorCompletion;
 
-mod common;
+use crate::common;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -228,7 +228,7 @@ async fn test_single_agent_2_responses_instruction_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/single_agent_2_responses_instruction_seed_42.json"),
-        include_str!("../assets/vector/completions/client_tests/single_agent_2_responses_instruction_seed_42.json"),
+        include_str!("../../assets/vector/completions/client_tests/single_agent_2_responses_instruction_seed_42.json"),
     );
 }
 
@@ -253,7 +253,7 @@ async fn test_single_agent_3_responses_instruction_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/single_agent_3_responses_instruction_seed_42.json"),
-        include_str!("../assets/vector/completions/client_tests/single_agent_3_responses_instruction_seed_42.json"),
+        include_str!("../../assets/vector/completions/client_tests/single_agent_3_responses_instruction_seed_42.json"),
     );
 }
 
@@ -278,7 +278,7 @@ async fn test_two_agents_equal_weights_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/two_agents_equal_weights_seed_42.json"),
-        include_str!("../assets/vector/completions/client_tests/two_agents_equal_weights_seed_42.json"),
+        include_str!("../../assets/vector/completions/client_tests/two_agents_equal_weights_seed_42.json"),
     );
 }
 
@@ -306,7 +306,7 @@ async fn test_two_agents_unequal_weights_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/two_agents_unequal_weights_seed_42.json"),
-        include_str!("../assets/vector/completions/client_tests/two_agents_unequal_weights_seed_42.json"),
+        include_str!("../../assets/vector/completions/client_tests/two_agents_unequal_weights_seed_42.json"),
     );
 }
 
@@ -329,7 +329,7 @@ async fn test_three_agents_4_responses_seed_99() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/three_agents_4_responses_seed_99.json"),
-        include_str!("../assets/vector/completions/client_tests/three_agents_4_responses_seed_99.json"),
+        include_str!("../../assets/vector/completions/client_tests/three_agents_4_responses_seed_99.json"),
     );
 }
 
@@ -357,7 +357,7 @@ async fn test_invert_vote_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/invert_vote_seed_42.json"),
-        include_str!("../assets/vector/completions/client_tests/invert_vote_seed_42.json"),
+        include_str!("../../assets/vector/completions/client_tests/invert_vote_seed_42.json"),
     );
 }
 
@@ -435,7 +435,7 @@ async fn test_many_responses_deep_prefix_tree_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/many_responses_deep_prefix_tree_seed_42.json"),
-        include_str!("../assets/vector/completions/client_tests/many_responses_deep_prefix_tree_seed_42.json"),
+        include_str!("../../assets/vector/completions/client_tests/many_responses_deep_prefix_tree_seed_42.json"),
     );
 }
 
@@ -464,7 +464,7 @@ async fn test_json_schema_single_agent_seed_77() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/json_schema_single_agent_seed_77.json"),
-        include_str!("../assets/vector/completions/client_tests/json_schema_single_agent_seed_77.json"),
+        include_str!("../../assets/vector/completions/client_tests/json_schema_single_agent_seed_77.json"),
     );
 }
 
@@ -489,7 +489,7 @@ async fn test_tool_call_single_agent_seed_55() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/tool_call_single_agent_seed_55.json"),
-        include_str!("../assets/vector/completions/client_tests/tool_call_single_agent_seed_55.json"),
+        include_str!("../../assets/vector/completions/client_tests/tool_call_single_agent_seed_55.json"),
     );
 }
 
@@ -514,7 +514,7 @@ async fn test_error_agent_skipped_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/error_agent_skipped_seed_42.json"),
-        include_str!("../assets/vector/completions/client_tests/error_agent_skipped_seed_42.json"),
+        include_str!("../../assets/vector/completions/client_tests/error_agent_skipped_seed_42.json"),
     );
 }
 
@@ -545,7 +545,7 @@ async fn test_mixed_output_modes_seed_88() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/mixed_output_modes_seed_88.json"),
-        include_str!("../assets/vector/completions/client_tests/mixed_output_modes_seed_88.json"),
+        include_str!("../../assets/vector/completions/client_tests/mixed_output_modes_seed_88.json"),
     );
 }
 
@@ -583,7 +583,7 @@ async fn test_image_responses_instruction_seed_33() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/image_responses_instruction_seed_33.json"),
-        include_str!("../assets/vector/completions/client_tests/image_responses_instruction_seed_33.json"),
+        include_str!("../../assets/vector/completions/client_tests/image_responses_instruction_seed_33.json"),
     );
 }
 
@@ -636,7 +636,7 @@ async fn test_video_and_file_responses_seed_66() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/video_and_file_responses_seed_66.json"),
-        include_str!("../assets/vector/completions/client_tests/video_and_file_responses_seed_66.json"),
+        include_str!("../../assets/vector/completions/client_tests/video_and_file_responses_seed_66.json"),
     );
 }
 
@@ -677,7 +677,7 @@ async fn test_three_different_agents_seed_11() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/three_different_agents_seed_11.json"),
-        include_str!("../assets/vector/completions/client_tests/three_different_agents_seed_11.json"),
+        include_str!("../../assets/vector/completions/client_tests/three_different_agents_seed_11.json"),
     );
 }
 
@@ -705,7 +705,7 @@ async fn test_json_schema_many_responses_seed_22() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/json_schema_many_responses_seed_22.json"),
-        include_str!("../assets/vector/completions/client_tests/json_schema_many_responses_seed_22.json"),
+        include_str!("../../assets/vector/completions/client_tests/json_schema_many_responses_seed_22.json"),
     );
 }
 
@@ -749,7 +749,7 @@ async fn test_tool_call_two_agents_seed_44() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/tool_call_two_agents_seed_44.json"),
-        include_str!("../assets/vector/completions/client_tests/tool_call_two_agents_seed_44.json"),
+        include_str!("../../assets/vector/completions/client_tests/tool_call_two_agents_seed_44.json"),
     );
 }
 
@@ -807,7 +807,7 @@ async fn test_error_and_healthy_agents_seed_99() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/error_and_healthy_agents_seed_99.json"),
-        include_str!("../assets/vector/completions/client_tests/error_and_healthy_agents_seed_99.json"),
+        include_str!("../../assets/vector/completions/client_tests/error_and_healthy_agents_seed_99.json"),
     );
 }
 
@@ -1002,7 +1002,7 @@ async fn test_logprobs_json_schema_2_agents_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/logprobs_json_schema_2_agents_seed_42.json"),
-        include_str!("../assets/vector/completions/client_tests/logprobs_json_schema_2_agents_seed_42.json"),
+        include_str!("../../assets/vector/completions/client_tests/logprobs_json_schema_2_agents_seed_42.json"),
     );
 }
 
@@ -1032,7 +1032,7 @@ async fn test_logprobs_json_schema_3_agents_unequal_seed_77() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/logprobs_json_schema_3_agents_unequal_seed_77.json"),
-        include_str!("../assets/vector/completions/client_tests/logprobs_json_schema_3_agents_unequal_seed_77.json"),
+        include_str!("../../assets/vector/completions/client_tests/logprobs_json_schema_3_agents_unequal_seed_77.json"),
     );
 }
 
@@ -1056,7 +1056,7 @@ async fn test_logprobs_tool_call_single_agent_seed_55() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/logprobs_tool_call_single_agent_seed_55.json"),
-        include_str!("../assets/vector/completions/client_tests/logprobs_tool_call_single_agent_seed_55.json"),
+        include_str!("../../assets/vector/completions/client_tests/logprobs_tool_call_single_agent_seed_55.json"),
     );
 }
 
@@ -1091,7 +1091,7 @@ async fn test_logprobs_error_with_fallback_seed_99() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/logprobs_error_with_fallback_seed_99.json"),
-        include_str!("../assets/vector/completions/client_tests/logprobs_error_with_fallback_seed_99.json"),
+        include_str!("../../assets/vector/completions/client_tests/logprobs_error_with_fallback_seed_99.json"),
     );
 }
 
@@ -1126,7 +1126,7 @@ async fn test_logprobs_all_errors_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/logprobs_all_errors_seed_42.json"),
-        include_str!("../assets/vector/completions/client_tests/logprobs_all_errors_seed_42.json"),
+        include_str!("../../assets/vector/completions/client_tests/logprobs_all_errors_seed_42.json"),
     );
 }
 
@@ -1150,7 +1150,7 @@ async fn test_logprobs_instruction_seed_33() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/logprobs_instruction_seed_33.json"),
-        include_str!("../assets/vector/completions/client_tests/logprobs_instruction_seed_33.json"),
+        include_str!("../../assets/vector/completions/client_tests/logprobs_instruction_seed_33.json"),
     );
 }
 
@@ -1190,6 +1190,6 @@ async fn test_logprobs_mixed_modes_with_fallback_seed_88() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/logprobs_mixed_modes_with_fallback_seed_88.json"),
-        include_str!("../assets/vector/completions/client_tests/logprobs_mixed_modes_with_fallback_seed_88.json"),
+        include_str!("../../assets/vector/completions/client_tests/logprobs_mixed_modes_with_fallback_seed_88.json"),
     );
 }

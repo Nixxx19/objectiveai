@@ -1,19 +1,13 @@
-//! Integration tests for `/functions/inventions` — scalar leaf + branch
-//! categories (200 tests). Split out from the rest because each
-//! invention test creates an MCP tenant on the spawned api server, and
-//! >300 concurrent tenants per server process deadlocks. Splitting by
-//! category gives this batch its own dedicated server.
+//! Scalar leaf + branch invention snapshot tests, plus the
+//! pre-provided-schema variants for both. ~200 tests.
 
-#![allow(clippy::too_many_arguments)]
-
+use crate::{invention_test_10x, invention_test_10x_schema};
 use objectiveai::functions::inventions::state::{
     AlphaScalarBranchState, AlphaScalarLeafState,
 };
 
-mod common;
-
 // ---------------------------------------------------------------------------
-// Scalar Leaf tests
+// Scalar Leaf snapshot tests
 // ---------------------------------------------------------------------------
 
 invention_test_10x!(test_scalar_leaf_s42,
@@ -47,7 +41,7 @@ invention_test_10x!(test_scalar_leaf_s8675309,
     "scalar_leaf_s8675309");
 
 // ---------------------------------------------------------------------------
-// Scalar Branch tests
+// Scalar Branch snapshot tests
 // ---------------------------------------------------------------------------
 
 invention_test_10x!(test_scalar_branch_s42,

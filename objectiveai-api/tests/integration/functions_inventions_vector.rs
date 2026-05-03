@@ -1,17 +1,13 @@
-//! Integration tests for `/functions/inventions` — vector leaf + branch
-//! categories (200 tests). See `functions_inventions_scalar.rs` for the
-//! split-binary rationale.
+//! Vector leaf + branch invention snapshot tests, plus the
+//! pre-provided-schema variants for both. ~200 tests.
 
-#![allow(clippy::too_many_arguments)]
-
+use crate::{invention_test_10x, invention_test_10x_schema};
 use objectiveai::functions::inventions::state::{
     AlphaVectorBranchState, AlphaVectorLeafState,
 };
 
-mod common;
-
 // ---------------------------------------------------------------------------
-// Vector Leaf tests
+// Vector Leaf snapshot tests
 // ---------------------------------------------------------------------------
 
 invention_test_10x!(test_vector_leaf_s42,
@@ -45,7 +41,7 @@ invention_test_10x!(test_vector_leaf_s271828,
     "vector_leaf_s271828");
 
 // ---------------------------------------------------------------------------
-// Vector Branch tests
+// Vector Branch snapshot tests
 // ---------------------------------------------------------------------------
 
 invention_test_10x!(test_vector_branch_s42,

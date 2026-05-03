@@ -17,7 +17,7 @@ use objectiveai::agent::completions::response::streaming::AgentCompletionChunk;
 use objectiveai::agent::completions::response::unary::{AgentCompletion, Message as UnaryMessage};
 use objectiveai::agent::mock::AgentBase as MockAgentBase;
 
-mod common;
+use crate::common;
 
 // ---------------------------------------------------------------------------
 // Snapshot helpers
@@ -188,7 +188,7 @@ async fn test_basic_mock_agent_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_basic_mock_agent_seed_42.json"),
-        include_str!("../assets/agent/completions/client_tests/test_basic_mock_agent_seed_42.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_basic_mock_agent_seed_42.json"),
     );
 }
 
@@ -201,7 +201,7 @@ async fn test_basic_mock_agent_seed_123() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_basic_mock_agent_seed_123.json"),
-        include_str!("../assets/agent/completions/client_tests/test_basic_mock_agent_seed_123.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_basic_mock_agent_seed_123.json"),
     );
 }
 
@@ -220,7 +220,7 @@ async fn test_deterministic_with_same_seed() {
     assert_snapshot(
         &json_a,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_deterministic_with_same_seed.json"),
-        include_str!("../assets/agent/completions/client_tests/test_deterministic_with_same_seed.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_deterministic_with_same_seed.json"),
     );
 }
 
@@ -239,13 +239,13 @@ async fn test_different_seeds_differ() {
     assert_snapshot(
         &json_a,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_different_seeds_differ_a.json"),
-        include_str!("../assets/agent/completions/client_tests/test_different_seeds_differ_a.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_different_seeds_differ_a.json"),
     );
     let json_b = serde_json::to_string_pretty(&completion_b).unwrap();
     assert_snapshot(
         &json_b,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_different_seeds_differ_b.json"),
-        include_str!("../assets/agent/completions/client_tests/test_different_seeds_differ_b.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_different_seeds_differ_b.json"),
     );
 }
 
@@ -272,7 +272,7 @@ async fn test_with_single_user_message() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_with_single_user_message.json"),
-        include_str!("../assets/agent/completions/client_tests/test_with_single_user_message.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_with_single_user_message.json"),
     );
 }
 
@@ -295,7 +295,7 @@ async fn test_with_developer_and_user_messages() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_with_developer_and_user_messages.json"),
-        include_str!("../assets/agent/completions/client_tests/test_with_developer_and_user_messages.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_with_developer_and_user_messages.json"),
     );
 }
 
@@ -309,7 +309,7 @@ async fn test_json_object_response_format() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_json_object_response_format.json"),
-        include_str!("../assets/agent/completions/client_tests/test_json_object_response_format.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_json_object_response_format.json"),
     );
 }
 
@@ -331,7 +331,7 @@ async fn test_json_schema_response_format() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_json_schema_response_format.json"),
-        include_str!("../assets/agent/completions/client_tests/test_json_schema_response_format.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_json_schema_response_format.json"),
     );
 }
 
@@ -345,7 +345,7 @@ async fn test_text_response_format() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_text_response_format.json"),
-        include_str!("../assets/agent/completions/client_tests/test_text_response_format.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_text_response_format.json"),
     );
 }
 
@@ -385,7 +385,7 @@ async fn test_required_tool_call_response_format() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_required_tool_call_response_format.json"),
-        include_str!("../assets/agent/completions/client_tests/test_required_tool_call_response_format.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_required_tool_call_response_format.json"),
     );
 }
 
@@ -410,7 +410,7 @@ async fn test_optional_tool_call_response_format() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_optional_tool_call_response_format.json"),
-        include_str!("../assets/agent/completions/client_tests/test_optional_tool_call_response_format.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_optional_tool_call_response_format.json"),
     );
 }
 
@@ -433,7 +433,7 @@ async fn test_multiple_user_messages() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_multiple_user_messages.json"),
-        include_str!("../assets/agent/completions/client_tests/test_multiple_user_messages.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_multiple_user_messages.json"),
     );
 }
 
@@ -450,7 +450,7 @@ async fn test_mock_agent_error_false_succeeds() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_mock_agent_error_false_succeeds.json"),
-        include_str!("../assets/agent/completions/client_tests/test_mock_agent_error_false_succeeds.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_mock_agent_error_false_succeeds.json"),
     );
 }
 
@@ -463,7 +463,7 @@ async fn test_final_item_is_mock_continuation() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_final_item_is_mock_continuation.json"),
-        include_str!("../assets/agent/completions/client_tests/test_final_item_is_mock_continuation.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_final_item_is_mock_continuation.json"),
     );
 }
 
@@ -484,7 +484,7 @@ async fn test_per_agent_response_format() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_per_agent_response_format.json"),
-        include_str!("../assets/agent/completions/client_tests/test_per_agent_response_format.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_per_agent_response_format.json"),
     );
 }
 
@@ -500,7 +500,7 @@ async fn test_per_agent_response_format_unknown_id() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_per_agent_response_format_unknown_id.json"),
-        include_str!("../assets/agent/completions/client_tests/test_per_agent_response_format_unknown_id.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_per_agent_response_format_unknown_id.json"),
     );
 }
 
@@ -537,7 +537,7 @@ async fn test_json_schema_nested_object() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_json_schema_nested_object.json"),
-        include_str!("../assets/agent/completions/client_tests/test_json_schema_nested_object.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_json_schema_nested_object.json"),
     );
 }
 
@@ -554,7 +554,7 @@ async fn test_fallback_agent_on_error() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_fallback_agent_on_error.json"),
-        include_str!("../assets/agent/completions/client_tests/test_fallback_agent_on_error.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_fallback_agent_on_error.json"),
     );
 }
 
@@ -590,7 +590,7 @@ async fn test_multiple_fallback_agents() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_multiple_fallback_agents.json"),
-        include_str!("../assets/agent/completions/client_tests/test_multiple_fallback_agents.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_multiple_fallback_agents.json"),
     );
 }
 
@@ -620,7 +620,7 @@ async fn test_with_mock_continuation() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_with_mock_continuation.json"),
-        include_str!("../assets/agent/completions/client_tests/test_with_mock_continuation.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_with_mock_continuation.json"),
     );
 }
 
@@ -633,7 +633,7 @@ async fn test_stream_yields_chunks_before_state() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_stream_yields_chunks_before_state.json"),
-        include_str!("../assets/agent/completions/client_tests/test_stream_yields_chunks_before_state.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_stream_yields_chunks_before_state.json"),
     );
 }
 
@@ -646,7 +646,7 @@ async fn test_large_seed_value() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_large_seed_value.json"),
-        include_str!("../assets/agent/completions/client_tests/test_large_seed_value.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_large_seed_value.json"),
     );
 }
 
@@ -659,7 +659,7 @@ async fn test_seed_zero() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_seed_zero.json"),
-        include_str!("../assets/agent/completions/client_tests/test_seed_zero.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_seed_zero.json"),
     );
 }
 
@@ -718,7 +718,7 @@ async fn test_logprobs_basic_seed_42() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_logprobs_basic_seed_42.json"),
-        include_str!("../assets/agent/completions/client_tests/test_logprobs_basic_seed_42.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_logprobs_basic_seed_42.json"),
     );
 }
 
@@ -763,7 +763,7 @@ async fn test_logprobs_json_schema_nested() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_logprobs_json_schema_nested.json"),
-        include_str!("../assets/agent/completions/client_tests/test_logprobs_json_schema_nested.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_logprobs_json_schema_nested.json"),
     );
 }
 
@@ -806,7 +806,7 @@ async fn test_logprobs_with_continuation() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_logprobs_with_continuation.json"),
-        include_str!("../assets/agent/completions/client_tests/test_logprobs_with_continuation.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_logprobs_with_continuation.json"),
     );
 }
 
@@ -830,7 +830,7 @@ async fn test_logprobs_fallback_agent() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_logprobs_fallback_agent.json"),
-        include_str!("../assets/agent/completions/client_tests/test_logprobs_fallback_agent.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_logprobs_fallback_agent.json"),
     );
 }
 
@@ -866,6 +866,6 @@ async fn test_logprobs_per_agent_json_object() {
     assert_snapshot(
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_logprobs_per_agent_json_object.json"),
-        include_str!("../assets/agent/completions/client_tests/test_logprobs_per_agent_json_object.json"),
+        include_str!("../../assets/agent/completions/client_tests/test_logprobs_per_agent_json_object.json"),
     );
 }

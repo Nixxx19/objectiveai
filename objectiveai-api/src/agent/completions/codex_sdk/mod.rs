@@ -17,6 +17,9 @@ mod prompt;
 mod state;
 mod stream_event;
 
+#[cfg(test)]
+mod types_tests;
+
 pub use abort::*;
 pub use client::*;
 pub use error::*;

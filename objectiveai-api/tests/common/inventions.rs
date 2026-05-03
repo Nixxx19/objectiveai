@@ -1,14 +1,28 @@
 //! Shared invention-test helpers, request builder, and macros used by
-//! the per-category invention test binaries
-//! (`tests/functions_inventions_scalar.rs`,
-//! `tests/functions_inventions_vector.rs`,
-//! `tests/functions_inventions_validation.rs`).
+//! the single inventions integration binary
+//! (`tests/functions_inventions.rs` plus its sibling-file modules
+//! under `tests/functions_inventions/`).
 //!
-//! Inventions tests are split across multiple test binaries because each
-//! invention request spins up an MCP tenant on the spawned api server,
-//! and accumulating ~400 concurrent tenants in one server process
-//! deadlocks. Splitting by category gives each ~200-test batch its own
-//! server process, which keeps tenant counts manageable.
+//! Every inventions test — scalar, vector, schema-provided variants,
+//! validation/error checks, and the recursive (depth-1+) suite —
+//! compiles into that one binary so the suite shares **exactly one**
+//! spawned api server subprocess (held by the
+//! `LazyLock<ServerHandle>` in `tests/common/server.rs`). Cargo
+//! treats every `tests/*.rs` file as its own test binary, so the
+//! tests are organised into `tests/functions_inventions/{scalar,
+//! vector, validation, recursive}.rs` modules pulled in via
+//! `mod` declarations from `tests/functions_inventions.rs` — sibling
+//! files inside a subdirectory aren't auto-discovered as separate
+//! binaries by cargo, so we keep the four-category source layout
+//! while paying the cost of just one binary and one server
+//! subprocess.
+//!
+//! Snapshot file paths in the `invention_test_10x!` /
+//! `recursive_test_3x!` macros use
+//! `concat!(env!("CARGO_MANIFEST_DIR"), "/assets/...")` for both
+//! `concat!` (the `path:` argument) and `include_str!` (the embedded
+//! snapshot bytes), so the macros work whether they're invoked from a
+//! `tests/*.rs` root file or a `tests/*/`-subdirectory module file.
 
 use futures::StreamExt;
 
@@ -445,52 +459,52 @@ macro_rules! invention_test_10x {
             #[tokio::test] async fn seed_0() {
                 run_snapshot(0,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_0.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_0.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_0.json"))).await;
             }
             #[tokio::test] async fn seed_1() {
                 run_snapshot(1,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_1.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_1.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_1.json"))).await;
             }
             #[tokio::test] async fn seed_2() {
                 run_snapshot(2,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_2.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_2.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_2.json"))).await;
             }
             #[tokio::test] async fn seed_3() {
                 run_snapshot(3,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_3.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_3.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_3.json"))).await;
             }
             #[tokio::test] async fn seed_4() {
                 run_snapshot(4,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_4.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_4.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_4.json"))).await;
             }
             #[tokio::test] async fn seed_5() {
                 run_snapshot(5,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_5.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_5.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_5.json"))).await;
             }
             #[tokio::test] async fn seed_6() {
                 run_snapshot(6,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_6.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_6.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_6.json"))).await;
             }
             #[tokio::test] async fn seed_7() {
                 run_snapshot(7,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_7.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_7.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_7.json"))).await;
             }
             #[tokio::test] async fn seed_8() {
                 run_snapshot(8,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_8.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_8.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_8.json"))).await;
             }
             #[tokio::test] async fn seed_9() {
                 run_snapshot(9,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_9.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_9.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_9.json"))).await;
             }
         }
     };
@@ -543,52 +557,52 @@ macro_rules! invention_test_10x_schema {
             #[tokio::test] async fn seed_0() {
                 run_snapshot(0,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_0.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_0.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_0.json"))).await;
             }
             #[tokio::test] async fn seed_1() {
                 run_snapshot(1,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_1.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_1.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_1.json"))).await;
             }
             #[tokio::test] async fn seed_2() {
                 run_snapshot(2,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_2.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_2.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_2.json"))).await;
             }
             #[tokio::test] async fn seed_3() {
                 run_snapshot(3,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_3.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_3.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_3.json"))).await;
             }
             #[tokio::test] async fn seed_4() {
                 run_snapshot(4,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_4.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_4.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_4.json"))).await;
             }
             #[tokio::test] async fn seed_5() {
                 run_snapshot(5,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_5.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_5.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_5.json"))).await;
             }
             #[tokio::test] async fn seed_6() {
                 run_snapshot(6,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_6.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_6.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_6.json"))).await;
             }
             #[tokio::test] async fn seed_7() {
                 run_snapshot(7,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_7.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_7.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_7.json"))).await;
             }
             #[tokio::test] async fn seed_8() {
                 run_snapshot(8,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_8.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_8.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_8.json"))).await;
             }
             #[tokio::test] async fn seed_9() {
                 run_snapshot(9,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_9.json"),
-                    include_str!(concat!("../assets/functions/inventions/client_tests/", $base, "_9.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_9.json"))).await;
             }
         }
     };
@@ -871,17 +885,17 @@ macro_rules! recursive_test_3x {
             #[tokio::test] async fn seed_0() {
                 run_snapshot(0,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/recursive_client_tests/", $base, "_0.json"),
-                    include_str!(concat!("../assets/functions/inventions/recursive_client_tests/", $base, "_0.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/recursive_client_tests/", $base, "_0.json"))).await;
             }
             #[tokio::test] async fn seed_1() {
                 run_snapshot(1,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/recursive_client_tests/", $base, "_1.json"),
-                    include_str!(concat!("../assets/functions/inventions/recursive_client_tests/", $base, "_1.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/recursive_client_tests/", $base, "_1.json"))).await;
             }
             #[tokio::test] async fn seed_2() {
                 run_snapshot(2,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/recursive_client_tests/", $base, "_2.json"),
-                    include_str!(concat!("../assets/functions/inventions/recursive_client_tests/", $base, "_2.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/recursive_client_tests/", $base, "_2.json"))).await;
             }
         }
     };
@@ -924,17 +938,17 @@ macro_rules! recursive_test_3x_unrouted {
             #[tokio::test] async fn seed_0() {
                 run_snapshot(0,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/recursive_client_tests/", $base, "_0.json"),
-                    include_str!(concat!("../assets/functions/inventions/recursive_client_tests/", $base, "_0.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/recursive_client_tests/", $base, "_0.json"))).await;
             }
             #[tokio::test] async fn seed_1() {
                 run_snapshot(1,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/recursive_client_tests/", $base, "_1.json"),
-                    include_str!(concat!("../assets/functions/inventions/recursive_client_tests/", $base, "_1.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/recursive_client_tests/", $base, "_1.json"))).await;
             }
             #[tokio::test] async fn seed_2() {
                 run_snapshot(2,
                     concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/recursive_client_tests/", $base, "_2.json"),
-                    include_str!(concat!("../assets/functions/inventions/recursive_client_tests/", $base, "_2.json"))).await;
+                    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/recursive_client_tests/", $base, "_2.json"))).await;
             }
         }
     };
