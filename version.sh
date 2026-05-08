@@ -327,5 +327,21 @@ for rel in "${REQUIREMENTS_TXTS[@]}";       do update reqs   "$rel"; done
 for rel in "${MARKDOWN_FILES[@]}";          do update md     "$rel"; done
 for rel in "${TS_VERSION_STRING_FILES[@]}"; do update ts     "$rel"; done
 
+# Sync Cargo.lock to the new workspace versions. If we leave Cargo.lock
+# with the old versions, every cargo invocation in CI rewrites the
+# lockfile mid-build, which mutates files mid-run and breaks fingerprint
+# checks (objectiveai-api/build.rs runs validate.sh that hashes Cargo.lock).
+if command -v cargo >/dev/null 2>&1; then
+  echo
+  echo "Refreshing Cargo.lock workspace versions..."
+  ( cd "$REPO_ROOT" && cargo update -w >/dev/null 2>&1 ) && echo "  Cargo.lock synced." \
+    || echo "  Cargo.lock refresh failed — run 'cargo update -w' manually."
+else
+  echo
+  echo "WARNING: cargo not found on PATH. Run 'cargo update -w' manually before"
+  echo "         pushing — otherwise CI will mutate Cargo.lock mid-build and"
+  echo "         break fingerprint checks."
+fi
+
 echo
-echo "Done. Cargo.lock and pnpm-lock.yaml will refresh on next build."
+echo "Done. pnpm-lock.yaml will refresh on next pnpm install."
