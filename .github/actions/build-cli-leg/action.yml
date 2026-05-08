@@ -64,6 +64,26 @@ runs:
       with:
         name: ${{ inputs.mcp_artifact_name }}
         path: objectiveai-mcp-filesystem/embed/${{ inputs.mcp_target }}/release/
+    - name: Re-stamp mcp-filesystem fingerprint with this runner's view
+      # The fingerprint produced by the mcp-fs builder runner doesn't
+      # always match what fingerprint.sh computes on the CLI runner —
+      # the same sha256-of-source-files calculation produces different
+      # results across (otherwise identical) Ubuntu hosts in practice.
+      # Workaround: re-stamp the fingerprint here using THIS runner's
+      # view of the source. The downstream `install.sh` then sees a
+      # fingerprint that matches what its own fingerprint.sh would
+      # compute on the same runner, and skips the mcp-filesystem
+      # rebuild — which would otherwise fail for lack of the musl
+      # rustup target on non-Linux-musl runners.
+      shell: bash
+      run: |
+        EMBED_DIR="objectiveai-mcp-filesystem/embed/${{ inputs.mcp_target }}/release"
+        # `|| true` because fingerprint.sh may return 1 if the stored
+        # fingerprint happens to match (don't let that propagate as a
+        # step failure under set -e). $CURRENT_FP is exported before
+        # that return so it's always set after sourcing.
+        source objectiveai-mcp-filesystem/fingerprint.sh --target ${{ inputs.mcp_target }} --release || true
+        echo "$CURRENT_FP" > "$EMBED_DIR/.fingerprint"
     - name: Build CLI
       shell: bash
       run: bash objectiveai-cli/install.sh ${{ inputs.install_args }}
