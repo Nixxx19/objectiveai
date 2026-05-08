@@ -33,6 +33,49 @@ jobs:
             echo "should-release=true" >> "$GITHUB_OUTPUT"
           fi
 
+  create-release:
+    name: Create release
+    needs: check-version
+    if: needs.check-version.outputs.should-release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Generate release notes
+        id: notes
+        run: |
+          PREV_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n 1)
+          if [ -n "$PREV_TAG" ]; then
+            echo "Previous tag: $PREV_TAG"
+            NOTES=$(git log --pretty=format:"- %s" "$PREV_TAG"..HEAD)
+          else
+            echo "No previous tags — using full history"
+            NOTES=$(git log --pretty=format:"- %s")
+          fi
+          {
+            echo 'notes<<RELEASE_NOTES_EOF'
+            echo "$NOTES"
+            echo 'RELEASE_NOTES_EOF'
+          } >> "$GITHUB_OUTPUT"
+      - name: Create release if missing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ needs.check-version.outputs.version }}"
+          if gh release view "v$VERSION" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "Release v$VERSION already exists — leaving as-is."
+            exit 0
+          fi
+          # Created without --draft so per-asset uploads are user-visible
+          # the moment each build job finishes uploading. Build jobs append
+          # their assets in parallel via `gh release upload --clobber`.
+          gh release create "v$VERSION" \
+            --repo "${{ github.repository }}" \
+            --target "${{ github.sha }}" \
+            --title "v$VERSION" \
+            --notes "${{ steps.notes.outputs.notes }}"
+
   build-mcp-filesystem:
     name: Build objectiveai-mcp-filesystem (${{ matrix.target }})
     needs: check-version
@@ -77,7 +120,7 @@ jobs:
 
   build-cli:
     name: Build CLI (${{ matrix.asset }})
-    needs: [check-version, build-mcp-filesystem]
+    needs: [check-version, create-release, build-mcp-filesystem]
     if: needs.check-version.outputs.should-release == 'true'
     strategy:
       fail-fast: false
@@ -201,47 +244,15 @@ jobs:
           name: ${{ matrix.asset }}
           path: ${{ matrix.asset }}
           if-no-files-found: error
-
-  release:
-    name: Create draft release
-    needs: [check-version, build-cli]
-    if: needs.check-version.outputs.should-release == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          pattern: objectiveai-*
-          merge-multiple: true
-      - name: Generate release notes
-        id: notes
-        run: |
-          PREV_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n 1)
-          if [ -n "$PREV_TAG" ]; then
-            echo "Previous tag: $PREV_TAG"
-            NOTES=$(git log --pretty=format:"- %s" "$PREV_TAG"..HEAD)
-          else
-            echo "No previous tags — using full history"
-            NOTES=$(git log --pretty=format:"- %s")
-          fi
-          {
-            echo 'notes<<RELEASE_NOTES_EOF'
-            echo "$NOTES"
-            echo 'RELEASE_NOTES_EOF'
-          } >> "$GITHUB_OUTPUT"
-      - name: Create draft release
+      - name: Upload asset to release
+        # Each matrix leg appends its single asset to the release the moment
+        # this leg finishes building — so fast platforms aren't gated on the
+        # slowest one. `--clobber` keeps re-runs idempotent.
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
           VERSION="${{ needs.check-version.outputs.version }}"
-          ls -la artifacts/
-          gh release create "v$VERSION" \
-            --repo "${{ github.repository }}" \
-            --target "${{ github.sha }}" \
-            --draft \
-            --title "v$VERSION" \
-            --notes "${{ steps.notes.outputs.notes }}" \
-            artifacts/*
+          gh release upload "v$VERSION" "${{ matrix.asset }}" \
+            --clobber \
+            --repo "${{ github.repository }}"
