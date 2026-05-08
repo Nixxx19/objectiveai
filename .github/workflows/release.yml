@@ -43,21 +43,22 @@ jobs:
         with:
           fetch-depth: 0
       - name: Generate release notes
-        id: notes
+        # Write notes to a file rather than capturing into a step output —
+        # commit messages routinely contain backticks (`like this`) and
+        # other shell metacharacters, which GHA's `${{ }}` interpolator
+        # would inline literally into the next step's bash script and
+        # cause bash to try evaluating them as command substitutions.
+        # `--notes-file` reads the bytes directly with zero shell
+        # interpolation involved.
         run: |
           PREV_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n 1)
           if [ -n "$PREV_TAG" ]; then
             echo "Previous tag: $PREV_TAG"
-            NOTES=$(git log --pretty=format:"- %s" "$PREV_TAG"..HEAD)
+            git log --pretty=format:"- %s" "$PREV_TAG"..HEAD > release-notes.md
           else
             echo "No previous tags — using full history"
-            NOTES=$(git log --pretty=format:"- %s")
+            git log --pretty=format:"- %s" > release-notes.md
           fi
-          {
-            echo 'notes<<RELEASE_NOTES_EOF'
-            echo "$NOTES"
-            echo 'RELEASE_NOTES_EOF'
-          } >> "$GITHUB_OUTPUT"
       - name: Create release if missing
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -74,7 +75,7 @@ jobs:
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
             --title "v$VERSION" \
-            --notes "${{ steps.notes.outputs.notes }}"
+            --notes-file release-notes.md
 
   build-mcp-filesystem:
     name: Build objectiveai-mcp-filesystem (${{ matrix.target }})
