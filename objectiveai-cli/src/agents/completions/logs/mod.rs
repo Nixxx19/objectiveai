@@ -45,7 +45,7 @@ impl Commands {
             Commands::Clear { nested } => {
                 if nested {
                     let counts = futures::future::try_join_all(vec![
-                        Box::pin(objectiveai::filesystem::logs::client::clear_agent_completions(&client)) as std::pin::Pin<Box<dyn std::future::Future<Output = _>>>,
+                        Box::pin(objectiveai::filesystem::logs::client::clear_agent_completions(&client)) as std::pin::Pin<Box<dyn std::future::Future<Output = _> + Send>>,
                         Box::pin(objectiveai::filesystem::logs::client::clear_agent_completion_continuations(&client)),
                         Box::pin(objectiveai::filesystem::logs::client::clear_agent_completion_messages(&client)),
                         Box::pin(objectiveai::filesystem::logs::client::clear_agent_completion_message_logprobs(&client)),

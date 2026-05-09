@@ -43,7 +43,7 @@ impl Commands {
             Commands::Clear { nested } => {
                 if nested {
                     let counts = futures::future::try_join_all(vec![
-                        Box::pin(objectiveai::filesystem::logs::client::clear_function_executions(&client)) as std::pin::Pin<Box<dyn std::future::Future<Output = _>>>,
+                        Box::pin(objectiveai::filesystem::logs::client::clear_function_executions(&client)) as std::pin::Pin<Box<dyn std::future::Future<Output = _> + Send>>,
                         Box::pin(objectiveai::filesystem::logs::client::clear_function_execution_retry_tokens(&client)),
                     ]).await?;
                     Ok(crate::Output::LogsClear(counts.into_iter().sum()))
