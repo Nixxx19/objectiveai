@@ -56,7 +56,7 @@ npm install objectiveai
 
 ```toml
 [dependencies]
-objectiveai = "2.0.1"
+objectiveai = "2.0.2"
 ```
 
 ## Core primitives
