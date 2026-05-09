@@ -75,12 +75,12 @@ fn validate_name(name: &str) -> Result<(), super::Error> {
 // ---------------------------------------------------------------------------
 
 /// Prefix the proxy stamps onto every tool name from the InventionServer
-/// upstream. Either `objectiveai-function-invention_<name>` (single upstream)
-/// or `objectiveai-function-invention_<digits>_<name>` (proxy collision-
-/// disambiguated when the same prefix would otherwise collide with another
-/// upstream). The prefix string itself is the InventionServer's rmcp
+/// upstream. Either `oaifi_<name>` (single upstream) or
+/// `oaifi_<digits>_<name>` (proxy collision-disambiguated when the
+/// same prefix would otherwise collide with another upstream). The
+/// prefix string itself is the InventionServer's rmcp
 /// `server_info.name` — see `invention_server.rs::InventionMcp::get_info`.
-const PROXY_INVENTION_PREFIX: &str = "objectiveai-function-invention_";
+const PROXY_INVENTION_PREFIX: &str = "oaifi_";
 
 /// Wait until every name in `expected` is present in the agent's MCP
 /// view of available tools, observing through the agent's existing MCP

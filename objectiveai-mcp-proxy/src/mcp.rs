@@ -723,7 +723,7 @@ fn server_capabilities() -> ServerCapabilities {
 
 fn server_info() -> Implementation {
     Implementation {
-        name: "objectiveai-proxy".into(),
+        name: "oaip".into(),
         title: None,
         version: env!("CARGO_PKG_VERSION").into(),
         website_url: None,
