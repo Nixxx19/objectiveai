@@ -11,18 +11,6 @@ pub struct Error {
     pub message: String,
 }
 
-impl Error {
-    /// Serialize as JSON and write to stdout as a single line. If
-    /// `fatal` is `true`, also write the same line to stderr.
-    pub fn emit(&self) {
-        let json = serde_json::to_string(self).expect("Error always serializes");
-        println!("{json}");
-        if self.fatal {
-            eprintln!("{json}");
-        }
-    }
-}
-
 /// Severity matching the conventions used by bunyan / pino / `log` crate
 /// JSON encoders. `fatal` is encoded separately on [`Error`].
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
