@@ -28,7 +28,7 @@ impl Commands {
                     Box::pin(objectiveai::filesystem::logs::client::clear_laboratory_executions(&client)),
                 ]).await?;
                 {
-                crate::ack::emit_log_clear_count(counts.into_iter().sum());
+                crate::log_line::emit_log_clear_count(counts.into_iter().sum());
                 Ok(())
             }
             }

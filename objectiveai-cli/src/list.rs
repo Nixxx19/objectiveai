@@ -1,5 +1,5 @@
 use clap::Subcommand;
-use serde::{Serialize, Deserialize};
+pub use objectiveai_cli_lib::output::{Items, ListItem, PairListItem};
 
 #[derive(Subcommand)]
 pub enum Source {
@@ -15,21 +15,12 @@ pub enum Source {
     All,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum ListItem {
-    Favorite(objectiveai::filesystem::config::Favorite),
-    Item(objectiveai::RemotePath),
-}
-
-/// Wire wrapper for a non-pair listing: `{"type":"notification","items":[...]}`.
-#[derive(Serialize)]
-struct Items {
-    items: Vec<ListItem>,
-}
-
 fn emit_items(items: Vec<ListItem>) {
-    objectiveai_cli_lib::output::Output::<Items>::Notification(Items { items }).emit();
+    objectiveai_cli_lib::output::Output::<Items<ListItem>>::Notification(Items { items }).emit();
+}
+
+fn emit_pair_items(items: Vec<PairListItem>) {
+    objectiveai_cli_lib::output::Output::<Items<PairListItem>>::Notification(Items { items }).emit();
 }
 
 /// Returns true if a favorite matches a remote path.
@@ -129,22 +120,6 @@ where
 }
 
 // -- Pair variants (function-profile pairs) --
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum PairListItem {
-    Favorite(objectiveai::filesystem::config::PairFavorite),
-    Item(objectiveai::functions::response::ListFunctionProfilePairItem),
-}
-
-#[derive(Serialize)]
-struct PairItems {
-    items: Vec<PairListItem>,
-}
-
-fn emit_pair_items(items: Vec<PairListItem>) {
-    objectiveai_cli_lib::output::Output::<PairItems>::Notification(PairItems { items }).emit();
-}
 
 /// Compares a RemotePathCommitOptional against a RemotePath.
 fn favorite_matches_path(

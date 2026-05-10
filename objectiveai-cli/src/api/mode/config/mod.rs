@@ -37,7 +37,7 @@ impl Commands {
             Commands::Set { value } => {
                 config.api().set_mode(value.into());
                 crate::config::write(&client, &config, cli_config).await?;
-                objectiveai_cli_lib::output::Output::<crate::ack::Ok>::Notification(crate::ack::OK).emit();
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Ok>::Notification(objectiveai_cli_lib::output::OK).emit();
                 Ok(())
             }
         }

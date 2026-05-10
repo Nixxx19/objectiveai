@@ -36,38 +36,7 @@ impl InputSource {
     }
 }
 
-/// Where in the execution tree an error occurred.
-pub enum ErrorPath {
-    Root,
-    Task(Vec<u64>),
-    Reasoning,
-}
-
-impl serde::Serialize for ErrorPath {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        match self {
-            ErrorPath::Root => serializer.serialize_str("root"),
-            ErrorPath::Task(path) => path.serialize(serializer),
-            ErrorPath::Reasoning => serializer.serialize_str("reasoning"),
-        }
-    }
-}
-
-/// A collected error with its location in the execution tree.
-#[derive(serde::Serialize)]
-pub struct CollectedError {
-    pub path: ErrorPath,
-    #[serde(flatten)]
-    pub error: objectiveai::error::ResponseError,
-}
-
-/// The final result of a function execution.
-#[derive(serde::Serialize)]
-pub struct ExecutionResult {
-    pub output: objectiveai::functions::expression::TaskOutputOwned,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub errors: Vec<CollectedError>,
-}
+use objectiveai_cli_lib::output::{CollectedError, ErrorPath, Execution, ExecutionResult};
 
 /// Recursively collect errors from the aggregated chunk.
 fn collect_errors(chunk: &objectiveai::functions::executions::response::streaming::FunctionExecutionChunk, errors: &mut Vec<CollectedError>) {
@@ -253,12 +222,8 @@ impl Commands {
                 });
 
             let result = ExecutionResult { output, errors };
-            #[derive(serde::Serialize)]
-            struct ExecutionEmit {
-                execution: ExecutionResult,
-            }
-            objectiveai_cli_lib::output::Output::<ExecutionEmit>::Notification(
-                ExecutionEmit { execution: result },
+            objectiveai_cli_lib::output::Output::<Execution>::Notification(
+                Execution { execution: result },
             )
             .emit();
             Ok(())

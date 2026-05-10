@@ -131,19 +131,11 @@ pub enum Commands {
 
 impl Commands {
     pub fn handle(self) -> Result<(), crate::error::Error> {
-        #[derive(serde::Serialize)]
-        struct SchemaList {
-            schemas: &'static [&'static str],
-        }
-        #[derive(serde::Serialize)]
-        struct Schema {
-            schema: serde_json::Value,
-        }
         match self {
             Commands::List => {
                 const NAMES: &[&str] = &["AnyOfInputSchema", "ArrayInputSchema", "ArrayInputSchemaType", "AudioInputSchema", "AudioInputSchemaType", "BooleanInputSchema", "BooleanInputSchemaType", "Expression", "FileInputSchema", "FileInputSchemaType", "ImageInputSchema", "ImageInputSchemaType", "InputSchema", "InputValue", "InputValueExpression", "IntegerInputSchema", "IntegerInputSchemaType", "NumberInputSchema", "NumberInputSchemaType", "ObjectInputSchema", "ObjectInputSchemaType", "Params", "Special", "StringInputSchema", "StringInputSchemaType", "TaskOutput", "VideoInputSchema", "VideoInputSchemaType"];
-                objectiveai_cli_lib::output::Output::<SchemaList>::Notification(
-                    SchemaList { schemas: NAMES },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schemas>::Notification(
+                    objectiveai_cli_lib::output::Schemas { schemas: NAMES.iter().map(|s| s.to_string()).collect() },
                 ).emit();
                 Ok(())
             }
@@ -151,8 +143,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.AnyOfInputSchema.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -160,8 +152,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.ArrayInputSchema.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -169,8 +161,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.ArrayInputSchemaType.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -178,8 +170,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.AudioInputSchema.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -187,8 +179,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.AudioInputSchemaType.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -196,8 +188,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.BooleanInputSchema.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -205,8 +197,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.BooleanInputSchemaType.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -214,8 +206,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.Expression.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -223,8 +215,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.FileInputSchema.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -232,8 +224,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.FileInputSchemaType.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -241,8 +233,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.ImageInputSchema.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -250,8 +242,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.ImageInputSchemaType.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -259,8 +251,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.InputSchema.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -268,8 +260,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.InputValue.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -277,8 +269,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.InputValueExpression.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -286,8 +278,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.IntegerInputSchema.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -295,8 +287,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.IntegerInputSchemaType.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -304,8 +296,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.NumberInputSchema.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -313,8 +305,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.NumberInputSchemaType.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -322,8 +314,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.ObjectInputSchema.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -331,8 +323,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.ObjectInputSchemaType.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -340,8 +332,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.Params.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -349,8 +341,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.Special.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -358,8 +350,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.StringInputSchema.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -367,8 +359,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.StringInputSchemaType.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -376,8 +368,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.TaskOutput.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -385,8 +377,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.VideoInputSchema.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -394,8 +386,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.VideoInputSchemaType.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }

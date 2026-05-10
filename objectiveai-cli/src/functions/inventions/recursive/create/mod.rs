@@ -43,15 +43,7 @@ impl InventionParams {
     }
 }
 
-/// A single invention result item.
-#[derive(serde::Serialize)]
-pub struct InventionResultItem {
-    pub name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub path: Option<objectiveai::RemotePath>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub error: Option<objectiveai::error::ResponseError>,
-}
+use objectiveai_cli_lib::output::{InventionResultItem, Inventions};
 
 /// Extract the name from an invention State.
 fn state_name(state: &objectiveai::functions::inventions::State) -> &str {
@@ -215,12 +207,8 @@ impl Commands {
                 })
                 .collect();
 
-            #[derive(serde::Serialize)]
-            struct RecursiveEmit {
-                inventions: Vec<InventionResultItem>,
-            }
-            objectiveai_cli_lib::output::Output::<RecursiveEmit>::Notification(
-                RecursiveEmit { inventions: results },
+            objectiveai_cli_lib::output::Output::<Inventions>::Notification(
+                Inventions { inventions: results },
             )
             .emit();
             Ok(())

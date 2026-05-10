@@ -2,13 +2,7 @@ pub mod config;
 pub mod favorites;
 
 use clap::Subcommand;
-use serde::{Serialize, Deserialize};
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct GetFunctionProfilePair {
-    pub function: objectiveai::functions::response::GetFunctionResponse,
-    pub profile: objectiveai::functions::profiles::response::GetProfileResponse,
-}
+use objectiveai_cli_lib::output::{FunctionProfilePair, Pair};
 
 #[derive(Subcommand)]
 pub enum Commands {
@@ -61,18 +55,12 @@ impl Commands {
                         objectiveai::functions::get_function(&http_client, function_path),
                         objectiveai::functions::profiles::get_profile(&http_client, profile_path),
                     );
-                    let pair = GetFunctionProfilePair {
+                    let pair = FunctionProfilePair {
                         function: function?,
                         profile: profile?,
                     };
-                    #[derive(serde::Serialize)]
-                    struct PairResponse {
-                        pair: GetFunctionProfilePair,
-                    }
-                    objectiveai_cli_lib::output::Output::<PairResponse>::Notification(
-                        PairResponse { pair },
-                    )
-                    .emit();
+                    objectiveai_cli_lib::output::Output::<Pair>::Notification(Pair { pair })
+                        .emit();
                     Ok(())
                 }, false).await
             }

@@ -20,7 +20,7 @@ impl Commands {
                 config.api().local().set_claude_agent_sdk(value);
                 crate::config::write(&client, &config, cli_config).await?;
                 {
-                objectiveai_cli_lib::output::Output::<crate::ack::Ok>::Notification(crate::ack::OK).emit();
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Ok>::Notification(objectiveai_cli_lib::output::OK).emit();
                 Ok(())
             }
             }

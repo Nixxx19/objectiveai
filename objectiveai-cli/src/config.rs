@@ -1,5 +1,6 @@
 use objectiveai::filesystem::config::Config;
 use objectiveai::filesystem::Client;
+use objectiveai_cli_lib::output::{JqResults, Value};
 
 pub fn filter(f: Option<String>) -> String {
     f.unwrap_or_else(|| ".".to_string())
@@ -23,13 +24,7 @@ pub async fn write(client: &Client, config: &Config, cli_config: &super::Config)
     Ok(())
 }
 
-/// Wire shape for a user-supplied jq filter's results. Documented escape
-/// hatch — jq produces arbitrary JSON that cannot be typed in advance.
-#[derive(serde::Serialize)]
-pub struct JqResults {
-    pub jq: serde_json::Value,
-}
-
+/// Emit a user-supplied jq filter's results as a single `Notification::Jq`.
 pub fn emit_jq(
     results: Result<Vec<serde_json::Value>, objectiveai::filesystem::Error>,
 ) -> Result<(), crate::error::Error> {
@@ -43,11 +38,7 @@ pub fn emit_jq(
     Ok(())
 }
 
-/// Emits a typed config value as `{"type":"notification","value":<v>}`.
+/// Emit a typed config value as `{"type":"notification","value":<v>}`.
 pub fn emit_value<V: serde::Serialize>(v: V) {
-    #[derive(serde::Serialize)]
-    struct Value<V: serde::Serialize> {
-        value: V,
-    }
     objectiveai_cli_lib::output::Output::<Value<V>>::Notification(Value { value: v }).emit();
 }

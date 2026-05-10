@@ -71,19 +71,11 @@ pub enum Commands {
 
 impl Commands {
     pub fn handle(self) -> Result<(), crate::error::Error> {
-        #[derive(serde::Serialize)]
-        struct SchemaList {
-            schemas: &'static [&'static str],
-        }
-        #[derive(serde::Serialize)]
-        struct Schema {
-            schema: serde_json::Value,
-        }
         match self {
             Commands::List => {
                 const NAMES: &[&str] = &["GetSwarmResponse", "InlineSwarm", "InlineSwarmBase", "InlineSwarmBaseOrRemote", "InlineSwarmBaseOrRemoteCommitOptional", "ListSwarmResponse", "ListSwarmsRequest", "ListSwarmsSource", "RemoteSwarm", "RemoteSwarmBase", "Swarm", "SwarmBase", "UsageSwarmResponse"];
-                objectiveai_cli_lib::output::Output::<SchemaList>::Notification(
-                    SchemaList { schemas: NAMES },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schemas>::Notification(
+                    objectiveai_cli_lib::output::Schemas { schemas: NAMES.iter().map(|s| s.to_string()).collect() },
                 ).emit();
                 Ok(())
             }
@@ -91,8 +83,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../objectiveai-json-schema/swarm.GetSwarmResponse.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -100,8 +92,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../objectiveai-json-schema/swarm.InlineSwarm.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -109,8 +101,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../objectiveai-json-schema/swarm.InlineSwarmBase.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -118,8 +110,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../objectiveai-json-schema/swarm.InlineSwarmBaseOrRemote.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -127,8 +119,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../objectiveai-json-schema/swarm.InlineSwarmBaseOrRemoteCommitOptional.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -136,8 +128,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../objectiveai-json-schema/swarm.ListSwarmResponse.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -145,8 +137,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../objectiveai-json-schema/swarm.ListSwarmsRequest.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -154,8 +146,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../objectiveai-json-schema/swarm.ListSwarmsSource.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -163,8 +155,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../objectiveai-json-schema/swarm.RemoteSwarm.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -172,8 +164,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../objectiveai-json-schema/swarm.RemoteSwarmBase.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -181,8 +173,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../objectiveai-json-schema/swarm.Swarm.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -190,8 +182,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../objectiveai-json-schema/swarm.SwarmBase.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -199,8 +191,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../objectiveai-json-schema/swarm.UsageSwarmResponse.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }

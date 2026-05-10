@@ -1,14 +1,7 @@
 use futures::StreamExt;
+use objectiveai_cli_lib::output::{LabResultItem, Laboratory};
 
 use super::create_args::CreateArgs;
-
-/// Result item for a single builder agent.
-#[derive(serde::Serialize)]
-struct ResultItem {
-    agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
-    score: Option<f64>,
-    error: Option<objectiveai::error::ResponseError>,
-}
 
 pub async fn handle(args: CreateArgs, cli_config: &crate::Config) -> Result<(), crate::error::Error> {
     args.instructions.verify(cli_config, crate::instructions::InstructionsScope::LaboratoryExecutions)?;
@@ -134,7 +127,7 @@ pub async fn handle(args: CreateArgs, cli_config: &crate::Config) -> Result<(), 
             }
 
             // Build results in original argument order
-            let results: Vec<ResultItem> = (0..num_agents)
+            let results: Vec<LabResultItem> = (0..num_agents)
                 .map(|i| {
                     let agent_index = i as u64;
                     let agent = original_agents[i].clone();
@@ -143,7 +136,7 @@ pub async fn handle(args: CreateArgs, cli_config: &crate::Config) -> Result<(), 
                         .get(&agent_index)
                         .and_then(|(_, e)| *e)
                         .cloned();
-                    ResultItem {
+                    LabResultItem {
                         agent,
                         score,
                         error,
@@ -151,12 +144,8 @@ pub async fn handle(args: CreateArgs, cli_config: &crate::Config) -> Result<(), 
                 })
                 .collect();
 
-            #[derive(serde::Serialize)]
-            struct LabEmit {
-                laboratory: Vec<ResultItem>,
-            }
-            objectiveai_cli_lib::output::Output::<LabEmit>::Notification(
-                LabEmit { laboratory: results },
+            objectiveai_cli_lib::output::Output::<Laboratory>::Notification(
+                Laboratory { laboratory: results },
             )
             .emit();
             Ok(())

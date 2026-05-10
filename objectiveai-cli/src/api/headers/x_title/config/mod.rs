@@ -18,7 +18,7 @@ impl Commands {
                 config.api().headers().set_x_title(value);
                 crate::config::write(&client, &config, cli_config).await?;
                 {
-                objectiveai_cli_lib::output::Output::<crate::ack::Ok>::Notification(crate::ack::OK).emit();
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Ok>::Notification(objectiveai_cli_lib::output::OK).emit();
                 Ok(())
             }
             }

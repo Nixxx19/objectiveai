@@ -67,19 +67,11 @@ pub enum Commands {
 
 impl Commands {
     pub fn handle(self) -> Result<(), crate::error::Error> {
-        #[derive(serde::Serialize)]
-        struct SchemaList {
-            schemas: &'static [&'static str],
-        }
-        #[derive(serde::Serialize)]
-        struct Schema {
-            schema: serde_json::Value,
-        }
         match self {
             Commands::List => {
                 const NAMES: &[&str] = &["Agent", "AgentBase", "Continuation", "OutputMode", "Provider", "ProviderQuantization", "Reasoning", "ReasoningEffort", "ReasoningSummaryVerbosity", "Stop", "Upstream", "Verbosity"];
-                objectiveai_cli_lib::output::Output::<SchemaList>::Notification(
-                    SchemaList { schemas: NAMES },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schemas>::Notification(
+                    objectiveai_cli_lib::output::Schemas { schemas: NAMES.iter().map(|s| s.to_string()).collect() },
                 ).emit();
                 Ok(())
             }
@@ -87,8 +79,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.Agent.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -96,8 +88,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.AgentBase.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -105,8 +97,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.Continuation.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -114,8 +106,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.OutputMode.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -123,8 +115,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.Provider.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -132,8 +124,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.ProviderQuantization.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -141,8 +133,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.Reasoning.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -150,8 +142,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.ReasoningEffort.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -159,8 +151,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.ReasoningSummaryVerbosity.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -168,8 +160,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.Stop.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -177,8 +169,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.Upstream.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -186,8 +178,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.Verbosity.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }

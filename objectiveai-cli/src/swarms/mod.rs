@@ -63,12 +63,8 @@ impl Commands {
                 let path = args.resolve(|| get_favorites(cli_config)).await?;
                 crate::api::run(|http_client| async move {
                     let response = objectiveai::swarm::get_swarm(&http_client, path).await?;
-                    #[derive(serde::Serialize)]
-                    struct SwarmResponse {
-                        swarm: objectiveai::swarm::response::GetSwarmResponse,
-                    }
-                    objectiveai_cli_lib::output::Output::<SwarmResponse>::Notification(
-                        SwarmResponse { swarm: response },
+                    objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Swarm>::Notification(
+                        objectiveai_cli_lib::output::Swarm { swarm: response },
                     )
                     .emit();
                     Ok(())
@@ -101,12 +97,8 @@ impl Commands {
                 let sha = objectiveai::filesystem::publish::publish_swarm(
                     &fs_client, &repository, &swarm, &msg, overwrite,
                 ).await?;
-                #[derive(serde::Serialize)]
-                struct Published {
-                    sha: String,
-                }
-                objectiveai_cli_lib::output::Output::<Published>::Notification(
-                    Published { sha },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Published>::Notification(
+                    objectiveai_cli_lib::output::Published { sha },
                 )
                 .emit();
                 Ok(())

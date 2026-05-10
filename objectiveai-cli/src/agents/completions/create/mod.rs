@@ -127,12 +127,8 @@ impl Commands {
                 })
                 .unwrap_or_default();
 
-            #[derive(serde::Serialize)]
-            struct CompletionEmit {
-                content: String,
-            }
-            objectiveai_cli_lib::output::Output::<CompletionEmit>::Notification(
-                CompletionEmit { content },
+            objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Content>::Notification(
+                objectiveai_cli_lib::output::Content { content },
             )
             .emit();
             Ok(())

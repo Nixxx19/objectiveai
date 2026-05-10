@@ -24,7 +24,7 @@ impl Commands {
             Commands::Get { id, message_index, media_index } => {
                 let content = objectiveai::filesystem::logs::client::read_agent_completion_message_file(&client, &id, message_index, media_index).await.map(objectiveai::filesystem::logs::LogContent::DataUrl)?;
                 {
-                crate::ack::emit_log_content(content);
+                crate::log_line::emit_log_content(content);
                 Ok(())
             }
             }
@@ -33,7 +33,7 @@ impl Commands {
                 {
                 match result.map(objectiveai::filesystem::logs::LogContent::DataUrl) {
                     Some(content) => {
-                        crate::ack::emit_log_content(content);
+                        crate::log_line::emit_log_content(content);
                         Ok(())
                     }
                     None => Err(crate::error::Error::LogSubscribeTimedOut),
@@ -41,7 +41,7 @@ impl Commands {
             }
             }
             Commands::Clear => {
-                crate::ack::emit_log_clear_count(objectiveai::filesystem::logs::client::clear_agent_completion_message_files(&client).await?);
+                crate::log_line::emit_log_clear_count(objectiveai::filesystem::logs::client::clear_agent_completion_message_files(&client).await?);
                 Ok(())
             },
         }

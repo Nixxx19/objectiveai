@@ -21,12 +21,8 @@ impl Commands {
                 let path = args.resolve(|| get_favorites(cli_config)).await?;
                 crate::api::run(|http_client| async move {
                     let response = objectiveai::functions::inventions::state::get_function_invention_state(&http_client, path).await?;
-                    #[derive(serde::Serialize)]
-                    struct StateResponse {
-                        state: objectiveai::functions::inventions::state::response::GetFunctionInventionStateResponse,
-                    }
-                    objectiveai_cli_lib::output::Output::<StateResponse>::Notification(
-                        StateResponse { state: response },
+                    objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::State>::Notification(
+                        objectiveai_cli_lib::output::State { state: response },
                     )
                     .emit();
                     Ok(())

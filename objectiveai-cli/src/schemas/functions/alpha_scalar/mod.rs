@@ -55,19 +55,11 @@ pub enum Commands {
 
 impl Commands {
     pub fn handle(self) -> Result<(), crate::error::Error> {
-        #[derive(serde::Serialize)]
-        struct SchemaList {
-            schemas: &'static [&'static str],
-        }
-        #[derive(serde::Serialize)]
-        struct Schema {
-            schema: serde_json::Value,
-        }
         match self {
             Commands::List => {
                 const NAMES: &[&str] = &["BranchTaskExpression", "InlineFunction", "LeafTaskExpression", "PartialPlaceholderBranchTaskExpression", "PartialPlaceholderScalarFunctionTaskExpression", "PlaceholderScalarFunctionTaskExpression", "RemoteFunction", "ScalarFunctionTaskExpression", "VectorCompletionTaskExpression"];
-                objectiveai_cli_lib::output::Output::<SchemaList>::Notification(
-                    SchemaList { schemas: NAMES },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schemas>::Notification(
+                    objectiveai_cli_lib::output::Schemas { schemas: NAMES.iter().map(|s| s.to_string()).collect() },
                 ).emit();
                 Ok(())
             }
@@ -75,8 +67,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.BranchTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -84,8 +76,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.InlineFunction.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -93,8 +85,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.LeafTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -102,8 +94,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.PartialPlaceholderBranchTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -111,8 +103,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.PartialPlaceholderScalarFunctionTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -120,8 +112,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -129,8 +121,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.RemoteFunction.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -138,8 +130,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.ScalarFunctionTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -147,8 +139,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.VectorCompletionTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }

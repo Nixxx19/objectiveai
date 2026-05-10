@@ -98,19 +98,11 @@ pub enum Commands {
 
 impl Commands {
     pub fn handle(self) -> Result<(), crate::error::Error> {
-        #[derive(serde::Serialize)]
-        struct SchemaList {
-            schemas: &'static [&'static str],
-        }
-        #[derive(serde::Serialize)]
-        struct Schema {
-            schema: serde_json::Value,
-        }
         match self {
             Commands::List => {
                 const NAMES: &[&str] = &["agent", "auth", "error", "filesystem", "functions", "laboratories", "mcp", "swarm", "vector", "PrefixedUuid", "Remote", "RemotePath", "RemotePathCommitOptional", "Weights", "WeightsEntry"];
-                objectiveai_cli_lib::output::Output::<SchemaList>::Notification(
-                    SchemaList { schemas: NAMES },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schemas>::Notification(
+                    objectiveai_cli_lib::output::Schemas { schemas: NAMES.iter().map(|s| s.to_string()).collect() },
                 ).emit();
                 Ok(())
             }
@@ -127,8 +119,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../objectiveai-json-schema/PrefixedUuid.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -136,8 +128,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../objectiveai-json-schema/Remote.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -145,8 +137,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../objectiveai-json-schema/RemotePath.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -154,8 +146,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../objectiveai-json-schema/RemotePathCommitOptional.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -163,8 +155,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../objectiveai-json-schema/Weights.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }
@@ -172,8 +164,8 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../objectiveai-json-schema/WeightsEntry.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_lib::output::Output::<Schema>::Notification(
-                    Schema { schema },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
+                    objectiveai_cli_lib::output::Schema { schema },
                 ).emit();
                 Ok(())
             }

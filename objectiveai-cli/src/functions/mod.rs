@@ -81,12 +81,8 @@ impl Commands {
                 let path = args.resolve(|| get_favorites(cli_config)).await?;
                 crate::api::run(|http_client| async move {
                     let response = objectiveai::functions::get_function(&http_client, path).await?;
-                    #[derive(serde::Serialize)]
-                    struct FunctionResponse {
-                        function: objectiveai::functions::response::GetFunctionResponse,
-                    }
-                    objectiveai_cli_lib::output::Output::<FunctionResponse>::Notification(
-                        FunctionResponse { function: response },
+                    objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Function>::Notification(
+                        objectiveai_cli_lib::output::Function { function: response },
                     )
                     .emit();
                     Ok(())
@@ -122,12 +118,8 @@ impl Commands {
                 let sha = objectiveai::filesystem::publish::publish_function(
                     &fs_client, &repository, &function, &msg, overwrite,
                 ).await?;
-                #[derive(serde::Serialize)]
-                struct Published {
-                    sha: String,
-                }
-                objectiveai_cli_lib::output::Output::<Published>::Notification(
-                    Published { sha },
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Published>::Notification(
+                    objectiveai_cli_lib::output::Published { sha },
                 )
                 .emit();
                 Ok(())

@@ -13,8 +13,10 @@
 //! internally-tagged enum.
 
 mod error;
+pub mod notification;
 
 pub use error::*;
+pub use notification::*;
 
 use serde::{Deserialize, Serialize};
 

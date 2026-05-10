@@ -30,7 +30,7 @@ impl Commands {
             Commands::Get { id, filter } => {
                 let content = objectiveai::filesystem::logs::client::read_laboratory_execution(&client, &id, filter.as_deref()).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
                 {
-                crate::ack::emit_log_content(content);
+                crate::log_line::emit_log_content(content);
                 Ok(())
             }
             }
@@ -39,7 +39,7 @@ impl Commands {
                 {
                 match result.map(objectiveai::filesystem::logs::LogContent::Json) {
                     Some(content) => {
-                        crate::ack::emit_log_content(content);
+                        crate::log_line::emit_log_content(content);
                         Ok(())
                     }
                     None => Err(crate::error::Error::LogSubscribeTimedOut),
@@ -48,12 +48,12 @@ impl Commands {
             }
             Commands::List { offset, limit } => {
                 {
-                crate::ack::emit_log_list(objectiveai::filesystem::logs::client::list_laboratory_executions(&client, offset, limit).await?);
+                crate::log_line::emit_log_list(objectiveai::filesystem::logs::client::list_laboratory_executions(&client, offset, limit).await?);
                 Ok(())
             }
             }
             Commands::Clear => {
-                crate::ack::emit_log_clear_count(objectiveai::filesystem::logs::client::clear_laboratory_executions(&client).await?);
+                crate::log_line::emit_log_clear_count(objectiveai::filesystem::logs::client::clear_laboratory_executions(&client).await?);
                 Ok(())
             },
         }
