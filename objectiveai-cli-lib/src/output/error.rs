@@ -1,3 +1,5 @@
+use std::io::Write;
+
 use serde::{Deserialize, Serialize};
 
 /// A failure or advisory written to stdout. `fatal: true` means the
@@ -9,6 +11,20 @@ pub struct Error {
     pub level: Level,
     pub fatal: bool,
     pub message: String,
+}
+
+impl Error {
+    /// Serialize as JSON and write to stdout as a single line. If
+    /// `fatal` is `true`, also write the same line to stderr.
+    pub fn emit(&self) {
+        let json = serde_json::to_string(self).expect("Error always serializes");
+        println!("{json}");
+        let _ = std::io::stdout().flush();
+        if self.fatal {
+            eprintln!("{json}");
+            let _ = std::io::stderr().flush();
+        }
+    }
 }
 
 /// Severity matching the conventions used by bunyan / pino / `log` crate

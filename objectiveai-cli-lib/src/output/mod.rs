@@ -16,6 +16,8 @@ mod error;
 
 pub use error::*;
 
+use std::io::Write;
+
 use serde::{Deserialize, Serialize};
 
 /// A single line of CLI output.
@@ -24,6 +26,20 @@ use serde::{Deserialize, Serialize};
 pub enum Output<T> {
     Error(Error),
     Notification(T),
+}
+
+impl<T: Serialize> Output<T> {
+    /// Serialize as JSON and write to stdout as a single line. If this
+    /// is a fatal [`Error`], also write the same line to stderr.
+    pub fn emit(&self) {
+        let json = serde_json::to_string(self).expect("Output<T> serializes when T: Serialize");
+        println!("{json}");
+        let _ = std::io::stdout().flush();
+        if matches!(self, Output::Error(e) if e.fatal) {
+            eprintln!("{json}");
+            let _ = std::io::stderr().flush();
+        }
+    }
 }
 
 #[cfg(test)]
