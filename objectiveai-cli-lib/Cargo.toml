@@ -2,6 +2,11 @@
 name = "objectiveai-cli-lib"
 version = "2.0.3"
 edition = "2024"
-description = "Library surface for objectiveai-cli: JSON Lines RPC protocol used between the CLI and plugin processes."
+description = "Library surface for objectiveai-cli: structured JSON Lines output types."
 
 [dependencies]
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = { version = "1.0.149", features = ["preserve_order"] }
+schemars = { version = "1.2.1", features = ["indexmap2"] }
+indexmap = { version = "2.13.0", features = ["serde"] }
+objectiveai = { path = "../objectiveai-rs", version = "2.0.3" }
