@@ -11,6 +11,15 @@ where
     serde_json::to_value(&back).unwrap()
 }
 
+#[tokio::test]
+async fn emit_with_none_handle_writes_to_stdout() {
+    // Smoke test that emit(&None) runs without panicking. We can't
+    // easily intercept stdout from a unit test, so just confirm the
+    // call completes and the future is Send + 'static-safe.
+    let out: Output<Ok> = Output::Notification(OK);
+    out.emit(&None).await;
+}
+
 #[test]
 fn error_fatal_wire_shape() {
     let out: Output<Ok> = Output::Error(Error {

@@ -115,7 +115,7 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_lib::output::Handle) -> Result<(), crate::error::Error> {
         let (agent_ref, continuation_args, instructions, seed, state, detach) = match self {
             Commands::AlphaScalar { params, agent, continuation, instructions, seed, detach } => {
                 let p = params.into_params();
@@ -153,7 +153,7 @@ impl Commands {
         instructions.verify(cli_config, crate::instructions::InstructionsScope::FunctionInventionsRecursive)?;
 
         if detach {
-            crate::api::detach::detach().await;
+            crate::api::detach::detach(handle).await;
         }
 
         let agent = agent_ref.resolve(|| async {
@@ -184,6 +184,7 @@ impl Commands {
         let fs_client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
         let log_writer = objectiveai::filesystem::logs::client::write_function_invention_recursive(&fs_client);
 
+        let handle = handle.clone();
         crate::api::run(Box::new(|http_client| Box::pin(async move {
             let stream = objectiveai::functions::inventions::recursive::create_function_invention_recursive_streaming(
                 &http_client, request,
@@ -193,6 +194,7 @@ impl Commands {
                 stream.map(|r| r.map_err(crate::error::Error::from)),
                 log_writer,
                 |agg: &mut objectiveai::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk, c| agg.push(c),
+                handle.clone(),
             ).await?;
 
             // Build result: one item per invention that has state
@@ -210,7 +212,7 @@ impl Commands {
             objectiveai_cli_lib::output::Output::<Inventions>::Notification(
                 Inventions { inventions: results },
             )
-            .emit();
+            .emit(&handle).await;
             Ok(())
         })), true).await
     }

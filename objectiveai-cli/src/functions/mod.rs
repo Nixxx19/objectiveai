@@ -75,38 +75,40 @@ async fn list_source(
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_lib::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::Get { args } => {
                 let path = args.resolve(|| get_favorites(cli_config)).await?;
+                let handle = handle.clone();
                 crate::api::run(|http_client| async move {
                     let response = objectiveai::functions::get_function(&http_client, path).await?;
                     objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Function>::Notification(
                         objectiveai_cli_lib::output::Function { function: response },
                     )
-                    .emit();
+                    .emit(&handle).await;
                     Ok(())
                 }, false).await
             }
             Commands::List { source } => {
                 use objectiveai::functions::request::ListFunctionsSource;
                 match source {
-                    crate::list::Source::Favorites => crate::list::favorites(|| get_favorites(cli_config)).await,
-                    crate::list::Source::Filesystem => crate::list::single(|c| Box::pin(list_source(c, ListFunctionsSource::Filesystem))).await,
-                    crate::list::Source::Objectiveai => crate::list::single(|c| Box::pin(list_source(c, ListFunctionsSource::Objectiveai))).await,
-                    crate::list::Source::Mock => crate::list::single(|c| Box::pin(list_source(c, ListFunctionsSource::Mock))).await,
+                    crate::list::Source::Favorites => crate::list::favorites(|| get_favorites(cli_config), handle).await,
+                    crate::list::Source::Filesystem => crate::list::single(|c| Box::pin(list_source(c, ListFunctionsSource::Filesystem)), handle).await,
+                    crate::list::Source::Objectiveai => crate::list::single(|c| Box::pin(list_source(c, ListFunctionsSource::Objectiveai)), handle).await,
+                    crate::list::Source::Mock => crate::list::single(|c| Box::pin(list_source(c, ListFunctionsSource::Mock)), handle).await,
                     crate::list::Source::All => crate::list::all(
                         || get_favorites(cli_config),
                         |c| Box::pin(list_source(c, ListFunctionsSource::Filesystem)),
                         |c| Box::pin(list_source(c, ListFunctionsSource::Objectiveai)),
+                        handle,
                     ).await,
                 }
             }
-            Commands::Executions { command } => command.handle(cli_config).await,
-            Commands::Config { command } => command.handle(cli_config).await,
-            Commands::Favorites { command } => command.handle(cli_config).await,
-            Commands::Inventions { command } => command.handle(cli_config).await,
-            Commands::Profiles { command } => command.handle(cli_config).await,
+            Commands::Executions { command } => command.handle(cli_config, handle).await,
+            Commands::Config { command } => command.handle(cli_config, handle).await,
+            Commands::Favorites { command } => command.handle(cli_config, handle).await,
+            Commands::Inventions { command } => command.handle(cli_config, handle).await,
+            Commands::Profiles { command } => command.handle(cli_config, handle).await,
             Commands::Publish { repository, body, message, overwrite } => {
                 let function: objectiveai::functions::FullRemoteFunction = body.resolve()?;
                 let msg = message.resolve()?;
@@ -121,7 +123,7 @@ impl Commands {
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Published>::Notification(
                     objectiveai_cli_lib::output::Published { sha },
                 )
-                .emit();
+                .emit(handle).await;
                 Ok(())
             }
         }

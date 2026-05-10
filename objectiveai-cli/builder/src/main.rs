@@ -146,7 +146,7 @@ fn generate_module(node: &TreeNode, dir: &Path, depth: usize) {
 
     // handle() implementation
     code.push_str("impl Commands {\n");
-    code.push_str("    pub fn handle(self) -> Result<(), crate::error::Error> {\n");
+    code.push_str("    pub async fn handle(self, handle: &objectiveai_cli_lib::output::Handle) -> Result<(), crate::error::Error> {\n");
     code.push_str("        match self {\n");
 
     code.push_str("            Commands::List => {\n");
@@ -160,7 +160,7 @@ fn generate_module(node: &TreeNode, dir: &Path, depth: usize) {
     code.push_str("];\n");
     code.push_str("                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schemas>::Notification(\n");
     code.push_str("                    objectiveai_cli_lib::output::Schemas { schemas: NAMES.iter().map(|s| s.to_string()).collect() },\n");
-    code.push_str("                ).emit();\n");
+    code.push_str("                ).emit(handle).await;\n");
     code.push_str("                Ok(())\n");
     code.push_str("            }\n");
 
@@ -168,7 +168,7 @@ fn generate_module(node: &TreeNode, dir: &Path, depth: usize) {
         let variant = to_pascal_case(child_name);
         writeln!(
             code,
-            "            Commands::{variant} {{ command }} => command.handle(),"
+            "            Commands::{variant} {{ command }} => command.handle(handle).await,"
         )
         .unwrap();
     }
@@ -180,7 +180,7 @@ fn generate_module(node: &TreeNode, dir: &Path, depth: usize) {
         writeln!(code, "                ).expect(\"embedded JSON Schema must parse\");").unwrap();
         writeln!(code, "                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(").unwrap();
         writeln!(code, "                    objectiveai_cli_lib::output::Schema {{ schema }},").unwrap();
-        writeln!(code, "                ).emit();").unwrap();
+        writeln!(code, "                ).emit(handle).await;").unwrap();
         writeln!(code, "                Ok(())").unwrap();
         writeln!(code, "            }}").unwrap();
     }

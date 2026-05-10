@@ -28,13 +28,13 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_lib::output::Handle) -> Result<(), crate::error::Error> {
         let client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
         match self {
             Commands::Get { id, filter } => {
                 let content = objectiveai::filesystem::logs::client::read_function_execution(&client, &id, filter.as_deref()).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
                 {
-                crate::log_line::emit_log_content(content);
+                crate::log_line::emit_log_content(content, handle).await;
                 Ok(())
             }
             }
@@ -43,7 +43,7 @@ impl Commands {
                 {
                 match result.map(objectiveai::filesystem::logs::LogContent::Json) {
                     Some(content) => {
-                        crate::log_line::emit_log_content(content);
+                        crate::log_line::emit_log_content(content, handle).await;
                         Ok(())
                     }
                     None => Err(crate::error::Error::LogSubscribeTimedOut),
@@ -51,7 +51,7 @@ impl Commands {
             }
             }
             Commands::List { offset, limit } => {
-                crate::log_line::emit_log_list(objectiveai::filesystem::logs::client::list_function_executions(&client, offset, limit).await?);
+                crate::log_line::emit_log_list(objectiveai::filesystem::logs::client::list_function_executions(&client, offset, limit).await?, handle).await;
                 Ok(())
             },
             Commands::Clear { nested } => {
@@ -61,12 +61,12 @@ impl Commands {
                         Box::pin(objectiveai::filesystem::logs::client::clear_function_execution_retry_tokens(&client)),
                     ]).await?;
                     {
-                crate::log_line::emit_log_clear_count(counts.into_iter().sum());
+                crate::log_line::emit_log_clear_count(counts.into_iter().sum(), handle).await;
                 Ok(())
             }
                 } else {
                     {
-                crate::log_line::emit_log_clear_count(objectiveai::filesystem::logs::client::clear_function_executions(&client).await?);
+                crate::log_line::emit_log_clear_count(objectiveai::filesystem::logs::client::clear_function_executions(&client).await?, handle).await;
                 Ok(())
             }
                 }

@@ -1,5 +1,5 @@
 use clap::Subcommand;
-pub use objectiveai_cli_lib::output::{Items, ListItem, PairListItem};
+use objectiveai_cli_lib::output::{Handle, Items, ListItem, Output, PairListItem};
 
 #[derive(Subcommand)]
 pub enum Source {
@@ -15,12 +15,16 @@ pub enum Source {
     All,
 }
 
-fn emit_items(items: Vec<ListItem>) {
-    objectiveai_cli_lib::output::Output::<Items<ListItem>>::Notification(Items { items }).emit();
+async fn emit_items(items: Vec<ListItem>, handle: &Handle) {
+    Output::<Items<ListItem>>::Notification(Items { items })
+        .emit(handle)
+        .await;
 }
 
-fn emit_pair_items(items: Vec<PairListItem>) {
-    objectiveai_cli_lib::output::Output::<Items<PairListItem>>::Notification(Items { items }).emit();
+async fn emit_pair_items(items: Vec<PairListItem>, handle: &Handle) {
+    Output::<Items<PairListItem>>::Notification(Items { items })
+        .emit(handle)
+        .await;
 }
 
 /// Returns true if a favorite matches a remote path.
@@ -31,6 +35,7 @@ fn favorite_matches(fav: &objectiveai::filesystem::config::Favorite, path: &obje
 /// Returns favorites only. No API call.
 pub async fn favorites<F, Fut>(
     get_favorites: F,
+    handle: &Handle,
 ) -> Result<(), crate::error::Error>
 where
     F: FnOnce() -> Fut,
@@ -40,25 +45,27 @@ where
         .into_iter()
         .map(ListItem::Favorite)
         .collect();
-    emit_items(items);
+    emit_items(items, handle).await;
     Ok(())
 }
 
 /// Fetches from a single remote source via api::run.
 pub async fn single<F>(
     list_remote: F,
+    handle: &Handle,
 ) -> Result<(), crate::error::Error>
 where
     F: FnOnce(objectiveai::HttpClient) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<objectiveai::RemotePath>, crate::error::Error>> + Send>> + Send + 'static,
 {
-    crate::api::run(|http_client| async move {
+    let handle = handle.clone();
+    crate::api::run(move |http_client| Box::pin(async move {
         let items: Vec<ListItem> = list_remote(http_client).await?
             .into_iter()
             .map(ListItem::Item)
             .collect();
-        emit_items(items);
+        emit_items(items, &handle).await;
         Ok(())
-    }, false).await
+    }), false).await
 }
 
 /// Fetches from all sources with de-duplication via api::run.
@@ -70,6 +77,7 @@ pub async fn all<F, Fut, FsF, OaiF>(
     get_favorites: F,
     list_filesystem: FsF,
     list_objectiveai: OaiF,
+    handle: &Handle,
 ) -> Result<(), crate::error::Error>
 where
     F: FnOnce() -> Fut,
@@ -79,7 +87,8 @@ where
 {
     // TODO: figure out how to not pre-await this (join with api::run concurrently)
     let favorites = get_favorites().await;
-    crate::api::run(|http_client| async move {
+    let handle = handle.clone();
+    crate::api::run(move |http_client| Box::pin(async move {
 
         let (fs_result, oai_result) = tokio::join!(
             list_filesystem(http_client.clone()),
@@ -114,9 +123,9 @@ where
             }
         }
 
-        emit_items(items);
+        emit_items(items, &handle).await;
         Ok(())
-    }, false).await
+    }), false).await
 }
 
 // -- Pair variants (function-profile pairs) --
@@ -155,6 +164,7 @@ fn pair_favorite_matches(
 /// Returns pair favorites only. No API call.
 pub async fn pair_favorites<F, Fut>(
     get_favorites: F,
+    handle: &Handle,
 ) -> Result<(), crate::error::Error>
 where
     F: FnOnce() -> Fut,
@@ -164,25 +174,27 @@ where
         .into_iter()
         .map(PairListItem::Favorite)
         .collect();
-    emit_pair_items(items);
+    emit_pair_items(items, handle).await;
     Ok(())
 }
 
 /// Fetches pairs from ObjectiveAI via api::run.
 pub async fn pair_single<F>(
     list_remote: F,
+    handle: &Handle,
 ) -> Result<(), crate::error::Error>
 where
     F: FnOnce(objectiveai::HttpClient) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<objectiveai::functions::response::ListFunctionProfilePairItem>, crate::error::Error>> + Send>> + Send + 'static,
 {
-    crate::api::run(|http_client| async move {
+    let handle = handle.clone();
+    crate::api::run(move |http_client| Box::pin(async move {
         let items: Vec<PairListItem> = list_remote(http_client).await?
             .into_iter()
             .map(PairListItem::Item)
             .collect();
-        emit_pair_items(items);
+        emit_pair_items(items, &handle).await;
         Ok(())
-    }, false).await
+    }), false).await
 }
 
 /// Fetches pairs from all sources with de-duplication via api::run.
@@ -191,6 +203,7 @@ where
 pub async fn pair_all<GF, GFut, F>(
     get_favorites: GF,
     list_objectiveai: F,
+    handle: &Handle,
 ) -> Result<(), crate::error::Error>
 where
     GF: FnOnce() -> GFut,
@@ -199,7 +212,8 @@ where
 {
     // TODO: figure out how to not pre-await this (join with api::run concurrently)
     let favorites = get_favorites().await;
-    crate::api::run(|http_client| async move {
+    let handle = handle.clone();
+    crate::api::run(move |http_client| Box::pin(async move {
         let oai_items = list_objectiveai(http_client).await?;
 
         let mut items: Vec<PairListItem> = Vec::new();
@@ -214,7 +228,7 @@ where
             }
         }
 
-        emit_pair_items(items);
+        emit_pair_items(items, &handle).await;
         Ok(())
-    }, false).await
+    }), false).await
 }

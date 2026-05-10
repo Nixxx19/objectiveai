@@ -1,6 +1,6 @@
 use objectiveai::filesystem::config::Config;
 use objectiveai::filesystem::Client;
-use objectiveai_cli_lib::output::{JqResults, Value};
+use objectiveai_cli_lib::output::{Handle, JqResults, Output, Value};
 
 pub fn filter(f: Option<String>) -> String {
     f.unwrap_or_else(|| ".".to_string())
@@ -25,8 +25,9 @@ pub async fn write(client: &Client, config: &Config, cli_config: &super::Config)
 }
 
 /// Emit a user-supplied jq filter's results as a single `Notification::Jq`.
-pub fn emit_jq(
+pub async fn emit_jq(
     results: Result<Vec<serde_json::Value>, objectiveai::filesystem::Error>,
+    handle: &Handle,
 ) -> Result<(), crate::error::Error> {
     let results = results?;
     let jq = match results.len() {
@@ -34,11 +35,15 @@ pub fn emit_jq(
         1 => results.into_iter().next().unwrap(),
         _ => serde_json::Value::Array(results),
     };
-    objectiveai_cli_lib::output::Output::<JqResults>::Notification(JqResults { jq }).emit();
+    Output::<JqResults>::Notification(JqResults { jq })
+        .emit(handle)
+        .await;
     Ok(())
 }
 
 /// Emit a typed config value as `{"type":"notification","value":<v>}`.
-pub fn emit_value<V: serde::Serialize>(v: V) {
-    objectiveai_cli_lib::output::Output::<Value<V>>::Notification(Value { value: v }).emit();
+pub async fn emit_value<V: serde::Serialize>(v: V, handle: &Handle) {
+    Output::<Value<V>>::Notification(Value { value: v })
+        .emit(handle)
+        .await;
 }

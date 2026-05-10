@@ -30,8 +30,11 @@ use crate::Config;
 /// (notably `GITHUB_AUTHORIZATION`) come through the same `Config`
 /// struct the rest of the CLI uses — no env-var names need to be
 /// defined in this module.
-pub async fn maybe_auto_update<I>(args: I, cli_config: &Config)
-where
+pub async fn maybe_auto_update<I>(
+    args: I,
+    cli_config: &Config,
+    handle: &objectiveai_cli_lib::output::Handle,
+) where
     I: IntoIterator<Item = OsString> + Clone,
 {
     #[cfg(feature = "updater")]
@@ -44,12 +47,12 @@ where
                     message: format!("auto-update error: {e}"),
                 },
             )
-            .emit();
+            .emit(handle).await;
         }
     }
     #[cfg(not(feature = "updater"))]
     {
-        let _ = (args, cli_config);
+        let _ = (args, cli_config, handle);
     }
 }
 

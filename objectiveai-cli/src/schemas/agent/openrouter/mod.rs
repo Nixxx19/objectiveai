@@ -66,13 +66,13 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn handle(self) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, handle: &objectiveai_cli_lib::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
                 const NAMES: &[&str] = &["Agent", "AgentBase", "Continuation", "OutputMode", "Provider", "ProviderQuantization", "Reasoning", "ReasoningEffort", "ReasoningSummaryVerbosity", "Stop", "Upstream", "Verbosity"];
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schemas>::Notification(
                     objectiveai_cli_lib::output::Schemas { schemas: NAMES.iter().map(|s| s.to_string()).collect() },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
             Commands::Agent { .. } => {
@@ -81,7 +81,7 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
                     objectiveai_cli_lib::output::Schema { schema },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
             Commands::AgentBase { .. } => {
@@ -90,7 +90,7 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
                     objectiveai_cli_lib::output::Schema { schema },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
             Commands::Continuation { .. } => {
@@ -99,7 +99,7 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
                     objectiveai_cli_lib::output::Schema { schema },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
             Commands::OutputMode { .. } => {
@@ -108,7 +108,7 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
                     objectiveai_cli_lib::output::Schema { schema },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
             Commands::Provider { .. } => {
@@ -117,7 +117,7 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
                     objectiveai_cli_lib::output::Schema { schema },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
             Commands::ProviderQuantization { .. } => {
@@ -126,7 +126,7 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
                     objectiveai_cli_lib::output::Schema { schema },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
             Commands::Reasoning { .. } => {
@@ -135,7 +135,7 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
                     objectiveai_cli_lib::output::Schema { schema },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
             Commands::ReasoningEffort { .. } => {
@@ -144,7 +144,7 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
                     objectiveai_cli_lib::output::Schema { schema },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
             Commands::ReasoningSummaryVerbosity { .. } => {
@@ -153,7 +153,7 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
                     objectiveai_cli_lib::output::Schema { schema },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
             Commands::Stop { .. } => {
@@ -162,7 +162,7 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
                     objectiveai_cli_lib::output::Schema { schema },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
             Commands::Upstream { .. } => {
@@ -171,7 +171,7 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
                     objectiveai_cli_lib::output::Schema { schema },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
             Commands::Verbosity { .. } => {
@@ -180,7 +180,7 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
                     objectiveai_cli_lib::output::Schema { schema },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
         }

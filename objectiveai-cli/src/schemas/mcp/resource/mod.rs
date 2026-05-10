@@ -38,13 +38,13 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn handle(self) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, handle: &objectiveai_cli_lib::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
                 const NAMES: &[&str] = &["ListResourcesRequest", "ListResourcesResult", "ReadResourceRequestParams", "ReadResourceResult", "Resource"];
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schemas>::Notification(
                     objectiveai_cli_lib::output::Schemas { schemas: NAMES.iter().map(|s| s.to_string()).collect() },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
             Commands::ListResourcesRequest { .. } => {
@@ -53,7 +53,7 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
                     objectiveai_cli_lib::output::Schema { schema },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
             Commands::ListResourcesResult { .. } => {
@@ -62,7 +62,7 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
                     objectiveai_cli_lib::output::Schema { schema },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
             Commands::ReadResourceRequestParams { .. } => {
@@ -71,7 +71,7 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
                     objectiveai_cli_lib::output::Schema { schema },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
             Commands::ReadResourceResult { .. } => {
@@ -80,7 +80,7 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
                     objectiveai_cli_lib::output::Schema { schema },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
             Commands::Resource { .. } => {
@@ -89,7 +89,7 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
                     objectiveai_cli_lib::output::Schema { schema },
-                ).emit();
+                ).emit(handle).await;
                 Ok(())
             }
         }

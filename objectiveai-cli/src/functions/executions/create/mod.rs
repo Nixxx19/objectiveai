@@ -158,7 +158,7 @@ async fn profile_favorites(cli_config: &crate::Config) -> Vec<objectiveai::files
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_lib::output::Handle) -> Result<(), crate::error::Error> {
         let (function_source, profile_source, input_source, continuation_args, instructions, retry_token, seed, split, invert, strategy, detach) = match self {
             Commands::Standard { function, profile, input, continuation, instructions, retry_token, seed, split, invert, detach } => {
                 (function, profile, input, continuation, instructions, retry_token, seed, split, invert, objectiveai::functions::executions::request::Strategy::Default, detach)
@@ -172,7 +172,7 @@ impl Commands {
         instructions.verify(cli_config, crate::instructions::InstructionsScope::FunctionExecutions)?;
 
         if detach {
-            crate::api::detach::detach().await;
+            crate::api::detach::detach(handle).await;
         }
 
         let function = function_source.resolve(|| fn_favorites(cli_config)).await?;
@@ -199,6 +199,7 @@ impl Commands {
         let fs_client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
         let log_writer = objectiveai::filesystem::logs::client::write_function_execution(&fs_client);
 
+        let handle = handle.clone();
         crate::api::run(Box::new(|http_client| Box::pin(async move {
             let stream = objectiveai::functions::executions::create_function_execution_streaming(
                 &http_client, params,
@@ -208,6 +209,7 @@ impl Commands {
                 stream.map(|r| r.map_err(crate::error::Error::from)),
                 log_writer,
                 |agg: &mut objectiveai::functions::executions::response::streaming::FunctionExecutionChunk, c| agg.push(c),
+                handle.clone(),
             ).await?;
 
             // Recursively collect all errors
@@ -225,7 +227,7 @@ impl Commands {
             objectiveai_cli_lib::output::Output::<Execution>::Notification(
                 Execution { execution: result },
             )
-            .emit();
+            .emit(&handle).await;
             Ok(())
         })), true).await
     }

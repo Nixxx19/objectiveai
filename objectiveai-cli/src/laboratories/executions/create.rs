@@ -3,7 +3,11 @@ use objectiveai_cli_lib::output::{LabResultItem, Laboratory};
 
 use super::create_args::CreateArgs;
 
-pub async fn handle(args: CreateArgs, cli_config: &crate::Config) -> Result<(), crate::error::Error> {
+pub async fn handle(
+    args: CreateArgs,
+    cli_config: &crate::Config,
+    handle: &objectiveai_cli_lib::output::Handle,
+) -> Result<(), crate::error::Error> {
     args.instructions.verify(cli_config, crate::instructions::InstructionsScope::LaboratoryExecutions)?;
 
     let mut builder_agents = Vec::with_capacity(args.builder_agent.len());
@@ -62,6 +66,7 @@ pub async fn handle(args: CreateArgs, cli_config: &crate::Config) -> Result<(), 
     let fs_client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
     let log_writer = objectiveai::filesystem::logs::client::write_laboratory_execution(&fs_client);
 
+    let handle = handle.clone();
     crate::api::run(
         Box::new(move |http_client| Box::pin(async move {
             let stream =
@@ -74,6 +79,7 @@ pub async fn handle(args: CreateArgs, cli_config: &crate::Config) -> Result<(), 
                 stream.map(|r| r.map_err(crate::error::Error::from)),
                 log_writer,
                 |agg: &mut objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk, c| agg.push(c),
+                handle.clone(),
             ).await?;
 
             let execution: objectiveai::laboratories::executions::response::unary::LaboratoryExecution =
@@ -147,7 +153,7 @@ pub async fn handle(args: CreateArgs, cli_config: &crate::Config) -> Result<(), 
             objectiveai_cli_lib::output::Output::<Laboratory>::Notification(
                 Laboratory { laboratory: results },
             )
-            .emit();
+            .emit(&handle).await;
             Ok(())
         })),
         true,

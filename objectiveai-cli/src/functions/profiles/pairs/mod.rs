@@ -46,10 +46,11 @@ async fn list_objectiveai(
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_lib::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::Get { args } => {
                 let (function_path, profile_path) = args.resolve(|| get_favorites(cli_config)).await?;
+                let handle = handle.clone();
                 crate::api::run(|http_client| async move {
                     let (function, profile) = tokio::join!(
                         objectiveai::functions::get_function(&http_client, function_path),
@@ -60,24 +61,25 @@ impl Commands {
                         profile: profile?,
                     };
                     objectiveai_cli_lib::output::Output::<Pair>::Notification(Pair { pair })
-                        .emit();
+                        .emit(&handle).await;
                     Ok(())
                 }, false).await
             }
             Commands::List { source } => {
                 match source {
-                    crate::list::Source::Favorites => crate::list::pair_favorites(|| get_favorites(cli_config)).await,
+                    crate::list::Source::Favorites => crate::list::pair_favorites(|| get_favorites(cli_config), handle).await,
                     crate::list::Source::Filesystem => Err(crate::error::Error::PairsSourceNotSupported("filesystem")),
-                    crate::list::Source::Objectiveai => crate::list::pair_single(|c| Box::pin(list_objectiveai(c))).await,
+                    crate::list::Source::Objectiveai => crate::list::pair_single(|c| Box::pin(list_objectiveai(c)), handle).await,
                     crate::list::Source::Mock => Err(crate::error::Error::PairsSourceNotSupported("mock")),
                     crate::list::Source::All => crate::list::pair_all(
                         || get_favorites(cli_config),
                         |c| Box::pin(list_objectiveai(c)),
+                        handle,
                     ).await,
                 }
             }
-            Commands::Config { command } => command.handle(cli_config).await,
-            Commands::Favorites { command } => command.handle(cli_config).await,
+            Commands::Config { command } => command.handle(cli_config, handle).await,
+            Commands::Favorites { command } => command.handle(cli_config, handle).await,
         }
     }
 }

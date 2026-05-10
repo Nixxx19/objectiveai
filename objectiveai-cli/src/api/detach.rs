@@ -1,9 +1,16 @@
 /// Re-invokes the current CLI as a subprocess with `--detach` removed from
-/// the arguments. Prints the child PID, then forwards all stdout/stderr.
-/// Once the log availability line appears on stdout, exits with code 0 —
-/// the child continues as an orphan. If the child exits without printing
-/// the log line, forwards its exit code.
-pub async fn detach() -> ! {
+/// the arguments. Emits the child PID, then forwards every JSON line the
+/// child writes to its stdout — either to `handle` (if `Some`) or to this
+/// process's own stdout (if `None`). Once `log_stream_ready` appears on
+/// the child's stdout, exits with code 0; the orphan continues running
+/// and writing more lines, but nobody reads them. If the child exits
+/// without producing the handshake, forwards its exit code.
+///
+/// The orphan child has no idea about `handle` — it's a fresh CLI
+/// invocation with the default `None` handle, writing JSONL to its own
+/// stdout. The parent's forwarding loop is the place where the JSONL
+/// stream gets routed.
+pub async fn detach(handle: &objectiveai_cli_lib::output::Handle) -> ! {
     let exe = std::env::current_exe().expect("failed to get current executable path");
     let args: Vec<String> = std::env::args()
         .skip(1) // skip binary name
@@ -30,7 +37,7 @@ pub async fn detach() -> ! {
     objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Detached>::Notification(
         objectiveai_cli_lib::output::Detached { pid },
     )
-    .emit();
+    .emit(handle).await;
 
     let child_stdout = child.stdout.take().unwrap();
     let child_stderr = child.stderr.take().unwrap();
@@ -49,7 +56,21 @@ pub async fn detach() -> ! {
                 if n == 0 {
                     stdout_done = true;
                 } else {
-                    print!("{stdout_line}");
+                    // Forward each line of the orphan's stdout to the
+                    // parent's emission destination — `handle` if `Some`,
+                    // else parent stdout. Keeps the JSONL stream
+                    // consistent for whoever is consuming it.
+                    match handle {
+                        Some(stdin) => {
+                            use tokio::io::AsyncWriteExt;
+                            let mut guard = stdin.lock().await;
+                            guard.write_all(stdout_line.as_bytes()).await
+                                .expect("forward to child stdin failed");
+                        }
+                        None => {
+                            print!("{stdout_line}");
+                        }
+                    }
                     if crate::log_line::parse_log_stream_ready(&stdout_line).is_some() {
                         std::process::exit(0);
                     }

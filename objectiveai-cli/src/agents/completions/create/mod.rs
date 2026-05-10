@@ -60,7 +60,7 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_lib::output::Handle) -> Result<(), crate::error::Error> {
         let (message_source, agent_arg, continuation_args, response_format_args, instructions, seed, detach) = match self {
             Commands::Standard { messages, agent, continuation, response_format, instructions, seed, detach } => {
                 (messages, agent, continuation, response_format, instructions, seed, detach)
@@ -70,7 +70,7 @@ impl Commands {
         instructions.verify(cli_config, crate::instructions::InstructionsScope::AgentCompletions)?;
 
         if detach {
-            crate::api::detach::detach().await;
+            crate::api::detach::detach(handle).await;
         }
 
         let messages = message_source.resolve()?;
@@ -95,6 +95,7 @@ impl Commands {
         let fs_client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
         let log_writer = objectiveai::filesystem::logs::client::write_agent_completion(&fs_client);
 
+        let handle = handle.clone();
         crate::api::run(Box::new(|http_client| Box::pin(async move {
             let stream = objectiveai::agent::completions::create_agent_completion_streaming(
                 &http_client, params,
@@ -104,6 +105,7 @@ impl Commands {
                 stream.map(|r| r.map_err(crate::error::Error::from)),
                 log_writer,
                 |agg: &mut objectiveai::agent::completions::response::streaming::AgentCompletionChunk, c| agg.push(c),
+                handle.clone(),
             ).await?;
 
             let completion: objectiveai::agent::completions::response::unary::AgentCompletion = accumulated.into();
@@ -130,7 +132,7 @@ impl Commands {
             objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Content>::Notification(
                 objectiveai_cli_lib::output::Content { content },
             )
-            .emit();
+            .emit(&handle).await;
             Ok(())
         })), true).await
     }

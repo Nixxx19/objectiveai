@@ -159,18 +159,22 @@ enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &Config) -> Result<(), error::Error> {
+    pub async fn handle(
+        self,
+        cli_config: &Config,
+        handle: &objectiveai_cli_lib::output::Handle,
+    ) -> Result<(), error::Error> {
         match self {
-            Commands::Api { command } => command.handle(cli_config).await,
-            Commands::Agents { command } => command.handle(cli_config).await,
-            Commands::Swarms { command } => command.handle(cli_config).await,
-            Commands::Functions { command } => command.handle(cli_config).await,
-            Commands::Viewer { command } => command.handle(cli_config).await,
-            Commands::Schemas { command } => command.handle(),
-            Commands::Laboratories { command } => command.handle(cli_config).await,
-            Commands::Vector { command } => command.handle(cli_config).await,
-            Commands::Logs { command } => command.handle(cli_config).await,
-            Commands::Instructions { command } => command.handle(cli_config),
+            Commands::Api { command } => command.handle(cli_config, handle).await,
+            Commands::Agents { command } => command.handle(cli_config, handle).await,
+            Commands::Swarms { command } => command.handle(cli_config, handle).await,
+            Commands::Functions { command } => command.handle(cli_config, handle).await,
+            Commands::Viewer { command } => command.handle(cli_config, handle).await,
+            Commands::Schemas { command } => command.handle(handle).await,
+            Commands::Laboratories { command } => command.handle(cli_config, handle).await,
+            Commands::Vector { command } => command.handle(cli_config, handle).await,
+            Commands::Logs { command } => command.handle(cli_config, handle).await,
+            Commands::Instructions { command } => command.handle(cli_config, handle).await,
         }
     }
 }
@@ -195,6 +199,7 @@ pub fn load_config() -> Config {
 pub async fn run<I, T>(
     args: I,
     cli_config: &Config,
+    handle: objectiveai_cli_lib::output::Handle,
 ) -> Result<(), objectiveai_cli_lib::output::Error>
 where
     I: IntoIterator<Item = T>,
@@ -206,7 +211,7 @@ where
         message: e.to_string(),
     })?;
     cli.command
-        .handle(cli_config)
+        .handle(cli_config, &handle)
         .await
         .map_err(|e| e.to_output(objectiveai_cli_lib::output::Level::Error, true))
 }

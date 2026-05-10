@@ -13,9 +13,11 @@
 //! internally-tagged enum.
 
 mod error;
+mod handle;
 pub mod notification;
 
 pub use error::*;
+pub use handle::*;
 pub use notification::*;
 
 use serde::{Deserialize, Serialize};
@@ -29,13 +31,33 @@ pub enum Output<T> {
 }
 
 impl<T: Serialize> Output<T> {
-    /// Serialize as JSON and write to stdout as a single line. If this
-    /// is a fatal [`Error`], also write the same line to stderr.
-    pub fn emit(&self) {
+    /// Serialize as JSON and write as a single line. If `handle` is
+    /// `Some`, writes the line to the child process's stdin (locking
+    /// the inner mutex). If `None`, writes to stdout — and if this is
+    /// a fatal [`Error`], also mirrors the line to stderr.
+    ///
+    /// Panics on write failure to match `println!` semantics.
+    pub async fn emit(&self, handle: &Handle) {
         let json = serde_json::to_string(self).expect("Output<T> serializes when T: Serialize");
-        println!("{json}");
-        if matches!(self, Output::Error(e) if e.fatal) {
-            eprintln!("{json}");
+        match handle {
+            Some(stdin) => {
+                use tokio::io::AsyncWriteExt;
+                let mut guard = stdin.lock().await;
+                guard
+                    .write_all(json.as_bytes())
+                    .await
+                    .expect("emit to child stdin failed");
+                guard
+                    .write_all(b"\n")
+                    .await
+                    .expect("emit to child stdin failed");
+            }
+            None => {
+                println!("{json}");
+                if matches!(self, Output::Error(e) if e.fatal) {
+                    eprintln!("{json}");
+                }
+            }
         }
     }
 }

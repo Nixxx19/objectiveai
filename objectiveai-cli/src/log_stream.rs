@@ -38,6 +38,7 @@ pub(crate) async fn consume_with_coalesced_writes<C, F>(
     stream: impl Stream<Item = Result<C, crate::error::Error>>,
     log_writer: objectiveai::filesystem::logs::LogWriter<C>,
     push: F,
+    handle: objectiveai_cli_lib::output::Handle,
 ) -> Result<C, crate::error::Error>
 where
     C: Clone + Send + Sync + 'static,
@@ -46,7 +47,7 @@ where
     let (tx, rx) = tokio::sync::mpsc::unbounded_channel::<C>();
     let writer_push = push.clone();
     let writer_handle = tokio::spawn(async move {
-        writer_loop(rx, log_writer, writer_push).await
+        writer_loop(rx, log_writer, writer_push, handle).await
     });
 
     let mut main_agg: Option<C> = None;
@@ -91,6 +92,7 @@ async fn writer_loop<C, F>(
     mut rx: tokio::sync::mpsc::UnboundedReceiver<C>,
     mut log_writer: objectiveai::filesystem::logs::LogWriter<C>,
     push: F,
+    handle: objectiveai_cli_lib::output::Handle,
 ) -> Result<(), crate::error::Error>
 where
     F: Fn(&mut C, &C),
@@ -115,7 +117,7 @@ where
         }
         if !logged_id {
             if let Some(id) = log_writer.primary_id() {
-                crate::log_line::emit_log_stream_ready(id);
+                crate::log_line::emit_log_stream_ready(id, &handle).await;
                 logged_id = true;
             }
         }

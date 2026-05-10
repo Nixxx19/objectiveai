@@ -15,16 +15,17 @@ async fn get_favorites(cli_config: &crate::Config) -> Vec<objectiveai::filesyste
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_lib::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::Get { args } => {
                 let path = args.resolve(|| get_favorites(cli_config)).await?;
+                let handle = handle.clone();
                 crate::api::run(|http_client| async move {
                     let response = objectiveai::functions::inventions::state::get_function_invention_state(&http_client, path).await?;
                     objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::State>::Notification(
                         objectiveai_cli_lib::output::State { state: response },
                     )
-                    .emit();
+                    .emit(&handle).await;
                     Ok(())
                 }, false).await
             }

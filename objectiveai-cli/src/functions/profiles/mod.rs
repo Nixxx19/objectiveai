@@ -63,36 +63,38 @@ async fn list_source(
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_lib::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::Get { args } => {
                 let path = args.resolve(|| get_favorites(cli_config)).await?;
+                let handle = handle.clone();
                 crate::api::run(|http_client| async move {
                     let response = objectiveai::functions::profiles::get_profile(&http_client, path).await?;
                     objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Profile>::Notification(
                         objectiveai_cli_lib::output::Profile { profile: response },
                     )
-                    .emit();
+                    .emit(&handle).await;
                     Ok(())
                 }, false).await
             }
             Commands::List { source } => {
                 use objectiveai::functions::profiles::request::ListProfilesSource;
                 match source {
-                    crate::list::Source::Favorites => crate::list::favorites(|| get_favorites(cli_config)).await,
-                    crate::list::Source::Filesystem => crate::list::single(|c| Box::pin(list_source(c, ListProfilesSource::Filesystem))).await,
-                    crate::list::Source::Objectiveai => crate::list::single(|c| Box::pin(list_source(c, ListProfilesSource::Objectiveai))).await,
-                    crate::list::Source::Mock => crate::list::single(|c| Box::pin(list_source(c, ListProfilesSource::Mock))).await,
+                    crate::list::Source::Favorites => crate::list::favorites(|| get_favorites(cli_config), handle).await,
+                    crate::list::Source::Filesystem => crate::list::single(|c| Box::pin(list_source(c, ListProfilesSource::Filesystem)), handle).await,
+                    crate::list::Source::Objectiveai => crate::list::single(|c| Box::pin(list_source(c, ListProfilesSource::Objectiveai)), handle).await,
+                    crate::list::Source::Mock => crate::list::single(|c| Box::pin(list_source(c, ListProfilesSource::Mock)), handle).await,
                     crate::list::Source::All => crate::list::all(
                         || get_favorites(cli_config),
                         |c| Box::pin(list_source(c, ListProfilesSource::Filesystem)),
                         |c| Box::pin(list_source(c, ListProfilesSource::Objectiveai)),
+                        handle,
                     ).await,
                 }
             }
-            Commands::Config { command } => command.handle(cli_config).await,
-            Commands::Favorites { command } => command.handle(cli_config).await,
-            Commands::Pairs { command } => command.handle(cli_config).await,
+            Commands::Config { command } => command.handle(cli_config, handle).await,
+            Commands::Favorites { command } => command.handle(cli_config, handle).await,
+            Commands::Pairs { command } => command.handle(cli_config, handle).await,
             Commands::Publish { repository, body, message, overwrite } => {
                 let profile: objectiveai::functions::RemoteProfile = body.resolve()?;
                 let msg = message.resolve()?;
@@ -107,7 +109,7 @@ impl Commands {
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Published>::Notification(
                     objectiveai_cli_lib::output::Published { sha },
                 )
-                .emit();
+                .emit(handle).await;
                 Ok(())
             }
         }

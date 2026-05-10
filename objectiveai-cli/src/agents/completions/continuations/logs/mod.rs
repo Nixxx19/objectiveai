@@ -17,13 +17,13 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_lib::output::Handle) -> Result<(), crate::error::Error> {
         let client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
         match self {
             Commands::Get { id, filter } => {
                 let content = objectiveai::filesystem::logs::client::read_agent_completion_continuation(&client, &id, filter.as_deref()).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
                 {
-                crate::log_line::emit_log_content(content);
+                crate::log_line::emit_log_content(content, handle).await;
                 Ok(())
             }
             }
@@ -32,7 +32,7 @@ impl Commands {
                 {
                 match result.map(objectiveai::filesystem::logs::LogContent::Json) {
                     Some(content) => {
-                        crate::log_line::emit_log_content(content);
+                        crate::log_line::emit_log_content(content, handle).await;
                         Ok(())
                     }
                     None => Err(crate::error::Error::LogSubscribeTimedOut),
@@ -40,7 +40,7 @@ impl Commands {
             }
             }
             Commands::Clear => {
-                crate::log_line::emit_log_clear_count(objectiveai::filesystem::logs::client::clear_agent_completion_continuations(&client).await?);
+                crate::log_line::emit_log_clear_count(objectiveai::filesystem::logs::client::clear_agent_completion_continuations(&client).await?, handle).await;
                 Ok(())
             },
         }
