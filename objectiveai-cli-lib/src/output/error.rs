@@ -1,5 +1,3 @@
-use std::io::Write;
-
 use serde::{Deserialize, Serialize};
 
 /// A failure or advisory written to stdout. `fatal: true` means the
@@ -19,10 +17,8 @@ impl Error {
     pub fn emit(&self) {
         let json = serde_json::to_string(self).expect("Error always serializes");
         println!("{json}");
-        let _ = std::io::stdout().flush();
         if self.fatal {
             eprintln!("{json}");
-            let _ = std::io::stderr().flush();
         }
     }
 }
