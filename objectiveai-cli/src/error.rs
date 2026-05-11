@@ -42,6 +42,14 @@ pub enum Error {
     UnknownInstructionsId,
     #[error("subscribe timed out")]
     LogSubscribeTimedOut,
+    #[error("plugin not found: {0}")]
+    PluginNotFound(String),
+    #[error("failed to spawn plugin: {0}")]
+    PluginSpawn(std::io::Error),
+    #[error("failed to read plugin output: {0}")]
+    PluginRead(std::io::Error),
+    #[error("plugin exited with non-zero status: {0}")]
+    PluginExit(i32),
 }
 
 impl Error {

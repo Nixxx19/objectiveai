@@ -83,7 +83,7 @@ impl ConfigBuilder {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Config {
     pub config_set_forbidden: bool,
     pub config_base_dir: Option<String>,
@@ -156,6 +156,12 @@ enum Commands {
         #[command(subcommand)]
         command: instructions::Commands,
     },
+    /// Run a plugin from `~/.objectiveai/plugins/`. First element is
+    /// the plugin name; the rest are forwarded as the plugin's argv.
+    /// Captured via clap's external-subcommand mechanism — any first
+    /// arg that isn't a known built-in lands here.
+    #[command(external_subcommand)]
+    Plugin(Vec<String>),
 }
 
 impl Commands {
@@ -175,6 +181,7 @@ impl Commands {
             Commands::Vector { command } => command.handle(cli_config, handle).await,
             Commands::Logs { command } => command.handle(cli_config, handle).await,
             Commands::Instructions { command } => command.handle(cli_config, handle).await,
+            Commands::Plugin(args) => crate::plugin::handle(args, cli_config, handle).await,
         }
     }
 }
