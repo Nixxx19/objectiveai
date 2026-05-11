@@ -3,8 +3,8 @@
 /// orphan writes to its stdout, parses the line as an [`Output`] and
 /// re-emits it through `Output::emit(handle)` — so the routing logic
 /// (handle vs stdout, fatal-error stderr mirror) lives in one place
-/// instead of being duplicated here. Lines that fail to parse fall
-/// back to a raw byte passthrough.
+/// instead of being duplicated here. A non-JSONL line on the orphan's
+/// stdout is a contract violation and panics.
 ///
 /// Stderr is forwarded raw to this process's own stderr (a separate
 /// channel from `handle`'s child stdin — the embedder captures cli's
@@ -74,27 +74,15 @@ pub async fn detach(handle: &objectiveai_cli_lib::output::Handle) -> ! {
                     // stderr mirror) in one place — Output::emit — and
                     // never deals with raw bytes here.
                     //
-                    // If a line fails to parse (orphan misbehaving or
-                    // a non-JSONL stray write), fall back to a raw
-                    // passthrough so the user still sees it.
+                    // The cli is documented to produce only JSONL on
+                    // stdout, so a parse failure is a contract violation
+                    // — panic so it's loud and traceable rather than
+                    // silently corrupting the consumer's stream.
                     let trimmed = stdout_line.trim_end_matches(['\r', '\n']);
-                    match serde_json::from_str::<
-                        objectiveai_cli_lib::output::Output<serde_json::Value>,
-                    >(trimmed)
-                    {
-                        Ok(out) => out.emit(handle).await,
-                        Err(_) => match handle {
-                            Some(stdin) => {
-                                use tokio::io::AsyncWriteExt;
-                                let mut guard = stdin.lock().await;
-                                guard
-                                    .write_all(stdout_line.as_bytes())
-                                    .await
-                                    .expect("forward to child stdin failed");
-                            }
-                            None => print!("{stdout_line}"),
-                        },
-                    }
+                    let out: objectiveai_cli_lib::output::Output<serde_json::Value> =
+                        serde_json::from_str(trimmed)
+                            .expect("orphan stdout produced a non-JSONL line");
+                    out.emit(handle).await;
                     if crate::log_line::parse_log_stream_ready(&stdout_line).is_some() {
                         std::process::exit(0);
                     }
