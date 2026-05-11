@@ -1,7 +1,10 @@
 //! Plugin discovery and manifest types.
 
+mod client;
 mod manifest;
-mod plugins;
 
+pub use client::*;
 pub use manifest::*;
-pub use plugins::*;
+
+#[cfg(test)]
+mod manifest_tests;
