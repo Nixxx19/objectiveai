@@ -20,7 +20,7 @@ pub fn parse_log_stream_ready(line: &str) -> Option<String> {
     let parsed: Output<LogStreamReady> = serde_json::from_str(trimmed).ok()?;
     match parsed {
         Output::Notification(LogStreamReady { log_stream_ready }) => Some(log_stream_ready),
-        Output::Error(_) => None,
+        Output::Error(_) | Output::Begin | Output::End => None,
     }
 }
 

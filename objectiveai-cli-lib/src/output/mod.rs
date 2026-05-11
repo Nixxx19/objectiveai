@@ -28,6 +28,10 @@ use serde::{Deserialize, Serialize};
 pub enum Output<T> {
     Error(Error),
     Notification(T),
+    /// Stream-start marker. Wire: `{"type":"begin"}`.
+    Begin,
+    /// Stream-end marker. Wire: `{"type":"end"}`.
+    End,
 }
 
 impl<T: Serialize> Output<T> {

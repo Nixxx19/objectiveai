@@ -210,11 +210,9 @@ where
     I: IntoIterator<Item = T>,
     T: Into<std::ffi::OsString> + Clone,
 {
-    use objectiveai_cli_lib::output::{
-        Begin, End, Error as OutputError, Level, Output, BEGIN, END,
-    };
+    use objectiveai_cli_lib::output::{Error as OutputError, Level, Output};
 
-    Output::<Begin>::Notification(BEGIN).emit(&handle).await;
+    Output::<serde_json::Value>::Begin.emit(&handle).await;
 
     let code = match Cli::try_parse_from(args) {
         Ok(cli) => match cli.command.handle(cli_config, &handle).await {
@@ -236,6 +234,6 @@ where
         }
     };
 
-    Output::<End>::Notification(END).emit(&handle).await;
+    Output::<serde_json::Value>::End.emit(&handle).await;
     code
 }

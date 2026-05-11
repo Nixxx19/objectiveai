@@ -77,6 +77,8 @@ impl Handle {
                         serde_json::to_value(t)
                             .expect("T serializes when T: Serialize"),
                     ),
+                    Output::Begin => Output::Begin,
+                    Output::End => Output::End,
                 };
                 vec.lock().await.push(typed);
             }

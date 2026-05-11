@@ -90,18 +90,19 @@ fn ack_ok_wire_shape() {
 
 #[test]
 fn begin_wire_shape() {
-    let out = Output::Notification(BEGIN);
+    let out: Output<Ok> = Output::Begin;
     let v = roundtrip(&out);
-    assert_eq!(v["type"], "notification");
-    assert_eq!(v["begin"], true);
+    assert_eq!(v["type"], "begin");
+    // No other fields.
+    assert_eq!(v.as_object().unwrap().len(), 1);
 }
 
 #[test]
 fn end_wire_shape() {
-    let out = Output::Notification(END);
+    let out: Output<Ok> = Output::End;
     let v = roundtrip(&out);
-    assert_eq!(v["type"], "notification");
-    assert_eq!(v["end"], true);
+    assert_eq!(v["type"], "end");
+    assert_eq!(v.as_object().unwrap().len(), 1);
 }
 
 #[test]
