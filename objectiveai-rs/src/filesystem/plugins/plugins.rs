@@ -7,7 +7,7 @@
 
 use std::path::PathBuf;
 
-use super::Client;
+use super::super::Client;
 
 impl Client {
     /// The plugins directory: `<base_dir>/plugins`.
