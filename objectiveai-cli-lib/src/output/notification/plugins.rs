@@ -19,3 +19,13 @@ pub struct Plugins {
 pub struct Plugin {
     pub plugin: Option<ManifestWithNameAndSource>,
 }
+
+/// Wire shape: `{"type":"notification","value":{"installed": true|false}}`.
+/// Emitted by `objectiveai plugins install`. `true` means the binary
+/// landed at `<base_dir>/plugins/<repository>/plugin[.exe]`; `false`
+/// means the manifest fetched OK but this platform isn't in its
+/// `binaries` map (nothing to install, not an error).
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Installed {
+    pub installed: bool,
+}

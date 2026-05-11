@@ -33,7 +33,7 @@
 //! error and converts to exit code 1.
 
 use clap::Subcommand;
-use objectiveai_cli_lib::output::{Handle, Notification, Output, Plugin, Plugins};
+use objectiveai_cli_lib::output::{Handle, Installed, Notification, Output, Plugin, Plugins};
 use objectiveai_cli_lib::plugins::PluginOutput;
 use tokio::io::AsyncBufReadExt;
 use tokio::task::JoinHandle;
@@ -48,6 +48,21 @@ pub enum Commands {
         /// Plugin name (filename stem of the manifest in
         /// `~/.objectiveai/plugins/`).
         name: String,
+    },
+    /// Install a plugin from a GitHub repository. Fetches
+    /// `objectiveai.json` from the repo root at `--commit-sha`
+    /// (or the default branch if omitted), then downloads the
+    /// matching release asset for this platform and writes it to
+    /// `~/.objectiveai/plugins/<repository>/plugin` (with `.exe` on
+    /// Windows). Emits `{"installed": false}` when this platform
+    /// isn't in the manifest's `binaries` map.
+    Install {
+        #[arg(long)]
+        owner: String,
+        #[arg(long)]
+        repository: String,
+        #[arg(long)]
+        commit_sha: Option<String>,
     },
     /// List installed plugins (every `.json` manifest in
     /// `~/.objectiveai/plugins/`). Sorted by manifest mtime, most
@@ -77,10 +92,34 @@ impl Commands {
     ) -> Result<(), crate::error::Error> {
         match self {
             Commands::Get { name } => get(cli_config, handle, &name).await,
+            Commands::Install { owner, repository, commit_sha } => {
+                install(cli_config, handle, &owner, &repository, commit_sha.as_deref()).await
+            }
             Commands::List { offset, limit } => list(cli_config, handle, offset, limit).await,
             Commands::Run(args) => dispatch_external(args, cli_config, handle).await,
         }
     }
+}
+
+async fn install(
+    cli_config: &crate::Config,
+    handle: &Handle,
+    owner: &str,
+    repository: &str,
+    commit_sha: Option<&str>,
+) -> Result<(), crate::error::Error> {
+    let fs_client = objectiveai::filesystem::Client::new(
+        cli_config.config_base_dir.as_deref(),
+        cli_config.commit_author_name.as_deref(),
+        cli_config.commit_author_email.as_deref(),
+    );
+    let installed = fs_client
+        .install_plugin(owner, repository, commit_sha, None)
+        .await?;
+    Output::<Installed>::Notification(Notification { value: Installed { installed } })
+        .emit(handle)
+        .await;
+    Ok(())
 }
 
 async fn get(

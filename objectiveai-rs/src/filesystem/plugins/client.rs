@@ -119,3 +119,194 @@ impl Client {
         }
     }
 }
+
+#[cfg(feature = "http")]
+impl Client {
+    /// Install a plugin from a GitHub repository.
+    ///
+    /// 1. Fetches `objectiveai.json` from `raw.githubusercontent.com`
+    ///    at the supplied `commit_sha` (or the default branch via
+    ///    `HEAD` when none).
+    /// 2. Parses it as a [`Manifest`].
+    /// 3. Looks up the current platform in `manifest.binaries`. If
+    ///    absent (or this host's platform isn't recognized by
+    ///    [`super::Platform::current`]), returns `Ok(false)` — the
+    ///    plugin simply doesn't support this host.
+    /// 4. Downloads the matching release asset from
+    ///    `https://github.com/<owner>/<repository>/releases/download/v<version>/<asset>`.
+    /// 5. Writes it to `<base_dir>/plugins/<repository>/plugin`
+    ///    (`plugin.exe` on Windows). Sets mode `0o755` on Unix so the
+    ///    binary is executable.
+    ///
+    /// `headers` is an optional `IndexMap<String, String>` that gets
+    /// attached to both HTTP requests (e.g. `Authorization` for
+    /// private repos / higher rate limits). The cli always passes
+    /// `None`.
+    ///
+    /// Failures past step 3 are returned as
+    /// [`super::InstallError`] wrapped by
+    /// [`super::super::Error::Install`].
+    pub async fn install_plugin(
+        &self,
+        owner: &str,
+        repository: &str,
+        commit_sha: Option<&str>,
+        headers: Option<&indexmap::IndexMap<String, String>>,
+    ) -> Result<bool, super::super::Error> {
+        self.install_plugin_impl(
+            "https://raw.githubusercontent.com",
+            "https://github.com",
+            owner,
+            repository,
+            commit_sha,
+            headers,
+        )
+        .await
+    }
+
+    /// Test-only entry point that exposes the raw / releases URL
+    /// bases so in-process mock servers can intercept the requests.
+    /// Same body otherwise.
+    #[cfg(test)]
+    pub(super) async fn install_plugin_at(
+        &self,
+        raw_base: &str,
+        releases_base: &str,
+        owner: &str,
+        repository: &str,
+        commit_sha: Option<&str>,
+        headers: Option<&indexmap::IndexMap<String, String>>,
+    ) -> Result<bool, super::super::Error> {
+        self.install_plugin_impl(
+            raw_base,
+            releases_base,
+            owner,
+            repository,
+            commit_sha,
+            headers,
+        )
+        .await
+    }
+
+    async fn install_plugin_impl(
+        &self,
+        raw_base: &str,
+        releases_base: &str,
+        owner: &str,
+        repository: &str,
+        commit_sha: Option<&str>,
+        headers: Option<&indexmap::IndexMap<String, String>>,
+    ) -> Result<bool, super::super::Error> {
+        let http = reqwest::Client::new();
+        let header_map = build_headers(headers)?;
+
+        // 1. Fetch manifest
+        let reference = commit_sha.unwrap_or("HEAD");
+        let manifest_url = format!(
+            "{raw_base}/{owner}/{repository}/{reference}/objectiveai.json"
+        );
+        let resp = http
+            .get(&manifest_url)
+            .headers(header_map.clone())
+            .send()
+            .await
+            .map_err(super::InstallError::ManifestRequest)?;
+        let status = resp.status();
+        let bytes = resp
+            .bytes()
+            .await
+            .map_err(super::InstallError::ManifestResponse)?;
+        if !status.is_success() {
+            return Err(super::InstallError::ManifestBadStatus {
+                code: status,
+                url: manifest_url,
+                body: String::from_utf8_lossy(&bytes).into_owned(),
+            }
+            .into());
+        }
+        let mut de = serde_json::Deserializer::from_slice(&bytes);
+        let manifest: Manifest = serde_path_to_error::deserialize(&mut de)
+            .map_err(super::InstallError::ManifestParse)?;
+
+        // 2. Match platform
+        let Some(platform) = super::Platform::current() else {
+            return Ok(false);
+        };
+        let Some(binary_name) = manifest.binaries.get(&platform) else {
+            return Ok(false);
+        };
+
+        // 3. Fetch binary
+        let binary_url = format!(
+            "{releases_base}/{owner}/{repository}/releases/download/v{version}/{binary_name}",
+            version = manifest.version,
+        );
+        let resp = http
+            .get(&binary_url)
+            .headers(header_map)
+            .send()
+            .await
+            .map_err(super::InstallError::BinaryRequest)?;
+        let status = resp.status();
+        if !status.is_success() {
+            return Err(super::InstallError::BinaryBadStatus {
+                code: status,
+                url: binary_url,
+            }
+            .into());
+        }
+        let bin_bytes = resp
+            .bytes()
+            .await
+            .map_err(super::InstallError::BinaryResponse)?;
+
+        // 4. Write to <plugins_dir>/<repository>/plugin[.exe]
+        let plugin_dir = self.plugins_dir().join(repository);
+        tokio::fs::create_dir_all(&plugin_dir)
+            .await
+            .map_err(|e| super::InstallError::PluginDirCreate(plugin_dir.clone(), e))?;
+        let binary_filename = if cfg!(windows) { "plugin.exe" } else { "plugin" };
+        let binary_path = plugin_dir.join(binary_filename);
+        tokio::fs::write(&binary_path, &bin_bytes)
+            .await
+            .map_err(|e| super::InstallError::BinaryWrite(binary_path.clone(), e))?;
+
+        // 5. chmod +x on Unix
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let perms = std::fs::Permissions::from_mode(0o755);
+            tokio::fs::set_permissions(&binary_path, perms)
+                .await
+                .map_err(|e| super::InstallError::Chmod(binary_path.clone(), e))?;
+        }
+
+        Ok(true)
+    }
+}
+
+#[cfg(feature = "http")]
+pub(super) fn build_headers(
+    headers: Option<&indexmap::IndexMap<String, String>>,
+) -> Result<reqwest::header::HeaderMap, super::InstallError> {
+    let mut out = reqwest::header::HeaderMap::new();
+    let Some(h) = headers else {
+        return Ok(out);
+    };
+    for (k, v) in h {
+        let name = reqwest::header::HeaderName::from_bytes(k.as_bytes()).map_err(|e| {
+            super::InstallError::InvalidHeaderName {
+                name: k.clone(),
+                reason: e.to_string(),
+            }
+        })?;
+        let value = reqwest::header::HeaderValue::from_str(v).map_err(|e| {
+            super::InstallError::InvalidHeaderValue {
+                name: k.clone(),
+                reason: e.to_string(),
+            }
+        })?;
+        out.insert(name, value);
+    }
+    Ok(out)
+}
