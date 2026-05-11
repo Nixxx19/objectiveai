@@ -32,14 +32,14 @@ impl Commands {
         let client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
         match self {
             Commands::Get { id, filter } => {
-                let content = objectiveai::filesystem::logs::client::read_function_execution(&client, &id, filter.as_deref()).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
+                let content = client.read_function_execution(&id, filter.as_deref()).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
                 {
                 crate::log_line::emit_log_content(content, handle).await;
                 Ok(())
             }
             }
             Commands::Subscribe { id, timeout_ms, require_modification, filter } => {
-                let result = objectiveai::filesystem::logs::client::subscribe_function_execution(&client, &id, std::time::Duration::from_millis(timeout_ms), require_modification, filter.as_deref()).await?;
+                let result = client.subscribe_function_execution(&id, std::time::Duration::from_millis(timeout_ms), require_modification, filter.as_deref()).await?;
                 {
                 match result.map(objectiveai::filesystem::logs::LogContent::Json) {
                     Some(content) => {
@@ -51,14 +51,14 @@ impl Commands {
             }
             }
             Commands::List { offset, limit } => {
-                crate::log_line::emit_log_list(objectiveai::filesystem::logs::client::list_function_executions(&client, offset, limit).await?, handle).await;
+                crate::log_line::emit_log_list(client.list_function_executions(offset, limit).await?, handle).await;
                 Ok(())
             },
             Commands::Clear { nested } => {
                 if nested {
                     let counts = futures::future::try_join_all(vec![
-                        Box::pin(objectiveai::filesystem::logs::client::clear_function_executions(&client)) as std::pin::Pin<Box<dyn std::future::Future<Output = _> + Send>>,
-                        Box::pin(objectiveai::filesystem::logs::client::clear_function_execution_retry_tokens(&client)),
+                        Box::pin(client.clear_function_executions()) as std::pin::Pin<Box<dyn std::future::Future<Output = _> + Send>>,
+                        Box::pin(client.clear_function_execution_retry_tokens()),
                     ]).await?;
                     {
                 crate::log_line::emit_log_clear_count(counts.into_iter().sum(), handle).await;
@@ -66,7 +66,7 @@ impl Commands {
             }
                 } else {
                     {
-                crate::log_line::emit_log_clear_count(objectiveai::filesystem::logs::client::clear_function_executions(&client).await?, handle).await;
+                crate::log_line::emit_log_clear_count(client.clear_function_executions().await?, handle).await;
                 Ok(())
             }
                 }

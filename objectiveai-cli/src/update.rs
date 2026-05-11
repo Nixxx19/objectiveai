@@ -342,7 +342,7 @@ mod imp {
                 let client = fs_client();
                 // Best-effort: if the config file doesn't exist / is
                 // malformed, just skip.
-                match objectiveai::filesystem::config::client::read(&client).await {
+                match client.read_config().await {
                     Ok(mut config) => config
                         .api()
                         .headers()

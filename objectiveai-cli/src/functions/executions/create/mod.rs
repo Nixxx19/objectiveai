@@ -197,7 +197,7 @@ impl Commands {
         };
 
         let fs_client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
-        let log_writer = objectiveai::filesystem::logs::client::write_function_execution(&fs_client);
+        let log_writer = fs_client.write_function_execution();
 
         let handle = handle.clone();
         crate::api::run(Box::new(|http_client| Box::pin(async move {

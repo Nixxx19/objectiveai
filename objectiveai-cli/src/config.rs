@@ -12,7 +12,7 @@ pub async fn read(cli_config: &super::Config) -> Result<(Client, Config), crate:
         cli_config.commit_author_name.as_deref(),
         cli_config.commit_author_email.as_deref(),
     );
-    let config = objectiveai::filesystem::config::client::read(&client).await?;
+    let config = client.read_config().await?;
     Ok((client, config))
 }
 
@@ -20,7 +20,7 @@ pub async fn write(client: &Client, config: &Config, cli_config: &super::Config)
     if cli_config.config_set_forbidden {
         return Err(crate::error::Error::ConfigSetForbidden);
     }
-    objectiveai::filesystem::config::client::write(client, config).await?;
+    client.write_config(config).await?;
     Ok(())
 }
 

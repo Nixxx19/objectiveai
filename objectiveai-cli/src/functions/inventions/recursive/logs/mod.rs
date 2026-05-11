@@ -28,14 +28,14 @@ impl Commands {
         let client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
         match self {
             Commands::Get { id, filter } => {
-                let content = objectiveai::filesystem::logs::client::read_function_invention_recursive(&client, &id, filter.as_deref()).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
+                let content = client.read_function_invention_recursive(&id, filter.as_deref()).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
                 {
                 crate::log_line::emit_log_content(content, handle).await;
                 Ok(())
             }
             }
             Commands::Subscribe { id, timeout_ms, require_modification, filter } => {
-                let result = objectiveai::filesystem::logs::client::subscribe_function_invention_recursive(&client, &id, std::time::Duration::from_millis(timeout_ms), require_modification, filter.as_deref()).await?;
+                let result = client.subscribe_function_invention_recursive(&id, std::time::Duration::from_millis(timeout_ms), require_modification, filter.as_deref()).await?;
                 {
                 match result.map(objectiveai::filesystem::logs::LogContent::Json) {
                     Some(content) => {
@@ -47,11 +47,11 @@ impl Commands {
             }
             }
             Commands::List { offset, limit } => {
-                crate::log_line::emit_log_list(objectiveai::filesystem::logs::client::list_function_inventions_recursive(&client, offset, limit).await?, handle).await;
+                crate::log_line::emit_log_list(client.list_function_inventions_recursive(offset, limit).await?, handle).await;
                 Ok(())
             },
             Commands::Clear => {
-                crate::log_line::emit_log_clear_count(objectiveai::filesystem::logs::client::clear_function_inventions_recursive(&client).await?, handle).await;
+                crate::log_line::emit_log_clear_count(client.clear_function_inventions_recursive().await?, handle).await;
                 Ok(())
             },
         }

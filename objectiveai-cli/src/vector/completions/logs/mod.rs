@@ -28,14 +28,14 @@ impl Commands {
         let client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
         match self {
             Commands::Get { id, filter } => {
-                let content = objectiveai::filesystem::logs::client::read_vector_completion(&client, &id, filter.as_deref()).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
+                let content = client.read_vector_completion(&id, filter.as_deref()).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
                 {
                 crate::log_line::emit_log_content(content, handle).await;
                 Ok(())
             }
             }
             Commands::Subscribe { id, timeout_ms, require_modification, filter } => {
-                let result = objectiveai::filesystem::logs::client::subscribe_vector_completion(&client, &id, std::time::Duration::from_millis(timeout_ms), require_modification, filter.as_deref()).await?;
+                let result = client.subscribe_vector_completion(&id, std::time::Duration::from_millis(timeout_ms), require_modification, filter.as_deref()).await?;
                 {
                 match result.map(objectiveai::filesystem::logs::LogContent::Json) {
                     Some(content) => {
@@ -47,11 +47,11 @@ impl Commands {
             }
             }
             Commands::List { offset, limit } => {
-                crate::log_line::emit_log_list(objectiveai::filesystem::logs::client::list_vector_completions(&client, offset, limit).await?, handle).await;
+                crate::log_line::emit_log_list(client.list_vector_completions(offset, limit).await?, handle).await;
                 Ok(())
             },
             Commands::Clear => {
-                crate::log_line::emit_log_clear_count(objectiveai::filesystem::logs::client::clear_vector_completions(&client).await?, handle).await;
+                crate::log_line::emit_log_clear_count(client.clear_vector_completions().await?, handle).await;
                 Ok(())
             },
         }

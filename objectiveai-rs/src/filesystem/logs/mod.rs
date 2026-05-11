@@ -1,4 +1,4 @@
-pub mod client;
+mod client;
 mod list;
 mod log_file;
 mod writer;

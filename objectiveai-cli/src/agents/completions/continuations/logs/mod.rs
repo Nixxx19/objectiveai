@@ -21,14 +21,14 @@ impl Commands {
         let client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
         match self {
             Commands::Get { id, filter } => {
-                let content = objectiveai::filesystem::logs::client::read_agent_completion_continuation(&client, &id, filter.as_deref()).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
+                let content = client.read_agent_completion_continuation(&id, filter.as_deref()).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
                 {
                 crate::log_line::emit_log_content(content, handle).await;
                 Ok(())
             }
             }
             Commands::Subscribe { id, timeout_ms, require_modification, filter } => {
-                let result = objectiveai::filesystem::logs::client::subscribe_agent_completion_continuation(&client, &id, std::time::Duration::from_millis(timeout_ms), require_modification, filter.as_deref()).await?;
+                let result = client.subscribe_agent_completion_continuation(&id, std::time::Duration::from_millis(timeout_ms), require_modification, filter.as_deref()).await?;
                 {
                 match result.map(objectiveai::filesystem::logs::LogContent::Json) {
                     Some(content) => {
@@ -40,7 +40,7 @@ impl Commands {
             }
             }
             Commands::Clear => {
-                crate::log_line::emit_log_clear_count(objectiveai::filesystem::logs::client::clear_agent_completion_continuations(&client).await?, handle).await;
+                crate::log_line::emit_log_clear_count(client.clear_agent_completion_continuations().await?, handle).await;
                 Ok(())
             },
         }
