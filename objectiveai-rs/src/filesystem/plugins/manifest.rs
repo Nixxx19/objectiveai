@@ -1,5 +1,8 @@
+use indexmap::IndexMap;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+
+use super::Platform;
 
 /// Declarative metadata a plugin ships with itself. The wire shape is
 /// JSON; the on-disk convention (sibling file, embedded resource,
@@ -27,6 +30,22 @@ pub struct Manifest {
     /// SPDX license identifier (or any string).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub license: Option<String>,
+
+    /// Release-asset filename per platform — what the cli should
+    /// download from the GitHub release tagged `v<version>` to install
+    /// the plugin's binary on each platform. Values are filenames
+    /// (e.g. `psyops-linux-x86_64`, `psyops-windows-x86_64.exe`), NOT
+    /// URLs; the URL is composed from the repository + tag + asset
+    /// name elsewhere.
+    ///
+    /// **Every platform key is optional.** Declare entries only for
+    /// the platforms this plugin actually ships a binary for; absent
+    /// platforms are simply not supported by this release. A plugin
+    /// shipping only Linux x86_64 declares one entry; a plugin
+    /// shipping all six declares six. Empty map ↔ field omitted in
+    /// the wire shape.
+    #[serde(default, skip_serializing_if = "IndexMap::is_empty")]
+    pub binaries: IndexMap<Platform, String>,
 }
 
 /// A [`Manifest`] enriched with the plugin's identifying `name` and

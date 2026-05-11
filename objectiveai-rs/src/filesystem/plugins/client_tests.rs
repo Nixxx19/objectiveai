@@ -22,6 +22,7 @@ fn minimal_manifest_json() -> String {
         author: None,
         homepage: None,
         license: None,
+        binaries: indexmap::IndexMap::new(),
     })
     .unwrap()
 }
