@@ -1,6 +1,9 @@
+use std::sync::Arc;
+
 use super::*;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use tokio::sync::Mutex;
 
 fn roundtrip<T>(out: &Output<T>) -> serde_json::Value
 where
@@ -12,12 +15,42 @@ where
 }
 
 #[tokio::test]
-async fn emit_with_none_handle_writes_to_stdout() {
-    // Smoke test that emit(&None) runs without panicking. We can't
-    // easily intercept stdout from a unit test, so just confirm the
+async fn emit_via_stdout_handle() {
+    // Smoke test that `Handle::Stdout` routes emit() without panicking.
+    // We can't intercept stdout from a unit test, so just confirm the
     // call completes and the future is Send + 'static-safe.
     let out: Output<Ok> = Output::Notification(OK);
-    out.emit(&None).await;
+    out.emit(&Handle::Stdout).await;
+}
+
+#[tokio::test]
+async fn emit_via_collect_handle_appends_to_vec() {
+    let vec = Arc::new(Mutex::new(Vec::new()));
+    let handle = Handle::Collect(vec.clone());
+
+    Output::Notification(OK).emit(&handle).await;
+    Output::<Ok>::Error(Error {
+        level: Level::Warn,
+        fatal: false,
+        message: "heads up".to_string(),
+    })
+    .emit(&handle)
+    .await;
+
+    let snapshot = vec.lock().await;
+    assert_eq!(snapshot.len(), 2);
+
+    // First: a notification carrying the `Ok` ack.
+    let first = serde_json::to_value(&snapshot[0]).unwrap();
+    assert_eq!(first["type"], "notification");
+    assert_eq!(first["ok"], true);
+
+    // Second: a warn-level non-fatal error.
+    let second = serde_json::to_value(&snapshot[1]).unwrap();
+    assert_eq!(second["type"], "error");
+    assert_eq!(second["level"], "warn");
+    assert_eq!(second["fatal"], false);
+    assert_eq!(second["message"], "heads up");
 }
 
 #[test]
