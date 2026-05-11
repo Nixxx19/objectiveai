@@ -43,6 +43,46 @@ fn manifest_full_roundtrip() {
 }
 
 #[test]
+fn manifest_with_name_and_source_field_order() {
+    let m = ManifestWithNameAndSource {
+        name: "psyops".to_string(),
+        manifest: Manifest {
+            description: "do things".to_string(),
+            version: "1.2.3".to_string(),
+            author: Some("Wiggidy".to_string()),
+            homepage: None,
+            license: Some("MIT".to_string()),
+        },
+        source: "/home/user/.objectiveai/plugins/psyops.manifest.json".to_string(),
+    };
+    let s = serde_json::to_string(&m).unwrap();
+    // With preserve_order, name comes first, the flattened manifest
+    // fields in declaration order, then source last. Optional `None`s
+    // are skipped (homepage).
+    let expected = concat!(
+        r#"{"#,
+        r#""name":"psyops","#,
+        r#""description":"do things","#,
+        r#""version":"1.2.3","#,
+        r#""author":"Wiggidy","#,
+        r#""license":"MIT","#,
+        r#""source":"/home/user/.objectiveai/plugins/psyops.manifest.json""#,
+        r#"}"#,
+    );
+    assert_eq!(s, expected);
+
+    // Roundtrip back.
+    let back: ManifestWithNameAndSource = serde_json::from_str(&s).unwrap();
+    assert_eq!(back.name, "psyops");
+    assert_eq!(back.manifest.description, "do things");
+    assert_eq!(back.manifest.version, "1.2.3");
+    assert_eq!(back.manifest.author.as_deref(), Some("Wiggidy"));
+    assert!(back.manifest.homepage.is_none());
+    assert_eq!(back.manifest.license.as_deref(), Some("MIT"));
+    assert_eq!(back.source, "/home/user/.objectiveai/plugins/psyops.manifest.json");
+}
+
+#[test]
 fn manifest_deserializes_minimal_json() {
     let json = serde_json::json!({
         "description": "x",
