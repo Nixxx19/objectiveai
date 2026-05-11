@@ -181,7 +181,7 @@ impl Commands {
             Commands::Vector { command } => command.handle(cli_config, handle).await,
             Commands::Logs { command } => command.handle(cli_config, handle).await,
             Commands::Instructions { command } => command.handle(cli_config, handle).await,
-            Commands::Plugin(args) => crate::plugin::handle(args, cli_config, handle).await,
+            Commands::Plugin(args) => crate::plugins::handle(args, cli_config, handle).await,
         }
     }
 }

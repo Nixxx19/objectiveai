@@ -23,7 +23,7 @@ mod instructions;
 mod log_line;
 mod log_stream;
 mod logs;
-mod plugin;
+mod plugins;
 pub mod update;
 mod vector;
 
