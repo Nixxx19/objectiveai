@@ -224,9 +224,9 @@ impl Commands {
                 });
 
             let result = ExecutionResult { output, errors };
-            objectiveai_cli_lib::output::Output::<Execution>::Notification(
+            objectiveai_cli_lib::output::Output::<Execution>::Notification(objectiveai_cli_lib::output::Notification { value: 
                 Execution { execution: result },
-            )
+             })
             .emit(&handle).await;
             Ok(())
         })), true).await

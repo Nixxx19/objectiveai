@@ -13,7 +13,7 @@ use serde::Serialize;
 use tokio::process::ChildStdin;
 use tokio::sync::Mutex;
 
-use super::Output;
+use super::{Notification, Output};
 
 /// Destination for [`super::Output::emit`].
 ///
@@ -73,10 +73,10 @@ impl Handle {
                 // roundtrip.
                 let typed = match output {
                     Output::Error(e) => Output::Error(e.clone()),
-                    Output::Notification(t) => Output::Notification(
-                        serde_json::to_value(t)
+                    Output::Notification(n) => Output::Notification(Notification {
+                        value: serde_json::to_value(&n.value)
                             .expect("T serializes when T: Serialize"),
-                    ),
+                    }),
                     Output::Begin => Output::Begin,
                     Output::End => Output::End,
                 };

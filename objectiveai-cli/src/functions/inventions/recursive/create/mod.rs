@@ -209,9 +209,9 @@ impl Commands {
                 })
                 .collect();
 
-            objectiveai_cli_lib::output::Output::<Inventions>::Notification(
+            objectiveai_cli_lib::output::Output::<Inventions>::Notification(objectiveai_cli_lib::output::Notification { value: 
                 Inventions { inventions: results },
-            )
+             })
             .emit(&handle).await;
             Ok(())
         })), true).await

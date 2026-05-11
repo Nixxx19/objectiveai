@@ -71,7 +71,11 @@ impl Commands {
             Commands::List => {
                 const NAMES: &[&str] = &["AlphaScalarBranchState", "AlphaScalarLeafState", "AlphaScalarState", "AlphaVectorBranchState", "AlphaVectorLeafState", "AlphaVectorState", "GetFunctionInventionStateResponse", "InputSchema", "Params", "ParamsState", "ParamsStateOrRemoteCommitOptional", "State"];
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schemas>::Notification(
-                    objectiveai_cli_lib::output::Schemas { schemas: NAMES.iter().map(|s| s.to_string()).collect() },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schemas {
+                            schemas: NAMES.iter().map(|s| s.to_string()).collect(),
+                        },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -80,7 +84,9 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.AlphaScalarBranchState.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -89,7 +95,9 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.AlphaScalarLeafState.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -98,7 +106,9 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.AlphaScalarState.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -107,7 +117,9 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.AlphaVectorBranchState.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -116,7 +128,9 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.AlphaVectorLeafState.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -125,7 +139,9 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.AlphaVectorState.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -134,7 +150,9 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.GetFunctionInventionStateResponse.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -143,7 +161,9 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.InputSchema.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -152,7 +172,9 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.Params.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -161,7 +183,9 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.ParamsState.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -170,7 +194,9 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.ParamsStateOrRemoteCommitOptional.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -179,7 +205,9 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.state.State.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }

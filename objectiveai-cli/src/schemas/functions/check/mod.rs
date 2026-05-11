@@ -31,7 +31,11 @@ impl Commands {
             Commands::List => {
                 const NAMES: &[&str] = &["ScalarFieldsValidation", "VectorFieldsValidation"];
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schemas>::Notification(
-                    objectiveai_cli_lib::output::Schemas { schemas: NAMES.iter().map(|s| s.to_string()).collect() },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schemas {
+                            schemas: NAMES.iter().map(|s| s.to_string()).collect(),
+                        },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -40,7 +44,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.check.ScalarFieldsValidation.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -49,7 +55,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.check.VectorFieldsValidation.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }

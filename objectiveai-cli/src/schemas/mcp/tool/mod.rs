@@ -99,7 +99,11 @@ impl Commands {
             Commands::List => {
                 const NAMES: &[&str] = &["AudioContent", "CallToolRequestParams", "CallToolResult", "ContentBlock", "EmbeddedResource", "ImageContent", "ListToolsRequest", "ListToolsResult", "ResourceLink", "TaskMetadata", "TaskSupport", "TextContent", "Tool", "ToolAnnotations", "ToolExecution", "ToolResultContent", "ToolSchemaObject", "ToolSchemaType", "ToolUseContent"];
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schemas>::Notification(
-                    objectiveai_cli_lib::output::Schemas { schemas: NAMES.iter().map(|s| s.to_string()).collect() },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schemas {
+                            schemas: NAMES.iter().map(|s| s.to_string()).collect(),
+                        },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -108,7 +112,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.AudioContent.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -117,7 +123,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.CallToolRequestParams.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -126,7 +134,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.CallToolResult.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -135,7 +145,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.ContentBlock.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -144,7 +156,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.EmbeddedResource.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -153,7 +167,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.ImageContent.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -162,7 +178,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.ListToolsRequest.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -171,7 +189,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.ListToolsResult.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -180,7 +200,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.ResourceLink.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -189,7 +211,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.TaskMetadata.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -198,7 +222,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.TaskSupport.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -207,7 +233,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.TextContent.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -216,7 +244,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.Tool.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -225,7 +255,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.ToolAnnotations.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -234,7 +266,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.ToolExecution.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -243,7 +277,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.ToolResultContent.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -252,7 +288,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.ToolSchemaObject.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -261,7 +299,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.ToolSchemaType.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -270,7 +310,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.tool.ToolUseContent.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }

@@ -30,7 +30,7 @@ impl Commands {
                 config.swarms().add_favorite(args.into_favorite()?);
                 crate::config::write(&client, &config, cli_config).await?;
                 {
-                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Ok>::Notification(objectiveai_cli_lib::output::OK).emit(handle).await;
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Ok>::Notification(objectiveai_cli_lib::output::Notification { value: objectiveai_cli_lib::output::OK }).emit(handle).await;
                 Ok(())
             }
             }
@@ -38,7 +38,7 @@ impl Commands {
                 config.swarms().del_favorite(&name)?;
                 crate::config::write(&client, &config, cli_config).await?;
                 {
-                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Ok>::Notification(objectiveai_cli_lib::output::OK).emit(handle).await;
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Ok>::Notification(objectiveai_cli_lib::output::Notification { value: objectiveai_cli_lib::output::OK }).emit(handle).await;
                 Ok(())
             }
             }
@@ -47,7 +47,7 @@ impl Commands {
                 args.apply(favorite)?;
                 crate::config::write(&client, &config, cli_config).await?;
                 {
-                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Ok>::Notification(objectiveai_cli_lib::output::OK).emit(handle).await;
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Ok>::Notification(objectiveai_cli_lib::output::Notification { value: objectiveai_cli_lib::output::OK }).emit(handle).await;
                 Ok(())
             }
             }

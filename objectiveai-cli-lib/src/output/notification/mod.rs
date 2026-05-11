@@ -1,3 +1,7 @@
+mod notification;
+
+pub use notification::*;
+
 // Shared / multi-command wire shapes.
 mod ack;
 mod cleared;

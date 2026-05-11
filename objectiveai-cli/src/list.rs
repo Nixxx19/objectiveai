@@ -16,13 +16,13 @@ pub enum Source {
 }
 
 async fn emit_items(items: Vec<ListItem>, handle: &Handle) {
-    Output::<Items<ListItem>>::Notification(Items { items })
+    Output::<Items<ListItem>>::Notification(objectiveai_cli_lib::output::Notification { value: Items { items } })
         .emit(handle)
         .await;
 }
 
 async fn emit_pair_items(items: Vec<PairListItem>, handle: &Handle) {
-    Output::<Items<PairListItem>>::Notification(Items { items })
+    Output::<Items<PairListItem>>::Notification(objectiveai_cli_lib::output::Notification { value: Items { items } })
         .emit(handle)
         .await;
 }

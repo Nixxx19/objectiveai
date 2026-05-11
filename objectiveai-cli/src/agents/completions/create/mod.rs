@@ -129,9 +129,9 @@ impl Commands {
                 })
                 .unwrap_or_default();
 
-            objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Content>::Notification(
+            objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Content>::Notification(objectiveai_cli_lib::output::Notification { value: 
                 objectiveai_cli_lib::output::Content { content },
-            )
+             })
             .emit(&handle).await;
             Ok(())
         })), true).await

@@ -59,7 +59,11 @@ impl Commands {
             Commands::List => {
                 const NAMES: &[&str] = &["BranchTaskExpression", "InlineFunction", "LeafTaskExpression", "PartialPlaceholderBranchTaskExpression", "PartialPlaceholderScalarFunctionTaskExpression", "PlaceholderScalarFunctionTaskExpression", "RemoteFunction", "ScalarFunctionTaskExpression", "VectorCompletionTaskExpression"];
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schemas>::Notification(
-                    objectiveai_cli_lib::output::Schemas { schemas: NAMES.iter().map(|s| s.to_string()).collect() },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schemas {
+                            schemas: NAMES.iter().map(|s| s.to_string()).collect(),
+                        },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -68,7 +72,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.BranchTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -77,7 +83,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.InlineFunction.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -86,7 +94,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.LeafTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -95,7 +105,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.PartialPlaceholderBranchTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -104,7 +116,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.PartialPlaceholderScalarFunctionTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -113,7 +127,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -122,7 +138,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.RemoteFunction.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -131,7 +149,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.ScalarFunctionTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }
@@ -140,7 +160,9 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.VectorCompletionTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(
-                    objectiveai_cli_lib::output::Schema { schema },
+                    objectiveai_cli_lib::output::Notification {
+                        value: objectiveai_cli_lib::output::Schema { schema },
+                    },
                 ).emit(handle).await;
                 Ok(())
             }

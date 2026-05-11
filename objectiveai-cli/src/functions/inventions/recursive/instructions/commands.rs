@@ -19,7 +19,7 @@ impl Commands {
                     crate::instructions::InstructionsScope::FunctionInventionsRecursive,
                     include_str!("../../../../../assets/functions/inventions/recursive/instructions/get/INSTRUCTIONS.md"),
                 )?;
-                objectiveai_cli_lib::output::Output::<Instructions>::Notification(Instructions { instructions }).emit(handle).await;
+                objectiveai_cli_lib::output::Output::<Instructions>::Notification(objectiveai_cli_lib::output::Notification { value: Instructions { instructions } }).emit(handle).await;
                 Ok(())
             },
         }

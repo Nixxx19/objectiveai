@@ -14,12 +14,16 @@ where
     serde_json::to_value(&back).unwrap()
 }
 
+fn notif<T>(value: T) -> Output<T> {
+    Output::Notification(Notification { value })
+}
+
 #[tokio::test]
 async fn emit_via_stdout_handle() {
     // Smoke test that `Handle::Stdout` routes emit() without panicking.
     // We can't intercept stdout from a unit test, so just confirm the
     // call completes and the future is Send + 'static-safe.
-    let out: Output<Ok> = Output::Notification(OK);
+    let out: Output<Ok> = notif(OK);
     out.emit(&Handle::Stdout).await;
 }
 
@@ -28,7 +32,7 @@ async fn emit_via_collect_handle_appends_to_vec() {
     let vec = Arc::new(Mutex::new(Vec::new()));
     let handle = Handle::Collect(vec.clone());
 
-    Output::Notification(OK).emit(&handle).await;
+    notif(OK).emit(&handle).await;
     Output::<Ok>::Error(Error {
         level: Level::Warn,
         fatal: false,
@@ -40,10 +44,10 @@ async fn emit_via_collect_handle_appends_to_vec() {
     let snapshot = vec.lock().await;
     assert_eq!(snapshot.len(), 2);
 
-    // First: a notification carrying the `Ok` ack.
+    // First: a notification carrying the `Ok` ack — nested under `value`.
     let first = serde_json::to_value(&snapshot[0]).unwrap();
     assert_eq!(first["type"], "notification");
-    assert_eq!(first["ok"], true);
+    assert_eq!(first["value"]["ok"], true);
 
     // Second: a warn-level non-fatal error.
     let second = serde_json::to_value(&snapshot[1]).unwrap();
@@ -82,10 +86,10 @@ fn error_non_fatal_warn_wire_shape() {
 
 #[test]
 fn ack_ok_wire_shape() {
-    let out = Output::Notification(OK);
+    let out = notif(OK);
     let v = roundtrip(&out);
     assert_eq!(v["type"], "notification");
-    assert_eq!(v["ok"], true);
+    assert_eq!(v["value"]["ok"], true);
 }
 
 #[test]
@@ -107,20 +111,20 @@ fn end_wire_shape() {
 
 #[test]
 fn cleared_wire_shape() {
-    let out = Output::Notification(Cleared { cleared: 7 });
+    let out = notif(Cleared { cleared: 7 });
     let v = roundtrip(&out);
     assert_eq!(v["type"], "notification");
-    assert_eq!(v["cleared"], 7);
+    assert_eq!(v["value"]["cleared"], 7);
 }
 
 #[test]
 fn instructions_wire_shape() {
-    let out = Output::Notification(Instructions {
+    let out = notif(Instructions {
         instructions: "follow these steps".to_string(),
     });
     let v = roundtrip(&out);
     assert_eq!(v["type"], "notification");
-    assert_eq!(v["instructions"], "follow these steps");
+    assert_eq!(v["value"]["instructions"], "follow these steps");
 }
 
 #[test]
@@ -129,13 +133,13 @@ fn items_generic_wire_shape() {
     struct Sample {
         n: u32,
     }
-    let out = Output::Notification(Items {
+    let out = notif(Items {
         items: vec![Sample { n: 1 }, Sample { n: 2 }],
     });
     let v = roundtrip(&out);
     assert_eq!(v["type"], "notification");
-    assert_eq!(v["items"][0]["n"], 1);
-    assert_eq!(v["items"][1]["n"], 2);
+    assert_eq!(v["value"]["items"][0]["n"], 1);
+    assert_eq!(v["value"]["items"][1]["n"], 2);
 }
 
 #[test]
@@ -149,101 +153,102 @@ fn pair_list_item_untagged_dispatch() {
         "note": ""
     }))
     .unwrap();
-    let out = Output::Notification(Items { items: vec![item] });
+    let out = notif(Items { items: vec![item] });
     let v = roundtrip(&out);
-    assert_eq!(v["items"][0]["name"], "fav");
+    assert_eq!(v["value"]["items"][0]["name"], "fav");
 }
 
 #[test]
 fn jq_results_wire_shape() {
-    let out = Output::Notification(JqResults {
+    let out = notif(JqResults {
         jq: json!([{"a": 1}, {"b": 2}]),
     });
     let v = roundtrip(&out);
     assert_eq!(v["type"], "notification");
-    assert_eq!(v["jq"][0]["a"], 1);
+    assert_eq!(v["value"]["jq"][0]["a"], 1);
 }
 
 #[test]
 fn log_content_json_wire_shape() {
-    let out = Output::Notification(LogContent::Json {
+    let out = notif(LogContent::Json {
         content: json!({"completion": {"id": "abc"}}),
     });
     let v = roundtrip(&out);
     assert_eq!(v["type"], "notification");
-    assert_eq!(v["content"]["completion"]["id"], "abc");
+    assert_eq!(v["value"]["content"]["completion"]["id"], "abc");
 }
 
 #[test]
 fn log_content_data_url_wire_shape() {
-    let out = Output::Notification(LogContent::DataUrl {
+    let out = notif(LogContent::DataUrl {
         content_data_url: "data:image/png;base64,abc".to_string(),
     });
     let v = roundtrip(&out);
     assert_eq!(v["type"], "notification");
-    assert_eq!(v["content_data_url"], "data:image/png;base64,abc");
+    assert_eq!(v["value"]["content_data_url"], "data:image/png;base64,abc");
 }
 
 #[test]
 fn log_stream_ready_wire_shape() {
-    let out = Output::Notification(LogStreamReady {
+    let out = notif(LogStreamReady {
         log_stream_ready: "abc-123".to_string(),
     });
     let v = roundtrip(&out);
     assert_eq!(v["type"], "notification");
-    assert_eq!(v["log_stream_ready"], "abc-123");
+    assert_eq!(v["value"]["log_stream_ready"], "abc-123");
 }
 
 #[test]
 fn published_wire_shape() {
-    let out = Output::Notification(Published {
+    let out = notif(Published {
         sha: "deadbeef".to_string(),
     });
     let v = roundtrip(&out);
     assert_eq!(v["type"], "notification");
-    assert_eq!(v["sha"], "deadbeef");
+    assert_eq!(v["value"]["sha"], "deadbeef");
 }
 
 #[test]
 fn schema_wire_shape() {
-    let out = Output::Notification(Schema {
+    let out = notif(Schema {
         schema: json!({"$schema": "...", "type": "object"}),
     });
     let v = roundtrip(&out);
     assert_eq!(v["type"], "notification");
-    assert_eq!(v["schema"]["$schema"], "...");
-    // `type` inside the schema must not collide with the outer `type`
-    // tag — they're at different JSON-object levels.
-    assert_eq!(v["schema"]["type"], "object");
+    assert_eq!(v["value"]["schema"]["$schema"], "...");
+    // `type` inside the schema lives at value.schema.type — fully
+    // separate from the outer `type`:"notification" discriminator,
+    // which is exactly the collision this nesting solves.
+    assert_eq!(v["value"]["schema"]["type"], "object");
 }
 
 #[test]
 fn schemas_list_wire_shape() {
-    let out = Output::Notification(Schemas {
+    let out = notif(Schemas {
         schemas: vec!["Foo".to_string(), "Bar".to_string()],
     });
     let v = roundtrip(&out);
     assert_eq!(v["type"], "notification");
-    assert_eq!(v["schemas"][0], "Foo");
-    assert_eq!(v["schemas"][1], "Bar");
+    assert_eq!(v["value"]["schemas"][0], "Foo");
+    assert_eq!(v["value"]["schemas"][1], "Bar");
 }
 
 #[test]
 fn value_generic_wire_shape() {
-    let out = Output::Notification(Value {
+    let out = notif(Value {
         value: vec!["a".to_string(), "b".to_string()],
     });
     let v = roundtrip(&out);
     assert_eq!(v["type"], "notification");
-    assert_eq!(v["value"][0], "a");
+    assert_eq!(v["value"]["value"][0], "a");
 }
 
 #[test]
 fn detached_wire_shape() {
-    let out = Output::Notification(Detached { pid: 12345 });
+    let out = notif(Detached { pid: 12345 });
     let v = roundtrip(&out);
     assert_eq!(v["type"], "notification");
-    assert_eq!(v["pid"], 12345);
+    assert_eq!(v["value"]["pid"], 12345);
 }
 
 #[test]

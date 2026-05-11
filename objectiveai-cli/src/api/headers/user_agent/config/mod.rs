@@ -18,7 +18,7 @@ impl Commands {
                 config.api().headers().set_user_agent(value);
                 crate::config::write(&client, &config, cli_config).await?;
                 {
-                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Ok>::Notification(objectiveai_cli_lib::output::OK).emit(handle).await;
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Ok>::Notification(objectiveai_cli_lib::output::Notification { value: objectiveai_cli_lib::output::OK }).emit(handle).await;
                 Ok(())
             }
             }

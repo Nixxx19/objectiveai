@@ -150,9 +150,9 @@ pub async fn handle(
                 })
                 .collect();
 
-            objectiveai_cli_lib::output::Output::<Laboratory>::Notification(
+            objectiveai_cli_lib::output::Output::<Laboratory>::Notification(objectiveai_cli_lib::output::Notification { value: 
                 Laboratory { laboratory: results },
-            )
+             })
             .emit(&handle).await;
             Ok(())
         })),

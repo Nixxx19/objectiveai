@@ -70,9 +70,9 @@ impl Commands {
                 let handle = handle.clone();
                 crate::api::run(|http_client| async move {
                     let response = objectiveai::agent::get_agent(&http_client, path).await?;
-                    objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Agent>::Notification(
+                    objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Agent>::Notification(objectiveai_cli_lib::output::Notification { value: 
                         objectiveai_cli_lib::output::Agent { agent: response },
-                    )
+                     })
                     .emit(&handle).await;
                     Ok(())
                 }, false).await
@@ -106,9 +106,9 @@ impl Commands {
                 let sha = objectiveai::filesystem::publish::publish_agent(
                     &fs_client, &repository, &agent, &msg, overwrite,
                 ).await?;
-                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Published>::Notification(
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Published>::Notification(objectiveai_cli_lib::output::Notification { value: 
                     objectiveai_cli_lib::output::Published { sha },
-                )
+                 })
                 .emit(handle).await;
                 Ok(())
             }

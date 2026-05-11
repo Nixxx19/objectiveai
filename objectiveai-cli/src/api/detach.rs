@@ -46,9 +46,9 @@ pub async fn detach(handle: &objectiveai_cli_lib::output::Handle) -> ! {
     let mut child = cmd.spawn().expect("failed to spawn detached process");
 
     let pid = child.id().expect("failed to get child PID");
-    objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Detached>::Notification(
+    objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Detached>::Notification(objectiveai_cli_lib::output::Notification { value: 
         objectiveai_cli_lib::output::Detached { pid },
-    )
+     })
     .emit(handle).await;
 
     let child_stdout = child.stdout.take().unwrap();

@@ -159,7 +159,11 @@ fn generate_module(node: &TreeNode, dir: &Path, depth: usize) {
     }
     code.push_str("];\n");
     code.push_str("                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schemas>::Notification(\n");
-    code.push_str("                    objectiveai_cli_lib::output::Schemas { schemas: NAMES.iter().map(|s| s.to_string()).collect() },\n");
+    code.push_str("                    objectiveai_cli_lib::output::Notification {\n");
+    code.push_str("                        value: objectiveai_cli_lib::output::Schemas {\n");
+    code.push_str("                            schemas: NAMES.iter().map(|s| s.to_string()).collect(),\n");
+    code.push_str("                        },\n");
+    code.push_str("                    },\n");
     code.push_str("                ).emit(handle).await;\n");
     code.push_str("                Ok(())\n");
     code.push_str("            }\n");
@@ -179,7 +183,9 @@ fn generate_module(node: &TreeNode, dir: &Path, depth: usize) {
         writeln!(code, "                    include_str!(\"{schema_rel}/{filename}\"),").unwrap();
         writeln!(code, "                ).expect(\"embedded JSON Schema must parse\");").unwrap();
         writeln!(code, "                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(").unwrap();
-        writeln!(code, "                    objectiveai_cli_lib::output::Schema {{ schema }},").unwrap();
+        writeln!(code, "                    objectiveai_cli_lib::output::Notification {{").unwrap();
+        writeln!(code, "                        value: objectiveai_cli_lib::output::Schema {{ schema }},").unwrap();
+        writeln!(code, "                    }},").unwrap();
         writeln!(code, "                ).emit(handle).await;").unwrap();
         writeln!(code, "                Ok(())").unwrap();
         writeln!(code, "            }}").unwrap();

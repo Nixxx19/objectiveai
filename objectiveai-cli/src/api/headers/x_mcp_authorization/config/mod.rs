@@ -22,7 +22,7 @@ impl Commands {
                 config.api().headers().add_x_mcp_authorization(key, value);
                 crate::config::write(&client, &config, cli_config).await?;
                 {
-                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Ok>::Notification(objectiveai_cli_lib::output::OK).emit(handle).await;
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Ok>::Notification(objectiveai_cli_lib::output::Notification { value: objectiveai_cli_lib::output::OK }).emit(handle).await;
                 Ok(())
             }
             }
@@ -30,7 +30,7 @@ impl Commands {
                 config.api().headers().del_x_mcp_authorization(&key);
                 crate::config::write(&client, &config, cli_config).await?;
                 {
-                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Ok>::Notification(objectiveai_cli_lib::output::OK).emit(handle).await;
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Ok>::Notification(objectiveai_cli_lib::output::Notification { value: objectiveai_cli_lib::output::OK }).emit(handle).await;
                 Ok(())
             }
             }

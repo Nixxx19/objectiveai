@@ -27,7 +27,10 @@ use serde::{Deserialize, Serialize};
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Output<T> {
     Error(Error),
-    Notification(T),
+    /// Wraps `T` in [`Notification`] so its fields end up under a
+    /// nested `value` key — protects against `T` carrying its own
+    /// `"type"` field colliding with this enum's discriminator.
+    Notification(Notification<T>),
     /// Stream-start marker. Wire: `{"type":"begin"}`.
     Begin,
     /// Stream-end marker. Wire: `{"type":"end"}`.

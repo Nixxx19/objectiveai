@@ -70,9 +70,9 @@ impl Commands {
                 let handle = handle.clone();
                 crate::api::run(|http_client| async move {
                     let response = objectiveai::functions::profiles::get_profile(&http_client, path).await?;
-                    objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Profile>::Notification(
+                    objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Profile>::Notification(objectiveai_cli_lib::output::Notification { value: 
                         objectiveai_cli_lib::output::Profile { profile: response },
-                    )
+                     })
                     .emit(&handle).await;
                     Ok(())
                 }, false).await
@@ -106,9 +106,9 @@ impl Commands {
                 let sha = objectiveai::filesystem::publish::publish_profile(
                     &fs_client, &repository, &profile, &msg, overwrite,
                 ).await?;
-                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Published>::Notification(
+                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Published>::Notification(objectiveai_cli_lib::output::Notification { value: 
                     objectiveai_cli_lib::output::Published { sha },
-                )
+                 })
                 .emit(handle).await;
                 Ok(())
             }
