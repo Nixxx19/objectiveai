@@ -30,7 +30,7 @@ fn minimal_manifest_json() -> String {
 async fn list_plugins_returns_empty_when_dir_missing() {
     let base = fresh_base_dir();
     let client = client_for(&base);
-    let plugins = client.list_plugins().await;
+    let plugins = client.list_plugins(0, 100).await;
     assert!(plugins.is_empty(), "expected empty Vec, got {plugins:?}");
     cleanup(&base);
 }
@@ -40,7 +40,7 @@ async fn list_plugins_returns_empty_when_dir_empty() {
     let base = fresh_base_dir();
     std::fs::create_dir_all(base.join("plugins")).unwrap();
     let client = client_for(&base);
-    let plugins = client.list_plugins().await;
+    let plugins = client.list_plugins(0, 100).await;
     assert!(plugins.is_empty(), "expected empty Vec, got {plugins:?}");
     cleanup(&base);
 }
@@ -54,7 +54,7 @@ async fn list_plugins_parses_valid_manifest() {
     std::fs::write(&manifest_path, minimal_manifest_json()).unwrap();
 
     let client = client_for(&base);
-    let plugins = client.list_plugins().await;
+    let plugins = client.list_plugins(0, 100).await;
 
     assert_eq!(plugins.len(), 1);
     let p = &plugins[0];
@@ -77,7 +77,7 @@ async fn list_plugins_skips_invalid_files() {
     std::fs::write(plugins_dir.join("noise.txt"), "ignore me").unwrap();
 
     let client = client_for(&base);
-    let plugins = client.list_plugins().await;
+    let plugins = client.list_plugins(0, 100).await;
 
     assert_eq!(plugins.len(), 1, "got {plugins:?}");
     assert_eq!(plugins[0].name, "a");
@@ -95,11 +95,32 @@ async fn list_plugins_handles_multiple_valid_manifests() {
     }
 
     let client = client_for(&base);
-    let mut plugins = client.list_plugins().await;
+    let mut plugins = client.list_plugins(0, 100).await;
     plugins.sort_by(|x, y| x.name.cmp(&y.name));
 
     let names: Vec<&str> = plugins.iter().map(|p| p.name.as_str()).collect();
     assert_eq!(names, vec!["a", "b", "c"]);
+
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn list_plugins_respects_offset_and_limit() {
+    let base = fresh_base_dir();
+    let plugins_dir = base.join("plugins");
+    std::fs::create_dir_all(&plugins_dir).unwrap();
+    for stem in ["a", "b", "c"] {
+        std::fs::write(plugins_dir.join(format!("{stem}.json")), minimal_manifest_json()).unwrap();
+    }
+
+    let client = client_for(&base);
+
+    assert_eq!(client.list_plugins(0, 100).await.len(), 3, "unbounded should return all 3");
+    assert_eq!(client.list_plugins(0, 1).await.len(), 1, "limit=1 should clip to 1");
+    assert_eq!(client.list_plugins(1, 1).await.len(), 1, "offset=1 limit=1 should return 1");
+    assert_eq!(client.list_plugins(2, 100).await.len(), 1, "offset=2 should leave 1 item");
+    assert_eq!(client.list_plugins(5, 100).await.len(), 0, "offset past end is empty");
+    assert_eq!(client.list_plugins(0, 0).await.len(), 0, "limit=0 is empty");
 
     cleanup(&base);
 }

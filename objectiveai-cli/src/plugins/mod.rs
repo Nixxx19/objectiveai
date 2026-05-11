@@ -41,8 +41,15 @@ use tokio::task::JoinHandle;
 #[derive(Subcommand)]
 pub enum Commands {
     /// List installed plugins (every `.json` manifest in
-    /// `~/.objectiveai/plugins/`).
-    List,
+    /// `~/.objectiveai/plugins/`). Sorted by manifest mtime, most
+    /// recent first. Supports `--offset` / `--limit` for pagination,
+    /// matching `agents completions logs list` and siblings.
+    List {
+        #[arg(long, default_value_t = 0)]
+        offset: usize,
+        #[arg(long, default_value_t = 100)]
+        limit: usize,
+    },
     /// Run a plugin from `~/.objectiveai/plugins/`. First element is
     /// the plugin name; the rest are forwarded as the plugin's argv
     /// verbatim. The shell handles tokenization — quoted args stay
@@ -60,7 +67,7 @@ impl Commands {
         handle: &Handle,
     ) -> Result<(), crate::error::Error> {
         match self {
-            Commands::List => list(cli_config, handle).await,
+            Commands::List { offset, limit } => list(cli_config, handle, offset, limit).await,
             Commands::Run(args) => dispatch_external(args, cli_config, handle).await,
         }
     }
@@ -69,13 +76,15 @@ impl Commands {
 async fn list(
     cli_config: &crate::Config,
     handle: &Handle,
+    offset: usize,
+    limit: usize,
 ) -> Result<(), crate::error::Error> {
     let fs_client = objectiveai::filesystem::Client::new(
         cli_config.config_base_dir.as_deref(),
         cli_config.commit_author_name.as_deref(),
         cli_config.commit_author_email.as_deref(),
     );
-    let plugins = fs_client.list_plugins().await;
+    let plugins = fs_client.list_plugins(offset, limit).await;
     Output::<Plugins>::Notification(Notification { value: Plugins { plugins } })
         .emit(handle)
         .await;
