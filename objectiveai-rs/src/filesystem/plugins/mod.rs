@@ -5,12 +5,14 @@ mod client;
 mod install_error;
 mod manifest;
 mod platform;
+mod whitelist;
 
 pub use client::*;
 #[cfg(feature = "http")]
 pub use install_error::*;
 pub use manifest::*;
 pub use platform::*;
+pub use whitelist::*;
 
 #[cfg(test)]
 mod client_tests;
@@ -22,3 +24,5 @@ mod install_tests;
 mod manifest_tests;
 #[cfg(test)]
 mod platform_tests;
+#[cfg(test)]
+mod whitelist_tests;

@@ -153,9 +153,26 @@ impl Client {
         commit_sha: Option<&str>,
         headers: Option<&indexmap::IndexMap<String, String>>,
     ) -> Result<bool, super::super::Error> {
-        self.install_plugin_impl(
+        let manifest = self
+            .fetch_plugin_manifest(owner, repository, commit_sha, headers)
+            .await?;
+        self.install_plugin_from_manifest(owner, repository, &manifest, headers)
+            .await
+    }
+
+    /// Step 1 of `install_plugin`: fetch `<owner>/<repo>/<ref>/objectiveai.json`
+    /// from `raw.githubusercontent.com` and parse it as a [`Manifest`].
+    /// Exposed publicly so callers can inspect the manifest before
+    /// committing to an install (e.g. for whitelist checks).
+    pub async fn fetch_plugin_manifest(
+        &self,
+        owner: &str,
+        repository: &str,
+        commit_sha: Option<&str>,
+        headers: Option<&indexmap::IndexMap<String, String>>,
+    ) -> Result<Manifest, super::super::Error> {
+        self.fetch_plugin_manifest_impl(
             "https://raw.githubusercontent.com",
-            "https://github.com",
             owner,
             repository,
             commit_sha,
@@ -164,9 +181,25 @@ impl Client {
         .await
     }
 
+    /// Step 2 of `install_plugin`: given an already-parsed manifest,
+    /// pick the binary for the current platform (`Ok(false)` if
+    /// absent), download it from the corresponding release asset,
+    /// and write it to `<plugins_dir>/<repository>/plugin[.exe]`.
+    pub async fn install_plugin_from_manifest(
+        &self,
+        owner: &str,
+        repository: &str,
+        manifest: &Manifest,
+        headers: Option<&indexmap::IndexMap<String, String>>,
+    ) -> Result<bool, super::super::Error> {
+        self.install_from_manifest_impl("https://github.com", owner, repository, manifest, headers)
+            .await
+    }
+
     /// Test-only entry point that exposes the raw / releases URL
     /// bases so in-process mock servers can intercept the requests.
-    /// Same body otherwise.
+    /// Threads both URLs through the same fetch + install_from path
+    /// used by production.
     #[cfg(test)]
     pub(super) async fn install_plugin_at(
         &self,
@@ -177,37 +210,43 @@ impl Client {
         commit_sha: Option<&str>,
         headers: Option<&indexmap::IndexMap<String, String>>,
     ) -> Result<bool, super::super::Error> {
-        self.install_plugin_impl(
-            raw_base,
-            releases_base,
-            owner,
-            repository,
-            commit_sha,
-            headers,
-        )
-        .await
+        let manifest = self
+            .fetch_plugin_manifest_impl(raw_base, owner, repository, commit_sha, headers)
+            .await?;
+        self.install_from_manifest_impl(releases_base, owner, repository, &manifest, headers)
+            .await
     }
 
-    async fn install_plugin_impl(
+    /// Test-only fetch-only entry point, mirrors `install_plugin_at`.
+    #[cfg(test)]
+    pub(super) async fn fetch_plugin_manifest_at(
         &self,
         raw_base: &str,
-        releases_base: &str,
         owner: &str,
         repository: &str,
         commit_sha: Option<&str>,
         headers: Option<&indexmap::IndexMap<String, String>>,
-    ) -> Result<bool, super::super::Error> {
+    ) -> Result<Manifest, super::super::Error> {
+        self.fetch_plugin_manifest_impl(raw_base, owner, repository, commit_sha, headers)
+            .await
+    }
+
+    async fn fetch_plugin_manifest_impl(
+        &self,
+        raw_base: &str,
+        owner: &str,
+        repository: &str,
+        commit_sha: Option<&str>,
+        headers: Option<&indexmap::IndexMap<String, String>>,
+    ) -> Result<Manifest, super::super::Error> {
         let http = reqwest::Client::new();
         let header_map = build_headers(headers)?;
-
-        // 1. Fetch manifest
         let reference = commit_sha.unwrap_or("HEAD");
-        let manifest_url = format!(
-            "{raw_base}/{owner}/{repository}/{reference}/objectiveai.json"
-        );
+        let manifest_url =
+            format!("{raw_base}/{owner}/{repository}/{reference}/objectiveai.json");
         let resp = http
             .get(&manifest_url)
-            .headers(header_map.clone())
+            .headers(header_map)
             .send()
             .await
             .map_err(super::InstallError::ManifestRequest)?;
@@ -227,8 +266,21 @@ impl Client {
         let mut de = serde_json::Deserializer::from_slice(&bytes);
         let manifest: Manifest = serde_path_to_error::deserialize(&mut de)
             .map_err(super::InstallError::ManifestParse)?;
+        Ok(manifest)
+    }
 
-        // 2. Match platform
+    async fn install_from_manifest_impl(
+        &self,
+        releases_base: &str,
+        owner: &str,
+        repository: &str,
+        manifest: &Manifest,
+        headers: Option<&indexmap::IndexMap<String, String>>,
+    ) -> Result<bool, super::super::Error> {
+        let http = reqwest::Client::new();
+        let header_map = build_headers(headers)?;
+
+        // 1. Match platform
         let Some(platform) = super::Platform::current() else {
             return Ok(false);
         };
@@ -236,7 +288,7 @@ impl Client {
             return Ok(false);
         };
 
-        // 3. Fetch binary
+        // 2. Fetch binary
         let binary_url = format!(
             "{releases_base}/{owner}/{repository}/releases/download/v{version}/{binary_name}",
             version = manifest.version,
@@ -260,7 +312,7 @@ impl Client {
             .await
             .map_err(super::InstallError::BinaryResponse)?;
 
-        // 4. Write to <plugins_dir>/<repository>/plugin[.exe]
+        // 3. Write to <plugins_dir>/<repository>/plugin[.exe]
         let plugin_dir = self.plugins_dir().join(repository);
         tokio::fs::create_dir_all(&plugin_dir)
             .await
@@ -271,7 +323,7 @@ impl Client {
             .await
             .map_err(|e| super::InstallError::BinaryWrite(binary_path.clone(), e))?;
 
-        // 5. chmod +x on Unix
+        // 4. chmod +x on Unix
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;

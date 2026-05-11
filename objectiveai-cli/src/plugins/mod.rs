@@ -51,11 +51,15 @@ pub enum Commands {
     },
     /// Install a plugin from a GitHub repository. Fetches
     /// `objectiveai.json` from the repo root at `--commit-sha`
-    /// (or the default branch if omitted), then downloads the
-    /// matching release asset for this platform and writes it to
+    /// (or the default branch if omitted), checks the (owner,
+    /// repository, commit_sha_or_HEAD, manifest.version) quadruple
+    /// against the install whitelist, then downloads the matching
+    /// release asset for this platform and writes it to
     /// `~/.objectiveai/plugins/<repository>/plugin` (with `.exe` on
     /// Windows). Emits `{"installed": false}` when this platform
-    /// isn't in the manifest's `binaries` map.
+    /// isn't in the manifest's `binaries` map. Errors with
+    /// `PluginNotWhitelisted` when the quadruple matches no
+    /// whitelist entry and `--allow-untrusted` was not passed.
     Install {
         #[arg(long)]
         owner: String,
@@ -63,6 +67,12 @@ pub enum Commands {
         repository: String,
         #[arg(long)]
         commit_sha: Option<String>,
+        /// Bypass the plugin whitelist. Emits a warning notification
+        /// and proceeds with the install. Use only if you trust the
+        /// repository — a non-whitelisted plugin runs with the same
+        /// permissions as any binary on your system.
+        #[arg(long)]
+        allow_untrusted: bool,
     },
     /// List installed plugins (every `.json` manifest in
     /// `~/.objectiveai/plugins/`). Sorted by manifest mtime, most
@@ -92,8 +102,8 @@ impl Commands {
     ) -> Result<(), crate::error::Error> {
         match self {
             Commands::Get { name } => get(cli_config, handle, &name).await,
-            Commands::Install { owner, repository, commit_sha } => {
-                install(cli_config, handle, &owner, &repository, commit_sha.as_deref()).await
+            Commands::Install { owner, repository, commit_sha, allow_untrusted } => {
+                install(cli_config, handle, &owner, &repository, commit_sha.as_deref(), allow_untrusted).await
             }
             Commands::List { offset, limit } => list(cli_config, handle, offset, limit).await,
             Commands::Run(args) => dispatch_external(args, cli_config, handle).await,
@@ -107,19 +117,73 @@ async fn install(
     owner: &str,
     repository: &str,
     commit_sha: Option<&str>,
+    allow_untrusted: bool,
 ) -> Result<(), crate::error::Error> {
     let fs_client = objectiveai::filesystem::Client::new(
         cli_config.config_base_dir.as_deref(),
         cli_config.commit_author_name.as_deref(),
         cli_config.commit_author_email.as_deref(),
     );
+
+    // Step 1: fetch the manifest so we can extract its version for
+    // the whitelist check.
+    let manifest = fs_client
+        .fetch_plugin_manifest(owner, repository, commit_sha, None)
+        .await?;
+
+    // Step 2: whitelist check.
+    let effective_sha = commit_sha.unwrap_or("HEAD");
+    let whitelist = objectiveai::filesystem::plugins::default_whitelist();
+    let allowed = objectiveai::filesystem::plugins::check_plugin_whitelist(
+        owner,
+        repository,
+        effective_sha,
+        &manifest.version,
+        &whitelist,
+    )
+    .map_err(crate::error::Error::WhitelistRegex)?;
+
+    if !allowed {
+        if !allow_untrusted {
+            return Err(crate::error::Error::PluginNotWhitelisted {
+                owner: owner.to_string(),
+                repository: repository.to_string(),
+                commit_sha: effective_sha.to_string(),
+                version: manifest.version.clone(),
+            });
+        }
+        emit_untrusted_warning(handle, owner, repository, effective_sha, &manifest.version).await;
+    }
+
+    // Step 3: install from the already-fetched manifest.
     let installed = fs_client
-        .install_plugin(owner, repository, commit_sha, None)
+        .install_plugin_from_manifest(owner, repository, &manifest, None)
         .await?;
     Output::<Installed>::Notification(Notification { value: Installed { installed } })
         .emit(handle)
         .await;
     Ok(())
+}
+
+async fn emit_untrusted_warning(
+    handle: &Handle,
+    owner: &str,
+    repository: &str,
+    commit_sha: &str,
+    version: &str,
+) {
+    use objectiveai_cli_lib::output::{Error as OutputError, Level};
+    let message = format!(
+        "installing untrusted plugin {owner}/{repository} (commit: {commit_sha}, version: {version}); \
+         this plugin is not in the whitelist and is being installed because --allow-untrusted was passed"
+    );
+    Output::<serde_json::Value>::Error(OutputError {
+        level: Level::Warn,
+        fatal: false,
+        message,
+    })
+    .emit(handle)
+    .await;
 }
 
 async fn get(

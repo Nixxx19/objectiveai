@@ -252,6 +252,39 @@ async fn install_malformed_manifest_returns_parse_error() {
 }
 
 #[tokio::test]
+async fn fetch_plugin_manifest_returns_parsed_manifest() {
+    let base = temp_base();
+    let server = MockServer::start().await;
+    let platform_key = current_platform_key();
+
+    let manifest_body = json!({
+        "description": "test plugin",
+        "version": "1.2.3",
+        "author": "Wiggidy",
+        "binaries": { platform_key: "asset-bin" }
+    });
+
+    Mock::given(method("GET"))
+        .and(path("/owner/repo/HEAD/objectiveai.json"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(manifest_body))
+        .mount(&server)
+        .await;
+
+    let client = client_for(&base);
+    let manifest = client
+        .fetch_plugin_manifest_at(&server.uri(), "owner", "repo", None, None)
+        .await
+        .expect("expected Ok(Manifest)");
+
+    assert_eq!(manifest.description, "test plugin");
+    assert_eq!(manifest.version, "1.2.3");
+    assert_eq!(manifest.author.as_deref(), Some("Wiggidy"));
+    assert_eq!(manifest.binaries.len(), 1);
+
+    cleanup(&base);
+}
+
+#[tokio::test]
 async fn install_passes_headers_to_both_requests() {
     let base = temp_base();
     let server = MockServer::start().await;

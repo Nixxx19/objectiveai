@@ -448,6 +448,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::filesystem::plugins::Manifest),
             schemars::schema_for!(crate::filesystem::plugins::ManifestWithNameAndSource),
             schemars::schema_for!(crate::filesystem::plugins::Platform),
+            schemars::schema_for!(crate::filesystem::plugins::WhitelistEntry),
         ]);
     }
     schemas

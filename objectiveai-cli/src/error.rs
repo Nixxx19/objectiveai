@@ -50,6 +50,15 @@ pub enum Error {
     PluginRead(std::io::Error),
     #[error("plugin exited with non-zero status: {0}")]
     PluginExit(i32),
+    #[error("plugin {owner}/{repository} (commit {commit_sha}, version {version}) is not in the install whitelist; pass --allow-untrusted to install anyway")]
+    PluginNotWhitelisted {
+        owner: String,
+        repository: String,
+        commit_sha: String,
+        version: String,
+    },
+    #[error("whitelist regex error: {0}")]
+    WhitelistRegex(regex::Error),
 }
 
 impl Error {
