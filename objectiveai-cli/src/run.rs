@@ -191,27 +191,40 @@ pub fn load_config() -> Config {
 /// The iterator should include the binary name as the first element
 /// (e.g., `["objectiveai", "agents", "list"]`).
 ///
-/// Returns `Ok(())` when the requested command succeeded — handlers
-/// emit their own [`objectiveai_cli_lib::output::Output`] lines inline.
-/// Returns `Err(cli_lib::output::Error)` when the command failed; the
-/// caller is responsible for emitting that error and choosing an exit
-/// code.
+/// Returns an exit code: `0` on success, `1` on any failure. Errors
+/// are emitted internally as `Output::Error` notifications via `handle`
+/// before the function returns — the caller doesn't see them. Handlers
+/// emit their own [`objectiveai_cli_lib::output::Output`] lines for
+/// successful runs.
 pub async fn run<I, T>(
     args: I,
     cli_config: &Config,
     handle: objectiveai_cli_lib::output::Handle,
-) -> Result<(), objectiveai_cli_lib::output::Error>
+) -> i32
 where
     I: IntoIterator<Item = T>,
     T: Into<std::ffi::OsString> + Clone,
 {
-    let cli = Cli::try_parse_from(args).map_err(|e| objectiveai_cli_lib::output::Error {
-        level: objectiveai_cli_lib::output::Level::Error,
-        fatal: true,
-        message: e.to_string(),
-    })?;
-    cli.command
-        .handle(cli_config, &handle)
-        .await
-        .map_err(|e| e.to_output(objectiveai_cli_lib::output::Level::Error, true))
+    use objectiveai_cli_lib::output::{Error as OutputError, Level, Output};
+
+    let cli = match Cli::try_parse_from(args) {
+        Ok(cli) => cli,
+        Err(e) => {
+            let err = OutputError {
+                level: Level::Error,
+                fatal: true,
+                message: e.to_string(),
+            };
+            Output::<serde_json::Value>::Error(err).emit(&handle).await;
+            return 1;
+        }
+    };
+    match cli.command.handle(cli_config, &handle).await {
+        Ok(()) => 0,
+        Err(e) => {
+            let err = e.to_output(Level::Error, true);
+            Output::<serde_json::Value>::Error(err).emit(&handle).await;
+            1
+        }
+    }
 }

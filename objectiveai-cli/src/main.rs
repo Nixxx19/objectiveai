@@ -19,10 +19,6 @@ async fn main() {
     // the same argv. Any error inside is emitted as a non-fatal warn-level
     // notification and swallowed.
     objectiveai_cli::update::maybe_auto_update(args.clone(), &cli_config, &handle).await;
-    if let Err(err) = objectiveai_cli::run(args, &cli_config, handle.clone()).await {
-        objectiveai_cli_lib::output::Output::<serde_json::Value>::Error(err)
-            .emit(&handle)
-            .await;
-        std::process::exit(1);
-    }
+    let code = objectiveai_cli::run(args, &cli_config, handle).await;
+    std::process::exit(code);
 }
