@@ -5,10 +5,26 @@
 //! [`Client::resolve_plugin`] to turn a user-supplied plugin name
 //! into an executable path.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use super::super::Client;
 use super::{Manifest, ManifestWithNameAndSource};
+
+/// Two-step parse: try `ManifestWithNameAndSource` first (installed
+/// plugins persist `name` + `source`), then fall back to a bare
+/// `Manifest` with `name = file_stem` and `source = absolute_path`
+/// (hand-edited / pre-existing manifests). Returns `None` on missing
+/// / unreadable / malformed files.
+async fn parse_manifest_file(path: &Path) -> Option<ManifestWithNameAndSource> {
+    let bytes = tokio::fs::read(path).await.ok()?;
+    if let Ok(full) = serde_json::from_slice::<ManifestWithNameAndSource>(&bytes) {
+        return Some(full);
+    }
+    let manifest: Manifest = serde_json::from_slice(&bytes).ok()?;
+    let name = path.file_stem()?.to_str()?.to_string();
+    let source = path.to_string_lossy().into_owned();
+    Some(ManifestWithNameAndSource { name, manifest, source })
+}
 
 impl Client {
     /// The plugins directory: `<base_dir>/plugins`.
@@ -45,21 +61,14 @@ impl Client {
     }
 
     /// Look up a single plugin manifest by name. Reads
-    /// `<base_dir>/plugins/<name>.json`, deserializes it as a
-    /// [`Manifest`], and pairs it with the bare `name` and absolute
-    /// `source` path. Returns `None` if the file is missing,
-    /// unreadable, or malformed — same silent-skip policy as
-    /// [`Client::list_plugins`].
+    /// `<base_dir>/plugins/<name>.json`. If the file persists `name`
+    /// and `source` (as installed plugins do), they're returned
+    /// verbatim; otherwise the wrapper is synthesized with
+    /// `name = <name>` and `source = absolute_path`. Returns `None`
+    /// if the file is missing, unreadable, or malformed.
     pub async fn get_plugin(&self, name: &str) -> Option<ManifestWithNameAndSource> {
         let path = self.plugins_dir().join(format!("{name}.json"));
-        let bytes = tokio::fs::read(&path).await.ok()?;
-        let manifest: Manifest = serde_json::from_slice(&bytes).ok()?;
-        let source = path.to_string_lossy().into_owned();
-        Some(ManifestWithNameAndSource {
-            name: name.to_string(),
-            manifest,
-            source,
-        })
+        parse_manifest_file(&path).await
     }
 
     /// Enumerate plugin manifests in the plugins directory. Reads each
@@ -91,10 +100,7 @@ impl Client {
             }
         }
         let futures = paths.into_iter().map(|p| async move {
-            let bytes = tokio::fs::read(&p).await.ok()?;
-            let manifest: Manifest = serde_json::from_slice(&bytes).ok()?;
-            let name = p.file_stem()?.to_str()?.to_string();
-            let source = p.to_string_lossy().into_owned();
+            let bundle = parse_manifest_file(&p).await?;
             let modified = tokio::fs::metadata(&p)
                 .await
                 .ok()?
@@ -103,7 +109,7 @@ impl Client {
                 .duration_since(std::time::SystemTime::UNIX_EPOCH)
                 .ok()?
                 .as_secs();
-            Some((modified, ManifestWithNameAndSource { name, manifest, source }))
+            Some((modified, bundle))
         });
         let mut entries: Vec<(u64, ManifestWithNameAndSource)> = futures::future::join_all(futures)
             .await
@@ -156,7 +162,8 @@ impl Client {
         let manifest = self
             .fetch_plugin_manifest(owner, repository, commit_sha, headers)
             .await?;
-        self.install_plugin_from_manifest(owner, repository, &manifest, headers)
+        let source = raw_manifest_url(owner, repository, commit_sha);
+        self.install_plugin_from_manifest(owner, repository, &manifest, &source, headers)
             .await
     }
 
@@ -190,10 +197,18 @@ impl Client {
         owner: &str,
         repository: &str,
         manifest: &Manifest,
+        source: &str,
         headers: Option<&indexmap::IndexMap<String, String>>,
     ) -> Result<bool, super::super::Error> {
-        self.install_from_manifest_impl("https://github.com", owner, repository, manifest, headers)
-            .await
+        self.install_from_manifest_impl(
+            "https://github.com",
+            owner,
+            repository,
+            manifest,
+            source,
+            headers,
+        )
+        .await
     }
 
     /// Test-only entry point that exposes the raw / releases URL
@@ -213,8 +228,17 @@ impl Client {
         let manifest = self
             .fetch_plugin_manifest_impl(raw_base, owner, repository, commit_sha, headers)
             .await?;
-        self.install_from_manifest_impl(releases_base, owner, repository, &manifest, headers)
-            .await
+        let reference = commit_sha.unwrap_or("HEAD");
+        let source = format!("{raw_base}/{owner}/{repository}/{reference}/objectiveai.json");
+        self.install_from_manifest_impl(
+            releases_base,
+            owner,
+            repository,
+            &manifest,
+            &source,
+            headers,
+        )
+        .await
     }
 
     /// Test-only fetch-only entry point, mirrors `install_plugin_at`.
@@ -275,6 +299,7 @@ impl Client {
         owner: &str,
         repository: &str,
         manifest: &Manifest,
+        source: &str,
         headers: Option<&indexmap::IndexMap<String, String>>,
     ) -> Result<bool, super::super::Error> {
         let http = reqwest::Client::new();
@@ -333,8 +358,33 @@ impl Client {
                 .map_err(|e| super::InstallError::Chmod(binary_path.clone(), e))?;
         }
 
+        // 5. Persist the manifest as <plugins_dir>/<repository>.json so
+        // list_plugins / get_plugin surface this install.
+        let manifest_path = self.plugins_dir().join(format!("{repository}.json"));
+        let bundle = ManifestWithNameAndSource {
+            name: repository.to_string(),
+            manifest: manifest.clone(),
+            source: source.to_string(),
+        };
+        let bytes = serde_json::to_vec_pretty(&bundle)
+            .map_err(super::InstallError::ManifestSerialize)?;
+        tokio::fs::write(&manifest_path, &bytes)
+            .await
+            .map_err(|e| super::InstallError::ManifestPersist(manifest_path.clone(), e))?;
+
         Ok(true)
     }
+}
+
+/// Convention: the raw-GitHub URL we'd fetch `objectiveai.json` from
+/// for a given (owner, repository, optional commit sha). Defaults to
+/// `HEAD` when no commit is supplied. Lifted out so the cli and the
+/// SDK's own `install_plugin` wrapper share one source of truth.
+pub fn raw_manifest_url(owner: &str, repository: &str, commit_sha: Option<&str>) -> String {
+    let reference = commit_sha.unwrap_or("HEAD");
+    format!(
+        "https://raw.githubusercontent.com/{owner}/{repository}/{reference}/objectiveai.json"
+    )
 }
 
 #[cfg(feature = "http")]

@@ -155,9 +155,12 @@ async fn install(
         emit_untrusted_warning(handle, owner, repository, effective_sha, &manifest.version).await;
     }
 
-    // Step 3: install from the already-fetched manifest.
+    // Step 3: install from the already-fetched manifest. The source
+    // URL persisted alongside the binary is the raw GitHub URL the
+    // manifest came from.
+    let source = objectiveai::filesystem::plugins::raw_manifest_url(owner, repository, commit_sha);
     let installed = fs_client
-        .install_plugin_from_manifest(owner, repository, &manifest, None)
+        .install_plugin_from_manifest(owner, repository, &manifest, &source, None)
         .await?;
     Output::<Installed>::Notification(Notification { value: Installed { installed } })
         .emit(handle)

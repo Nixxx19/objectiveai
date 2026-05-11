@@ -36,6 +36,10 @@ pub enum InstallError {
     BinaryWrite(PathBuf, std::io::Error),
     #[error("failed to set executable permission on {0}: {1}")]
     Chmod(PathBuf, std::io::Error),
+    #[error("failed to serialize manifest for persistence: {0}")]
+    ManifestSerialize(serde_json::Error),
+    #[error("failed to persist manifest at {0}: {1}")]
+    ManifestPersist(PathBuf, std::io::Error),
     #[error("invalid header name {name:?}: {reason}")]
     InvalidHeaderName { name: String, reason: String },
     #[error("invalid header value for {name:?}: {reason}")]

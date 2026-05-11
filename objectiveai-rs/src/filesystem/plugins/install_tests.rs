@@ -1,5 +1,5 @@
 use super::super::Client;
-use super::{InstallError, Platform};
+use super::{InstallError, ManifestWithNameAndSource, Platform};
 use indexmap::IndexMap;
 use serde_json::json;
 use wiremock::matchers::{header, method, path};
@@ -81,6 +81,16 @@ async fn install_succeeds_when_platform_supported() {
         assert!(mode & 0o111 != 0, "binary not executable, mode={mode:o}");
     }
 
+    // Manifest must be persisted as a flat sibling at
+    // <plugins_dir>/<repository>.json with name = repository and
+    // source = the github URL the manifest came from.
+    let manifest_path = base.join("plugins").join("repo.json");
+    assert!(manifest_path.exists(), "manifest missing at {manifest_path:?}");
+    let manifest_bytes = std::fs::read(&manifest_path).unwrap();
+    let bundle: ManifestWithNameAndSource = serde_json::from_slice(&manifest_bytes).unwrap();
+    assert_eq!(bundle.name, "repo");
+    assert_eq!(bundle.source, format!("{}/owner/repo/HEAD/objectiveai.json", server.uri()));
+
     cleanup(&base);
 }
 
@@ -111,6 +121,11 @@ async fn install_returns_false_when_platform_not_in_binaries() {
     assert!(
         !base.join("plugins").join("repo").exists(),
         "plugin dir should not exist when install returned false"
+    );
+    // No manifest persistence either when install short-circuits.
+    assert!(
+        !base.join("plugins").join("repo.json").exists(),
+        "manifest sibling should not exist when install returned false"
     );
 
     cleanup(&base);
@@ -329,6 +344,90 @@ async fn install_passes_headers_to_both_requests() {
         .await;
 
     assert!(matches!(result, Ok(true)), "got {result:?}");
+
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn install_makes_plugin_appear_in_list() {
+    let base = temp_base();
+    let server = MockServer::start().await;
+    let platform_key = current_platform_key();
+
+    let manifest_body = json!({
+        "description": "installed plugin",
+        "version": "1.0.0",
+        "author": "tester",
+        "binaries": { platform_key: "asset-bin" }
+    });
+
+    Mock::given(method("GET"))
+        .and(path("/owner/repo/HEAD/objectiveai.json"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(manifest_body))
+        .mount(&server)
+        .await;
+
+    Mock::given(method("GET"))
+        .and(path("/owner/repo/releases/download/v1.0.0/asset-bin"))
+        .respond_with(ResponseTemplate::new(200).set_body_bytes(FAKE_BIN.to_vec()))
+        .mount(&server)
+        .await;
+
+    let client = client_for(&base);
+    let ok = client
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None)
+        .await
+        .unwrap();
+    assert!(ok);
+
+    let plugins = client.list_plugins(0, 100).await;
+    assert_eq!(plugins.len(), 1, "expected one installed plugin, got {plugins:?}");
+    let p = &plugins[0];
+    assert_eq!(p.name, "repo");
+    assert_eq!(p.manifest.description, "installed plugin");
+    assert_eq!(p.manifest.version, "1.0.0");
+    assert_eq!(p.manifest.author.as_deref(), Some("tester"));
+    let expected_source = format!("{}/owner/repo/HEAD/objectiveai.json", server.uri());
+    assert_eq!(p.source, expected_source);
+
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn install_then_get_plugin_returns_persisted_manifest() {
+    let base = temp_base();
+    let server = MockServer::start().await;
+    let platform_key = current_platform_key();
+
+    let manifest_body = json!({
+        "description": "installed plugin",
+        "version": "1.0.0",
+        "binaries": { platform_key: "asset-bin" }
+    });
+
+    Mock::given(method("GET"))
+        .and(path("/owner/repo/HEAD/objectiveai.json"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(manifest_body))
+        .mount(&server)
+        .await;
+
+    Mock::given(method("GET"))
+        .and(path("/owner/repo/releases/download/v1.0.0/asset-bin"))
+        .respond_with(ResponseTemplate::new(200).set_body_bytes(FAKE_BIN.to_vec()))
+        .mount(&server)
+        .await;
+
+    let client = client_for(&base);
+    let ok = client
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None)
+        .await
+        .unwrap();
+    assert!(ok);
+
+    let got = client.get_plugin("repo").await.expect("expected Some(_)");
+    assert_eq!(got.name, "repo");
+    assert_eq!(got.manifest.version, "1.0.0");
+    assert_eq!(got.source, format!("{}/owner/repo/HEAD/objectiveai.json", server.uri()));
 
     cleanup(&base);
 }
