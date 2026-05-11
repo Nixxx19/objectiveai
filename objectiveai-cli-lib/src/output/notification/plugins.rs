@@ -9,3 +9,13 @@ use serde::{Deserialize, Serialize};
 pub struct Plugins {
     pub plugins: Vec<ManifestWithNameAndSource>,
 }
+
+/// Wire shape: `{"type":"notification","value":{"plugin": <manifest> | null}}`.
+/// Emitted by `objectiveai plugins get <name>`. The value is the
+/// resolved `ManifestWithNameAndSource` when the manifest file exists
+/// and parses, or JSON `null` when it doesn't (same silent-skip policy
+/// as `list`).
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Plugin {
+    pub plugin: Option<ManifestWithNameAndSource>,
+}

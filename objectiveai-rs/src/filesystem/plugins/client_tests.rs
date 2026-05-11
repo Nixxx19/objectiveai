@@ -105,6 +105,58 @@ async fn list_plugins_handles_multiple_valid_manifests() {
 }
 
 #[tokio::test]
+async fn get_plugin_returns_some_when_manifest_exists() {
+    let base = fresh_base_dir();
+    let plugins_dir = base.join("plugins");
+    std::fs::create_dir_all(&plugins_dir).unwrap();
+    let manifest_path = plugins_dir.join("psyops.json");
+    std::fs::write(&manifest_path, minimal_manifest_json()).unwrap();
+
+    let client = client_for(&base);
+    let plugin = client.get_plugin("psyops").await;
+
+    let p = plugin.expect("expected Some(_)");
+    assert_eq!(p.name, "psyops");
+    assert_eq!(p.manifest.description, "tiny test plugin");
+    assert_eq!(p.manifest.version, "0.1.0");
+    assert_eq!(p.source, manifest_path.to_string_lossy());
+
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn get_plugin_returns_none_when_dir_missing() {
+    let base = fresh_base_dir();
+    let client = client_for(&base);
+    assert!(client.get_plugin("psyops").await.is_none());
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn get_plugin_returns_none_when_file_missing() {
+    let base = fresh_base_dir();
+    let plugins_dir = base.join("plugins");
+    std::fs::create_dir_all(&plugins_dir).unwrap();
+    std::fs::write(plugins_dir.join("other.json"), minimal_manifest_json()).unwrap();
+
+    let client = client_for(&base);
+    assert!(client.get_plugin("missing").await.is_none());
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn get_plugin_returns_none_when_malformed() {
+    let base = fresh_base_dir();
+    let plugins_dir = base.join("plugins");
+    std::fs::create_dir_all(&plugins_dir).unwrap();
+    std::fs::write(plugins_dir.join("bad.json"), "\"not json\"").unwrap();
+
+    let client = client_for(&base);
+    assert!(client.get_plugin("bad").await.is_none());
+    cleanup(&base);
+}
+
+#[tokio::test]
 async fn list_plugins_respects_offset_and_limit() {
     let base = fresh_base_dir();
     let plugins_dir = base.join("plugins");

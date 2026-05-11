@@ -33,13 +33,22 @@
 //! error and converts to exit code 1.
 
 use clap::Subcommand;
-use objectiveai_cli_lib::output::{Handle, Notification, Output, Plugins};
+use objectiveai_cli_lib::output::{Handle, Notification, Output, Plugin, Plugins};
 use objectiveai_cli_lib::plugins::PluginOutput;
 use tokio::io::AsyncBufReadExt;
 use tokio::task::JoinHandle;
 
 #[derive(Subcommand)]
 pub enum Commands {
+    /// Get a single plugin's manifest by name. Emits the manifest as
+    /// `{"plugin": <manifest>}` when found, or `{"plugin": null}` when
+    /// the manifest file is missing / unreadable / malformed (same
+    /// silent-skip policy as `list`).
+    Get {
+        /// Plugin name (filename stem of the manifest in
+        /// `~/.objectiveai/plugins/`).
+        name: String,
+    },
     /// List installed plugins (every `.json` manifest in
     /// `~/.objectiveai/plugins/`). Sorted by manifest mtime, most
     /// recent first. Supports `--offset` / `--limit` for pagination,
@@ -67,10 +76,28 @@ impl Commands {
         handle: &Handle,
     ) -> Result<(), crate::error::Error> {
         match self {
+            Commands::Get { name } => get(cli_config, handle, &name).await,
             Commands::List { offset, limit } => list(cli_config, handle, offset, limit).await,
             Commands::Run(args) => dispatch_external(args, cli_config, handle).await,
         }
     }
+}
+
+async fn get(
+    cli_config: &crate::Config,
+    handle: &Handle,
+    name: &str,
+) -> Result<(), crate::error::Error> {
+    let fs_client = objectiveai::filesystem::Client::new(
+        cli_config.config_base_dir.as_deref(),
+        cli_config.commit_author_name.as_deref(),
+        cli_config.commit_author_email.as_deref(),
+    );
+    let plugin = fs_client.get_plugin(name).await;
+    Output::<Plugin>::Notification(Notification { value: Plugin { plugin } })
+        .emit(handle)
+        .await;
+    Ok(())
 }
 
 async fn list(

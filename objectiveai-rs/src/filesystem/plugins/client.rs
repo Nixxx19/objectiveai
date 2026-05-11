@@ -44,6 +44,24 @@ impl Client {
         None
     }
 
+    /// Look up a single plugin manifest by name. Reads
+    /// `<base_dir>/plugins/<name>.json`, deserializes it as a
+    /// [`Manifest`], and pairs it with the bare `name` and absolute
+    /// `source` path. Returns `None` if the file is missing,
+    /// unreadable, or malformed — same silent-skip policy as
+    /// [`Client::list_plugins`].
+    pub async fn get_plugin(&self, name: &str) -> Option<ManifestWithNameAndSource> {
+        let path = self.plugins_dir().join(format!("{name}.json"));
+        let bytes = tokio::fs::read(&path).await.ok()?;
+        let manifest: Manifest = serde_json::from_slice(&bytes).ok()?;
+        let source = path.to_string_lossy().into_owned();
+        Some(ManifestWithNameAndSource {
+            name: name.to_string(),
+            manifest,
+            source,
+        })
+    }
+
     /// Enumerate plugin manifests in the plugins directory. Reads each
     /// `.json` file in `<base_dir>/plugins/`, deserializes it as a
     /// [`Manifest`], and pairs it with the file's stem (`name`) and
