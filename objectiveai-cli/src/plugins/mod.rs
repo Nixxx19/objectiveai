@@ -19,7 +19,7 @@
 //! error and converts to exit code 1.
 
 use objectiveai_cli_lib::output::{Handle, Notification, Output};
-use objectiveai_cli_lib::plugin_output::PluginOutput;
+use objectiveai_cli_lib::plugins::PluginOutput;
 use tokio::io::AsyncBufReadExt;
 use tokio::task::JoinHandle;
 

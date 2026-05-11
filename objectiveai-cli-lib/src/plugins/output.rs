@@ -28,6 +28,3 @@ pub enum PluginOutput {
     Notification(serde_json::Value),
     Command { command: String },
 }
-
-#[cfg(test)]
-mod tests;
