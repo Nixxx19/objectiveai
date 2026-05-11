@@ -191,10 +191,15 @@ pub fn load_config() -> Config {
 /// The iterator should include the binary name as the first element
 /// (e.g., `["objectiveai", "agents", "list"]`).
 ///
+/// Emits [`objectiveai_cli_lib::output::BEGIN`] as the very first line
+/// and [`objectiveai_cli_lib::output::END`] as the very last line.
+/// Everything else (handler output, error notifications) appears
+/// between those bookends.
+///
 /// Returns an exit code: `0` on success, `1` on any failure. Errors
-/// are emitted internally as `Output::Error` notifications via `handle`
-/// before the function returns — the caller doesn't see them. Handlers
-/// emit their own [`objectiveai_cli_lib::output::Output`] lines for
+/// are emitted internally as `Output::Error` via `handle` before the
+/// function returns — the caller doesn't see them. Handlers emit
+/// their own [`objectiveai_cli_lib::output::Output`] lines for
 /// successful runs.
 pub async fn run<I, T>(
     args: I,
@@ -205,10 +210,21 @@ where
     I: IntoIterator<Item = T>,
     T: Into<std::ffi::OsString> + Clone,
 {
-    use objectiveai_cli_lib::output::{Error as OutputError, Level, Output};
+    use objectiveai_cli_lib::output::{
+        Begin, End, Error as OutputError, Level, Output, BEGIN, END,
+    };
 
-    let cli = match Cli::try_parse_from(args) {
-        Ok(cli) => cli,
+    Output::<Begin>::Notification(BEGIN).emit(&handle).await;
+
+    let code = match Cli::try_parse_from(args) {
+        Ok(cli) => match cli.command.handle(cli_config, &handle).await {
+            Ok(()) => 0,
+            Err(e) => {
+                let err = e.to_output(Level::Error, true);
+                Output::<serde_json::Value>::Error(err).emit(&handle).await;
+                1
+            }
+        },
         Err(e) => {
             let err = OutputError {
                 level: Level::Error,
@@ -216,15 +232,10 @@ where
                 message: e.to_string(),
             };
             Output::<serde_json::Value>::Error(err).emit(&handle).await;
-            return 1;
-        }
-    };
-    match cli.command.handle(cli_config, &handle).await {
-        Ok(()) => 0,
-        Err(e) => {
-            let err = e.to_output(Level::Error, true);
-            Output::<serde_json::Value>::Error(err).emit(&handle).await;
             1
         }
-    }
+    };
+
+    Output::<End>::Notification(END).emit(&handle).await;
+    code
 }
