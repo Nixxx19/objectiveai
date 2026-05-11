@@ -9,6 +9,7 @@ use crate::viewer;
 use crate::schemas;
 use crate::laboratories;
 use crate::logs;
+use crate::plugins;
 use crate::vector;
 use crate::instructions;
 use crate::error;
@@ -156,12 +157,17 @@ enum Commands {
         #[command(subcommand)]
         command: instructions::Commands,
     },
+    /// Plugins management
+    Plugins {
+        #[command(subcommand)]
+        command: plugins::Commands,
+    },
     /// Run a plugin from `~/.objectiveai/plugins/`. First element is
     /// the plugin name; the rest are forwarded as the plugin's argv.
     /// Captured via clap's external-subcommand mechanism — any first
     /// arg that isn't a known built-in lands here.
     #[command(external_subcommand)]
-    Plugins(Vec<String>),
+    External(Vec<String>),
 }
 
 impl Commands {
@@ -181,7 +187,8 @@ impl Commands {
             Commands::Vector { command } => command.handle(cli_config, handle).await,
             Commands::Logs { command } => command.handle(cli_config, handle).await,
             Commands::Instructions { command } => command.handle(cli_config, handle).await,
-            Commands::Plugins(args) => crate::plugins::handle(args, cli_config, handle).await,
+            Commands::Plugins { command } => command.handle(cli_config, handle).await,
+            Commands::External(args) => crate::plugins::dispatch_external(args, cli_config, handle).await,
         }
     }
 }

@@ -7,4 +7,6 @@ pub use client::*;
 pub use manifest::*;
 
 #[cfg(test)]
+mod client_tests;
+#[cfg(test)]
 mod manifest_tests;

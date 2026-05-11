@@ -1,0 +1,105 @@
+use super::super::Client;
+use super::Manifest;
+
+fn fresh_base_dir() -> std::path::PathBuf {
+    let d = std::env::temp_dir().join(format!("oai-list-plugins-{}", uuid::Uuid::new_v4()));
+    std::fs::create_dir_all(&d).unwrap();
+    d
+}
+
+fn cleanup(d: &std::path::Path) {
+    let _ = std::fs::remove_dir_all(d);
+}
+
+fn client_for(base: &std::path::Path) -> Client {
+    Client::new(Some(base.to_path_buf()), None::<&str>, None::<&str>)
+}
+
+fn minimal_manifest_json() -> String {
+    serde_json::to_string(&Manifest {
+        description: "tiny test plugin".to_string(),
+        version: "0.1.0".to_string(),
+        author: None,
+        homepage: None,
+        license: None,
+    })
+    .unwrap()
+}
+
+#[tokio::test]
+async fn list_plugins_returns_empty_when_dir_missing() {
+    let base = fresh_base_dir();
+    let client = client_for(&base);
+    let plugins = client.list_plugins().await;
+    assert!(plugins.is_empty(), "expected empty Vec, got {plugins:?}");
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn list_plugins_returns_empty_when_dir_empty() {
+    let base = fresh_base_dir();
+    std::fs::create_dir_all(base.join("plugins")).unwrap();
+    let client = client_for(&base);
+    let plugins = client.list_plugins().await;
+    assert!(plugins.is_empty(), "expected empty Vec, got {plugins:?}");
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn list_plugins_parses_valid_manifest() {
+    let base = fresh_base_dir();
+    let plugins_dir = base.join("plugins");
+    std::fs::create_dir_all(&plugins_dir).unwrap();
+    let manifest_path = plugins_dir.join("psyops.json");
+    std::fs::write(&manifest_path, minimal_manifest_json()).unwrap();
+
+    let client = client_for(&base);
+    let plugins = client.list_plugins().await;
+
+    assert_eq!(plugins.len(), 1);
+    let p = &plugins[0];
+    assert_eq!(p.name, "psyops");
+    assert_eq!(p.manifest.description, "tiny test plugin");
+    assert_eq!(p.manifest.version, "0.1.0");
+    assert_eq!(p.source, manifest_path.to_string_lossy());
+
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn list_plugins_skips_invalid_files() {
+    let base = fresh_base_dir();
+    let plugins_dir = base.join("plugins");
+    std::fs::create_dir_all(&plugins_dir).unwrap();
+    std::fs::write(plugins_dir.join("a.json"), minimal_manifest_json()).unwrap();
+    std::fs::write(plugins_dir.join("b.json"), "\"not json\"").unwrap();
+    std::fs::write(plugins_dir.join("c.json"), r#"{"version":"1.0.0"}"#).unwrap();
+    std::fs::write(plugins_dir.join("noise.txt"), "ignore me").unwrap();
+
+    let client = client_for(&base);
+    let plugins = client.list_plugins().await;
+
+    assert_eq!(plugins.len(), 1, "got {plugins:?}");
+    assert_eq!(plugins[0].name, "a");
+
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn list_plugins_handles_multiple_valid_manifests() {
+    let base = fresh_base_dir();
+    let plugins_dir = base.join("plugins");
+    std::fs::create_dir_all(&plugins_dir).unwrap();
+    for stem in ["a", "b", "c"] {
+        std::fs::write(plugins_dir.join(format!("{stem}.json")), minimal_manifest_json()).unwrap();
+    }
+
+    let client = client_for(&base);
+    let mut plugins = client.list_plugins().await;
+    plugins.sort_by(|x, y| x.name.cmp(&y.name));
+
+    let names: Vec<&str> = plugins.iter().map(|p| p.name.as_str()).collect();
+    assert_eq!(names, vec!["a", "b", "c"]);
+
+    cleanup(&base);
+}

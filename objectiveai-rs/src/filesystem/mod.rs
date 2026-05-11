@@ -1,9 +1,9 @@
 mod client;
 mod error;
 mod jq;
-mod plugins;
 pub mod config;
 pub mod logs;
+pub mod plugins;
 pub mod publish;
 
 pub use client::*;

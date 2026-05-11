@@ -1,10 +1,19 @@
-//! External plugin dispatcher.
+//! Plugins management + external plugin dispatcher.
 //!
-//! When `objectiveai <name> <args…>` is invoked and `<name>` isn't a
-//! built-in subcommand, clap's `external_subcommand` mechanism routes
-//! the call here. We resolve `<name>` against `~/.objectiveai/plugins/`,
-//! spawn the binary with `<args…>`, and consume its stdout as a JSONL
-//! stream of [`PluginOutput`]. Per-line dispatch:
+//! Two responsibilities live here:
+//!
+//! 1. The built-in `plugins` subcommand tree ([`Commands`]) — currently
+//!    just `plugins list`, which enumerates every manifest in
+//!    `~/.objectiveai/plugins/` via [`objectiveai::filesystem::Client::list_plugins`].
+//! 2. The catch-all dispatcher ([`dispatch_external`]) invoked by clap's
+//!    `external_subcommand` for any unknown top-level subcommand.
+//!
+//! For (2): when `objectiveai <name> <args…>` is invoked and `<name>`
+//! isn't a built-in subcommand, clap's `external_subcommand` mechanism
+//! routes the call to [`dispatch_external`]. We resolve `<name>` against
+//! `~/.objectiveai/plugins/`, spawn the binary with `<args…>`, and
+//! consume its stdout as a JSONL stream of [`PluginOutput`]. Per-line
+//! dispatch:
 //!
 //! - `Error` → forward via [`Output::Error`]
 //! - `Notification(Value)` → forward via [`Output::Notification`]
@@ -18,12 +27,48 @@
 //! function's `Err(PluginExit)` — which `run()` then emits as a fatal
 //! error and converts to exit code 1.
 
-use objectiveai_cli_lib::output::{Handle, Notification, Output};
+use clap::Subcommand;
+use objectiveai_cli_lib::output::{Handle, Notification, Output, Plugins};
 use objectiveai_cli_lib::plugins::PluginOutput;
 use tokio::io::AsyncBufReadExt;
 use tokio::task::JoinHandle;
 
-pub async fn handle(
+#[derive(Subcommand)]
+pub enum Commands {
+    /// List installed plugins (every `.json` manifest in
+    /// `~/.objectiveai/plugins/`).
+    List,
+}
+
+impl Commands {
+    pub async fn handle(
+        self,
+        cli_config: &crate::Config,
+        handle: &Handle,
+    ) -> Result<(), crate::error::Error> {
+        match self {
+            Commands::List => list(cli_config, handle).await,
+        }
+    }
+}
+
+async fn list(
+    cli_config: &crate::Config,
+    handle: &Handle,
+) -> Result<(), crate::error::Error> {
+    let fs_client = objectiveai::filesystem::Client::new(
+        cli_config.config_base_dir.as_deref(),
+        cli_config.commit_author_name.as_deref(),
+        cli_config.commit_author_email.as_deref(),
+    );
+    let plugins = fs_client.list_plugins().await;
+    Output::<Plugins>::Notification(Notification { value: Plugins { plugins } })
+        .emit(handle)
+        .await;
+    Ok(())
+}
+
+pub async fn dispatch_external(
     args: Vec<String>,
     cli_config: &crate::Config,
     handle: &Handle,
