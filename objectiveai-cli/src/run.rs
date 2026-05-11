@@ -161,7 +161,7 @@ enum Commands {
     /// Captured via clap's external-subcommand mechanism — any first
     /// arg that isn't a known built-in lands here.
     #[command(external_subcommand)]
-    Plugin(Vec<String>),
+    Plugins(Vec<String>),
 }
 
 impl Commands {
@@ -181,7 +181,7 @@ impl Commands {
             Commands::Vector { command } => command.handle(cli_config, handle).await,
             Commands::Logs { command } => command.handle(cli_config, handle).await,
             Commands::Instructions { command } => command.handle(cli_config, handle).await,
-            Commands::Plugin(args) => crate::plugins::handle(args, cli_config, handle).await,
+            Commands::Plugins(args) => crate::plugins::handle(args, cli_config, handle).await,
         }
     }
 }
