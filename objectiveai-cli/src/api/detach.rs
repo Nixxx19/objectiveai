@@ -1,15 +1,27 @@
 /// Re-invokes the current CLI as a subprocess with `--detach` removed from
-/// the arguments. Emits the child PID, then forwards every JSON line the
-/// child writes to its stdout — either to `handle` (if `Some`) or to this
-/// process's own stdout (if `None`). Once `log_stream_ready` appears on
-/// the child's stdout, exits with code 0; the orphan continues running
-/// and writing more lines, but nobody reads them. If the child exits
-/// without producing the handshake, forwards its exit code.
+/// the arguments. Emits `Detached { pid }`, then for every line the
+/// orphan writes to its stdout, parses the line as an [`Output`] and
+/// re-emits it through `Output::emit(handle)` — so the routing logic
+/// (handle vs stdout, fatal-error stderr mirror) lives in one place
+/// instead of being duplicated here. Lines that fail to parse fall
+/// back to a raw byte passthrough.
 ///
-/// The orphan child has no idea about `handle` — it's a fresh CLI
-/// invocation with the default `None` handle, writing JSONL to its own
-/// stdout. The parent's forwarding loop is the place where the JSONL
-/// stream gets routed.
+/// Stderr is forwarded raw to this process's own stderr (a separate
+/// channel from `handle`'s child stdin — the embedder captures cli's
+/// stderr pipe independently if it wants diagnostic visibility into
+/// the orphan).
+///
+/// Once `log_stream_ready` appears on the orphan's stdout, exits with
+/// code 0; the orphan continues running and writing more lines, but
+/// nobody reads them. If the orphan exits without producing the
+/// handshake, forwards its exit code.
+///
+/// The orphan has no idea about `handle` — it's a fresh CLI invocation
+/// with the default `None` handle, writing JSONL to its own stdout.
+/// The parent's forwarding loop is the only place the JSONL stream
+/// gets routed to the embedder.
+///
+/// [`Output`]: objectiveai_cli_lib::output::Output
 pub async fn detach(handle: &objectiveai_cli_lib::output::Handle) -> ! {
     let exe = std::env::current_exe().expect("failed to get current executable path");
     let args: Vec<String> = std::env::args()
@@ -56,20 +68,32 @@ pub async fn detach(handle: &objectiveai_cli_lib::output::Handle) -> ! {
                 if n == 0 {
                     stdout_done = true;
                 } else {
-                    // Forward each line of the orphan's stdout to the
-                    // parent's emission destination — `handle` if `Some`,
-                    // else parent stdout. Keeps the JSONL stream
-                    // consistent for whoever is consuming it.
-                    match handle {
-                        Some(stdin) => {
-                            use tokio::io::AsyncWriteExt;
-                            let mut guard = stdin.lock().await;
-                            guard.write_all(stdout_line.as_bytes()).await
-                                .expect("forward to child stdin failed");
-                        }
-                        None => {
-                            print!("{stdout_line}");
-                        }
+                    // Parse each orphan-stdout line as an Output and run
+                    // it through the standard emit pipeline. That keeps
+                    // all routing logic (handle vs stdout, fatal-error
+                    // stderr mirror) in one place — Output::emit — and
+                    // never deals with raw bytes here.
+                    //
+                    // If a line fails to parse (orphan misbehaving or
+                    // a non-JSONL stray write), fall back to a raw
+                    // passthrough so the user still sees it.
+                    let trimmed = stdout_line.trim_end_matches(['\r', '\n']);
+                    match serde_json::from_str::<
+                        objectiveai_cli_lib::output::Output<serde_json::Value>,
+                    >(trimmed)
+                    {
+                        Ok(out) => out.emit(handle).await,
+                        Err(_) => match handle {
+                            Some(stdin) => {
+                                use tokio::io::AsyncWriteExt;
+                                let mut guard = stdin.lock().await;
+                                guard
+                                    .write_all(stdout_line.as_bytes())
+                                    .await
+                                    .expect("forward to child stdin failed");
+                            }
+                            None => print!("{stdout_line}"),
+                        },
                     }
                     if crate::log_line::parse_log_stream_ready(&stdout_line).is_some() {
                         std::process::exit(0);
