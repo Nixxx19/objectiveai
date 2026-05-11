@@ -2,18 +2,23 @@
 //!
 //! Two responsibilities live here:
 //!
-//! 1. The built-in `plugins` subcommand tree ([`Commands`]) — currently
-//!    just `plugins list`, which enumerates every manifest in
-//!    `~/.objectiveai/plugins/` via [`objectiveai::filesystem::Client::list_plugins`].
-//! 2. The catch-all dispatcher ([`dispatch_external`]) invoked by clap's
-//!    `external_subcommand` for any unknown top-level subcommand.
+//! 1. The built-in `plugins` subcommand tree ([`Commands`]):
+//!    - `plugins list` — enumerate every manifest in
+//!      `~/.objectiveai/plugins/` via
+//!      [`objectiveai::filesystem::Client::list_plugins`].
+//!    - `plugins <name> <args…>` — dispatch to plugin `<name>` with
+//!      `<args…>` forwarded verbatim (the [`Commands::Run`] external
+//!      subcommand). Identical behaviour to the top-level catch-all
+//!      below; this is just the explicit, namespaced form.
+//! 2. The top-level catch-all dispatcher ([`dispatch_external`]) invoked
+//!    by clap's outer `external_subcommand` for any unknown top-level
+//!    subcommand: `objectiveai <name> <args…>`.
 //!
-//! For (2): when `objectiveai <name> <args…>` is invoked and `<name>`
-//! isn't a built-in subcommand, clap's `external_subcommand` mechanism
-//! routes the call to [`dispatch_external`]. We resolve `<name>` against
-//! `~/.objectiveai/plugins/`, spawn the binary with `<args…>`, and
-//! consume its stdout as a JSONL stream of [`PluginOutput`]. Per-line
-//! dispatch:
+//! Both routes land in [`dispatch_external`], so the runtime behaviour
+//! is identical — only the parse path differs. We resolve `<name>`
+//! against `~/.objectiveai/plugins/`, spawn the binary with `<args…>`,
+//! and consume its stdout as a JSONL stream of [`PluginOutput`].
+//! Per-line dispatch:
 //!
 //! - `Error` → forward via [`Output::Error`]
 //! - `Notification(Value)` → forward via [`Output::Notification`]
@@ -38,6 +43,14 @@ pub enum Commands {
     /// List installed plugins (every `.json` manifest in
     /// `~/.objectiveai/plugins/`).
     List,
+    /// Run a plugin from `~/.objectiveai/plugins/`. First element is
+    /// the plugin name; the rest are forwarded as the plugin's argv
+    /// verbatim. The shell handles tokenization — quoted args stay
+    /// grouped, no flag parsing happens here. Identical dispatch to
+    /// the top-level catch-all `objectiveai <name> <args…>`, just
+    /// namespaced under `plugins`.
+    #[command(external_subcommand)]
+    Run(Vec<String>),
 }
 
 impl Commands {
@@ -48,6 +61,7 @@ impl Commands {
     ) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => list(cli_config, handle).await,
+            Commands::Run(args) => dispatch_external(args, cli_config, handle).await,
         }
     }
 }
