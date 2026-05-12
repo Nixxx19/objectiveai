@@ -14,14 +14,27 @@ use crate::agent;
 use crate::functions;
 use crate::laboratories;
 
-#[derive(Clone, Serialize)]
-#[serde(untagged)]
+#[derive(Clone)]
 pub enum Event {
     AgentCompletions(agent::completions::request::Request),
     FunctionsExecutions(functions::executions::request::Request),
     FunctionsInventionsRecursive(functions::inventions::recursive::request::Request),
     LaboratoriesExecutions(laboratories::executions::request::Request),
     Plugin(PluginEvent),
+}
+
+/// Unified wire shape for every Tauri event the viewer emits to the
+/// frontend. `destination` is `"objectiveai"` for built-in events or
+/// the plugin's repository name for plugin events. `type` is a
+/// snake_case discriminator (built-ins use `agent_completions` etc.;
+/// plugins use whatever they declared in their manifest's
+/// `viewer_routes[i].type`). `value` is the original request body.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct EmittedEvent {
+    pub destination: String,
+    #[serde(rename = "type")]
+    pub r#type: String,
+    pub value: serde_json::Value,
 }
 
 /// Payload emitted whenever a plugin's viewer route is hit. `plugin`
@@ -46,20 +59,49 @@ pub struct PluginRequest {
 }
 
 impl Event {
-    /// Tauri event name to emit this event under. Static for the
-    /// built-in variants; `plugin-<name>` for plugin events so the
-    /// host bridge can filter per-plugin.
-    pub(crate) fn name(&self) -> std::borrow::Cow<'static, str> {
+    /// Tauri event name (channel) to emit under. All four built-in
+    /// variants share the `"objectiveai"` channel; plugin events go
+    /// to `plugin-<repo>` so the host bridge can filter per-plugin
+    /// and so a plugin named `objectiveai` can't collide with the
+    /// root channel.
+    pub(crate) fn tauri_event_name(&self) -> std::borrow::Cow<'static, str> {
         match self {
-            Event::AgentCompletions(_) => std::borrow::Cow::Borrowed("agent-completions"),
-            Event::FunctionsExecutions(_) => std::borrow::Cow::Borrowed("functions-executions"),
-            Event::FunctionsInventionsRecursive(_) => {
-                std::borrow::Cow::Borrowed("functions-inventions-recursive")
-            }
-            Event::LaboratoriesExecutions(_) => {
-                std::borrow::Cow::Borrowed("laboratories-executions")
-            }
             Event::Plugin(p) => std::borrow::Cow::Owned(format!("plugin-{}", p.plugin)),
+            _ => std::borrow::Cow::Borrowed("objectiveai"),
+        }
+    }
+
+    /// Build the unified [`EmittedEvent`] envelope for this event.
+    /// Built-in variants serialize their typed request into the
+    /// `value` field; plugin events pass through the route handler's
+    /// JSON body verbatim.
+    pub(crate) fn to_emitted(&self) -> EmittedEvent {
+        match self {
+            Event::AgentCompletions(r) => EmittedEvent {
+                destination: "objectiveai".to_string(),
+                r#type: "agent_completions".to_string(),
+                value: serde_json::to_value(r).unwrap_or(serde_json::Value::Null),
+            },
+            Event::FunctionsExecutions(r) => EmittedEvent {
+                destination: "objectiveai".to_string(),
+                r#type: "functions_executions".to_string(),
+                value: serde_json::to_value(r).unwrap_or(serde_json::Value::Null),
+            },
+            Event::FunctionsInventionsRecursive(r) => EmittedEvent {
+                destination: "objectiveai".to_string(),
+                r#type: "functions_inventions_recursive".to_string(),
+                value: serde_json::to_value(r).unwrap_or(serde_json::Value::Null),
+            },
+            Event::LaboratoriesExecutions(r) => EmittedEvent {
+                destination: "objectiveai".to_string(),
+                r#type: "laboratories_executions".to_string(),
+                value: serde_json::to_value(r).unwrap_or(serde_json::Value::Null),
+            },
+            Event::Plugin(p) => EmittedEvent {
+                destination: p.plugin.clone(),
+                r#type: p.request.r#type.clone(),
+                value: p.request.value.clone(),
+            },
         }
     }
 }
@@ -70,9 +112,10 @@ pub type EventSender = mpsc::UnboundedSender<Event>;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
 
     #[test]
-    fn event_name_for_plugin_includes_plugin_name() {
+    fn tauri_event_name_for_plugin_includes_plugin_name() {
         let e = Event::Plugin(PluginEvent {
             plugin: "myplugin".to_string(),
             request: PluginRequest {
@@ -80,6 +123,21 @@ mod tests {
                 value: serde_json::Value::Null,
             },
         });
-        assert_eq!(&*e.name(), "plugin-myplugin");
+        assert_eq!(&*e.tauri_event_name(), "plugin-myplugin");
+    }
+
+    #[test]
+    fn to_emitted_for_plugin_passes_through_type_and_value() {
+        let e = Event::Plugin(PluginEvent {
+            plugin: "psyops".to_string(),
+            request: PluginRequest {
+                r#type: "say".to_string(),
+                value: json!({"to":"world"}),
+            },
+        });
+        let em = e.to_emitted();
+        assert_eq!(em.destination, "psyops");
+        assert_eq!(em.r#type, "say");
+        assert_eq!(em.value, json!({"to":"world"}));
     }
 }

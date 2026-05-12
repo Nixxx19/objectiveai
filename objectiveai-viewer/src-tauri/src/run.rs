@@ -346,11 +346,11 @@ pub fn serve(
                 }
                 // Drain buffered events.
                 for event in buffer {
-                    let _ = handle.emit(&event.name(), &event);
+                    let _ = handle.emit(&event.tauri_event_name(), &event.to_emitted());
                 }
                 // Forward remaining events directly.
                 while let Some(event) = rx.recv().await {
-                    let _ = handle.emit(&event.name(), &event);
+                    let _ = handle.emit(&event.tauri_event_name(), &event.to_emitted());
                 }
             });
             Ok(())
