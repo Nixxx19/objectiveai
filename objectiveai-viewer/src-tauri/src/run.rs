@@ -310,10 +310,14 @@ pub fn serve(
     let ready = Arc::new(Notify::new());
     let ready_for_task = ready.clone();
 
+    let plugins_dir_for_protocol = fs_client.plugins_dir();
     tauri::Builder::default()
         .manage(ready)
         .manage(http_client)
         .manage(fs_client)
+        .register_uri_scheme_protocol("plugin", move |_app, request| {
+            serve_plugin_asset(&plugins_dir_for_protocol, request)
+        })
         .invoke_handler(tauri::generate_handler![
             viewer_ready,
             notify_agent_completion,
@@ -593,6 +597,87 @@ async fn plugin_invoke(
 
     let _ = child.wait().await;
     Ok(lines)
+}
+
+/// Handler for the custom `plugin://` URI scheme. Resolves
+/// `plugin://localhost/<plugin>/<path>` to a file under
+/// `<plugins_dir>/<plugin>/viewer/<path>`. Rejects path components
+/// containing `..` so a plugin can't read outside its own viewer
+/// subtree. Falls back to `<path>` = `index.html` when the request
+/// path ends with `/`.
+fn serve_plugin_asset(
+    plugins_dir: &std::path::Path,
+    request: tauri::http::Request<Vec<u8>>,
+) -> tauri::http::Response<Vec<u8>> {
+    let uri = request.uri();
+    let mut segments: Vec<&str> = uri
+        .path()
+        .trim_start_matches('/')
+        .split('/')
+        .filter(|s| !s.is_empty())
+        .collect();
+    if segments.is_empty() || segments.iter().any(|s| *s == "..") {
+        return not_found();
+    }
+    if uri.path().ends_with('/') || segments.len() == 1 {
+        segments.push("index.html");
+    }
+    let plugin = segments.remove(0);
+    let rest: std::path::PathBuf = segments.iter().collect();
+    let abs = plugins_dir.join(plugin).join("viewer").join(&rest);
+    let canon_root = plugins_dir.join(plugin).join("viewer");
+
+    // Path-traversal defense: the resolved path must remain inside
+    // <plugins_dir>/<plugin>/viewer/.
+    let canon_abs = match abs.canonicalize() {
+        Ok(p) => p,
+        Err(_) => return not_found(),
+    };
+    let canon_root = match canon_root.canonicalize() {
+        Ok(p) => p,
+        Err(_) => return not_found(),
+    };
+    if !canon_abs.starts_with(&canon_root) {
+        return not_found();
+    }
+
+    let bytes = match std::fs::read(&canon_abs) {
+        Ok(b) => b,
+        Err(_) => return not_found(),
+    };
+    let mime = guess_mime(&canon_abs);
+    tauri::http::Response::builder()
+        .status(200)
+        .header("Content-Type", mime)
+        .body(bytes)
+        .unwrap_or_else(|_| not_found())
+}
+
+fn not_found() -> tauri::http::Response<Vec<u8>> {
+    tauri::http::Response::builder()
+        .status(404)
+        .body(b"not found".to_vec())
+        .unwrap()
+}
+
+fn guess_mime(path: &std::path::Path) -> &'static str {
+    match path.extension().and_then(|e| e.to_str()) {
+        Some("html") | Some("htm") => "text/html; charset=utf-8",
+        Some("js") | Some("mjs") => "application/javascript; charset=utf-8",
+        Some("css") => "text/css; charset=utf-8",
+        Some("json") => "application/json; charset=utf-8",
+        Some("svg") => "image/svg+xml",
+        Some("png") => "image/png",
+        Some("jpg") | Some("jpeg") => "image/jpeg",
+        Some("gif") => "image/gif",
+        Some("ico") => "image/x-icon",
+        Some("woff") => "font/woff",
+        Some("woff2") => "font/woff2",
+        Some("wasm") => "application/wasm",
+        Some("txt") => "text/plain; charset=utf-8",
+        Some("map") => "application/json; charset=utf-8",
+        _ => "application/octet-stream",
+    }
 }
 
 #[cfg(test)]

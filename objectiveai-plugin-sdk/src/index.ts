@@ -57,12 +57,13 @@ type IncomingMessage = InvokeResultMessage | PluginEventMessage;
 
 /** RFC-4122 v4 UUID. Small/local implementation — no extra deps. */
 function uuid(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
+  const g = globalThis as { crypto?: Crypto };
+  if (g.crypto && typeof g.crypto.randomUUID === "function") {
+    return g.crypto.randomUUID();
   }
   const bytes = new Uint8Array(16);
-  if (typeof crypto !== "undefined" && "getRandomValues" in crypto) {
-    crypto.getRandomValues(bytes);
+  if (g.crypto && typeof g.crypto.getRandomValues === "function") {
+    g.crypto.getRandomValues(bytes);
   } else {
     for (let i = 0; i < 16; i++) bytes[i] = Math.floor(Math.random() * 256);
   }

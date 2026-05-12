@@ -4,6 +4,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { AgentCompletionView } from "./AgentCompletionView";
 import { FunctionInventionRecursiveView } from "./FunctionInventionRecursiveView";
 import { FunctionExecutionView } from "./FunctionExecutionView";
+import { TabBar, type Tab } from "./TabBar";
+import { PluginPane } from "./PluginPane";
 import { z } from "zod";
 import {
   AgentCompletionsRequestAgentCompletionCreateParamsSchema,
@@ -169,7 +171,7 @@ function EntryView({ entry }: { entry: Entry }) {
   return <pre style={{ color: "gray" }}>{JSON.stringify(entry.request, null, 2)}</pre>;
 }
 
-function App() {
+function ObjectiveAIView() {
   const [entries, setEntries] = useState<Entry[]>([]);
 
   useEffect(() => {
@@ -338,6 +340,49 @@ function App() {
         <EntryView key={entry.id} entry={entry} />
       ))}
     </main>
+  );
+}
+
+interface PluginTab {
+  name: string;
+  description: string;
+  version: string;
+  has_viewer_bundle: boolean;
+}
+
+const OBJECTIVEAI_TAB_ID = "objectiveai";
+
+function App() {
+  const [pluginTabs, setPluginTabs] = useState<PluginTab[]>([]);
+  const [activeTab, setActiveTab] = useState<string>(OBJECTIVEAI_TAB_ID);
+
+  useEffect(() => {
+    invoke<PluginTab[]>("list_plugins_with_viewer")
+      .then(setPluginTabs)
+      .catch((e) => {
+        // eslint-disable-next-line no-console
+        console.warn("list_plugins_with_viewer failed:", e);
+      });
+  }, []);
+
+  const tabs: Tab[] = [
+    { id: OBJECTIVEAI_TAB_ID, label: "ObjectiveAI" },
+    ...pluginTabs
+      .filter((p) => p.has_viewer_bundle)
+      .map((p) => ({ id: p.name, label: p.name })),
+  ];
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <TabBar tabs={tabs} activeTab={activeTab} onSelect={setActiveTab} />
+      <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+        {activeTab === OBJECTIVEAI_TAB_ID ? (
+          <ObjectiveAIView />
+        ) : (
+          <PluginPane pluginName={activeTab} />
+        )}
+      </div>
+    </div>
   );
 }
 
