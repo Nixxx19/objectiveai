@@ -160,6 +160,7 @@ impl Client {
         headers: Option<&indexmap::IndexMap<String, String>>,
         upgrade: bool,
     ) -> Result<bool, super::super::Error> {
+        check_repository_name(repository)?;
         let manifest = self
             .fetch_plugin_manifest(owner, repository, commit_sha, headers)
             .await?;
@@ -202,6 +203,7 @@ impl Client {
         headers: Option<&indexmap::IndexMap<String, String>>,
         upgrade: bool,
     ) -> Result<bool, super::super::Error> {
+        check_repository_name(repository)?;
         self.install_from_manifest_impl(
             "https://github.com",
             owner,
@@ -229,6 +231,7 @@ impl Client {
         headers: Option<&indexmap::IndexMap<String, String>>,
         upgrade: bool,
     ) -> Result<bool, super::super::Error> {
+        check_repository_name(repository)?;
         let manifest = self
             .fetch_plugin_manifest_impl(raw_base, owner, repository, commit_sha, headers)
             .await?;
@@ -483,6 +486,20 @@ async fn write_manifest_branch(
     tokio::fs::write(&manifest_path, &bytes)
         .await
         .map_err(|e| super::InstallError::ManifestPersist(manifest_path.clone(), e))
+}
+
+/// Reject reserved plugin repository names before any install
+/// side-effect. `objectiveai` (case-insensitive) is reserved because
+/// the viewer uses it as the Tauri channel name for built-in events;
+/// a plugin with that repository name would shadow them.
+#[cfg(feature = "http")]
+fn check_repository_name(repository: &str) -> Result<(), super::InstallError> {
+    if repository.eq_ignore_ascii_case("objectiveai") {
+        return Err(super::InstallError::ReservedRepositoryName {
+            repository: repository.to_string(),
+        });
+    }
+    Ok(())
 }
 
 /// Convention: the raw-GitHub URL we'd fetch `objectiveai.json` from

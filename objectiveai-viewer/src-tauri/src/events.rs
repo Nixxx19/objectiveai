@@ -2,10 +2,13 @@
 //! buffers events while the React frontend boots, and Tauri's
 //! `Emitter` that fans events out to the renderer.
 //!
-//! Each `Event` variant maps to a unique Tauri event name via
-//! [`Event::name`]; plugin events use a per-plugin name
-//! (`plugin-<name>`) so the host-side bridge can filter and forward
-//! to the matching iframe.
+//! Every event is converted to [`EmittedEvent`] at the emit boundary
+//! via [`Event::to_emitted`]. The envelope's `destination` field
+//! doubles as the Tauri channel name — `"objectiveai"` for built-in
+//! events, the plugin's repository name for plugin events. Plugin
+//! repositories named `objectiveai` are refused at install time
+//! (see `filesystem::plugins::InstallError::ReservedRepositoryName`),
+//! so the channel namespaces can't collide.
 
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc;
@@ -47,18 +50,6 @@ pub struct EmittedEvent {
 }
 
 impl Event {
-    /// Tauri event name (channel) to emit under. All four built-in
-    /// variants share the `"objectiveai"` channel; plugin events go
-    /// to `plugin-<repo>` so the host bridge can filter per-plugin
-    /// and so a plugin named `objectiveai` can't collide with the
-    /// root channel.
-    pub(crate) fn tauri_event_name(&self) -> std::borrow::Cow<'static, str> {
-        match self {
-            Event::Plugin { plugin, .. } => std::borrow::Cow::Owned(format!("plugin-{plugin}")),
-            _ => std::borrow::Cow::Borrowed("objectiveai"),
-        }
-    }
-
     /// Build the unified [`EmittedEvent`] envelope for this event.
     /// Built-in variants serialize their typed request into the
     /// `value` field; plugin events pass through the route handler's
@@ -101,16 +92,6 @@ pub type EventSender = mpsc::UnboundedSender<Event>;
 mod tests {
     use super::*;
     use serde_json::json;
-
-    #[test]
-    fn tauri_event_name_for_plugin_includes_plugin_name() {
-        let e = Event::Plugin {
-            plugin: "myplugin".to_string(),
-            r#type: "x".to_string(),
-            value: serde_json::Value::Null,
-        };
-        assert_eq!(&*e.tauri_event_name(), "plugin-myplugin");
-    }
 
     #[test]
     fn to_emitted_for_plugin_passes_through_type_and_value() {

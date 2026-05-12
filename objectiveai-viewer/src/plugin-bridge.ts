@@ -107,9 +107,8 @@ function reply(
 
 async function subscribeToPluginEvents(pluginName: string): Promise<void> {
   if (tauriUnlisteners.has(pluginName)) return;
-  const eventName = `plugin-${pluginName}`;
   const unlisten = await tauriListen<{ destination: string; type: string; value: unknown }>(
-    eventName,
+    pluginName,
     (event) => {
       const handle = iframes.get(pluginName);
       if (!handle) return;

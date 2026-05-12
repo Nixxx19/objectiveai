@@ -54,4 +54,6 @@ pub enum InstallError {
     InvalidHeaderValue { name: String, reason: String },
     #[error("plugin {repository} is already installed; pass `--upgrade` to replace it")]
     AlreadyInstalled { repository: String },
+    #[error("repository name {repository:?} is reserved and cannot be used as a plugin name")]
+    ReservedRepositoryName { repository: String },
 }

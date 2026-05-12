@@ -813,3 +813,56 @@ async fn install_upgrade_network_failure_leaves_disk_after_cleanup() {
 
     cleanup(&base);
 }
+
+#[tokio::test]
+async fn install_refuses_reserved_repository_name() {
+    let base = temp_base();
+    let client = client_for(&base);
+    let result = client
+        .install_plugin_at(
+            "http://example.invalid",
+            "http://example.invalid",
+            "owner",
+            "objectiveai",
+            None,
+            None,
+            false,
+        )
+        .await;
+    match result {
+        Err(super::super::Error::Install(InstallError::ReservedRepositoryName { repository })) => {
+            assert_eq!(repository, "objectiveai");
+        }
+        other => panic!("expected ReservedRepositoryName, got {other:?}"),
+    }
+    assert!(!base.join("plugins").join("objectiveai").exists());
+    assert!(!base.join("plugins").join("objectiveai.json").exists());
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn install_refuses_reserved_repository_name_case_insensitive() {
+    let base = temp_base();
+    let client = client_for(&base);
+    for candidate in ["ObjectiveAI", "OBJECTIVEAI", "Objectiveai"] {
+        let result = client
+            .install_plugin_at(
+                "http://example.invalid",
+                "http://example.invalid",
+                "owner",
+                candidate,
+                None,
+                None,
+                false,
+            )
+            .await;
+        assert!(
+            matches!(
+                result,
+                Err(super::super::Error::Install(InstallError::ReservedRepositoryName { .. }))
+            ),
+            "expected ReservedRepositoryName for {candidate:?}",
+        );
+    }
+    cleanup(&base);
+}
