@@ -52,4 +52,6 @@ pub enum InstallError {
     InvalidHeaderName { name: String, reason: String },
     #[error("invalid header value for {name:?}: {reason}")]
     InvalidHeaderValue { name: String, reason: String },
+    #[error("plugin {repository} is already installed; pass `--upgrade` to replace it")]
+    AlreadyInstalled { repository: String },
 }

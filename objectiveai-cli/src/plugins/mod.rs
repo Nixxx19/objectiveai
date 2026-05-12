@@ -73,6 +73,16 @@ pub enum Commands {
         /// permissions as any binary on your system.
         #[arg(long)]
         allow_untrusted: bool,
+        /// Replace an already-installed plugin. Without this flag,
+        /// install fails with `AlreadyInstalled` when a manifest exists
+        /// at `~/.objectiveai/plugins/<repository>.json`. With it,
+        /// the existing binary, viewer/ directory, and sibling
+        /// manifest are deleted before the new install runs. Extra
+        /// data under `~/.objectiveai/plugins/<repository>/` (files
+        /// the plugin's runtime created beyond the install artifacts)
+        /// is preserved either way.
+        #[arg(long)]
+        upgrade: bool,
     },
     /// List installed plugins (every `.json` manifest in
     /// `~/.objectiveai/plugins/`). Sorted by manifest mtime, most
@@ -102,8 +112,8 @@ impl Commands {
     ) -> Result<(), crate::error::Error> {
         match self {
             Commands::Get { name } => get(cli_config, handle, &name).await,
-            Commands::Install { owner, repository, commit_sha, allow_untrusted } => {
-                install(cli_config, handle, &owner, &repository, commit_sha.as_deref(), allow_untrusted).await
+            Commands::Install { owner, repository, commit_sha, allow_untrusted, upgrade } => {
+                install(cli_config, handle, &owner, &repository, commit_sha.as_deref(), allow_untrusted, upgrade).await
             }
             Commands::List { offset, limit } => list(cli_config, handle, offset, limit).await,
             Commands::Run(args) => dispatch_external(args, cli_config, handle).await,
@@ -118,6 +128,7 @@ async fn install(
     repository: &str,
     commit_sha: Option<&str>,
     allow_untrusted: bool,
+    upgrade: bool,
 ) -> Result<(), crate::error::Error> {
     let fs_client = objectiveai::filesystem::Client::new(
         cli_config.config_base_dir.as_deref(),
@@ -160,7 +171,7 @@ async fn install(
     // manifest came from.
     let source = objectiveai::filesystem::plugins::raw_manifest_url(owner, repository, commit_sha);
     let installed = fs_client
-        .install_plugin_from_manifest(owner, repository, &manifest, &source, None)
+        .install_plugin_from_manifest(owner, repository, &manifest, &source, None, upgrade)
         .await?;
     Output::<Installed>::Notification(Notification { value: Installed { installed } })
         .emit(handle)

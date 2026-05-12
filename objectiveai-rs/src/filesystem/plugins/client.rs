@@ -158,12 +158,13 @@ impl Client {
         repository: &str,
         commit_sha: Option<&str>,
         headers: Option<&indexmap::IndexMap<String, String>>,
+        upgrade: bool,
     ) -> Result<bool, super::super::Error> {
         let manifest = self
             .fetch_plugin_manifest(owner, repository, commit_sha, headers)
             .await?;
         let source = raw_manifest_url(owner, repository, commit_sha);
-        self.install_plugin_from_manifest(owner, repository, &manifest, &source, headers)
+        self.install_plugin_from_manifest(owner, repository, &manifest, &source, headers, upgrade)
             .await
     }
 
@@ -199,6 +200,7 @@ impl Client {
         manifest: &Manifest,
         source: &str,
         headers: Option<&indexmap::IndexMap<String, String>>,
+        upgrade: bool,
     ) -> Result<bool, super::super::Error> {
         self.install_from_manifest_impl(
             "https://github.com",
@@ -207,6 +209,7 @@ impl Client {
             manifest,
             source,
             headers,
+            upgrade,
         )
         .await
     }
@@ -224,6 +227,7 @@ impl Client {
         repository: &str,
         commit_sha: Option<&str>,
         headers: Option<&indexmap::IndexMap<String, String>>,
+        upgrade: bool,
     ) -> Result<bool, super::super::Error> {
         let manifest = self
             .fetch_plugin_manifest_impl(raw_base, owner, repository, commit_sha, headers)
@@ -237,6 +241,7 @@ impl Client {
             &manifest,
             &source,
             headers,
+            upgrade,
         )
         .await
     }
@@ -301,11 +306,9 @@ impl Client {
         manifest: &Manifest,
         source: &str,
         headers: Option<&indexmap::IndexMap<String, String>>,
+        upgrade: bool,
     ) -> Result<bool, super::super::Error> {
-        let http = reqwest::Client::new();
-        let header_map = build_headers(headers)?;
-
-        // 1. Match platform
+        // 1. Platform match (no disk touches).
         let Some(platform) = super::Platform::current() else {
             return Ok(false);
         };
@@ -313,63 +316,72 @@ impl Client {
             return Ok(false);
         };
 
-        // 2. Fetch binary
-        let binary_url = format!(
-            "{releases_base}/{owner}/{repository}/releases/download/v{version}/{binary_name}",
-            version = manifest.version,
-        );
-        let resp = http
-            .get(&binary_url)
-            .headers(header_map)
-            .send()
-            .await
-            .map_err(super::InstallError::BinaryRequest)?;
-        let status = resp.status();
-        if !status.is_success() {
-            return Err(super::InstallError::BinaryBadStatus {
-                code: status,
-                url: binary_url,
+        let plugins_dir = self.plugins_dir();
+        let plugin_dir = plugins_dir.join(repository);
+        let binary_filename = if cfg!(windows) { "plugin.exe" } else { "plugin" };
+        let binary_path = plugin_dir.join(binary_filename);
+        let viewer_dir = plugin_dir.join("viewer");
+        let manifest_path = plugins_dir.join(format!("{repository}.json"));
+
+        // 2. Existing-install check: the manifest sibling file is the
+        //    source of truth for "this plugin is installed."
+        let manifest_exists = tokio::fs::metadata(&manifest_path).await.is_ok();
+        if manifest_exists && !upgrade {
+            return Err(super::InstallError::AlreadyInstalled {
+                repository: repository.to_string(),
             }
             .into());
         }
-        let bin_bytes = resp
-            .bytes()
-            .await
-            .map_err(super::InstallError::BinaryResponse)?;
 
-        // 3. Write to <plugins_dir>/<repository>/plugin[.exe]
-        let plugin_dir = self.plugins_dir().join(repository);
-        tokio::fs::create_dir_all(&plugin_dir)
-            .await
-            .map_err(|e| super::InstallError::PluginDirCreate(plugin_dir.clone(), e))?;
-        let binary_filename = if cfg!(windows) { "plugin.exe" } else { "plugin" };
-        let binary_path = plugin_dir.join(binary_filename);
-        tokio::fs::write(&binary_path, &bin_bytes)
-            .await
-            .map_err(|e| super::InstallError::BinaryWrite(binary_path.clone(), e))?;
-
-        // 4. chmod +x on Unix
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-            let perms = std::fs::Permissions::from_mode(0o755);
-            tokio::fs::set_permissions(&binary_path, perms)
-                .await
-                .map_err(|e| super::InstallError::Chmod(binary_path.clone(), e))?;
+        // 3. Clean prior install data when --upgrade. Best-effort: any
+        //    delete failure surfaces later as a write-phase error
+        //    (e.g. ManifestPersist) if the artifact is truly stuck.
+        //    Extra entries under <plugin_dir>/ are untouched.
+        if upgrade {
+            let _ = tokio::fs::remove_file(&manifest_path).await;
+            let _ = tokio::fs::remove_file(&binary_path).await;
+            let _ = tokio::fs::remove_dir_all(&viewer_dir).await;
         }
 
-        // 5. Fetch + extract the viewer UI bundle into
-        // <plugins_dir>/<repository>/viewer/ if the manifest declares
-        // a `viewer_zip`.
-        if let Some(viewer_zip_name) = &manifest.viewer_zip {
+        // 4. Network phase: fetch everything into memory before any
+        //    disk write. A network failure here leaves the disk in
+        //    whatever state step 3 left it in (empty if upgrade,
+        //    unchanged if fresh install — since step 2's check would
+        //    have refused).
+        let http = reqwest::Client::new();
+        let bin_bytes: Vec<u8> = {
+            let binary_url = format!(
+                "{releases_base}/{owner}/{repository}/releases/download/v{version}/{binary_name}",
+                version = manifest.version,
+            );
+            let resp = http
+                .get(&binary_url)
+                .headers(build_headers(headers)?)
+                .send()
+                .await
+                .map_err(super::InstallError::BinaryRequest)?;
+            let status = resp.status();
+            if !status.is_success() {
+                return Err(super::InstallError::BinaryBadStatus {
+                    code: status,
+                    url: binary_url,
+                }
+                .into());
+            }
+            resp.bytes()
+                .await
+                .map_err(super::InstallError::BinaryResponse)?
+                .to_vec()
+        };
+
+        let zip_bytes: Option<Vec<u8>> = if let Some(viewer_zip_name) = &manifest.viewer_zip {
             let viewer_url = format!(
                 "{releases_base}/{owner}/{repository}/releases/download/v{version}/{viewer_zip_name}",
                 version = manifest.version,
             );
-            let viewer_header_map = build_headers(headers)?;
             let resp = http
                 .get(&viewer_url)
-                .headers(viewer_header_map)
+                .headers(build_headers(headers)?)
                 .send()
                 .await
                 .map_err(super::InstallError::ViewerZipRequest)?;
@@ -381,44 +393,96 @@ impl Client {
                 }
                 .into());
             }
-            let zip_bytes = resp
-                .bytes()
-                .await
-                .map_err(super::InstallError::ViewerZipResponse)?;
-            let viewer_dir = plugin_dir.join("viewer");
-            tokio::fs::create_dir_all(&viewer_dir)
-                .await
-                .map_err(|e| super::InstallError::ViewerZipExtract(viewer_dir.clone(), e.to_string()))?;
-            let viewer_dir_for_blocking = viewer_dir.clone();
-            tokio::task::spawn_blocking(move || {
-                let cursor = std::io::Cursor::new(zip_bytes);
-                let mut archive = zip::ZipArchive::new(cursor)
-                    .map_err(|e| format!("zip archive open: {e}"))?;
-                archive
-                    .extract(&viewer_dir_for_blocking)
-                    .map_err(|e| format!("extract: {e}"))
-            })
-            .await
-            .map_err(|e| super::InstallError::ViewerZipExtract(viewer_dir.clone(), format!("join: {e}")))?
-            .map_err(|e| super::InstallError::ViewerZipExtract(viewer_dir.clone(), e))?;
-        }
-
-        // 6. Persist the manifest as <plugins_dir>/<repository>.json so
-        // list_plugins / get_plugin surface this install.
-        let manifest_path = self.plugins_dir().join(format!("{repository}.json"));
-        let bundle = ManifestWithNameAndSource {
-            name: repository.to_string(),
-            manifest: manifest.clone(),
-            source: source.to_string(),
+            Some(
+                resp.bytes()
+                    .await
+                    .map_err(super::InstallError::ViewerZipResponse)?
+                    .to_vec(),
+            )
+        } else {
+            None
         };
-        let bytes = serde_json::to_vec_pretty(&bundle)
-            .map_err(super::InstallError::ManifestSerialize)?;
-        tokio::fs::write(&manifest_path, &bytes)
+
+        let manifest_bytes: Vec<u8> = {
+            let bundle = ManifestWithNameAndSource {
+                name: repository.to_string(),
+                manifest: manifest.clone(),
+                source: source.to_string(),
+            };
+            serde_json::to_vec_pretty(&bundle).map_err(super::InstallError::ManifestSerialize)?
+        };
+
+        // 5. Plugin dir setup. Idempotent — preserves any pre-existing
+        //    "extra data" the plugin's runtime created.
+        tokio::fs::create_dir_all(&plugin_dir)
             .await
-            .map_err(|e| super::InstallError::ManifestPersist(manifest_path.clone(), e))?;
+            .map_err(|e| super::InstallError::PluginDirCreate(plugin_dir.clone(), e))?;
+
+        // 6. Concurrent write phase via try_join!. Three branches fan
+        //    out, short-circuit on first error.
+        tokio::try_join!(
+            write_binary_branch(binary_path, bin_bytes),
+            write_viewer_branch(viewer_dir, zip_bytes),
+            write_manifest_branch(manifest_path, manifest_bytes),
+        )?;
 
         Ok(true)
     }
+}
+
+#[cfg(feature = "http")]
+async fn write_binary_branch(
+    binary_path: PathBuf,
+    bytes: Vec<u8>,
+) -> Result<(), super::InstallError> {
+    tokio::fs::write(&binary_path, &bytes)
+        .await
+        .map_err(|e| super::InstallError::BinaryWrite(binary_path.clone(), e))?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let perms = std::fs::Permissions::from_mode(0o755);
+        tokio::fs::set_permissions(&binary_path, perms)
+            .await
+            .map_err(|e| super::InstallError::Chmod(binary_path.clone(), e))?;
+    }
+    Ok(())
+}
+
+#[cfg(feature = "http")]
+async fn write_viewer_branch(
+    viewer_dir: PathBuf,
+    zip_bytes: Option<Vec<u8>>,
+) -> Result<(), super::InstallError> {
+    let Some(bytes) = zip_bytes else {
+        return Ok(());
+    };
+    tokio::fs::create_dir_all(&viewer_dir)
+        .await
+        .map_err(|e| super::InstallError::ViewerZipExtract(viewer_dir.clone(), e.to_string()))?;
+    let viewer_dir_for_blocking = viewer_dir.clone();
+    tokio::task::spawn_blocking(move || {
+        let cursor = std::io::Cursor::new(bytes);
+        let mut archive = zip::ZipArchive::new(cursor)
+            .map_err(|e| format!("zip archive open: {e}"))?;
+        archive
+            .extract(&viewer_dir_for_blocking)
+            .map_err(|e| format!("extract: {e}"))
+    })
+    .await
+    .map_err(|e| super::InstallError::ViewerZipExtract(viewer_dir.clone(), format!("join: {e}")))?
+    .map_err(|e| super::InstallError::ViewerZipExtract(viewer_dir.clone(), e))?;
+    Ok(())
+}
+
+#[cfg(feature = "http")]
+async fn write_manifest_branch(
+    manifest_path: PathBuf,
+    bytes: Vec<u8>,
+) -> Result<(), super::InstallError> {
+    tokio::fs::write(&manifest_path, &bytes)
+        .await
+        .map_err(|e| super::InstallError::ManifestPersist(manifest_path.clone(), e))
 }
 
 /// Convention: the raw-GitHub URL we'd fetch `objectiveai.json` from

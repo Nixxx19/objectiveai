@@ -64,7 +64,7 @@ async fn install_succeeds_when_platform_supported() {
 
     let client = client_for(&base);
     let result = client
-        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None)
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None, false)
         .await;
 
     assert!(matches!(result, Ok(true)), "got {result:?}");
@@ -113,7 +113,7 @@ async fn install_returns_false_when_platform_not_in_binaries() {
 
     let client = client_for(&base);
     let result = client
-        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None)
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None, false)
         .await;
 
     assert!(matches!(result, Ok(false)), "got {result:?}");
@@ -166,6 +166,7 @@ async fn install_uses_commit_sha_when_provided() {
             "repo",
             Some("abc123"),
             None,
+            false,
         )
         .await;
 
@@ -190,7 +191,7 @@ async fn install_manifest_404_returns_manifest_bad_status_error() {
 
     let client = client_for(&base);
     let result = client
-        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None)
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None, false)
         .await;
 
     match result {
@@ -229,7 +230,7 @@ async fn install_binary_404_returns_binary_bad_status_error() {
 
     let client = client_for(&base);
     let result = client
-        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None)
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None, false)
         .await;
 
     match result {
@@ -255,7 +256,7 @@ async fn install_malformed_manifest_returns_parse_error() {
 
     let client = client_for(&base);
     let result = client
-        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None)
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None, false)
         .await;
 
     match result {
@@ -340,6 +341,7 @@ async fn install_passes_headers_to_both_requests() {
             "repo",
             None,
             Some(&headers),
+            false,
         )
         .await;
 
@@ -375,7 +377,7 @@ async fn install_makes_plugin_appear_in_list() {
 
     let client = client_for(&base);
     let ok = client
-        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None)
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None, false)
         .await
         .unwrap();
     assert!(ok);
@@ -419,7 +421,7 @@ async fn install_then_get_plugin_returns_persisted_manifest() {
 
     let client = client_for(&base);
     let ok = client
-        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None)
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None, false)
         .await
         .unwrap();
     assert!(ok);
@@ -485,7 +487,7 @@ async fn install_extracts_viewer_zip_when_present() {
 
     let client = client_for(&base);
     let ok = client
-        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None)
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None, false)
         .await
         .unwrap();
     assert!(ok);
@@ -530,7 +532,7 @@ async fn install_skips_viewer_zip_when_absent() {
 
     let client = client_for(&base);
     let ok = client
-        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None)
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None, false)
         .await
         .unwrap();
     assert!(ok);
@@ -574,7 +576,7 @@ async fn install_viewer_zip_404_returns_error() {
 
     let client = client_for(&base);
     let result = client
-        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None)
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None, false)
         .await;
 
     match result {
@@ -583,6 +585,231 @@ async fn install_viewer_zip_404_returns_error() {
         }
         other => panic!("expected ViewerZipBadStatus(404), got {other:?}"),
     }
+
+    cleanup(&base);
+}
+
+// ============================================================
+// --upgrade flag behaviour
+// ============================================================
+
+/// Builds two mock endpoints (manifest + binary) that any install
+/// call hits. Returns (server, full manifest body) so the test can
+/// drive multiple installs against the same mock.
+async fn upgrade_test_server(
+    version: &str,
+    binary_body: &'static [u8],
+) -> (MockServer, serde_json::Value) {
+    let server = MockServer::start().await;
+    let platform_key = current_platform_key();
+    let manifest_body = json!({
+        "description": "upgrade test plugin",
+        "version": version,
+        "binaries": { platform_key: "asset-bin" }
+    });
+    Mock::given(method("GET"))
+        .and(path("/owner/repo/HEAD/objectiveai.json"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(manifest_body.clone()))
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path(format!("/owner/repo/releases/download/v{version}/asset-bin")))
+        .respond_with(ResponseTemplate::new(200).set_body_bytes(binary_body.to_vec()))
+        .mount(&server)
+        .await;
+    (server, manifest_body)
+}
+
+#[tokio::test]
+async fn install_refuses_when_manifest_exists_and_not_upgrade() {
+    let base = temp_base();
+    let (server, _) = upgrade_test_server("1.0.0", FAKE_BIN).await;
+    let client = client_for(&base);
+
+    // First install succeeds.
+    client
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None, false)
+        .await
+        .unwrap();
+
+    // Second install with upgrade=false errors.
+    let result = client
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None, false)
+        .await;
+    match result {
+        Err(super::super::Error::Install(InstallError::AlreadyInstalled { repository })) => {
+            assert_eq!(repository, "repo");
+        }
+        other => panic!("expected AlreadyInstalled, got {other:?}"),
+    }
+
+    // Disk state should match the first install (untouched by the refused second one).
+    let bin = std::fs::read(base.join("plugins").join("repo").join(binary_filename())).unwrap();
+    assert_eq!(bin, FAKE_BIN);
+    assert!(base.join("plugins").join("repo.json").exists());
+
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn install_upgrade_replaces_prior_artifacts() {
+    let base = temp_base();
+    let client = client_for(&base);
+
+    // Install A at version 1.0.0.
+    let (server_a, _) = upgrade_test_server("1.0.0", b"VERSION_A_BIN").await;
+    client
+        .install_plugin_at(&server_a.uri(), &server_a.uri(), "owner", "repo", None, None, false)
+        .await
+        .unwrap();
+
+    // Install B at version 2.0.0 with --upgrade.
+    let (server_b, _) = upgrade_test_server("2.0.0", b"VERSION_B_BIN").await;
+    client
+        .install_plugin_at(&server_b.uri(), &server_b.uri(), "owner", "repo", None, None, true)
+        .await
+        .unwrap();
+
+    // Binary on disk now has B's body; manifest carries B's version.
+    let bin = std::fs::read(base.join("plugins").join("repo").join(binary_filename())).unwrap();
+    assert_eq!(bin, b"VERSION_B_BIN");
+    let persisted: ManifestWithNameAndSource =
+        serde_json::from_slice(&std::fs::read(base.join("plugins").join("repo.json")).unwrap())
+            .unwrap();
+    assert_eq!(persisted.manifest.version, "2.0.0");
+
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn install_upgrade_preserves_extra_data_under_plugin_dir() {
+    let base = temp_base();
+    let client = client_for(&base);
+
+    // Install A.
+    let (server_a, _) = upgrade_test_server("1.0.0", FAKE_BIN).await;
+    client
+        .install_plugin_at(&server_a.uri(), &server_a.uri(), "owner", "repo", None, None, false)
+        .await
+        .unwrap();
+
+    // Drop a "user-state" file under the plugin's dir.
+    let user_state = base.join("plugins").join("repo").join("user-state.json");
+    std::fs::write(&user_state, b"{\"runs\":42}").unwrap();
+
+    // Upgrade.
+    let (server_b, _) = upgrade_test_server("2.0.0", b"V2").await;
+    client
+        .install_plugin_at(&server_b.uri(), &server_b.uri(), "owner", "repo", None, None, true)
+        .await
+        .unwrap();
+
+    // user-state.json is preserved verbatim.
+    let preserved = std::fs::read(&user_state).unwrap();
+    assert_eq!(preserved, b"{\"runs\":42}");
+
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn install_upgrade_with_no_prior_install_just_installs() {
+    let base = temp_base();
+    let (server, _) = upgrade_test_server("1.0.0", FAKE_BIN).await;
+    let client = client_for(&base);
+
+    // upgrade=true on a fresh base — should still work, no prior state to delete.
+    let ok = client
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None, true)
+        .await
+        .unwrap();
+    assert!(ok);
+    assert!(base.join("plugins").join("repo").join(binary_filename()).exists());
+    assert!(base.join("plugins").join("repo.json").exists());
+
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn install_network_failure_leaves_disk_untouched_on_fresh() {
+    let base = temp_base();
+    let server = MockServer::start().await;
+    let platform_key = current_platform_key();
+    let manifest_body = json!({
+        "description": "broken plugin",
+        "version": "1.0.0",
+        "binaries": { platform_key: "asset-bin" }
+    });
+
+    Mock::given(method("GET"))
+        .and(path("/owner/repo/HEAD/objectiveai.json"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(manifest_body))
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/owner/repo/releases/download/v1.0.0/asset-bin"))
+        .respond_with(ResponseTemplate::new(500))
+        .mount(&server)
+        .await;
+
+    let client = client_for(&base);
+    let result = client
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None, false)
+        .await;
+    assert!(matches!(
+        result,
+        Err(super::super::Error::Install(InstallError::BinaryBadStatus { .. }))
+    ));
+
+    // Nothing on disk — the failure happened in the network phase before any writes.
+    assert!(!base.join("plugins").join("repo").exists());
+    assert!(!base.join("plugins").join("repo.json").exists());
+
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn install_upgrade_network_failure_leaves_disk_after_cleanup() {
+    let base = temp_base();
+    let client = client_for(&base);
+
+    // Install A successfully.
+    let (server_a, _) = upgrade_test_server("1.0.0", b"V1").await;
+    client
+        .install_plugin_at(&server_a.uri(), &server_a.uri(), "owner", "repo", None, None, false)
+        .await
+        .unwrap();
+
+    // Attempt upgrade with a binary endpoint that 500s.
+    let server_b = MockServer::start().await;
+    let platform_key = current_platform_key();
+    let manifest_body = json!({
+        "description": "broken upgrade",
+        "version": "2.0.0",
+        "binaries": { platform_key: "asset-bin" }
+    });
+    Mock::given(method("GET"))
+        .and(path("/owner/repo/HEAD/objectiveai.json"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(manifest_body))
+        .mount(&server_b)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/owner/repo/releases/download/v2.0.0/asset-bin"))
+        .respond_with(ResponseTemplate::new(500))
+        .mount(&server_b)
+        .await;
+
+    let result = client
+        .install_plugin_at(&server_b.uri(), &server_b.uri(), "owner", "repo", None, None, true)
+        .await;
+    assert!(matches!(
+        result,
+        Err(super::super::Error::Install(InstallError::BinaryBadStatus { .. }))
+    ));
+
+    // Documented trade-off: upgrade deleted A's artifacts (step 3) BEFORE
+    // the network fetch failed (step 4). The user must retry install.
+    assert!(!base.join("plugins").join("repo").join(binary_filename()).exists());
+    assert!(!base.join("plugins").join("repo.json").exists());
 
     cleanup(&base);
 }
