@@ -130,23 +130,9 @@ fn not_found() -> tauri::http::Response<Vec<u8>> {
         .unwrap()
 }
 
-fn guess_mime(path: &std::path::Path) -> &'static str {
-    match path.extension().and_then(|e| e.to_str()) {
-        Some("html") | Some("htm") => "text/html; charset=utf-8",
-        Some("js") | Some("mjs") => "application/javascript; charset=utf-8",
-        Some("css") => "text/css; charset=utf-8",
-        Some("json") => "application/json; charset=utf-8",
-        Some("svg") => "image/svg+xml",
-        Some("png") => "image/png",
-        Some("jpg") | Some("jpeg") => "image/jpeg",
-        Some("gif") => "image/gif",
-        Some("ico") => "image/x-icon",
-        Some("woff") => "font/woff",
-        Some("woff2") => "font/woff2",
-        Some("wasm") => "application/wasm",
-        Some("txt") => "text/plain; charset=utf-8",
-        Some("map") => "application/json; charset=utf-8",
-        _ => "application/octet-stream",
-    }
+fn guess_mime(path: &std::path::Path) -> String {
+    mime_guess::from_path(path)
+        .first_or_octet_stream()
+        .to_string()
 }
 
