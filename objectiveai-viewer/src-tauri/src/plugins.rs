@@ -7,7 +7,6 @@ use axum::Json;
 use axum::http::StatusCode;
 use objectiveai::filesystem::Client as FsClient;
 use objectiveai::filesystem::plugins::{HttpMethod, ViewerRoute};
-use serde::Serialize;
 
 use crate::events::{Event, EventSender, PluginEvent, PluginRequest};
 
@@ -52,31 +51,21 @@ pub(crate) fn register_plugin_route(
     app.route(&full_path, method_router)
 }
 
-/// Subset of `ManifestWithNameAndSource` returned to the frontend by
-/// [`list_plugins_with_viewer`]. Pre-filtered to plugins that have a
-/// viewer surface (either `viewer_zip` or `viewer_routes`).
-#[derive(Clone, Debug, Serialize)]
-pub struct PluginTab {
-    pub name: String,
-    pub description: String,
-    pub version: String,
-    pub has_viewer_bundle: bool,
-}
-
+/// Names of installed plugins that should appear as tabs in the
+/// viewer shell. Pre-filtered to plugins that ship a viewer bundle
+/// (`viewer_zip` set) — without a bundle there's nothing for the
+/// iframe to render. Plugins with only `viewer_routes` and no
+/// bundle still have their axum routes registered at startup but
+/// don't get a tab.
 #[tauri::command]
 pub(crate) async fn list_plugins_with_viewer(
     state: tauri::State<'_, FsClient>,
-) -> Result<Vec<PluginTab>, String> {
+) -> Result<Vec<String>, String> {
     let plugins = state.inner().list_plugins(0, usize::MAX).await;
     Ok(plugins
         .into_iter()
-        .filter(|p| p.manifest.viewer_zip.is_some() || !p.manifest.viewer_routes.is_empty())
-        .map(|p| PluginTab {
-            name: p.name.clone(),
-            description: p.manifest.description,
-            version: p.manifest.version,
-            has_viewer_bundle: p.manifest.viewer_zip.is_some(),
-        })
+        .filter(|p| p.manifest.viewer_zip.is_some())
+        .map(|p| p.name)
         .collect())
 }
 

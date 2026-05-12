@@ -343,22 +343,15 @@ function ObjectiveAIView() {
   );
 }
 
-interface PluginTab {
-  name: string;
-  description: string;
-  version: string;
-  has_viewer_bundle: boolean;
-}
-
 const OBJECTIVEAI_TAB_ID = "objectiveai";
 
 function App() {
-  const [pluginTabs, setPluginTabs] = useState<PluginTab[]>([]);
+  const [pluginNames, setPluginNames] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<string>(OBJECTIVEAI_TAB_ID);
 
   useEffect(() => {
-    invoke<PluginTab[]>("list_plugins_with_viewer")
-      .then(setPluginTabs)
+    invoke<string[]>("list_plugins_with_viewer")
+      .then(setPluginNames)
       .catch((e) => {
         // eslint-disable-next-line no-console
         console.warn("list_plugins_with_viewer failed:", e);
@@ -367,9 +360,7 @@ function App() {
 
   const tabs: Tab[] = [
     { id: OBJECTIVEAI_TAB_ID, label: "ObjectiveAI" },
-    ...pluginTabs
-      .filter((p) => p.has_viewer_bundle)
-      .map((p) => ({ id: p.name, label: p.name })),
+    ...pluginNames.map((name) => ({ id: name, label: name })),
   ];
 
   return (
