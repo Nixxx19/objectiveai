@@ -4,7 +4,7 @@ use objectiveai::filesystem::plugins::{HttpMethod, ViewerRoute};
 use tokio::sync::mpsc;
 use tower::ServiceExt;
 
-use crate::events::{Event, PluginEvent};
+use crate::events::Event;
 use crate::plugins::register_plugin_route;
 
 #[tokio::test]
@@ -30,10 +30,10 @@ async fn register_plugin_route_emits_event_with_type_and_value() {
 
     let event = rx.try_recv().expect("expected an event");
     match event {
-        Event::Plugin(PluginEvent { plugin, request }) => {
+        Event::Plugin { plugin, r#type, value } => {
             assert_eq!(plugin, "myplugin");
-            assert_eq!(request.r#type, "echo_request");
-            assert_eq!(request.value["hello"], "world");
+            assert_eq!(r#type, "echo_request");
+            assert_eq!(value["hello"], "world");
         }
         _ => panic!("expected Event::Plugin"),
     }
@@ -57,9 +57,9 @@ async fn register_plugin_route_emits_null_value_for_get() {
 
     let event = rx.try_recv().expect("expected an event");
     match event {
-        Event::Plugin(PluginEvent { request, .. }) => {
-            assert_eq!(request.r#type, "status_request");
-            assert!(request.value.is_null());
+        Event::Plugin { r#type, value, .. } => {
+            assert_eq!(r#type, "status_request");
+            assert!(value.is_null());
         }
         _ => panic!("expected Event::Plugin"),
     }

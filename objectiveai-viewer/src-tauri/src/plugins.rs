@@ -8,7 +8,7 @@ use axum::http::StatusCode;
 use objectiveai::filesystem::Client as FsClient;
 use objectiveai::filesystem::plugins::{HttpMethod, ViewerRoute};
 
-use crate::events::{Event, EventSender, PluginEvent, PluginRequest};
+use crate::events::{Event, EventSender};
 
 /// Register one plugin viewer route on the given axum router. The
 /// route lands at `/plugin/<plugin>/<route.path>`; a hit emits an
@@ -32,11 +32,7 @@ pub(crate) fn register_plugin_route(
         let r#type = r#type.clone();
         async move {
             let value = body.map(|Json(v)| v).unwrap_or(serde_json::Value::Null);
-            tx.send(Event::Plugin(PluginEvent {
-                plugin,
-                request: PluginRequest { r#type, value },
-            }))
-            .ok();
+            tx.send(Event::Plugin { plugin, r#type, value }).ok();
             StatusCode::OK
         }
     };
