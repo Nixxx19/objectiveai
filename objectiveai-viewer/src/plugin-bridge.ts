@@ -11,18 +11,14 @@
  *     messages to the matching iframe.
  *
  * Allow-list (commands plugin iframes may call):
- *   - `plugin_invoke` — call the plugin's own backend binary.
- *   - `objectiveai_api_call` — proxied API request (future).
+ *   - `objectiveai_api_call` — proxied API request (future placeholder).
  *
  * Any other command name is rejected with an error reply.
  */
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 import { listen as tauriListen, type UnlistenFn } from "@tauri-apps/api/event";
 
-const ALLOWED_COMMANDS: ReadonlySet<string> = new Set([
-  "plugin_invoke",
-  "objectiveai_api_call",
-]);
+const ALLOWED_COMMANDS: ReadonlySet<string> = new Set(["objectiveai_api_call"]);
 
 type IframeHandle = {
   pluginName: string;
@@ -83,13 +79,7 @@ function handleIncomingMessage(event: MessageEvent): void {
     return;
   }
 
-  // For `plugin_invoke`, force the `name` arg to the iframe's plugin
-  // name regardless of what the plugin passed — plugins can only
-  // invoke themselves, never each other.
-  let args = msg.args as Record<string, unknown> | null | undefined;
-  if (msg.method === "plugin_invoke") {
-    args = { ...(args ?? {}), name: matched.pluginName };
-  }
+  const args = msg.args as Record<string, unknown> | null | undefined;
 
   void (async () => {
     try {

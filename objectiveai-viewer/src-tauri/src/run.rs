@@ -321,8 +321,7 @@ pub fn serve(
         .invoke_handler(tauri::generate_handler![
             viewer_ready,
             notify_agent_completion,
-            crate::plugins::list_plugins_with_viewer,
-            crate::plugins::plugin_invoke
+            crate::plugins::list_plugins_with_viewer
         ])
         .setup(move |tauri_app| {
             let handle = tauri_app.handle().clone();

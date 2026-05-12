@@ -4,6 +4,8 @@ pub mod laboratories;
 pub mod response_error;
 mod events;
 mod plugins;
+#[cfg(test)]
+mod plugins_tests;
 mod run;
 mod signature;
 
