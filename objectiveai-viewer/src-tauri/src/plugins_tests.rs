@@ -29,14 +29,10 @@ async fn register_plugin_route_emits_event_with_type_and_value() {
     assert_eq!(response.status(), StatusCode::OK);
 
     let event = rx.try_recv().expect("expected an event");
-    match event {
-        Event::Plugin { plugin, r#type, value } => {
-            assert_eq!(plugin, "myplugin");
-            assert_eq!(r#type, "echo_request");
-            assert_eq!(value["hello"], "world");
-        }
-        _ => panic!("expected Event::Plugin"),
-    }
+    let Event { destination, r#type, value } = event;
+    assert_eq!(destination, "myplugin");
+    assert_eq!(r#type, "echo_request");
+    assert_eq!(value["hello"], "world");
 }
 
 #[tokio::test]
@@ -56,11 +52,7 @@ async fn register_plugin_route_emits_null_value_for_get() {
     assert_eq!(response.status(), StatusCode::OK);
 
     let event = rx.try_recv().expect("expected an event");
-    match event {
-        Event::Plugin { r#type, value, .. } => {
-            assert_eq!(r#type, "status_request");
-            assert!(value.is_null());
-        }
-        _ => panic!("expected Event::Plugin"),
-    }
+    let Event { r#type, value, .. } = event;
+    assert_eq!(r#type, "status_request");
+    assert!(value.is_null());
 }

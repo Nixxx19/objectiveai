@@ -10,10 +10,7 @@ use std::sync::Arc;
 use tauri::Emitter;
 use tokio::sync::{Notify, mpsc};
 
-use crate::agent;
 use crate::events::{Event, EventReceiver};
-use crate::functions;
-use crate::laboratories;
 use crate::plugins::{register_plugin_route, serve_plugin_asset};
 use crate::signature::signature_middleware;
 
@@ -213,47 +210,39 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         config.commit_author_email,
     );
 
-    let mut app = axum::Router::new()
-        .route(
-            "/agent/completions",
-            axum::routing::post({
-                let tx = tx.clone();
-                move |Json(request): Json<agent::completions::request::Request>| async move {
-                    tx.send(Event::AgentCompletions(request)).ok();
-                    StatusCode::OK
-                }
-            }),
-        )
-        .route(
-            "/functions/executions",
-            axum::routing::post({
-                let tx = tx.clone();
-                move |Json(request): Json<functions::executions::request::Request>| async move {
-                    tx.send(Event::FunctionsExecutions(request)).ok();
-                    StatusCode::OK
-                }
-            }),
-        )
-        .route(
+    fn built_in_route(
+        path: &'static str,
+        r#type: &'static str,
+        tx: tokio::sync::mpsc::UnboundedSender<Event>,
+    ) -> (&'static str, axum::routing::MethodRouter) {
+        let handler = move |Json(value): Json<serde_json::Value>| {
+            let tx = tx.clone();
+            let r#type = r#type.to_string();
+            async move {
+                let _ = tx.send(Event {
+                    destination: "objectiveai".to_string(),
+                    r#type,
+                    value,
+                });
+                StatusCode::OK
+            }
+        };
+        (path, axum::routing::post(handler))
+    }
+
+    let mut app = axum::Router::new();
+    for (path, route) in [
+        built_in_route("/agent/completions", "agent_completions", tx.clone()),
+        built_in_route("/functions/executions", "functions_executions", tx.clone()),
+        built_in_route(
             "/functions/inventions/recursive",
-            axum::routing::post({
-                let tx = tx.clone();
-                move |Json(request): Json<functions::inventions::recursive::request::Request>| async move {
-                    tx.send(Event::FunctionsInventionsRecursive(request)).ok();
-                    StatusCode::OK
-                }
-            }),
-        )
-        .route(
-            "/laboratories/executions",
-            axum::routing::post({
-                let tx = tx.clone();
-                move |Json(request): Json<laboratories::executions::request::Request>| async move {
-                    tx.send(Event::LaboratoriesExecutions(request)).ok();
-                    StatusCode::OK
-                }
-            }),
-        );
+            "functions_inventions_recursive",
+            tx.clone(),
+        ),
+        built_in_route("/laboratories/executions", "laboratories_executions", tx.clone()),
+    ] {
+        app = app.route(path, route);
+    }
 
     let fs_client = FsClient::new(
         config.config_base_dir.as_deref(),
@@ -346,13 +335,11 @@ pub fn serve(
                 }
                 // Drain buffered events.
                 for event in buffer {
-                    let e = event.to_emitted();
-                    let _ = handle.emit(&e.destination, &e);
+                    let _ = handle.emit(&event.destination, &event);
                 }
                 // Forward remaining events directly.
                 while let Some(event) = rx.recv().await {
-                    let e = event.to_emitted();
-                    let _ = handle.emit(&e.destination, &e);
+                    let _ = handle.emit(&event.destination, &event);
                 }
             });
             Ok(())

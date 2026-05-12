@@ -32,7 +32,11 @@ pub(crate) fn register_plugin_route(
         let r#type = r#type.clone();
         async move {
             let value = body.map(|Json(v)| v).unwrap_or(serde_json::Value::Null);
-            tx.send(Event::Plugin { plugin, r#type, value }).ok();
+            let _ = tx.send(Event {
+                destination: plugin,
+                r#type,
+                value,
+            });
             StatusCode::OK
         }
     };
