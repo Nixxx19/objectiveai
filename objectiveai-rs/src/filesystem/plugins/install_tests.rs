@@ -431,3 +431,158 @@ async fn install_then_get_plugin_returns_persisted_manifest() {
 
     cleanup(&base);
 }
+
+/// Build a minimal in-memory zip containing one `index.html` file.
+fn build_viewer_zip(html_contents: &str) -> Vec<u8> {
+    use std::io::Write;
+    let mut buf = Vec::new();
+    {
+        let mut writer = zip::ZipWriter::new(std::io::Cursor::new(&mut buf));
+        let options: zip::write::SimpleFileOptions = zip::write::SimpleFileOptions::default()
+            .compression_method(zip::CompressionMethod::Stored);
+        writer.start_file("index.html", options).unwrap();
+        writer.write_all(html_contents.as_bytes()).unwrap();
+        writer.finish().unwrap();
+    }
+    buf
+}
+
+#[tokio::test]
+async fn install_extracts_viewer_zip_when_present() {
+    let base = temp_base();
+    let server = MockServer::start().await;
+    let platform_key = current_platform_key();
+
+    let manifest_body = json!({
+        "description": "viewer plugin",
+        "version": "1.0.0",
+        "binaries": { platform_key: "asset-bin" },
+        "viewer_zip": "v.zip",
+        "viewer_routes": [
+            { "path": "/say", "method": "POST", "type": "say_request" }
+        ]
+    });
+
+    Mock::given(method("GET"))
+        .and(path("/owner/repo/HEAD/objectiveai.json"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(manifest_body))
+        .mount(&server)
+        .await;
+
+    Mock::given(method("GET"))
+        .and(path("/owner/repo/releases/download/v1.0.0/asset-bin"))
+        .respond_with(ResponseTemplate::new(200).set_body_bytes(FAKE_BIN.to_vec()))
+        .mount(&server)
+        .await;
+
+    let zip_bytes = build_viewer_zip("<!doctype html><title>hi</title>");
+
+    Mock::given(method("GET"))
+        .and(path("/owner/repo/releases/download/v1.0.0/v.zip"))
+        .respond_with(ResponseTemplate::new(200).set_body_bytes(zip_bytes))
+        .mount(&server)
+        .await;
+
+    let client = client_for(&base);
+    let ok = client
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None)
+        .await
+        .unwrap();
+    assert!(ok);
+
+    let viewer_index = base.join("plugins").join("repo").join("viewer").join("index.html");
+    assert!(viewer_index.exists(), "viewer/index.html missing at {viewer_index:?}");
+    let contents = std::fs::read_to_string(&viewer_index).unwrap();
+    assert!(contents.contains("hi"), "unexpected viewer index: {contents:?}");
+
+    // Manifest persistence still records the viewer fields.
+    let persisted: ManifestWithNameAndSource =
+        serde_json::from_slice(&std::fs::read(base.join("plugins").join("repo.json")).unwrap()).unwrap();
+    assert_eq!(persisted.manifest.viewer_zip.as_deref(), Some("v.zip"));
+    assert_eq!(persisted.manifest.viewer_routes.len(), 1);
+
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn install_skips_viewer_zip_when_absent() {
+    let base = temp_base();
+    let server = MockServer::start().await;
+    let platform_key = current_platform_key();
+
+    let manifest_body = json!({
+        "description": "no-viewer plugin",
+        "version": "1.0.0",
+        "binaries": { platform_key: "asset-bin" }
+    });
+
+    Mock::given(method("GET"))
+        .and(path("/owner/repo/HEAD/objectiveai.json"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(manifest_body))
+        .mount(&server)
+        .await;
+
+    Mock::given(method("GET"))
+        .and(path("/owner/repo/releases/download/v1.0.0/asset-bin"))
+        .respond_with(ResponseTemplate::new(200).set_body_bytes(FAKE_BIN.to_vec()))
+        .mount(&server)
+        .await;
+
+    let client = client_for(&base);
+    let ok = client
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None)
+        .await
+        .unwrap();
+    assert!(ok);
+
+    let viewer_dir = base.join("plugins").join("repo").join("viewer");
+    assert!(!viewer_dir.exists(), "viewer dir should not exist for plugin without viewer_zip");
+
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn install_viewer_zip_404_returns_error() {
+    let base = temp_base();
+    let server = MockServer::start().await;
+    let platform_key = current_platform_key();
+
+    let manifest_body = json!({
+        "description": "broken viewer plugin",
+        "version": "1.0.0",
+        "binaries": { platform_key: "asset-bin" },
+        "viewer_zip": "missing.zip"
+    });
+
+    Mock::given(method("GET"))
+        .and(path("/owner/repo/HEAD/objectiveai.json"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(manifest_body))
+        .mount(&server)
+        .await;
+
+    Mock::given(method("GET"))
+        .and(path("/owner/repo/releases/download/v1.0.0/asset-bin"))
+        .respond_with(ResponseTemplate::new(200).set_body_bytes(FAKE_BIN.to_vec()))
+        .mount(&server)
+        .await;
+
+    Mock::given(method("GET"))
+        .and(path("/owner/repo/releases/download/v1.0.0/missing.zip"))
+        .respond_with(ResponseTemplate::new(404))
+        .mount(&server)
+        .await;
+
+    let client = client_for(&base);
+    let result = client
+        .install_plugin_at(&server.uri(), &server.uri(), "owner", "repo", None, None)
+        .await;
+
+    match result {
+        Err(super::super::Error::Install(InstallError::ViewerZipBadStatus { code, .. })) => {
+            assert_eq!(code.as_u16(), 404);
+        }
+        other => panic!("expected ViewerZipBadStatus(404), got {other:?}"),
+    }
+
+    cleanup(&base);
+}

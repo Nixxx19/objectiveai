@@ -40,6 +40,14 @@ pub enum InstallError {
     ManifestSerialize(serde_json::Error),
     #[error("failed to persist manifest at {0}: {1}")]
     ManifestPersist(PathBuf, std::io::Error),
+    #[error("viewer-zip request failed: {0}")]
+    ViewerZipRequest(reqwest::Error),
+    #[error("viewer-zip fetch returned bad status {code} from {url}")]
+    ViewerZipBadStatus { code: StatusCode, url: String },
+    #[error("viewer-zip body could not be read: {0}")]
+    ViewerZipResponse(reqwest::Error),
+    #[error("failed to extract viewer zip into {0}: {1}")]
+    ViewerZipExtract(PathBuf, String),
     #[error("invalid header name {name:?}: {reason}")]
     InvalidHeaderName { name: String, reason: String },
     #[error("invalid header value for {name:?}: {reason}")]

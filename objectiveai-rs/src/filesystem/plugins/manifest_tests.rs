@@ -10,6 +10,9 @@ fn manifest_minimal_roundtrip() {
         homepage: None,
         license: None,
         binaries: IndexMap::new(),
+        viewer_zip: None,
+        viewer_routes: vec![],
+        mobile_ready: false,
     };
     let json = serde_json::to_value(&m).unwrap();
     // `skip_serializing_if = "Option::is_none"` keeps the wire shape lean.
@@ -36,6 +39,9 @@ fn manifest_full_roundtrip() {
         homepage: Some("https://github.com/Wiggidy/psychological-operations".to_string()),
         license: Some("MIT".to_string()),
         binaries: IndexMap::new(),
+        viewer_zip: None,
+        viewer_routes: vec![],
+        mobile_ready: false,
     };
     let json = serde_json::to_value(&m).unwrap();
     let back: Manifest = serde_json::from_value(json).unwrap();
@@ -57,6 +63,9 @@ fn manifest_with_name_and_source_field_order() {
             homepage: None,
             license: Some("MIT".to_string()),
             binaries: IndexMap::new(),
+            viewer_zip: None,
+            viewer_routes: vec![],
+            mobile_ready: false,
         },
         source: "/home/user/.objectiveai/plugins/psyops.manifest.json".to_string(),
     };
@@ -121,6 +130,9 @@ fn manifest_with_binaries_roundtrip() {
         homepage: None,
         license: None,
         binaries: full_binaries(),
+        viewer_zip: None,
+        viewer_routes: vec![],
+        mobile_ready: false,
     };
     let json = serde_json::to_value(&m).unwrap();
     let back: Manifest = serde_json::from_value(json).unwrap();
@@ -140,6 +152,9 @@ fn manifest_omits_empty_binaries_field() {
         homepage: None,
         license: None,
         binaries: IndexMap::new(),
+        viewer_zip: None,
+        viewer_routes: vec![],
+        mobile_ready: false,
     };
     let json = serde_json::to_value(&m).unwrap();
     let obj = json.as_object().unwrap();
@@ -165,6 +180,9 @@ fn manifest_with_binaries_field_order() {
         homepage: None,
         license: None,
         binaries: full_binaries(),
+        viewer_zip: None,
+        viewer_routes: vec![],
+        mobile_ready: false,
     };
     let s = serde_json::to_string(&m).unwrap();
     // Insertion order: linux-x86_64, linux-aarch64, windows-x86_64,
@@ -197,6 +215,9 @@ fn manifest_with_sparse_binaries_is_valid() {
         homepage: None,
         license: None,
         binaries: bins,
+        viewer_zip: None,
+        viewer_routes: vec![],
+        mobile_ready: false,
     };
     let s = serde_json::to_string(&m).unwrap();
     let back: Manifest = serde_json::from_str(&s).unwrap();
@@ -207,4 +228,93 @@ fn manifest_with_sparse_binaries_is_valid() {
     assert!(!back.binaries.contains_key(&Platform::WindowsAarch64));
     assert!(!back.binaries.contains_key(&Platform::MacosX86_64));
     assert!(!back.binaries.contains_key(&Platform::MacosAarch64));
+}
+
+#[test]
+fn manifest_with_viewer_fields_roundtrip() {
+    let m = Manifest {
+        description: "viewer plugin".to_string(),
+        version: "1.0.0".to_string(),
+        author: None,
+        homepage: None,
+        license: None,
+        binaries: IndexMap::new(),
+        viewer_zip: Some("psyops-viewer.zip".to_string()),
+        viewer_routes: vec![
+            ViewerRoute {
+                path: "/say".to_string(),
+                method: HttpMethod::Post,
+                r#type: "say_request".to_string(),
+            },
+            ViewerRoute {
+                path: "/status".to_string(),
+                method: HttpMethod::Get,
+                r#type: "status_request".to_string(),
+            },
+        ],
+        mobile_ready: true,
+    };
+    let json = serde_json::to_value(&m).unwrap();
+    let back: Manifest = serde_json::from_value(json.clone()).unwrap();
+    assert_eq!(back.viewer_zip.as_deref(), Some("psyops-viewer.zip"));
+    assert_eq!(back.viewer_routes.len(), 2);
+    assert_eq!(back.viewer_routes[0].path, "/say");
+    assert_eq!(back.viewer_routes[0].method, HttpMethod::Post);
+    assert_eq!(back.viewer_routes[0].r#type, "say_request");
+    assert_eq!(back.viewer_routes[1].method, HttpMethod::Get);
+    assert!(back.mobile_ready);
+
+    // The two viewer routes should serialize methods as uppercase strings.
+    let routes_json = json.get("viewer_routes").unwrap();
+    assert_eq!(routes_json[0]["method"], "POST");
+    assert_eq!(routes_json[1]["method"], "GET");
+}
+
+#[test]
+fn manifest_omits_viewer_fields_when_absent() {
+    let m = Manifest {
+        description: "x".to_string(),
+        version: "1.0.0".to_string(),
+        author: None,
+        homepage: None,
+        license: None,
+        binaries: IndexMap::new(),
+        viewer_zip: None,
+        viewer_routes: vec![],
+        mobile_ready: false,
+    };
+    let json = serde_json::to_value(&m).unwrap();
+    let obj = json.as_object().unwrap();
+    assert!(!obj.contains_key("viewer_zip"));
+    assert!(!obj.contains_key("viewer_routes"));
+    assert!(!obj.contains_key("mobile_ready"));
+}
+
+#[test]
+fn manifest_deserializes_without_viewer_fields() {
+    let json = serde_json::json!({
+        "description": "x",
+        "version": "1.0.0"
+    });
+    let m: Manifest = serde_json::from_value(json).unwrap();
+    assert!(m.viewer_zip.is_none());
+    assert!(m.viewer_routes.is_empty());
+    assert!(!m.mobile_ready);
+}
+
+#[test]
+fn http_method_serializes_uppercase() {
+    let cases = [
+        (HttpMethod::Get, "\"GET\""),
+        (HttpMethod::Post, "\"POST\""),
+        (HttpMethod::Put, "\"PUT\""),
+        (HttpMethod::Patch, "\"PATCH\""),
+        (HttpMethod::Delete, "\"DELETE\""),
+    ];
+    for (m, expected) in cases {
+        let got = serde_json::to_string(&m).unwrap();
+        assert_eq!(got, expected);
+        let back: HttpMethod = serde_json::from_str(&got).unwrap();
+        assert_eq!(back, m);
+    }
 }

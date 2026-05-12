@@ -23,6 +23,9 @@ fn minimal_manifest_json() -> String {
         homepage: None,
         license: None,
         binaries: indexmap::IndexMap::new(),
+        viewer_zip: None,
+        viewer_routes: vec![],
+        mobile_ready: false,
     })
     .unwrap()
 }

@@ -358,7 +358,52 @@ impl Client {
                 .map_err(|e| super::InstallError::Chmod(binary_path.clone(), e))?;
         }
 
-        // 5. Persist the manifest as <plugins_dir>/<repository>.json so
+        // 5. Fetch + extract the viewer UI bundle into
+        // <plugins_dir>/<repository>/viewer/ if the manifest declares
+        // a `viewer_zip`.
+        if let Some(viewer_zip_name) = &manifest.viewer_zip {
+            let viewer_url = format!(
+                "{releases_base}/{owner}/{repository}/releases/download/v{version}/{viewer_zip_name}",
+                version = manifest.version,
+            );
+            let viewer_header_map = build_headers(headers)?;
+            let resp = http
+                .get(&viewer_url)
+                .headers(viewer_header_map)
+                .send()
+                .await
+                .map_err(super::InstallError::ViewerZipRequest)?;
+            let status = resp.status();
+            if !status.is_success() {
+                return Err(super::InstallError::ViewerZipBadStatus {
+                    code: status,
+                    url: viewer_url,
+                }
+                .into());
+            }
+            let zip_bytes = resp
+                .bytes()
+                .await
+                .map_err(super::InstallError::ViewerZipResponse)?;
+            let viewer_dir = plugin_dir.join("viewer");
+            tokio::fs::create_dir_all(&viewer_dir)
+                .await
+                .map_err(|e| super::InstallError::ViewerZipExtract(viewer_dir.clone(), e.to_string()))?;
+            let viewer_dir_for_blocking = viewer_dir.clone();
+            tokio::task::spawn_blocking(move || {
+                let cursor = std::io::Cursor::new(zip_bytes);
+                let mut archive = zip::ZipArchive::new(cursor)
+                    .map_err(|e| format!("zip archive open: {e}"))?;
+                archive
+                    .extract(&viewer_dir_for_blocking)
+                    .map_err(|e| format!("extract: {e}"))
+            })
+            .await
+            .map_err(|e| super::InstallError::ViewerZipExtract(viewer_dir.clone(), format!("join: {e}")))?
+            .map_err(|e| super::InstallError::ViewerZipExtract(viewer_dir.clone(), e))?;
+        }
+
+        // 6. Persist the manifest as <plugins_dir>/<repository>.json so
         // list_plugins / get_plugin surface this install.
         let manifest_path = self.plugins_dir().join(format!("{repository}.json"));
         let bundle = ManifestWithNameAndSource {

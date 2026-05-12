@@ -46,6 +46,67 @@ pub struct Manifest {
     /// the wire shape.
     #[serde(default, skip_serializing_if = "IndexMap::is_empty")]
     pub binaries: IndexMap<Platform, String>,
+
+    /// GitHub-release asset filename for the plugin's viewer UI
+    /// bundle (a `.zip` whose root contains `index.html` plus
+    /// assets). When absent, the plugin has no viewer tab and the
+    /// viewer's startup scan ignores it for UI purposes.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub viewer_zip: Option<String>,
+
+    /// HTTP routes the viewer exposes on behalf of this plugin.
+    /// Each entry registers a handler at
+    /// `/plugin/<repository>/<path>` on the viewer's embedded axum
+    /// server; a hit emits a `PluginRequest { type, value }` event
+    /// to the React frontend, which dispatches to the plugin's
+    /// iframe via the postMessage bridge.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub viewer_routes: Vec<ViewerRoute>,
+
+    /// Plugin author opts in to mobile viewer support by setting
+    /// this. Mobile viewer builds only surface plugins with this
+    /// flag true — mobile has no local backend binary, so plugin
+    /// UIs that require a backend will misbehave unless their
+    /// authors specifically design for "no-backend" mode. Defaults
+    /// to false (desktop-only).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub mobile_ready: bool,
+}
+
+/// One HTTP route a plugin's viewer registers on the host viewer's
+/// embedded axum server. The full path served is
+/// `/plugin/<repository>/<self.path>`; on a hit, the body is
+/// JSON-decoded and forwarded as a `PluginRequest { type: self.type,
+/// value: body }` event to the frontend.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "filesystem.plugins.ViewerRoute")]
+pub struct ViewerRoute {
+    /// Path relative to the plugin's namespace. Must start with `/`;
+    /// the host prepends `/plugin/<repository>` before registering.
+    pub path: String,
+
+    /// HTTP method this route handles. Methods other than the listed
+    /// five aren't supported (and don't appear in plugin practice).
+    pub method: HttpMethod,
+
+    /// String tag forwarded to the plugin's iframe as the `type`
+    /// field of the resulting `PluginRequest`. Plugin authors pick
+    /// any value they want; the host doesn't interpret it.
+    #[serde(rename = "type")]
+    pub r#type: String,
+}
+
+/// HTTP methods supported by [`ViewerRoute`]. Serializes as upper-case
+/// (`"GET"`, `"POST"`, …) on the wire.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "filesystem.plugins.HttpMethod")]
+#[serde(rename_all = "UPPERCASE")]
+pub enum HttpMethod {
+    Get,
+    Post,
+    Put,
+    Patch,
+    Delete,
 }
 
 /// A [`Manifest`] enriched with the plugin's identifying `name` and
