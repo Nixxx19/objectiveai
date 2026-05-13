@@ -629,6 +629,26 @@ func resolveFieldTypeWithInline(propSchema Schema, selfTitle string, allTitles m
 		}
 	}
 
+	// Inline closed object: `properties` + `additionalProperties: false`.
+	// Generate a helper struct so the schema's explicit field set is
+	// preserved; otherwise the field would resolve to bare `JsonValue`
+	// and the roundtrip schema would lose the `properties` block.
+	if cs["type"] == "object" {
+		if _, hasProps := cs["properties"].(map[string]any); hasProps {
+			if ap, hasAP := cs["additionalProperties"]; hasAP && ap == false {
+				inlineName := parentType + fieldName
+				if fieldName == "" {
+					inlineName = parentType
+				}
+				aux.WriteString(generateInlineVariantStruct(inlineName, cs, selfTitle, allTitles))
+				if nullable {
+					return "*" + inlineName
+				}
+				return inlineName
+			}
+		}
+	}
+
 	return resolveFieldType(propSchema, selfTitle, allTitles)
 }
 
