@@ -105,14 +105,14 @@ set_cargo_objectiveai_deps() {
     "version = \"$NEW_VERSION\""
 }
 
-# Bare-string `objectiveai = "X.Y.Z"` deps. Used in README install snippets
+# Bare-string `objectiveai-sdk = "X.Y.Z"` deps. Used in README install snippets
 # that demonstrate Cargo.toml entries to downstream users. Distinct from
 # `set_cargo_objectiveai_deps` which only handles the inline-table form
-# `objectiveai = { ..., version = "X.Y.Z", ... }`.
+# `objectiveai-sdk = { ..., version = "X.Y.Z", ... }`.
 set_objectiveai_string_dep() {
   local file="$1"
   inline_substitute "$file" \
-    '^objectiveai[[:space:]]*=[[:space:]]*"[0-9]' \
+    '^objectiveai-sdk[[:space:]]*=[[:space:]]*"[0-9]' \
     '"[0-9][0-9.]*"' \
     "\"$NEW_VERSION\""
 }
@@ -238,7 +238,7 @@ PYPROJECT_TOMLS=(
 )
 
 PACKAGE_JSONS=(
-  objectiveai-js/package.json
+  objectiveai-sdk-js/package.json
   objectiveai-function-tree/package.json
   objectiveai-viewer/package.json
   objectiveai-viewer-sdk/package.json

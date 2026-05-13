@@ -9,9 +9,9 @@ const {
 const path = require("path");
 
 // Paths
-const jsRoot = process.cwd(); // objectiveai-js
+const jsRoot = process.cwd(); // objectiveai-sdk-js
 const repoRoot = path.resolve(jsRoot, ".."); // objectiveai
-const wasmDir = path.join(repoRoot, "objectiveai-rs-wasm-js");
+const wasmDir = path.join(repoRoot, "objectiveai-sdk-rs-wasm-js");
 const outDir = path.join(jsRoot, "src", "wasm");
 const wasmDistDir = path.join(wasmDir, "dist");
 
@@ -39,11 +39,11 @@ mkdirSync(outDir, { recursive: true });
 
 // 2. Read the generated files
 const glueCode = readFileSync(
-  path.join(wasmDistDir, "objectiveai_wasm_js.js"),
+  path.join(wasmDistDir, "objectiveai_sdk_wasm_js.js"),
   "utf-8",
 );
 const wasmBinary = readFileSync(
-  path.join(wasmDistDir, "objectiveai_wasm_js_bg.wasm"),
+  path.join(wasmDistDir, "objectiveai_sdk_wasm_js_bg.wasm"),
 );
 const wasmBase64 = wasmBinary.toString("base64");
 
@@ -99,7 +99,7 @@ console.log("✓ Created loader.cjs (universal CJS loader)");
 
 // 5. Read type declarations and extract exported function names
 const dtsContent = readFileSync(
-  path.join(wasmDistDir, "objectiveai_wasm_js.d.ts"),
+  path.join(wasmDistDir, "objectiveai_sdk_wasm_js.d.ts"),
   "utf-8",
 );
 

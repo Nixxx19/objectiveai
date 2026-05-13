@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Builds objectiveai-rs-wasm-js to dist/.
+# Builds objectiveai-sdk-rs-wasm-js to dist/.
 # Skips the build if the source fingerprint hasn't changed (SHA-based, like cargo).
-# Output is captured to .logs/build/objectiveai-rs-wasm-js.txt.
+# Output is captured to .logs/build/objectiveai-sdk-rs-wasm-js.txt.
 #
 # Usage:
-#   bash objectiveai-rs-wasm-js/build.sh
+#   bash objectiveai-sdk-rs-wasm-js/build.sh
 
 set -euo pipefail
 
-MODULE="objectiveai-rs-wasm-js"
+MODULE="objectiveai-sdk-rs-wasm-js"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 LOG_DIR="$REPO_ROOT/.logs/build"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Publishes objectiveai-js to npm as the `objectiveai` package.
+# Publishes objectiveai-sdk-js to npm as the `objectiveai-sdk` package.
 #
 # By default, dispatches the GitHub Actions workflow that runs
 # `pnpm publish --access public` against the public npm registry.
@@ -8,12 +8,12 @@
 # can inspect the tarball without uploading.
 #
 # Usage:
-#   bash objectiveai-js/publish.sh                # npm (via GHA)
-#   bash objectiveai-js/publish.sh --build-only   # local build + pnpm pack
+#   bash objectiveai-sdk-js/publish.sh                # npm (via GHA)
+#   bash objectiveai-sdk-js/publish.sh --build-only   # local build + pnpm pack
 #
 # `--test` is not supported (npm has no test registry).
 #
-# Output is captured to .logs/publish/objectiveai-js.txt.
+# Output is captured to .logs/publish/objectiveai-sdk-js.txt.
 #
 # Setup (one-time):
 #   - NPM_TOKEN must be set as a repo secret. Generate an automation token
@@ -22,7 +22,7 @@
 
 set -euo pipefail
 
-MODULE="objectiveai-js"
+MODULE="objectiveai-sdk-js"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 LOG_DIR="$REPO_ROOT/.logs/publish"
@@ -46,11 +46,11 @@ if $BUILD_ONLY; then
     bash "$SCRIPT_DIR/build.sh" || return $?
 
     # ── pack tarball ─────────────────────────────────────────────────────────────
-    rm -f "$SCRIPT_DIR"/objectiveai-*.tgz
+    rm -f "$SCRIPT_DIR"/objectiveai-sdk-*.tgz
     ( cd "$SCRIPT_DIR" && pnpm pack ) || return $?
 
     echo "Built artifact:"
-    ls -1 "$SCRIPT_DIR"/objectiveai-*.tgz
+    ls -1 "$SCRIPT_DIR"/objectiveai-sdk-*.tgz
 
     echo "--build-only specified; skipping upload. (Real publishes go through GHA.)"
   }
