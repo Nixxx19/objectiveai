@@ -3,31 +3,8 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
+from objectiveai_sdk.filesystem.plugins.binaries import Binaries
 from objectiveai_sdk.filesystem.plugins.viewer_route import ViewerRoute
-
-
-class ManifestWithNameAndSourceBinaries(BaseModel):
-    """Release-asset filename per platform — what the cli should
-download from the GitHub release tagged `v<version>` to install
-the plugin's binary on each platform. Values are filenames
-(e.g. `psyops-linux-x86_64`, `psyops-windows-x86_64.exe`), NOT
-URLs; the URL is composed from the repository + tag + asset
-name elsewhere.
-
-**Every platform key is optional.** Declare entries only for
-the platforms this plugin actually ships a binary for; absent
-platforms are simply not supported by this release. A plugin
-shipping only Linux x86_64 declares one entry; a plugin
-shipping all six declares six. Empty map ↔ field omitted in
-the wire shape."""
-    model_config = ConfigDict(extra='forbid')
-
-    linux_aarch64: str
-    linux_x86_64: str
-    macos_aarch64: str
-    macos_x86_64: str
-    windows_aarch64: str
-    windows_x86_64: str
 
 
 class ManifestWithNameAndSource(BaseModel):
@@ -44,7 +21,7 @@ and `source` last."""
     model_config = ConfigDict(title='filesystem.plugins.ManifestWithNameAndSource')
 
     author: Optional[str] = Field(None, description='Author or authors of the plugin. Free-form string.', json_schema_extra={'omitempty': True})
-    binaries: ManifestWithNameAndSourceBinaries = Field(..., description="Release-asset filename per platform — what the cli should\ndownload from the GitHub release tagged `v<version>` to install\nthe plugin's binary on each platform. Values are filenames\n(e.g. `psyops-linux-x86_64`, `psyops-windows-x86_64.exe`), NOT\nURLs; the URL is composed from the repository + tag + asset\nname elsewhere.\n\n**Every platform key is optional.** Declare entries only for\nthe platforms this plugin actually ships a binary for; absent\nplatforms are simply not supported by this release. A plugin\nshipping only Linux x86_64 declares one entry; a plugin\nshipping all six declares six. Empty map ↔ field omitted in\nthe wire shape.")
+    binaries: Binaries = Field(..., description="Release-asset filename per platform — what the cli should\ndownload from the GitHub release tagged `v<version>` to install\nthe plugin's binary on each platform. Values are filenames\n(e.g. `psyops-linux-x86_64`, `psyops-windows-x86_64.exe`), NOT\nURLs; the URL is composed from the repository + tag + asset\nname elsewhere.\n\n**Every platform field is optional.** Declare entries only for\nthe platforms this plugin actually ships a binary for; absent\nplatforms are simply not supported by this release. A plugin\nshipping only Linux x86_64 declares one entry; a plugin\nshipping all six declares six. All-None ↔ field omitted in\nthe wire shape.", json_schema_extra={'omitempty': True})
     description: str = Field(..., description="One-line description of what the plugin does. Surfaced in\nlistings and the plugin's `--help`-equivalent UI.")
     homepage: Optional[str] = Field(None, description='Homepage or repository URL.', json_schema_extra={'omitempty': True})
     license: Optional[str] = Field(None, description='SPDX license identifier (or any string).', json_schema_extra={'omitempty': True})

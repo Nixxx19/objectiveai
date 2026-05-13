@@ -16,29 +16,9 @@
       "omitempty": true
     },
     "binaries": {
-      "description": "Release-asset filename per platform — what the cli should\ndownload from the GitHub release tagged `v<version>` to install\nthe plugin's binary on each platform. Values are filenames\n(e.g. `psyops-linux-x86_64`, `psyops-windows-x86_64.exe`), NOT\nURLs; the URL is composed from the repository + tag + asset\nname elsewhere.\n\n**Every platform key is optional.** Declare entries only for\nthe platforms this plugin actually ships a binary for; absent\nplatforms are simply not supported by this release. A plugin\nshipping only Linux x86_64 declares one entry; a plugin\nshipping all six declares six. Empty map ↔ field omitted in\nthe wire shape.",
-      "type": "object",
-      "properties": {
-        "linux_aarch64": {
-          "type": "string"
-        },
-        "linux_x86_64": {
-          "type": "string"
-        },
-        "macos_aarch64": {
-          "type": "string"
-        },
-        "macos_x86_64": {
-          "type": "string"
-        },
-        "windows_aarch64": {
-          "type": "string"
-        },
-        "windows_x86_64": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false
+      "description": "Release-asset filename per platform — what the cli should\ndownload from the GitHub release tagged `v<version>` to install\nthe plugin's binary on each platform. Values are filenames\n(e.g. `psyops-linux-x86_64`, `psyops-windows-x86_64.exe`), NOT\nURLs; the URL is composed from the repository + tag + asset\nname elsewhere.\n\n**Every platform field is optional.** Declare entries only for\nthe platforms this plugin actually ships a binary for; absent\nplatforms are simply not supported by this release. A plugin\nshipping only Linux x86_64 declares one entry; a plugin\nshipping all six declares six. All-None ↔ field omitted in\nthe wire shape.",
+      "$ref": "filesystem.plugins.Binaries",
+      "omitempty": true
     },
     "description": {
       "description": "One-line description of what the plugin does. Surfaced in\nlistings and the plugin's `--help`-equivalent UI.",

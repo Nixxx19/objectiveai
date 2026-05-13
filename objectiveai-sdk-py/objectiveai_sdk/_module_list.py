@@ -146,6 +146,7 @@ MODULES = [
     'objectiveai_sdk.filesystem.config.viewer_mode',
     'objectiveai_sdk.filesystem.config.viewer_secret_signature_pair',
     'objectiveai_sdk.filesystem.logs.list_item',
+    'objectiveai_sdk.filesystem.plugins.binaries',
     'objectiveai_sdk.filesystem.plugins.http_method',
     'objectiveai_sdk.filesystem.plugins.manifest',
     'objectiveai_sdk.filesystem.plugins.manifest_with_name_and_source',

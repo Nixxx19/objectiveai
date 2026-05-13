@@ -7,48 +7,6 @@ import (
 	"fmt"
 )
 
-// Release-asset filename per platform — what the cli should
-// download from the GitHub release tagged `v<version>` to install
-// the plugin's binary on each platform. Values are filenames
-// (e.g. `psyops-linux-x86_64`, `psyops-windows-x86_64.exe`), NOT
-// URLs; the URL is composed from the repository + tag + asset
-// name elsewhere.
-//
-// **Every platform key is optional.** Declare entries only for
-// the platforms this plugin actually ships a binary for; absent
-// platforms are simply not supported by this release. A plugin
-// shipping only Linux x86_64 declares one entry; a plugin
-// shipping all six declares six. Empty map ↔ field omitted in
-// the wire shape.
-type FilesystemPluginsManifestWithNameAndSourceBinaries struct {
-	LinuxAarch64 string `json:"linux_aarch64"`
-	LinuxX8664 string `json:"linux_x86_64"`
-	MacosAarch64 string `json:"macos_aarch64"`
-	MacosX8664 string `json:"macos_x86_64"`
-	WindowsAarch64 string `json:"windows_aarch64"`
-	WindowsX8664 string `json:"windows_x86_64"`
-}
-
-func (FilesystemPluginsManifestWithNameAndSourceBinaries) AdditionalProperties() bool { return false }
-
-func (v *FilesystemPluginsManifestWithNameAndSourceBinaries) UnmarshalJSON(data []byte) error {
-	var raw map[string]json.RawMessage
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return err
-	}
-	for _, key := range []string{"linux_aarch64", "linux_x86_64", "macos_aarch64", "macos_x86_64", "windows_aarch64", "windows_x86_64"} {
-		if _, ok := raw[key]; !ok {
-			return fmt.Errorf("FilesystemPluginsManifestWithNameAndSourceBinaries: missing required field %q", key)
-		}
-	}
-	type Alias FilesystemPluginsManifestWithNameAndSourceBinaries
-	var alias Alias
-	if err := json.Unmarshal(data, &alias); err != nil {
-		return err
-	}
-	*v = FilesystemPluginsManifestWithNameAndSourceBinaries(alias)
-	return nil
-}
 // A [`Manifest`] enriched with the plugin's identifying `name` and
 // the `source` it was loaded from. Used when listing or describing
 // installed plugins, where the bare manifest fields are not enough
@@ -69,13 +27,13 @@ type FilesystemPluginsManifestWithNameAndSource struct {
 	// URLs; the URL is composed from the repository + tag + asset
 	// name elsewhere.
 	//
-	// **Every platform key is optional.** Declare entries only for
+	// **Every platform field is optional.** Declare entries only for
 	// the platforms this plugin actually ships a binary for; absent
 	// platforms are simply not supported by this release. A plugin
 	// shipping only Linux x86_64 declares one entry; a plugin
-	// shipping all six declares six. Empty map ↔ field omitted in
+	// shipping all six declares six. All-None ↔ field omitted in
 	// the wire shape.
-	Binaries FilesystemPluginsManifestWithNameAndSourceBinaries `json:"binaries"`
+	Binaries FilesystemPluginsBinaries `json:"binaries,omitempty"`
 	// One-line description of what the plugin does. Surfaced in
 	// listings and the plugin's `--help`-equivalent UI.
 	Description string `json:"description"`

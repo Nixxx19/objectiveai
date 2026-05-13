@@ -15,6 +15,10 @@ pub enum GetCommand {
 pub enum Commands {
     #[command(name = "list")]
     List,
+    Binaries {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
     HttpMethod {
         #[command(subcommand)]
         command: GetCommand,
@@ -45,12 +49,23 @@ impl Commands {
     pub async fn handle(self, handle: &objectiveai_cli_sdk::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["HttpMethod", "Manifest", "ManifestWithNameAndSource", "Platform", "ViewerRoute", "WhitelistEntry"];
+                const NAMES: &[&str] = &["Binaries", "HttpMethod", "Manifest", "ManifestWithNameAndSource", "Platform", "ViewerRoute", "WhitelistEntry"];
                 objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Schemas>::Notification(
                     objectiveai_cli_sdk::output::Notification {
                         value: objectiveai_cli_sdk::output::Schemas {
                             schemas: NAMES.iter().map(|s| s.to_string()).collect(),
                         },
+                    },
+                ).emit(handle).await;
+                Ok(())
+            }
+            Commands::Binaries { .. } => {
+                let schema: serde_json::Value = serde_json::from_str(
+                    include_str!("../../../../../objectiveai-json-schema/filesystem.plugins.Binaries.json"),
+                ).expect("embedded JSON Schema must parse");
+                objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Schema>::Notification(
+                    objectiveai_cli_sdk::output::Notification {
+                        value: objectiveai_cli_sdk::output::Schema { schema },
                     },
                 ).emit(handle).await;
                 Ok(())

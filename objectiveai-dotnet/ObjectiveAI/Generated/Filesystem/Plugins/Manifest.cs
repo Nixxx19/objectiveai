@@ -3,7 +3,6 @@
 
 using ObjectiveAI.Attributes;
 using System.ComponentModel;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace ObjectiveAI.Filesystem.Plugins;
@@ -40,11 +39,11 @@ public partial class Manifest
     /// URLs; the URL is composed from the repository + tag + asset
     /// name elsewhere.
     /// 
-    /// **Every platform key is optional.** Declare entries only for
+    /// **Every platform field is optional.** Declare entries only for
     /// the platforms this plugin actually ships a binary for; absent
     /// platforms are simply not supported by this release. A plugin
     /// shipping only Linux x86_64 declares one entry; a plugin
-    /// shipping all six declares six. Empty map ↔ field omitted in
+    /// shipping all six declares six. All-None ↔ field omitted in
     /// the wire shape.
     /// </summary>
     [Description("""
@@ -55,15 +54,16 @@ the plugin's binary on each platform. Values are filenames
 URLs; the URL is composed from the repository + tag + asset
 name elsewhere.
 
-**Every platform key is optional.** Declare entries only for
+**Every platform field is optional.** Declare entries only for
 the platforms this plugin actually ships a binary for; absent
 platforms are simply not supported by this release. A plugin
 shipping only Linux x86_64 declares one entry; a plugin
-shipping all six declares six. Empty map ↔ field omitted in
+shipping all six declares six. All-None ↔ field omitted in
 the wire shape.
 """)]
     [JsonPropertyName("binaries")]
-    public JsonElement Binaries { get; set; } = default!;
+    [JsonSchemaOmitEmpty]
+    public Binaries Binaries { get; set; } = default!;
 
     /// <summary>
     /// One-line description of what the plugin does. Surfaced in
