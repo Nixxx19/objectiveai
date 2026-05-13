@@ -161,26 +161,25 @@ set_csproj_version() {
     "<Version>$NEW_VERSION</Version>"
 }
 
-# `objectiveai==X.Y.Z` lines in a pip requirements.txt. Other entries in the
-# file (including non-pinned ones, comments, and unrelated packages) pass
+# `objectiveai-sdk==X.Y.Z` lines in a pip requirements.txt. Other entries in
+# the file (including non-pinned ones, comments, and unrelated packages) pass
 # through untouched. Spec stays `==NEW_VERSION`.
 set_requirements_objectiveai_pin() {
   local file="$1"
   inline_substitute "$file" \
-    '^objectiveai[[:space:]]*==' \
+    '^objectiveai-sdk[[:space:]]*==' \
     '==[0-9][^[:space:]]*' \
     "==$NEW_VERSION"
 }
 
-# `"objectiveai==X.Y.Z"` entries inside a pyproject.toml [project.dependencies]
-# array (or any line that quotes an objectiveai pin). The token regex stops at
-# the closing quote/comma so trailing TOML punctuation isn't consumed. Lines
-# without an objectiveai pin pass through untouched, including unrelated deps
-# like `objectiveai-foo==X` (the `-foo` breaks the `objectiveai==` boundary).
+# `"objectiveai-sdk==X.Y.Z"` entries inside a pyproject.toml [project.dependencies]
+# array (or any line that quotes an objectiveai-sdk pin). The token regex stops
+# at the closing quote/comma so trailing TOML punctuation isn't consumed. Lines
+# without an objectiveai-sdk pin pass through untouched.
 set_pyproject_objectiveai_dep_pin() {
   local file="$1"
   inline_substitute "$file" \
-    'objectiveai[[:space:]]*==' \
+    'objectiveai-sdk[[:space:]]*==' \
     '==[0-9][^",[:space:]]*' \
     "==$NEW_VERSION"
 }
@@ -233,7 +232,7 @@ CARGO_TOMLS=(
 )
 
 PYPROJECT_TOMLS=(
-  objectiveai-py/pyproject.toml
+  objectiveai-sdk-py/pyproject.toml
   objectiveai-cocoindex/pyproject.toml
 )
 
