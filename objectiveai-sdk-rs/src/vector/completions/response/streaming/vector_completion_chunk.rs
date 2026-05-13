@@ -73,7 +73,7 @@ impl VectorCompletionChunk {
     pub fn inner_errors(&self) -> impl Iterator<Item = super::InnerError<'_>> {
         self.completions.iter().filter_map(|c| {
             c.inner.error.as_ref().map(|error| super::InnerError {
-                index: c.index,
+                agent_completion_index: c.index,
                 error: std::borrow::Cow::Borrowed(error),
             })
         })

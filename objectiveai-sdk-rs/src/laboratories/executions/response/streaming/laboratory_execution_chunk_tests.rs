@@ -67,9 +67,9 @@ fn inner_errors_only_builder_errors() {
     let collected: Vec<_> = chunk.inner_errors().collect();
     assert_eq!(collected.len(), 1);
     match &collected[0] {
-        InnerError::Builder { index, agent_index, error } => {
-            assert_eq!(*index, 1);
-            assert_eq!(*agent_index, 2);
+        InnerError::Builder { builder_index, agent_completion_index, error } => {
+            assert_eq!(*builder_index, 1);
+            assert_eq!(*agent_completion_index, 2);
             assert_eq!(error.code, 429);
             assert_eq!(error.message, serde_json::Value::String("rate limit".into()));
         }
@@ -90,17 +90,17 @@ fn inner_errors_only_evaluation_errors() {
     let collected: Vec<_> = chunk.inner_errors().collect();
     assert_eq!(collected.len(), 2);
     match &collected[0] {
-        InnerError::Evaluation { index, agent_index, error } => {
-            assert_eq!(*index, 0);
-            assert_eq!(*agent_index, 1);
+        InnerError::Evaluation { evaluation_index, agent_completion_index, error } => {
+            assert_eq!(*evaluation_index, 0);
+            assert_eq!(*agent_completion_index, 1);
             assert_eq!(error.code, 500);
         }
         other => panic!("expected Evaluation, got {other:?}"),
     }
     match &collected[1] {
-        InnerError::Evaluation { index, agent_index, error } => {
-            assert_eq!(*index, 1);
-            assert_eq!(*agent_index, 0);
+        InnerError::Evaluation { evaluation_index, agent_completion_index, error } => {
+            assert_eq!(*evaluation_index, 1);
+            assert_eq!(*agent_completion_index, 0);
             assert_eq!(error.code, 502);
         }
         other => panic!("expected Evaluation, got {other:?}"),
@@ -122,8 +122,8 @@ fn inner_errors_mixed_builders_and_evaluations() {
     );
     let collected: Vec<_> = chunk.inner_errors().collect();
     assert_eq!(collected.len(), 2);
-    assert!(matches!(&collected[0], InnerError::Builder { index: 0, agent_index: 0, .. }));
-    assert!(matches!(&collected[1], InnerError::Evaluation { index: 1, agent_index: 0, .. }));
+    assert!(matches!(&collected[0], InnerError::Builder { builder_index: 0, agent_completion_index: 0, .. }));
+    assert!(matches!(&collected[1], InnerError::Evaluation { evaluation_index: 1, agent_completion_index: 0, .. }));
 }
 
 #[test]
@@ -137,13 +137,13 @@ fn inner_error_serde_roundtrip_builder() {
     let wire = serde_json::to_string(&item).unwrap();
     assert_eq!(
         wire,
-        r#"{"type":"builder","index":3,"agent_index":4,"error":{"code":404,"message":"missing"}}"#,
+        r#"{"type":"builder","builder_index":3,"agent_completion_index":4,"error":{"code":404,"message":"missing"}}"#,
     );
     let round: InnerError<'static> = serde_json::from_str(&wire).unwrap();
     match round {
-        InnerError::Builder { index, agent_index, error } => {
-            assert_eq!(index, 3);
-            assert_eq!(agent_index, 4);
+        InnerError::Builder { builder_index, agent_completion_index, error } => {
+            assert_eq!(builder_index, 3);
+            assert_eq!(agent_completion_index, 4);
             assert_eq!(error.code, 404);
             assert_eq!(error.message, serde_json::Value::String("missing".into()));
         }
@@ -162,13 +162,13 @@ fn inner_error_serde_roundtrip_evaluation() {
     let wire = serde_json::to_string(&item).unwrap();
     assert_eq!(
         wire,
-        r#"{"type":"evaluation","index":5,"agent_index":6,"error":{"code":418,"message":"teapot"}}"#,
+        r#"{"type":"evaluation","evaluation_index":5,"agent_completion_index":6,"error":{"code":418,"message":"teapot"}}"#,
     );
     let round: InnerError<'static> = serde_json::from_str(&wire).unwrap();
     match round {
-        InnerError::Evaluation { index, agent_index, error } => {
-            assert_eq!(index, 5);
-            assert_eq!(agent_index, 6);
+        InnerError::Evaluation { evaluation_index, agent_completion_index, error } => {
+            assert_eq!(evaluation_index, 5);
+            assert_eq!(agent_completion_index, 6);
             assert_eq!(error.code, 418);
             assert_eq!(error.message, serde_json::Value::String("teapot".into()));
         }

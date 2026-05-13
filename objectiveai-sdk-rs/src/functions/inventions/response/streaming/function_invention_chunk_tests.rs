@@ -68,7 +68,7 @@ fn inner_errors_mixed() {
     );
     let collected: Vec<_> = chunk.inner_errors().collect();
     assert_eq!(collected.len(), 1);
-    assert_eq!(collected[0].index, 1);
+    assert_eq!(collected[0].agent_completion_index, 1);
     assert_eq!(collected[0].error.code, 429);
     assert_eq!(collected[0].error.message, serde_json::Value::String("rate limited".into()));
 }
@@ -85,11 +85,11 @@ fn inner_errors_all_completions_errored() {
     );
     let collected: Vec<_> = chunk.inner_errors().collect();
     assert_eq!(collected.len(), 3);
-    assert_eq!(collected[0].index, 0);
+    assert_eq!(collected[0].agent_completion_index, 0);
     assert_eq!(collected[0].error.code, 500);
-    assert_eq!(collected[1].index, 1);
+    assert_eq!(collected[1].agent_completion_index, 1);
     assert_eq!(collected[1].error.code, 502);
-    assert_eq!(collected[2].index, 2);
+    assert_eq!(collected[2].agent_completion_index, 2);
     assert_eq!(collected[2].error.code, 503);
 }
 
@@ -98,9 +98,9 @@ fn inner_error_serde_roundtrip() {
     let chunk = chunk_with(vec![completion(9, Some(err(404, "missing")))], None);
     let item = chunk.inner_errors().next().unwrap();
     let wire = serde_json::to_string(&item).unwrap();
-    assert_eq!(wire, r#"{"index":9,"error":{"code":404,"message":"missing"}}"#);
+    assert_eq!(wire, r#"{"agent_completion_index":9,"error":{"code":404,"message":"missing"}}"#);
     let round: InnerError<'static> = serde_json::from_str(&wire).unwrap();
-    assert_eq!(round.index, 9);
+    assert_eq!(round.agent_completion_index, 9);
     assert_eq!(round.error.code, 404);
     assert_eq!(round.error.message, serde_json::Value::String("missing".into()));
 }

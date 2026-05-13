@@ -16,8 +16,8 @@ use crate::error;
 ///
 /// Wire shape (internally tagged on `"type"`):
 /// ```json
-/// { "type": "builder",    "index": 0, "agent_index": 1, "error": { } }
-/// { "type": "evaluation", "index": 2, "agent_index": 0, "error": { } }
+/// { "type": "builder",    "builder_index": 0,    "agent_completion_index": 1, "error": { } }
+/// { "type": "evaluation", "evaluation_index": 2, "agent_completion_index": 0, "error": { } }
 /// ```
 ///
 /// Does NOT include the lab chunk's own top-level `.error` — that
@@ -29,18 +29,18 @@ pub enum InnerError<'a> {
     /// An error from a [`BuilderChunk`](super::BuilderChunk).
     Builder {
         /// Builder index (matches `BuilderChunk::index`).
-        index: u64,
-        /// Agent index within the builder (matches `BuilderChunk::agent_index`).
-        agent_index: u64,
+        builder_index: u64,
+        /// Agent completion index within the builder (matches `BuilderChunk::agent_index`).
+        agent_completion_index: u64,
         /// The underlying error from the agent completion.
         error: Cow<'a, error::ResponseError>,
     },
     /// An error from an [`EvaluationChunk`](super::EvaluationChunk).
     Evaluation {
         /// Evaluation index (matches `EvaluationChunk::index`).
-        index: u64,
-        /// Agent index within the evaluation (matches `EvaluationChunk::agent_index`).
-        agent_index: u64,
+        evaluation_index: u64,
+        /// Agent completion index within the evaluation (matches `EvaluationChunk::agent_index`).
+        agent_completion_index: u64,
         /// The underlying error from the agent completion.
         error: Cow<'a, error::ResponseError>,
     },

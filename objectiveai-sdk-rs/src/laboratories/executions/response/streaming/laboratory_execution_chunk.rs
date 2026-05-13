@@ -33,15 +33,15 @@ impl LaboratoryExecutionChunk {
     pub fn inner_errors(&self) -> impl Iterator<Item = super::InnerError<'_>> {
         let builders = self.builders.iter().filter_map(|b| {
             b.inner.error.as_ref().map(|error| super::InnerError::Builder {
-                index: b.index,
-                agent_index: b.agent_index,
+                builder_index: b.index,
+                agent_completion_index: b.agent_index,
                 error: std::borrow::Cow::Borrowed(error),
             })
         });
         let evaluations = self.evaluations.iter().filter_map(|e| {
             e.inner.error.as_ref().map(|error| super::InnerError::Evaluation {
-                index: e.index,
-                agent_index: e.agent_index,
+                evaluation_index: e.index,
+                agent_completion_index: e.agent_index,
                 error: std::borrow::Cow::Borrowed(error),
             })
         });

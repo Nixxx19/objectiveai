@@ -15,7 +15,7 @@ use crate::error;
 ///
 /// Wire shape:
 /// ```json
-/// { "index": 1, "error": { } }
+/// { "agent_completion_index": 1, "error": { } }
 /// ```
 ///
 /// Does NOT include the invention chunk's own top-level `.error` — that
@@ -23,7 +23,7 @@ use crate::error;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct InnerError<'a> {
     /// Index of the failing completion (matches `AgentCompletionChunk::index`).
-    pub index: u64,
+    pub agent_completion_index: u64,
     /// The underlying error from the agent completion.
     pub error: Cow<'a, error::ResponseError>,
 }
