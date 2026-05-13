@@ -1,14 +1,14 @@
 use super::Platform;
 
 #[test]
-fn platform_serializes_to_kebab_pair() {
+fn platform_serializes_to_snake_pair() {
     let cases = [
-        (Platform::LinuxX86_64, "\"linux-x86_64\""),
-        (Platform::LinuxAarch64, "\"linux-aarch64\""),
-        (Platform::WindowsX86_64, "\"windows-x86_64\""),
-        (Platform::WindowsAarch64, "\"windows-aarch64\""),
-        (Platform::MacosX86_64, "\"macos-x86_64\""),
-        (Platform::MacosAarch64, "\"macos-aarch64\""),
+        (Platform::LinuxX86_64, "\"linux_x86_64\""),
+        (Platform::LinuxAarch64, "\"linux_aarch64\""),
+        (Platform::WindowsX86_64, "\"windows_x86_64\""),
+        (Platform::WindowsAarch64, "\"windows_aarch64\""),
+        (Platform::MacosX86_64, "\"macos_x86_64\""),
+        (Platform::MacosAarch64, "\"macos_aarch64\""),
     ];
     for (p, expected) in cases {
         let got = serde_json::to_string(&p).unwrap();
@@ -17,14 +17,14 @@ fn platform_serializes_to_kebab_pair() {
 }
 
 #[test]
-fn platform_deserializes_from_kebab_pair() {
+fn platform_deserializes_from_snake_pair() {
     let cases = [
-        ("\"linux-x86_64\"", Platform::LinuxX86_64),
-        ("\"linux-aarch64\"", Platform::LinuxAarch64),
-        ("\"windows-x86_64\"", Platform::WindowsX86_64),
-        ("\"windows-aarch64\"", Platform::WindowsAarch64),
-        ("\"macos-x86_64\"", Platform::MacosX86_64),
-        ("\"macos-aarch64\"", Platform::MacosAarch64),
+        ("\"linux_x86_64\"", Platform::LinuxX86_64),
+        ("\"linux_aarch64\"", Platform::LinuxAarch64),
+        ("\"windows_x86_64\"", Platform::WindowsX86_64),
+        ("\"windows_aarch64\"", Platform::WindowsAarch64),
+        ("\"macos_x86_64\"", Platform::MacosX86_64),
+        ("\"macos_aarch64\"", Platform::MacosAarch64),
     ];
     for (json, expected) in cases {
         let got: Platform = serde_json::from_str(json).unwrap();
