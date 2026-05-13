@@ -51,7 +51,9 @@ fn hello_plugin_dispatch_produces_expected_output() {
     std::fs::create_dir_all(&plugins_dir).unwrap();
 
     let fixture = build_and_locate_hello_plugin();
-    let target = plugins_dir.join(if cfg!(windows) { "hello.exe" } else { "hello" });
+    let plugin_subdir = plugins_dir.join("hello");
+    std::fs::create_dir_all(&plugin_subdir).unwrap();
+    let target = plugin_subdir.join(if cfg!(windows) { "plugin.exe" } else { "plugin" });
     std::fs::copy(&fixture, &target).expect("failed to copy fixture binary");
     #[cfg(unix)]
     {

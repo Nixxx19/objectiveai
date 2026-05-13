@@ -160,6 +160,55 @@ async fn get_plugin_returns_none_when_malformed() {
     cleanup(&base);
 }
 
+#[test]
+fn plugin_binary_path_layout() {
+    let base = fresh_base_dir();
+    let client = client_for(&base);
+    let expected = client
+        .plugins_dir()
+        .join("my-plugin")
+        .join(if cfg!(windows) { "plugin.exe" } else { "plugin" });
+    assert_eq!(client.plugin_binary_path("my-plugin"), expected);
+    assert_eq!(client.plugin_dir("my-plugin"), client.plugins_dir().join("my-plugin"));
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn resolve_plugin_returns_none_when_missing() {
+    let base = fresh_base_dir();
+    let client = client_for(&base);
+    assert!(client.resolve_plugin("nope").await.is_none());
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn resolve_plugin_returns_canonical_nested_path_when_present() {
+    let base = fresh_base_dir();
+    let client = client_for(&base);
+    let target = client.plugin_binary_path("hello");
+    std::fs::create_dir_all(target.parent().unwrap()).unwrap();
+    std::fs::write(&target, b"\x7fELF or MZ; contents don't matter for is_file()").unwrap();
+
+    let resolved = client.resolve_plugin("hello").await;
+    assert_eq!(resolved.as_deref(), Some(target.as_path()));
+    cleanup(&base);
+}
+
+#[tokio::test]
+async fn resolve_plugin_ignores_flat_layout() {
+    // Pre-fix bug behaviour: a file at <plugins_dir>/<name>[.exe] used
+    // to resolve. After the fix, only the nested layout is honoured.
+    let base = fresh_base_dir();
+    let plugins_dir = base.join("plugins");
+    std::fs::create_dir_all(&plugins_dir).unwrap();
+    let flat = plugins_dir.join(if cfg!(windows) { "hello.exe" } else { "hello" });
+    std::fs::write(&flat, b"x").unwrap();
+
+    let client = client_for(&base);
+    assert!(client.resolve_plugin("hello").await.is_none());
+    cleanup(&base);
+}
+
 #[tokio::test]
 async fn list_plugins_respects_offset_and_limit() {
     let base = fresh_base_dir();
