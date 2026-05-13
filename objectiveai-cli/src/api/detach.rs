@@ -21,8 +21,8 @@
 /// The parent's forwarding loop is the only place the JSONL stream
 /// gets routed to the embedder.
 ///
-/// [`Output`]: objectiveai_cli_lib::output::Output
-pub async fn detach(handle: &objectiveai_cli_lib::output::Handle) -> ! {
+/// [`Output`]: objectiveai_cli_sdk::output::Output
+pub async fn detach(handle: &objectiveai_cli_sdk::output::Handle) -> ! {
     let exe = std::env::current_exe().expect("failed to get current executable path");
     let args: Vec<String> = std::env::args()
         .skip(1) // skip binary name
@@ -46,8 +46,8 @@ pub async fn detach(handle: &objectiveai_cli_lib::output::Handle) -> ! {
     let mut child = cmd.spawn().expect("failed to spawn detached process");
 
     let pid = child.id().expect("failed to get child PID");
-    objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Detached>::Notification(objectiveai_cli_lib::output::Notification { value: 
-        objectiveai_cli_lib::output::Detached { pid },
+    objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Detached>::Notification(objectiveai_cli_sdk::output::Notification { value: 
+        objectiveai_cli_sdk::output::Detached { pid },
      })
     .emit(handle).await;
 
@@ -79,7 +79,7 @@ pub async fn detach(handle: &objectiveai_cli_lib::output::Handle) -> ! {
                     // — panic so it's loud and traceable rather than
                     // silently corrupting the consumer's stream.
                     let trimmed = stdout_line.trim_end_matches(['\r', '\n']);
-                    let out: objectiveai_cli_lib::output::Output<serde_json::Value> =
+                    let out: objectiveai_cli_sdk::output::Output<serde_json::Value> =
                         serde_json::from_str(trimmed)
                             .expect("orphan stdout produced a non-JSONL line");
                     out.emit(handle).await;

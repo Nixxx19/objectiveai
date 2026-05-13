@@ -1,5 +1,5 @@
 use clap::Subcommand;
-use objectiveai_cli_lib::output::{Handle, Items, ListItem, Output, PairListItem};
+use objectiveai_cli_sdk::output::{Handle, Items, ListItem, Output, PairListItem};
 
 #[derive(Subcommand)]
 pub enum Source {
@@ -16,13 +16,13 @@ pub enum Source {
 }
 
 async fn emit_items(items: Vec<ListItem>, handle: &Handle) {
-    Output::<Items<ListItem>>::Notification(objectiveai_cli_lib::output::Notification { value: Items { items } })
+    Output::<Items<ListItem>>::Notification(objectiveai_cli_sdk::output::Notification { value: Items { items } })
         .emit(handle)
         .await;
 }
 
 async fn emit_pair_items(items: Vec<PairListItem>, handle: &Handle) {
-    Output::<Items<PairListItem>>::Notification(objectiveai_cli_lib::output::Notification { value: Items { items } })
+    Output::<Items<PairListItem>>::Notification(objectiveai_cli_sdk::output::Notification { value: Items { items } })
         .emit(handle)
         .await;
 }

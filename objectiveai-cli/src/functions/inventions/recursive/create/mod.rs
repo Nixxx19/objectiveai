@@ -43,7 +43,7 @@ impl InventionParams {
     }
 }
 
-use objectiveai_cli_lib::output::{InventionResultItem, Inventions};
+use objectiveai_cli_sdk::output::{InventionResultItem, Inventions};
 
 /// Extract the name from an invention State.
 fn state_name(state: &objectiveai::functions::inventions::State) -> &str {
@@ -115,7 +115,7 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_lib::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_sdk::output::Handle) -> Result<(), crate::error::Error> {
         let (agent_ref, continuation_args, instructions, seed, state, detach) = match self {
             Commands::AlphaScalar { params, agent, continuation, instructions, seed, detach } => {
                 let p = params.into_params();
@@ -209,7 +209,7 @@ impl Commands {
                 })
                 .collect();
 
-            objectiveai_cli_lib::output::Output::<Inventions>::Notification(objectiveai_cli_lib::output::Notification { value: 
+            objectiveai_cli_sdk::output::Output::<Inventions>::Notification(objectiveai_cli_sdk::output::Notification { value: 
                 Inventions { inventions: results },
              })
             .emit(&handle).await;

@@ -146,7 +146,7 @@ fn generate_module(node: &TreeNode, dir: &Path, depth: usize) {
 
     // handle() implementation
     code.push_str("impl Commands {\n");
-    code.push_str("    pub async fn handle(self, handle: &objectiveai_cli_lib::output::Handle) -> Result<(), crate::error::Error> {\n");
+    code.push_str("    pub async fn handle(self, handle: &objectiveai_cli_sdk::output::Handle) -> Result<(), crate::error::Error> {\n");
     code.push_str("        match self {\n");
 
     code.push_str("            Commands::List => {\n");
@@ -158,9 +158,9 @@ fn generate_module(node: &TreeNode, dir: &Path, depth: usize) {
         write!(code, "\"{name}\"").unwrap();
     }
     code.push_str("];\n");
-    code.push_str("                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schemas>::Notification(\n");
-    code.push_str("                    objectiveai_cli_lib::output::Notification {\n");
-    code.push_str("                        value: objectiveai_cli_lib::output::Schemas {\n");
+    code.push_str("                objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Schemas>::Notification(\n");
+    code.push_str("                    objectiveai_cli_sdk::output::Notification {\n");
+    code.push_str("                        value: objectiveai_cli_sdk::output::Schemas {\n");
     code.push_str("                            schemas: NAMES.iter().map(|s| s.to_string()).collect(),\n");
     code.push_str("                        },\n");
     code.push_str("                    },\n");
@@ -182,9 +182,9 @@ fn generate_module(node: &TreeNode, dir: &Path, depth: usize) {
         writeln!(code, "                let schema: serde_json::Value = serde_json::from_str(").unwrap();
         writeln!(code, "                    include_str!(\"{schema_rel}/{filename}\"),").unwrap();
         writeln!(code, "                ).expect(\"embedded JSON Schema must parse\");").unwrap();
-        writeln!(code, "                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Schema>::Notification(").unwrap();
-        writeln!(code, "                    objectiveai_cli_lib::output::Notification {{").unwrap();
-        writeln!(code, "                        value: objectiveai_cli_lib::output::Schema {{ schema }},").unwrap();
+        writeln!(code, "                objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Schema>::Notification(").unwrap();
+        writeln!(code, "                    objectiveai_cli_sdk::output::Notification {{").unwrap();
+        writeln!(code, "                        value: objectiveai_cli_sdk::output::Schema {{ schema }},").unwrap();
         writeln!(code, "                    }},").unwrap();
         writeln!(code, "                ).emit(handle).await;").unwrap();
         writeln!(code, "                Ok(())").unwrap();

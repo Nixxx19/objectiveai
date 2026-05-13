@@ -57,15 +57,15 @@ async fn list_source(
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_lib::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_sdk::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::Get { args } => {
                 let path = args.resolve(|| get_favorites(cli_config)).await?;
                 let handle = handle.clone();
                 crate::api::run(|http_client| async move {
                     let response = objectiveai::swarm::get_swarm(&http_client, path).await?;
-                    objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Swarm>::Notification(objectiveai_cli_lib::output::Notification { value: 
-                        objectiveai_cli_lib::output::Swarm { swarm: response },
+                    objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Swarm>::Notification(objectiveai_cli_sdk::output::Notification { value: 
+                        objectiveai_cli_sdk::output::Swarm { swarm: response },
                      })
                     .emit(&handle).await;
                     Ok(())
@@ -99,8 +99,8 @@ impl Commands {
                 let sha = objectiveai::filesystem::publish::publish_swarm(
                     &fs_client, &repository, &swarm, &msg, overwrite,
                 ).await?;
-                objectiveai_cli_lib::output::Output::<objectiveai_cli_lib::output::Published>::Notification(objectiveai_cli_lib::output::Notification { value: 
-                    objectiveai_cli_lib::output::Published { sha },
+                objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Published>::Notification(objectiveai_cli_sdk::output::Notification { value: 
+                    objectiveai_cli_sdk::output::Published { sha },
                  })
                 .emit(handle).await;
                 Ok(())

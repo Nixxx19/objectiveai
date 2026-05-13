@@ -1,12 +1,12 @@
 use futures::StreamExt;
-use objectiveai_cli_lib::output::{LabResultItem, Laboratory};
+use objectiveai_cli_sdk::output::{LabResultItem, Laboratory};
 
 use super::create_args::CreateArgs;
 
 pub async fn handle(
     args: CreateArgs,
     cli_config: &crate::Config,
-    handle: &objectiveai_cli_lib::output::Handle,
+    handle: &objectiveai_cli_sdk::output::Handle,
 ) -> Result<(), crate::error::Error> {
     args.instructions.verify(cli_config, crate::instructions::InstructionsScope::LaboratoryExecutions)?;
 
@@ -150,7 +150,7 @@ pub async fn handle(
                 })
                 .collect();
 
-            objectiveai_cli_lib::output::Output::<Laboratory>::Notification(objectiveai_cli_lib::output::Notification { value: 
+            objectiveai_cli_sdk::output::Output::<Laboratory>::Notification(objectiveai_cli_sdk::output::Notification { value: 
                 Laboratory { laboratory: results },
              })
             .emit(&handle).await;

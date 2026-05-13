@@ -33,8 +33,8 @@
 //! error and converts to exit code 1.
 
 use clap::Subcommand;
-use objectiveai_cli_lib::output::{Handle, Installed, Notification, Output, Plugin, Plugins};
-use objectiveai_cli_lib::plugins::PluginOutput;
+use objectiveai_cli_sdk::output::{Handle, Installed, Notification, Output, Plugin, Plugins};
+use objectiveai_cli_sdk::plugins::PluginOutput;
 use tokio::io::AsyncBufReadExt;
 use tokio::task::JoinHandle;
 
@@ -186,7 +186,7 @@ async fn emit_untrusted_warning(
     commit_sha: &str,
     version: &str,
 ) {
-    use objectiveai_cli_lib::output::{Error as OutputError, Level};
+    use objectiveai_cli_sdk::output::{Error as OutputError, Level};
     let message = format!(
         "installing untrusted plugin {owner}/{repository} (commit: {commit_sha}, version: {version}); \
          this plugin is not in the whitelist and is being installed because --allow-untrusted was passed"

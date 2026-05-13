@@ -36,7 +36,7 @@ impl InputSource {
     }
 }
 
-use objectiveai_cli_lib::output::{CollectedError, ErrorPath, Execution, ExecutionResult};
+use objectiveai_cli_sdk::output::{CollectedError, ErrorPath, Execution, ExecutionResult};
 
 /// Recursively collect errors from the aggregated chunk.
 fn collect_errors(chunk: &objectiveai::functions::executions::response::streaming::FunctionExecutionChunk, errors: &mut Vec<CollectedError>) {
@@ -158,7 +158,7 @@ async fn profile_favorites(cli_config: &crate::Config) -> Vec<objectiveai::files
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_lib::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_sdk::output::Handle) -> Result<(), crate::error::Error> {
         let (function_source, profile_source, input_source, continuation_args, instructions, retry_token, seed, split, invert, strategy, detach) = match self {
             Commands::Standard { function, profile, input, continuation, instructions, retry_token, seed, split, invert, detach } => {
                 (function, profile, input, continuation, instructions, retry_token, seed, split, invert, objectiveai::functions::executions::request::Strategy::Default, detach)
@@ -224,7 +224,7 @@ impl Commands {
                 });
 
             let result = ExecutionResult { output, errors };
-            objectiveai_cli_lib::output::Output::<Execution>::Notification(objectiveai_cli_lib::output::Notification { value: 
+            objectiveai_cli_sdk::output::Output::<Execution>::Notification(objectiveai_cli_sdk::output::Notification { value: 
                 Execution { execution: result },
              })
             .emit(&handle).await;
