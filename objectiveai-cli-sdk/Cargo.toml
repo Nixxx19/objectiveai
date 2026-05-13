@@ -1,13 +1,13 @@
 [package]
 name = "objectiveai-cli-sdk"
-version = "2.0.3"
+version = "2.0.4"
 edition = "2024"
 description = "Library surface for objectiveai-cli: structured JSON Lines output types."
 
 [dependencies]
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.149", features = ["preserve_order"] }
-objectiveai = { path = "../objectiveai-rs", version = "2.0.3", default-features = false, features = ["filesystem"] }
+objectiveai = { path = "../objectiveai-rs", version = "2.0.4", default-features = false, features = ["filesystem"] }
 indexmap = { version = "2.13.0", features = ["serde"] }
 tokio = { version = "1.50.0", features = ["process", "sync", "io-util"] }
 
