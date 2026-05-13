@@ -342,31 +342,7 @@ def _convert_object_type(schema: dict, self_title: str, all_titles: set[str]) ->
         return f"dict[str, {val_type}]"
     if "properties" not in schema:
         return "dict[str, JsonValue]"
-    # Inline closed object: `properties` + `additionalProperties: false`.
-    # Generate a Pydantic helper class for it; otherwise the schema would
-    # roundtrip as a generic `dict[str, JsonValue]` and lose the explicit
-    # field set.
-    if schema.get("additionalProperties") is False:
-        return _generate_inline_closed_object(schema, self_title, all_titles)
     return "dict[str, JsonValue]"
-
-
-def _generate_inline_closed_object(
-    schema: dict, self_title: str, all_titles: set[str],
-) -> str:
-    """Generate a helper Pydantic class for an inline closed-object schema
-    (`properties` + `additionalProperties: false`). Names the class from the
-    current naming context. Returns the class name."""
-    class_name = "".join(_naming_context)
-    refs: set[str] = set()
-    desc = schema.get("description", "")
-    safe_desc = desc.replace('"""', '\\"\\"\\"') if desc else ""
-    code = _generate_object_model(
-        self_title, schema, refs, all_titles, class_name, safe_desc,
-    )
-    _generated_helpers.append(code)
-    _generated_helper_refs.update(refs)
-    return class_name
 
 
 def _union_type(variants: list[str]) -> str:

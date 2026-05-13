@@ -405,40 +405,6 @@ func buildFieldTypeSchema(
 		return map[string]any{"type": "object", "additionalProperties": valSchema}
 	}
 
-	// Inline closed-object struct: a regular Go struct (json-tagged
-	// fields) that is NOT a top-level schema. The codegen emits these
-	// for inline `properties + additionalProperties: false` schemas
-	// (e.g. Manifest.binaries). Inline the property schema here so
-	// the roundtrip matches the original inline schema instead of
-	// emitting an unresolvable $ref.
-	if ti, ok := types[typeName]; ok && len(ti.fields) > 0 && getTagValue(ti.fields[0].tags, "json") != "" {
-		result := map[string]any{"type": "object"}
-		properties := map[string]any{}
-		for _, f := range ti.fields {
-			jsonTag := getTagValue(f.tags, "json")
-			if jsonTag == "" || jsonTag == "-" {
-				continue
-			}
-			propName := strings.Split(jsonTag, ",")[0]
-			isOmitempty := strings.Contains(jsonTag, "omitempty")
-			propSchema := reconstructFieldSchema(f, isOmitempty, types, titleMap)
-			if f.doc != "" {
-				propSchema["description"] = f.doc
-			}
-			properties[propName] = propSchema
-		}
-		if len(properties) > 0 {
-			result["properties"] = properties
-		}
-		if ap, ok := ti.methods["AdditionalProperties"]; ok {
-			result["additionalProperties"] = ap == "true"
-		}
-		if ti.doc != "" {
-			result["description"] = ti.doc
-		}
-		return result
-	}
-
 	return map[string]any{}
 }
 
