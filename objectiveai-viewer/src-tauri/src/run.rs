@@ -2,10 +2,10 @@ use axum::Json;
 use axum::http::StatusCode;
 use axum::middleware;
 use envconfig::Envconfig;
-use objectiveai::HttpClient;
-use objectiveai::agent::completions::request::AgentCompletionNotifyParams;
-use objectiveai::filesystem::Client as FsClient;
-use objectiveai::filesystem::plugins::ManifestWithNameAndSource;
+use objectiveai_sdk::HttpClient;
+use objectiveai_sdk::agent::completions::request::AgentCompletionNotifyParams;
+use objectiveai_sdk::filesystem::Client as FsClient;
+use objectiveai_sdk::filesystem::plugins::ManifestWithNameAndSource;
 use std::sync::Arc;
 use tauri::Emitter;
 use tokio::sync::{Notify, mpsc};
@@ -24,7 +24,7 @@ async fn notify_agent_completion(
     state: tauri::State<'_, HttpClient>,
     params: AgentCompletionNotifyParams,
 ) -> Result<(), String> {
-    objectiveai::agent::completions::notify_agent_completion(
+    objectiveai_sdk::agent::completions::notify_agent_completion(
         state.inner(),
         params,
     )

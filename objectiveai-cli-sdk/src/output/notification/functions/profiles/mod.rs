@@ -9,5 +9,5 @@ use serde::{Deserialize, Serialize};
 /// Wire: `{"type":"notification","profile":{...GetProfileResponse...}}`.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Profile {
-    pub profile: objectiveai::functions::profiles::response::GetProfileResponse,
+    pub profile: objectiveai_sdk::functions::profiles::response::GetProfileResponse,
 }

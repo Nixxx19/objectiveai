@@ -26,7 +26,7 @@ struct EnvConfigBuilder {
     commit_author_email: Option<String>,
     /// Consumed by the auto-updater to authenticate against GitHub's
     /// release API — matches the env name the rest of the CLI honours
-    /// (see `objectiveai::HttpClient::new` in
+    /// (see `objectiveai_sdk::HttpClient::new` in
     /// `objectiveai-rs/src/http/client.rs`).
     #[envconfig(from = "GITHUB_AUTHORIZATION")]
     github_authorization: Option<String>,

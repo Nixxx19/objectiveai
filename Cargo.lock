@@ -4114,56 +4114,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "objectiveai"
-version = "2.0.4"
-dependencies = [
- "anyhow",
- "arbitrary",
- "backoff",
- "base62",
- "base64 0.22.1",
- "chrono",
- "dirs",
- "eventsource-stream",
- "futures",
- "futures-util",
- "getrandom 0.3.4",
- "git2",
- "indexmap 2.13.0",
- "jaq-core",
- "jaq-json",
- "jaq-std",
- "jmespath",
- "json-escape",
- "mime2ext",
- "mime_guess",
- "objectiveai-macros",
- "proc-macro2",
- "quote",
- "rand 0.9.2",
- "regex",
- "reqwest 0.12.28",
- "reqwest-eventsource",
- "rusqlite",
- "rust_decimal",
- "schemars 1.2.1",
- "serde",
- "serde_json",
- "serde_path_to_error",
- "sha2",
- "starlark",
- "syn 2.0.117",
- "thiserror 2.0.18",
- "tokio",
- "tokio-util",
- "twox-hash",
- "uuid",
- "walkdir",
- "wiremock",
- "zip",
-]
-
-[[package]]
 name = "objectiveai-api"
 version = "2.0.4"
 dependencies = [
@@ -4187,8 +4137,8 @@ dependencies = [
  "git2",
  "indexmap 2.13.0",
  "json-escape",
- "objectiveai",
  "objectiveai-mcp-proxy",
+ "objectiveai-sdk",
  "rand 0.9.2",
  "regex",
  "reqwest 0.12.28",
@@ -4213,18 +4163,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "objectiveai-cffi"
-version = "2.0.4"
-dependencies = [
- "arbitrary",
- "objectiveai",
- "rand 0.10.0",
- "rust_decimal",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "objectiveai-cli"
 version = "2.0.4"
 dependencies = [
@@ -4234,9 +4172,9 @@ dependencies = [
  "dotenv",
  "envconfig",
  "futures",
- "objectiveai",
  "objectiveai-api",
  "objectiveai-cli-sdk",
+ "objectiveai-sdk",
  "ratatui",
  "regex",
  "reqwest 0.12.28",
@@ -4262,7 +4200,7 @@ name = "objectiveai-cli-sdk"
 version = "2.0.4"
 dependencies = [
  "indexmap 2.13.0",
- "objectiveai",
+ "objectiveai-sdk",
  "serde",
  "serde_json",
  "tokio",
@@ -4272,14 +4210,10 @@ dependencies = [
 name = "objectiveai-json-schema-builder"
 version = "2.0.4"
 dependencies = [
- "objectiveai",
+ "objectiveai-sdk",
  "schemars 1.2.1",
  "serde_json",
 ]
-
-[[package]]
-name = "objectiveai-macros"
-version = "2.0.4"
 
 [[package]]
 name = "objectiveai-mcp-cli"
@@ -4337,7 +4271,7 @@ dependencies = [
  "envconfig",
  "futures",
  "indexmap 2.13.0",
- "objectiveai",
+ "objectiveai-sdk",
  "rand 0.9.2",
  "reqwest 0.12.28",
  "rmcp",
@@ -4354,17 +4288,97 @@ dependencies = [
 ]
 
 [[package]]
-name = "objectiveai-rs-pyo3"
+name = "objectiveai-sdk"
+version = "2.0.4"
+dependencies = [
+ "anyhow",
+ "arbitrary",
+ "backoff",
+ "base62",
+ "base64 0.22.1",
+ "chrono",
+ "dirs",
+ "eventsource-stream",
+ "futures",
+ "futures-util",
+ "getrandom 0.3.4",
+ "git2",
+ "indexmap 2.13.0",
+ "jaq-core",
+ "jaq-json",
+ "jaq-std",
+ "jmespath",
+ "json-escape",
+ "mime2ext",
+ "mime_guess",
+ "objectiveai-sdk-macros",
+ "proc-macro2",
+ "quote",
+ "rand 0.9.2",
+ "regex",
+ "reqwest 0.12.28",
+ "reqwest-eventsource",
+ "rusqlite",
+ "rust_decimal",
+ "schemars 1.2.1",
+ "serde",
+ "serde_json",
+ "serde_path_to_error",
+ "sha2",
+ "starlark",
+ "syn 2.0.117",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-util",
+ "twox-hash",
+ "uuid",
+ "walkdir",
+ "wiremock",
+ "zip",
+]
+
+[[package]]
+name = "objectiveai-sdk-cffi"
 version = "2.0.4"
 dependencies = [
  "arbitrary",
- "objectiveai",
+ "objectiveai-sdk",
+ "rand 0.10.0",
+ "rust_decimal",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "objectiveai-sdk-macros"
+version = "2.0.4"
+
+[[package]]
+name = "objectiveai-sdk-rs-pyo3"
+version = "2.0.4"
+dependencies = [
+ "arbitrary",
+ "objectiveai-sdk",
  "pyo3",
  "pythonize",
  "rand 0.9.2",
  "rust_decimal",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "objectiveai-sdk-wasm-js"
+version = "2.0.4"
+dependencies = [
+ "arbitrary",
+ "getrandom 0.4.2",
+ "objectiveai-sdk",
+ "rand 0.10.0",
+ "rust_decimal",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -4376,7 +4390,7 @@ dependencies = [
  "envconfig",
  "hex",
  "mime_guess",
- "objectiveai",
+ "objectiveai-sdk",
  "reqwest 0.12.28",
  "serde",
  "serde_json",
@@ -4386,20 +4400,6 @@ dependencies = [
  "tauri-build",
  "tokio",
  "tower",
-]
-
-[[package]]
-name = "objectiveai-wasm-js"
-version = "2.0.4"
-dependencies = [
- "arbitrary",
- "getrandom 0.4.2",
- "objectiveai",
- "rand 0.10.0",
- "rust_decimal",
- "serde-wasm-bindgen",
- "serde_json",
- "wasm-bindgen",
 ]
 
 [[package]]
@@ -7548,7 +7548,7 @@ dependencies = [
  "envconfig",
  "futures",
  "indexmap 2.13.0",
- "objectiveai",
+ "objectiveai-sdk",
  "serde",
  "serde_json",
  "tokio",

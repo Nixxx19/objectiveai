@@ -29,10 +29,10 @@ pub enum Commands {
 
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_sdk::output::Handle) -> Result<(), crate::error::Error> {
-        let client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
+        let client = objectiveai_sdk::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
         match self {
             Commands::Get { id, filter } => {
-                let content = client.read_function_execution(&id, filter.as_deref()).await.map(objectiveai::filesystem::logs::LogContent::Json)?;
+                let content = client.read_function_execution(&id, filter.as_deref()).await.map(objectiveai_sdk::filesystem::logs::LogContent::Json)?;
                 {
                 crate::log_line::emit_log_content(content, handle).await;
                 Ok(())
@@ -41,7 +41,7 @@ impl Commands {
             Commands::Subscribe { id, timeout_ms, require_modification, filter } => {
                 let result = client.subscribe_function_execution(&id, std::time::Duration::from_millis(timeout_ms), require_modification, filter.as_deref()).await?;
                 {
-                match result.map(objectiveai::filesystem::logs::LogContent::Json) {
+                match result.map(objectiveai_sdk::filesystem::logs::LogContent::Json) {
                     Some(content) => {
                         crate::log_line::emit_log_content(content, handle).await;
                         Ok(())

@@ -1,7 +1,7 @@
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("{0}")]
-    Filesystem(#[from] objectiveai::filesystem::Error),
+    Filesystem(#[from] objectiveai_sdk::filesystem::Error),
     #[error("viewer subprocess failed to start: {0}")]
     ViewerSpawn(std::io::Error),
     #[error("viewer subprocess did not report its bound address")]
@@ -13,7 +13,7 @@ pub enum Error {
     #[error("VIEWER_SECRET env var set without VIEWER_SIGNATURE, or vice versa")]
     ViewerSecretSignatureEnvMismatch,
     #[error("{0}")]
-    Http(#[from] objectiveai::HttpError),
+    Http(#[from] objectiveai_sdk::HttpError),
     #[error("{0} source is not supported for function-profile pairs")]
     PairsSourceNotSupported(&'static str),
     #[error("favorite not found: {0}")]

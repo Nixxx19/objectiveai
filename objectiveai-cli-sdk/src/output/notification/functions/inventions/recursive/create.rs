@@ -16,7 +16,7 @@ pub struct Inventions {
 pub struct InventionResultItem {
     pub name: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub path: Option<objectiveai::RemotePath>,
+    pub path: Option<objectiveai_sdk::RemotePath>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub error: Option<objectiveai::error::ResponseError>,
+    pub error: Option<objectiveai_sdk::error::ResponseError>,
 }

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Contents of a log read or subscribe. Mirrors the upstream
-/// `objectiveai::filesystem::logs::LogContent` (which has no serde
+/// `objectiveai_sdk::filesystem::logs::LogContent` (which has no serde
 /// derives) so the wire shape is parseable in cli-lib without depending
 /// on it for serialization.
 ///

@@ -12,6 +12,6 @@ pub struct Pair {
 /// The composite body inside a `Pair` notification.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct FunctionProfilePair {
-    pub function: objectiveai::functions::response::GetFunctionResponse,
-    pub profile: objectiveai::functions::profiles::response::GetProfileResponse,
+    pub function: objectiveai_sdk::functions::response::GetFunctionResponse,
+    pub profile: objectiveai_sdk::functions::profiles::response::GetProfileResponse,
 }

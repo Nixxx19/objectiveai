@@ -28,18 +28,18 @@ pub enum Commands {
     },
 }
 
-async fn get_favorites(cli_config: &crate::Config) -> Vec<objectiveai::filesystem::config::PairFavorite> {
+async fn get_favorites(cli_config: &crate::Config) -> Vec<objectiveai_sdk::filesystem::config::PairFavorite> {
     let (_, mut config) = crate::config::read(cli_config).await.unwrap();
     config.functions().profiles().pairs().get_favorites().to_vec()
 }
 
 async fn list_objectiveai(
-    http_client: objectiveai::HttpClient,
-) -> Result<Vec<objectiveai::functions::response::ListFunctionProfilePairItem>, crate::error::Error> {
-    let response = objectiveai::functions::list_function_profile_pairs(
+    http_client: objectiveai_sdk::HttpClient,
+) -> Result<Vec<objectiveai_sdk::functions::response::ListFunctionProfilePairItem>, crate::error::Error> {
+    let response = objectiveai_sdk::functions::list_function_profile_pairs(
         &http_client,
-        objectiveai::functions::request::ListFunctionProfilePairsRequest {
-            source: Some(objectiveai::functions::request::ListFunctionProfilePairsSource::Objectiveai),
+        objectiveai_sdk::functions::request::ListFunctionProfilePairsRequest {
+            source: Some(objectiveai_sdk::functions::request::ListFunctionProfilePairsSource::Objectiveai),
         },
     ).await?;
     Ok(response.data)
@@ -53,8 +53,8 @@ impl Commands {
                 let handle = handle.clone();
                 crate::api::run(|http_client| async move {
                     let (function, profile) = tokio::join!(
-                        objectiveai::functions::get_function(&http_client, function_path),
-                        objectiveai::functions::profiles::get_profile(&http_client, profile_path),
+                        objectiveai_sdk::functions::get_function(&http_client, function_path),
+                        objectiveai_sdk::functions::profiles::get_profile(&http_client, profile_path),
                     );
                     let pair = FunctionProfilePair {
                         function: function?,

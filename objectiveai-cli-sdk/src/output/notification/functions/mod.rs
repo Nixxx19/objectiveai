@@ -13,5 +13,5 @@ use serde::{Deserialize, Serialize};
 /// Wire: `{"type":"notification","function":{...GetFunctionResponse...}}`.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Function {
-    pub function: objectiveai::functions::response::GetFunctionResponse,
+    pub function: objectiveai_sdk::functions::response::GetFunctionResponse,
 }

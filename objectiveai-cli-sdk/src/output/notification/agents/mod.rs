@@ -9,5 +9,5 @@ use serde::{Deserialize, Serialize};
 /// Wire: `{"type":"notification","agent":{...GetAgentResponse...}}`.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Agent {
-    pub agent: objectiveai::agent::response::GetAgentResponse,
+    pub agent: objectiveai_sdk::agent::response::GetAgentResponse,
 }

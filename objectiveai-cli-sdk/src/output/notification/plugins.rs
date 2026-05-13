@@ -1,4 +1,4 @@
-use objectiveai::filesystem::plugins::ManifestWithNameAndSource;
+use objectiveai_sdk::filesystem::plugins::ManifestWithNameAndSource;
 use serde::{Deserialize, Serialize};
 
 /// Wire shape: `{"type":"notification","value":{"plugins":[...]}}`.

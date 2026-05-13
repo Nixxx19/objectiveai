@@ -1,7 +1,7 @@
 use clap::{Args, Subcommand};
 use futures::StreamExt;
 
-crate::define_inline_or_ref!(AgentArg, "agent", objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional, Remote);
+crate::define_inline_or_ref!(AgentArg, "agent", objectiveai_sdk::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional, Remote);
 
 /// How messages are provided to the agent completion.
 #[derive(Args)]
@@ -19,7 +19,7 @@ pub struct MessageSource {
 }
 
 impl MessageSource {
-    fn resolve(self) -> Result<Vec<objectiveai::agent::completions::message::Message>, crate::error::Error> {
+    fn resolve(self) -> Result<Vec<objectiveai_sdk::agent::completions::message::Message>, crate::error::Error> {
         if let Some(inline) = self.messages_inline {
             let mut de = serde_json::Deserializer::from_str(&inline);
             return serde_path_to_error::deserialize(&mut de)
@@ -80,9 +80,9 @@ impl Commands {
         }).await?;
         let continuation = continuation_args.resolve()?;
         let response_format = response_format_args.resolve()?
-            .map(objectiveai::agent::completions::request::ResponseFormatParam::Single);
+            .map(objectiveai_sdk::agent::completions::request::ResponseFormatParam::Single);
 
-        let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
+        let params = objectiveai_sdk::agent::completions::request::AgentCompletionCreateParams {
             messages,
             provider: None,
             agent,
@@ -92,33 +92,33 @@ impl Commands {
             continuation,
         };
 
-        let fs_client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
+        let fs_client = objectiveai_sdk::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
         let log_writer = fs_client.write_agent_completion();
 
         let handle = handle.clone();
         crate::api::run(Box::new(|http_client| Box::pin(async move {
-            let stream = objectiveai::agent::completions::create_agent_completion_streaming(
+            let stream = objectiveai_sdk::agent::completions::create_agent_completion_streaming(
                 &http_client, params,
             ).await?;
 
             let accumulated = crate::log_stream::consume_with_coalesced_writes(
                 stream.map(|r| r.map_err(crate::error::Error::from)),
                 log_writer,
-                |agg: &mut objectiveai::agent::completions::response::streaming::AgentCompletionChunk, c| agg.push(c),
+                |agg: &mut objectiveai_sdk::agent::completions::response::streaming::AgentCompletionChunk, c| agg.push(c),
                 handle.clone(),
             ).await?;
 
-            let completion: objectiveai::agent::completions::response::unary::AgentCompletion = accumulated.into();
+            let completion: objectiveai_sdk::agent::completions::response::unary::AgentCompletion = accumulated.into();
 
             // Extract the last assistant message content
             let content = completion.messages.iter().rev()
                 .find_map(|msg| {
-                    if let objectiveai::agent::completions::response::unary::Message::Assistant(asst) = msg {
+                    if let objectiveai_sdk::agent::completions::response::unary::Message::Assistant(asst) = msg {
                         asst.content.as_ref().map(|c| match c {
-                            objectiveai::agent::completions::message::RichContent::Text(t) => t.clone(),
-                            objectiveai::agent::completions::message::RichContent::Parts(parts) => {
+                            objectiveai_sdk::agent::completions::message::RichContent::Text(t) => t.clone(),
+                            objectiveai_sdk::agent::completions::message::RichContent::Parts(parts) => {
                                 parts.iter().filter_map(|p| match p {
-                                    objectiveai::agent::completions::message::RichContentPart::Text { text } => Some(text.as_str()),
+                                    objectiveai_sdk::agent::completions::message::RichContentPart::Text { text } => Some(text.as_str()),
                                     _ => None,
                                 }).collect::<Vec<_>>().join("")
                             }

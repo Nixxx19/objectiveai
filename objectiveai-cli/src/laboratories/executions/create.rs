@@ -47,7 +47,7 @@ pub async fn handle(
 
     let num_agents = original_agents.len();
 
-    let params = objectiveai::laboratories::executions::request::LaboratoryExecutionCreateParams {
+    let params = objectiveai_sdk::laboratories::executions::request::LaboratoryExecutionCreateParams {
         docker_image: args.docker_image,
         builder_agents,
         evaluation_agent,
@@ -63,14 +63,14 @@ pub async fn handle(
         stream: Some(true),
     };
 
-    let fs_client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
+    let fs_client = objectiveai_sdk::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
     let log_writer = fs_client.write_laboratory_execution();
 
     let handle = handle.clone();
     crate::api::run(
         Box::new(move |http_client| Box::pin(async move {
             let stream =
-                objectiveai::laboratories::executions::create_laboratory_execution_streaming(
+                objectiveai_sdk::laboratories::executions::create_laboratory_execution_streaming(
                     &http_client, params,
                 )
                 .await?;
@@ -78,23 +78,23 @@ pub async fn handle(
             let accumulated = crate::log_stream::consume_with_coalesced_writes(
                 stream.map(|r| r.map_err(crate::error::Error::from)),
                 log_writer,
-                |agg: &mut objectiveai::laboratories::executions::response::streaming::LaboratoryExecutionChunk, c| agg.push(c),
+                |agg: &mut objectiveai_sdk::laboratories::executions::response::streaming::LaboratoryExecutionChunk, c| agg.push(c),
                 handle.clone(),
             ).await?;
 
-            let execution: objectiveai::laboratories::executions::response::unary::LaboratoryExecution =
+            let execution: objectiveai_sdk::laboratories::executions::response::unary::LaboratoryExecution =
                 accumulated.into();
 
             // Collect evaluation outputs indexed by agent_index
             // agent_index -> (output, error)
-            let mut eval_map: std::collections::HashMap<u64, (Option<&objectiveai::functions::expression::InputValue>, Option<&objectiveai::error::ResponseError>)> =
+            let mut eval_map: std::collections::HashMap<u64, (Option<&objectiveai_sdk::functions::expression::InputValue>, Option<&objectiveai_sdk::error::ResponseError>)> =
                 std::collections::HashMap::new();
             for eval in &execution.evaluations {
                 eval_map.insert(eval.agent_index, (eval.output.as_ref(), eval.inner.error.as_ref()));
             }
 
             // Collect non-None outputs in agent_index order, tracking which indices have outputs
-            let mut outputs_with_indices: Vec<(u64, &objectiveai::functions::expression::InputValue)> = Vec::new();
+            let mut outputs_with_indices: Vec<(u64, &objectiveai_sdk::functions::expression::InputValue)> = Vec::new();
             for agent_index in 0..num_agents as u64 {
                 if let Some((Some(output), _)) = eval_map.get(&agent_index) {
                     outputs_with_indices.push((agent_index, output));

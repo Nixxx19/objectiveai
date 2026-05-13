@@ -6,11 +6,11 @@ pub enum Mode {
     Local,
 }
 
-impl From<Mode> for objectiveai::filesystem::config::ViewerMode {
+impl From<Mode> for objectiveai_sdk::filesystem::config::ViewerMode {
     fn from(m: Mode) -> Self {
         match m {
-            Mode::Remote => objectiveai::filesystem::config::ViewerMode::Remote,
-            Mode::Local => objectiveai::filesystem::config::ViewerMode::Local,
+            Mode::Remote => objectiveai_sdk::filesystem::config::ViewerMode::Remote,
+            Mode::Local => objectiveai_sdk::filesystem::config::ViewerMode::Local,
         }
     }
 }

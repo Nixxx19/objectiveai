@@ -46,18 +46,18 @@ pub enum Commands {
     },
 }
 
-async fn get_favorites(cli_config: &crate::Config) -> Vec<objectiveai::filesystem::config::Favorite> {
+async fn get_favorites(cli_config: &crate::Config) -> Vec<objectiveai_sdk::filesystem::config::Favorite> {
     let (_, mut config) = crate::config::read(cli_config).await.unwrap();
     config.functions().profiles().get_favorites().to_vec()
 }
 
 async fn list_source(
-    http_client: objectiveai::HttpClient,
-    source: objectiveai::functions::profiles::request::ListProfilesSource,
-) -> Result<Vec<objectiveai::RemotePath>, crate::error::Error> {
-    let response = objectiveai::functions::profiles::list_profiles(
+    http_client: objectiveai_sdk::HttpClient,
+    source: objectiveai_sdk::functions::profiles::request::ListProfilesSource,
+) -> Result<Vec<objectiveai_sdk::RemotePath>, crate::error::Error> {
+    let response = objectiveai_sdk::functions::profiles::list_profiles(
         &http_client,
-        objectiveai::functions::profiles::request::ListProfilesRequest { source: Some(source) },
+        objectiveai_sdk::functions::profiles::request::ListProfilesRequest { source: Some(source) },
     ).await?;
     Ok(response.data)
 }
@@ -69,7 +69,7 @@ impl Commands {
                 let path = args.resolve(|| get_favorites(cli_config)).await?;
                 let handle = handle.clone();
                 crate::api::run(|http_client| async move {
-                    let response = objectiveai::functions::profiles::get_profile(&http_client, path).await?;
+                    let response = objectiveai_sdk::functions::profiles::get_profile(&http_client, path).await?;
                     objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Profile>::Notification(objectiveai_cli_sdk::output::Notification { value: 
                         objectiveai_cli_sdk::output::Profile { profile: response },
                      })
@@ -78,7 +78,7 @@ impl Commands {
                 }, false).await
             }
             Commands::List { source } => {
-                use objectiveai::functions::profiles::request::ListProfilesSource;
+                use objectiveai_sdk::functions::profiles::request::ListProfilesSource;
                 match source {
                     crate::list::Source::Favorites => crate::list::favorites(|| get_favorites(cli_config), handle).await,
                     crate::list::Source::Filesystem => crate::list::single(|c| Box::pin(list_source(c, ListProfilesSource::Filesystem)), handle).await,
@@ -96,14 +96,14 @@ impl Commands {
             Commands::Favorites { command } => command.handle(cli_config, handle).await,
             Commands::Pairs { command } => command.handle(cli_config, handle).await,
             Commands::Publish { repository, body, message, overwrite } => {
-                let profile: objectiveai::functions::RemoteProfile = body.resolve()?;
+                let profile: objectiveai_sdk::functions::RemoteProfile = body.resolve()?;
                 let msg = message.resolve()?;
-                let fs_client = objectiveai::filesystem::Client::new(
+                let fs_client = objectiveai_sdk::filesystem::Client::new(
                     cli_config.config_base_dir.as_deref(),
                     cli_config.commit_author_name.as_deref(),
                     cli_config.commit_author_email.as_deref(),
                 );
-                let sha = objectiveai::filesystem::publish::publish_profile(
+                let sha = objectiveai_sdk::filesystem::publish::publish_profile(
                     &fs_client, &repository, &profile, &msg, overwrite,
                 ).await?;
                 objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Published>::Notification(objectiveai_cli_sdk::output::Notification { value: 

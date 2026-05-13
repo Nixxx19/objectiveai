@@ -32,7 +32,7 @@ impl Commands {
             Commands::Mode { command } => command.handle(cli_config, handle).await,
             Commands::Local { command } => command.handle(cli_config, handle).await,
             Commands::GenerateSecretSignaturePair => {
-                let pair = objectiveai::filesystem::config::generate_viewer_secret_signature_pair();
+                let pair = objectiveai_sdk::filesystem::config::generate_viewer_secret_signature_pair();
                 crate::config::emit_value(&pair, handle).await;
                 Ok(())
             }

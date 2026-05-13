@@ -8,11 +8,11 @@ pub enum Remote {
     Filesystem,
 }
 
-impl From<Remote> for objectiveai::Remote {
+impl From<Remote> for objectiveai_sdk::Remote {
     fn from(r: Remote) -> Self {
         match r {
-            Remote::Github => objectiveai::Remote::Github,
-            Remote::Filesystem => objectiveai::Remote::Filesystem,
+            Remote::Github => objectiveai_sdk::Remote::Github,
+            Remote::Filesystem => objectiveai_sdk::Remote::Filesystem,
         }
     }
 }

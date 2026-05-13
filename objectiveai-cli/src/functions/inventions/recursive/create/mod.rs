@@ -1,7 +1,7 @@
 use clap::{Args, Subcommand};
 use futures::StreamExt;
 
-crate::define_inline_or_ref!(AgentArg, "agent", objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional, Remote);
+crate::define_inline_or_ref!(AgentArg, "agent", objectiveai_sdk::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional, Remote);
 
 /// Shared params across all invention state types.
 #[derive(Args)]
@@ -30,8 +30,8 @@ pub struct InventionParams {
 }
 
 impl InventionParams {
-    fn into_params(self) -> objectiveai::functions::inventions::state::Params {
-        objectiveai::functions::inventions::state::Params {
+    fn into_params(self) -> objectiveai_sdk::functions::inventions::state::Params {
+        objectiveai_sdk::functions::inventions::state::Params {
             depth: self.depth,
             min_branch_width: self.min_branch_width,
             max_branch_width: self.max_branch_width,
@@ -46,12 +46,12 @@ impl InventionParams {
 use objectiveai_cli_sdk::output::{InventionResultItem, Inventions};
 
 /// Extract the name from an invention State.
-fn state_name(state: &objectiveai::functions::inventions::State) -> &str {
+fn state_name(state: &objectiveai_sdk::functions::inventions::State) -> &str {
     match state {
-        objectiveai::functions::inventions::State::AlphaScalarBranch(s) => &s.params.name,
-        objectiveai::functions::inventions::State::AlphaScalarLeaf(s) => &s.params.name,
-        objectiveai::functions::inventions::State::AlphaVectorBranch(s) => &s.params.name,
-        objectiveai::functions::inventions::State::AlphaVectorLeaf(s) => &s.params.name,
+        objectiveai_sdk::functions::inventions::State::AlphaScalarBranch(s) => &s.params.name,
+        objectiveai_sdk::functions::inventions::State::AlphaScalarLeaf(s) => &s.params.name,
+        objectiveai_sdk::functions::inventions::State::AlphaVectorBranch(s) => &s.params.name,
+        objectiveai_sdk::functions::inventions::State::AlphaVectorLeaf(s) => &s.params.name,
     }
 }
 
@@ -119,18 +119,18 @@ impl Commands {
         let (agent_ref, continuation_args, instructions, seed, state, detach) = match self {
             Commands::AlphaScalar { params, agent, continuation, instructions, seed, detach } => {
                 let p = params.into_params();
-                let state = objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(
-                    objectiveai::functions::inventions::ParamsState::AlphaScalar(
-                        objectiveai::functions::inventions::state::AlphaScalarState { params: p, input_schema: None },
+                let state = objectiveai_sdk::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(
+                    objectiveai_sdk::functions::inventions::ParamsState::AlphaScalar(
+                        objectiveai_sdk::functions::inventions::state::AlphaScalarState { params: p, input_schema: None },
                     ),
                 );
                 (agent, continuation, instructions, seed, state, detach)
             }
             Commands::AlphaVector { params, agent, continuation, instructions, seed, detach } => {
                 let p = params.into_params();
-                let state = objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(
-                    objectiveai::functions::inventions::ParamsState::AlphaVector(
-                        objectiveai::functions::inventions::state::AlphaVectorState { params: p, input_schema: None },
+                let state = objectiveai_sdk::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(
+                    objectiveai_sdk::functions::inventions::ParamsState::AlphaVector(
+                        objectiveai_sdk::functions::inventions::state::AlphaVectorState { params: p, input_schema: None },
                     ),
                 );
                 (agent, continuation, instructions, seed, state, detach)
@@ -138,13 +138,13 @@ impl Commands {
             Commands::Remote { state, state_inline, agent, continuation, instructions, seed, detach } => {
                 let state = if let Some(inline) = state_inline {
                     let mut de = serde_json::Deserializer::from_str(&inline);
-                    let parsed: objectiveai::functions::inventions::ParamsState =
+                    let parsed: objectiveai_sdk::functions::inventions::ParamsState =
                         serde_path_to_error::deserialize(&mut de)
                             .map_err(crate::error::Error::InlineDeserialize)?;
-                    objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(parsed)
+                    objectiveai_sdk::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(parsed)
                 } else {
                     let remote_path = state.expect("clap ensures one is set").resolve()?;
-                    objectiveai::functions::inventions::ParamsStateOrRemoteCommitOptional::Remote(remote_path)
+                    objectiveai_sdk::functions::inventions::ParamsStateOrRemoteCommitOptional::Remote(remote_path)
                 };
                 (agent, continuation, instructions, seed, state, detach)
             }
@@ -166,14 +166,14 @@ impl Commands {
         let (_, mut config) = crate::config::read(cli_config).await?;
         let remote = config.functions().inventions().get_remote();
 
-        let request = objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams {
+        let request = objectiveai_sdk::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams {
             remote,
             overwrite: None,
             state,
             provider: None,
             agent,
-            prompt: objectiveai::functions::inventions::prompts::InlinePromptOrRemoteCommitOptional::Remote(
-                objectiveai::RemotePathCommitOptional::Mock { name: "default".to_string() },
+            prompt: objectiveai_sdk::functions::inventions::prompts::InlinePromptOrRemoteCommitOptional::Remote(
+                objectiveai_sdk::RemotePathCommitOptional::Mock { name: "default".to_string() },
             ),
             seed,
             stream: Some(true),
@@ -181,19 +181,19 @@ impl Commands {
             continuation,
         };
 
-        let fs_client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
+        let fs_client = objectiveai_sdk::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
         let log_writer = fs_client.write_function_invention_recursive();
 
         let handle = handle.clone();
         crate::api::run(Box::new(|http_client| Box::pin(async move {
-            let stream = objectiveai::functions::inventions::recursive::create_function_invention_recursive_streaming(
+            let stream = objectiveai_sdk::functions::inventions::recursive::create_function_invention_recursive_streaming(
                 &http_client, request,
             ).await?;
 
             let chunk = crate::log_stream::consume_with_coalesced_writes(
                 stream.map(|r| r.map_err(crate::error::Error::from)),
                 log_writer,
-                |agg: &mut objectiveai::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk, c| agg.push(c),
+                |agg: &mut objectiveai_sdk::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk, c| agg.push(c),
                 handle.clone(),
             ).await?;
 

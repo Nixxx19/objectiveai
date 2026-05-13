@@ -5,5 +5,5 @@ use serde::{Deserialize, Serialize};
 /// Wire: `{"type":"notification","state":{...GetFunctionInventionStateResponse...}}`.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct State {
-    pub state: objectiveai::functions::inventions::state::response::GetFunctionInventionStateResponse,
+    pub state: objectiveai_sdk::functions::inventions::state::response::GetFunctionInventionStateResponse,
 }

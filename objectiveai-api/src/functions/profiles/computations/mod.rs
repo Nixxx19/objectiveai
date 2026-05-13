@@ -6,4 +6,4 @@ mod client;
 mod objectiveai;
 
 pub use client::*;
-pub use objectiveai::*;
+pub use objectiveai_sdk::*;

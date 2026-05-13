@@ -9,7 +9,7 @@ pub enum Commands {
     },
 }
 
-async fn get_favorites(cli_config: &crate::Config) -> Vec<objectiveai::filesystem::config::Favorite> {
+async fn get_favorites(cli_config: &crate::Config) -> Vec<objectiveai_sdk::filesystem::config::Favorite> {
     let (_, mut config) = crate::config::read(cli_config).await.unwrap();
     config.functions().get_favorites().to_vec()
 }
@@ -21,7 +21,7 @@ impl Commands {
                 let path = args.resolve(|| get_favorites(cli_config)).await?;
                 let handle = handle.clone();
                 crate::api::run(|http_client| async move {
-                    let response = objectiveai::functions::inventions::state::get_function_invention_state(&http_client, path).await?;
+                    let response = objectiveai_sdk::functions::inventions::state::get_function_invention_state(&http_client, path).await?;
                     objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::State>::Notification(objectiveai_cli_sdk::output::Notification { value: 
                         objectiveai_cli_sdk::output::State { state: response },
                      })

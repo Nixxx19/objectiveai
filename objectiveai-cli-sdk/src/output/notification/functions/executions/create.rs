@@ -12,7 +12,7 @@ pub struct Execution {
 /// collected from the aggregated chunk tree.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ExecutionResult {
-    pub output: objectiveai::functions::expression::TaskOutputOwned,
+    pub output: objectiveai_sdk::functions::expression::TaskOutputOwned,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub errors: Vec<CollectedError>,
 }
@@ -22,7 +22,7 @@ pub struct ExecutionResult {
 pub struct CollectedError {
     pub path: ErrorPath,
     #[serde(flatten)]
-    pub error: objectiveai::error::ResponseError,
+    pub error: objectiveai_sdk::error::ResponseError,
 }
 
 /// Where in the execution tree an error occurred. Serializes as either

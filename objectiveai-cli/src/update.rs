@@ -307,15 +307,15 @@ mod imp {
     }
 
     /// The marker is `<config_base_dir>/updated.txt`. Reuses
-    /// `objectiveai::filesystem::Client` so CONFIG_BASE_DIR / ~/.objectiveai
+    /// `objectiveai_sdk::filesystem::Client` so CONFIG_BASE_DIR / ~/.objectiveai
     /// resolution matches the rest of the CLI.
     fn marker_path() -> Result<PathBuf, Error> {
         let fs_client = fs_client();
         Ok(fs_client.base_dir().join("updated.txt"))
     }
 
-    fn fs_client() -> objectiveai::filesystem::Client {
-        objectiveai::filesystem::Client::new(
+    fn fs_client() -> objectiveai_sdk::filesystem::Client {
+        objectiveai_sdk::filesystem::Client::new(
             None::<String>,
             None::<String>,
             None::<String>,

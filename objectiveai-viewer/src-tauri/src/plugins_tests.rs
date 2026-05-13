@@ -1,6 +1,6 @@
 use axum::body::Body;
 use axum::http::{Request, StatusCode};
-use objectiveai::filesystem::plugins::{HttpMethod, ViewerRoute};
+use objectiveai_sdk::filesystem::plugins::{HttpMethod, ViewerRoute};
 use tokio::sync::mpsc;
 use tower::ServiceExt;
 

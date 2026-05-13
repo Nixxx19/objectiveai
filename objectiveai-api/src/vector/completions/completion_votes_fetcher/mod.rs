@@ -8,4 +8,4 @@ mod fetcher;
 mod objectiveai;
 
 pub use fetcher::*;
-pub use objectiveai::*;
+pub use objectiveai_sdk::*;

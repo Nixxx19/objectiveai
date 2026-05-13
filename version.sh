@@ -224,11 +224,11 @@ CARGO_TOMLS=(
   objectiveai-mcp-filesystem/Cargo.toml
   objectiveai-mcp-proxy/Cargo.toml
   objectiveai-mcp-proxy/test-upstream/Cargo.toml
-  objectiveai-rs/Cargo.toml
-  objectiveai-rs-cffi/Cargo.toml
-  objectiveai-rs-macros/Cargo.toml
-  objectiveai-rs-pyo3/Cargo.toml
-  objectiveai-rs-wasm-js/Cargo.toml
+  objectiveai-sdk-rs/Cargo.toml
+  objectiveai-sdk-rs-cffi/Cargo.toml
+  objectiveai-sdk-rs-macros/Cargo.toml
+  objectiveai-sdk-rs-pyo3/Cargo.toml
+  objectiveai-sdk-rs-wasm-js/Cargo.toml
   objectiveai-viewer/src-tauri/Cargo.toml
 )
 

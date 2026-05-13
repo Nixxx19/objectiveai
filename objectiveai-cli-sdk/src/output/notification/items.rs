@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 /// Generic wire wrapper for every list-style notification:
 /// `{"type":"notification","items":[...]}`. The element type varies
 /// (e.g. `Items<ListItem>` for `agents list`, `Items<PairListItem>` for
-/// `pairs list`, `Items<objectiveai::filesystem::config::Favorite>` for
-/// favorites listings, `Items<objectiveai::filesystem::logs::ListItem>`
+/// `pairs list`, `Items<objectiveai_sdk::filesystem::config::Favorite>` for
+/// favorites listings, `Items<objectiveai_sdk::filesystem::logs::ListItem>`
 /// for log listings).
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Items<T> {
@@ -17,14 +17,14 @@ pub struct Items<T> {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum ListItem {
-    Favorite(objectiveai::filesystem::config::Favorite),
-    Item(objectiveai::RemotePath),
+    Favorite(objectiveai_sdk::filesystem::config::Favorite),
+    Item(objectiveai_sdk::RemotePath),
 }
 
 /// One entry in a function-profile pair listing.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum PairListItem {
-    Favorite(objectiveai::filesystem::config::PairFavorite),
-    Item(objectiveai::functions::response::ListFunctionProfilePairItem),
+    Favorite(objectiveai_sdk::filesystem::config::PairFavorite),
+    Item(objectiveai_sdk::functions::response::ListFunctionProfilePairItem),
 }

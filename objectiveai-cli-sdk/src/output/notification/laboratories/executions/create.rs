@@ -11,7 +11,7 @@ pub struct Laboratory {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LabResultItem {
-    pub agent: objectiveai::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
+    pub agent: objectiveai_sdk::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
     pub score: Option<f64>,
-    pub error: Option<objectiveai::error::ResponseError>,
+    pub error: Option<objectiveai_sdk::error::ResponseError>,
 }

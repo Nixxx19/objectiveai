@@ -28,7 +28,7 @@ async fn emit_pair_items(items: Vec<PairListItem>, handle: &Handle) {
 }
 
 /// Returns true if a favorite matches a remote path.
-fn favorite_matches(fav: &objectiveai::filesystem::config::Favorite, path: &objectiveai::RemotePath) -> bool {
+fn favorite_matches(fav: &objectiveai_sdk::filesystem::config::Favorite, path: &objectiveai_sdk::RemotePath) -> bool {
     favorite_matches_path(fav.path(), path)
 }
 
@@ -39,7 +39,7 @@ pub async fn favorites<F, Fut>(
 ) -> Result<(), crate::error::Error>
 where
     F: FnOnce() -> Fut,
-    Fut: std::future::Future<Output = Vec<objectiveai::filesystem::config::Favorite>>,
+    Fut: std::future::Future<Output = Vec<objectiveai_sdk::filesystem::config::Favorite>>,
 {
     let items: Vec<ListItem> = get_favorites().await
         .into_iter()
@@ -55,7 +55,7 @@ pub async fn single<F>(
     handle: &Handle,
 ) -> Result<(), crate::error::Error>
 where
-    F: FnOnce(objectiveai::HttpClient) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<objectiveai::RemotePath>, crate::error::Error>> + Send>> + Send + 'static,
+    F: FnOnce(objectiveai_sdk::HttpClient) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<objectiveai_sdk::RemotePath>, crate::error::Error>> + Send>> + Send + 'static,
 {
     let handle = handle.clone();
     crate::api::run(move |http_client| Box::pin(async move {
@@ -81,9 +81,9 @@ pub async fn all<F, Fut, FsF, OaiF>(
 ) -> Result<(), crate::error::Error>
 where
     F: FnOnce() -> Fut,
-    Fut: std::future::Future<Output = Vec<objectiveai::filesystem::config::Favorite>>,
-    FsF: FnOnce(objectiveai::HttpClient) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<objectiveai::RemotePath>, crate::error::Error>> + Send>> + Send + 'static,
-    OaiF: FnOnce(objectiveai::HttpClient) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<objectiveai::RemotePath>, crate::error::Error>> + Send>> + Send + 'static,
+    Fut: std::future::Future<Output = Vec<objectiveai_sdk::filesystem::config::Favorite>>,
+    FsF: FnOnce(objectiveai_sdk::HttpClient) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<objectiveai_sdk::RemotePath>, crate::error::Error>> + Send>> + Send + 'static,
+    OaiF: FnOnce(objectiveai_sdk::HttpClient) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<objectiveai_sdk::RemotePath>, crate::error::Error>> + Send>> + Send + 'static,
 {
     // TODO: figure out how to not pre-await this (join with api::run concurrently)
     let favorites = get_favorites().await;
@@ -132,21 +132,21 @@ where
 
 /// Compares a RemotePathCommitOptional against a RemotePath.
 fn favorite_matches_path(
-    fav_path: &objectiveai::RemotePathCommitOptional,
-    path: &objectiveai::RemotePath,
+    fav_path: &objectiveai_sdk::RemotePathCommitOptional,
+    path: &objectiveai_sdk::RemotePath,
 ) -> bool {
     match (fav_path, path) {
         (
-            objectiveai::RemotePathCommitOptional::Github { owner: fo, repository: fr, commit: fc },
-            objectiveai::RemotePath::Github { owner: po, repository: pr, commit: pc },
+            objectiveai_sdk::RemotePathCommitOptional::Github { owner: fo, repository: fr, commit: fc },
+            objectiveai_sdk::RemotePath::Github { owner: po, repository: pr, commit: pc },
         ) => fo == po && fr == pr && fc.as_ref().is_none_or(|c| c == pc),
         (
-            objectiveai::RemotePathCommitOptional::Filesystem { owner: fo, repository: fr, commit: fc },
-            objectiveai::RemotePath::Filesystem { owner: po, repository: pr, commit: pc },
+            objectiveai_sdk::RemotePathCommitOptional::Filesystem { owner: fo, repository: fr, commit: fc },
+            objectiveai_sdk::RemotePath::Filesystem { owner: po, repository: pr, commit: pc },
         ) => fo == po && fr == pr && fc.as_ref().is_none_or(|c| c == pc),
         (
-            objectiveai::RemotePathCommitOptional::Mock { name: fn_ },
-            objectiveai::RemotePath::Mock { name: pn },
+            objectiveai_sdk::RemotePathCommitOptional::Mock { name: fn_ },
+            objectiveai_sdk::RemotePath::Mock { name: pn },
         ) => fn_ == pn,
         _ => false,
     }
@@ -154,8 +154,8 @@ fn favorite_matches_path(
 
 /// Returns true if a pair favorite matches a pair item (both function and profile match).
 fn pair_favorite_matches(
-    fav: &objectiveai::filesystem::config::PairFavorite,
-    item: &objectiveai::functions::response::ListFunctionProfilePairItem,
+    fav: &objectiveai_sdk::filesystem::config::PairFavorite,
+    item: &objectiveai_sdk::functions::response::ListFunctionProfilePairItem,
 ) -> bool {
     favorite_matches_path(&fav.function, &item.function)
         && favorite_matches_path(&fav.profile, &item.profile)
@@ -168,7 +168,7 @@ pub async fn pair_favorites<F, Fut>(
 ) -> Result<(), crate::error::Error>
 where
     F: FnOnce() -> Fut,
-    Fut: std::future::Future<Output = Vec<objectiveai::filesystem::config::PairFavorite>>,
+    Fut: std::future::Future<Output = Vec<objectiveai_sdk::filesystem::config::PairFavorite>>,
 {
     let items: Vec<PairListItem> = get_favorites().await
         .into_iter()
@@ -184,7 +184,7 @@ pub async fn pair_single<F>(
     handle: &Handle,
 ) -> Result<(), crate::error::Error>
 where
-    F: FnOnce(objectiveai::HttpClient) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<objectiveai::functions::response::ListFunctionProfilePairItem>, crate::error::Error>> + Send>> + Send + 'static,
+    F: FnOnce(objectiveai_sdk::HttpClient) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<objectiveai_sdk::functions::response::ListFunctionProfilePairItem>, crate::error::Error>> + Send>> + Send + 'static,
 {
     let handle = handle.clone();
     crate::api::run(move |http_client| Box::pin(async move {
@@ -207,8 +207,8 @@ pub async fn pair_all<GF, GFut, F>(
 ) -> Result<(), crate::error::Error>
 where
     GF: FnOnce() -> GFut,
-    GFut: std::future::Future<Output = Vec<objectiveai::filesystem::config::PairFavorite>>,
-    F: FnOnce(objectiveai::HttpClient) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<objectiveai::functions::response::ListFunctionProfilePairItem>, crate::error::Error>> + Send>> + Send + 'static,
+    GFut: std::future::Future<Output = Vec<objectiveai_sdk::filesystem::config::PairFavorite>>,
+    F: FnOnce(objectiveai_sdk::HttpClient) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<objectiveai_sdk::functions::response::ListFunctionProfilePairItem>, crate::error::Error>> + Send>> + Send + 'static,
 {
     // TODO: figure out how to not pre-await this (join with api::run concurrently)
     let favorites = get_favorites().await;

@@ -5,8 +5,8 @@
 
 use axum::Json;
 use axum::http::StatusCode;
-use objectiveai::filesystem::Client as FsClient;
-use objectiveai::filesystem::plugins::{HttpMethod, ViewerRoute};
+use objectiveai_sdk::filesystem::Client as FsClient;
+use objectiveai_sdk::filesystem::plugins::{HttpMethod, ViewerRoute};
 
 use crate::events::{Event, EventSender};
 

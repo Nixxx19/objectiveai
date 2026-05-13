@@ -5,5 +5,5 @@ use serde::{Deserialize, Serialize};
 /// Wire: `{"type":"notification","swarm":{...GetSwarmResponse...}}`.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Swarm {
-    pub swarm: objectiveai::swarm::response::GetSwarmResponse,
+    pub swarm: objectiveai_sdk::swarm::response::GetSwarmResponse,
 }

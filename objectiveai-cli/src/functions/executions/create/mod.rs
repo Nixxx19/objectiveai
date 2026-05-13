@@ -1,8 +1,8 @@
 use clap::{Args, Subcommand};
 use futures::StreamExt;
 
-crate::define_inline_or_ref!(FunctionArg, "function", objectiveai::functions::FullInlineFunctionOrRemoteCommitOptional, Remote);
-crate::define_inline_or_ref!(ProfileArg, "profile", objectiveai::functions::InlineProfileOrRemoteCommitOptional, Remote);
+crate::define_inline_or_ref!(FunctionArg, "function", objectiveai_sdk::functions::FullInlineFunctionOrRemoteCommitOptional, Remote);
+crate::define_inline_or_ref!(ProfileArg, "profile", objectiveai_sdk::functions::InlineProfileOrRemoteCommitOptional, Remote);
 
 /// How input is provided to the function execution.
 #[derive(Args)]
@@ -20,7 +20,7 @@ pub struct InputSource {
 }
 
 impl InputSource {
-    fn resolve(self) -> Result<objectiveai::functions::expression::InputValue, crate::error::Error> {
+    fn resolve(self) -> Result<objectiveai_sdk::functions::expression::InputValue, crate::error::Error> {
         if let Some(inline) = self.input_inline {
             let mut de = serde_json::Deserializer::from_str(&inline);
             return serde_path_to_error::deserialize(&mut de)
@@ -39,7 +39,7 @@ impl InputSource {
 use objectiveai_cli_sdk::output::{CollectedError, ErrorPath, Execution, ExecutionResult};
 
 /// Recursively collect errors from the aggregated chunk.
-fn collect_errors(chunk: &objectiveai::functions::executions::response::streaming::FunctionExecutionChunk, errors: &mut Vec<CollectedError>) {
+fn collect_errors(chunk: &objectiveai_sdk::functions::executions::response::streaming::FunctionExecutionChunk, errors: &mut Vec<CollectedError>) {
     if let Some(err) = &chunk.error {
         errors.push(CollectedError {
             path: ErrorPath::Root,
@@ -48,7 +48,7 @@ fn collect_errors(chunk: &objectiveai::functions::executions::response::streamin
     }
     for task in &chunk.tasks {
         match task {
-            objectiveai::functions::executions::response::streaming::TaskChunk::FunctionExecution(ft) => {
+            objectiveai_sdk::functions::executions::response::streaming::TaskChunk::FunctionExecution(ft) => {
                 if let Some(err) = &ft.inner.error {
                     errors.push(CollectedError {
                         path: ErrorPath::Task(ft.task_path.clone()),
@@ -57,7 +57,7 @@ fn collect_errors(chunk: &objectiveai::functions::executions::response::streamin
                 }
                 collect_errors(&ft.inner, errors);
             }
-            objectiveai::functions::executions::response::streaming::TaskChunk::VectorCompletion(vt) => {
+            objectiveai_sdk::functions::executions::response::streaming::TaskChunk::VectorCompletion(vt) => {
                 if let Some(err) = &vt.error {
                     errors.push(CollectedError {
                         path: ErrorPath::Task(vt.task_path.clone()),
@@ -147,12 +147,12 @@ pub enum Commands {
     },
 }
 
-async fn fn_favorites(cli_config: &crate::Config) -> Vec<objectiveai::filesystem::config::Favorite> {
+async fn fn_favorites(cli_config: &crate::Config) -> Vec<objectiveai_sdk::filesystem::config::Favorite> {
     let (_, mut config) = crate::config::read(cli_config).await.unwrap();
     config.functions().get_favorites().to_vec()
 }
 
-async fn profile_favorites(cli_config: &crate::Config) -> Vec<objectiveai::filesystem::config::Favorite> {
+async fn profile_favorites(cli_config: &crate::Config) -> Vec<objectiveai_sdk::filesystem::config::Favorite> {
     let (_, mut config) = crate::config::read(cli_config).await.unwrap();
     config.functions().profiles().get_favorites().to_vec()
 }
@@ -161,10 +161,10 @@ impl Commands {
     pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_sdk::output::Handle) -> Result<(), crate::error::Error> {
         let (function_source, profile_source, input_source, continuation_args, instructions, retry_token, seed, split, invert, strategy, detach) = match self {
             Commands::Standard { function, profile, input, continuation, instructions, retry_token, seed, split, invert, detach } => {
-                (function, profile, input, continuation, instructions, retry_token, seed, split, invert, objectiveai::functions::executions::request::Strategy::Default, detach)
+                (function, profile, input, continuation, instructions, retry_token, seed, split, invert, objectiveai_sdk::functions::executions::request::Strategy::Default, detach)
             }
             Commands::SwissSystem { function, profile, input, continuation, instructions, retry_token, seed, split, invert, pool, rounds, detach } => {
-                let strategy = objectiveai::functions::executions::request::Strategy::SwissSystem { pool, rounds };
+                let strategy = objectiveai_sdk::functions::executions::request::Strategy::SwissSystem { pool, rounds };
                 (function, profile, input, continuation, instructions, retry_token, seed, split, invert, strategy, detach)
             }
         };
@@ -180,7 +180,7 @@ impl Commands {
         let input_value = input_source.resolve()?;
         let continuation = continuation_args.resolve()?;
 
-        let params = objectiveai::functions::executions::request::FunctionExecutionCreateParams {
+        let params = objectiveai_sdk::functions::executions::request::FunctionExecutionCreateParams {
             function,
             profile,
             retry_token,
@@ -196,19 +196,19 @@ impl Commands {
             continuation,
         };
 
-        let fs_client = objectiveai::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
+        let fs_client = objectiveai_sdk::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
         let log_writer = fs_client.write_function_execution();
 
         let handle = handle.clone();
         crate::api::run(Box::new(|http_client| Box::pin(async move {
-            let stream = objectiveai::functions::executions::create_function_execution_streaming(
+            let stream = objectiveai_sdk::functions::executions::create_function_execution_streaming(
                 &http_client, params,
             ).await?;
 
             let chunk = crate::log_stream::consume_with_coalesced_writes(
                 stream.map(|r| r.map_err(crate::error::Error::from)),
                 log_writer,
-                |agg: &mut objectiveai::functions::executions::response::streaming::FunctionExecutionChunk, c| agg.push(c),
+                |agg: &mut objectiveai_sdk::functions::executions::response::streaming::FunctionExecutionChunk, c| agg.push(c),
                 handle.clone(),
             ).await?;
 
@@ -219,7 +219,7 @@ impl Commands {
             // Extract output (default to Err { error: null } if missing)
             let output = chunk.output
                 .map(|o| o.unwrap())
-                .unwrap_or(objectiveai::functions::expression::TaskOutputOwned::Err {
+                .unwrap_or(objectiveai_sdk::functions::expression::TaskOutputOwned::Err {
                     error: serde_json::Value::Null,
                 });
 

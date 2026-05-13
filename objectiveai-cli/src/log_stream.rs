@@ -36,7 +36,7 @@ use futures::{Stream, StreamExt};
 /// so the writer task can own its own copy).
 pub(crate) async fn consume_with_coalesced_writes<C, F>(
     stream: impl Stream<Item = Result<C, crate::error::Error>>,
-    log_writer: objectiveai::filesystem::logs::LogWriter<C>,
+    log_writer: objectiveai_sdk::filesystem::logs::LogWriter<C>,
     push: F,
     handle: objectiveai_cli_sdk::output::Handle,
 ) -> Result<C, crate::error::Error>
@@ -90,7 +90,7 @@ where
 /// the previous write, merge, write once. Repeat until the channel closes.
 async fn writer_loop<C, F>(
     mut rx: tokio::sync::mpsc::UnboundedReceiver<C>,
-    mut log_writer: objectiveai::filesystem::logs::LogWriter<C>,
+    mut log_writer: objectiveai_sdk::filesystem::logs::LogWriter<C>,
     push: F,
     handle: objectiveai_cli_sdk::output::Handle,
 ) -> Result<(), crate::error::Error>
