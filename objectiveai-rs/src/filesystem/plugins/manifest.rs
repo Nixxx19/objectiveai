@@ -21,14 +21,17 @@ pub struct Manifest {
 
     /// Author or authors of the plugin. Free-form string.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub author: Option<String>,
 
     /// Homepage or repository URL.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub homepage: Option<String>,
 
     /// SPDX license identifier (or any string).
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub license: Option<String>,
 
     /// Release-asset filename per platform — what the cli should
@@ -52,6 +55,7 @@ pub struct Manifest {
     /// assets). When absent, the plugin has no viewer tab and the
     /// viewer's startup scan ignores it for UI purposes.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub viewer_zip: Option<String>,
 
     /// HTTP routes the viewer exposes on behalf of this plugin.
