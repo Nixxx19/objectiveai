@@ -21,6 +21,33 @@ pub struct LaboratoryExecutionChunk {
 }
 
 impl LaboratoryExecutionChunk {
+    /// Yields each inner error from this chunk's builders and evaluations,
+    /// tagged with `(index, agent_index)` and discriminated by an
+    /// [`InnerError`](super::InnerError) variant (`Builder` | `Evaluation`).
+    ///
+    /// Builder errors yield first (in vec order), then evaluation errors.
+    /// Lazy and zero-allocation; collect with `.collect::<Vec<_>>()` if
+    /// you need to retain the items past the chunk's lifetime.
+    ///
+    /// Does NOT include the chunk's own top-level `.error` field.
+    pub fn inner_errors(&self) -> impl Iterator<Item = super::InnerError<'_>> {
+        let builders = self.builders.iter().filter_map(|b| {
+            b.inner.error.as_ref().map(|error| super::InnerError::Builder {
+                index: b.index,
+                agent_index: b.agent_index,
+                error: std::borrow::Cow::Borrowed(error),
+            })
+        });
+        let evaluations = self.evaluations.iter().filter_map(|e| {
+            e.inner.error.as_ref().map(|error| super::InnerError::Evaluation {
+                index: e.index,
+                agent_index: e.agent_index,
+                error: std::borrow::Cow::Borrowed(error),
+            })
+        });
+        builders.chain(evaluations)
+    }
+
     pub fn push(
         &mut self,
         LaboratoryExecutionChunk {
