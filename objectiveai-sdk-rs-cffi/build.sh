@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Builds objectiveai-rs-cffi to dist/ (WASM + native for host platform).
+# Builds objectiveai-sdk-rs-cffi to dist/ (WASM + native for host platform).
 # Skips the build if the source fingerprint hasn't changed (SHA-based, like cargo).
-# Output is captured to .logs/build/objectiveai-rs-cffi.txt.
+# Output is captured to .logs/build/objectiveai-sdk-rs-cffi.txt.
 #
 # Usage:
-#   bash objectiveai-rs-cffi/build.sh
+#   bash objectiveai-sdk-rs-cffi/build.sh
 
 set -euo pipefail
 
-MODULE="objectiveai-rs-cffi"
+MODULE="objectiveai-sdk-rs-cffi"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 LOG_DIR="$REPO_ROOT/.logs/build"

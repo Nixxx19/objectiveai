@@ -1,6 +1,6 @@
 //! Python bindings for ObjectiveAI via PyO3.
 //!
-//! This crate provides the same functions as `objectiveai-rs-wasm-js` but for
+//! This crate provides the same functions as `objectiveai-sdk-rs-wasm-js` but for
 //! Python instead of JavaScript. It uses `pythonize` for zero-copy conversion
 //! between Python dicts and Rust serde types.
 

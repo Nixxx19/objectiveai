@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# Publishes objectiveai-rs to crates.io as the `objectiveai` crate.
+# Publishes objectiveai-sdk-rs to crates.io as the `objectiveai-sdk` crate.
 #
 # By default, dispatches the GitHub Actions workflow that runs
-# `cargo publish -p objectiveai` against crates.io.
+# `cargo publish -p objectiveai-sdk` against crates.io.
 #
 # Local --build-only mode runs `cargo publish --dry-run` so you can
 # verify the package metadata + tarball without uploading.
 #
 # Usage:
-#   bash objectiveai-rs/publish.sh                # crates.io (via GHA)
-#   bash objectiveai-rs/publish.sh --build-only   # local cargo publish --dry-run
+#   bash objectiveai-sdk-rs/publish.sh                # crates.io (via GHA)
+#   bash objectiveai-sdk-rs/publish.sh --build-only   # local cargo publish --dry-run
 #
 # `--test` is not supported (crates.io has no test registry).
 #
-# Output is captured to .logs/publish/objectiveai-rs.txt.
+# Output is captured to .logs/publish/objectiveai-sdk-rs.txt.
 #
 # Setup (one-time):
 #   - CARGO_REGISTRY_TOKEN must be set as a repo secret. Generate at

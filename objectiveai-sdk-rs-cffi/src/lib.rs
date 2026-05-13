@@ -1,7 +1,7 @@
 //! C FFI bindings for ObjectiveAI.
 //!
-//! This crate provides the same functions as `objectiveai-rs-wasm-js` and
-//! `objectiveai-rs-pyo3` but via a C ABI, suitable for consumption by Go (CGo),
+//! This crate provides the same functions as `objectiveai-sdk-rs-wasm-js` and
+//! `objectiveai-sdk-rs-pyo3` but via a C ABI, suitable for consumption by Go (CGo),
 //! .NET (P/Invoke), and any other language with C FFI support.
 //!
 //! # ABI Convention

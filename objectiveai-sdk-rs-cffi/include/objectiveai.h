@@ -6,7 +6,7 @@
  *   - Return: 0 on success, -1 on error (error message in output)
  *   - Memory: Output must be freed with objectiveai_free()
  *
- * Generated from objectiveai-rs-cffi. Do not edit manually.
+ * Generated from objectiveai-sdk-rs-cffi. Do not edit manually.
  */
 
 #ifndef OBJECTIVEAI_H

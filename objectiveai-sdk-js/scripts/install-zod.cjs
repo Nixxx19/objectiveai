@@ -1,6 +1,6 @@
 // install-zod.js
 // Reads JSON schemas from objectiveai-json-schema/ and generates Zod schemas
-// in objectiveai-js/src/ with proper imports and index.ts barrel exports.
+// in objectiveai-sdk-js/src/ with proper imports and index.ts barrel exports.
 //
 // Relies on objectiveai-json-schema builder guarantees:
 // - No $defs, $schema, required, oneOf, const

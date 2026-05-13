@@ -1,10 +1,10 @@
-# objectiveai-rs-pyo3
+# objectiveai-sdk-rs-pyo3
 
 PyO3 bindings for ObjectiveAI.
 
 This crate is consumed by the sibling `objectiveai-py` package via maturin's
-`manifest-path` setting (in `objectiveai-py/pyproject.toml`). The compiled
-extension is bundled into the `objectiveai` PyPI wheel as `objectiveai._pyo3`,
+`manifest-path` setting (in `objectiveai-sdk-py/pyproject.toml`). The compiled
+extension is bundled into the `objectiveai-sdk` PyPI wheel as `objectiveai_sdk._pyo3`,
 not published as a separate distribution.
 
 ## Layout
@@ -20,10 +20,10 @@ There is no standalone build for this crate; it is built as part of the
 `objectiveai-py` package:
 
 ```bash
-bash objectiveai-py/build.sh             # local dev (maturin develop)
-bash objectiveai-py/publish.sh           # cross-platform wheels via GHA
+bash objectiveai-sdk-py/build.sh             # local dev (maturin develop)
+bash objectiveai-sdk-py/publish.sh           # cross-platform wheels via GHA
 ```
 
-`maturin` reads `objectiveai-py/pyproject.toml`, follows `manifest-path` to
+`maturin` reads `objectiveai-sdk-py/pyproject.toml`, follows `manifest-path` to
 this `Cargo.toml`, and produces a wheel containing the pure-Python sources
 plus the compiled extension.

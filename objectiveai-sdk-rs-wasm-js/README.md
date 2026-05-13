@@ -1,4 +1,4 @@
-# objectiveai-rs-wasm-js
+# objectiveai-sdk-rs-wasm-js
 
 WebAssembly bindings for ObjectiveAI, providing JavaScript/TypeScript access to client-side validation and compilation.
 
@@ -25,7 +25,7 @@ This crate compiles Rust code from `objectiveai-rs` to WebAssembly, enabling bro
 
 ## Usage
 
-This crate is consumed via the `objectiveai` npm package. The TypeScript SDK wraps these functions with proper type definitions.
+This crate is consumed via the `objectiveai-sdk` npm package. The TypeScript SDK wraps these functions with proper type definitions.
 
 ```typescript
 import { validateSwarmLlm, validateSwarm } from 'objectiveai';

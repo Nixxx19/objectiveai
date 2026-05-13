@@ -20,8 +20,8 @@ compute_fingerprint() {
   {
     find "$SCRIPT_DIR/src" -type f -name '*.rs' | sort
     echo "$SCRIPT_DIR/Cargo.toml"
-    find "$REPO_ROOT/objectiveai-rs/src" -type f -name '*.rs' | sort
-    echo "$REPO_ROOT/objectiveai-rs/Cargo.toml"
+    find "$REPO_ROOT/objectiveai-sdk-rs/src" -type f -name '*.rs' | sort
+    echo "$REPO_ROOT/objectiveai-sdk-rs/Cargo.toml"
     echo "$REPO_ROOT/Cargo.lock"
   } | while IFS= read -r file; do
     relpath="${file#"$REPO_ROOT/"}"

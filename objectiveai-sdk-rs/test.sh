@@ -3,8 +3,8 @@
 # Output is captured to .logs/test/objectiveai-rs.txt.
 #
 # Usage:
-#   bash objectiveai-rs/test.sh
-#   bash objectiveai-rs/test.sh -- --test-threads=1   # pass args to cargo test
+#   bash objectiveai-sdk-rs/test.sh
+#   bash objectiveai-sdk-rs/test.sh -- --test-threads=1   # pass args to cargo test
 
 set -euo pipefail
 

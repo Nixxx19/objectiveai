@@ -2,7 +2,7 @@
 # Validates that dist/ exists and its fingerprint matches the current source.
 #
 # Usage:
-#   bash objectiveai-rs-wasm-js/validate.sh
+#   bash objectiveai-sdk-rs-wasm-js/validate.sh
 
 set -euo pipefail
 

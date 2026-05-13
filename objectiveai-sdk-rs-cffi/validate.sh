@@ -2,7 +2,7 @@
 # Validates that dist/ exists and its fingerprint matches the current source.
 #
 # Usage:
-#   bash objectiveai-rs-cffi/validate.sh
+#   bash objectiveai-sdk-rs-cffi/validate.sh
 
 set -euo pipefail
 

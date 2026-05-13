@@ -1,9 +1,9 @@
 // install_cffi.go
 //
-// Validates objectiveai-rs-cffi dist/ and copies the WASM binary
-// into objectiveai-go/lib/ for Go embed.
+// Validates objectiveai-sdk-rs-cffi dist/ and copies the WASM binary
+// into objectiveai-sdk-go/lib/ for Go embed.
 //
-// Delegates the fingerprint check to objectiveai-rs-cffi/validate.sh.
+// Delegates the fingerprint check to objectiveai-sdk-rs-cffi/validate.sh.
 // If dist/ is missing or stale, exits with an error — run build.sh first.
 //
 //go:build ignore
@@ -25,7 +25,7 @@ func main() {
 	goRoot := filepath.Dir(scriptsDir)
 	repoRoot := filepath.Dir(goRoot)
 
-	cffiDir := filepath.Join(repoRoot, "objectiveai-rs-cffi")
+	cffiDir := filepath.Join(repoRoot, "objectiveai-sdk-rs-cffi")
 	wasmSrc := filepath.Join(cffiDir, "dist", "objectiveai_cffi.wasm")
 	validateScript := filepath.Join(cffiDir, "validate.sh")
 	libDir := filepath.Join(goRoot, "lib")
@@ -36,7 +36,7 @@ func main() {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		fmt.Fprintf(os.Stderr, "objectiveai-rs-cffi dist/ is not valid. Run build.sh first.\n")
+		fmt.Fprintf(os.Stderr, "objectiveai-sdk-rs-cffi dist/ is not valid. Run build.sh first.\n")
 		os.Exit(1)
 	}
 

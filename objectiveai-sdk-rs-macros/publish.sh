@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# Publishes objectiveai-rs-macros to crates.io as the `objectiveai-macros` crate.
+# Publishes objectiveai-sdk-rs-macros to crates.io as the `objectiveai-sdk-macros` crate.
 #
-# This proc-macro crate is a regular versioned dependency of `objectiveai`,
-# so it MUST be on crates.io for `objectiveai` to publish successfully.
+# This proc-macro crate is a regular versioned dependency of `objectiveai-sdk`,
+# so it MUST be on crates.io for `objectiveai-sdk` to publish successfully.
 # Even though it's a workspace-internal helper, the publish flow needs it.
 #
 # Usage:
-#   bash objectiveai-rs-macros/publish.sh                # crates.io (via GHA)
-#   bash objectiveai-rs-macros/publish.sh --build-only   # local cargo publish --dry-run
+#   bash objectiveai-sdk-rs-macros/publish.sh                # crates.io (via GHA)
+#   bash objectiveai-sdk-rs-macros/publish.sh --build-only   # local cargo publish --dry-run
 #
 # `--test` is not supported (crates.io has no test registry).
 #
-# Output is captured to .logs/publish/objectiveai-rs-macros.txt.
+# Output is captured to .logs/publish/objectiveai-sdk-rs-macros.txt.
 #
 # Setup (one-time):
 #   - CARGO_REGISTRY_TOKEN must be set as a repo secret.

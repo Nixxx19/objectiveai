@@ -1,7 +1,7 @@
 // install_go.go
 //
 // Reads JSON schemas from objectiveai-json-schema/ and generates Go type files
-// in objectiveai-go/ as a single flat package. Type names use full PascalCase
+// in objectiveai-sdk-go/ as a single flat package. Type names use full PascalCase
 // paths (e.g., AgentOpenrouterAgent). File names use snake_case paths joined
 // with underscores (e.g., agent_openrouter_agent.go).
 //
@@ -50,10 +50,10 @@ func init() {
 		fmt.Fprintln(os.Stderr, "Failed to resolve install_go.go path")
 		os.Exit(1)
 	}
-	// thisFile = .../objectiveai-go/scripts/install_go.go
+	// thisFile = .../objectiveai-sdk-go/scripts/install_go.go
 	rootDir = filepath.Dir(filepath.Dir(filepath.Dir(thisFile)))
 	schemaDir = filepath.Join(rootDir, "objectiveai-json-schema")
-	srcDir = filepath.Join(rootDir, "objectiveai-go")
+	srcDir = filepath.Join(rootDir, "objectiveai-sdk-go")
 }
 
 // ---------------------------------------------------------------------------
