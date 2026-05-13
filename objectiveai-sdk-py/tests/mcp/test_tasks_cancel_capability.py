@@ -3,5 +3,5 @@
 
 
 def test_tasks_cancel_capability():
-    from objectiveai.mcp import TasksCancelCapability
+    from objectiveai_sdk.mcp import TasksCancelCapability
     schema = TasksCancelCapability.model_json_schema()

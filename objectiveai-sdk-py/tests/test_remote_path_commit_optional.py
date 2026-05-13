@@ -3,5 +3,5 @@
 
 
 def test_remote_path_commit_optional():
-    from objectiveai import RemotePathCommitOptional
+    from objectiveai_sdk import RemotePathCommitOptional
     schema = RemotePathCommitOptional.model_json_schema()

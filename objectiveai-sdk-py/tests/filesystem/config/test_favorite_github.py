@@ -3,5 +3,5 @@
 
 
 def test_favorite_github():
-    from objectiveai.filesystem.config import FavoriteGithub
+    from objectiveai_sdk.filesystem.config import FavoriteGithub
     schema = FavoriteGithub.model_json_schema()

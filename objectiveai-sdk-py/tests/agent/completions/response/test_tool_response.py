@@ -3,5 +3,5 @@
 
 
 def test_tool_response():
-    from objectiveai.agent.completions.response import ToolResponse
+    from objectiveai_sdk.agent.completions.response import ToolResponse
     schema = ToolResponse.model_json_schema()

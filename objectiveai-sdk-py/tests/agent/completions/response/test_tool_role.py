@@ -3,5 +3,5 @@
 
 
 def test_tool_role():
-    from objectiveai.agent.completions.response import ToolRole
+    from objectiveai_sdk.agent.completions.response import ToolRole
     schema = ToolRole.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_viewer_route():
-    from objectiveai.filesystem.plugins import ViewerRoute
+    from objectiveai_sdk.filesystem.plugins import ViewerRoute
     schema = ViewerRoute.model_json_schema()

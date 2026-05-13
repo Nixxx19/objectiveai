@@ -3,5 +3,5 @@
 
 
 def test_task_output():
-    from objectiveai.functions.expression import TaskOutput
+    from objectiveai_sdk.functions.expression import TaskOutput
     schema = TaskOutput.model_json_schema()

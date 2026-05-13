@@ -3,5 +3,5 @@
 
 
 def test_list_api_key_response():
-    from objectiveai.auth import ListApiKeyResponse
+    from objectiveai_sdk.auth import ListApiKeyResponse
     schema = ListApiKeyResponse.model_json_schema()

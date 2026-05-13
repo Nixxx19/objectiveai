@@ -3,5 +3,5 @@
 
 
 def test_function_invention_recursive_chunk():
-    from objectiveai.functions.inventions.recursive.response.streaming import FunctionInventionRecursiveChunk
+    from objectiveai_sdk.functions.inventions.recursive.response.streaming import FunctionInventionRecursiveChunk
     schema = FunctionInventionRecursiveChunk.model_json_schema()

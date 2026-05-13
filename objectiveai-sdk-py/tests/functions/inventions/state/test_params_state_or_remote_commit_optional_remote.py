@@ -3,5 +3,5 @@
 
 
 def test_params_state_or_remote_commit_optional_remote():
-    from objectiveai.functions.inventions.state import ParamsStateOrRemoteCommitOptionalRemote
+    from objectiveai_sdk.functions.inventions.state import ParamsStateOrRemoteCommitOptionalRemote
     schema = ParamsStateOrRemoteCommitOptionalRemote.model_json_schema()

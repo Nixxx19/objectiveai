@@ -3,5 +3,5 @@
 
 
 def test_scalar_leaf_task_object():
-    from objectiveai.functions.inventions import ScalarLeafTaskObject
+    from objectiveai_sdk.functions.inventions import ScalarLeafTaskObject
     schema = ScalarLeafTaskObject.model_json_schema()

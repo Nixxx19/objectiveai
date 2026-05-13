@@ -3,5 +3,5 @@
 
 
 def test_api_mode():
-    from objectiveai.filesystem.config import ApiMode
+    from objectiveai_sdk.filesystem.config import ApiMode
     schema = ApiMode.model_json_schema()

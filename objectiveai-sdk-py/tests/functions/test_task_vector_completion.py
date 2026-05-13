@@ -3,5 +3,5 @@
 
 
 def test_task_vector_completion():
-    from objectiveai.functions import TaskVectorCompletion
+    from objectiveai_sdk.functions import TaskVectorCompletion
     schema = TaskVectorCompletion.model_json_schema()

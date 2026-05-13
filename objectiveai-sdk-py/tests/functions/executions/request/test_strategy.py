@@ -3,5 +3,5 @@
 
 
 def test_strategy():
-    from objectiveai.functions.executions.request import Strategy
+    from objectiveai_sdk.functions.executions.request import Strategy
     schema = Strategy.model_json_schema()

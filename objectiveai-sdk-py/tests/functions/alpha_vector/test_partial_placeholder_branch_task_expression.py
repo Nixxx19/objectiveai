@@ -3,5 +3,5 @@
 
 
 def test_partial_placeholder_branch_task_expression():
-    from objectiveai.functions.alpha_vector import PartialPlaceholderBranchTaskExpression
+    from objectiveai_sdk.functions.alpha_vector import PartialPlaceholderBranchTaskExpression
     schema = PartialPlaceholderBranchTaskExpression.model_json_schema()

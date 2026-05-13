@@ -3,5 +3,5 @@
 
 
 def test_remote_agent_mock():
-    from objectiveai.agent import RemoteAgentMock
+    from objectiveai_sdk.agent import RemoteAgentMock
     schema = RemoteAgentMock.model_json_schema()

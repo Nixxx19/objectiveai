@@ -3,5 +3,5 @@
 
 
 def test_agent_completion_notify_params():
-    from objectiveai.agent.completions.request import AgentCompletionNotifyParams
+    from objectiveai_sdk.agent.completions.request import AgentCompletionNotifyParams
     schema = AgentCompletionNotifyParams.model_json_schema()

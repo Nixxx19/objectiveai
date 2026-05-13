@@ -3,5 +3,5 @@
 
 
 def test_get_function_response_github():
-    from objectiveai.functions import GetFunctionResponseGithub
+    from objectiveai_sdk.functions import GetFunctionResponseGithub
     schema = GetFunctionResponseGithub.model_json_schema()

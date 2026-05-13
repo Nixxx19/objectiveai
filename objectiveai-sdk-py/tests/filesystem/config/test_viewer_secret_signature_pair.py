@@ -3,5 +3,5 @@
 
 
 def test_viewer_secret_signature_pair():
-    from objectiveai.filesystem.config import ViewerSecretSignaturePair
+    from objectiveai_sdk.filesystem.config import ViewerSecretSignaturePair
     schema = ViewerSecretSignaturePair.model_json_schema()

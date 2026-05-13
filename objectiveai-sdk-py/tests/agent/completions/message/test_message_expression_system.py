@@ -3,5 +3,5 @@
 
 
 def test_message_expression_system():
-    from objectiveai.agent.completions.message import MessageExpressionSystem
+    from objectiveai_sdk.agent.completions.message import MessageExpressionSystem
     schema = MessageExpressionSystem.model_json_schema()

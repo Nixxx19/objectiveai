@@ -3,5 +3,5 @@
 
 
 def test_provider_sort_latency():
-    from objectiveai.agent.completions.request import ProviderSortLatency
+    from objectiveai_sdk.agent.completions.request import ProviderSortLatency
     schema = ProviderSortLatency.model_json_schema()

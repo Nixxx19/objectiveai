@@ -3,5 +3,5 @@
 
 
 def test_message_system():
-    from objectiveai.agent.completions.message import MessageSystem
+    from objectiveai_sdk.agent.completions.message import MessageSystem
     schema = MessageSystem.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_blob_resource_contents():
-    from objectiveai.mcp.shared import BlobResourceContents
+    from objectiveai_sdk.mcp.shared import BlobResourceContents
     schema = BlobResourceContents.model_json_schema()

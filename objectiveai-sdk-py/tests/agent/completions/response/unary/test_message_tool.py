@@ -3,5 +3,5 @@
 
 
 def test_message_tool():
-    from objectiveai.agent.completions.response.unary import MessageTool
+    from objectiveai_sdk.agent.completions.response.unary import MessageTool
     schema = MessageTool.model_json_schema()

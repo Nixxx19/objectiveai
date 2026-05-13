@@ -3,5 +3,5 @@
 
 
 def test_viewer_mode():
-    from objectiveai.filesystem.config import ViewerMode
+    from objectiveai_sdk.filesystem.config import ViewerMode
     schema = ViewerMode.model_json_schema()

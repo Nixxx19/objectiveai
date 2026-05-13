@@ -3,5 +3,5 @@
 
 
 def test_json_rpc_request():
-    from objectiveai.mcp import JsonRpcRequest
+    from objectiveai_sdk.mcp import JsonRpcRequest
     schema = JsonRpcRequest.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_alpha_scalar_leaf_state():
-    from objectiveai.functions.inventions.state import AlphaScalarLeafState
+    from objectiveai_sdk.functions.inventions.state import AlphaScalarLeafState
     schema = AlphaScalarLeafState.model_json_schema()

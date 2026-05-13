@@ -3,5 +3,5 @@
 
 
 def test_stop():
-    from objectiveai.agent.openrouter import Stop
+    from objectiveai_sdk.agent.openrouter import Stop
     schema = Stop.model_json_schema()

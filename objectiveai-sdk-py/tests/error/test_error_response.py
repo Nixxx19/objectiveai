@@ -3,5 +3,5 @@
 
 
 def test_error_response():
-    from objectiveai.error import ErrorResponse
+    from objectiveai_sdk.error import ErrorResponse
     schema = ErrorResponse.model_json_schema()

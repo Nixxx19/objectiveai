@@ -3,5 +3,5 @@
 
 
 def test_manifest_binaries():
-    from objectiveai.filesystem.plugins import ManifestBinaries
+    from objectiveai_sdk.filesystem.plugins import ManifestBinaries
     schema = ManifestBinaries.model_json_schema()

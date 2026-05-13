@@ -3,5 +3,5 @@
 
 
 def test_task_scalar_function_github():
-    from objectiveai.functions import TaskScalarFunctionGithub
+    from objectiveai_sdk.functions import TaskScalarFunctionGithub
     schema = TaskScalarFunctionGithub.model_json_schema()

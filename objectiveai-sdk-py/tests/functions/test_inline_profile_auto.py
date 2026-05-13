@@ -3,5 +3,5 @@
 
 
 def test_inline_profile_auto():
-    from objectiveai.functions import InlineProfileAuto
+    from objectiveai_sdk.functions import InlineProfileAuto
     schema = InlineProfileAuto.model_json_schema()

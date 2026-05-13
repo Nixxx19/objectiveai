@@ -3,5 +3,5 @@
 
 
 def test_full_inline_function_or_remote_commit_optional_remote():
-    from objectiveai.functions import FullInlineFunctionOrRemoteCommitOptionalRemote
+    from objectiveai_sdk.functions import FullInlineFunctionOrRemoteCommitOptionalRemote
     schema = FullInlineFunctionOrRemoteCommitOptionalRemote.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_item():
-    from objectiveai.agent.completions.message import Item
+    from objectiveai_sdk.agent.completions.message import Item
     schema = Item.model_json_schema()

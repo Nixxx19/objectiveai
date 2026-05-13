@@ -3,5 +3,5 @@
 
 
 def test_boolean_input_schema_type():
-    from objectiveai.functions.expression import BooleanInputSchemaType
+    from objectiveai_sdk.functions.expression import BooleanInputSchemaType
     schema = BooleanInputSchemaType.model_json_schema()

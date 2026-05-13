@@ -3,5 +3,5 @@
 
 
 def test_message():
-    from objectiveai.agent.completions.response.unary import Message
+    from objectiveai_sdk.agent.completions.response.unary import Message
     schema = Message.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_response_format_grammar():
-    from objectiveai.agent.completions.request import ResponseFormatGrammar
+    from objectiveai_sdk.agent.completions.request import ResponseFormatGrammar
     schema = ResponseFormatGrammar.model_json_schema()

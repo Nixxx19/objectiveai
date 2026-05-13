@@ -3,5 +3,5 @@
 
 
 def test_number_input_schema():
-    from objectiveai.functions.expression import NumberInputSchema
+    from objectiveai_sdk.functions.expression import NumberInputSchema
     schema = NumberInputSchema.model_json_schema()

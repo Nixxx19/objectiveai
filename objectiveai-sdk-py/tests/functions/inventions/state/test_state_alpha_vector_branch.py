@@ -3,5 +3,5 @@
 
 
 def test_state_alpha_vector_branch():
-    from objectiveai.functions.inventions.state import StateAlphaVectorBranch
+    from objectiveai_sdk.functions.inventions.state import StateAlphaVectorBranch
     schema = StateAlphaVectorBranch.model_json_schema()

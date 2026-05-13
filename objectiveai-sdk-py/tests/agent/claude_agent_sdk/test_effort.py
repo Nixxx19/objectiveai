@@ -3,5 +3,5 @@
 
 
 def test_effort():
-    from objectiveai.agent.claude_agent_sdk import Effort
+    from objectiveai_sdk.agent.claude_agent_sdk import Effort
     schema = Effort.model_json_schema()

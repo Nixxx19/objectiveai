@@ -3,5 +3,5 @@
 
 
 def test_get_function_invention_state_response_filesystem():
-    from objectiveai.functions.inventions.state import GetFunctionInventionStateResponseFilesystem
+    from objectiveai_sdk.functions.inventions.state import GetFunctionInventionStateResponseFilesystem
     schema = GetFunctionInventionStateResponseFilesystem.model_json_schema()

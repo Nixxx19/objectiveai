@@ -3,5 +3,5 @@
 
 
 def test_get_prompt_response_github():
-    from objectiveai.functions.inventions.prompts import GetPromptResponseGithub
+    from objectiveai_sdk.functions.inventions.prompts import GetPromptResponseGithub
     schema = GetPromptResponseGithub.model_json_schema()

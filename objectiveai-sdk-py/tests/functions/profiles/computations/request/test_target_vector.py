@@ -3,5 +3,5 @@
 
 
 def test_target_vector():
-    from objectiveai.functions.profiles.computations.request import TargetVector
+    from objectiveai_sdk.functions.profiles.computations.request import TargetVector
     schema = TargetVector.model_json_schema()

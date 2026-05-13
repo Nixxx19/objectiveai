@@ -3,5 +3,5 @@
 
 
 def test_remote_agent_base_codex_sdk():
-    from objectiveai.agent import RemoteAgentBaseCodexSdk
+    from objectiveai_sdk.agent import RemoteAgentBaseCodexSdk
     schema = RemoteAgentBaseCodexSdk.model_json_schema()

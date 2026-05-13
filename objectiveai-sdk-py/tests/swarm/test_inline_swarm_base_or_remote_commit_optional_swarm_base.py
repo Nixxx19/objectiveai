@@ -3,5 +3,5 @@
 
 
 def test_inline_swarm_base_or_remote_commit_optional_swarm_base():
-    from objectiveai.swarm import InlineSwarmBaseOrRemoteCommitOptionalSwarmBase
+    from objectiveai_sdk.swarm import InlineSwarmBaseOrRemoteCommitOptionalSwarmBase
     schema = InlineSwarmBaseOrRemoteCommitOptionalSwarmBase.model_json_schema()

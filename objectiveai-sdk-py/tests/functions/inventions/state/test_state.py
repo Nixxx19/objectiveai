@@ -3,5 +3,5 @@
 
 
 def test_state():
-    from objectiveai.functions.inventions.state import State
+    from objectiveai_sdk.functions.inventions.state import State
     schema = State.model_json_schema()

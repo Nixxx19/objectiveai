@@ -3,5 +3,5 @@
 
 
 def test_task_expression_scalar_function_github_input_value():
-    from objectiveai.functions import TaskExpressionScalarFunctionGithubInputValue
+    from objectiveai_sdk.functions import TaskExpressionScalarFunctionGithubInputValue
     schema = TaskExpressionScalarFunctionGithubInputValue.model_json_schema()

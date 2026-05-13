@@ -3,5 +3,5 @@
 
 
 def test_output_mode():
-    from objectiveai.agent import OutputMode
+    from objectiveai_sdk.agent import OutputMode
     schema = OutputMode.model_json_schema()

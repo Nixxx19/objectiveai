@@ -3,5 +3,5 @@
 
 
 def test_item_expression():
-    from objectiveai.agent.completions.message import ItemExpression
+    from objectiveai_sdk.agent.completions.message import ItemExpression
     schema = ItemExpression.model_json_schema()

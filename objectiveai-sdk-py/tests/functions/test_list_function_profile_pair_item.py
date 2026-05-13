@@ -3,5 +3,5 @@
 
 
 def test_list_function_profile_pair_item():
-    from objectiveai.functions import ListFunctionProfilePairItem
+    from objectiveai_sdk.functions import ListFunctionProfilePairItem
     schema = ListFunctionProfilePairItem.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_branch_task_expression():
-    from objectiveai.functions.alpha_vector import BranchTaskExpression
+    from objectiveai_sdk.functions.alpha_vector import BranchTaskExpression
     schema = BranchTaskExpression.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_get_function_response_mock():
-    from objectiveai.functions import GetFunctionResponseMock
+    from objectiveai_sdk.functions import GetFunctionResponseMock
     schema = GetFunctionResponseMock.model_json_schema()

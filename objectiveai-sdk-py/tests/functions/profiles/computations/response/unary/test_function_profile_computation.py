@@ -3,5 +3,5 @@
 
 
 def test_function_profile_computation():
-    from objectiveai.functions.profiles.computations.response.unary import FunctionProfileComputation
+    from objectiveai_sdk.functions.profiles.computations.response.unary import FunctionProfileComputation
     schema = FunctionProfileComputation.model_json_schema()

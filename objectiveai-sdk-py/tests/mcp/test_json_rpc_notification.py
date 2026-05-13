@@ -3,5 +3,5 @@
 
 
 def test_json_rpc_notification():
-    from objectiveai.mcp import JsonRpcNotification
+    from objectiveai_sdk.mcp import JsonRpcNotification
     schema = JsonRpcNotification.model_json_schema()

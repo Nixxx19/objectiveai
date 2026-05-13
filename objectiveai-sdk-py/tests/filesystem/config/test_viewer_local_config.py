@@ -3,5 +3,5 @@
 
 
 def test_viewer_local_config():
-    from objectiveai.filesystem.config import ViewerLocalConfig
+    from objectiveai_sdk.filesystem.config import ViewerLocalConfig
     schema = ViewerLocalConfig.model_json_schema()

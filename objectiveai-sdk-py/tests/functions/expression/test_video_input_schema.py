@@ -3,5 +3,5 @@
 
 
 def test_video_input_schema():
-    from objectiveai.functions.expression import VideoInputSchema
+    from objectiveai_sdk.functions.expression import VideoInputSchema
     schema = VideoInputSchema.model_json_schema()

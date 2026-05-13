@@ -3,5 +3,5 @@
 
 
 def test_object_input_schema():
-    from objectiveai.functions.expression import ObjectInputSchema
+    from objectiveai_sdk.functions.expression import ObjectInputSchema
     schema = ObjectInputSchema.model_json_schema()

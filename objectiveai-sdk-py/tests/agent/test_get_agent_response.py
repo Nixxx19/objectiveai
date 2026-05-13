@@ -3,5 +3,5 @@
 
 
 def test_get_agent_response():
-    from objectiveai.agent import GetAgentResponse
+    from objectiveai_sdk.agent import GetAgentResponse
     schema = GetAgentResponse.model_json_schema()

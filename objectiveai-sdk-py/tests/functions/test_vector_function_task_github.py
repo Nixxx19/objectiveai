@@ -3,5 +3,5 @@
 
 
 def test_vector_function_task_github():
-    from objectiveai.functions import VectorFunctionTaskGithub
+    from objectiveai_sdk.functions import VectorFunctionTaskGithub
     schema = VectorFunctionTaskGithub.model_json_schema()

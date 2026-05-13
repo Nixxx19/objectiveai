@@ -3,5 +3,5 @@
 
 
 def test_input_schema_audio():
-    from objectiveai.functions.expression import InputSchemaAudio
+    from objectiveai_sdk.functions.expression import InputSchemaAudio
     schema = InputSchemaAudio.model_json_schema()

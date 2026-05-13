@@ -3,5 +3,5 @@
 
 
 def test_upstream_unknown():
-    from objectiveai.agent import UpstreamUnknown
+    from objectiveai_sdk.agent import UpstreamUnknown
     schema = UpstreamUnknown.model_json_schema()

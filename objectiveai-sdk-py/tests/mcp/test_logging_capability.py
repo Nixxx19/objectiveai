@@ -3,5 +3,5 @@
 
 
 def test_logging_capability():
-    from objectiveai.mcp import LoggingCapability
+    from objectiveai_sdk.mcp import LoggingCapability
     schema = LoggingCapability.model_json_schema()

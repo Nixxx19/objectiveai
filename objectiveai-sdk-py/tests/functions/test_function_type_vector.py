@@ -3,5 +3,5 @@
 
 
 def test_function_type_vector():
-    from objectiveai.functions import FunctionTypeVector
+    from objectiveai_sdk.functions import FunctionTypeVector
     schema = FunctionTypeVector.model_json_schema()

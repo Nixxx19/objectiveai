@@ -3,5 +3,5 @@
 
 
 def test_provider():
-    from objectiveai.agent.openrouter import Provider
+    from objectiveai_sdk.agent.openrouter import Provider
     schema = Provider.model_json_schema()

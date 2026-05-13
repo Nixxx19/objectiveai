@@ -3,5 +3,5 @@
 
 
 def test_value_expression():
-    from objectiveai.functions.expression import ValueExpression
+    from objectiveai_sdk.functions.expression import ValueExpression
     schema = ValueExpression.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_input_schema_scalar_function_input_schema():
-    from objectiveai.functions.inventions.state import InputSchemaScalarFunctionInputSchema
+    from objectiveai_sdk.functions.inventions.state import InputSchemaScalarFunctionInputSchema
     schema = InputSchemaScalarFunctionInputSchema.model_json_schema()

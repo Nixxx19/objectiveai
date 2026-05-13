@@ -3,5 +3,5 @@
 
 
 def test_expression_special():
-    from objectiveai.functions.expression import ExpressionSpecial
+    from objectiveai_sdk.functions.expression import ExpressionSpecial
     schema = ExpressionSpecial.model_json_schema()

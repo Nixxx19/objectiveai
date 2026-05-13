@@ -3,5 +3,5 @@
 
 
 def test_remote_function_branch():
-    from objectiveai.functions.alpha_scalar import RemoteFunctionBranch
+    from objectiveai_sdk.functions.alpha_scalar import RemoteFunctionBranch
     schema = RemoteFunctionBranch.model_json_schema()

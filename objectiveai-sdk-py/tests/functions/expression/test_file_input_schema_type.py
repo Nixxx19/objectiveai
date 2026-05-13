@@ -3,5 +3,5 @@
 
 
 def test_file_input_schema_type():
-    from objectiveai.functions.expression import FileInputSchemaType
+    from objectiveai_sdk.functions.expression import FileInputSchemaType
     schema = FileInputSchemaType.model_json_schema()

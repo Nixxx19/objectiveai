@@ -3,5 +3,5 @@
 
 
 def test_upstream():
-    from objectiveai.agent.openrouter import Upstream
+    from objectiveai_sdk.agent.openrouter import Upstream
     schema = Upstream.model_json_schema()

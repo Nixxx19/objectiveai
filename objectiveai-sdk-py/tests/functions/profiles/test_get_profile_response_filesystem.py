@@ -3,5 +3,5 @@
 
 
 def test_get_profile_response_filesystem():
-    from objectiveai.functions.profiles import GetProfileResponseFilesystem
+    from objectiveai_sdk.functions.profiles import GetProfileResponseFilesystem
     schema = GetProfileResponseFilesystem.model_json_schema()

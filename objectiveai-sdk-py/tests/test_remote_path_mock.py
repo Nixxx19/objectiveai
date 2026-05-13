@@ -3,5 +3,5 @@
 
 
 def test_remote_path_mock():
-    from objectiveai import RemotePathMock
+    from objectiveai_sdk import RemotePathMock
     schema = RemotePathMock.model_json_schema()

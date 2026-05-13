@@ -3,5 +3,5 @@
 
 
 def test_profile():
-    from objectiveai.functions import Profile
+    from objectiveai_sdk.functions import Profile
     schema = Profile.model_json_schema()

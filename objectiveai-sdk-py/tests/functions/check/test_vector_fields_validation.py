@@ -3,5 +3,5 @@
 
 
 def test_vector_fields_validation():
-    from objectiveai.functions.check import VectorFieldsValidation
+    from objectiveai_sdk.functions.check import VectorFieldsValidation
     schema = VectorFieldsValidation.model_json_schema()

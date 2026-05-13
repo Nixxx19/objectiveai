@@ -3,5 +3,5 @@
 
 
 def test_continuation_codex_sdk():
-    from objectiveai.agent import ContinuationCodexSdk
+    from objectiveai_sdk.agent import ContinuationCodexSdk
     schema = ContinuationCodexSdk.model_json_schema()

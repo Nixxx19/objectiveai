@@ -3,5 +3,5 @@
 
 
 def test_remote_prompt():
-    from objectiveai.functions.inventions.prompts import RemotePrompt
+    from objectiveai_sdk.functions.inventions.prompts import RemotePrompt
     schema = RemotePrompt.model_json_schema()

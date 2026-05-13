@@ -3,5 +3,5 @@
 
 
 def test_response_format_tool_call():
-    from objectiveai.agent.completions.request import ResponseFormatToolCall
+    from objectiveai_sdk.agent.completions.request import ResponseFormatToolCall
     schema = ResponseFormatToolCall.model_json_schema()

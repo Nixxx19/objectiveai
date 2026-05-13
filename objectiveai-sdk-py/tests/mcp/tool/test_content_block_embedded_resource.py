@@ -3,5 +3,5 @@
 
 
 def test_content_block_embedded_resource():
-    from objectiveai.mcp.tool import ContentBlockEmbeddedResource
+    from objectiveai_sdk.mcp.tool import ContentBlockEmbeddedResource
     schema = ContentBlockEmbeddedResource.model_json_schema()

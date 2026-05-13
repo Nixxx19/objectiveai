@@ -3,5 +3,5 @@
 
 
 def test_scalar_input_schema_object():
-    from objectiveai.functions.inventions import ScalarInputSchemaObject
+    from objectiveai_sdk.functions.inventions import ScalarInputSchemaObject
     schema = ScalarInputSchemaObject.model_json_schema()

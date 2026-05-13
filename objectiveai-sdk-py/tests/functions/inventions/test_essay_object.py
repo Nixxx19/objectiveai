@@ -3,5 +3,5 @@
 
 
 def test_essay_object():
-    from objectiveai.functions.inventions import EssayObject
+    from objectiveai_sdk.functions.inventions import EssayObject
     schema = EssayObject.model_json_schema()

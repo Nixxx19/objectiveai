@@ -3,5 +3,5 @@
 
 
 def test_index_object():
-    from objectiveai.functions.inventions import IndexObject
+    from objectiveai_sdk.functions.inventions import IndexObject
     schema = IndexObject.model_json_schema()

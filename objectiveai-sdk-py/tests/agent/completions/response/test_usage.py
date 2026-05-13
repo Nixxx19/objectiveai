@@ -3,5 +3,5 @@
 
 
 def test_usage():
-    from objectiveai.agent.completions.response import Usage
+    from objectiveai_sdk.agent.completions.response import Usage
     schema = Usage.model_json_schema()

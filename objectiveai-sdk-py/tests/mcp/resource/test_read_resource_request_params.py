@@ -3,5 +3,5 @@
 
 
 def test_read_resource_request_params():
-    from objectiveai.mcp.resource import ReadResourceRequestParams
+    from objectiveai_sdk.mcp.resource import ReadResourceRequestParams
     schema = ReadResourceRequestParams.model_json_schema()

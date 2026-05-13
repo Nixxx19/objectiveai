@@ -3,5 +3,5 @@
 
 
 def test_text_content():
-    from objectiveai.mcp.tool import TextContent
+    from objectiveai_sdk.mcp.tool import TextContent
     schema = TextContent.model_json_schema()

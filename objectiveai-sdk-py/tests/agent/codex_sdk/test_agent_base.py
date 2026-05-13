@@ -3,5 +3,5 @@
 
 
 def test_agent_base():
-    from objectiveai.agent.codex_sdk import AgentBase
+    from objectiveai_sdk.agent.codex_sdk import AgentBase
     schema = AgentBase.model_json_schema()

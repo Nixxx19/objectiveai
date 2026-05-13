@@ -3,5 +3,5 @@
 
 
 def test_continuation():
-    from objectiveai.agent.openrouter import Continuation
+    from objectiveai_sdk.agent.openrouter import Continuation
     schema = Continuation.model_json_schema()

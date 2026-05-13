@@ -3,5 +3,5 @@
 
 
 def test_scalar_function_task_expression_filesystem_input_expression():
-    from objectiveai.functions import ScalarFunctionTaskExpressionFilesystemInputExpression
+    from objectiveai_sdk.functions import ScalarFunctionTaskExpressionFilesystemInputExpression
     schema = ScalarFunctionTaskExpressionFilesystemInputExpression.model_json_schema()

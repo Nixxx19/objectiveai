@@ -3,5 +3,5 @@
 
 
 def test_task_expression_placeholder_vector_function():
-    from objectiveai.functions import TaskExpressionPlaceholderVectorFunction
+    from objectiveai_sdk.functions import TaskExpressionPlaceholderVectorFunction
     schema = TaskExpressionPlaceholderVectorFunction.model_json_schema()

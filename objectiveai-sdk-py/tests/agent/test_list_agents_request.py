@@ -3,5 +3,5 @@
 
 
 def test_list_agents_request():
-    from objectiveai.agent import ListAgentsRequest
+    from objectiveai_sdk.agent import ListAgentsRequest
     schema = ListAgentsRequest.model_json_schema()

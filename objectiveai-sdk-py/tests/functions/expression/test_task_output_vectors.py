@@ -3,5 +3,5 @@
 
 
 def test_task_output_vectors():
-    from objectiveai.functions.expression import TaskOutputVectors
+    from objectiveai_sdk.functions.expression import TaskOutputVectors
     schema = TaskOutputVectors.model_json_schema()

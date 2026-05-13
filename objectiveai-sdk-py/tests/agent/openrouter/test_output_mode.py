@@ -3,5 +3,5 @@
 
 
 def test_output_mode():
-    from objectiveai.agent.openrouter import OutputMode
+    from objectiveai_sdk.agent.openrouter import OutputMode
     schema = OutputMode.model_json_schema()

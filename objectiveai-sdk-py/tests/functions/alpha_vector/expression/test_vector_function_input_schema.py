@@ -3,5 +3,5 @@
 
 
 def test_vector_function_input_schema():
-    from objectiveai.functions.alpha_vector.expression import VectorFunctionInputSchema
+    from objectiveai_sdk.functions.alpha_vector.expression import VectorFunctionInputSchema
     schema = VectorFunctionInputSchema.model_json_schema()

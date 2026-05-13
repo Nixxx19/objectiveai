@@ -3,5 +3,5 @@
 
 
 def test_params():
-    from objectiveai.functions.inventions.state import Params
+    from objectiveai_sdk.functions.inventions.state import Params
     schema = Params.model_json_schema()

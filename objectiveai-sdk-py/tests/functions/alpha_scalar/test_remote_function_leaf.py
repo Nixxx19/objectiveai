@@ -3,5 +3,5 @@
 
 
 def test_remote_function_leaf():
-    from objectiveai.functions.alpha_scalar import RemoteFunctionLeaf
+    from objectiveai_sdk.functions.alpha_scalar import RemoteFunctionLeaf
     schema = RemoteFunctionLeaf.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_params_state_alpha_scalar_branch():
-    from objectiveai.functions.inventions.state import ParamsStateAlphaScalarBranch
+    from objectiveai_sdk.functions.inventions.state import ParamsStateAlphaScalarBranch
     schema = ParamsStateAlphaScalarBranch.model_json_schema()

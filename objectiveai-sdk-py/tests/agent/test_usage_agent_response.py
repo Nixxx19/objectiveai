@@ -3,5 +3,5 @@
 
 
 def test_usage_agent_response():
-    from objectiveai.agent import UsageAgentResponse
+    from objectiveai_sdk.agent import UsageAgentResponse
     schema = UsageAgentResponse.model_json_schema()

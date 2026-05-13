@@ -3,5 +3,5 @@
 
 
 def test_alpha_scalar_branch_state():
-    from objectiveai.functions.inventions.state import AlphaScalarBranchState
+    from objectiveai_sdk.functions.inventions.state import AlphaScalarBranchState
     schema = AlphaScalarBranchState.model_json_schema()

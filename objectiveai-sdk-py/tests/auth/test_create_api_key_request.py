@@ -3,5 +3,5 @@
 
 
 def test_create_api_key_request():
-    from objectiveai.auth import CreateApiKeyRequest
+    from objectiveai_sdk.auth import CreateApiKeyRequest
     schema = CreateApiKeyRequest.model_json_schema()

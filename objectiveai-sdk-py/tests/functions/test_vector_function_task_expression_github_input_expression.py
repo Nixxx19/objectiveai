@@ -3,5 +3,5 @@
 
 
 def test_vector_function_task_expression_github_input_expression():
-    from objectiveai.functions import VectorFunctionTaskExpressionGithubInputExpression
+    from objectiveai_sdk.functions import VectorFunctionTaskExpressionGithubInputExpression
     schema = VectorFunctionTaskExpressionGithubInputExpression.model_json_schema()

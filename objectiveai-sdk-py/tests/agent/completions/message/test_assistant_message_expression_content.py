@@ -3,5 +3,5 @@
 
 
 def test_assistant_message_expression_content():
-    from objectiveai.agent.completions.message import AssistantMessageExpressionContent
+    from objectiveai_sdk.agent.completions.message import AssistantMessageExpressionContent
     schema = AssistantMessageExpressionContent.model_json_schema()

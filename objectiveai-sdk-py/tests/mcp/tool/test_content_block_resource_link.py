@@ -3,5 +3,5 @@
 
 
 def test_content_block_resource_link():
-    from objectiveai.mcp.tool import ContentBlockResourceLink
+    from objectiveai_sdk.mcp.tool import ContentBlockResourceLink
     schema = ContentBlockResourceLink.model_json_schema()

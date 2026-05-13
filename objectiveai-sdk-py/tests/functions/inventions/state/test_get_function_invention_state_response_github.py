@@ -3,5 +3,5 @@
 
 
 def test_get_function_invention_state_response_github():
-    from objectiveai.functions.inventions.state import GetFunctionInventionStateResponseGithub
+    from objectiveai_sdk.functions.inventions.state import GetFunctionInventionStateResponseGithub
     schema = GetFunctionInventionStateResponseGithub.model_json_schema()

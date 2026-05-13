@@ -3,5 +3,5 @@
 
 
 def test_partial_placeholder_scalar_function_task_expression():
-    from objectiveai.functions.alpha_vector import PartialPlaceholderScalarFunctionTaskExpression
+    from objectiveai_sdk.functions.alpha_vector import PartialPlaceholderScalarFunctionTaskExpression
     schema = PartialPlaceholderScalarFunctionTaskExpression.model_json_schema()

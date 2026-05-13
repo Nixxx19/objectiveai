@@ -3,5 +3,5 @@
 
 
 def test_effort_medium():
-    from objectiveai.agent.claude_agent_sdk import EffortMedium
+    from objectiveai_sdk.agent.claude_agent_sdk import EffortMedium
     schema = EffortMedium.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_inline_function_branch():
-    from objectiveai.functions.alpha_vector import InlineFunctionBranch
+    from objectiveai_sdk.functions.alpha_vector import InlineFunctionBranch
     schema = InlineFunctionBranch.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_error_create_params():
-    from objectiveai.error import ErrorCreateParams
+    from objectiveai_sdk.error import ErrorCreateParams
     schema = ErrorCreateParams.model_json_schema()

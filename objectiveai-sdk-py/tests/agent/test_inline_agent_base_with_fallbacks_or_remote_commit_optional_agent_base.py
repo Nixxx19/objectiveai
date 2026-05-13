@@ -3,5 +3,5 @@
 
 
 def test_inline_agent_base_with_fallbacks_or_remote_commit_optional_agent_base():
-    from objectiveai.agent import InlineAgentBaseWithFallbacksOrRemoteCommitOptionalAgentBase
+    from objectiveai_sdk.agent import InlineAgentBaseWithFallbacksOrRemoteCommitOptionalAgentBase
     schema = InlineAgentBaseWithFallbacksOrRemoteCommitOptionalAgentBase.model_json_schema()

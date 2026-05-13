@@ -3,5 +3,5 @@
 
 
 def test_vector_completion_task():
-    from objectiveai.functions.executions.response.unary import VectorCompletionTask
+    from objectiveai_sdk.functions.executions.response.unary import VectorCompletionTask
     schema = VectorCompletionTask.model_json_schema()

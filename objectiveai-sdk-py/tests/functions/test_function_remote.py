@@ -3,5 +3,5 @@
 
 
 def test_function_remote():
-    from objectiveai.functions import FunctionRemote
+    from objectiveai_sdk.functions import FunctionRemote
     schema = FunctionRemote.model_json_schema()

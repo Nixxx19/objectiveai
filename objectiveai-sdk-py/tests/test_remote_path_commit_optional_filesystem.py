@@ -3,5 +3,5 @@
 
 
 def test_remote_path_commit_optional_filesystem():
-    from objectiveai import RemotePathCommitOptionalFilesystem
+    from objectiveai_sdk import RemotePathCommitOptionalFilesystem
     schema = RemotePathCommitOptionalFilesystem.model_json_schema()

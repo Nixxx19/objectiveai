@@ -3,5 +3,5 @@
 
 
 def test_provider_sort_throughput():
-    from objectiveai.agent.completions.request import ProviderSortThroughput
+    from objectiveai_sdk.agent.completions.request import ProviderSortThroughput
     schema = ProviderSortThroughput.model_json_schema()

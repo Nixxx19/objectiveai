@@ -3,5 +3,5 @@
 
 
 def test_vector_function_task_expression_filesystem():
-    from objectiveai.functions.alpha_vector import VectorFunctionTaskExpressionFilesystem
+    from objectiveai_sdk.functions.alpha_vector import VectorFunctionTaskExpressionFilesystem
     schema = VectorFunctionTaskExpressionFilesystem.model_json_schema()

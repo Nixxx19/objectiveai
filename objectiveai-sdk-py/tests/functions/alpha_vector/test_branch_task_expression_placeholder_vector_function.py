@@ -3,5 +3,5 @@
 
 
 def test_branch_task_expression_placeholder_vector_function():
-    from objectiveai.functions.alpha_vector import BranchTaskExpressionPlaceholderVectorFunction
+    from objectiveai_sdk.functions.alpha_vector import BranchTaskExpressionPlaceholderVectorFunction
     schema = BranchTaskExpressionPlaceholderVectorFunction.model_json_schema()

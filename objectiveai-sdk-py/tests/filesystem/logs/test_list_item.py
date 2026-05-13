@@ -3,5 +3,5 @@
 
 
 def test_list_item():
-    from objectiveai.filesystem.logs import ListItem
+    from objectiveai_sdk.filesystem.logs import ListItem
     schema = ListItem.model_json_schema()

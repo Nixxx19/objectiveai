@@ -3,5 +3,5 @@
 
 
 def test_rich_content_part_expression_file_file_expression():
-    from objectiveai.agent.completions.message import RichContentPartExpressionFileFileExpression
+    from objectiveai_sdk.agent.completions.message import RichContentPartExpressionFileFileExpression
     schema = RichContentPartExpressionFileFileExpression.model_json_schema()

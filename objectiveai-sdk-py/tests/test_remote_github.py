@@ -3,5 +3,5 @@
 
 
 def test_remote_github():
-    from objectiveai import RemoteGithub
+    from objectiveai_sdk import RemoteGithub
     schema = RemoteGithub.model_json_schema()

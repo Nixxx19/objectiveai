@@ -3,5 +3,5 @@
 
 
 def test_target_vector_winner():
-    from objectiveai.functions.profiles.computations.request import TargetVectorWinner
+    from objectiveai_sdk.functions.profiles.computations.request import TargetVectorWinner
     schema = TargetVectorWinner.model_json_schema()

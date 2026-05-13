@@ -3,5 +3,5 @@
 
 
 def test_vector_completion_chunk():
-    from objectiveai.vector.completions.response.streaming import VectorCompletionChunk
+    from objectiveai_sdk.vector.completions.response.streaming import VectorCompletionChunk
     schema = VectorCompletionChunk.model_json_schema()

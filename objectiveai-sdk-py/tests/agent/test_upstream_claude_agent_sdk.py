@@ -3,5 +3,5 @@
 
 
 def test_upstream_claude_agent_sdk():
-    from objectiveai.agent import UpstreamClaudeAgentSdk
+    from objectiveai_sdk.agent import UpstreamClaudeAgentSdk
     schema = UpstreamClaudeAgentSdk.model_json_schema()

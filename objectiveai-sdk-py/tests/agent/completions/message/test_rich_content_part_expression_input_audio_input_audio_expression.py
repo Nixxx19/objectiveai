@@ -3,5 +3,5 @@
 
 
 def test_rich_content_part_expression_input_audio_input_audio_expression():
-    from objectiveai.agent.completions.message import RichContentPartExpressionInputAudioInput_audioExpression
+    from objectiveai_sdk.agent.completions.message import RichContentPartExpressionInputAudioInput_audioExpression
     schema = RichContentPartExpressionInputAudioInput_audioExpression.model_json_schema()

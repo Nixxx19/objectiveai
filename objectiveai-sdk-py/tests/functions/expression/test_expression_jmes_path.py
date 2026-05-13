@@ -3,5 +3,5 @@
 
 
 def test_expression_jmes_path():
-    from objectiveai.functions.expression import ExpressionJMESPath
+    from objectiveai_sdk.functions.expression import ExpressionJMESPath
     schema = ExpressionJMESPath.model_json_schema()

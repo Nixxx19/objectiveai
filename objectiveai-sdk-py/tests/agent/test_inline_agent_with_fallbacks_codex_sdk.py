@@ -3,5 +3,5 @@
 
 
 def test_inline_agent_with_fallbacks_codex_sdk():
-    from objectiveai.agent import InlineAgentWithFallbacksCodexSdk
+    from objectiveai_sdk.agent import InlineAgentWithFallbacksCodexSdk
     schema = InlineAgentWithFallbacksCodexSdk.model_json_schema()

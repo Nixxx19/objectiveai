@@ -3,5 +3,5 @@
 
 
 def test_any_of_input_schema():
-    from objectiveai.functions.expression import AnyOfInputSchema
+    from objectiveai_sdk.functions.expression import AnyOfInputSchema
     schema = AnyOfInputSchema.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_effort_max():
-    from objectiveai.agent.claude_agent_sdk import EffortMax
+    from objectiveai_sdk.agent.claude_agent_sdk import EffortMax
     schema = EffortMax.model_json_schema()

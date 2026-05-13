@@ -3,5 +3,5 @@
 
 
 def test_effort_high():
-    from objectiveai.agent.codex_sdk import EffortHigh
+    from objectiveai_sdk.agent.codex_sdk import EffortHigh
     schema = EffortHigh.model_json_schema()

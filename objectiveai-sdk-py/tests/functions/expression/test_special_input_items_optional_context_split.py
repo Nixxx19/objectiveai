@@ -3,5 +3,5 @@
 
 
 def test_special_input_items_optional_context_split():
-    from objectiveai.functions.expression import SpecialInputItemsOptionalContextSplit
+    from objectiveai_sdk.functions.expression import SpecialInputItemsOptionalContextSplit
     schema = SpecialInputItemsOptionalContextSplit.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_cost_details():
-    from objectiveai.agent.completions.response import CostDetails
+    from objectiveai_sdk.agent.completions.response import CostDetails
     schema = CostDetails.model_json_schema()

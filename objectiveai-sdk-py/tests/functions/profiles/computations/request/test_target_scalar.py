@@ -3,5 +3,5 @@
 
 
 def test_target_scalar():
-    from objectiveai.functions.profiles.computations.request import TargetScalar
+    from objectiveai_sdk.functions.profiles.computations.request import TargetScalar
     schema = TargetScalar.model_json_schema()

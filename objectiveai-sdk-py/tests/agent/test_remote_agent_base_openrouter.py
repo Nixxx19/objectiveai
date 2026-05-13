@@ -3,5 +3,5 @@
 
 
 def test_remote_agent_base_openrouter():
-    from objectiveai.agent import RemoteAgentBaseOpenrouter
+    from objectiveai_sdk.agent import RemoteAgentBaseOpenrouter
     schema = RemoteAgentBaseOpenrouter.model_json_schema()

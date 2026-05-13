@@ -3,5 +3,5 @@
 
 
 def test_inline_function_vector():
-    from objectiveai.functions import InlineFunctionVector
+    from objectiveai_sdk.functions import InlineFunctionVector
     schema = InlineFunctionVector.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_inline_prompt_or_remote_commit_optional():
-    from objectiveai.functions.inventions.prompts import InlinePromptOrRemoteCommitOptional
+    from objectiveai_sdk.functions.inventions.prompts import InlinePromptOrRemoteCommitOptional
     schema = InlinePromptOrRemoteCommitOptional.model_json_schema()

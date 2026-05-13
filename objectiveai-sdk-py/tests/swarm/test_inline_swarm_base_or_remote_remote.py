@@ -3,5 +3,5 @@
 
 
 def test_inline_swarm_base_or_remote_remote():
-    from objectiveai.swarm import InlineSwarmBaseOrRemoteRemote
+    from objectiveai_sdk.swarm import InlineSwarmBaseOrRemoteRemote
     schema = InlineSwarmBaseOrRemoteRemote.model_json_schema()

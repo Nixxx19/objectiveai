@@ -3,5 +3,5 @@
 
 
 def test_integer_input_schema_type():
-    from objectiveai.functions.expression import IntegerInputSchemaType
+    from objectiveai_sdk.functions.expression import IntegerInputSchemaType
     schema = IntegerInputSchemaType.model_json_schema()

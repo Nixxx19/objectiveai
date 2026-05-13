@@ -3,5 +3,5 @@
 
 
 def test_get_completion_votes_request():
-    from objectiveai.vector.completions.cache import GetCompletionVotesRequest
+    from objectiveai_sdk.vector.completions.cache import GetCompletionVotesRequest
     schema = GetCompletionVotesRequest.model_json_schema()

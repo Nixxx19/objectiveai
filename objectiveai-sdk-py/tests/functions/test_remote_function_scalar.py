@@ -3,5 +3,5 @@
 
 
 def test_remote_function_scalar():
-    from objectiveai.functions import RemoteFunctionScalar
+    from objectiveai_sdk.functions import RemoteFunctionScalar
     schema = RemoteFunctionScalar.model_json_schema()

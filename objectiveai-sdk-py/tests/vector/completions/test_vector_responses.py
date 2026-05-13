@@ -3,5 +3,5 @@
 
 
 def test_vector_responses():
-    from objectiveai.vector.completions import VectorResponses
+    from objectiveai_sdk.vector.completions import VectorResponses
     schema = VectorResponses.model_json_schema()

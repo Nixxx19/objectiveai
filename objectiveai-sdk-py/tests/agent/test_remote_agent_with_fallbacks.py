@@ -3,5 +3,5 @@
 
 
 def test_remote_agent_with_fallbacks():
-    from objectiveai.agent import RemoteAgentWithFallbacks
+    from objectiveai_sdk.agent import RemoteAgentWithFallbacks
     schema = RemoteAgentWithFallbacks.model_json_schema()

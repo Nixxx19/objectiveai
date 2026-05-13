@@ -3,5 +3,5 @@
 
 
 def test_remote_path_commit_optional_github():
-    from objectiveai import RemotePathCommitOptionalGithub
+    from objectiveai_sdk import RemotePathCommitOptionalGithub
     schema = RemotePathCommitOptionalGithub.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_full_inline_function_standard():
-    from objectiveai.functions import FullInlineFunctionStandard
+    from objectiveai_sdk.functions import FullInlineFunctionStandard
     schema = FullInlineFunctionStandard.model_json_schema()

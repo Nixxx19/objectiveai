@@ -3,5 +3,5 @@
 
 
 def test_get_prompt_response_mock():
-    from objectiveai.functions.inventions.prompts import GetPromptResponseMock
+    from objectiveai_sdk.functions.inventions.prompts import GetPromptResponseMock
     schema = GetPromptResponseMock.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_object():
-    from objectiveai.functions.profiles.computations.response.streaming import Object
+    from objectiveai_sdk.functions.profiles.computations.response.streaming import Object
     schema = Object.model_json_schema()

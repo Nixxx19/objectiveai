@@ -3,5 +3,5 @@
 
 
 def test_image_url_detail_auto():
-    from objectiveai.agent.completions.message import ImageUrlDetailAuto
+    from objectiveai_sdk.agent.completions.message import ImageUrlDetailAuto
     schema = ImageUrlDetailAuto.model_json_schema()

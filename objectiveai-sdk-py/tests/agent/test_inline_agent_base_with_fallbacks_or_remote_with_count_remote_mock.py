@@ -3,5 +3,5 @@
 
 
 def test_inline_agent_base_with_fallbacks_or_remote_with_count_remote_mock():
-    from objectiveai.agent import InlineAgentBaseWithFallbacksOrRemoteWithCountRemoteMock
+    from objectiveai_sdk.agent import InlineAgentBaseWithFallbacksOrRemoteWithCountRemoteMock
     schema = InlineAgentBaseWithFallbacksOrRemoteWithCountRemoteMock.model_json_schema()

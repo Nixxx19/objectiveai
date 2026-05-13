@@ -3,5 +3,5 @@
 
 
 def test_get_open_router_byok_api_key_response():
-    from objectiveai.auth import GetOpenRouterByokApiKeyResponse
+    from objectiveai_sdk.auth import GetOpenRouterByokApiKeyResponse
     schema = GetOpenRouterByokApiKeyResponse.model_json_schema()

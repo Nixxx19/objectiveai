@@ -3,5 +3,5 @@
 
 
 def test_tool_result_content():
-    from objectiveai.mcp.tool import ToolResultContent
+    from objectiveai_sdk.mcp.tool import ToolResultContent
     schema = ToolResultContent.model_json_schema()

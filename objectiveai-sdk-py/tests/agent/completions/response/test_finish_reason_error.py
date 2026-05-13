@@ -3,5 +3,5 @@
 
 
 def test_finish_reason_error():
-    from objectiveai.agent.completions.response import FinishReasonError
+    from objectiveai_sdk.agent.completions.response import FinishReasonError
     schema = FinishReasonError.model_json_schema()

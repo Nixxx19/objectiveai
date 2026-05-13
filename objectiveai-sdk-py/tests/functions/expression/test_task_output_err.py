@@ -3,5 +3,5 @@
 
 
 def test_task_output_err():
-    from objectiveai.functions.expression import TaskOutputErr
+    from objectiveai_sdk.functions.expression import TaskOutputErr
     schema = TaskOutputErr.model_json_schema()

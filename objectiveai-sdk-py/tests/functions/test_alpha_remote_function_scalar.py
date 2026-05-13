@@ -3,5 +3,5 @@
 
 
 def test_alpha_remote_function_scalar():
-    from objectiveai.functions import AlphaRemoteFunctionScalar
+    from objectiveai_sdk.functions import AlphaRemoteFunctionScalar
     schema = AlphaRemoteFunctionScalar.model_json_schema()

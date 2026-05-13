@@ -3,5 +3,5 @@
 
 
 def test_reasoning_summary_verbosity_detailed():
-    from objectiveai.agent.openrouter import ReasoningSummaryVerbosityDetailed
+    from objectiveai_sdk.agent.openrouter import ReasoningSummaryVerbosityDetailed
     schema = ReasoningSummaryVerbosityDetailed.model_json_schema()

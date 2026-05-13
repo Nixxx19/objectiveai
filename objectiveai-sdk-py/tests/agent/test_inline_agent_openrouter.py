@@ -3,5 +3,5 @@
 
 
 def test_inline_agent_openrouter():
-    from objectiveai.agent import InlineAgentOpenrouter
+    from objectiveai_sdk.agent import InlineAgentOpenrouter
     schema = InlineAgentOpenrouter.model_json_schema()

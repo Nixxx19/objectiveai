@@ -3,5 +3,5 @@
 
 
 def test_content_block_text():
-    from objectiveai.mcp.tool import ContentBlockText
+    from objectiveai_sdk.mcp.tool import ContentBlockText
     schema = ContentBlockText.model_json_schema()

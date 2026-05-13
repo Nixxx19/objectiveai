@@ -3,5 +3,5 @@
 
 
 def test_task_support_optional():
-    from objectiveai.mcp.tool import TaskSupportOptional
+    from objectiveai_sdk.mcp.tool import TaskSupportOptional
     schema = TaskSupportOptional.model_json_schema()

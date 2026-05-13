@@ -3,5 +3,5 @@
 
 
 def test_upstream_mock():
-    from objectiveai.agent import UpstreamMock
+    from objectiveai_sdk.agent import UpstreamMock
     schema = UpstreamMock.model_json_schema()

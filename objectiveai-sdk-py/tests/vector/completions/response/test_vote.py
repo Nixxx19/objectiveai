@@ -3,5 +3,5 @@
 
 
 def test_vote():
-    from objectiveai.vector.completions.response import Vote
+    from objectiveai_sdk.vector.completions.response import Vote
     schema = Vote.model_json_schema()

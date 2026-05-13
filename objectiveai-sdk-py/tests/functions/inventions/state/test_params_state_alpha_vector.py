@@ -3,5 +3,5 @@
 
 
 def test_params_state_alpha_vector():
-    from objectiveai.functions.inventions.state import ParamsStateAlphaVector
+    from objectiveai_sdk.functions.inventions.state import ParamsStateAlphaVector
     schema = ParamsStateAlphaVector.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_provider_data_collection_allow():
-    from objectiveai.agent.completions.request import ProviderDataCollectionAllow
+    from objectiveai_sdk.agent.completions.request import ProviderDataCollectionAllow
     schema = ProviderDataCollectionAllow.model_json_schema()

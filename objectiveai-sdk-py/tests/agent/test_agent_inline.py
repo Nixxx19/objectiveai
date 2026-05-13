@@ -3,5 +3,5 @@
 
 
 def test_agent_inline():
-    from objectiveai.agent import AgentInline
+    from objectiveai_sdk.agent import AgentInline
     schema = AgentInline.model_json_schema()

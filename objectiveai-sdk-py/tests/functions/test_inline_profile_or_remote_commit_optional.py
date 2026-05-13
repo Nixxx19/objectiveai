@@ -3,5 +3,5 @@
 
 
 def test_inline_profile_or_remote_commit_optional():
-    from objectiveai.functions import InlineProfileOrRemoteCommitOptional
+    from objectiveai_sdk.functions import InlineProfileOrRemoteCommitOptional
     schema = InlineProfileOrRemoteCommitOptional.model_json_schema()

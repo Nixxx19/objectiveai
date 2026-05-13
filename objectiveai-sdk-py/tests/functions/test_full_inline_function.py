@@ -3,5 +3,5 @@
 
 
 def test_full_inline_function():
-    from objectiveai.functions import FullInlineFunction
+    from objectiveai_sdk.functions import FullInlineFunction
     schema = FullInlineFunction.model_json_schema()

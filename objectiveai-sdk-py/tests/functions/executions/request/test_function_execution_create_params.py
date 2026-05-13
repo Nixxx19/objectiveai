@@ -3,5 +3,5 @@
 
 
 def test_function_execution_create_params():
-    from objectiveai.functions.executions.request import FunctionExecutionCreateParams
+    from objectiveai_sdk.functions.executions.request import FunctionExecutionCreateParams
     schema = FunctionExecutionCreateParams.model_json_schema()

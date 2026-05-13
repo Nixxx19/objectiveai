@@ -3,5 +3,5 @@
 
 
 def test_list_prompt_response():
-    from objectiveai.functions.inventions.prompts import ListPromptResponse
+    from objectiveai_sdk.functions.inventions.prompts import ListPromptResponse
     schema = ListPromptResponse.model_json_schema()

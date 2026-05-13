@@ -3,5 +3,5 @@
 
 
 def test_list_agents_source():
-    from objectiveai.agent import ListAgentsSource
+    from objectiveai_sdk.agent import ListAgentsSource
     schema = ListAgentsSource.model_json_schema()

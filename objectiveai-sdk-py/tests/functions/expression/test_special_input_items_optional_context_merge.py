@@ -3,5 +3,5 @@
 
 
 def test_special_input_items_optional_context_merge():
-    from objectiveai.functions.expression import SpecialInputItemsOptionalContextMerge
+    from objectiveai_sdk.functions.expression import SpecialInputItemsOptionalContextMerge
     schema = SpecialInputItemsOptionalContextMerge.model_json_schema()

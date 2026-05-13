@@ -3,5 +3,5 @@
 
 
 def test_scalar_fields_validation():
-    from objectiveai.functions.check import ScalarFieldsValidation
+    from objectiveai_sdk.functions.check import ScalarFieldsValidation
     schema = ScalarFieldsValidation.model_json_schema()

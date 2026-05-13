@@ -3,5 +3,5 @@
 
 
 def test_assistant_response():
-    from objectiveai.agent.completions.response.unary import AssistantResponse
+    from objectiveai_sdk.agent.completions.response.unary import AssistantResponse
     schema = AssistantResponse.model_json_schema()

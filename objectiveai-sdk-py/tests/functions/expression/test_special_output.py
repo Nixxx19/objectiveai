@@ -3,5 +3,5 @@
 
 
 def test_special_output():
-    from objectiveai.functions.expression import SpecialOutput
+    from objectiveai_sdk.functions.expression import SpecialOutput
     schema = SpecialOutput.model_json_schema()

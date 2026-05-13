@@ -3,5 +3,5 @@
 
 
 def test_whitelist_entry():
-    from objectiveai.filesystem.plugins import WhitelistEntry
+    from objectiveai_sdk.filesystem.plugins import WhitelistEntry
     schema = WhitelistEntry.model_json_schema()

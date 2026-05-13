@@ -3,5 +3,5 @@
 
 
 def test_assistant_tool_call_type():
-    from objectiveai.agent.completions.message import AssistantToolCallType
+    from objectiveai_sdk.agent.completions.message import AssistantToolCallType
     schema = AssistantToolCallType.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_simple_content_expression_parts():
-    from objectiveai.agent.completions.message import SimpleContentExpressionParts
+    from objectiveai_sdk.agent.completions.message import SimpleContentExpressionParts
     schema = SimpleContentExpressionParts.model_json_schema()

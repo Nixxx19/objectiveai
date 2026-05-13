@@ -3,5 +3,5 @@
 
 
 def test_audio_content():
-    from objectiveai.mcp.tool import AudioContent
+    from objectiveai_sdk.mcp.tool import AudioContent
     schema = AudioContent.model_json_schema()

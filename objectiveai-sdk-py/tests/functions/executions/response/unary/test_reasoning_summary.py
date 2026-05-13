@@ -3,5 +3,5 @@
 
 
 def test_reasoning_summary():
-    from objectiveai.functions.executions.response.unary import ReasoningSummary
+    from objectiveai_sdk.functions.executions.response.unary import ReasoningSummary
     schema = ReasoningSummary.model_json_schema()

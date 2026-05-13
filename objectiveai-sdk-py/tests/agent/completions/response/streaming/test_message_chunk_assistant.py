@@ -3,5 +3,5 @@
 
 
 def test_message_chunk_assistant():
-    from objectiveai.agent.completions.response.streaming import MessageChunkAssistant
+    from objectiveai_sdk.agent.completions.response.streaming import MessageChunkAssistant
     schema = MessageChunkAssistant.model_json_schema()

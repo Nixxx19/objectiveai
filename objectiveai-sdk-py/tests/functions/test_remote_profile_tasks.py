@@ -3,5 +3,5 @@
 
 
 def test_remote_profile_tasks():
-    from objectiveai.functions import RemoteProfileTasks
+    from objectiveai_sdk.functions import RemoteProfileTasks
     schema = RemoteProfileTasks.model_json_schema()

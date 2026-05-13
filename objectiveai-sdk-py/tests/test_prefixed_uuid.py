@@ -3,5 +3,5 @@
 
 
 def test_prefixed_uuid():
-    from objectiveai import PrefixedUuid
+    from objectiveai_sdk import PrefixedUuid
     schema = PrefixedUuid.model_json_schema()

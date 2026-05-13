@@ -3,5 +3,5 @@
 
 
 def test_remote_profile():
-    from objectiveai.functions import RemoteProfile
+    from objectiveai_sdk.functions import RemoteProfile
     schema = RemoteProfile.model_json_schema()

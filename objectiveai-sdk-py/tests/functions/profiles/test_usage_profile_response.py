@@ -3,5 +3,5 @@
 
 
 def test_usage_profile_response():
-    from objectiveai.functions.profiles import UsageProfileResponse
+    from objectiveai_sdk.functions.profiles import UsageProfileResponse
     schema = UsageProfileResponse.model_json_schema()

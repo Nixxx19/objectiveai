@@ -3,5 +3,5 @@
 
 
 def test_completion_tokens_details():
-    from objectiveai.agent.completions.response import CompletionTokensDetails
+    from objectiveai_sdk.agent.completions.response import CompletionTokensDetails
     schema = CompletionTokensDetails.model_json_schema()

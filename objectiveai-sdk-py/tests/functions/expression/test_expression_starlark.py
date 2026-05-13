@@ -3,5 +3,5 @@
 
 
 def test_expression_starlark():
-    from objectiveai.functions.expression import ExpressionStarlark
+    from objectiveai_sdk.functions.expression import ExpressionStarlark
     schema = ExpressionStarlark.model_json_schema()

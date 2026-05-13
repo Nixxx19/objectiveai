@@ -3,5 +3,5 @@
 
 
 def test_inline_agent_with_fallbacks():
-    from objectiveai.agent import InlineAgentWithFallbacks
+    from objectiveai_sdk.agent import InlineAgentWithFallbacks
     schema = InlineAgentWithFallbacks.model_json_schema()

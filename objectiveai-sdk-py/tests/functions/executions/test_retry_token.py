@@ -3,5 +3,5 @@
 
 
 def test_retry_token():
-    from objectiveai.functions.executions import RetryToken
+    from objectiveai_sdk.functions.executions import RetryToken
     schema = RetryToken.model_json_schema()

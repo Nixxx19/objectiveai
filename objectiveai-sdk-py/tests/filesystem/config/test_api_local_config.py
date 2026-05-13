@@ -3,5 +3,5 @@
 
 
 def test_api_local_config():
-    from objectiveai.filesystem.config import ApiLocalConfig
+    from objectiveai_sdk.filesystem.config import ApiLocalConfig
     schema = ApiLocalConfig.model_json_schema()

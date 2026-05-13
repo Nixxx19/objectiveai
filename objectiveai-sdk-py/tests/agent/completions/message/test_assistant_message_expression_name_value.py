@@ -3,5 +3,5 @@
 
 
 def test_assistant_message_expression_name_value():
-    from objectiveai.agent.completions.message import AssistantMessageExpressionNameValue
+    from objectiveai_sdk.agent.completions.message import AssistantMessageExpressionNameValue
     schema = AssistantMessageExpressionNameValue.model_json_schema()

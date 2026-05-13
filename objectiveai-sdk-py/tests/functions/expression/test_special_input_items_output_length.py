@@ -3,5 +3,5 @@
 
 
 def test_special_input_items_output_length():
-    from objectiveai.functions.expression import SpecialInputItemsOutputLength
+    from objectiveai_sdk.functions.expression import SpecialInputItemsOutputLength
     schema = SpecialInputItemsOutputLength.model_json_schema()

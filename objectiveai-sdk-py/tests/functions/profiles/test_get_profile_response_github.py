@@ -3,5 +3,5 @@
 
 
 def test_get_profile_response_github():
-    from objectiveai.functions.profiles import GetProfileResponseGithub
+    from objectiveai_sdk.functions.profiles import GetProfileResponseGithub
     schema = GetProfileResponseGithub.model_json_schema()

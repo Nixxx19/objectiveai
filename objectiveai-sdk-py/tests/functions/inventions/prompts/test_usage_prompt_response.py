@@ -3,5 +3,5 @@
 
 
 def test_usage_prompt_response():
-    from objectiveai.functions.inventions.prompts import UsagePromptResponse
+    from objectiveai_sdk.functions.inventions.prompts import UsagePromptResponse
     schema = UsagePromptResponse.model_json_schema()

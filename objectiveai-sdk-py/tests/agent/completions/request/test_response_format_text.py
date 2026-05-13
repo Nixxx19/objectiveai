@@ -3,5 +3,5 @@
 
 
 def test_response_format_text():
-    from objectiveai.agent.completions.request import ResponseFormatText
+    from objectiveai_sdk.agent.completions.request import ResponseFormatText
     schema = ResponseFormatText.model_json_schema()

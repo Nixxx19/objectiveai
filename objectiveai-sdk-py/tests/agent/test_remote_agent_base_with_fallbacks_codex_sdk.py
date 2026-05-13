@@ -3,5 +3,5 @@
 
 
 def test_remote_agent_base_with_fallbacks_codex_sdk():
-    from objectiveai.agent import RemoteAgentBaseWithFallbacksCodexSdk
+    from objectiveai_sdk.agent import RemoteAgentBaseWithFallbacksCodexSdk
     schema = RemoteAgentBaseWithFallbacksCodexSdk.model_json_schema()

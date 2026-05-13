@@ -3,5 +3,5 @@
 
 
 def test_json_rpc_error():
-    from objectiveai.mcp import JsonRpcError
+    from objectiveai_sdk.mcp import JsonRpcError
     schema = JsonRpcError.model_json_schema()

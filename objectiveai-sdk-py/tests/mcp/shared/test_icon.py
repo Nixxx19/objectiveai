@@ -3,5 +3,5 @@
 
 
 def test_icon():
-    from objectiveai.mcp.shared import Icon
+    from objectiveai_sdk.mcp.shared import Icon
     schema = Icon.model_json_schema()

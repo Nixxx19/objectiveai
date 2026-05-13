@@ -3,5 +3,5 @@
 
 
 def test_swarm_base():
-    from objectiveai.swarm import SwarmBase
+    from objectiveai_sdk.swarm import SwarmBase
     schema = SwarmBase.model_json_schema()

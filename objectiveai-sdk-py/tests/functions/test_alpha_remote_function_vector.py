@@ -3,5 +3,5 @@
 
 
 def test_alpha_remote_function_vector():
-    from objectiveai.functions import AlphaRemoteFunctionVector
+    from objectiveai_sdk.functions import AlphaRemoteFunctionVector
     schema = AlphaRemoteFunctionVector.model_json_schema()

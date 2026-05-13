@@ -3,5 +3,5 @@
 
 
 def test_text_resource_contents():
-    from objectiveai.mcp.shared import TextResourceContents
+    from objectiveai_sdk.mcp.shared import TextResourceContents
     schema = TextResourceContents.model_json_schema()

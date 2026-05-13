@@ -3,5 +3,5 @@
 
 
 def test_functions_config():
-    from objectiveai.filesystem.config import FunctionsConfig
+    from objectiveai_sdk.filesystem.config import FunctionsConfig
     schema = FunctionsConfig.model_json_schema()

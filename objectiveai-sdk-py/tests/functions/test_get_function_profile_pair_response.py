@@ -3,5 +3,5 @@
 
 
 def test_get_function_profile_pair_response():
-    from objectiveai.functions import GetFunctionProfilePairResponse
+    from objectiveai_sdk.functions import GetFunctionProfilePairResponse
     schema = GetFunctionProfilePairResponse.model_json_schema()

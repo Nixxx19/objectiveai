@@ -3,5 +3,5 @@
 
 
 def test_get_swarm_response_filesystem():
-    from objectiveai.swarm import GetSwarmResponseFilesystem
+    from objectiveai_sdk.swarm import GetSwarmResponseFilesystem
     schema = GetSwarmResponseFilesystem.model_json_schema()

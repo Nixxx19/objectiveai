@@ -3,5 +3,5 @@
 
 
 def test_function_invention_recursive():
-    from objectiveai.functions.inventions.recursive.response.unary import FunctionInventionRecursive
+    from objectiveai_sdk.functions.inventions.recursive.response.unary import FunctionInventionRecursive
     schema = FunctionInventionRecursive.model_json_schema()

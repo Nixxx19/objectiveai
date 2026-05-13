@@ -3,5 +3,5 @@
 
 
 def test_completions_capability():
-    from objectiveai.mcp import CompletionsCapability
+    from objectiveai_sdk.mcp import CompletionsCapability
     schema = CompletionsCapability.model_json_schema()

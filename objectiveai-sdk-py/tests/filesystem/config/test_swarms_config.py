@@ -3,5 +3,5 @@
 
 
 def test_swarms_config():
-    from objectiveai.filesystem.config import SwarmsConfig
+    from objectiveai_sdk.filesystem.config import SwarmsConfig
     schema = SwarmsConfig.model_json_schema()

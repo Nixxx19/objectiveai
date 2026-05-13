@@ -3,5 +3,5 @@
 
 
 def test_remote():
-    from objectiveai import Remote
+    from objectiveai_sdk import Remote
     schema = Remote.model_json_schema()

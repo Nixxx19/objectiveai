@@ -3,5 +3,5 @@
 
 
 def test_tools_capability():
-    from objectiveai.mcp import ToolsCapability
+    from objectiveai_sdk.mcp import ToolsCapability
     schema = ToolsCapability.model_json_schema()

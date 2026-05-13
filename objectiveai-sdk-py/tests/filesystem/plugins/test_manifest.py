@@ -3,5 +3,5 @@
 
 
 def test_manifest():
-    from objectiveai.filesystem.plugins import Manifest
+    from objectiveai_sdk.filesystem.plugins import Manifest
     schema = Manifest.model_json_schema()

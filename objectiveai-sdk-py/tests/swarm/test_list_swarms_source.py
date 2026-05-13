@@ -3,5 +3,5 @@
 
 
 def test_list_swarms_source():
-    from objectiveai.swarm import ListSwarmsSource
+    from objectiveai_sdk.swarm import ListSwarmsSource
     schema = ListSwarmsSource.model_json_schema()

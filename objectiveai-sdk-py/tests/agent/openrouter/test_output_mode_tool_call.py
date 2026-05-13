@@ -3,5 +3,5 @@
 
 
 def test_output_mode_tool_call():
-    from objectiveai.agent.openrouter import OutputModeToolCall
+    from objectiveai_sdk.agent.openrouter import OutputModeToolCall
     schema = OutputModeToolCall.model_json_schema()

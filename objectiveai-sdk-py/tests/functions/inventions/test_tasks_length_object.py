@@ -3,5 +3,5 @@
 
 
 def test_tasks_length_object():
-    from objectiveai.functions.inventions import TasksLengthObject
+    from objectiveai_sdk.functions.inventions import TasksLengthObject
     schema = TasksLengthObject.model_json_schema()

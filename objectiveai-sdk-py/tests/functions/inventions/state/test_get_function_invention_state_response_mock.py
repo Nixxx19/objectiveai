@@ -3,5 +3,5 @@
 
 
 def test_get_function_invention_state_response_mock():
-    from objectiveai.functions.inventions.state import GetFunctionInventionStateResponseMock
+    from objectiveai_sdk.functions.inventions.state import GetFunctionInventionStateResponseMock
     schema = GetFunctionInventionStateResponseMock.model_json_schema()

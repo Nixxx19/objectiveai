@@ -3,5 +3,5 @@
 
 
 def test_input_value_rich_content_part():
-    from objectiveai.functions.expression import InputValueRichContentPart
+    from objectiveai_sdk.functions.expression import InputValueRichContentPart
     schema = InputValueRichContentPart.model_json_schema()

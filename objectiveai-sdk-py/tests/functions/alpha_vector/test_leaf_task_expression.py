@@ -3,5 +3,5 @@
 
 
 def test_leaf_task_expression():
-    from objectiveai.functions.alpha_vector import LeafTaskExpression
+    from objectiveai_sdk.functions.alpha_vector import LeafTaskExpression
     schema = LeafTaskExpression.model_json_schema()

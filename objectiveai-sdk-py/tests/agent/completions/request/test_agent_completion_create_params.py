@@ -3,5 +3,5 @@
 
 
 def test_agent_completion_create_params():
-    from objectiveai.agent.completions.request import AgentCompletionCreateParams
+    from objectiveai_sdk.agent.completions.request import AgentCompletionCreateParams
     schema = AgentCompletionCreateParams.model_json_schema()

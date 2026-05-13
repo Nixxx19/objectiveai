@@ -3,5 +3,5 @@
 
 
 def test_get_swarm_response_github():
-    from objectiveai.swarm import GetSwarmResponseGithub
+    from objectiveai_sdk.swarm import GetSwarmResponseGithub
     schema = GetSwarmResponseGithub.model_json_schema()

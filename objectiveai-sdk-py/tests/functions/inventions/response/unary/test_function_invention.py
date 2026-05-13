@@ -3,5 +3,5 @@
 
 
 def test_function_invention():
-    from objectiveai.functions.inventions.response.unary import FunctionInvention
+    from objectiveai_sdk.functions.inventions.response.unary import FunctionInvention
     schema = FunctionInvention.model_json_schema()

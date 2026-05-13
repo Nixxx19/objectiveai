@@ -3,5 +3,5 @@
 
 
 def test_reasoning_effort_minimal():
-    from objectiveai.agent.openrouter import ReasoningEffortMinimal
+    from objectiveai_sdk.agent.openrouter import ReasoningEffortMinimal
     schema = ReasoningEffortMinimal.model_json_schema()

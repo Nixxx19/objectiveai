@@ -3,5 +3,5 @@
 
 
 def test_continuation():
-    from objectiveai.agent import Continuation
+    from objectiveai_sdk.agent import Continuation
     schema = Continuation.model_json_schema()

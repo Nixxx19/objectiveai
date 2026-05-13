@@ -3,5 +3,5 @@
 
 
 def test_usage_swarm_response():
-    from objectiveai.swarm import UsageSwarmResponse
+    from objectiveai_sdk.swarm import UsageSwarmResponse
     schema = UsageSwarmResponse.model_json_schema()

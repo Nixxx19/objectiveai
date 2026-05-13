@@ -3,5 +3,5 @@
 
 
 def test_remote_path_github():
-    from objectiveai import RemotePathGithub
+    from objectiveai_sdk import RemotePathGithub
     schema = RemotePathGithub.model_json_schema()

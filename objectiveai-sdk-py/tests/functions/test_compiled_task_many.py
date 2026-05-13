@@ -3,5 +3,5 @@
 
 
 def test_compiled_task_many():
-    from objectiveai.functions import CompiledTaskMany
+    from objectiveai_sdk.functions import CompiledTaskMany
     schema = CompiledTaskMany.model_json_schema()

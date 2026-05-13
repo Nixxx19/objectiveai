@@ -3,5 +3,5 @@
 
 
 def test_provider():
-    from objectiveai.agent.completions.request import Provider
+    from objectiveai_sdk.agent.completions.request import Provider
     schema = Provider.model_json_schema()

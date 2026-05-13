@@ -3,5 +3,5 @@
 
 
 def test_implementation():
-    from objectiveai.mcp import Implementation
+    from objectiveai_sdk.mcp import Implementation
     schema = Implementation.model_json_schema()

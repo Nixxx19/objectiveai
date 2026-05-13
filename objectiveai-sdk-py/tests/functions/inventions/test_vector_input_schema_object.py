@@ -3,5 +3,5 @@
 
 
 def test_vector_input_schema_object():
-    from objectiveai.functions.inventions import VectorInputSchemaObject
+    from objectiveai_sdk.functions.inventions import VectorInputSchemaObject
     schema = VectorInputSchemaObject.model_json_schema()

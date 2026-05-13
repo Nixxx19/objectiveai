@@ -3,5 +3,5 @@
 
 
 def test_resource_contents_union_text():
-    from objectiveai.mcp.shared import ResourceContentsUnionText
+    from objectiveai_sdk.mcp.shared import ResourceContentsUnionText
     schema = ResourceContentsUnionText.model_json_schema()

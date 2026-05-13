@@ -3,5 +3,5 @@
 
 
 def test_remote_swarm():
-    from objectiveai.swarm import RemoteSwarm
+    from objectiveai_sdk.swarm import RemoteSwarm
     schema = RemoteSwarm.model_json_schema()

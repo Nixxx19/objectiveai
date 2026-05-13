@@ -3,5 +3,5 @@
 
 
 def test_function_execution_task_chunk():
-    from objectiveai.functions.executions.response.streaming import FunctionExecutionTaskChunk
+    from objectiveai_sdk.functions.executions.response.streaming import FunctionExecutionTaskChunk
     schema = FunctionExecutionTaskChunk.model_json_schema()

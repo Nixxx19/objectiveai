@@ -3,5 +3,5 @@
 
 
 def test_branch_task_expression_scalar_function():
-    from objectiveai.functions.alpha_scalar import BranchTaskExpressionScalarFunction
+    from objectiveai_sdk.functions.alpha_scalar import BranchTaskExpressionScalarFunction
     schema = BranchTaskExpressionScalarFunction.model_json_schema()

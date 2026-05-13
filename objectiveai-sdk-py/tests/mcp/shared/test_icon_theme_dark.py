@@ -3,5 +3,5 @@
 
 
 def test_icon_theme_dark():
-    from objectiveai.mcp.shared import IconThemeDark
+    from objectiveai_sdk.mcp.shared import IconThemeDark
     schema = IconThemeDark.model_json_schema()

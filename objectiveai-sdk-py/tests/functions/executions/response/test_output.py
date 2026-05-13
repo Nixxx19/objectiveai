@@ -3,5 +3,5 @@
 
 
 def test_output():
-    from objectiveai.functions.executions.response import Output
+    from objectiveai_sdk.functions.executions.response import Output
     schema = Output.model_json_schema()

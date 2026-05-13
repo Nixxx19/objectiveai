@@ -3,5 +3,5 @@
 
 
 def test_target():
-    from objectiveai.functions.profiles.computations.request import Target
+    from objectiveai_sdk.functions.profiles.computations.request import Target
     schema = Target.model_json_schema()

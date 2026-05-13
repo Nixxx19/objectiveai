@@ -3,5 +3,5 @@
 
 
 def test_system_message():
-    from objectiveai.agent.completions.message import SystemMessage
+    from objectiveai_sdk.agent.completions.message import SystemMessage
     schema = SystemMessage.model_json_schema()

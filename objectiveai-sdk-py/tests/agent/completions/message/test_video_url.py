@@ -3,5 +3,5 @@
 
 
 def test_video_url():
-    from objectiveai.agent.completions.message import VideoUrl
+    from objectiveai_sdk.agent.completions.message import VideoUrl
     schema = VideoUrl.model_json_schema()

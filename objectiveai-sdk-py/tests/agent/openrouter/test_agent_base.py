@@ -3,5 +3,5 @@
 
 
 def test_agent_base():
-    from objectiveai.agent.openrouter import AgentBase
+    from objectiveai_sdk.agent.openrouter import AgentBase
     schema = AgentBase.model_json_schema()

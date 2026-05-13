@@ -3,5 +3,5 @@
 
 
 def test_list_function_response():
-    from objectiveai.functions import ListFunctionResponse
+    from objectiveai_sdk.functions import ListFunctionResponse
     schema = ListFunctionResponse.model_json_schema()

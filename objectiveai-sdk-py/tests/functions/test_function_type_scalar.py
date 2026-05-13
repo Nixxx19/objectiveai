@@ -3,5 +3,5 @@
 
 
 def test_function_type_scalar():
-    from objectiveai.functions import FunctionTypeScalar
+    from objectiveai_sdk.functions import FunctionTypeScalar
     schema = FunctionTypeScalar.model_json_schema()

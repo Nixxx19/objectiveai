@@ -3,5 +3,5 @@
 
 
 def test_annotations():
-    from objectiveai.mcp.shared import Annotations
+    from objectiveai_sdk.mcp.shared import Annotations
     schema = Annotations.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_disable_api_key_request():
-    from objectiveai.auth import DisableApiKeyRequest
+    from objectiveai_sdk.auth import DisableApiKeyRequest
     schema = DisableApiKeyRequest.model_json_schema()

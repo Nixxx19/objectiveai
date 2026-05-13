@@ -3,5 +3,5 @@
 
 
 def test_response_format_json_schema():
-    from objectiveai.agent.completions.request import ResponseFormatJsonSchema
+    from objectiveai_sdk.agent.completions.request import ResponseFormatJsonSchema
     schema = ResponseFormatJsonSchema.model_json_schema()

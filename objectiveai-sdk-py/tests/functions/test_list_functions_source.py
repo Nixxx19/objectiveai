@@ -3,5 +3,5 @@
 
 
 def test_list_functions_source():
-    from objectiveai.functions import ListFunctionsSource
+    from objectiveai_sdk.functions import ListFunctionsSource
     schema = ListFunctionsSource.model_json_schema()

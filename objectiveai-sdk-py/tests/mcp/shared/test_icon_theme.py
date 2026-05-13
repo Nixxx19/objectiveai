@@ -3,5 +3,5 @@
 
 
 def test_icon_theme():
-    from objectiveai.mcp.shared import IconTheme
+    from objectiveai_sdk.mcp.shared import IconTheme
     schema = IconTheme.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_get_agent_response_mock():
-    from objectiveai.agent import GetAgentResponseMock
+    from objectiveai_sdk.agent import GetAgentResponseMock
     schema = GetAgentResponseMock.model_json_schema()

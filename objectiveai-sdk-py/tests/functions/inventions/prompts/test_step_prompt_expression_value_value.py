@@ -3,5 +3,5 @@
 
 
 def test_step_prompt_expression_value_value():
-    from objectiveai.functions.inventions.prompts import StepPromptExpressionValueValue
+    from objectiveai_sdk.functions.inventions.prompts import StepPromptExpressionValueValue
     schema = StepPromptExpressionValueValue.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_fitting_stats():
-    from objectiveai.functions.profiles.computations.response import FittingStats
+    from objectiveai_sdk.functions.profiles.computations.response import FittingStats
     schema = FittingStats.model_json_schema()

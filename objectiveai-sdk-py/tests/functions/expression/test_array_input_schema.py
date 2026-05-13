@@ -3,5 +3,5 @@
 
 
 def test_array_input_schema():
-    from objectiveai.functions.expression import ArrayInputSchema
+    from objectiveai_sdk.functions.expression import ArrayInputSchema
     schema = ArrayInputSchema.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_laboratory_execution():
-    from objectiveai.laboratories.executions.response.unary import LaboratoryExecution
+    from objectiveai_sdk.laboratories.executions.response.unary import LaboratoryExecution
     schema = LaboratoryExecution.model_json_schema()

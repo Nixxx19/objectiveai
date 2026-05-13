@@ -3,5 +3,5 @@
 
 
 def test_role_user():
-    from objectiveai.mcp.shared import RoleUser
+    from objectiveai_sdk.mcp.shared import RoleUser
     schema = RoleUser.model_json_schema()

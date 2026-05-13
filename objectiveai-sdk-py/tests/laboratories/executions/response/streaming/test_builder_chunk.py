@@ -3,5 +3,5 @@
 
 
 def test_builder_chunk():
-    from objectiveai.laboratories.executions.response.streaming import BuilderChunk
+    from objectiveai_sdk.laboratories.executions.response.streaming import BuilderChunk
     schema = BuilderChunk.model_json_schema()

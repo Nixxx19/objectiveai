@@ -3,5 +3,5 @@
 
 
 def test_builder():
-    from objectiveai.laboratories.executions.response.unary import Builder
+    from objectiveai_sdk.laboratories.executions.response.unary import Builder
     schema = Builder.model_json_schema()

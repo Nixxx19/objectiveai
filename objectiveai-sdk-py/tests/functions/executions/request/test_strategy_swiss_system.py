@@ -3,5 +3,5 @@
 
 
 def test_strategy_swiss_system():
-    from objectiveai.functions.executions.request import StrategySwissSystem
+    from objectiveai_sdk.functions.executions.request import StrategySwissSystem
     schema = StrategySwissSystem.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_special_task_output_weighted_sum():
-    from objectiveai.functions.expression import SpecialTaskOutputWeightedSum
+    from objectiveai_sdk.functions.expression import SpecialTaskOutputWeightedSum
     schema = SpecialTaskOutputWeightedSum.model_json_schema()

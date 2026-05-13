@@ -3,5 +3,5 @@
 
 
 def test_function_profile_computation_chunk():
-    from objectiveai.functions.profiles.computations.response.streaming import FunctionProfileComputationChunk
+    from objectiveai_sdk.functions.profiles.computations.response.streaming import FunctionProfileComputationChunk
     schema = FunctionProfileComputationChunk.model_json_schema()

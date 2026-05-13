@@ -3,5 +3,5 @@
 
 
 def test_reasoning_summary_chunk():
-    from objectiveai.functions.executions.response.streaming import ReasoningSummaryChunk
+    from objectiveai_sdk.functions.executions.response.streaming import ReasoningSummaryChunk
     schema = ReasoningSummaryChunk.model_json_schema()

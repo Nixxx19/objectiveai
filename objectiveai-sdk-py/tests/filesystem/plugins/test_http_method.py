@@ -3,5 +3,5 @@
 
 
 def test_http_method():
-    from objectiveai.filesystem.plugins import HttpMethod
+    from objectiveai_sdk.filesystem.plugins import HttpMethod
     schema = HttpMethod.model_json_schema()

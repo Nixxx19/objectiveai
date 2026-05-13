@@ -3,5 +3,5 @@
 
 
 def test_special_task_output_l1_normalized():
-    from objectiveai.functions.expression import SpecialTaskOutputL1Normalized
+    from objectiveai_sdk.functions.expression import SpecialTaskOutputL1Normalized
     schema = SpecialTaskOutputL1Normalized.model_json_schema()

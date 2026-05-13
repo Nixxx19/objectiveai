@@ -3,5 +3,5 @@
 
 
 def test_remote_function_vector():
-    from objectiveai.functions import RemoteFunctionVector
+    from objectiveai_sdk.functions import RemoteFunctionVector
     schema = RemoteFunctionVector.model_json_schema()

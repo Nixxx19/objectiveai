@@ -3,5 +3,5 @@
 
 
 def test_image_content():
-    from objectiveai.mcp.tool import ImageContent
+    from objectiveai_sdk.mcp.tool import ImageContent
     schema = ImageContent.model_json_schema()

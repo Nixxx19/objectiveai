@@ -3,5 +3,5 @@
 
 
 def test_get_agent_response_filesystem():
-    from objectiveai.agent import GetAgentResponseFilesystem
+    from objectiveai_sdk.agent import GetAgentResponseFilesystem
     schema = GetAgentResponseFilesystem.model_json_schema()

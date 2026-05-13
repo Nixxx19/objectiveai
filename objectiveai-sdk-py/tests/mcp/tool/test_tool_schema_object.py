@@ -3,5 +3,5 @@
 
 
 def test_tool_schema_object():
-    from objectiveai.mcp.tool import ToolSchemaObject
+    from objectiveai_sdk.mcp.tool import ToolSchemaObject
     schema = ToolSchemaObject.model_json_schema()

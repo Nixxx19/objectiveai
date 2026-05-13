@@ -3,5 +3,5 @@
 
 
 def test_mcp_server():
-    from objectiveai.agent import McpServer
+    from objectiveai_sdk.agent import McpServer
     schema = McpServer.model_json_schema()

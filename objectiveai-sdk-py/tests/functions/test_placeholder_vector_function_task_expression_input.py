@@ -3,5 +3,5 @@
 
 
 def test_placeholder_vector_function_task_expression_input():
-    from objectiveai.functions import PlaceholderVectorFunctionTaskExpressionInput
+    from objectiveai_sdk.functions import PlaceholderVectorFunctionTaskExpressionInput
     schema = PlaceholderVectorFunctionTaskExpressionInput.model_json_schema()

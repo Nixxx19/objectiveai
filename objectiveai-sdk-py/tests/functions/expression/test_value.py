@@ -3,5 +3,5 @@
 
 
 def test_value():
-    from objectiveai.functions.expression import Value
+    from objectiveai_sdk.functions.expression import Value
     schema = Value.model_json_schema()

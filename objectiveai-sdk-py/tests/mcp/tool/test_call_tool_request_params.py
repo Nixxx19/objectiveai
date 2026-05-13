@@ -3,5 +3,5 @@
 
 
 def test_call_tool_request_params():
-    from objectiveai.mcp.tool import CallToolRequestParams
+    from objectiveai_sdk.mcp.tool import CallToolRequestParams
     schema = CallToolRequestParams.model_json_schema()

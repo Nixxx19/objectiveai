@@ -3,5 +3,5 @@
 
 
 def test_input_value_expression_boolean():
-    from objectiveai.functions.expression import InputValueExpressionBoolean
+    from objectiveai_sdk.functions.expression import InputValueExpressionBoolean
     schema = InputValueExpressionBoolean.model_json_schema()

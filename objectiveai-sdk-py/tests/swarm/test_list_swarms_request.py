@@ -3,5 +3,5 @@
 
 
 def test_list_swarms_request():
-    from objectiveai.swarm import ListSwarmsRequest
+    from objectiveai_sdk.swarm import ListSwarmsRequest
     schema = ListSwarmsRequest.model_json_schema()

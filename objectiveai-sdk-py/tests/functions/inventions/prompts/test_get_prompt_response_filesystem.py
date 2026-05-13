@@ -3,5 +3,5 @@
 
 
 def test_get_prompt_response_filesystem():
-    from objectiveai.functions.inventions.prompts import GetPromptResponseFilesystem
+    from objectiveai_sdk.functions.inventions.prompts import GetPromptResponseFilesystem
     schema = GetPromptResponseFilesystem.model_json_schema()

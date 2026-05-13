@@ -3,5 +3,5 @@
 
 
 def test_description_object():
-    from objectiveai.functions.inventions import DescriptionObject
+    from objectiveai_sdk.functions.inventions import DescriptionObject
     schema = DescriptionObject.model_json_schema()

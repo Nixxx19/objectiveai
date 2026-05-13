@@ -3,5 +3,5 @@
 
 
 def test_laboratory_execution_create_params():
-    from objectiveai.laboratories.executions.request import LaboratoryExecutionCreateParams
+    from objectiveai_sdk.laboratories.executions.request import LaboratoryExecutionCreateParams
     schema = LaboratoryExecutionCreateParams.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_alpha_vector_leaf_state():
-    from objectiveai.functions.inventions.state import AlphaVectorLeafState
+    from objectiveai_sdk.functions.inventions.state import AlphaVectorLeafState
     schema = AlphaVectorLeafState.model_json_schema()

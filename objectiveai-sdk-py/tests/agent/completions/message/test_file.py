@@ -3,5 +3,5 @@
 
 
 def test_file():
-    from objectiveai.agent.completions.message import File
+    from objectiveai_sdk.agent.completions.message import File
     schema = File.model_json_schema()

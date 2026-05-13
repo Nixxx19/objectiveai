@@ -3,5 +3,5 @@
 
 
 def test_function_invention_recursive_create_params():
-    from objectiveai.functions.inventions.recursive.request import FunctionInventionRecursiveCreateParams
+    from objectiveai_sdk.functions.inventions.recursive.request import FunctionInventionRecursiveCreateParams
     schema = FunctionInventionRecursiveCreateParams.model_json_schema()

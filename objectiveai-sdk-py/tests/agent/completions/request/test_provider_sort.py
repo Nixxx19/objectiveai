@@ -3,5 +3,5 @@
 
 
 def test_provider_sort():
-    from objectiveai.agent.completions.request import ProviderSort
+    from objectiveai_sdk.agent.completions.request import ProviderSort
     schema = ProviderSort.model_json_schema()

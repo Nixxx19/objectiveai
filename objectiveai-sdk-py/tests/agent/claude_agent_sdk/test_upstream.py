@@ -3,5 +3,5 @@
 
 
 def test_upstream():
-    from objectiveai.agent.claude_agent_sdk import Upstream
+    from objectiveai_sdk.agent.claude_agent_sdk import Upstream
     schema = Upstream.model_json_schema()

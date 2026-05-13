@@ -3,5 +3,5 @@
 
 
 def test_remote_filesystem():
-    from objectiveai import RemoteFilesystem
+    from objectiveai_sdk import RemoteFilesystem
     schema = RemoteFilesystem.model_json_schema()

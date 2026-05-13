@@ -3,5 +3,5 @@
 
 
 def test_api_remote_config():
-    from objectiveai.filesystem.config import ApiRemoteConfig
+    from objectiveai_sdk.filesystem.config import ApiRemoteConfig
     schema = ApiRemoteConfig.model_json_schema()

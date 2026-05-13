@@ -3,5 +3,5 @@
 
 
 def test_scalar_function_task_expression_mock_input_value():
-    from objectiveai.functions import ScalarFunctionTaskExpressionMockInputValue
+    from objectiveai_sdk.functions import ScalarFunctionTaskExpressionMockInputValue
     schema = ScalarFunctionTaskExpressionMockInputValue.model_json_schema()

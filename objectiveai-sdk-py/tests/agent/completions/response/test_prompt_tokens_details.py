@@ -3,5 +3,5 @@
 
 
 def test_prompt_tokens_details():
-    from objectiveai.agent.completions.response import PromptTokensDetails
+    from objectiveai_sdk.agent.completions.response import PromptTokensDetails
     schema = PromptTokensDetails.model_json_schema()

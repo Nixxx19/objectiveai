@@ -3,5 +3,5 @@
 
 
 def test_object():
-    from objectiveai.agent.completions.response.unary import Object
+    from objectiveai_sdk.agent.completions.response.unary import Object
     schema = Object.model_json_schema()

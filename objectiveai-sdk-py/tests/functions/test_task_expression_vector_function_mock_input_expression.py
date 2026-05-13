@@ -3,5 +3,5 @@
 
 
 def test_task_expression_vector_function_mock_input_expression():
-    from objectiveai.functions import TaskExpressionVectorFunctionMockInputExpression
+    from objectiveai_sdk.functions import TaskExpressionVectorFunctionMockInputExpression
     schema = TaskExpressionVectorFunctionMockInputExpression.model_json_schema()

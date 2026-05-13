@@ -3,5 +3,5 @@
 
 
 def test_task_metadata():
-    from objectiveai.mcp.tool import TaskMetadata
+    from objectiveai_sdk.mcp.tool import TaskMetadata
     schema = TaskMetadata.model_json_schema()

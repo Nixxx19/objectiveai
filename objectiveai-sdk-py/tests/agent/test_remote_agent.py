@@ -3,5 +3,5 @@
 
 
 def test_remote_agent():
-    from objectiveai.agent import RemoteAgent
+    from objectiveai_sdk.agent import RemoteAgent
     schema = RemoteAgent.model_json_schema()

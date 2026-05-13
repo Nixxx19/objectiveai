@@ -3,5 +3,5 @@
 
 
 def test_assistant_message_expression_tool_calls_value():
-    from objectiveai.agent.completions.message import AssistantMessageExpressionTool_callsValue
+    from objectiveai_sdk.agent.completions.message import AssistantMessageExpressionTool_callsValue
     schema = AssistantMessageExpressionTool_callsValue.model_json_schema()

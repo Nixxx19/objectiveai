@@ -3,5 +3,5 @@
 
 
 def test_provider_quantization_fp8():
-    from objectiveai.agent.openrouter import ProviderQuantizationFp8
+    from objectiveai_sdk.agent.openrouter import ProviderQuantizationFp8
     schema = ProviderQuantizationFp8.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_assistant_tool_call_delta():
-    from objectiveai.agent.completions.message import AssistantToolCallDelta
+    from objectiveai_sdk.agent.completions.message import AssistantToolCallDelta
     schema = AssistantToolCallDelta.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_provider_quantization():
-    from objectiveai.agent.openrouter import ProviderQuantization
+    from objectiveai_sdk.agent.openrouter import ProviderQuantization
     schema = ProviderQuantization.model_json_schema()

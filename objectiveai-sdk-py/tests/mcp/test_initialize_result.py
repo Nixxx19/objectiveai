@@ -3,5 +3,5 @@
 
 
 def test_initialize_result():
-    from objectiveai.mcp import InitializeResult
+    from objectiveai_sdk.mcp import InitializeResult
     schema = InitializeResult.model_json_schema()

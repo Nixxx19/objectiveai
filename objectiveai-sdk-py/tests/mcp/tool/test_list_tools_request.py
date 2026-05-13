@@ -3,5 +3,5 @@
 
 
 def test_list_tools_request():
-    from objectiveai.mcp.tool import ListToolsRequest
+    from objectiveai_sdk.mcp.tool import ListToolsRequest
     schema = ListToolsRequest.model_json_schema()

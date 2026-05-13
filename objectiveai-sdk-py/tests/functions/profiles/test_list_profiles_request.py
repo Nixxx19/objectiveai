@@ -3,5 +3,5 @@
 
 
 def test_list_profiles_request():
-    from objectiveai.functions.profiles import ListProfilesRequest
+    from objectiveai_sdk.functions.profiles import ListProfilesRequest
     schema = ListProfilesRequest.model_json_schema()

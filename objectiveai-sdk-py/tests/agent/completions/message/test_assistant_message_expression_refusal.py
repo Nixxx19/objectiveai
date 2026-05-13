@@ -3,5 +3,5 @@
 
 
 def test_assistant_message_expression_refusal():
-    from objectiveai.agent.completions.message import AssistantMessageExpressionRefusal
+    from objectiveai_sdk.agent.completions.message import AssistantMessageExpressionRefusal
     schema = AssistantMessageExpressionRefusal.model_json_schema()

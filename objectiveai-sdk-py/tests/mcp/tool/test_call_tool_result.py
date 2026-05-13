@@ -3,5 +3,5 @@
 
 
 def test_call_tool_result():
-    from objectiveai.mcp.tool import CallToolResult
+    from objectiveai_sdk.mcp.tool import CallToolResult
     schema = CallToolResult.model_json_schema()

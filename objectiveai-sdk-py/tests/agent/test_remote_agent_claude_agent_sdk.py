@@ -3,5 +3,5 @@
 
 
 def test_remote_agent_claude_agent_sdk():
-    from objectiveai.agent import RemoteAgentClaudeAgentSdk
+    from objectiveai_sdk.agent import RemoteAgentClaudeAgentSdk
     schema = RemoteAgentClaudeAgentSdk.model_json_schema()

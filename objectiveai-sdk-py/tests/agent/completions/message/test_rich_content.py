@@ -3,5 +3,5 @@
 
 
 def test_rich_content():
-    from objectiveai.agent.completions.message import RichContent
+    from objectiveai_sdk.agent.completions.message import RichContent
     schema = RichContent.model_json_schema()

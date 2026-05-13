@@ -3,5 +3,5 @@
 
 
 def test_viewer_config():
-    from objectiveai.filesystem.config import ViewerConfig
+    from objectiveai_sdk.filesystem.config import ViewerConfig
     schema = ViewerConfig.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_tool_annotations():
-    from objectiveai.mcp.tool import ToolAnnotations
+    from objectiveai_sdk.mcp.tool import ToolAnnotations
     schema = ToolAnnotations.model_json_schema()

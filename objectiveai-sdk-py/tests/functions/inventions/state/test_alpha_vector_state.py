@@ -3,5 +3,5 @@
 
 
 def test_alpha_vector_state():
-    from objectiveai.functions.inventions.state import AlphaVectorState
+    from objectiveai_sdk.functions.inventions.state import AlphaVectorState
     schema = AlphaVectorState.model_json_schema()

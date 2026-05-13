@@ -3,5 +3,5 @@
 
 
 def test_cache_vote():
-    from objectiveai.vector.completions.cache import CacheVote
+    from objectiveai_sdk.vector.completions.cache import CacheVote
     schema = CacheVote.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_provider_quantization_fp32():
-    from objectiveai.agent.openrouter import ProviderQuantizationFp32
+    from objectiveai_sdk.agent.openrouter import ProviderQuantizationFp32
     schema = ProviderQuantizationFp32.model_json_schema()

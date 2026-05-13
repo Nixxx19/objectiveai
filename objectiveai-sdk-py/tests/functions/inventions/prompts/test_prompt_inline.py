@@ -3,5 +3,5 @@
 
 
 def test_prompt_inline():
-    from objectiveai.functions.inventions.prompts import PromptInline
+    from objectiveai_sdk.functions.inventions.prompts import PromptInline
     schema = PromptInline.model_json_schema()

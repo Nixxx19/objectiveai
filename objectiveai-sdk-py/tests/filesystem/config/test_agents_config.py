@@ -3,5 +3,5 @@
 
 
 def test_agents_config():
-    from objectiveai.filesystem.config import AgentsConfig
+    from objectiveai_sdk.filesystem.config import AgentsConfig
     schema = AgentsConfig.model_json_schema()

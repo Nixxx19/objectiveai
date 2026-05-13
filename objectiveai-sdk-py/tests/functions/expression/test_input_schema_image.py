@@ -3,5 +3,5 @@
 
 
 def test_input_schema_image():
-    from objectiveai.functions.expression import InputSchemaImage
+    from objectiveai_sdk.functions.expression import InputSchemaImage
     schema = InputSchemaImage.model_json_schema()

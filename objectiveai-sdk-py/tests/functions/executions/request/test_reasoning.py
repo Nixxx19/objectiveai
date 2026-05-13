@@ -3,5 +3,5 @@
 
 
 def test_reasoning():
-    from objectiveai.functions.executions.request import Reasoning
+    from objectiveai_sdk.functions.executions.request import Reasoning
     schema = Reasoning.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_favorite():
-    from objectiveai.filesystem.config import Favorite
+    from objectiveai_sdk.filesystem.config import Favorite
     schema = Favorite.model_json_schema()

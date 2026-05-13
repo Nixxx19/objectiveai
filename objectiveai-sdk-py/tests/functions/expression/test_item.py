@@ -3,5 +3,5 @@
 
 
 def test_item():
-    from objectiveai.functions.expression import Item
+    from objectiveai_sdk.functions.expression import Item
     schema = Item.model_json_schema()

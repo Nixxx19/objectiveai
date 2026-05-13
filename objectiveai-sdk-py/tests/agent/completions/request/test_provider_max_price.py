@@ -3,5 +3,5 @@
 
 
 def test_provider_max_price():
-    from objectiveai.agent.completions.request import ProviderMaxPrice
+    from objectiveai_sdk.agent.completions.request import ProviderMaxPrice
     schema = ProviderMaxPrice.model_json_schema()

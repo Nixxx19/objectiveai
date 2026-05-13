@@ -3,5 +3,5 @@
 
 
 def test_remote_path():
-    from objectiveai import RemotePath
+    from objectiveai_sdk import RemotePath
     schema = RemotePath.model_json_schema()

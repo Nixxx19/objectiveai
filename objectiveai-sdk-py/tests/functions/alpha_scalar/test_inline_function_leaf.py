@@ -3,5 +3,5 @@
 
 
 def test_inline_function_leaf():
-    from objectiveai.functions.alpha_scalar import InlineFunctionLeaf
+    from objectiveai_sdk.functions.alpha_scalar import InlineFunctionLeaf
     schema = InlineFunctionLeaf.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_special_input():
-    from objectiveai.functions.expression import SpecialInput
+    from objectiveai_sdk.functions.expression import SpecialInput
     schema = SpecialInput.model_json_schema()

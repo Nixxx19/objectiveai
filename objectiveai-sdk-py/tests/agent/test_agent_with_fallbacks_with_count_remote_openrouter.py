@@ -3,5 +3,5 @@
 
 
 def test_agent_with_fallbacks_with_count_remote_openrouter():
-    from objectiveai.agent import AgentWithFallbacksWithCountRemoteOpenrouter
+    from objectiveai_sdk.agent import AgentWithFallbacksWithCountRemoteOpenrouter
     schema = AgentWithFallbacksWithCountRemoteOpenrouter.model_json_schema()

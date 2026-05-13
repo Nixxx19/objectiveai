@@ -3,5 +3,5 @@
 
 
 def test_functions_profiles_config():
-    from objectiveai.filesystem.config import FunctionsProfilesConfig
+    from objectiveai_sdk.filesystem.config import FunctionsProfilesConfig
     schema = FunctionsProfilesConfig.model_json_schema()

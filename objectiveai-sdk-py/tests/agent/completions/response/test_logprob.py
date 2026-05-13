@@ -3,5 +3,5 @@
 
 
 def test_logprob():
-    from objectiveai.agent.completions.response import Logprob
+    from objectiveai_sdk.agent.completions.response import Logprob
     schema = Logprob.model_json_schema()

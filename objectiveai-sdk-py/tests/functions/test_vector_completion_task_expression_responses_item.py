@@ -3,5 +3,5 @@
 
 
 def test_vector_completion_task_expression_responses_item():
-    from objectiveai.functions import VectorCompletionTaskExpressionResponsesItem
+    from objectiveai_sdk.functions import VectorCompletionTaskExpressionResponsesItem
     schema = VectorCompletionTaskExpressionResponsesItem.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_swarm_inline():
-    from objectiveai.swarm import SwarmInline
+    from objectiveai_sdk.swarm import SwarmInline
     schema = SwarmInline.model_json_schema()

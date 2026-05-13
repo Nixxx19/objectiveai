@@ -3,5 +3,5 @@
 
 
 def test_prompt():
-    from objectiveai.functions.inventions.prompts import Prompt
+    from objectiveai_sdk.functions.inventions.prompts import Prompt
     schema = Prompt.model_json_schema()

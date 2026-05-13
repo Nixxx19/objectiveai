@@ -3,5 +3,5 @@
 
 
 def test_verbosity_high():
-    from objectiveai.agent.openrouter import VerbosityHigh
+    from objectiveai_sdk.agent.openrouter import VerbosityHigh
     schema = VerbosityHigh.model_json_schema()

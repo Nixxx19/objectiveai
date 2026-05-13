@@ -3,5 +3,5 @@
 
 
 def test_vector_function_task_mock():
-    from objectiveai.functions import VectorFunctionTaskMock
+    from objectiveai_sdk.functions import VectorFunctionTaskMock
     schema = VectorFunctionTaskMock.model_json_schema()

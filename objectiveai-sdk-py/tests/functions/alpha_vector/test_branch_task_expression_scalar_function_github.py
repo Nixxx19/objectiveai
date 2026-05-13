@@ -3,5 +3,5 @@
 
 
 def test_branch_task_expression_scalar_function_github():
-    from objectiveai.functions.alpha_vector import BranchTaskExpressionScalarFunctionGithub
+    from objectiveai_sdk.functions.alpha_vector import BranchTaskExpressionScalarFunctionGithub
     schema = BranchTaskExpressionScalarFunctionGithub.model_json_schema()

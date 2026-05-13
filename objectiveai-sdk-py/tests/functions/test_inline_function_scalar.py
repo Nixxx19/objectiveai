@@ -3,5 +3,5 @@
 
 
 def test_inline_function_scalar():
-    from objectiveai.functions import InlineFunctionScalar
+    from objectiveai_sdk.functions import InlineFunctionScalar
     schema = InlineFunctionScalar.model_json_schema()

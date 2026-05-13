@@ -3,5 +3,5 @@
 
 
 def test_effort_minimal():
-    from objectiveai.agent.codex_sdk import EffortMinimal
+    from objectiveai_sdk.agent.codex_sdk import EffortMinimal
     schema = EffortMinimal.model_json_schema()

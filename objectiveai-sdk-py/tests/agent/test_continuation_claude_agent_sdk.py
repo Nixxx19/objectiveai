@@ -3,5 +3,5 @@
 
 
 def test_continuation_claude_agent_sdk():
-    from objectiveai.agent import ContinuationClaudeAgentSdk
+    from objectiveai_sdk.agent import ContinuationClaudeAgentSdk
     schema = ContinuationClaudeAgentSdk.model_json_schema()

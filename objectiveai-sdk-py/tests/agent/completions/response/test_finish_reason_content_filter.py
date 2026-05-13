@@ -3,5 +3,5 @@
 
 
 def test_finish_reason_content_filter():
-    from objectiveai.agent.completions.response import FinishReasonContentFilter
+    from objectiveai_sdk.agent.completions.response import FinishReasonContentFilter
     schema = FinishReasonContentFilter.model_json_schema()

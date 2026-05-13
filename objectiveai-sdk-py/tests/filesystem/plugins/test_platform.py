@@ -3,5 +3,5 @@
 
 
 def test_platform():
-    from objectiveai.filesystem.plugins import Platform
+    from objectiveai_sdk.filesystem.plugins import Platform
     schema = Platform.model_json_schema()

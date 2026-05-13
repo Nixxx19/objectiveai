@@ -3,5 +3,5 @@
 
 
 def test_alpha_inline_function():
-    from objectiveai.functions import AlphaInlineFunction
+    from objectiveai_sdk.functions import AlphaInlineFunction
     schema = AlphaInlineFunction.model_json_schema()

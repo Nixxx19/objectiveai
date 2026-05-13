@@ -3,5 +3,5 @@
 
 
 def test_server_capabilities():
-    from objectiveai.mcp import ServerCapabilities
+    from objectiveai_sdk.mcp import ServerCapabilities
     schema = ServerCapabilities.model_json_schema()

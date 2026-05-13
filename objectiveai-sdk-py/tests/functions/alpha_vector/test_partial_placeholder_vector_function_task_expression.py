@@ -3,5 +3,5 @@
 
 
 def test_partial_placeholder_vector_function_task_expression():
-    from objectiveai.functions.alpha_vector import PartialPlaceholderVectorFunctionTaskExpression
+    from objectiveai_sdk.functions.alpha_vector import PartialPlaceholderVectorFunctionTaskExpression
     schema = PartialPlaceholderVectorFunctionTaskExpression.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_pair_favorite():
-    from objectiveai.filesystem.config import PairFavorite
+    from objectiveai_sdk.filesystem.config import PairFavorite
     schema = PairFavorite.model_json_schema()

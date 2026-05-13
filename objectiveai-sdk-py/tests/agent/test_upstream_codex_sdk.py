@@ -3,5 +3,5 @@
 
 
 def test_upstream_codex_sdk():
-    from objectiveai.agent import UpstreamCodexSdk
+    from objectiveai_sdk.agent import UpstreamCodexSdk
     schema = UpstreamCodexSdk.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_usage_function_response():
-    from objectiveai.functions import UsageFunctionResponse
+    from objectiveai_sdk.functions import UsageFunctionResponse
     schema = UsageFunctionResponse.model_json_schema()

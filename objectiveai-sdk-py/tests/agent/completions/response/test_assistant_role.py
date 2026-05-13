@@ -3,5 +3,5 @@
 
 
 def test_assistant_role():
-    from objectiveai.agent.completions.response import AssistantRole
+    from objectiveai_sdk.agent.completions.response import AssistantRole
     schema = AssistantRole.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_task_expression_scalar_function():
-    from objectiveai.functions import TaskExpressionScalarFunction
+    from objectiveai_sdk.functions import TaskExpressionScalarFunction
     schema = TaskExpressionScalarFunction.model_json_schema()

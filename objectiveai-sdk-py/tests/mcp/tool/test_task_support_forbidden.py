@@ -3,5 +3,5 @@
 
 
 def test_task_support_forbidden():
-    from objectiveai.mcp.tool import TaskSupportForbidden
+    from objectiveai_sdk.mcp.tool import TaskSupportForbidden
     schema = TaskSupportForbidden.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_tasks_tools_capability():
-    from objectiveai.mcp import TasksToolsCapability
+    from objectiveai_sdk.mcp import TasksToolsCapability
     schema = TasksToolsCapability.model_json_schema()

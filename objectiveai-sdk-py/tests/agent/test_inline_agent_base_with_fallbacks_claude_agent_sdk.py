@@ -3,5 +3,5 @@
 
 
 def test_inline_agent_base_with_fallbacks_claude_agent_sdk():
-    from objectiveai.agent import InlineAgentBaseWithFallbacksClaudeAgentSdk
+    from objectiveai_sdk.agent import InlineAgentBaseWithFallbacksClaudeAgentSdk
     schema = InlineAgentBaseWithFallbacksClaudeAgentSdk.model_json_schema()

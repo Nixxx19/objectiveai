@@ -3,5 +3,5 @@
 
 
 def test_vector_leaf_task_object():
-    from objectiveai.functions.inventions import VectorLeafTaskObject
+    from objectiveai_sdk.functions.inventions import VectorLeafTaskObject
     schema = VectorLeafTaskObject.model_json_schema()

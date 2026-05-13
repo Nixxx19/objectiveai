@@ -3,5 +3,5 @@
 
 
 def test_placeholder_scalar_function_task_expression_input():
-    from objectiveai.functions import PlaceholderScalarFunctionTaskExpressionInput
+    from objectiveai_sdk.functions import PlaceholderScalarFunctionTaskExpressionInput
     schema = PlaceholderScalarFunctionTaskExpressionInput.model_json_schema()

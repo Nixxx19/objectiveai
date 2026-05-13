@@ -3,5 +3,5 @@
 
 
 def test_branch_task_expression_scalar_function_filesystem():
-    from objectiveai.functions.alpha_vector import BranchTaskExpressionScalarFunctionFilesystem
+    from objectiveai_sdk.functions.alpha_vector import BranchTaskExpressionScalarFunctionFilesystem
     schema = BranchTaskExpressionScalarFunctionFilesystem.model_json_schema()

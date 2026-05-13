@@ -3,5 +3,5 @@
 
 
 def test_task_function_execution():
-    from objectiveai.functions.executions.response.unary import TaskFunctionExecution
+    from objectiveai_sdk.functions.executions.response.unary import TaskFunctionExecution
     schema = TaskFunctionExecution.model_json_schema()

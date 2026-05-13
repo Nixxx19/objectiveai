@@ -3,5 +3,5 @@
 
 
 def test_agent_completion():
-    from objectiveai.agent.completions.response.unary import AgentCompletion
+    from objectiveai_sdk.agent.completions.response.unary import AgentCompletion
     schema = AgentCompletion.model_json_schema()

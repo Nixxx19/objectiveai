@@ -3,5 +3,5 @@
 
 
 def test_function_profile_computation_create_params():
-    from objectiveai.functions.profiles.computations.request import FunctionProfileComputationCreateParams
+    from objectiveai_sdk.functions.profiles.computations.request import FunctionProfileComputationCreateParams
     schema = FunctionProfileComputationCreateParams.model_json_schema()

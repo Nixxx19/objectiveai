@@ -3,5 +3,5 @@
 
 
 def test_function():
-    from objectiveai.functions import Function
+    from objectiveai_sdk.functions import Function
     schema = Function.model_json_schema()

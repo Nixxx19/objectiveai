@@ -3,5 +3,5 @@
 
 
 def test_rich_content_part_expression_image_url_image_url_value():
-    from objectiveai.agent.completions.message import RichContentPartExpressionImageUrlImage_urlValue
+    from objectiveai_sdk.agent.completions.message import RichContentPartExpressionImageUrlImage_urlValue
     schema = RichContentPartExpressionImageUrlImage_urlValue.model_json_schema()

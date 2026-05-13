@@ -3,5 +3,5 @@
 
 
 def test_agent_with_fallbacks_with_count_inline_mock():
-    from objectiveai.agent import AgentWithFallbacksWithCountInlineMock
+    from objectiveai_sdk.agent import AgentWithFallbacksWithCountInlineMock
     schema = AgentWithFallbacksWithCountInlineMock.model_json_schema()

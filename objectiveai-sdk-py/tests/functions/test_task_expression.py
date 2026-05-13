@@ -3,5 +3,5 @@
 
 
 def test_task_expression():
-    from objectiveai.functions import TaskExpression
+    from objectiveai_sdk.functions import TaskExpression
     schema = TaskExpression.model_json_schema()

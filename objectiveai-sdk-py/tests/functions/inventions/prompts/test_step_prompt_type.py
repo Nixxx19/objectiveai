@@ -3,5 +3,5 @@
 
 
 def test_step_prompt_type():
-    from objectiveai.functions.inventions.prompts import StepPromptType
+    from objectiveai_sdk.functions.inventions.prompts import StepPromptType
     schema = StepPromptType.model_json_schema()

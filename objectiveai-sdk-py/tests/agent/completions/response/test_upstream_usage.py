@@ -3,5 +3,5 @@
 
 
 def test_upstream_usage():
-    from objectiveai.agent.completions.response import UpstreamUsage
+    from objectiveai_sdk.agent.completions.response import UpstreamUsage
     schema = UpstreamUsage.model_json_schema()

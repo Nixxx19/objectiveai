@@ -3,5 +3,5 @@
 
 
 def test_role_assistant():
-    from objectiveai.mcp.shared import RoleAssistant
+    from objectiveai_sdk.mcp.shared import RoleAssistant
     schema = RoleAssistant.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_rich_content_part_expression_video_url_video_url_value():
-    from objectiveai.agent.completions.message import RichContentPartExpressionVideoUrlVideo_urlValue
+    from objectiveai_sdk.agent.completions.message import RichContentPartExpressionVideoUrlVideo_urlValue
     schema = RichContentPartExpressionVideoUrlVideo_urlValue.model_json_schema()

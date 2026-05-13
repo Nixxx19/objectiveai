@@ -3,5 +3,5 @@
 
 
 def test_inline_agent_base_with_fallbacks_or_remote_with_count_remote_filesystem():
-    from objectiveai.agent import InlineAgentBaseWithFallbacksOrRemoteWithCountRemoteFilesystem
+    from objectiveai_sdk.agent import InlineAgentBaseWithFallbacksOrRemoteWithCountRemoteFilesystem
     schema = InlineAgentBaseWithFallbacksOrRemoteWithCountRemoteFilesystem.model_json_schema()

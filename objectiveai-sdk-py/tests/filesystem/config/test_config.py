@@ -3,5 +3,5 @@
 
 
 def test_config():
-    from objectiveai.filesystem.config import Config
+    from objectiveai_sdk.filesystem.config import Config
     schema = Config.model_json_schema()

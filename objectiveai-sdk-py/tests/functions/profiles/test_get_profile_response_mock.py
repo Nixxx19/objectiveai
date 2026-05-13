@@ -3,5 +3,5 @@
 
 
 def test_get_profile_response_mock():
-    from objectiveai.functions.profiles import GetProfileResponseMock
+    from objectiveai_sdk.functions.profiles import GetProfileResponseMock
     schema = GetProfileResponseMock.model_json_schema()

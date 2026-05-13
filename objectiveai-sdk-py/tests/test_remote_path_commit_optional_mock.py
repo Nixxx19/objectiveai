@@ -3,5 +3,5 @@
 
 
 def test_remote_path_commit_optional_mock():
-    from objectiveai import RemotePathCommitOptionalMock
+    from objectiveai_sdk import RemotePathCommitOptionalMock
     schema = RemotePathCommitOptionalMock.model_json_schema()

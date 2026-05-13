@@ -3,5 +3,5 @@
 
 
 def test_evaluation():
-    from objectiveai.laboratories.executions.response.unary import Evaluation
+    from objectiveai_sdk.laboratories.executions.response.unary import Evaluation
     schema = Evaluation.model_json_schema()

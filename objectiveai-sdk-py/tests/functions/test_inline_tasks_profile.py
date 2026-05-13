@@ -3,5 +3,5 @@
 
 
 def test_inline_tasks_profile():
-    from objectiveai.functions import InlineTasksProfile
+    from objectiveai_sdk.functions import InlineTasksProfile
     schema = InlineTasksProfile.model_json_schema()

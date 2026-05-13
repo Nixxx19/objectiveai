@@ -3,5 +3,5 @@
 
 
 def test_finish_reason_stop():
-    from objectiveai.agent.completions.response import FinishReasonStop
+    from objectiveai_sdk.agent.completions.response import FinishReasonStop
     schema = FinishReasonStop.model_json_schema()

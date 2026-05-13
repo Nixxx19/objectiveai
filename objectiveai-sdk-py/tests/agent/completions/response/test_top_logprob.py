@@ -3,5 +3,5 @@
 
 
 def test_top_logprob():
-    from objectiveai.agent.completions.response import TopLogprob
+    from objectiveai_sdk.agent.completions.response import TopLogprob
     schema = TopLogprob.model_json_schema()

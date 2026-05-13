@@ -3,5 +3,5 @@
 
 
 def test_get_swarm_response_mock():
-    from objectiveai.swarm import GetSwarmResponseMock
+    from objectiveai_sdk.swarm import GetSwarmResponseMock
     schema = GetSwarmResponseMock.model_json_schema()

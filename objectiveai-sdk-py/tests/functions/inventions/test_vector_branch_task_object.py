@@ -3,5 +3,5 @@
 
 
 def test_vector_branch_task_object():
-    from objectiveai.functions.inventions import VectorBranchTaskObject
+    from objectiveai_sdk.functions.inventions import VectorBranchTaskObject
     schema = VectorBranchTaskObject.model_json_schema()

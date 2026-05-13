@@ -3,5 +3,5 @@
 
 
 def test_provider_data_collection_deny():
-    from objectiveai.agent.completions.request import ProviderDataCollectionDeny
+    from objectiveai_sdk.agent.completions.request import ProviderDataCollectionDeny
     schema = ProviderDataCollectionDeny.model_json_schema()

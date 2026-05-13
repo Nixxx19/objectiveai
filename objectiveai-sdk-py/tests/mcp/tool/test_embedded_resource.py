@@ -3,5 +3,5 @@
 
 
 def test_embedded_resource():
-    from objectiveai.mcp.tool import EmbeddedResource
+    from objectiveai_sdk.mcp.tool import EmbeddedResource
     schema = EmbeddedResource.model_json_schema()

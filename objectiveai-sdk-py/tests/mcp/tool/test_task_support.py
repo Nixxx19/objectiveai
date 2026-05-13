@@ -3,5 +3,5 @@
 
 
 def test_task_support():
-    from objectiveai.mcp.tool import TaskSupport
+    from objectiveai_sdk.mcp.tool import TaskSupport
     schema = TaskSupport.model_json_schema()

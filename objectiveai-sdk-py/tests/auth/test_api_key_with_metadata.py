@@ -3,5 +3,5 @@
 
 
 def test_api_key_with_metadata():
-    from objectiveai.auth import ApiKeyWithMetadata
+    from objectiveai_sdk.auth import ApiKeyWithMetadata
     schema = ApiKeyWithMetadata.model_json_schema()

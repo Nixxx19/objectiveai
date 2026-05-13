@@ -3,5 +3,5 @@
 
 
 def test_input_audio():
-    from objectiveai.agent.completions.message import InputAudio
+    from objectiveai_sdk.agent.completions.message import InputAudio
     schema = InputAudio.model_json_schema()

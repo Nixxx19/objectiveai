@@ -3,5 +3,5 @@
 
 
 def test_inline_agent_codex_sdk():
-    from objectiveai.agent import InlineAgentCodexSdk
+    from objectiveai_sdk.agent import InlineAgentCodexSdk
     schema = InlineAgentCodexSdk.model_json_schema()

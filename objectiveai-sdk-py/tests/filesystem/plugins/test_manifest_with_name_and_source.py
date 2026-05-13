@@ -3,5 +3,5 @@
 
 
 def test_manifest_with_name_and_source():
-    from objectiveai.filesystem.plugins import ManifestWithNameAndSource
+    from objectiveai_sdk.filesystem.plugins import ManifestWithNameAndSource
     schema = ManifestWithNameAndSource.model_json_schema()

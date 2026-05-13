@@ -3,5 +3,5 @@
 
 
 def test_reasoning():
-    from objectiveai.agent.openrouter import Reasoning
+    from objectiveai_sdk.agent.openrouter import Reasoning
     schema = Reasoning.model_json_schema()

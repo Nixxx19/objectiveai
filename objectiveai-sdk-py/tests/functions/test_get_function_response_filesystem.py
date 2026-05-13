@@ -3,5 +3,5 @@
 
 
 def test_get_function_response_filesystem():
-    from objectiveai.functions import GetFunctionResponseFilesystem
+    from objectiveai_sdk.functions import GetFunctionResponseFilesystem
     schema = GetFunctionResponseFilesystem.model_json_schema()

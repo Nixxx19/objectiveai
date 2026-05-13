@@ -3,5 +3,5 @@
 
 
 def test_task():
-    from objectiveai.functions import Task
+    from objectiveai_sdk.functions import Task
     schema = Task.model_json_schema()

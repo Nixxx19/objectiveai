@@ -3,5 +3,5 @@
 
 
 def test_favorite_filesystem():
-    from objectiveai.filesystem.config import FavoriteFilesystem
+    from objectiveai_sdk.filesystem.config import FavoriteFilesystem
     schema = FavoriteFilesystem.model_json_schema()

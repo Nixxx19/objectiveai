@@ -3,5 +3,5 @@
 
 
 def test_prompts_capability():
-    from objectiveai.mcp import PromptsCapability
+    from objectiveai_sdk.mcp import PromptsCapability
     schema = PromptsCapability.model_json_schema()

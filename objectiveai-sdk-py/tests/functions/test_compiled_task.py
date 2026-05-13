@@ -3,5 +3,5 @@
 
 
 def test_compiled_task():
-    from objectiveai.functions import CompiledTask
+    from objectiveai_sdk.functions import CompiledTask
     schema = CompiledTask.model_json_schema()

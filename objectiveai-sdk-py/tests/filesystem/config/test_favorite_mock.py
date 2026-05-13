@@ -3,5 +3,5 @@
 
 
 def test_favorite_mock():
-    from objectiveai.filesystem.config import FavoriteMock
+    from objectiveai_sdk.filesystem.config import FavoriteMock
     schema = FavoriteMock.model_json_schema()

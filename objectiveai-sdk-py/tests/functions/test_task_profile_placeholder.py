@@ -3,5 +3,5 @@
 
 
 def test_task_profile_placeholder():
-    from objectiveai.functions import TaskProfilePlaceholder
+    from objectiveai_sdk.functions import TaskProfilePlaceholder
     schema = TaskProfilePlaceholder.model_json_schema()

@@ -25,7 +25,7 @@ import (
 // # Examples
 //
 // ```
-// use objectiveai::prefixed_uuid::PrefixedUuid;
+// use objectiveai_sdk::prefixed_uuid::PrefixedUuid;
 //
 // // Define an API key type with prefix "apk"
 // type ApiKey = PrefixedUuid<'a', 'p', 'k'>;

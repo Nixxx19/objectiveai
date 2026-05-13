@@ -3,5 +3,5 @@
 
 
 def test_resource_link():
-    from objectiveai.mcp.tool import ResourceLink
+    from objectiveai_sdk.mcp.tool import ResourceLink
     schema = ResourceLink.model_json_schema()

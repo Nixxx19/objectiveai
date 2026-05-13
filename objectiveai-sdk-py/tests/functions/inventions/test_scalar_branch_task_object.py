@@ -3,5 +3,5 @@
 
 
 def test_scalar_branch_task_object():
-    from objectiveai.functions.inventions import ScalarBranchTaskObject
+    from objectiveai_sdk.functions.inventions import ScalarBranchTaskObject
     schema = ScalarBranchTaskObject.model_json_schema()

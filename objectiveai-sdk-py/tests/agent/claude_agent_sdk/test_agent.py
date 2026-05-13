@@ -3,5 +3,5 @@
 
 
 def test_agent():
-    from objectiveai.agent.claude_agent_sdk import Agent
+    from objectiveai_sdk.agent.claude_agent_sdk import Agent
     schema = Agent.model_json_schema()

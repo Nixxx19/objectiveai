@@ -3,5 +3,5 @@
 
 
 def test_inline_agent_base_with_fallbacks_or_remote_remote():
-    from objectiveai.agent import InlineAgentBaseWithFallbacksOrRemoteRemote
+    from objectiveai_sdk.agent import InlineAgentBaseWithFallbacksOrRemoteRemote
     schema = InlineAgentBaseWithFallbacksOrRemoteRemote.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_read_resource_result():
-    from objectiveai.mcp.resource import ReadResourceResult
+    from objectiveai_sdk.mcp.resource import ReadResourceResult
     schema = ReadResourceResult.model_json_schema()

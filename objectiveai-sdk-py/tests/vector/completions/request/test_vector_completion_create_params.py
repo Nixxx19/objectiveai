@@ -3,5 +3,5 @@
 
 
 def test_vector_completion_create_params():
-    from objectiveai.vector.completions.request import VectorCompletionCreateParams
+    from objectiveai_sdk.vector.completions.request import VectorCompletionCreateParams
     schema = VectorCompletionCreateParams.model_json_schema()

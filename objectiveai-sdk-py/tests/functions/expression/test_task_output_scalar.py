@@ -3,5 +3,5 @@
 
 
 def test_task_output_scalar():
-    from objectiveai.functions.expression import TaskOutputScalar
+    from objectiveai_sdk.functions.expression import TaskOutputScalar
     schema = TaskOutputScalar.model_json_schema()

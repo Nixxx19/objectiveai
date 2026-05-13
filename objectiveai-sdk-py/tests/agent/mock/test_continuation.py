@@ -3,5 +3,5 @@
 
 
 def test_continuation():
-    from objectiveai.agent.mock import Continuation
+    from objectiveai_sdk.agent.mock import Continuation
     schema = Continuation.model_json_schema()

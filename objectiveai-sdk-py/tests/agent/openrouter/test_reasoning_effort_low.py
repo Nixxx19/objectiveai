@@ -3,5 +3,5 @@
 
 
 def test_reasoning_effort_low():
-    from objectiveai.agent.openrouter import ReasoningEffortLow
+    from objectiveai_sdk.agent.openrouter import ReasoningEffortLow
     schema = ReasoningEffortLow.model_json_schema()

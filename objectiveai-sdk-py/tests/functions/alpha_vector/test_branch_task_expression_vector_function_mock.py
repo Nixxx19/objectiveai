@@ -3,5 +3,5 @@
 
 
 def test_branch_task_expression_vector_function_mock():
-    from objectiveai.functions.alpha_vector import BranchTaskExpressionVectorFunctionMock
+    from objectiveai_sdk.functions.alpha_vector import BranchTaskExpressionVectorFunctionMock
     schema = BranchTaskExpressionVectorFunctionMock.model_json_schema()

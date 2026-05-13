@@ -3,5 +3,5 @@
 
 
 def test_assistant_response_chunk():
-    from objectiveai.agent.completions.response.streaming import AssistantResponseChunk
+    from objectiveai_sdk.agent.completions.response.streaming import AssistantResponseChunk
     schema = AssistantResponseChunk.model_json_schema()

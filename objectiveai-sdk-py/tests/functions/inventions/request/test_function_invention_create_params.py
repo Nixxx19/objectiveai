@@ -3,5 +3,5 @@
 
 
 def test_function_invention_create_params():
-    from objectiveai.functions.inventions.request import FunctionInventionCreateParams
+    from objectiveai_sdk.functions.inventions.request import FunctionInventionCreateParams
     schema = FunctionInventionCreateParams.model_json_schema()

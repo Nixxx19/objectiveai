@@ -3,5 +3,5 @@
 
 
 def test_full_function():
-    from objectiveai.functions import FullFunction
+    from objectiveai_sdk.functions import FullFunction
     schema = FullFunction.model_json_schema()

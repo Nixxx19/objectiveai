@@ -3,5 +3,5 @@
 
 
 def test_content_block_audio():
-    from objectiveai.mcp.tool import ContentBlockAudio
+    from objectiveai_sdk.mcp.tool import ContentBlockAudio
     schema = ContentBlockAudio.model_json_schema()

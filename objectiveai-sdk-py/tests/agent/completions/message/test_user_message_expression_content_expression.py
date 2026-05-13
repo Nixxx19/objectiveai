@@ -3,5 +3,5 @@
 
 
 def test_user_message_expression_content_expression():
-    from objectiveai.agent.completions.message import UserMessageExpressionContentExpression
+    from objectiveai_sdk.agent.completions.message import UserMessageExpressionContentExpression
     schema = UserMessageExpressionContentExpression.model_json_schema()

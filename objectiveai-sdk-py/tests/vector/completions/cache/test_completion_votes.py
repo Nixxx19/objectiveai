@@ -3,5 +3,5 @@
 
 
 def test_completion_votes():
-    from objectiveai.vector.completions.cache import CompletionVotes
+    from objectiveai_sdk.vector.completions.cache import CompletionVotes
     schema = CompletionVotes.model_json_schema()

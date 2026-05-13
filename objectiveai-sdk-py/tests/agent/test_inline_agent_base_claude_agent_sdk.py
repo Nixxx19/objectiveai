@@ -3,5 +3,5 @@
 
 
 def test_inline_agent_base_claude_agent_sdk():
-    from objectiveai.agent import InlineAgentBaseClaudeAgentSdk
+    from objectiveai_sdk.agent import InlineAgentBaseClaudeAgentSdk
     schema = InlineAgentBaseClaudeAgentSdk.model_json_schema()

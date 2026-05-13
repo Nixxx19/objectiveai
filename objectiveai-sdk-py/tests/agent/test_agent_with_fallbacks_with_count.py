@@ -3,5 +3,5 @@
 
 
 def test_agent_with_fallbacks_with_count():
-    from objectiveai.agent import AgentWithFallbacksWithCount
+    from objectiveai_sdk.agent import AgentWithFallbacksWithCount
     schema = AgentWithFallbacksWithCount.model_json_schema()

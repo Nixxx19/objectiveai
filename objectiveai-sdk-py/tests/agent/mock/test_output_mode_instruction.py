@@ -3,5 +3,5 @@
 
 
 def test_output_mode_instruction():
-    from objectiveai.agent.mock import OutputModeInstruction
+    from objectiveai_sdk.agent.mock import OutputModeInstruction
     schema = OutputModeInstruction.model_json_schema()

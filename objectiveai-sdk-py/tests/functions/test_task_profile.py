@@ -3,5 +3,5 @@
 
 
 def test_task_profile():
-    from objectiveai.functions import TaskProfile
+    from objectiveai_sdk.functions import TaskProfile
     schema = TaskProfile.model_json_schema()

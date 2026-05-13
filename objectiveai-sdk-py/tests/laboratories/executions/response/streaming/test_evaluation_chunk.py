@@ -3,5 +3,5 @@
 
 
 def test_evaluation_chunk():
-    from objectiveai.laboratories.executions.response.streaming import EvaluationChunk
+    from objectiveai_sdk.laboratories.executions.response.streaming import EvaluationChunk
     schema = EvaluationChunk.model_json_schema()

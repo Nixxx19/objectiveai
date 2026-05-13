@@ -3,5 +3,5 @@
 
 
 def test_output_mode_tool_call():
-    from objectiveai.agent.mock import OutputModeToolCall
+    from objectiveai_sdk.agent.mock import OutputModeToolCall
     schema = OutputModeToolCall.model_json_schema()

@@ -3,5 +3,5 @@
 
 
 def test_assistant_message_expression_reasoning():
-    from objectiveai.agent.completions.message import AssistantMessageExpressionReasoning
+    from objectiveai_sdk.agent.completions.message import AssistantMessageExpressionReasoning
     schema = AssistantMessageExpressionReasoning.model_json_schema()

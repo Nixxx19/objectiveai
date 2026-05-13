@@ -3,5 +3,5 @@
 
 
 def test_get_credits_response():
-    from objectiveai.auth import GetCreditsResponse
+    from objectiveai_sdk.auth import GetCreditsResponse
     schema = GetCreditsResponse.model_json_schema()

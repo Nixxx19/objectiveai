@@ -3,5 +3,5 @@
 
 
 def test_remote_mock():
-    from objectiveai import RemoteMock
+    from objectiveai_sdk import RemoteMock
     schema = RemoteMock.model_json_schema()

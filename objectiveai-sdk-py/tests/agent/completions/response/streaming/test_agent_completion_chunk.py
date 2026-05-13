@@ -3,5 +3,5 @@
 
 
 def test_agent_completion_chunk():
-    from objectiveai.agent.completions.response.streaming import AgentCompletionChunk
+    from objectiveai_sdk.agent.completions.response.streaming import AgentCompletionChunk
     schema = AgentCompletionChunk.model_json_schema()

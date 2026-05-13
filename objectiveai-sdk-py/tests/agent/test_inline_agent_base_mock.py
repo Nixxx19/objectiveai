@@ -3,5 +3,5 @@
 
 
 def test_inline_agent_base_mock():
-    from objectiveai.agent import InlineAgentBaseMock
+    from objectiveai_sdk.agent import InlineAgentBaseMock
     schema = InlineAgentBaseMock.model_json_schema()

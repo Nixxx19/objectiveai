@@ -3,5 +3,5 @@
 
 
 def test_finish_reason_length():
-    from objectiveai.agent.completions.response import FinishReasonLength
+    from objectiveai_sdk.agent.completions.response import FinishReasonLength
     schema = FinishReasonLength.model_json_schema()

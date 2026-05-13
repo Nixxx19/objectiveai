@@ -3,5 +3,5 @@
 
 
 def test_response_format_param():
-    from objectiveai.agent.completions.request import ResponseFormatParam
+    from objectiveai_sdk.agent.completions.request import ResponseFormatParam
     schema = ResponseFormatParam.model_json_schema()

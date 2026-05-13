@@ -3,5 +3,5 @@
 
 
 def test_api_headers_config():
-    from objectiveai.filesystem.config import ApiHeadersConfig
+    from objectiveai_sdk.filesystem.config import ApiHeadersConfig
     schema = ApiHeadersConfig.model_json_schema()

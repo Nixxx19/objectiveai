@@ -3,5 +3,5 @@
 
 
 def test_dataset_item():
-    from objectiveai.functions.profiles.computations.request import DatasetItem
+    from objectiveai_sdk.functions.profiles.computations.request import DatasetItem
     schema = DatasetItem.model_json_schema()

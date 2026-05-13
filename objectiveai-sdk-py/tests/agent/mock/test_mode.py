@@ -3,5 +3,5 @@
 
 
 def test_mode():
-    from objectiveai.agent.mock import Mode
+    from objectiveai_sdk.agent.mock import Mode
     schema = Mode.model_json_schema()

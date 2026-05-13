@@ -3,5 +3,5 @@
 
 
 def test_weights_weights():
-    from objectiveai import WeightsWeights
+    from objectiveai_sdk import WeightsWeights
     schema = WeightsWeights.model_json_schema()

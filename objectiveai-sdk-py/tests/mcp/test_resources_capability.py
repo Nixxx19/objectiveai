@@ -3,5 +3,5 @@
 
 
 def test_resources_capability():
-    from objectiveai.mcp import ResourcesCapability
+    from objectiveai_sdk.mcp import ResourcesCapability
     schema = ResourcesCapability.model_json_schema()

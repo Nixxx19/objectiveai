@@ -3,5 +3,5 @@
 
 
 def test_stop_strings():
-    from objectiveai.agent.openrouter import StopStrings
+    from objectiveai_sdk.agent.openrouter import StopStrings
     schema = StopStrings.model_json_schema()

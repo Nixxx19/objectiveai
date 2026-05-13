@@ -3,5 +3,5 @@
 
 
 def test_developer_message():
-    from objectiveai.agent.completions.message import DeveloperMessage
+    from objectiveai_sdk.agent.completions.message import DeveloperMessage
     schema = DeveloperMessage.model_json_schema()

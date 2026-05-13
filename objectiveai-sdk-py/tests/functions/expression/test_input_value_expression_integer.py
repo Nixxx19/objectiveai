@@ -3,5 +3,5 @@
 
 
 def test_input_value_expression_integer():
-    from objectiveai.functions.expression import InputValueExpressionInteger
+    from objectiveai_sdk.functions.expression import InputValueExpressionInteger
     schema = InputValueExpressionInteger.model_json_schema()
