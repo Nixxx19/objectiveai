@@ -81,6 +81,19 @@ pub fn test_target_dir() -> PathBuf {
 }
 
 pub fn cli_binary() -> PathBuf {
+    let workspace_target = Path::new(env!("CARGO_MANIFEST_DIR")).join("../target");
+    let mut main_path = workspace_target.join("debug/objectiveai-cli");
+    if cfg!(windows) {
+        main_path.set_extension("exe");
+    }
+    // Prefer the workspace's pre-built cli binary if it already exists
+    // (build.sh produces it). Avoids a parallel cargo invocation that
+    // would otherwise re-link the whole api+cli graph into a separate
+    // target dir and fill the disk on every test.sh run.
+    if main_path.is_file() {
+        return main_path;
+    }
+
     let target_dir = test_target_dir();
     let mut path = target_dir.join("debug/objectiveai-cli");
     if cfg!(windows) {
