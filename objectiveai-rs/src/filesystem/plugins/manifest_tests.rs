@@ -185,15 +185,15 @@ fn manifest_with_binaries_field_order() {
         mobile_ready: false,
     };
     let s = serde_json::to_string(&m).unwrap();
-    // Insertion order: linux-x86_64, linux-aarch64, windows-x86_64,
-    // macos-aarch64. preserve_order + IndexMap should keep it.
-    let i_lx = s.find("linux-x86_64").unwrap();
-    let i_la = s.find("linux-aarch64").unwrap();
-    let i_wx = s.find("windows-x86_64").unwrap();
-    let i_ma = s.find("macos-aarch64").unwrap();
-    assert!(i_lx < i_la, "linux-x86_64 should come before linux-aarch64: {s}");
-    assert!(i_la < i_wx, "linux-aarch64 should come before windows-x86_64: {s}");
-    assert!(i_wx < i_ma, "windows-x86_64 should come before macos-aarch64: {s}");
+    // Insertion order: linux_x86_64, linux_aarch64, windows_x86_64,
+    // macos_aarch64. preserve_order + IndexMap should keep it.
+    let i_lx = s.find("linux_x86_64").unwrap();
+    let i_la = s.find("linux_aarch64").unwrap();
+    let i_wx = s.find("windows_x86_64").unwrap();
+    let i_ma = s.find("macos_aarch64").unwrap();
+    assert!(i_lx < i_la, "linux_x86_64 should come before linux_aarch64: {s}");
+    assert!(i_la < i_wx, "linux_aarch64 should come before windows_x86_64: {s}");
+    assert!(i_wx < i_ma, "windows_x86_64 should come before macos_aarch64: {s}");
 
     let back: Manifest = serde_json::from_str(&s).unwrap();
     let keys: Vec<&Platform> = back.binaries.keys().collect();

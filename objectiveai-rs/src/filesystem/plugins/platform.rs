@@ -3,24 +3,26 @@ use serde::{Deserialize, Serialize};
 
 /// A supported runtime target — the cross product of OS and CPU
 /// architecture the cli knows how to install plugin binaries for.
-/// Serialized as `<os>-<arch>` (e.g. `"linux-x86_64"`,
-/// `"windows-aarch64"`). Used as the key type in
+/// Serialized as `<os>_<arch>` (e.g. `"linux_x86_64"`,
+/// `"windows_aarch64"`). Used as the key type in
 /// [`super::Manifest::binaries`] so a manifest can declare a distinct
-/// release-asset filename per platform.
+/// release-asset filename per platform. The underscore separator (vs
+/// the hyphen used by Rust target triples) keeps the names usable
+/// directly as identifiers in the cross-language SDK codegen.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "filesystem.plugins.Platform")]
 pub enum Platform {
-    #[serde(rename = "linux-x86_64")]
+    #[serde(rename = "linux_x86_64")]
     LinuxX86_64,
-    #[serde(rename = "linux-aarch64")]
+    #[serde(rename = "linux_aarch64")]
     LinuxAarch64,
-    #[serde(rename = "windows-x86_64")]
+    #[serde(rename = "windows_x86_64")]
     WindowsX86_64,
-    #[serde(rename = "windows-aarch64")]
+    #[serde(rename = "windows_aarch64")]
     WindowsAarch64,
-    #[serde(rename = "macos-x86_64")]
+    #[serde(rename = "macos_x86_64")]
     MacosX86_64,
-    #[serde(rename = "macos-aarch64")]
+    #[serde(rename = "macos_aarch64")]
     MacosAarch64,
 }
 

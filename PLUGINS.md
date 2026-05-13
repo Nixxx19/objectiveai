@@ -46,10 +46,10 @@ Plugins are **content-addressed by repository** — the name a plugin lives unde
   "license":      "MIT",
 
   "binaries": {
-    "linux-x86_64":    "my-plugin-linux-x86_64",
-    "linux-aarch64":   "my-plugin-linux-aarch64",
-    "windows-x86_64":  "my-plugin-windows-x86_64.exe",
-    "macos-aarch64":   "my-plugin-macos-aarch64"
+    "linux_x86_64":    "my-plugin-linux-x86_64",
+    "linux_aarch64":   "my-plugin-linux-aarch64",
+    "windows_x86_64":  "my-plugin-windows-x86_64.exe",
+    "macos_aarch64":   "my-plugin-macos-aarch64"
   },
 
   "viewer_zip": "my-plugin-viewer.zip",
@@ -69,7 +69,7 @@ Field-by-field:
 | `description` | string | Required. One-line summary. |
 | `version` | string | Required. Used to construct the release-asset URLs (`releases/download/v<version>/<asset>`). Semver recommended; not enforced. |
 | `author` / `homepage` / `license` | string | Optional metadata. |
-| `binaries` | map | Platform → asset filename. Keys are `<os>-<arch>` (`linux-x86_64`, `linux-aarch64`, `windows-x86_64`, `windows-aarch64`, `macos-x86_64`, `macos-aarch64`). Every key is optional — only declare platforms you ship for. |
+| `binaries` | map | Platform → asset filename. Keys are `<os>_<arch>` (`linux_x86_64`, `linux_aarch64`, `windows_x86_64`, `windows_aarch64`, `macos_x86_64`, `macos_aarch64`). Every key is optional — only declare platforms you ship for. |
 | `viewer_zip` | string | Asset filename for the UI bundle. Omit if the plugin is CLI-only. |
 | `viewer_routes` | array | HTTP routes the viewer exposes on this plugin's behalf. See [Viewer plugins reference](objectiveai-viewer/PLUGINS.md). |
 | `mobile_ready` | bool | Opt-in flag for iOS/Android viewer builds. Future feature; default false. |
