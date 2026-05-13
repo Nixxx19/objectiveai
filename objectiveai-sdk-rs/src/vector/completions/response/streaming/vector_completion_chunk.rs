@@ -74,7 +74,7 @@ impl VectorCompletionChunk {
         self.completions.iter().filter_map(|c| {
             c.inner.error.as_ref().map(|error| super::InnerError {
                 index: c.index,
-                error,
+                error: std::borrow::Cow::Borrowed(error),
             })
         })
     }

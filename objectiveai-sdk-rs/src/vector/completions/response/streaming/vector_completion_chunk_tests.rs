@@ -62,6 +62,18 @@ fn inner_errors_single_error_at_index_2() {
 }
 
 #[test]
+fn inner_error_serde_roundtrip() {
+    let chunk = chunk_with(vec![completion(7, Some(err(503, "unavailable")))]);
+    let item = chunk.inner_errors().next().expect("one inner error");
+    let wire = serde_json::to_string(&item).unwrap();
+    assert_eq!(wire, r#"{"index":7,"error":{"code":503,"message":"unavailable"}}"#);
+    let round: InnerError<'static> = serde_json::from_str(&wire).unwrap();
+    assert_eq!(round.index, 7);
+    assert_eq!(round.error.code, 503);
+    assert_eq!(round.error.message, serde_json::Value::String("unavailable".into()));
+}
+
+#[test]
 fn inner_errors_all_completions_errored() {
     let chunk = chunk_with(vec![
         completion(0, Some(err(500, "a"))),
