@@ -77,10 +77,12 @@ func toSnake(name string) string {
 	return strings.ToLower(s)
 }
 
-// toPascal converts a dot-separated title to PascalCase.
-// "agent.openrouter.Agent" → "AgentOpenrouterAgent"
+// toPascal converts a dot/underscore/hyphen-separated title to
+// PascalCase. "agent.openrouter.Agent" → "AgentOpenrouterAgent".
+// Hyphens may appear in string-enum variant titles in future SDKs,
+// so we accept them here too.
 func toPascal(title string) string {
-	parts := regexp.MustCompile(`[._]`).Split(title, -1)
+	parts := regexp.MustCompile(`[._-]`).Split(title, -1)
 	var b strings.Builder
 	for _, p := range parts {
 		if p == "" {
