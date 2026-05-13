@@ -1,7 +1,7 @@
-//! Plugin glue: dynamic axum route registration, Tauri commands
-//! invoked from the React frontend's postMessage bridge, and the
-//! custom `plugin://` URI scheme handler that serves plugin UI
-//! bundles out of `<plugins_dir>/<name>/viewer/`.
+//! Plugin glue: dynamic axum route registration, Tauri commands the
+//! React shell calls to discover installed plugins, and the custom
+//! `plugin://` URI scheme handler that serves plugin UI bundles out
+//! of `<plugins_dir>/<name>/viewer/`.
 
 use axum::Json;
 use axum::http::StatusCode;

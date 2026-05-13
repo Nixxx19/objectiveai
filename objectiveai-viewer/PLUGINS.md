@@ -69,10 +69,10 @@ The Rust definition lives in [`objectiveai-viewer/src-tauri/src/events.rs`](src-
 
 ## The TypeScript SDK
 
-Plugin UIs use [`@objectiveai/plugin-sdk`](../objectiveai-plugin-sdk/) (workspace package; npm publication pending). Two functions:
+Plugin UIs use [`@objectiveai/plugin-sdk`](../objectiveai-plugin-sdk/) (workspace package; npm publication pending). One function:
 
 ```ts
-import { invoke, listen } from "@objectiveai/plugin-sdk";
+import { listen } from "@objectiveai/plugin-sdk";
 
 // Listen for events the host emits to your plugin. `type` matches the
 // `type` field of an incoming event (the manifest-declared value of your
@@ -86,56 +86,35 @@ const unlisten = listen<{ to: string }>("echo_request", (value) => {
 unlisten();
 ```
 
-```ts
-// Call a host-mediated command. The host's postMessage bridge allow-lists
-// what plugins can invoke. Today's allow-list: `objectiveai_api_call`
-// (placeholder for proxied API calls; not yet wired to a Tauri handler).
-const result = await invoke<SomeResult>("objectiveai_api_call", { … });
-```
-
 The SDK detects context:
 
-- **Production** (inside the host viewer's iframe): `window.parent !== window`, so the SDK posts messages to `window.parent`. The host bridge receives them.
-- **Dev** (your plugin running in its own standalone Tauri shell): `window.parent === window`, so the SDK falls through to `@tauri-apps/api`'s `invoke` / `listen`. You get the same surface; only the transport differs.
+- **Production** (inside the host viewer's iframe): `window.parent !== window`, so the SDK subscribes to `postMessage` from `window.parent` and dispatches matching `plugin-event` messages to your handler.
+- **Dev** (your plugin running in its own standalone Tauri shell): `window.parent === window`, so the SDK falls through to `@tauri-apps/api`'s `listen`. You get the same surface; only the transport differs.
 
-Plugin authors can develop their plugin as a normal Tauri app locally (their `src-tauri` backend handles their own commands), then ship the built `dist/` as `<repo>-viewer.zip`. The SDK shim is the only thing they need to use to make their plugin work in both contexts.
+Plugin authors can develop their plugin as a normal Tauri app locally (their `src-tauri` backend can emit events themselves for development), then ship the built `dist/` as `<repo>-viewer.zip`. The SDK shim is the only thing they need to use to make their plugin work in both contexts.
 
 ## The postMessage bridge
 
 ```
-plugin iframe                    host React shell                     Rust backend
-─────────────                    ────────────────                     ────────────
+plugin iframe                    host React shell                Rust backend
+─────────────                    ────────────────                ────────────
 listen("echo_request", h)
         ▲
-        │ postMessage            window.addEventListener("message")        ▲
-        │ {kind:"plugin-event",  ──► validate source                       │
-        │  type, value}              forward to matching iframe            │
-        │                                          ▲                       │
-        │                                          │  Tauri emit           │
-        │                                          │  channel=destination  │
-        │                                          │  payload=Event        │
-        │                                          └───────────────────────┤
-                                                                            │
-        ▼                                                                   │
-invoke("objectiveai_api_call",  postMessage                                 │
-       args)                    ──► validate allow-list                     │
-                                    invoke(method, args)  ──────► Tauri ───┘
-                                          ▲
-                                          │
-                                          │ Promise<result>
-        ◄──────────────────────────────── │
-        invoke-result reply
+        │ postMessage                                            Tauri emit
+        │ {kind:"plugin-event",   forward to matching iframe ◄── channel=destination
+        │  type, value}           per-plugin tauriListen          payload=Event
 ```
 
 The bridge lives in [`objectiveai-viewer/src/plugin-bridge.ts`](src/plugin-bridge.ts). Its responsibilities:
 
 - Track which iframe corresponds to which plugin (`registerIframe` / `unregisterIframe`).
-- Receive postMessage from each iframe; validate the source matches a registered iframe; allow-list the requested method; invoke the matching Tauri command.
 - Subscribe per-plugin to the `<repository>` Tauri channel; forward each event to that plugin's iframe (and only that iframe — cross-plugin event leakage isn't possible).
+
+The bridge is event-forwarding only. There is no inbound channel: iframes don't call into the host. If a plugin needs to talk to a remote backend it does so directly via `fetch`.
 
 ## `mobile_ready`
 
-Plugins that want to surface on the viewer's eventual iOS/Android builds set `"mobile_ready": true` in their manifest. The mobile viewer (Tauri 2 mobile, not yet built) will surface only `mobile_ready` plugins as tabs, because mobile has no local CLI binary and therefore no `invoke()`-able backend — plugins must either be pure-frontend or talk to a remote backend over `fetch`.
+Plugins that want to surface on the viewer's eventual iOS/Android builds set `"mobile_ready": true` in their manifest. The mobile viewer (Tauri 2 mobile, not yet built) will surface only `mobile_ready` plugins as tabs, because mobile has no local CLI binary — plugins must either be pure-frontend or talk to a remote backend over `fetch`.
 
 Out of scope today; documented so the manifest schema doesn't need a future migration.
 
@@ -146,10 +125,18 @@ The CLI fixture at [`objectiveai-cli/test-fixtures/hello-plugin/`](../objectivea
 ```html
 <!doctype html>
 <title>my-plugin</title>
+<p>Waiting for events…</p>
 <script type="module">
-  import { listen } from "https://… (or your bundler output)";
-  listen("echo_request", (value) => {
-    document.body.textContent = `Got: ${JSON.stringify(value)}`;
+  // The host posts `{kind: "plugin-event", type, value}` messages
+  // into this iframe whenever one of our manifest-declared
+  // viewer_routes is hit. @objectiveai/plugin-sdk is a thin wrapper
+  // around this protocol; you can also use postMessage directly:
+  window.addEventListener("message", (e) => {
+    if (e.data?.kind !== "plugin-event") return;
+    if (e.data.type === "echo_request") {
+      document.querySelector("p").textContent =
+        `Got: ${JSON.stringify(e.data.value)}`;
+    }
   });
 </script>
 ```

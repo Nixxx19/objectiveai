@@ -9,7 +9,7 @@ interface PluginPaneProps {
  * Renders a sandboxed iframe pointing at the plugin's UI bundle via
  * the host viewer's custom `plugin://` URI scheme. Registers the
  * iframe with the postMessage bridge on mount, unregisters on
- * unmount. The bridge handles invoke routing + event forwarding.
+ * unmount. The bridge forwards Tauri events into the iframe.
  *
  * Inactive plugin panes are unmounted (not just hidden) so their
  * iframe memory is reclaimed; performance follow-up if hot-switching
