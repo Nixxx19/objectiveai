@@ -19,6 +19,38 @@ pub struct FunctionInventionRecursiveChunk {
 }
 
 impl FunctionInventionRecursiveChunk {
+    /// Yields each inner error from the recursive chunk's wrapped
+    /// non-recursive `FunctionInventionChunk`s.
+    ///
+    /// For each wrapped invention:
+    /// 1. If the wrapped invention has its own `.error`, yields one item
+    ///    with `agent_completion_index: None`.
+    /// 2. Then yields each item from the wrapped invention's
+    ///    `inner_errors()`, re-tagged with this wrapper's
+    ///    `function_invention_index` and `agent_completion_index:
+    ///    Some(non_recursive.agent_completion_index)`.
+    ///
+    /// Lazy and zero-allocation; collect with `.collect::<Vec<_>>()` if
+    /// you need to retain the items past the chunk's lifetime.
+    pub fn inner_errors(&self) -> impl Iterator<Item = super::InnerError<'_>> {
+        self.inventions.iter().flat_map(|wrapper| {
+            let function_invention_index = wrapper.index;
+            let own = wrapper.inner.error.as_ref().map(move |error| super::InnerError {
+                function_invention_index,
+                agent_completion_index: None,
+                error: std::borrow::Cow::Borrowed(error),
+            });
+            let nested = wrapper.inner.inner_errors().map(move |non_recursive| {
+                super::InnerError {
+                    function_invention_index,
+                    agent_completion_index: Some(non_recursive.agent_completion_index),
+                    error: non_recursive.error,
+                }
+            });
+            own.into_iter().chain(nested)
+        })
+    }
+
     pub fn push(
         &mut self,
         FunctionInventionRecursiveChunk {
