@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	. "github.com/ObjectiveAI/objectiveai/objectiveai-go"
+	. "github.com/ObjectiveAI/objectiveai/objectiveai-sdk-go"
 )
 
 func TestVectorCompletionsHTTP(t *testing.T) {

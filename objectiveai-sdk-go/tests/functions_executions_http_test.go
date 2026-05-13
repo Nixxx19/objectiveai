@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	. "github.com/ObjectiveAI/objectiveai/objectiveai-go"
+	. "github.com/ObjectiveAI/objectiveai/objectiveai-sdk-go"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 

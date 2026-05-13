@@ -1,33 +1,33 @@
 #!/usr/bin/env bash
-# Publishes objectiveai-go by pushing a git tag.
+# Publishes objectiveai-sdk-go by pushing a git tag.
 #
 # Go modules are not registry-hosted — `go get` resolves versions from
 # git tags. To publish a new version, tag the current HEAD as
-# `objectiveai-go/v<X.Y.Z>` and push.
+# `objectiveai-sdk-go/v<X.Y.Z>` and push.
 #
 # This script is local-only (no GHA workflow) — pushing a tag from a
 # server-side checkout would require the same git auth that the local
 # operator already has, with no extra benefit.
 #
 # Usage:
-#   bash objectiveai-go/publish.sh                # tag + push current HEAD
-#   bash objectiveai-go/publish.sh --build-only   # go build + go test (no tag)
+#   bash objectiveai-sdk-go/publish.sh                # tag + push current HEAD
+#   bash objectiveai-sdk-go/publish.sh --build-only   # go build + go test (no tag)
 #
 # `--test` is not supported — Go has no test registry.
 #
-# Output is captured to .logs/publish/objectiveai-go.txt.
+# Output is captured to .logs/publish/objectiveai-sdk-go.txt.
 #
 # Pre-flight (the script enforces these):
 #   - working tree is clean
 #   - on branch `main`
-#   - tag `objectiveai-go/v<version>` does not already exist on origin
+#   - tag `objectiveai-sdk-go/v<version>` does not already exist on origin
 #
 # Version is read from `objectiveai-rs/Cargo.toml` (the canonical version
 # source — `version.sh` keeps every package in lockstep).
 
 set -euo pipefail
 
-MODULE="objectiveai-go"
+MODULE="objectiveai-sdk-go"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 LOG_DIR="$REPO_ROOT/.logs/publish"
@@ -50,7 +50,7 @@ if [[ -z "$VERSION" ]]; then
   echo "ERROR: could not read version from objectiveai-rs/Cargo.toml" >&2
   exit 1
 fi
-TAG="objectiveai-go/v$VERSION"
+TAG="objectiveai-sdk-go/v$VERSION"
 
 if $BUILD_ONLY; then
   run_local() {
@@ -90,12 +90,12 @@ run_remote() {
   fi
 
   echo "Tagging HEAD as $TAG..."
-  git -C "$REPO_ROOT" tag -a "$TAG" -m "objectiveai-go v$VERSION"
+  git -C "$REPO_ROOT" tag -a "$TAG" -m "objectiveai-sdk-go v$VERSION"
   echo "Pushing tag to origin..."
   git -C "$REPO_ROOT" push origin "$TAG"
   echo
   echo "Tag pushed. Consumers can now run:"
-  echo "  go get github.com/ObjectiveAI/objectiveai/objectiveai-go@v$VERSION"
+  echo "  go get github.com/ObjectiveAI/objectiveai/objectiveai-sdk-go@v$VERSION"
 }
 
 if run_remote 2>&1 | tee "$LOG_FILE"; then

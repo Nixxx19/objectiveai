@@ -1,4 +1,4 @@
-module github.com/ObjectiveAI/objectiveai/objectiveai-go
+module github.com/ObjectiveAI/objectiveai/objectiveai-sdk-go
 
 go 1.26.1
 

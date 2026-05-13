@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # Spawns the API server (if needed) and runs tests.
-# Output is captured to .logs/test/objectiveai-go.txt.
+# Output is captured to .logs/test/objectiveai-sdk-go.txt.
 #
 # If OBJECTIVEAI_TEST_PORT is already set, uses that server as-is.
 # Otherwise, spawns a new server via test-spawn-api-server.sh and kills it on exit.
 #
 # Usage:
-#   bash objectiveai-go/test.sh
-#   bash objectiveai-go/test.sh -- -run TestRoundtrip   # pass args to go test
+#   bash objectiveai-sdk-go/test.sh
+#   bash objectiveai-sdk-go/test.sh -- -run TestRoundtrip   # pass args to go test
 
 set -euo pipefail
 
-MODULE="objectiveai-go"
+MODULE="objectiveai-sdk-go"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 LOG_DIR="$REPO_ROOT/.logs/test"

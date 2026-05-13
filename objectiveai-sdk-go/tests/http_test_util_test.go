@@ -10,7 +10,7 @@ import (
 	"reflect"
 	"testing"
 
-	. "github.com/ObjectiveAI/objectiveai/objectiveai-go"
+	. "github.com/ObjectiveAI/objectiveai/objectiveai-sdk-go"
 )
 
 var testPort = os.Getenv("OBJECTIVEAI_TEST_PORT")
