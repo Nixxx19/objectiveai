@@ -23,7 +23,7 @@ use std::{convert::Infallible, sync::Arc};
 use tokio_stream::StreamExt;
 
 type ListRouter = retrieval::list::Router<
-    retrieval::list::objectiveai_sdk::ObjectiveAiClient,
+    retrieval::list::objectiveai::ObjectiveAiClient,
     retrieval::list::filesystem::FilesystemClient,
     retrieval::list::mock::MockClient,
     ctx::DefaultContextExt,
@@ -37,7 +37,7 @@ type RetrieveRouter = retrieval::retrieve::Router<
 >;
 
 type UsageRouter = retrieval::usage::Router<
-    retrieval::usage::objectiveai_sdk::ObjectiveAiClient,
+    retrieval::usage::objectiveai::ObjectiveAiClient,
     ctx::DefaultContextExt,
 >;
 
@@ -717,7 +717,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
 
     // Retrieval: List Router
     let list_router = Arc::new(retrieval::list::Router::new(
-        Arc::new(retrieval::list::objectiveai_sdk::ObjectiveAiClient::new(
+        Arc::new(retrieval::list::objectiveai::ObjectiveAiClient::new(
             objectiveai_http_client.clone(),
         )),
         Arc::new(retrieval::list::filesystem::FilesystemClient::new(
@@ -728,7 +728,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
 
     // Retrieval: Usage Router
     let usage_router = Arc::new(retrieval::usage::Router::new(
-        Arc::new(retrieval::usage::objectiveai_sdk::ObjectiveAiClient::new(
+        Arc::new(retrieval::usage::objectiveai::ObjectiveAiClient::new(
             objectiveai_http_client.clone(),
         )),
     ));

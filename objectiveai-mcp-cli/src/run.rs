@@ -13,7 +13,7 @@ use rmcp::transport::streamable_http_server::{
 };
 use tokio_util::sync::CancellationToken;
 
-use crate::objectiveai_sdk::ObjectiveAiMcpCli;
+use crate::objectiveai::ObjectiveAiMcpCli;
 
 #[derive(Envconfig)]
 struct EnvConfigBuilder {

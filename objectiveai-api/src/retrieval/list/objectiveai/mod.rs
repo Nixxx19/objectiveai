@@ -1,3 +1,3 @@
 mod objectiveai;
 
-pub use objectiveai_sdk::*;
+pub use objectiveai::*;
