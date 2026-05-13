@@ -1,5 +1,5 @@
 use super::super::Client;
-use super::Manifest;
+use super::{Binaries, Manifest};
 
 fn fresh_base_dir() -> std::path::PathBuf {
     let d = std::env::temp_dir().join(format!("oai-list-plugins-{}", uuid::Uuid::new_v4()));
@@ -22,7 +22,7 @@ fn minimal_manifest_json() -> String {
         author: None,
         homepage: None,
         license: None,
-        binaries: indexmap::IndexMap::new(),
+        binaries: Binaries::default(),
         viewer_zip: None,
         viewer_routes: vec![],
         mobile_ready: false,

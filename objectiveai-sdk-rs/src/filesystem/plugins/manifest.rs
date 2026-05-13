@@ -1,4 +1,3 @@
-use indexmap::IndexMap;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -41,14 +40,15 @@ pub struct Manifest {
     /// URLs; the URL is composed from the repository + tag + asset
     /// name elsewhere.
     ///
-    /// **Every platform key is optional.** Declare entries only for
+    /// **Every platform field is optional.** Declare entries only for
     /// the platforms this plugin actually ships a binary for; absent
     /// platforms are simply not supported by this release. A plugin
     /// shipping only Linux x86_64 declares one entry; a plugin
-    /// shipping all six declares six. Empty map ↔ field omitted in
+    /// shipping all six declares six. All-None ↔ field omitted in
     /// the wire shape.
-    #[serde(default, skip_serializing_if = "IndexMap::is_empty")]
-    pub binaries: IndexMap<Platform, String>,
+    #[serde(default, skip_serializing_if = "Binaries::is_empty")]
+    #[schemars(extend("omitempty" = true))]
+    pub binaries: Binaries,
 
     /// GitHub-release asset filename for the plugin's viewer UI
     /// bundle (a `.zip` whose root contains `index.html` plus
@@ -75,6 +75,81 @@ pub struct Manifest {
     /// to false (desktop-only).
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub mobile_ready: bool,
+}
+
+/// Release-asset filename per platform. Every field is optional;
+/// declare only the platforms a plugin ships for. The wire shape is
+/// a flat JSON object — absent platforms are omitted, never
+/// serialised as `null`.
+///
+/// Exposes a [`Self::get`] method that takes a [`Platform`] enum so
+/// callers can read the asset filename for the current host without
+/// pattern-matching the field set themselves.
+#[derive(Debug, Clone, Default, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+#[schemars(rename = "filesystem.plugins.Binaries")]
+pub struct Binaries {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub linux_x86_64: Option<String>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub linux_aarch64: Option<String>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub windows_x86_64: Option<String>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub windows_aarch64: Option<String>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub macos_x86_64: Option<String>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub macos_aarch64: Option<String>,
+}
+
+impl Binaries {
+    /// Asset filename for the given platform, if declared.
+    pub fn get(&self, platform: Platform) -> Option<&String> {
+        match platform {
+            Platform::LinuxX86_64 => self.linux_x86_64.as_ref(),
+            Platform::LinuxAarch64 => self.linux_aarch64.as_ref(),
+            Platform::WindowsX86_64 => self.windows_x86_64.as_ref(),
+            Platform::WindowsAarch64 => self.windows_aarch64.as_ref(),
+            Platform::MacosX86_64 => self.macos_x86_64.as_ref(),
+            Platform::MacosAarch64 => self.macos_aarch64.as_ref(),
+        }
+    }
+
+    /// True when no platform has an asset declared.
+    pub fn is_empty(&self) -> bool {
+        self.linux_x86_64.is_none()
+            && self.linux_aarch64.is_none()
+            && self.windows_x86_64.is_none()
+            && self.windows_aarch64.is_none()
+            && self.macos_x86_64.is_none()
+            && self.macos_aarch64.is_none()
+    }
+
+    /// Count of declared platforms.
+    pub fn len(&self) -> usize {
+        [
+            &self.linux_x86_64,
+            &self.linux_aarch64,
+            &self.windows_x86_64,
+            &self.windows_aarch64,
+            &self.macos_x86_64,
+            &self.macos_aarch64,
+        ]
+        .iter()
+        .filter(|o| o.is_some())
+        .count()
+    }
 }
 
 /// One HTTP route a plugin's viewer registers on the host viewer's

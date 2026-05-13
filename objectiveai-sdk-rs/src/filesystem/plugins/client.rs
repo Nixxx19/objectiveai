@@ -320,7 +320,7 @@ impl Client {
         let Some(platform) = super::Platform::current() else {
             return Ok(false);
         };
-        let Some(binary_name) = manifest.binaries.get(&platform) else {
+        let Some(binary_name) = manifest.binaries.get(platform) else {
             return Ok(false);
         };
 

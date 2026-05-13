@@ -1,5 +1,4 @@
 use super::*;
-use indexmap::IndexMap;
 
 #[test]
 fn manifest_minimal_roundtrip() {
@@ -9,7 +8,7 @@ fn manifest_minimal_roundtrip() {
         author: None,
         homepage: None,
         license: None,
-        binaries: IndexMap::new(),
+        binaries: Binaries::default(),
         viewer_zip: None,
         viewer_routes: vec![],
         mobile_ready: false,
@@ -38,7 +37,7 @@ fn manifest_full_roundtrip() {
         author: Some("Wiggidy".to_string()),
         homepage: Some("https://github.com/Wiggidy/psychological-operations".to_string()),
         license: Some("MIT".to_string()),
-        binaries: IndexMap::new(),
+        binaries: Binaries::default(),
         viewer_zip: None,
         viewer_routes: vec![],
         mobile_ready: false,
@@ -62,7 +61,7 @@ fn manifest_with_name_and_source_field_order() {
             author: Some("Wiggidy".to_string()),
             homepage: None,
             license: Some("MIT".to_string()),
-            binaries: IndexMap::new(),
+            binaries: Binaries::default(),
             viewer_zip: None,
             viewer_routes: vec![],
             mobile_ready: false,
@@ -112,13 +111,14 @@ fn manifest_deserializes_minimal_json() {
     assert!(m.binaries.is_empty());
 }
 
-fn full_binaries() -> IndexMap<Platform, String> {
-    let mut bins = IndexMap::new();
-    bins.insert(Platform::LinuxX86_64, "psyops-linux-x86_64".to_string());
-    bins.insert(Platform::LinuxAarch64, "psyops-linux-aarch64".to_string());
-    bins.insert(Platform::WindowsX86_64, "psyops-windows-x86_64.exe".to_string());
-    bins.insert(Platform::MacosAarch64, "psyops-macos-aarch64".to_string());
-    bins
+fn full_binaries() -> Binaries {
+    Binaries {
+        linux_x86_64: Some("psyops-linux-x86_64".to_string()),
+        linux_aarch64: Some("psyops-linux-aarch64".to_string()),
+        windows_x86_64: Some("psyops-windows-x86_64.exe".to_string()),
+        macos_aarch64: Some("psyops-macos-aarch64".to_string()),
+        ..Default::default()
+    }
 }
 
 #[test]
@@ -137,10 +137,10 @@ fn manifest_with_binaries_roundtrip() {
     let json = serde_json::to_value(&m).unwrap();
     let back: Manifest = serde_json::from_value(json).unwrap();
     assert_eq!(back.binaries.len(), 4);
-    assert_eq!(back.binaries[&Platform::LinuxX86_64], "psyops-linux-x86_64");
-    assert_eq!(back.binaries[&Platform::LinuxAarch64], "psyops-linux-aarch64");
-    assert_eq!(back.binaries[&Platform::WindowsX86_64], "psyops-windows-x86_64.exe");
-    assert_eq!(back.binaries[&Platform::MacosAarch64], "psyops-macos-aarch64");
+    assert_eq!(back.binaries.get(Platform::LinuxX86_64).map(String::as_str), Some("psyops-linux-x86_64"));
+    assert_eq!(back.binaries.get(Platform::LinuxAarch64).map(String::as_str), Some("psyops-linux-aarch64"));
+    assert_eq!(back.binaries.get(Platform::WindowsX86_64).map(String::as_str), Some("psyops-windows-x86_64.exe"));
+    assert_eq!(back.binaries.get(Platform::MacosAarch64).map(String::as_str), Some("psyops-macos-aarch64"));
 }
 
 #[test]
@@ -151,7 +151,7 @@ fn manifest_omits_empty_binaries_field() {
         author: None,
         homepage: None,
         license: None,
-        binaries: IndexMap::new(),
+        binaries: Binaries::default(),
         viewer_zip: None,
         viewer_routes: vec![],
         mobile_ready: false,
@@ -185,8 +185,9 @@ fn manifest_with_binaries_field_order() {
         mobile_ready: false,
     };
     let s = serde_json::to_string(&m).unwrap();
-    // Insertion order: linux_x86_64, linux_aarch64, windows_x86_64,
-    // macos_aarch64. preserve_order + IndexMap should keep it.
+    // Field declaration order on `Binaries`: linux_x86_64, linux_aarch64,
+    // windows_x86_64, windows_aarch64, macos_x86_64, macos_aarch64.
+    // serde respects that for serialization.
     let i_lx = s.find("linux_x86_64").unwrap();
     let i_la = s.find("linux_aarch64").unwrap();
     let i_wx = s.find("windows_x86_64").unwrap();
@@ -196,25 +197,27 @@ fn manifest_with_binaries_field_order() {
     assert!(i_wx < i_ma, "windows_x86_64 should come before macos_aarch64: {s}");
 
     let back: Manifest = serde_json::from_str(&s).unwrap();
-    let keys: Vec<&Platform> = back.binaries.keys().collect();
-    assert_eq!(
-        keys,
-        vec![&Platform::LinuxX86_64, &Platform::LinuxAarch64, &Platform::WindowsX86_64, &Platform::MacosAarch64]
-    );
+    assert_eq!(back.binaries.linux_x86_64.as_deref(), Some("psyops-linux-x86_64"));
+    assert_eq!(back.binaries.linux_aarch64.as_deref(), Some("psyops-linux-aarch64"));
+    assert_eq!(back.binaries.windows_x86_64.as_deref(), Some("psyops-windows-x86_64.exe"));
+    assert!(back.binaries.windows_aarch64.is_none());
+    assert!(back.binaries.macos_x86_64.is_none());
+    assert_eq!(back.binaries.macos_aarch64.as_deref(), Some("psyops-macos-aarch64"));
 }
 
 #[test]
 fn manifest_with_sparse_binaries_is_valid() {
     // Plugin that only ships a Linux x86_64 binary.
-    let mut bins = IndexMap::new();
-    bins.insert(Platform::LinuxX86_64, "psyops-linux-x86_64".to_string());
     let m = Manifest {
         description: "linux-only plugin".to_string(),
         version: "0.1.0".to_string(),
         author: None,
         homepage: None,
         license: None,
-        binaries: bins,
+        binaries: Binaries {
+            linux_x86_64: Some("psyops-linux-x86_64".to_string()),
+            ..Default::default()
+        },
         viewer_zip: None,
         viewer_routes: vec![],
         mobile_ready: false,
@@ -222,12 +225,12 @@ fn manifest_with_sparse_binaries_is_valid() {
     let s = serde_json::to_string(&m).unwrap();
     let back: Manifest = serde_json::from_str(&s).unwrap();
     assert_eq!(back.binaries.len(), 1);
-    assert_eq!(back.binaries[&Platform::LinuxX86_64], "psyops-linux-x86_64");
-    assert!(!back.binaries.contains_key(&Platform::LinuxAarch64));
-    assert!(!back.binaries.contains_key(&Platform::WindowsX86_64));
-    assert!(!back.binaries.contains_key(&Platform::WindowsAarch64));
-    assert!(!back.binaries.contains_key(&Platform::MacosX86_64));
-    assert!(!back.binaries.contains_key(&Platform::MacosAarch64));
+    assert_eq!(back.binaries.get(Platform::LinuxX86_64).map(String::as_str), Some("psyops-linux-x86_64"));
+    assert!(back.binaries.get(Platform::LinuxAarch64).is_none());
+    assert!(back.binaries.get(Platform::WindowsX86_64).is_none());
+    assert!(back.binaries.get(Platform::WindowsAarch64).is_none());
+    assert!(back.binaries.get(Platform::MacosX86_64).is_none());
+    assert!(back.binaries.get(Platform::MacosAarch64).is_none());
 }
 
 #[test]
@@ -238,7 +241,7 @@ fn manifest_with_viewer_fields_roundtrip() {
         author: None,
         homepage: None,
         license: None,
-        binaries: IndexMap::new(),
+        binaries: Binaries::default(),
         viewer_zip: Some("psyops-viewer.zip".to_string()),
         viewer_routes: vec![
             ViewerRoute {
@@ -278,7 +281,7 @@ fn manifest_omits_viewer_fields_when_absent() {
         author: None,
         homepage: None,
         license: None,
-        binaries: IndexMap::new(),
+        binaries: Binaries::default(),
         viewer_zip: None,
         viewer_routes: vec![],
         mobile_ready: false,
