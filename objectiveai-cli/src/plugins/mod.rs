@@ -194,7 +194,7 @@ async fn emit_untrusted_warning(
     Output::<serde_json::Value>::Error(OutputError {
         level: Level::Warn,
         fatal: false,
-        message,
+        message: message.into(),
     })
     .emit(handle)
     .await;

@@ -12,7 +12,7 @@ fn error_wire_shape() {
     let out = PluginOutput::Error(Error {
         level: Level::Error,
         fatal: true,
-        message: "plugin blew up".to_string(),
+        message: "plugin blew up".into(),
     });
     let v = roundtrip(&out);
     assert_eq!(v["type"], "error");

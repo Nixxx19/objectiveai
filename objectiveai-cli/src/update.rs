@@ -44,7 +44,7 @@ pub async fn maybe_auto_update<I>(
                 objectiveai_cli_sdk::output::Error {
                     level: objectiveai_cli_sdk::output::Level::Warn,
                     fatal: false,
-                    message: format!("auto-update error: {e}"),
+                    message: format!("auto-update error: {e}").into(),
                 },
             )
             .emit(handle).await;

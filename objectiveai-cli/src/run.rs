@@ -241,7 +241,7 @@ where
             let err = OutputError {
                 level: Level::Error,
                 fatal: true,
-                message: e.to_string(),
+                message: e.to_string().into(),
             };
             Output::<serde_json::Value>::Error(err).emit(&handle).await;
             1

@@ -36,7 +36,7 @@ async fn emit_via_collect_handle_appends_to_vec() {
     Output::<Ok>::Error(Error {
         level: Level::Warn,
         fatal: false,
-        message: "heads up".to_string(),
+        message: "heads up".into(),
     })
     .emit(&handle)
     .await;
@@ -62,7 +62,7 @@ fn error_fatal_wire_shape() {
     let out: Output<Ok> = Output::Error(Error {
         level: Level::Error,
         fatal: true,
-        message: "favorite not found: foo".to_string(),
+        message: "favorite not found: foo".into(),
     });
     let v = roundtrip(&out);
     assert_eq!(v["type"], "error");
@@ -76,7 +76,7 @@ fn error_non_fatal_warn_wire_shape() {
     let out: Output<Ok> = Output::Error(Error {
         level: Level::Warn,
         fatal: false,
-        message: "auto-update error: ...".to_string(),
+        message: "auto-update error: ...".into(),
     });
     let v = roundtrip(&out);
     assert_eq!(v["type"], "error");

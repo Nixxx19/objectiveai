@@ -70,7 +70,7 @@ impl Error {
         objectiveai_cli_sdk::output::Error {
             level,
             fatal,
-            message: self.to_string(),
+            message: self.to_string().into(),
         }
     }
 }
