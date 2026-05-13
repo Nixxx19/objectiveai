@@ -240,7 +240,7 @@ PACKAGE_JSONS=(
   objectiveai-js/package.json
   objectiveai-function-tree/package.json
   objectiveai-viewer/package.json
-  objectiveai-viewer-plugin-lib/package.json
+  objectiveai-viewer-sdk/package.json
   objectiveai-mcp-proxy/tests-ts/package.json
 )
 

@@ -69,10 +69,10 @@ The Rust definition lives in [`objectiveai-viewer/src-tauri/src/events.rs`](src-
 
 ## The TypeScript SDK
 
-Plugin UIs use [`@objectiveai/viewer-plugin-lib`](../objectiveai-viewer-plugin-lib/) (workspace package; npm publication pending). One function:
+Plugin UIs use [`@objectiveai/viewer-sdk`](../objectiveai-viewer-sdk/) (workspace package; npm publication pending). One function:
 
 ```ts
-import { listen } from "@objectiveai/viewer-plugin-lib";
+import { listen } from "@objectiveai/viewer-sdk";
 
 // Listen for events the host emits to your plugin. `type` matches the
 // `type` field of an incoming event (the manifest-declared value of your
@@ -129,7 +129,7 @@ The CLI fixture at [`objectiveai-cli/test-fixtures/hello-plugin/`](../objectivea
 <script type="module">
   // The host posts `{kind: "plugin-event", type, value}` messages
   // into this iframe whenever one of our manifest-declared
-  // viewer_routes is hit. @objectiveai/viewer-plugin-lib is a thin wrapper
+  // viewer_routes is hit. @objectiveai/viewer-sdk is a thin wrapper
   // around this protocol; you can also use postMessage directly:
   window.addEventListener("message", (e) => {
     if (e.data?.kind !== "plugin-event") return;
