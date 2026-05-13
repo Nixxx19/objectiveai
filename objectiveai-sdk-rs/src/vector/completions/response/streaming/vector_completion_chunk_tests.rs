@@ -1,6 +1,83 @@
 use crate::tests::stream_push::stream_push_test;
 use super::*;
 
+fn completion(index: u64, error: Option<crate::error::ResponseError>) -> AgentCompletionChunk {
+    AgentCompletionChunk {
+        index,
+        inner: crate::agent::completions::response::streaming::AgentCompletionChunk {
+            id: format!("acc-{index}"),
+            created: 0,
+            messages: vec![],
+            object: crate::agent::completions::response::streaming::Object::AgentCompletionChunk,
+            usage: None,
+            upstream: crate::agent::Upstream::Openrouter,
+            error,
+            continuation: None,
+        },
+    }
+}
+
+fn chunk_with(completions: Vec<AgentCompletionChunk>) -> VectorCompletionChunk {
+    VectorCompletionChunk {
+        id: "vcc-ie".into(),
+        completions,
+        votes: vec![],
+        scores: vec![],
+        weights: vec![],
+        created: 0,
+        swarm: "ens-1".into(),
+        object: Object::VectorCompletionChunk,
+        usage: None,
+    }
+}
+
+fn err(code: u16, message: &str) -> crate::error::ResponseError {
+    crate::error::ResponseError { code, message: message.into() }
+}
+
+#[test]
+fn inner_errors_empty_completions() {
+    let chunk = chunk_with(vec![]);
+    assert!(chunk.inner_errors().next().is_none());
+}
+
+#[test]
+fn inner_errors_no_errors() {
+    let chunk = chunk_with(vec![completion(0, None), completion(1, None)]);
+    assert!(chunk.inner_errors().next().is_none());
+}
+
+#[test]
+fn inner_errors_single_error_at_index_2() {
+    let chunk = chunk_with(vec![
+        completion(0, None),
+        completion(1, None),
+        completion(2, Some(err(429, "rate limited"))),
+    ]);
+    let collected: Vec<_> = chunk.inner_errors().collect();
+    assert_eq!(collected.len(), 1);
+    assert_eq!(collected[0].index, 2);
+    assert_eq!(collected[0].error.code, 429);
+    assert_eq!(collected[0].error.message, serde_json::Value::String("rate limited".into()));
+}
+
+#[test]
+fn inner_errors_all_completions_errored() {
+    let chunk = chunk_with(vec![
+        completion(0, Some(err(500, "a"))),
+        completion(1, Some(err(502, "b"))),
+        completion(2, Some(err(503, "c"))),
+    ]);
+    let collected: Vec<_> = chunk.inner_errors().collect();
+    assert_eq!(collected.len(), 3);
+    assert_eq!(collected[0].index, 0);
+    assert_eq!(collected[0].error.code, 500);
+    assert_eq!(collected[1].index, 1);
+    assert_eq!(collected[1].error.code, 502);
+    assert_eq!(collected[2].index, 2);
+    assert_eq!(collected[2].error.code, 503);
+}
+
 stream_push_test!(
     single_chunk_unchanged,
     vec![VectorCompletionChunk {

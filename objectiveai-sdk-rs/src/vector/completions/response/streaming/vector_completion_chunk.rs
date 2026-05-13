@@ -65,6 +65,20 @@ impl VectorCompletionChunk {
         }
     }
 
+    /// Yields each inner error from this chunk's per-agent completions,
+    /// tagged with the failing completion's `index`.
+    ///
+    /// Lazy and zero-allocation; collect with `.collect::<Vec<_>>()` if you
+    /// need to retain the items past the chunk's lifetime.
+    pub fn inner_errors(&self) -> impl Iterator<Item = super::InnerError<'_>> {
+        self.completions.iter().filter_map(|c| {
+            c.inner.error.as_ref().map(|error| super::InnerError {
+                index: c.index,
+                error,
+            })
+        })
+    }
+
     /// Accumulates another chunk into this one.
     ///
     /// Updates scores, weights, and usage, appends new votes.
