@@ -1,19 +1,20 @@
 #!/usr/bin/env bash
-# Publishes @objectiveai/viewer-sdk to npm.
+# Publishes objectiveai-viewer-sdk to npm.
 #
 # Dispatches the GitHub Actions workflow that builds + publishes the
 # package. Local --build-only mode runs `pnpm run build && pnpm pack`
 # so you can inspect the tarball without uploading.
 #
-# Scoped under @objectiveai — auto-namespaced, no manual name claim
-# needed (unlike unscoped public names).
+# Unscoped name; the first publish needs to be a manual interactive
+# `npm publish` to claim the name on npm (same as objectiveai-sdk
+# needed). After that, the automation token handles updates.
 #
 # Usage:
 #   bash objectiveai-viewer-sdk/publish.sh                # npm (via GHA)
 #   bash objectiveai-viewer-sdk/publish.sh --build-only   # local build + pack
 #
 # Setup (one-time):
-#   - NPM_TOKEN with publish access to @objectiveai (repo secret).
+#   - NPM_TOKEN with publish access (repo secret).
 #   - `gh` CLI authenticated.
 
 set -euo pipefail

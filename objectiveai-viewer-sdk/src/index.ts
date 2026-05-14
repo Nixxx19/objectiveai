@@ -49,7 +49,7 @@ function attachMessageHandler(): void {
       } catch (e) {
         // Don't let one handler take down the others.
         // eslint-disable-next-line no-console
-        console.error("@objectiveai/viewer-sdk listener threw:", e);
+        console.error("objectiveai-viewer-sdk listener threw:", e);
       }
     }
   });
@@ -89,7 +89,7 @@ export function listen<T = unknown>(
       } catch {
         // eslint-disable-next-line no-console
         console.warn(
-          `@objectiveai/viewer-sdk: listen('${type}') called outside an iframe and ` +
+          `objectiveai-viewer-sdk: listen('${type}') called outside an iframe and ` +
             `@tauri-apps/api is unavailable; events will not fire.`,
         );
       }

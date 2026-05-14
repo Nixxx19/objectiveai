@@ -1,4 +1,4 @@
-# @objectiveai/viewer-sdk
+# objectiveai-viewer-sdk
 
 Plugin SDK for the [ObjectiveAI](https://objectiveai.dev) viewer. A thin TypeScript shim that lets plugin authors subscribe to events emitted by the host viewer from inside their iframe-mounted UI bundle, with the same `listen` surface as `@tauri-apps/api`.
 

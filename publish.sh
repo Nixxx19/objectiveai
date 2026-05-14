@@ -36,9 +36,7 @@ WAVE_3=(
   "objectiveai-cli-sdk|crates|objectiveai-cli-sdk"
   "objectiveai-sdk-py|pypi|objectiveai-sdk"
   "objectiveai-sdk-js|npm|objectiveai-sdk"
-  # @objectiveai/viewer-sdk: scoped under @objectiveai (no name-claim).
-  # is_live() URL-encodes the slash as %2F for the npm registry.
-  "objectiveai-viewer-sdk|npm|@objectiveai/viewer-sdk"
+  "objectiveai-viewer-sdk|npm|objectiveai-viewer-sdk"
 )
 WAVE_4=(
   "objectiveai-api|crates|objectiveai-api"

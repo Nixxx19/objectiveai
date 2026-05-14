@@ -1,12 +1,13 @@
-name: Publish @objectiveai/viewer-sdk
+name: Publish objectiveai-viewer-sdk
 
-# Publishes the `@objectiveai/viewer-sdk` npm package. Scoped under the
-# @objectiveai org (no name-claim issues). Triggered manually via
-# workflow_dispatch.
+# Publishes the `objectiveai-viewer-sdk` npm package. Unscoped name --
+# the first publish must be a manual interactive `npm publish` to
+# claim the name on npm. Subsequent publishes work via this workflow
+# using the NPM_TOKEN. Triggered manually via workflow_dispatch.
 #
 # Setup required (one-time):
-#   - NPM_TOKEN: npm automation token with publish access to the
-#     @objectiveai org. Save as a repo secret.
+#   - NPM_TOKEN: npm automation token with publish access. Save as a
+#     repo secret.
 
 on:
   workflow_dispatch:
