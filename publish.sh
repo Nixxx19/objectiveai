@@ -35,7 +35,12 @@ WAVE_3=(
   "objectiveai-mcp-filesystem|crates|objectiveai-mcp-filesystem"
   "objectiveai-cli-sdk|crates|objectiveai-cli-sdk"
   "objectiveai-sdk-py|pypi|objectiveai-sdk"
-  "objectiveai-sdk-js|npm|objectiveai-sdk"
+  # objectiveai-sdk-js is held out of the wave until the NPM_TOKEN /
+  # account permissions are sorted (npm 404 on PUT means the token
+  # account can't create the unscoped `objectiveai-sdk` name). Nothing
+  # downstream depends on it, so the rest of the chain can complete.
+  # Re-add once a manual `npm publish` claims the name.
+  # "objectiveai-sdk-js|npm|objectiveai-sdk"
 )
 WAVE_4=(
   "objectiveai-api|crates|objectiveai-api"

@@ -82,7 +82,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out objectiveai-sdk-py/dist
+          args: --release --out dist
           manylinux: ${{ matrix.manylinux || '' }}
           sccache: 'true'
           working-directory: objectiveai-sdk-py
@@ -92,6 +92,9 @@ jobs:
           name: wheel-${{ matrix.platform }}
           path: objectiveai-sdk-py/dist/*.whl
           if-no-files-found: error
+        # maturin-action ran with working-directory: objectiveai-sdk-py and
+        # `--out dist`, so the artifact ends up at
+        # objectiveai-sdk-py/dist/*.whl relative to the repo root.
 
   build-sdist:
     name: Build sdist
@@ -118,7 +121,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           command: sdist
-          args: --out objectiveai-sdk-py/dist
+          args: --out dist
           working-directory: objectiveai-sdk-py
 
       - uses: actions/upload-artifact@v4
