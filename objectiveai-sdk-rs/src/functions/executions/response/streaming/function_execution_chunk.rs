@@ -33,6 +33,75 @@ pub struct FunctionExecutionChunk {
 }
 
 impl FunctionExecutionChunk {
+    /// Yields every inner error reachable from this chunk: nested function-task
+    /// failures, vector-completion task failures (own + per-agent), and
+    /// reasoning agent-completion failures. Each item carries the full
+    /// hierarchical `task_path` to uniquely identify the failing site.
+    ///
+    /// Does NOT include the chunk's own top-level `.error` field, nor the
+    /// reasoning summary's own `.error` (only the inner agent completion's
+    /// failure surfaces as a reasoning error).
+    ///
+    /// Internally collects into a `Vec` (recursion + `impl Iterator` don't
+    /// mix without `Box<dyn>`), but the hot path still avoids
+    /// `ResponseError` clones via `Cow::Borrowed`.
+    pub fn inner_errors(&self) -> impl Iterator<Item = super::InnerError<'_>> {
+        let mut items = Vec::new();
+        self.collect_inner_errors(&[], &mut items);
+        items.into_iter()
+    }
+
+    fn collect_inner_errors<'a>(
+        &'a self,
+        my_task_path: &[u64],
+        items: &mut Vec<super::InnerError<'a>>,
+    ) {
+        for task in &self.tasks {
+            match task {
+                super::TaskChunk::FunctionExecution(wrapper) => {
+                    if let Some(error) = &wrapper.inner.error {
+                        items.push(super::InnerError::FunctionTaskError {
+                            task_path: wrapper.task_path.clone(),
+                            swiss_pool_index: wrapper.swiss_pool_index,
+                            swiss_round: wrapper.swiss_round,
+                            split_index: wrapper.split_index,
+                            error: std::borrow::Cow::Borrowed(error),
+                        });
+                    }
+                    wrapper.inner.collect_inner_errors(&wrapper.task_path, items);
+                }
+                super::TaskChunk::VectorCompletion(wrapper) => {
+                    if let Some(error) = &wrapper.error {
+                        items.push(super::InnerError::VectorCompletionTaskError {
+                            task_path: wrapper.task_path.clone(),
+                            agent_completion_index: None,
+                            error: std::borrow::Cow::Borrowed(error),
+                        });
+                    }
+                    for completion in &wrapper.inner.completions {
+                        if let Some(error) = &completion.inner.error {
+                            items.push(super::InnerError::VectorCompletionTaskError {
+                                task_path: wrapper.task_path.clone(),
+                                agent_completion_index: Some(completion.index),
+                                error: std::borrow::Cow::Borrowed(error),
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        if let Some(reasoning) = &self.reasoning {
+            // Intentionally skip reasoning.error (the summary's own .error);
+            // only the inner agent completion's failure surfaces here.
+            if let Some(error) = &reasoning.inner.error {
+                items.push(super::InnerError::ReasoningAgentCompletionError {
+                    task_path: my_task_path.to_vec(),
+                    error: std::borrow::Cow::Borrowed(error),
+                });
+            }
+        }
+    }
+
     pub fn vector_completion_tasks(
         &self,
     ) -> impl Iterator<Item = &super::VectorCompletionTaskChunk> {
