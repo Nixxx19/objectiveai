@@ -29,6 +29,13 @@ on:
         options:
           - pypi
           - testpypi
+  workflow_call:
+    inputs:
+      target:
+        description: 'Where to publish'
+        required: false
+        default: 'pypi'
+        type: string
 
 permissions:
   contents: read
