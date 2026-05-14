@@ -29,4 +29,8 @@ jobs:
       - name: cargo publish
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-        run: cargo publish -p objectiveai-api
+        # --no-verify: the default `claude-agent-sdk` feature's
+        # build.rs reaches into ../objectiveai-claude-agent-sdk-runner/
+        # (not part of the published tarball). The workspace is
+        # already type-checked before this publish runs.
+        run: cargo publish --no-verify -p objectiveai-api
