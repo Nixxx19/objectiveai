@@ -1,0 +1,44 @@
+name: Publish @objectiveai/viewer-sdk
+
+# Publishes the `@objectiveai/viewer-sdk` npm package. Scoped under the
+# @objectiveai org (no name-claim issues). Triggered manually via
+# workflow_dispatch.
+#
+# Setup required (one-time):
+#   - NPM_TOKEN: npm automation token with publish access to the
+#     @objectiveai org. Save as a repo secret.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: pnpm publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        # Version inferred from packageManager in package.json
+        # (avoids ERR_PNPM_BAD_PM_VERSION).
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: pnpm install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build viewer-sdk
+        working-directory: objectiveai-viewer-sdk
+        run: pnpm run build
+
+      - name: pnpm publish
+        working-directory: objectiveai-viewer-sdk
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish --access public --no-git-checks
