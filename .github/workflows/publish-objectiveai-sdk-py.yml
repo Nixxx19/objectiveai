@@ -48,9 +48,11 @@ jobs:
             platform: linux-aarch64
             target: aarch64-unknown-linux-gnu
             manylinux: auto
-          - os: macos-13
-            platform: macos-x86_64
-            target: x86_64-apple-darwin
+          # macos-x86_64 (Intel) wheels dropped from the matrix:
+          # GitHub's macos-13 runners are deprecated and have an
+          # essentially-permanent queue. Apple Silicon dominates the
+          # macOS user base now; the rare Intel Mac user can build
+          # from the sdist locally (it ships with the Rust source).
           - os: macos-14
             platform: macos-arm64
             target: aarch64-apple-darwin
