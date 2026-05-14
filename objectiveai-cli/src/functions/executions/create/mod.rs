@@ -36,46 +36,7 @@ impl InputSource {
     }
 }
 
-use objectiveai_cli_sdk::output::{CollectedError, ErrorPath, Execution, ExecutionResult};
-
-/// Recursively collect errors from the aggregated chunk.
-fn collect_errors(chunk: &objectiveai_sdk::functions::executions::response::streaming::FunctionExecutionChunk, errors: &mut Vec<CollectedError>) {
-    if let Some(err) = &chunk.error {
-        errors.push(CollectedError {
-            path: ErrorPath::Root,
-            error: err.clone(),
-        });
-    }
-    for task in &chunk.tasks {
-        match task {
-            objectiveai_sdk::functions::executions::response::streaming::TaskChunk::FunctionExecution(ft) => {
-                if let Some(err) = &ft.inner.error {
-                    errors.push(CollectedError {
-                        path: ErrorPath::Task(ft.task_path.clone()),
-                        error: err.clone(),
-                    });
-                }
-                collect_errors(&ft.inner, errors);
-            }
-            objectiveai_sdk::functions::executions::response::streaming::TaskChunk::VectorCompletion(vt) => {
-                if let Some(err) = &vt.error {
-                    errors.push(CollectedError {
-                        path: ErrorPath::Task(vt.task_path.clone()),
-                        error: err.clone(),
-                    });
-                }
-            }
-        }
-    }
-    if let Some(reasoning) = &chunk.reasoning {
-        if let Some(err) = &reasoning.error {
-            errors.push(CollectedError {
-                path: ErrorPath::Reasoning,
-                error: err.clone(),
-            });
-        }
-    }
-}
+use objectiveai_cli_sdk::output::{Execution, ExecutionResult};
 
 #[derive(Subcommand)]
 pub enum Commands {
@@ -205,16 +166,43 @@ impl Commands {
                 &http_client, params,
             ).await?;
 
-            let chunk = crate::log_stream::consume_with_coalesced_writes(
-                stream.map(|r| r.map_err(crate::error::Error::from)),
+            // Emit each chunk's inner errors live (Warn) before pushing
+            // into the aggregator. Inner errors are walked in the SDK's
+            // natural order (tasks first, then reasoning).
+            let emit_handle = handle.clone();
+            let stream = stream.then(move |result| {
+                let handle = emit_handle.clone();
+                async move {
+                    if let Ok(chunk) = &result {
+                        for inner in chunk.inner_errors() {
+                            objectiveai_cli_sdk::output::Output::<serde_json::Value>::Error(
+                                objectiveai_cli_sdk::output::Error {
+                                    level: objectiveai_cli_sdk::output::Level::Warn,
+                                    fatal: false,
+                                    message: serde_json::to_value(&inner).unwrap(),
+                                },
+                            )
+                            .emit(&handle)
+                            .await;
+                        }
+                    }
+                    result.map_err(crate::error::Error::from)
+                }
+            });
+
+            let mut chunk = crate::log_stream::consume_with_coalesced_writes(
+                stream,
                 log_writer,
                 |agg: &mut objectiveai_sdk::functions::executions::response::streaming::FunctionExecutionChunk, c| agg.push(c),
                 handle.clone(),
             ).await?;
 
-            // Recursively collect all errors
-            let mut errors = Vec::new();
-            collect_errors(&chunk, &mut errors);
+            // Root-level execution failure -> propagate as Err so the
+            // global path emits a single Output::Error with Level::Error
+            // and fatal=true, exit code 1.
+            if let Some(error) = chunk.error.take() {
+                return Err(crate::error::Error::ResponseError(error));
+            }
 
             // Extract output (default to Err { error: null } if missing)
             let output = chunk.output
@@ -223,8 +211,8 @@ impl Commands {
                     error: serde_json::Value::Null,
                 });
 
-            let result = ExecutionResult { output, errors };
-            objectiveai_cli_sdk::output::Output::<Execution>::Notification(objectiveai_cli_sdk::output::Notification { value: 
+            let result = ExecutionResult { output };
+            objectiveai_cli_sdk::output::Output::<Execution>::Notification(objectiveai_cli_sdk::output::Notification { value:
                 Execution { execution: result },
              })
             .emit(&handle).await;

@@ -14,6 +14,8 @@ pub enum Error {
     ViewerSecretSignatureEnvMismatch,
     #[error("{0}")]
     Http(#[from] objectiveai_sdk::HttpError),
+    #[error("{0}")]
+    ResponseError(objectiveai_sdk::error::ResponseError),
     #[error("{0} source is not supported for function-profile pairs")]
     PairsSourceNotSupported(&'static str),
     #[error("favorite not found: {0}")]
@@ -70,7 +72,20 @@ impl Error {
         objectiveai_cli_sdk::output::Error {
             level,
             fatal,
-            message: self.to_string().into(),
+            message: self.output_message(),
+        }
+    }
+
+    /// JSON value to use for the `message` field of `Output::Error`.
+    /// For `ResponseError` this is the inner error serialized as a
+    /// structured object; for everything else it's a string built from
+    /// the `Display` impl.
+    pub fn output_message(&self) -> serde_json::Value {
+        match self {
+            Error::ResponseError(re) => {
+                serde_json::to_value(re).unwrap_or_else(|_| self.to_string().into())
+            }
+            _ => self.to_string().into(),
         }
     }
 }

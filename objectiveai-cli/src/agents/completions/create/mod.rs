@@ -101,12 +101,16 @@ impl Commands {
                 &http_client, params,
             ).await?;
 
-            let accumulated = crate::log_stream::consume_with_coalesced_writes(
+            let mut accumulated = crate::log_stream::consume_with_coalesced_writes(
                 stream.map(|r| r.map_err(crate::error::Error::from)),
                 log_writer,
                 |agg: &mut objectiveai_sdk::agent::completions::response::streaming::AgentCompletionChunk, c| agg.push(c),
                 handle.clone(),
             ).await?;
+
+            if let Some(error) = accumulated.error.take() {
+                return Err(crate::error::Error::ResponseError(error));
+            }
 
             let completion: objectiveai_sdk::agent::completions::response::unary::AgentCompletion = accumulated.into();
 

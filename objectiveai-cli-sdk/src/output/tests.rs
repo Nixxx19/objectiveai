@@ -251,34 +251,3 @@ fn detached_wire_shape() {
     assert_eq!(v["value"]["pid"], 12345);
 }
 
-#[test]
-fn error_path_root_serializes_as_string() {
-    use crate::output::ErrorPath;
-    let s = serde_json::to_string(&ErrorPath::Root).unwrap();
-    assert_eq!(s, "\"root\"");
-}
-
-#[test]
-fn error_path_task_serializes_as_array() {
-    use crate::output::ErrorPath;
-    let s = serde_json::to_string(&ErrorPath::Task(vec![0, 3, 1])).unwrap();
-    assert_eq!(s, "[0,3,1]");
-}
-
-#[test]
-fn error_path_roundtrips() {
-    use crate::output::ErrorPath;
-    let cases = [
-        ("\"root\"", ErrorPath::Root),
-        ("\"reasoning\"", ErrorPath::Reasoning),
-        ("[1,2,3]", ErrorPath::Task(vec![1, 2, 3])),
-    ];
-    for (wire, expected) in cases {
-        let parsed: ErrorPath = serde_json::from_str(wire).unwrap();
-        match (parsed, expected) {
-            (ErrorPath::Root, ErrorPath::Root) | (ErrorPath::Reasoning, ErrorPath::Reasoning) => {}
-            (ErrorPath::Task(a), ErrorPath::Task(b)) => assert_eq!(a, b),
-            (a, b) => panic!("mismatch: parsed {a:?}, expected {b:?}"),
-        }
-    }
-}

@@ -190,26 +190,49 @@ impl Commands {
                 &http_client, request,
             ).await?;
 
+            // Emit each chunk's inner errors live (Warn) before pushing.
+            let emit_handle = handle.clone();
+            let stream = stream.then(move |result| {
+                let handle = emit_handle.clone();
+                async move {
+                    if let Ok(chunk) = &result {
+                        for inner in chunk.inner_errors() {
+                            objectiveai_cli_sdk::output::Output::<serde_json::Value>::Error(
+                                objectiveai_cli_sdk::output::Error {
+                                    level: objectiveai_cli_sdk::output::Level::Warn,
+                                    fatal: false,
+                                    message: serde_json::to_value(&inner).unwrap(),
+                                },
+                            )
+                            .emit(&handle)
+                            .await;
+                        }
+                    }
+                    result.map_err(crate::error::Error::from)
+                }
+            });
+
             let chunk = crate::log_stream::consume_with_coalesced_writes(
-                stream.map(|r| r.map_err(crate::error::Error::from)),
+                stream,
                 log_writer,
                 |agg: &mut objectiveai_sdk::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk, c| agg.push(c),
                 handle.clone(),
             ).await?;
 
-            // Build result: one item per invention that has state
+            // Build result: one item per invention that has state.
+            // Per-invention errors already streamed as Output::Error;
+            // `path: None` indicates failure (or no resolved path yet).
             let results: Vec<InventionResultItem> = chunk.inventions.iter()
                 .filter_map(|inv| {
                     let state = inv.inner.state.as_ref()?;
                     Some(InventionResultItem {
                         name: state_name(state).to_string(),
                         path: inv.inner.path.clone(),
-                        error: inv.inner.error.clone(),
                     })
                 })
                 .collect();
 
-            objectiveai_cli_sdk::output::Output::<Inventions>::Notification(objectiveai_cli_sdk::output::Notification { value: 
+            objectiveai_cli_sdk::output::Output::<Inventions>::Notification(objectiveai_cli_sdk::output::Notification { value:
                 Inventions { inventions: results },
              })
             .emit(&handle).await;

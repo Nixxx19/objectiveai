@@ -53,9 +53,9 @@ impl FunctionExecutionChunk {
     fn inner_errors_at<'a>(
         &'a self,
         my_task_path: &'a [u64],
-    ) -> Box<dyn Iterator<Item = super::InnerError<'a>> + 'a> {
+    ) -> Box<dyn Iterator<Item = super::InnerError<'a>> + Send + 'a> {
         let task_errors = self.tasks.iter().flat_map(
-            |task| -> Box<dyn Iterator<Item = super::InnerError<'a>> + 'a> {
+            |task| -> Box<dyn Iterator<Item = super::InnerError<'a>> + Send + 'a> {
                 match task {
                     super::TaskChunk::FunctionExecution(wrapper) => {
                         let own = wrapper.inner.error.as_ref().map(|error| {
