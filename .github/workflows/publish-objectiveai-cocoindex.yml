@@ -42,6 +42,15 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install build twine
 
+      - name: Stage README + LICENSE for objectiveai-cocoindex
+        # objectiveai-cocoindex/.gitignore excludes /README.md and
+        # /LICENSE -- they're staged from the repo root at publish
+        # time so a single source-of-truth README + LICENSE applies
+        # across all packages.
+        run: |
+          cp README.md objectiveai-cocoindex/README.md
+          cp LICENSE objectiveai-cocoindex/LICENSE
+
       - name: Build sdist + wheel
         working-directory: objectiveai-cocoindex
         run: python -m build --sdist --wheel --outdir dist
