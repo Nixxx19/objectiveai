@@ -11,6 +11,14 @@ documentation = "https://docs.rs/objectiveai-sdk"
 readme = "README.md"
 keywords = ["llm", "ai", "swarm"]
 publish = true
+include = [
+    "src/**/*.rs",
+    "Cargo.toml",
+    "build.rs",
+    "README.md",
+    "LICENSE*",
+    "schemas/*.json",
+]
 
 [features]
 default = ["http", "filesystem", "env", "mcp"]

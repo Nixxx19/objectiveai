@@ -40,13 +40,23 @@ fn extract_refs(content: &str) -> Vec<String> {
 }
 
 fn main() {
-    let schema_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("..")
-        .join("objectiveai-json-schema");
+    // In a published crate (downloaded from crates.io) the schemas live
+    // inside the package at `./schemas/`. In monorepo development they
+    // live in the sibling crate `../objectiveai-json-schema/`. Try the
+    // packaged location first, then fall back to the sibling.
+    let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let packaged = manifest_dir.join("schemas");
+    let sibling = manifest_dir.join("..").join("objectiveai-json-schema");
+
+    let schema_dir = if packaged.is_dir() {
+        packaged
+    } else {
+        sibling
+    };
 
     let schema_dir = schema_dir
         .canonicalize()
-        .expect("schema directory must exist");
+        .expect("schema directory must exist (either ./schemas/ or ../objectiveai-json-schema/)");
 
     // Collect all schema files: name -> (absolute_path, refs)
     let mut schemas: BTreeMap<String, (String, Vec<String>)> = BTreeMap::new();
