@@ -62,13 +62,13 @@ is_live() {
   local registry="$1" name="$2" version="$3"
   case "$registry" in
     crates)
-      curl -fsS -o /dev/null "https://crates.io/api/v1/crates/$name/$version"
+      curl -fsS -o /dev/null 2>/dev/null "https://crates.io/api/v1/crates/$name/$version"
       ;;
     pypi)
-      curl -fsS -o /dev/null "https://pypi.org/pypi/$name/$version/json"
+      curl -fsS -o /dev/null 2>/dev/null "https://pypi.org/pypi/$name/$version/json"
       ;;
     npm)
-      curl -fsS -o /dev/null "https://registry.npmjs.org/$name/$version"
+      curl -fsS -o /dev/null 2>/dev/null "https://registry.npmjs.org/$name/$version"
       ;;
     go)
       git -C "$REPO_ROOT" ls-remote --tags origin "refs/tags/$name/v$version" \

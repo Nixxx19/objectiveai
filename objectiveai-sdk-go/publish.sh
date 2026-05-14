@@ -22,7 +22,7 @@
 #   - on branch `main`
 #   - tag `objectiveai-sdk-go/v<version>` does not already exist on origin
 #
-# Version is read from `objectiveai-rs/Cargo.toml` (the canonical version
+# Version is read from `objectiveai-sdk-rs/Cargo.toml` (the canonical version
 # source — `version.sh` keeps every package in lockstep).
 
 set -euo pipefail
@@ -44,10 +44,10 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Read canonical version from objectiveai-rs/Cargo.toml
-VERSION="$(awk '/^version = "/ { gsub(/version = "|"/, ""); print; exit }' "$REPO_ROOT/objectiveai-rs/Cargo.toml")"
+# Read canonical version from objectiveai-sdk-rs/Cargo.toml
+VERSION="$(awk '/^version = "/ { gsub(/version = "|"/, ""); print; exit }' "$REPO_ROOT/objectiveai-sdk-rs/Cargo.toml")"
 if [[ -z "$VERSION" ]]; then
-  echo "ERROR: could not read version from objectiveai-rs/Cargo.toml" >&2
+  echo "ERROR: could not read version from objectiveai-sdk-rs/Cargo.toml" >&2
   exit 1
 fi
 TAG="objectiveai-sdk-go/v$VERSION"
