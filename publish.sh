@@ -31,22 +31,27 @@ WAVE_2=(
   "objectiveai-sdk-rs|crates|objectiveai-sdk"
 )
 WAVE_3=(
-  "objectiveai-api|crates|objectiveai-api"
-  "objectiveai-mcp-cli|crates|objectiveai-mcp-cli"
   "objectiveai-mcp-proxy|crates|objectiveai-mcp-proxy"
   "objectiveai-mcp-filesystem|crates|objectiveai-mcp-filesystem"
+  "objectiveai-cli-sdk|crates|objectiveai-cli-sdk"
   "objectiveai-sdk-py|pypi|objectiveai-sdk"
   "objectiveai-sdk-js|npm|objectiveai-sdk"
-  "objectiveai-cli|github-release|"
 )
 WAVE_4=(
+  "objectiveai-api|crates|objectiveai-api"
+)
+WAVE_5=(
+  "objectiveai-cli|crates|objectiveai-cli"
+)
+WAVE_6=(
+  "objectiveai-mcp-cli|crates|objectiveai-mcp-cli"
   "objectiveai-cocoindex|pypi|objectiveai-cocoindex"
 )
 
 # ── --build-only fast path: everything in parallel, no wave/wait logic ──
 if [[ "${1:-}" == "--build-only" ]]; then
   pids=()
-  for entry in "${WAVE_1[@]}" "${WAVE_2[@]}" "${WAVE_3[@]}" "${WAVE_4[@]}"; do
+  for entry in "${WAVE_1[@]}" "${WAVE_2[@]}" "${WAVE_3[@]}" "${WAVE_4[@]}" "${WAVE_5[@]}" "${WAVE_6[@]}"; do
     dir="${entry%%|*}"
     bash "$REPO_ROOT/$dir/publish.sh" --build-only &
     pids+=($!)
@@ -148,9 +153,11 @@ run_wave() {
 
 # ── go ──────────────────────────────────────────────────────────────────
 echo "Publishing ObjectiveAI $VERSION across all registries..."
-run_wave "Wave 1 — leaves (no upstream deps)"          "${WAVE_1[@]}"
-run_wave "Wave 2 — depends on objectiveai-sdk-macros"  "${WAVE_2[@]}"
-run_wave "Wave 3 — depends on objectiveai-sdk"         "${WAVE_3[@]}"
-run_wave "Wave 4 — depends on objectiveai-sdk on PyPI" "${WAVE_4[@]}"
+run_wave "Wave 1 — leaves (no upstream deps)"               "${WAVE_1[@]}"
+run_wave "Wave 2 — depends on objectiveai-sdk-macros"       "${WAVE_2[@]}"
+run_wave "Wave 3 — depends on objectiveai-sdk"              "${WAVE_3[@]}"
+run_wave "Wave 4 — depends on objectiveai-mcp-proxy (api)"  "${WAVE_4[@]}"
+run_wave "Wave 5 — depends on api + cli-sdk (cli)"          "${WAVE_5[@]}"
+run_wave "Wave 6 — depends on cli / sdk-py on PyPI"         "${WAVE_6[@]}"
 echo
 echo "✓ All packages published at $VERSION"

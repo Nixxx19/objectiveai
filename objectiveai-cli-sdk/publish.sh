@@ -1,20 +1,13 @@
 #!/usr/bin/env bash
-# Publishes objectiveai-cli to crates.io.
+# Publishes objectiveai-cli-sdk to crates.io.
 #
 # Dispatches the GitHub Actions workflow that runs
-# `cargo publish --no-verify -p objectiveai-cli`. `--no-verify` is used
-# because the default `viewer` feature's build.rs reaches into
-# ../objectiveai-viewer/ (not part of the tarball); the workspace is
-# already type-checked before this script runs.
-#
-# CLI BINARIES (pre-compiled, cross-platform) are released separately
-# by .github/workflows/release.yml, which fires automatically on push
-# to main when objectiveai-cli/Cargo.toml has a fresh version. No
-# manual trigger needed for the binary release.
+# `cargo publish -p objectiveai-cli-sdk`. Local --build-only mode runs
+# `cargo publish --dry-run` so you can verify metadata + tarball.
 #
 # Usage:
-#   bash objectiveai-cli/publish.sh                # crates.io (via GHA)
-#   bash objectiveai-cli/publish.sh --build-only   # local dry-run
+#   bash objectiveai-cli-sdk/publish.sh                # crates.io (via GHA)
+#   bash objectiveai-cli-sdk/publish.sh --build-only   # local dry-run
 #
 # Setup (one-time):
 #   - CARGO_REGISTRY_TOKEN as repo secret (generate at https://crates.io/me).
@@ -22,8 +15,8 @@
 
 set -euo pipefail
 
-MODULE="objectiveai-cli"
-CRATE="objectiveai-cli"
+MODULE="objectiveai-cli-sdk"
+CRATE="objectiveai-cli-sdk"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 LOG_DIR="$REPO_ROOT/.logs/publish"
@@ -43,8 +36,8 @@ done
 
 if $BUILD_ONLY; then
   run_local() {
-    echo "Running cargo publish --dry-run --allow-dirty --no-verify -p $CRATE..."
-    cargo publish --dry-run --allow-dirty --no-verify -p "$CRATE" || return $?
+    echo "Running cargo publish --dry-run --allow-dirty -p $CRATE..."
+    cargo publish --dry-run --allow-dirty -p "$CRATE" || return $?
   }
 
   if run_local > "$LOG_FILE" 2>&1; then
