@@ -4,7 +4,7 @@
  * For each registered plugin iframe, this module subscribes to the
  * matching `<repository>` Tauri channel and forwards each emitted
  * event into the iframe as a `{kind: 'plugin-event', type, value}`
- * postMessage. The iframe consumes those via `@objectiveai/viewer-sdk`'s
+ * postMessage. The iframe consumes those via `objectiveai-sdk/viewer`'s
  * `listen()` (or by adding its own `window.addEventListener('message')`).
  */
 import { listen as tauriListen, type UnlistenFn } from "@tauri-apps/api/event";

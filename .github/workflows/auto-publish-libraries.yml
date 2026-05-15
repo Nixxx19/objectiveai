@@ -10,7 +10,7 @@ name: Auto-publish libraries
 #   1. sdk-rs-macros (crates), sdk-go (git tag)
 #   2. sdk-rs (crates)             — needs macros
 #   3. mcp-proxy, mcp-filesystem, cli-sdk (crates) +
-#      sdk-py (PyPI) + sdk-js, viewer-sdk (npm)    — need sdk-rs
+#      sdk-py (PyPI) + sdk-js (npm)               — need sdk-rs
 #   4. api (crates)                — needs mcp-proxy
 #   5. cli (crates)                — needs api + cli-sdk
 #   6. mcp-cli (crates), cocoindex (PyPI)
@@ -158,14 +158,9 @@ jobs:
     uses: ./.github/workflows/publish-objectiveai-sdk-js.yml
     secrets: inherit
 
-  publish-viewer-sdk:
-    needs: wait-after-wave-2
-    uses: ./.github/workflows/publish-objectiveai-viewer-sdk.yml
-    secrets: inherit
-
   # ─── Wave 4 ───────────────────────────────────────────────────────
   wait-after-wave-3:
-    needs: [check-version, publish-mcp-proxy, publish-mcp-filesystem, publish-cli-sdk, publish-sdk-py, publish-sdk-js, publish-viewer-sdk]
+    needs: [check-version, publish-mcp-proxy, publish-mcp-filesystem, publish-cli-sdk, publish-sdk-py, publish-sdk-js]
     runs-on: ubuntu-latest
     steps:
       - name: Wait for mcp-proxy on crates.io

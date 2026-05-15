@@ -9,6 +9,7 @@ export * from "./laboratories/index";
 export * from "./mcp/index";
 export * from "./swarm/index";
 export * from "./vector/index";
+export * from "./viewer/index";
 export * from "./prefixedUuid";
 export * from "./remote";
 export * from "./remotePath";

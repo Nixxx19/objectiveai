@@ -1,6 +1,6 @@
+export { __resetForTests, listen } from './chunk-S2KGS3MH.js';
 import z425, { z } from 'zod';
 
-// src/agent/claude_agent_sdk/agent.ts
 var AgentClaudeAgentSdkEffortSchema = z.union([z.literal("low").describe("Minimal output, concise responses.").meta({ "variantTitle": "Low" }), z.literal("medium").describe("Balanced output (default, normalized away during preparation).").meta({ "variantTitle": "Medium" }), z.literal("high").describe("Detailed output with thorough explanations.").meta({ "variantTitle": "High" }), z.literal("max").describe("Maximum effort, most detailed output possible.").meta({ "variantTitle": "Max" })]).describe("The effort level for model output.\n\nThis setting hints to the model how detailed its responses should be.").meta({ title: "agent.claude_agent_sdk.Effort" });
 var AgentClaudeAgentSdkOutputModeSchema = z.literal("instruction").describe("The model is instructed via the prompt to output a specific key.\n\nThis is the default and most widely supported mode.").meta({ title: "agent.claude_agent_sdk.OutputMode" });
 var AgentClaudeAgentSdkUpstreamSchema = z.literal("claude_agent_sdk").describe("Claude Agent SDK upstream marker.").meta({ title: "agent.claude_agent_sdk.Upstream" });

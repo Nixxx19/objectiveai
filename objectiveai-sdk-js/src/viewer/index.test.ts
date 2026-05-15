@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import { listen, __resetForTests } from "./index";
 

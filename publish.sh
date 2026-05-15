@@ -36,7 +36,6 @@ WAVE_3=(
   "objectiveai-cli-sdk|crates|objectiveai-cli-sdk"
   "objectiveai-sdk-py|pypi|objectiveai-sdk"
   "objectiveai-sdk-js|npm|objectiveai-sdk"
-  "objectiveai-viewer-sdk|npm|objectiveai-viewer-sdk"
 )
 WAVE_4=(
   "objectiveai-api|crates|objectiveai-api"

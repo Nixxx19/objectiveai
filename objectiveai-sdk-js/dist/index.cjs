@@ -6,7 +6,102 @@ function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
 
 var z425__default = /*#__PURE__*/_interopDefault(z425);
 
-// src/agent/claude_agent_sdk/agent.ts
+var __defProp = Object.defineProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var init_tslib_es6 = __esm({
+  "../node_modules/@tauri-apps/api/external/tslib/tslib.es6.js"() {
+  }
+});
+
+// ../node_modules/@tauri-apps/api/core.js
+function transformCallback(callback, once2 = false) {
+  return window.__TAURI_INTERNALS__.transformCallback(callback, once2);
+}
+async function invoke(cmd, args = {}, options) {
+  return window.__TAURI_INTERNALS__.invoke(cmd, args, options);
+}
+var init_core = __esm({
+  "../node_modules/@tauri-apps/api/core.js"() {
+    init_tslib_es6();
+  }
+});
+
+// ../node_modules/@tauri-apps/api/event.js
+var event_exports = {};
+__export(event_exports, {
+  TauriEvent: () => TauriEvent,
+  emit: () => emit,
+  emitTo: () => emitTo,
+  listen: () => listen,
+  once: () => once
+});
+async function _unlisten(event, eventId) {
+  window.__TAURI_EVENT_PLUGIN_INTERNALS__.unregisterListener(event, eventId);
+  await invoke("plugin:event|unlisten", {
+    event,
+    eventId
+  });
+}
+async function listen(event, handler, options) {
+  var _a;
+  const target = typeof (options === null || options === void 0 ? void 0 : options.target) === "string" ? { kind: "AnyLabel", label: options.target } : (_a = options === null || options === void 0 ? void 0 : options.target) !== null && _a !== void 0 ? _a : { kind: "Any" };
+  return invoke("plugin:event|listen", {
+    event,
+    target,
+    handler: transformCallback(handler)
+  }).then((eventId) => {
+    return async () => _unlisten(event, eventId);
+  });
+}
+async function once(event, handler, options) {
+  return listen(event, (eventData) => {
+    void _unlisten(event, eventData.id);
+    handler(eventData);
+  }, options);
+}
+async function emit(event, payload) {
+  await invoke("plugin:event|emit", {
+    event,
+    payload
+  });
+}
+async function emitTo(target, event, payload) {
+  const eventTarget = typeof target === "string" ? { kind: "AnyLabel", label: target } : target;
+  await invoke("plugin:event|emit_to", {
+    target: eventTarget,
+    event,
+    payload
+  });
+}
+var TauriEvent;
+var init_event = __esm({
+  "../node_modules/@tauri-apps/api/event.js"() {
+    init_core();
+    (function(TauriEvent2) {
+      TauriEvent2["WINDOW_RESIZED"] = "tauri://resize";
+      TauriEvent2["WINDOW_MOVED"] = "tauri://move";
+      TauriEvent2["WINDOW_CLOSE_REQUESTED"] = "tauri://close-requested";
+      TauriEvent2["WINDOW_DESTROYED"] = "tauri://destroyed";
+      TauriEvent2["WINDOW_FOCUS"] = "tauri://focus";
+      TauriEvent2["WINDOW_BLUR"] = "tauri://blur";
+      TauriEvent2["WINDOW_SCALE_FACTOR_CHANGED"] = "tauri://scale-change";
+      TauriEvent2["WINDOW_THEME_CHANGED"] = "tauri://theme-changed";
+      TauriEvent2["WINDOW_CREATED"] = "tauri://window-created";
+      TauriEvent2["WEBVIEW_CREATED"] = "tauri://webview-created";
+      TauriEvent2["DRAG_ENTER"] = "tauri://drag-enter";
+      TauriEvent2["DRAG_OVER"] = "tauri://drag-over";
+      TauriEvent2["DRAG_DROP"] = "tauri://drag-drop";
+      TauriEvent2["DRAG_LEAVE"] = "tauri://drag-leave";
+    })(TauriEvent || (TauriEvent = {}));
+  }
+});
 var AgentClaudeAgentSdkEffortSchema = z425.z.union([z425.z.literal("low").describe("Minimal output, concise responses.").meta({ "variantTitle": "Low" }), z425.z.literal("medium").describe("Balanced output (default, normalized away during preparation).").meta({ "variantTitle": "Medium" }), z425.z.literal("high").describe("Detailed output with thorough explanations.").meta({ "variantTitle": "High" }), z425.z.literal("max").describe("Maximum effort, most detailed output possible.").meta({ "variantTitle": "Max" })]).describe("The effort level for model output.\n\nThis setting hints to the model how detailed its responses should be.").meta({ title: "agent.claude_agent_sdk.Effort" });
 var AgentClaudeAgentSdkOutputModeSchema = z425.z.literal("instruction").describe("The model is instructed via the prompt to output a specific key.\n\nThis is the default and most widely supported mode.").meta({ title: "agent.claude_agent_sdk.OutputMode" });
 var AgentClaudeAgentSdkUpstreamSchema = z425.z.literal("claude_agent_sdk").describe("Claude Agent SDK upstream marker.").meta({ title: "agent.claude_agent_sdk.Upstream" });
@@ -5516,6 +5611,75 @@ function wasmVectorCompletionsVectorResponseId(response) {
   return vectorResponseId(response);
 }
 
+// src/viewer/index.ts
+function isInIframe() {
+  return typeof window !== "undefined" && window.parent !== window;
+}
+var listeners = /* @__PURE__ */ new Map();
+var messageHandlerAttached = false;
+function attachMessageHandler() {
+  if (messageHandlerAttached) return;
+  if (typeof window === "undefined") return;
+  window.addEventListener("message", (event) => {
+    const msg = event.data;
+    if (!msg || typeof msg !== "object") return;
+    if (msg.kind !== "plugin-event") return;
+    const set = listeners.get(msg.type);
+    if (!set) return;
+    for (const fn of set) {
+      try {
+        fn(msg.value);
+      } catch (e) {
+        console.error("objectiveai-sdk/viewer listener threw:", e);
+      }
+    }
+  });
+  messageHandlerAttached = true;
+}
+function listen2(type, handler) {
+  if (!isInIframe()) {
+    let unlisten = null;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const mod = await Promise.resolve().then(() => (init_event(), event_exports));
+        if (cancelled) return;
+        const u = await mod.listen(
+          `plugin-${type}`,
+          (e) => handler(e.payload?.value)
+        );
+        if (cancelled) {
+          u();
+        } else {
+          unlisten = u;
+        }
+      } catch {
+        console.warn(
+          `objectiveai-sdk/viewer: listen('${type}') called outside an iframe and @tauri-apps/api is unavailable; events will not fire.`
+        );
+      }
+    })();
+    return () => {
+      cancelled = true;
+      if (unlisten) unlisten();
+    };
+  }
+  attachMessageHandler();
+  const set = listeners.get(type) ?? /* @__PURE__ */ new Set();
+  const fn = (value) => handler(value);
+  set.add(fn);
+  listeners.set(type, set);
+  return () => {
+    const s = listeners.get(type);
+    if (!s) return;
+    s.delete(fn);
+    if (s.size === 0) listeners.delete(type);
+  };
+}
+function __resetForTests() {
+  listeners.clear();
+}
+
 // src/error.ts
 var ObjectiveAIFetchError = class extends Error {
   constructor(codeOrBody, rawBody) {
@@ -6364,6 +6528,7 @@ exports.VectorCompletionsResponseVoteSchema = VectorCompletionsResponseVoteSchem
 exports.VectorCompletionsVectorResponsesSchema = VectorCompletionsVectorResponsesSchema;
 exports.WeightsEntrySchema = WeightsEntrySchema;
 exports.WeightsSchema = WeightsSchema;
+exports.__resetForTests = __resetForTests;
 exports.agentCompletionsCreateAgentCompletion = agentCompletionsCreateAgentCompletion;
 exports.agentCompletionsMessageAssistantToolCallDeltaMerged = agentCompletionsMessageAssistantToolCallDeltaMerged;
 exports.agentCompletionsMessageAssistantToolCallDeltaMergedList = agentCompletionsMessageAssistantToolCallDeltaMergedList;
@@ -6428,6 +6593,7 @@ exports.laboratoriesExecutionsResponseStreamingBuilderChunkMergedList = laborato
 exports.laboratoriesExecutionsResponseStreamingEvaluationChunkMerged = laboratoriesExecutionsResponseStreamingEvaluationChunkMerged;
 exports.laboratoriesExecutionsResponseStreamingEvaluationChunkMergedList = laboratoriesExecutionsResponseStreamingEvaluationChunkMergedList;
 exports.laboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkMerged = laboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkMerged;
+exports.listen = listen2;
 exports.merge = merge;
 exports.mergedNumberArray = mergedNumberArray;
 exports.mergedString = mergedString;
