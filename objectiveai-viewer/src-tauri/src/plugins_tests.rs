@@ -4,7 +4,7 @@ use objectiveai_sdk::filesystem::plugins::{HttpMethod, ViewerRoute};
 use tokio::sync::mpsc;
 use tower::ServiceExt;
 
-use crate::events::Event;
+use objectiveai_sdk::viewer::Event;
 use crate::plugins::register_plugin_route;
 
 #[tokio::test]

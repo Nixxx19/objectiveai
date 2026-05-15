@@ -72,3 +72,6 @@ pub mod mcp;
 #[cfg(feature = "cli")]
 pub mod cli;
 
+#[cfg(feature = "viewer")]
+pub mod viewer;
+

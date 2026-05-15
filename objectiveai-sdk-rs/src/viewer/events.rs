@@ -1,6 +1,7 @@
 //! Event bus. Built-in axum routes, dynamic plugin routes, and the
-//! cli_command stream all fan into the same enum; serve() emits each
-//! variant as-is under the `destination` Tauri channel name.
+//! cli_command stream all fan into the same enum; the viewer's
+//! `serve()` emits each variant as-is under the `destination` Tauri
+//! channel name.
 //!
 //! Channel-name namespacing: `"objectiveai"` is reserved as the
 //! built-in destination; plugin repositories named "objectiveai"
@@ -8,6 +9,7 @@
 //! `filesystem::plugins::InstallError::ReservedRepositoryName`), so
 //! a plugin can't shadow built-in events.
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc;
 
@@ -20,8 +22,9 @@ use tokio::sync::mpsc;
 /// repository name of whichever iframe invoked the CLI — the bridge
 /// derives it from `MessageEvent.source`, the plugin author never
 /// sets it.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
+#[schemars(rename = "viewer.Event")]
 pub enum Event {
     /// Host → iframe. Carries data into the plugin (the existing
     /// path). `sub_type` is the snake_case discriminator the plugin
@@ -29,6 +32,7 @@ pub enum Event {
     /// `functions_executions` / `functions_inventions_recursive` /
     /// `laboratories_executions`; plugins: whatever they declared in
     /// their manifest's `viewer_routes[i].type`).
+    #[schemars(title = "Inbound")]
     Inbound {
         destination: String,
         sub_type: String,
@@ -39,6 +43,7 @@ pub enum Event {
     /// this iframe via `invokeCli`. `value` is the cli's `Output<T>`
     /// envelope. No sub_type — a single invocation produces a single
     /// stream of lines.
+    #[schemars(title = "CliCommand")]
     CliCommand {
         destination: String,
         value: serde_json::Value,

@@ -8,7 +8,7 @@ use axum::http::StatusCode;
 use objectiveai_sdk::filesystem::Client as FsClient;
 use objectiveai_sdk::filesystem::plugins::{HttpMethod, ViewerRoute};
 
-use crate::events::{Event, EventSender};
+use objectiveai_sdk::viewer::{Event, EventSender};
 
 /// Register one plugin viewer route on the given axum router. The
 /// route lands at `/plugin/<plugin>/<route.path>`; a hit emits an

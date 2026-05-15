@@ -10,7 +10,7 @@ use std::sync::Arc;
 use tauri::Emitter;
 use tokio::sync::{Notify, mpsc};
 
-use crate::events::{Event, EventReceiver};
+use objectiveai_sdk::viewer::{Event, EventReceiver};
 use crate::plugins::{register_plugin_route, serve_plugin_asset};
 use crate::signature::signature_middleware;
 
@@ -182,7 +182,7 @@ pub struct Config {
     pub config_base_dir: Option<String>,
 }
 
-pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, axum::Router, crate::events::EventSender, EventReceiver, HttpClient, FsClient)> {
+pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, axum::Router, objectiveai_sdk::viewer::EventSender, EventReceiver, HttpClient, FsClient)> {
     let (tx, rx) = mpsc::unbounded_channel::<Event>();
     let secret = config.secret.map(Arc::new);
 
@@ -291,7 +291,7 @@ pub type Exiter = Box<dyn FnOnce(i32) + Send>;
 pub fn serve(
     listener: tokio::net::TcpListener,
     app: axum::Router,
-    events_tx: crate::events::EventSender,
+    events_tx: objectiveai_sdk::viewer::EventSender,
     mut rx: EventReceiver,
     http_client: HttpClient,
     fs_client: FsClient,

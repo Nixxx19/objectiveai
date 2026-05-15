@@ -496,6 +496,12 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::cli::plugins::PluginOutput),
         ]);
     }
+    #[cfg(feature = "viewer")]
+    {
+        schemas.extend([
+            schemars::schema_for!(crate::viewer::Event),
+        ]);
+    }
     schemas
 }
 
