@@ -3,6 +3,7 @@
 
 pub mod agent;
 pub mod auth;
+pub mod cli;
 pub mod error;
 pub mod filesystem;
 pub mod functions;
@@ -10,6 +11,7 @@ pub mod laboratories;
 pub mod mcp;
 pub mod swarm;
 pub mod vector;
+pub mod viewer;
 
 use clap::Subcommand;
 
@@ -34,6 +36,11 @@ pub enum Commands {
     Auth {
         #[command(subcommand)]
         command: auth::Commands,
+    },
+    #[command(name = "cli")]
+    Cli {
+        #[command(subcommand)]
+        command: cli::Commands,
     },
     #[command(name = "error")]
     Error {
@@ -70,6 +77,11 @@ pub enum Commands {
         #[command(subcommand)]
         command: vector::Commands,
     },
+    #[command(name = "viewer")]
+    Viewer {
+        #[command(subcommand)]
+        command: viewer::Commands,
+    },
     PrefixedUuid {
         #[command(subcommand)]
         command: GetCommand,
@@ -100,7 +112,7 @@ impl Commands {
     pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["agent", "auth", "error", "filesystem", "functions", "laboratories", "mcp", "swarm", "vector", "PrefixedUuid", "Remote", "RemotePath", "RemotePathCommitOptional", "Weights", "WeightsEntry"];
+                const NAMES: &[&str] = &["agent", "auth", "cli", "error", "filesystem", "functions", "laboratories", "mcp", "swarm", "vector", "viewer", "PrefixedUuid", "Remote", "RemotePath", "RemotePathCommitOptional", "Weights", "WeightsEntry"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
                     objectiveai_sdk::cli::output::Notification {
                         value: objectiveai_sdk::cli::output::Schemas {
@@ -112,6 +124,7 @@ impl Commands {
             }
             Commands::Agent { command } => command.handle(handle).await,
             Commands::Auth { command } => command.handle(handle).await,
+            Commands::Cli { command } => command.handle(handle).await,
             Commands::Error { command } => command.handle(handle).await,
             Commands::Filesystem { command } => command.handle(handle).await,
             Commands::Functions { command } => command.handle(handle).await,
@@ -119,6 +132,7 @@ impl Commands {
             Commands::Mcp { command } => command.handle(handle).await,
             Commands::Swarm { command } => command.handle(handle).await,
             Commands::Vector { command } => command.handle(handle).await,
+            Commands::Viewer { command } => command.handle(handle).await,
             Commands::PrefixedUuid { .. } => {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../objectiveai-json-schema/PrefixedUuid.json"),
