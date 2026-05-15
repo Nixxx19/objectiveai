@@ -174,7 +174,7 @@ impl Commands {
     pub async fn handle(
         self,
         cli_config: &Config,
-        handle: &objectiveai_cli_sdk::output::Handle,
+        handle: &objectiveai_sdk::cli::output::Handle,
     ) -> Result<(), error::Error> {
         match self {
             Commands::Api { command } => command.handle(cli_config, handle).await,
@@ -205,26 +205,26 @@ pub fn load_config() -> Config {
 /// The iterator should include the binary name as the first element
 /// (e.g., `["objectiveai", "agents", "list"]`).
 ///
-/// Emits [`objectiveai_cli_sdk::output::BEGIN`] as the very first line
-/// and [`objectiveai_cli_sdk::output::END`] as the very last line.
+/// Emits [`objectiveai_sdk::cli::output::BEGIN`] as the very first line
+/// and [`objectiveai_sdk::cli::output::END`] as the very last line.
 /// Everything else (handler output, error notifications) appears
 /// between those bookends.
 ///
 /// Returns an exit code: `0` on success, `1` on any failure. Errors
 /// are emitted internally as `Output::Error` via `handle` before the
 /// function returns — the caller doesn't see them. Handlers emit
-/// their own [`objectiveai_cli_sdk::output::Output`] lines for
+/// their own [`objectiveai_sdk::cli::output::Output`] lines for
 /// successful runs.
 pub async fn run<I, T>(
     args: I,
     cli_config: &Config,
-    handle: objectiveai_cli_sdk::output::Handle,
+    handle: objectiveai_sdk::cli::output::Handle,
 ) -> i32
 where
     I: IntoIterator<Item = T>,
     T: Into<std::ffi::OsString> + Clone,
 {
-    use objectiveai_cli_sdk::output::{Error as OutputError, Level, Output};
+    use objectiveai_sdk::cli::output::{Error as OutputError, Level, Output};
 
     Output::<serde_json::Value>::Begin.emit(&handle).await;
 

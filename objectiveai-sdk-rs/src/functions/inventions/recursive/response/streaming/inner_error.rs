@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::error;
@@ -29,7 +30,8 @@ use crate::error;
 ///
 /// The recursive chunk has no top-level `.error` field of its own,
 /// so there is nothing to exclude at this level.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.inventions.recursive.response.streaming.InnerError")]
 pub struct InnerError<'a> {
     /// Index of the wrapped non-recursive `FunctionInventionChunk`.
     pub function_invention_index: u64,
@@ -37,6 +39,7 @@ pub struct InnerError<'a> {
     /// wrapped invention; `None` if the error is the wrapped invention's
     /// own top-level `.error`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub agent_completion_index: Option<u64>,
     /// The underlying error.
     pub error: Cow<'a, error::ResponseError>,

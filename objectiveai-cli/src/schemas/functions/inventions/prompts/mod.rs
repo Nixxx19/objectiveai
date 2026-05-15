@@ -62,13 +62,13 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, handle: &objectiveai_cli_sdk::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
                 const NAMES: &[&str] = &["GetPromptResponse", "InlinePrompt", "InlinePromptOrRemoteCommitOptional", "ListPromptResponse", "ListPromptsRequest", "ListPromptsSource", "Prompt", "RemotePrompt", "StepPromptExpression", "StepPromptType", "UsagePromptResponse"];
-                objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Schemas>::Notification(
-                    objectiveai_cli_sdk::output::Notification {
-                        value: objectiveai_cli_sdk::output::Schemas {
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: objectiveai_sdk::cli::output::Schemas {
                             schemas: NAMES.iter().map(|s| s.to_string()).collect(),
                         },
                     },
@@ -79,9 +79,9 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.GetPromptResponse.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Schema>::Notification(
-                    objectiveai_cli_sdk::output::Notification {
-                        value: objectiveai_cli_sdk::output::Schema { schema },
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
                 Ok(())
@@ -90,9 +90,9 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.InlinePrompt.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Schema>::Notification(
-                    objectiveai_cli_sdk::output::Notification {
-                        value: objectiveai_cli_sdk::output::Schema { schema },
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
                 Ok(())
@@ -101,9 +101,9 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.InlinePromptOrRemoteCommitOptional.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Schema>::Notification(
-                    objectiveai_cli_sdk::output::Notification {
-                        value: objectiveai_cli_sdk::output::Schema { schema },
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
                 Ok(())
@@ -112,9 +112,9 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.ListPromptResponse.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Schema>::Notification(
-                    objectiveai_cli_sdk::output::Notification {
-                        value: objectiveai_cli_sdk::output::Schema { schema },
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
                 Ok(())
@@ -123,9 +123,9 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.ListPromptsRequest.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Schema>::Notification(
-                    objectiveai_cli_sdk::output::Notification {
-                        value: objectiveai_cli_sdk::output::Schema { schema },
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
                 Ok(())
@@ -134,9 +134,9 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.ListPromptsSource.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Schema>::Notification(
-                    objectiveai_cli_sdk::output::Notification {
-                        value: objectiveai_cli_sdk::output::Schema { schema },
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
                 Ok(())
@@ -145,9 +145,9 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.Prompt.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Schema>::Notification(
-                    objectiveai_cli_sdk::output::Notification {
-                        value: objectiveai_cli_sdk::output::Schema { schema },
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
                 Ok(())
@@ -156,9 +156,9 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.RemotePrompt.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Schema>::Notification(
-                    objectiveai_cli_sdk::output::Notification {
-                        value: objectiveai_cli_sdk::output::Schema { schema },
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
                 Ok(())
@@ -167,9 +167,9 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.StepPromptExpression.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Schema>::Notification(
-                    objectiveai_cli_sdk::output::Notification {
-                        value: objectiveai_cli_sdk::output::Schema { schema },
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
                 Ok(())
@@ -178,9 +178,9 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.StepPromptType.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Schema>::Notification(
-                    objectiveai_cli_sdk::output::Notification {
-                        value: objectiveai_cli_sdk::output::Schema { schema },
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
                 Ok(())
@@ -189,9 +189,9 @@ impl Commands {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.UsagePromptResponse.json"),
                 ).expect("embedded JSON Schema must parse");
-                objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Schema>::Notification(
-                    objectiveai_cli_sdk::output::Notification {
-                        value: objectiveai_cli_sdk::output::Schema { schema },
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
                 Ok(())

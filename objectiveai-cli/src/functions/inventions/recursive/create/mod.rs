@@ -43,7 +43,7 @@ impl InventionParams {
     }
 }
 
-use objectiveai_cli_sdk::output::{InventionResultItem, Inventions};
+use objectiveai_sdk::cli::output::{InventionResultItem, Inventions};
 
 /// Extract the name from an invention State.
 fn state_name(state: &objectiveai_sdk::functions::inventions::State) -> &str {
@@ -115,7 +115,7 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_sdk::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         let (agent_ref, continuation_args, instructions, seed, state, detach) = match self {
             Commands::AlphaScalar { params, agent, continuation, instructions, seed, detach } => {
                 let p = params.into_params();
@@ -197,9 +197,9 @@ impl Commands {
                 async move {
                     if let Ok(chunk) = &result {
                         for inner in chunk.inner_errors() {
-                            objectiveai_cli_sdk::output::Output::<serde_json::Value>::Error(
-                                objectiveai_cli_sdk::output::Error {
-                                    level: objectiveai_cli_sdk::output::Level::Warn,
+                            objectiveai_sdk::cli::output::Output::<serde_json::Value>::Error(
+                                objectiveai_sdk::cli::output::Error {
+                                    level: objectiveai_sdk::cli::output::Level::Warn,
                                     fatal: false,
                                     message: serde_json::to_value(&inner).unwrap(),
                                 },
@@ -232,7 +232,7 @@ impl Commands {
                 })
                 .collect();
 
-            objectiveai_cli_sdk::output::Output::<Inventions>::Notification(objectiveai_cli_sdk::output::Notification { value:
+            objectiveai_sdk::cli::output::Output::<Inventions>::Notification(objectiveai_sdk::cli::output::Notification { value:
                 Inventions { inventions: results },
              })
             .emit(&handle).await;

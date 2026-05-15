@@ -12,8 +12,8 @@ async fn main() {
     // constructing their own `cli::run` call can supply
     // `Handle::Stdin(Arc::new(Mutex::new(child.stdin.take().unwrap())))`
     // or `Handle::Collect(_)` instead.
-    let handle: objectiveai_cli_sdk::output::Handle =
-        objectiveai_cli_sdk::output::Handle::Stdout;
+    let handle: objectiveai_sdk::cli::output::Handle =
+        objectiveai_sdk::cli::output::Handle::Stdout;
     // Best-effort auto-update. No-op unless the `updater` feature is on;
     // may never return because the replacement has been spawned with
     // the same argv. Any error inside is emitted as a non-fatal warn-level

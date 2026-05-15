@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::error;
@@ -23,10 +24,12 @@ use crate::error;
 /// Does NOT include the lab chunk's own top-level `.error` — that
 /// field is the chunk's own failure state and is reachable directly
 /// via [`LaboratoryExecutionChunk::error`](super::LaboratoryExecutionChunk::error).
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
+#[schemars(rename = "laboratories.executions.response.streaming.InnerError")]
 pub enum InnerError<'a> {
     /// An error from a [`BuilderChunk`](super::BuilderChunk).
+    #[schemars(title = "Builder")]
     Builder {
         /// Builder index (matches `BuilderChunk::index`).
         builder_index: u64,
@@ -36,6 +39,7 @@ pub enum InnerError<'a> {
         error: Cow<'a, error::ResponseError>,
     },
     /// An error from an [`EvaluationChunk`](super::EvaluationChunk).
+    #[schemars(title = "Evaluation")]
     Evaluation {
         /// Evaluation index (matches `EvaluationChunk::index`).
         evaluation_index: u64,

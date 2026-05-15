@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::error;
@@ -26,8 +27,9 @@ use crate::error;
 ///   [`FunctionExecutionChunk::error`](super::FunctionExecutionChunk::error).
 /// - The reasoning summary's own `.error`; only the inner agent
 ///   completion's failure surfaces as a reasoning error.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
+#[schemars(rename = "functions.executions.response.streaming.InnerError")]
 pub enum InnerError<'a> {
     /// A nested function execution task failed at its top level.
     /// Yielded when a
@@ -37,13 +39,17 @@ pub enum InnerError<'a> {
     /// `task_path` locates the failing task; `swiss_pool_index` /
     /// `swiss_round` / `split_index` carry the tournament/split context
     /// from the wrapper when set.
+    #[schemars(title = "FunctionTaskError")]
     FunctionTaskError {
         task_path: Vec<u64>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(extend("omitempty" = true))]
         swiss_pool_index: Option<u64>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(extend("omitempty" = true))]
         swiss_round: Option<u64>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(extend("omitempty" = true))]
         split_index: Option<u64>,
         error: Cow<'a, error::ResponseError>,
     },
@@ -54,9 +60,11 @@ pub enum InnerError<'a> {
     ///   completion failed.
     ///
     /// `task_path` locates the vector completion task.
+    #[schemars(title = "VectorCompletionTaskError")]
     VectorCompletionTaskError {
         task_path: Vec<u64>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[schemars(extend("omitempty" = true))]
         agent_completion_index: Option<u64>,
         error: Cow<'a, error::ResponseError>,
     },
@@ -65,6 +73,7 @@ pub enum InnerError<'a> {
     ///
     /// `task_path` identifies whose reasoning — empty for the root
     /// execution; non-empty for a nested execution at that path.
+    #[schemars(title = "ReasoningAgentCompletionError")]
     ReasoningAgentCompletionError {
         task_path: Vec<u64>,
         error: Cow<'a, error::ResponseError>,

@@ -96,7 +96,7 @@ When the host dispatches your plugin, it spawns the binary at `<plugins_dir>/<re
 
 ### PluginOutput variants
 
-Internally tagged on `"type"` (snake_case). Defined in [`objectiveai-cli-sdk/src/plugins/output.rs`](../objectiveai-cli-sdk/src/plugins/output.rs).
+Internally tagged on `"type"` (snake_case). Defined in [`objectiveai-sdk-rs/src/cli/plugins/output.rs`](../objectiveai-sdk-rs/src/cli/plugins/output.rs).
 
 ```jsonc
 // 1. A notification — the value's fields sit flat next to the type discriminator.

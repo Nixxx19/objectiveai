@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::error;
@@ -20,7 +21,8 @@ use crate::error;
 ///
 /// Does NOT include the invention chunk's own top-level `.error` — that
 /// field is reachable directly via [`FunctionInventionChunk::error`](super::FunctionInventionChunk::error).
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.inventions.response.streaming.InnerError")]
 pub struct InnerError<'a> {
     /// Index of the failing completion (matches `AgentCompletionChunk::index`).
     pub agent_completion_index: u64,

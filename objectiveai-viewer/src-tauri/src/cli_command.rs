@@ -7,7 +7,7 @@
 //! which becomes the `destination` on every emitted event. The plugin
 //! never sets `destination` itself.
 
-use objectiveai_cli_sdk::output::Handle;
+use objectiveai_sdk::cli::output::Handle;
 use tokio::sync::mpsc;
 
 use crate::events::{Event, EventSender};

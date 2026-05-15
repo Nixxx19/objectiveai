@@ -36,7 +36,7 @@ impl InputSource {
     }
 }
 
-use objectiveai_cli_sdk::output::{Execution, ExecutionResult};
+use objectiveai_sdk::cli::output::{Execution, ExecutionResult};
 
 #[derive(Subcommand)]
 pub enum Commands {
@@ -119,7 +119,7 @@ async fn profile_favorites(cli_config: &crate::Config) -> Vec<objectiveai_sdk::f
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_sdk::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         let (function_source, profile_source, input_source, continuation_args, instructions, retry_token, seed, split, invert, strategy, detach) = match self {
             Commands::Standard { function, profile, input, continuation, instructions, retry_token, seed, split, invert, detach } => {
                 (function, profile, input, continuation, instructions, retry_token, seed, split, invert, objectiveai_sdk::functions::executions::request::Strategy::Default, detach)
@@ -175,9 +175,9 @@ impl Commands {
                 async move {
                     if let Ok(chunk) = &result {
                         for inner in chunk.inner_errors() {
-                            objectiveai_cli_sdk::output::Output::<serde_json::Value>::Error(
-                                objectiveai_cli_sdk::output::Error {
-                                    level: objectiveai_cli_sdk::output::Level::Warn,
+                            objectiveai_sdk::cli::output::Output::<serde_json::Value>::Error(
+                                objectiveai_sdk::cli::output::Error {
+                                    level: objectiveai_sdk::cli::output::Level::Warn,
                                     fatal: false,
                                     message: serde_json::to_value(&inner).unwrap(),
                                 },
@@ -212,7 +212,7 @@ impl Commands {
                 });
 
             let result = ExecutionResult { output };
-            objectiveai_cli_sdk::output::Output::<Execution>::Notification(objectiveai_cli_sdk::output::Notification { value:
+            objectiveai_sdk::cli::output::Output::<Execution>::Notification(objectiveai_sdk::cli::output::Notification { value:
                 Execution { execution: result },
              })
             .emit(&handle).await;

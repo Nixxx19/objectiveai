@@ -33,16 +33,16 @@ use crate::Config;
 pub async fn maybe_auto_update<I>(
     args: I,
     cli_config: &Config,
-    handle: &objectiveai_cli_sdk::output::Handle,
+    handle: &objectiveai_sdk::cli::output::Handle,
 ) where
     I: IntoIterator<Item = OsString> + Clone,
 {
     #[cfg(feature = "updater")]
     {
         if let Err(e) = imp::run(args, cli_config).await {
-            objectiveai_cli_sdk::output::Output::<serde_json::Value>::Error(
-                objectiveai_cli_sdk::output::Error {
-                    level: objectiveai_cli_sdk::output::Level::Warn,
+            objectiveai_sdk::cli::output::Output::<serde_json::Value>::Error(
+                objectiveai_sdk::cli::output::Error {
+                    level: objectiveai_sdk::cli::output::Level::Warn,
                     fatal: false,
                     message: format!("auto-update error: {e}").into(),
                 },

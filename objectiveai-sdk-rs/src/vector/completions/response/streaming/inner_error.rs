@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::error;
@@ -17,7 +18,8 @@ use crate::error;
 /// ```json
 /// { "agent_completion_index": 1, "error": { ... } }
 /// ```
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "vector.completions.response.streaming.InnerError")]
 pub struct InnerError<'a> {
     /// Index of the failing completion (matches `AgentCompletionChunk::index`).
     pub agent_completion_index: u64,

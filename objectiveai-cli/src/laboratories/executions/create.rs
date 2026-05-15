@@ -1,12 +1,12 @@
 use futures::StreamExt;
-use objectiveai_cli_sdk::output::{LabResultItem, Laboratory};
+use objectiveai_sdk::cli::output::{LabResultItem, Laboratory};
 
 use super::create_args::CreateArgs;
 
 pub async fn handle(
     args: CreateArgs,
     cli_config: &crate::Config,
-    handle: &objectiveai_cli_sdk::output::Handle,
+    handle: &objectiveai_sdk::cli::output::Handle,
 ) -> Result<(), crate::error::Error> {
     args.instructions.verify(cli_config, crate::instructions::InstructionsScope::LaboratoryExecutions)?;
 
@@ -82,9 +82,9 @@ pub async fn handle(
                 async move {
                     if let Ok(chunk) = &result {
                         for inner in chunk.inner_errors() {
-                            objectiveai_cli_sdk::output::Output::<serde_json::Value>::Error(
-                                objectiveai_cli_sdk::output::Error {
-                                    level: objectiveai_cli_sdk::output::Level::Warn,
+                            objectiveai_sdk::cli::output::Output::<serde_json::Value>::Error(
+                                objectiveai_sdk::cli::output::Error {
+                                    level: objectiveai_sdk::cli::output::Level::Warn,
                                     fatal: false,
                                     message: serde_json::to_value(&inner).unwrap(),
                                 },
@@ -171,7 +171,7 @@ pub async fn handle(
                 })
                 .collect();
 
-            objectiveai_cli_sdk::output::Output::<Laboratory>::Notification(objectiveai_cli_sdk::output::Notification { value: 
+            objectiveai_sdk::cli::output::Output::<Laboratory>::Notification(objectiveai_sdk::cli::output::Notification { value: 
                 Laboratory { laboratory: results },
              })
             .emit(&handle).await;

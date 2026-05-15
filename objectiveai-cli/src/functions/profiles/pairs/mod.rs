@@ -2,7 +2,7 @@ pub mod config;
 pub mod favorites;
 
 use clap::Subcommand;
-use objectiveai_cli_sdk::output::{FunctionProfilePair, Pair};
+use objectiveai_sdk::cli::output::{FunctionProfilePair, Pair};
 
 #[derive(Subcommand)]
 pub enum Commands {
@@ -46,7 +46,7 @@ async fn list_objectiveai(
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_sdk::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::Get { args } => {
                 let (function_path, profile_path) = args.resolve(|| get_favorites(cli_config)).await?;
@@ -60,7 +60,7 @@ impl Commands {
                         function: function?,
                         profile: profile?,
                     };
-                    objectiveai_cli_sdk::output::Output::<Pair>::Notification(objectiveai_cli_sdk::output::Notification { value: Pair { pair } })
+                    objectiveai_sdk::cli::output::Output::<Pair>::Notification(objectiveai_sdk::cli::output::Notification { value: Pair { pair } })
                         .emit(&handle).await;
                     Ok(())
                 }, false).await

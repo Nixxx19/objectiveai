@@ -1,6 +1,6 @@
 use objectiveai_sdk::filesystem::config::Config;
 use objectiveai_sdk::filesystem::Client;
-use objectiveai_cli_sdk::output::{Handle, JqResults, Output, Value};
+use objectiveai_sdk::cli::output::{Handle, JqResults, Output, Value};
 
 pub fn filter(f: Option<String>) -> String {
     f.unwrap_or_else(|| ".".to_string())
@@ -35,7 +35,7 @@ pub async fn emit_jq(
         1 => results.into_iter().next().unwrap(),
         _ => serde_json::Value::Array(results),
     };
-    Output::<JqResults>::Notification(objectiveai_cli_sdk::output::Notification { value: JqResults { jq } })
+    Output::<JqResults>::Notification(objectiveai_sdk::cli::output::Notification { value: JqResults { jq } })
         .emit(handle)
         .await;
     Ok(())
@@ -43,7 +43,7 @@ pub async fn emit_jq(
 
 /// Emit a typed config value as `{"type":"notification","value":<v>}`.
 pub async fn emit_value<V: serde::Serialize>(v: V, handle: &Handle) {
-    Output::<Value<V>>::Notification(objectiveai_cli_sdk::output::Notification { value: Value { value: v } })
+    Output::<Value<V>>::Notification(objectiveai_sdk::cli::output::Notification { value: Value { value: v } })
         .emit(handle)
         .await;
 }

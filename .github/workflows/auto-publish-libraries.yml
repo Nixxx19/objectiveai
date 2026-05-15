@@ -9,10 +9,10 @@ name: Auto-publish libraries
 # Wave map (matches publish.sh):
 #   1. sdk-rs-macros (crates), sdk-go (git tag)
 #   2. sdk-rs (crates)             — needs macros
-#   3. mcp-proxy, mcp-filesystem, cli-sdk (crates) +
+#   3. mcp-proxy, mcp-filesystem (crates) +
 #      sdk-py (PyPI) + sdk-js (npm)               — need sdk-rs
 #   4. api (crates)                — needs mcp-proxy
-#   5. cli (crates)                — needs api + cli-sdk
+#   5. cli (crates)                — needs api
 #   6. mcp-cli (crates), cocoindex (PyPI)
 #                                  — need cli / sdk-py respectively
 #
@@ -143,11 +143,6 @@ jobs:
     uses: ./.github/workflows/publish-objectiveai-mcp-filesystem.yml
     secrets: inherit
 
-  publish-cli-sdk:
-    needs: wait-after-wave-2
-    uses: ./.github/workflows/publish-objectiveai-cli-sdk.yml
-    secrets: inherit
-
   publish-sdk-py:
     needs: wait-after-wave-2
     uses: ./.github/workflows/publish-objectiveai-sdk-py.yml
@@ -160,7 +155,7 @@ jobs:
 
   # ─── Wave 4 ───────────────────────────────────────────────────────
   wait-after-wave-3:
-    needs: [check-version, publish-mcp-proxy, publish-mcp-filesystem, publish-cli-sdk, publish-sdk-py, publish-sdk-js]
+    needs: [check-version, publish-mcp-proxy, publish-mcp-filesystem, publish-sdk-py, publish-sdk-js]
     runs-on: ubuntu-latest
     steps:
       - name: Wait for mcp-proxy on crates.io
@@ -186,16 +181,12 @@ jobs:
     needs: [check-version, publish-api]
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for api + cli-sdk on crates.io
+      - name: Wait for api on crates.io
         env:
           VERSION: ${{ needs.check-version.outputs.version }}
         run: |
           for _ in $(seq 1 80); do
-            ok=true
-            for name in objectiveai-api objectiveai-cli-sdk; do
-              curl -fsS -A "objectiveai-publish-orchestrator (admin@objectiveai.dev)" -o /dev/null "https://crates.io/api/v1/crates/$name/$VERSION" 2>/dev/null || ok=false
-            done
-            if $ok; then
+            if curl -fsS -A "objectiveai-publish-orchestrator (admin@objectiveai.dev)" -o /dev/null "https://crates.io/api/v1/crates/objectiveai-api/$VERSION" 2>/dev/null; then
               echo "live"
               exit 0
             fi

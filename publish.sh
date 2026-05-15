@@ -33,7 +33,6 @@ WAVE_2=(
 WAVE_3=(
   "objectiveai-mcp-proxy|crates|objectiveai-mcp-proxy"
   "objectiveai-mcp-filesystem|crates|objectiveai-mcp-filesystem"
-  "objectiveai-cli-sdk|crates|objectiveai-cli-sdk"
   "objectiveai-sdk-py|pypi|objectiveai-sdk"
   "objectiveai-sdk-js|npm|@objectiveai/sdk"
 )
@@ -157,7 +156,7 @@ run_wave "Wave 1 — leaves (no upstream deps)"               "${WAVE_1[@]}"
 run_wave "Wave 2 — depends on objectiveai-sdk-macros"       "${WAVE_2[@]}"
 run_wave "Wave 3 — depends on objectiveai-sdk"              "${WAVE_3[@]}"
 run_wave "Wave 4 — depends on objectiveai-mcp-proxy (api)"  "${WAVE_4[@]}"
-run_wave "Wave 5 — depends on api + cli-sdk (cli)"          "${WAVE_5[@]}"
+run_wave "Wave 5 — depends on api (cli)"                    "${WAVE_5[@]}"
 run_wave "Wave 6 — depends on cli / sdk-py on PyPI"         "${WAVE_6[@]}"
 echo
 echo "✓ All packages published at $VERSION"

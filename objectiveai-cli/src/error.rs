@@ -66,10 +66,10 @@ pub enum Error {
 impl Error {
     pub fn to_output(
         &self,
-        level: objectiveai_cli_sdk::output::Level,
+        level: objectiveai_sdk::cli::output::Level,
         fatal: bool,
-    ) -> objectiveai_cli_sdk::output::Error {
-        objectiveai_cli_sdk::output::Error {
+    ) -> objectiveai_sdk::cli::output::Error {
+        objectiveai_sdk::cli::output::Error {
             level,
             fatal,
             message: self.output_message(),

@@ -75,15 +75,15 @@ async fn list_source(
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_cli_sdk::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::Get { args } => {
                 let path = args.resolve(|| get_favorites(cli_config)).await?;
                 let handle = handle.clone();
                 crate::api::run(|http_client| async move {
                     let response = objectiveai_sdk::functions::get_function(&http_client, path).await?;
-                    objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Function>::Notification(objectiveai_cli_sdk::output::Notification { value: 
-                        objectiveai_cli_sdk::output::Function { function: response },
+                    objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Function>::Notification(objectiveai_sdk::cli::output::Notification { value: 
+                        objectiveai_sdk::cli::output::Function { function: response },
                      })
                     .emit(&handle).await;
                     Ok(())
@@ -120,8 +120,8 @@ impl Commands {
                 let sha = objectiveai_sdk::filesystem::publish::publish_function(
                     &fs_client, &repository, &function, &msg, overwrite,
                 ).await?;
-                objectiveai_cli_sdk::output::Output::<objectiveai_cli_sdk::output::Published>::Notification(objectiveai_cli_sdk::output::Notification { value: 
-                    objectiveai_cli_sdk::output::Published { sha },
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Published>::Notification(objectiveai_sdk::cli::output::Notification { value: 
+                    objectiveai_sdk::cli::output::Published { sha },
                  })
                 .emit(handle).await;
                 Ok(())
