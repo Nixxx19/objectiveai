@@ -5615,16 +5615,17 @@ function wasmVectorCompletionsVectorResponseId(response) {
 function isInIframe() {
   return typeof window !== "undefined" && window.parent !== window;
 }
-var listeners = /* @__PURE__ */ new Map();
-var messageHandlerAttached = false;
-function attachMessageHandler() {
-  if (messageHandlerAttached) return;
+var inboundListeners = /* @__PURE__ */ new Map();
+var inboundHandlerAttached = false;
+function attachInboundHandler() {
+  if (inboundHandlerAttached) return;
   if (typeof window === "undefined") return;
   window.addEventListener("message", (event) => {
     const msg = event.data;
     if (!msg || typeof msg !== "object") return;
     if (msg.kind !== "plugin-event") return;
-    const set = listeners.get(msg.type);
+    if (msg.type !== "inbound") return;
+    const set = inboundListeners.get(msg.sub_type);
     if (!set) return;
     for (const fn of set) {
       try {
@@ -5634,9 +5635,9 @@ function attachMessageHandler() {
       }
     }
   });
-  messageHandlerAttached = true;
+  inboundHandlerAttached = true;
 }
-function listen2(type, handler) {
+function listen2(sub_type, handler) {
   if (!isInIframe()) {
     let unlisten = null;
     let cancelled = false;
@@ -5645,7 +5646,7 @@ function listen2(type, handler) {
         const mod = await Promise.resolve().then(() => (init_event(), event_exports));
         if (cancelled) return;
         const u = await mod.listen(
-          `plugin-${type}`,
+          `plugin-${sub_type}`,
           (e) => handler(e.payload?.value)
         );
         if (cancelled) {
@@ -5655,7 +5656,7 @@ function listen2(type, handler) {
         }
       } catch {
         console.warn(
-          `@objectiveai/sdk/viewer: listen('${type}') called outside an iframe and @tauri-apps/api is unavailable; events will not fire.`
+          `@objectiveai/sdk/viewer: listen('${sub_type}') called outside an iframe and @tauri-apps/api is unavailable; events will not fire.`
         );
       }
     })();
@@ -5664,20 +5665,78 @@ function listen2(type, handler) {
       if (unlisten) unlisten();
     };
   }
-  attachMessageHandler();
-  const set = listeners.get(type) ?? /* @__PURE__ */ new Set();
+  attachInboundHandler();
+  const set = inboundListeners.get(sub_type) ?? /* @__PURE__ */ new Set();
   const fn = (value) => handler(value);
   set.add(fn);
-  listeners.set(type, set);
+  inboundListeners.set(sub_type, set);
   return () => {
-    const s = listeners.get(type);
+    const s = inboundListeners.get(sub_type);
     if (!s) return;
     s.delete(fn);
-    if (s.size === 0) listeners.delete(type);
+    if (s.size === 0) inboundListeners.delete(sub_type);
+  };
+}
+function invokeCli(args) {
+  return {
+    [Symbol.asyncIterator]() {
+      const queue = [];
+      let resolveNext = null;
+      let done = false;
+      let cleaned = false;
+      const onMessage = (event) => {
+        const msg = event.data;
+        if (!msg || typeof msg !== "object") return;
+        if (msg.kind !== "plugin-event" || msg.type !== "cli_command") return;
+        queue.push(msg.value);
+        if (typeof msg.value === "object" && msg.value !== null && msg.value.type === "end") {
+          done = true;
+        }
+        if (resolveNext) {
+          const r = resolveNext;
+          resolveNext = null;
+          r();
+        }
+      };
+      const cleanup = () => {
+        if (cleaned) return;
+        cleaned = true;
+        if (typeof window !== "undefined") {
+          window.removeEventListener("message", onMessage);
+        }
+      };
+      if (typeof window === "undefined" || window.parent === window) {
+        console.warn(
+          "@objectiveai/sdk/viewer: invokeCli() called outside an iframe; no host present, the iterator will yield nothing."
+        );
+        done = true;
+      } else {
+        window.addEventListener("message", onMessage);
+        window.parent.postMessage({ kind: "cli-invoke", args }, "*");
+      }
+      return {
+        async next() {
+          while (queue.length === 0 && !done) {
+            await new Promise((r) => {
+              resolveNext = r;
+            });
+          }
+          if (queue.length > 0) {
+            return { value: queue.shift(), done: false };
+          }
+          cleanup();
+          return { value: void 0, done: true };
+        },
+        async return() {
+          cleanup();
+          return { value: void 0, done: true };
+        }
+      };
+    }
   };
 }
 function __resetForTests() {
-  listeners.clear();
+  inboundListeners.clear();
 }
 
 // src/error.ts
@@ -6586,6 +6645,7 @@ exports.functionsProfilesComputationsResponseStreamingFunctionProfileComputation
 exports.functionsProfilesGetProfile = functionsProfilesGetProfile;
 exports.functionsProfilesGetProfileUsage = functionsProfilesGetProfileUsage;
 exports.functionsProfilesListProfiles = functionsProfilesListProfiles;
+exports.invokeCli = invokeCli;
 exports.isResponseError = isResponseError;
 exports.laboratoriesExecutionsCreateLaboratoryExecution = laboratoriesExecutionsCreateLaboratoryExecution;
 exports.laboratoriesExecutionsResponseStreamingBuilderChunkMerged = laboratoriesExecutionsResponseStreamingBuilderChunkMerged;

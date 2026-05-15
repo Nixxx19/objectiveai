@@ -1,5 +1,5 @@
 import z$1, { z } from 'zod';
-export { __resetForTests, listen } from './viewer/index.js';
+export { __resetForTests, invokeCli, listen } from './viewer/index.js';
 
 declare const AgentClaudeAgentSdkAgentSchema: z.ZodObject<{
     effort: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"low">, z.ZodLiteral<"medium">, z.ZodLiteral<"high">, z.ZodLiteral<"max">]>>>;

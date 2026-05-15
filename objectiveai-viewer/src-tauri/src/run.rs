@@ -182,7 +182,7 @@ pub struct Config {
     pub config_base_dir: Option<String>,
 }
 
-pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, axum::Router, EventReceiver, HttpClient, FsClient)> {
+pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, axum::Router, crate::events::EventSender, EventReceiver, HttpClient, FsClient)> {
     let (tx, rx) = mpsc::unbounded_channel::<Event>();
     let secret = config.secret.map(Arc::new);
 
@@ -212,16 +212,16 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
 
     fn built_in_route(
         path: &'static str,
-        r#type: &'static str,
+        sub_type: &'static str,
         tx: tokio::sync::mpsc::UnboundedSender<Event>,
     ) -> (&'static str, axum::routing::MethodRouter) {
         let handler = move |Json(value): Json<serde_json::Value>| {
             let tx = tx.clone();
-            let r#type = r#type.to_string();
+            let sub_type = sub_type.to_string();
             async move {
-                let _ = tx.send(Event {
+                let _ = tx.send(Event::Inbound {
                     destination: "objectiveai".to_string(),
-                    r#type,
+                    sub_type,
                     value,
                 });
                 StatusCode::OK
@@ -270,7 +270,11 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
 
     let app = app.layer(middleware::from_fn_with_state(secret, signature_middleware));
 
-    Ok((listener, app, rx, http_client, fs_client))
+    // Clone tx for downstream consumers (cli_command Tauri command
+    // managed on the Tauri Builder; lets in-process embedders inject
+    // synthetic events too).
+    let events_tx = tx.clone();
+    Ok((listener, app, events_tx, rx, http_client, fs_client))
 }
 
 /// A function that exits the viewer's event loop with the given exit code.
@@ -287,6 +291,7 @@ pub type Exiter = Box<dyn FnOnce(i32) + Send>;
 pub fn serve(
     listener: tokio::net::TcpListener,
     app: axum::Router,
+    events_tx: crate::events::EventSender,
     mut rx: EventReceiver,
     http_client: HttpClient,
     fs_client: FsClient,
@@ -300,18 +305,28 @@ pub fn serve(
     let ready_for_task = ready.clone();
 
     let plugins_dir_for_protocol = fs_client.plugins_dir();
-    tauri::Builder::default()
+    let builder = tauri::Builder::default()
         .manage(ready)
         .manage(http_client)
         .manage(fs_client)
+        .manage(events_tx)
         .register_uri_scheme_protocol("plugin", move |_app, request| {
             serve_plugin_asset(&plugins_dir_for_protocol, request)
-        })
-        .invoke_handler(tauri::generate_handler![
-            viewer_ready,
-            notify_agent_completion,
-            crate::plugins::list_plugins_with_viewer
-        ])
+        });
+    #[cfg(feature = "cli")]
+    let builder = builder.invoke_handler(tauri::generate_handler![
+        viewer_ready,
+        notify_agent_completion,
+        crate::plugins::list_plugins_with_viewer,
+        crate::cli_command::cli_run,
+    ]);
+    #[cfg(not(feature = "cli"))]
+    let builder = builder.invoke_handler(tauri::generate_handler![
+        viewer_ready,
+        notify_agent_completion,
+        crate::plugins::list_plugins_with_viewer,
+    ]);
+    builder
         .setup(move |tauri_app| {
             let handle = tauri_app.handle().clone();
             if let Some(tx) = exiter_tx {
@@ -335,11 +350,11 @@ pub fn serve(
                 }
                 // Drain buffered events.
                 for event in buffer {
-                    let _ = handle.emit(&event.destination, &event);
+                    let _ = handle.emit(event.destination(), &event);
                 }
                 // Forward remaining events directly.
                 while let Some(event) = rx.recv().await {
-                    let _ = handle.emit(&event.destination, &event);
+                    let _ = handle.emit(event.destination(), &event);
                 }
             });
             Ok(())
@@ -353,10 +368,10 @@ pub fn serve(
 /// The caller should use `std::process::exit(code)` with the returned value.
 pub async fn run(config: Config) -> std::io::Result<i32> {
     let suppress_output = config.suppress_output;
-    let (listener, app, rx, http_client, fs_client) = setup(config).await?;
+    let (listener, app, events_tx, rx, http_client, fs_client) = setup(config).await?;
     if !suppress_output {
         let addr = listener.local_addr()?;
         eprintln!("listening on {addr}");
     }
-    Ok(serve(listener, app, rx, http_client, fs_client, None))
+    Ok(serve(listener, app, events_tx, rx, http_client, fs_client, None))
 }

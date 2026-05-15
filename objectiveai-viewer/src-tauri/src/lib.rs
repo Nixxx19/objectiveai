@@ -1,4 +1,6 @@
 mod events;
+#[cfg(feature = "cli")]
+mod cli_command;
 mod plugins;
 #[cfg(test)]
 mod plugins_tests;
