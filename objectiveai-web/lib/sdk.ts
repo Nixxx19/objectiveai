@@ -1,4 +1,4 @@
-import { ObjectiveAI } from "objectiveai-sdk";
+import { ObjectiveAI } from "@objectiveai/sdk";
 
 /** Shared ObjectiveAI client */
 let _client: ObjectiveAI | null = null;

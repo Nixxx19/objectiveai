@@ -4,11 +4,11 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import {
   functionsExecutionsCreateFunctionExecution,
   functionsExecutionsResponseStreamingFunctionExecutionChunkMerged,
-} from "objectiveai-sdk";
+} from "@objectiveai/sdk";
 import type {
   FunctionsExecutionsResponseStreamingFunctionExecutionChunk,
   FunctionsExpressionInputValue,
-} from "objectiveai-sdk";
+} from "@objectiveai/sdk";
 import { getClient } from "./sdk";
 
 type Chunk = FunctionsExecutionsResponseStreamingFunctionExecutionChunk;

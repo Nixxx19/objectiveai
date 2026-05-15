@@ -7,7 +7,7 @@ import type {
   AgentCompletionsMessageRichContentPart,
   AgentCompletionsResponseUsage,
   ErrorResponseError,
-} from "objectiveai-sdk";
+} from "@objectiveai/sdk";
 
 interface AgentCompletionEntry {
   kind: "agent-completion";

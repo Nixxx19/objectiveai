@@ -5630,7 +5630,7 @@ function attachMessageHandler() {
       try {
         fn(msg.value);
       } catch (e) {
-        console.error("objectiveai-sdk/viewer listener threw:", e);
+        console.error("@objectiveai/sdk/viewer listener threw:", e);
       }
     }
   });
@@ -5655,7 +5655,7 @@ function listen2(type, handler) {
         }
       } catch {
         console.warn(
-          `objectiveai-sdk/viewer: listen('${type}') called outside an iframe and @tauri-apps/api is unavailable; events will not fire.`
+          `@objectiveai/sdk/viewer: listen('${type}') called outside an iframe and @tauri-apps/api is unavailable; events will not fire.`
         );
       }
     })();

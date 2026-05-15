@@ -1,6 +1,6 @@
 import type {
   FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk,
-} from "objectiveai-sdk";
+} from "@objectiveai/sdk";
 import { AgentCompletionChat } from "./AgentCompletionView";
 
 interface FunctionInventionRecursiveEntry {

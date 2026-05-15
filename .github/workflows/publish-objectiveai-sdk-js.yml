@@ -1,9 +1,9 @@
 name: Publish objectiveai-sdk-js
 
-# Builds and publishes the `objectiveai-sdk` npm package. Triggered manually via
+# Builds and publishes the `@objectiveai/sdk` npm package. Triggered manually via
 # workflow_dispatch.
 #
-# The build pipeline (`pnpm --filter objectiveai-sdk run build`) regenerates Zod
+# The build pipeline (`pnpm --filter @objectiveai/sdk run build`) regenerates Zod
 # schemas from objectiveai-json-schema/, embeds the WASM loader, and bundles
 # via tsup. We need to run a full repo build first because the JS package's
 # build depends on objectiveai-sdk-rs-wasm-js/dist/ (built by build-bin + the

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Publishes objectiveai-sdk-js to npm as the `objectiveai-sdk` package.
+# Publishes objectiveai-sdk-js to npm as the `@objectiveai/sdk` package.
 #
 # By default, dispatches the GitHub Actions workflow that runs
 # `pnpm publish --access public` against the public npm registry.

@@ -1,5 +1,5 @@
 /**
- * objectiveai-sdk/viewer
+ * @objectiveai/sdk/viewer
  *
  * Thin TypeScript shim that lets plugin authors subscribe to events
  * emitted by the host viewer from inside their iframe-mounted UI

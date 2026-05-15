@@ -21,13 +21,13 @@ import {
   functionsExecutionsResponseStreamingFunctionExecutionChunkMerged,
   functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged,
   laboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkMerged,
-} from "objectiveai-sdk";
+} from "@objectiveai/sdk";
 import type {
   AgentCompletionsResponseStreamingAgentCompletionChunk,
   FunctionsExecutionsResponseStreamingFunctionExecutionChunk,
   FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk,
   LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunk,
-} from "objectiveai-sdk";
+} from "@objectiveai/sdk";
 
 // Extended schemas with required id
 const AgentCompletionCreateParamsSchema = AgentCompletionsRequestAgentCompletionCreateParamsSchema.extend({
