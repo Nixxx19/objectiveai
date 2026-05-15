@@ -79,11 +79,9 @@ impl Client {
     /// versions get separate binaries and the same version reuses the cached
     /// binary across restarts.
     ///
-    /// Returns `None` when the crate is built without the
-    /// `claude-agent-sdk` feature — in that configuration no runner
-    /// binary is embedded, and `create()` returns `Error::NotEnabled`
-    /// before this method is reached.
-    #[cfg(feature = "claude-agent-sdk")]
+    /// Returns `None` only if the on-disk extraction of the embedded
+    /// runner binary failed (e.g. temp dir not writable). In normal
+    /// operation this returns `Some(path)`.
     async fn binary_path(&self) -> Option<&str> {
         let path = self
             .binary_path
@@ -132,11 +130,6 @@ impl Client {
         } else {
             Some(path.as_str())
         }
-    }
-
-    #[cfg(not(feature = "claude-agent-sdk"))]
-    async fn binary_path(&self) -> Option<&str> {
-        None
     }
 
     /// Get-or-init the shared runner subprocess. The first caller to
@@ -255,14 +248,6 @@ impl UpstreamClient<objectiveai_sdk::agent::claude_agent_sdk::Agent, objectiveai
 
         async move {
             if !enabled {
-                return Err(super::Error::NotEnabled);
-            }
-
-            // When built without the claude-agent-sdk feature, no
-            // runner binary is embedded, so the client is non-functional
-            // regardless of the `enabled` flag.
-            #[cfg(not(feature = "claude-agent-sdk"))]
-            {
                 return Err(super::Error::NotEnabled);
             }
 

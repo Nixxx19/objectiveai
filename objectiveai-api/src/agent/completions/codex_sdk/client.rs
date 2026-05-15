@@ -81,11 +81,9 @@ impl Client {
     /// versions get separate binaries and the same version reuses the
     /// cached binary across restarts.
     ///
-    /// Returns `None` when the crate is built without the `codex-sdk`
-    /// feature — in that configuration no runner binary is embedded,
-    /// and `create()` returns `Error::NotEnabled` before this method is
-    /// reached.
-    #[cfg(feature = "codex-sdk")]
+    /// Returns `None` only if the on-disk extraction of the embedded
+    /// runner binary failed (e.g. temp dir not writable). In normal
+    /// operation this returns `Some(path)`.
     async fn binary_path(&self) -> Option<&str> {
         let path = self
             .binary_path
@@ -133,11 +131,6 @@ impl Client {
         } else {
             Some(path.as_str())
         }
-    }
-
-    #[cfg(not(feature = "codex-sdk"))]
-    async fn binary_path(&self) -> Option<&str> {
-        None
     }
 
     /// Get-or-init the shared runner subprocess. The first caller to
@@ -268,14 +261,6 @@ impl
 
         async move {
             if !enabled {
-                return Err(super::Error::NotEnabled);
-            }
-
-            // When built without the codex-sdk feature, no runner
-            // binary is embedded, so the client is non-functional
-            // regardless of the `enabled` flag.
-            #[cfg(not(feature = "codex-sdk"))]
-            {
                 return Err(super::Error::NotEnabled);
             }
 

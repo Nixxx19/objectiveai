@@ -50,13 +50,16 @@ CLI_PID=$!
 
 # Embedded binaries (depend on phase 1, run concurrently with phases 2+3).
 # mcp-filesystem is a cargo build pinned to linux-musl (Docker container
-# injection); claude-agent-sdk-runner is PyInstaller. mcp-proxy is NOT
-# embedded — objectiveai-api consumes it in-process as a regular cargo
-# path dep, so its build is folded into the api's own cargo build.
+# injection); claude-agent-sdk-runner and codex-sdk-runner are PyInstaller.
+# mcp-proxy is NOT embedded — objectiveai-api consumes it in-process as a
+# regular cargo path dep, so its build is folded into the api's own cargo
+# build.
 bash "$REPO_ROOT/objectiveai-mcp-filesystem/build.sh" --target "$(uname -m)-unknown-linux-musl" &
 MCP_FILESYSTEM_PID=$!
 bash "$REPO_ROOT/objectiveai-claude-agent-sdk-runner/build.sh" &
-SDK_RUNNER_PID=$!
+CLAUDE_RUNNER_PID=$!
+bash "$REPO_ROOT/objectiveai-codex-sdk-runner/build.sh" &
+CODEX_RUNNER_PID=$!
 
 # Phase 2: wasm + cffi (need build tools from phase 1)
 run_phase objectiveai-sdk-rs-wasm-js/build.sh objectiveai-sdk-rs-cffi/build.sh
@@ -67,7 +70,7 @@ run_phase objectiveai-sdk-js/build.sh objectiveai-sdk-py/build.sh objectiveai-sd
 
 # Wait for background builds before running viewer (viewer depends on objectiveai-sdk-js)
 FAILED=false
-for pid in $CLI_PID $MCP_FILESYSTEM_PID $SDK_RUNNER_PID; do
+for pid in $CLI_PID $MCP_FILESYSTEM_PID $CLAUDE_RUNNER_PID $CODEX_RUNNER_PID; do
   if ! wait "$pid"; then
     FAILED=true
   fi

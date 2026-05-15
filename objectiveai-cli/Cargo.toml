@@ -13,7 +13,7 @@ keywords = ["llm", "ai", "swarm", "cli"]
 publish = true
 
 [features]
-default = ["viewer", "rustpython", "systempython", "claude-agent-sdk", "updater"]
+default = ["viewer", "rustpython", "systempython", "updater"]
 viewer = []
 # Auto-update from GitHub releases on startup. Default-on so shipped
 # binaries self-update; test/CI builds that pass
@@ -21,7 +21,6 @@ viewer = []
 updater = ["dep:semver"]
 rustpython = ["dep:rustpython"]
 systempython = []
-claude-agent-sdk = ["objectiveai-api/claude-agent-sdk"]
 
 [dependencies]
 objectiveai-sdk = { path = "../objectiveai-sdk-rs", version = "2.0.5" }
