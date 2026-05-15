@@ -29,12 +29,12 @@ pub(crate) fn register_plugin_route(
     let handler = move |body: Option<Json<serde_json::Value>>| {
         let tx = tx.clone();
         let plugin = plugin_for_handler.clone();
-        let r#type = r#type.clone();
+        let sub_type = r#type.clone();
         async move {
             let value = body.map(|Json(v)| v).unwrap_or(serde_json::Value::Null);
-            let _ = tx.send(Event {
+            let _ = tx.send(Event::Inbound {
                 destination: plugin,
-                r#type,
+                sub_type,
                 value,
             });
             StatusCode::OK
