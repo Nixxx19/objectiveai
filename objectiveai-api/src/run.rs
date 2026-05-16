@@ -516,7 +516,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         mcp_call_timeout,
         mcp_encryption_key,
         config_base_dir,
-        persistent_cache_transient_ttl_ms: _persistent_cache_transient_ttl_ms,
+        persistent_cache_transient_ttl_ms,
         mock_delay_ms,
         mock_max_tool_calls,
         docker_timeout,
@@ -596,7 +596,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
     ));
 
     let filesystem_client = Arc::new(filesystem::Client::new(
-        config_base_dir,
+        config_base_dir.clone(),
         commit_author_name,
         commit_author_email,
     ));
@@ -822,7 +822,20 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
     ));
 
     // Persistent Cache Client
-    let persistent_cache = Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient);
+    #[cfg(feature = "sqlite-persistent-cache")]
+    let persistent_cache = Arc::new(
+        ctx::persistent_cache::sqlite::SqlitePersistentCacheClient::new(
+            config_base_dir,
+            std::time::Duration::from_millis(persistent_cache_transient_ttl_ms),
+        )
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?,
+    );
+    #[cfg(not(feature = "sqlite-persistent-cache"))]
+    let persistent_cache = {
+        let _ = persistent_cache_transient_ttl_ms;
+        let _ = &config_base_dir;
+        Arc::new(ctx::persistent_cache::default::DefaultPersistentCacheClient)
+    };
 
     // Router
     let app = axum::Router::new()
