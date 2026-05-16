@@ -5943,7 +5943,7 @@ function isResponseError(obj) {
 }
 
 // src/stream.ts
-var Stream = class {
+var Stream = class _Stream {
   constructor(response, controller) {
     this.buffer = "";
     this.done = false;
@@ -5953,6 +5953,22 @@ var Stream = class {
     this.reader = response.body.getReader();
     this.decoder = new TextDecoder();
     this.controller = controller ?? null;
+    this.asyncIterableSource = null;
+  }
+  /**
+   * Wrap an `AsyncIterable<T>` (e.g. the viewer-mode api-call
+   * iterator) as a `Stream<T>`. Skips the SSE parsing path entirely;
+   * the iterator yields chunks pre-parsed by its source.
+   */
+  static fromAsyncIterable(source, controller) {
+    const stream = Object.create(_Stream.prototype);
+    stream.reader = null;
+    stream.decoder = new TextDecoder();
+    stream.buffer = "";
+    stream.done = false;
+    stream.controller = controller ?? null;
+    stream.asyncIterableSource = source;
+    return stream;
   }
   /**
    * Abort the stream.
@@ -5961,9 +5977,19 @@ var Stream = class {
     this.controller?.abort();
   }
   async *[Symbol.asyncIterator]() {
+    if (this.asyncIterableSource) {
+      for await (const chunk of this.asyncIterableSource) {
+        yield chunk;
+      }
+      return;
+    }
+    if (!this.reader) {
+      throw new Error("Stream has no backing source");
+    }
+    const reader = this.reader;
     try {
       while (!this.done) {
-        const { value, done } = await this.reader.read();
+        const { value, done } = await reader.read();
         if (done) {
           this.done = true;
           if (this.buffer.trim()) {
@@ -5989,7 +6015,7 @@ var Stream = class {
         }
       }
     } finally {
-      this.reader.releaseLock();
+      reader.releaseLock();
     }
   }
   /**
@@ -6047,6 +6073,103 @@ var Stream = class {
   }
 };
 
+// src/viewer/apiCallBridge.ts
+function isInIframe2() {
+  return typeof window !== "undefined" && window.parent !== window;
+}
+function buildSubType(method, path) {
+  return `${method}_${path}`;
+}
+function viewerApiCallChunks(method, path, body) {
+  if (!isInIframe2()) {
+    throw new Error(
+      `ObjectiveAI({ viewer: true }) used outside a viewer iframe; cannot route ${method} ${path} through Tauri. Construct the client with viewer: false (or omit it) when running outside the viewer host.`
+    );
+  }
+  const subType = buildSubType(method, path);
+  return {
+    [Symbol.asyncIterator]() {
+      const queue = [];
+      let resolveNext = null;
+      let done = false;
+      let errored = null;
+      let cleaned = false;
+      const onMessage = (event) => {
+        const msg = event.data;
+        if (!msg || typeof msg !== "object") return;
+        if (msg.kind !== "plugin-event") return;
+        if (msg.type !== "api_call") return;
+        if (msg.sub_type !== subType) return;
+        const env = msg.value;
+        if (!env || typeof env !== "object") return;
+        if (env.type === "begin") ; else if (env.type === "chunk") {
+          queue.push(env.chunk);
+        } else if (env.type === "error") {
+          const raw = env.error;
+          const message = raw && typeof raw === "object" && typeof raw.message === "string" ? raw.message : JSON.stringify(env.error);
+          errored = new ObjectiveAIFetchError(0, message);
+          done = true;
+        } else if (env.type === "end") {
+          done = true;
+        }
+        if (resolveNext) {
+          const r = resolveNext;
+          resolveNext = null;
+          r();
+        }
+      };
+      const cleanup = () => {
+        if (cleaned) return;
+        cleaned = true;
+        if (typeof window !== "undefined") {
+          window.removeEventListener("message", onMessage);
+        }
+      };
+      window.addEventListener("message", onMessage);
+      window.parent.postMessage(
+        { kind: "api-call-invoke", subType, body: body ?? null },
+        "*"
+      );
+      return {
+        async next() {
+          while (queue.length === 0 && !done) {
+            await new Promise((r) => {
+              resolveNext = r;
+            });
+          }
+          if (queue.length > 0) {
+            return { value: queue.shift(), done: false };
+          }
+          cleanup();
+          if (errored) throw errored;
+          return { value: void 0, done: true };
+        },
+        async return() {
+          cleanup();
+          return { value: void 0, done: true };
+        }
+      };
+    }
+  };
+}
+async function viewerApiCallUnary(method, path, body) {
+  const iter = viewerApiCallChunks(method, path, body);
+  for await (const chunk of iter) {
+    return chunk;
+  }
+  throw new Error(
+    `viewer api call ${method} ${path} produced no chunks before end`
+  );
+}
+async function viewerApiCallUnaryNoResponse(method, path, body) {
+  const iter = viewerApiCallChunks(method, path, body);
+  for await (const _ of iter) {
+  }
+}
+function viewerApiCallStream(method, path, body) {
+  return Stream.fromAsyncIterable(viewerApiCallChunks(method, path, body));
+}
+
 // src/client.ts
 function readEnv(env) {
   if (typeof globalThis.process !== "undefined") {
@@ -6056,6 +6179,11 @@ function readEnv(env) {
     return globalThis.Deno.env?.get?.(env)?.trim();
   }
   return void 0;
+}
+function isTruthyEnv(value) {
+  if (!value) return false;
+  const v = value.toLowerCase();
+  return v === "1" || v === "true" || v === "yes" || v === "on";
 }
 var ObjectiveAIOptionsSchema = z462__default.default.object({
   address: z462__default.default.string().nullish().describe(
@@ -6071,7 +6199,10 @@ var ObjectiveAIOptionsSchema = z462__default.default.object({
   xViewerSignature: z462__default.default.string().nullish().describe("X-VIEWER-SIGNATURE header for viewer authentication."),
   xViewerAddress: z462__default.default.string().nullish().describe("X-VIEWER-ADDRESS header for viewer address."),
   xCommitAuthorName: z462__default.default.string().nullish().describe("X-COMMIT-AUTHOR-NAME header for commit author name."),
-  xCommitAuthorEmail: z462__default.default.string().nullish().describe("X-COMMIT-AUTHOR-EMAIL header for commit author email.")
+  xCommitAuthorEmail: z462__default.default.string().nullish().describe("X-COMMIT-AUTHOR-EMAIL header for commit author email."),
+  viewer: z462__default.default.boolean().nullish().describe(
+    "Route every HTTP request through a Tauri postMessage channel (`api-call-invoke`) instead of `fetch()`. Requires running inside an objectiveai-viewer plugin iframe; the host bridge dispatches the request and streams the response back. Falls back to OBJECTIVEAI_VIEWER env var (any truthy value enables it)."
+  )
 }).describe("Options for the ObjectiveAI client.");
 var RequestOptionsSchema = z462__default.default.object({
   headers: z462__default.default.union([
@@ -6104,6 +6235,7 @@ var ObjectiveAI = class {
     this.xViewerAddress = options?.xViewerAddress ?? readEnv("VIEWER_ADDRESS") ?? void 0;
     this.xCommitAuthorName = options?.xCommitAuthorName ?? readEnv("COMMIT_AUTHOR_NAME") ?? void 0;
     this.xCommitAuthorEmail = options?.xCommitAuthorEmail ?? readEnv("COMMIT_AUTHOR_EMAIL") ?? void 0;
+    this.viewer = options?.viewer ?? isTruthyEnv(readEnv("OBJECTIVEAI_VIEWER"));
   }
   /**
    * Build headers for a request.
@@ -6184,6 +6316,9 @@ var ObjectiveAI = class {
    * Perform a GET request and return the parsed JSON response.
    */
   async get_unary(path, options) {
+    if (this.viewer) {
+      return viewerApiCallUnary("GET", path, void 0);
+    }
     const response = await fetch(this.buildUrl(path), {
       method: "GET",
       headers: this.buildHeaders(options),
@@ -6198,6 +6333,9 @@ var ObjectiveAI = class {
    * Perform a POST request and return the parsed JSON response.
    */
   async post_unary(path, body, options) {
+    if (this.viewer) {
+      return viewerApiCallUnary("POST", path, body);
+    }
     const response = await fetch(this.buildUrl(path), {
       method: "POST",
       headers: this.buildHeaders(options),
@@ -6214,6 +6352,9 @@ var ObjectiveAI = class {
    * treated as success; non-2xx throws.
    */
   async post_unary_no_response(path, body, options) {
+    if (this.viewer) {
+      return viewerApiCallUnaryNoResponse("POST", path, body);
+    }
     const response = await fetch(this.buildUrl(path), {
       method: "POST",
       headers: this.buildHeaders(options),
@@ -6228,6 +6369,9 @@ var ObjectiveAI = class {
    * Perform a DELETE request and return the parsed JSON response.
    */
   async delete_unary(path, body, options) {
+    if (this.viewer) {
+      return viewerApiCallUnary("DELETE", path, body);
+    }
     const response = await fetch(this.buildUrl(path), {
       method: "DELETE",
       headers: this.buildHeaders(options),
@@ -6243,6 +6387,9 @@ var ObjectiveAI = class {
    * Perform a GET request and return an SSE stream.
    */
   async get_streaming(path, options) {
+    if (this.viewer) {
+      return viewerApiCallStream("GET", path, void 0);
+    }
     const headers = this.buildHeaders(options);
     headers.set("Accept", "text/event-stream");
     const controller = new AbortController();
@@ -6264,6 +6411,9 @@ var ObjectiveAI = class {
    * Perform a POST request and return an SSE stream.
    */
   async post_streaming(path, body, options) {
+    if (this.viewer) {
+      return viewerApiCallStream("POST", path, body);
+    }
     const headers = this.buildHeaders(options);
     headers.set("Accept", "text/event-stream");
     const controller = new AbortController();
@@ -6286,6 +6436,9 @@ var ObjectiveAI = class {
    * Perform a DELETE request and return an SSE stream.
    */
   async delete_streaming(path, body, options) {
+    if (this.viewer) {
+      return viewerApiCallStream("DELETE", path, body);
+    }
     const headers = this.buildHeaders(options);
     headers.set("Accept", "text/event-stream");
     const controller = new AbortController();

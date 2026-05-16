@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Literal, Union
 from objectiveai_sdk.json_value import JsonValue
 from pydantic import BaseModel, ConfigDict, Field, RootModel
+from objectiveai_sdk.viewer.api_call_sub_type import ApiCallSubType
 
 
 class EventInbound(BaseModel):
@@ -34,6 +35,23 @@ stream of lines."""
     value: JsonValue
 
 
+class EventApiCall(BaseModel):
+    """Host → iframe. One value in the response stream of an
+in-process upstream API call started by the iframe via
+`api-call-invoke`. `sub_type` identifies which endpoint the
+stream belongs to (lets the iframe demux multiple concurrent
+calls to *different* endpoints). `value` is an
+[`ApiCallEnvelope`](super::ApiCallEnvelope) JSON object: one
+`begin`, then one or more `chunk`s (or `error`), then exactly
+one `end`."""
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'ApiCall'})
+
+    destination: str
+    sub_type: ApiCallSubType
+    type_: Literal['api_call'] = Field(..., alias='type')
+    value: JsonValue
+
+
 class Event(RootModel):
     """Every event the viewer emits to the JS side. Serde-tagged on
 `type` so the JS bridge can pattern-match and decide how to
@@ -46,5 +64,5 @@ derives it from `MessageEvent.source`, the plugin author never
 sets it."""
     model_config = ConfigDict(title='viewer.Event')
 
-    root: Union[EventInbound, EventCliCommand]
+    root: Union[EventInbound, EventCliCommand, EventApiCall]
 

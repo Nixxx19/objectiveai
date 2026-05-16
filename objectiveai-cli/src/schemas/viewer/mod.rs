@@ -15,7 +15,19 @@ pub enum GetCommand {
 pub enum Commands {
     #[command(name = "list")]
     List,
+    ApiCallEnvelope {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
+    ApiCallSubType {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
     Event {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
+    HttpMethod {
         #[command(subcommand)]
         command: GetCommand,
     },
@@ -25,7 +37,7 @@ impl Commands {
     pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["Event"];
+                const NAMES: &[&str] = &["ApiCallEnvelope", "ApiCallSubType", "Event", "HttpMethod"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
                     objectiveai_sdk::cli::output::Notification {
                         value: objectiveai_sdk::cli::output::Schemas {
@@ -35,9 +47,42 @@ impl Commands {
                 ).emit(handle).await;
                 Ok(())
             }
+            Commands::ApiCallEnvelope { .. } => {
+                let schema: serde_json::Value = serde_json::from_str(
+                    include_str!("../../../../objectiveai-json-schema/viewer.ApiCallEnvelope.json"),
+                ).expect("embedded JSON Schema must parse");
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: objectiveai_sdk::cli::output::Schema { schema },
+                    },
+                ).emit(handle).await;
+                Ok(())
+            }
+            Commands::ApiCallSubType { .. } => {
+                let schema: serde_json::Value = serde_json::from_str(
+                    include_str!("../../../../objectiveai-json-schema/viewer.ApiCallSubType.json"),
+                ).expect("embedded JSON Schema must parse");
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: objectiveai_sdk::cli::output::Schema { schema },
+                    },
+                ).emit(handle).await;
+                Ok(())
+            }
             Commands::Event { .. } => {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../objectiveai-json-schema/viewer.Event.json"),
+                ).expect("embedded JSON Schema must parse");
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: objectiveai_sdk::cli::output::Schema { schema },
+                    },
+                ).emit(handle).await;
+                Ok(())
+            }
+            Commands::HttpMethod { .. } => {
+                let schema: serde_json::Value = serde_json::from_str(
+                    include_str!("../../../../objectiveai-json-schema/viewer.HttpMethod.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
                     objectiveai_sdk::cli::output::Notification {

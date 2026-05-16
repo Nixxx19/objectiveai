@@ -4516,6 +4516,16 @@ declare function agentCompletionsResponseUpstreamUsageMerged(a: AgentCompletions
  * A readable stream wrapper for Server-Sent Events (SSE).
  * Provides async iteration over parsed SSE data events.
  * Throws ObjectiveAIFetchError if the API returns an error in the stream.
+ *
+ * Two backing sources are supported:
+ *
+ * 1. `new Stream(response, controller?)` — wraps an SSE-emitting
+ *    HTTP response; this is the path used by `fetch`-mode clients.
+ *
+ * 2. `Stream.fromAsyncIterable(iter, controller?)` — wraps a
+ *    pre-parsed AsyncIterable of chunks; used by `viewer: true`
+ *    clients so the consumer-facing `Stream<T>` type stays identical
+ *    across both fetch and Tauri-postMessage backends.
  */
 declare class Stream<T> implements AsyncIterable<T> {
     private reader;
@@ -4523,7 +4533,14 @@ declare class Stream<T> implements AsyncIterable<T> {
     private buffer;
     private done;
     private controller;
+    private asyncIterableSource;
     constructor(response: Response, controller?: AbortController | null);
+    /**
+     * Wrap an `AsyncIterable<T>` (e.g. the viewer-mode api-call
+     * iterator) as a `Stream<T>`. Skips the SSE parsing path entirely;
+     * the iterator yields chunks pre-parsed by its source.
+     */
+    static fromAsyncIterable<T>(source: AsyncIterable<T>, controller?: AbortController | null): Stream<T>;
     /**
      * Abort the stream.
      */
@@ -4562,6 +4579,7 @@ declare const ObjectiveAIOptionsSchema: z$1.ZodObject<{
     xViewerAddress: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
     xCommitAuthorName: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
     xCommitAuthorEmail: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodString>>;
+    viewer: z$1.ZodOptional<z$1.ZodNullable<z$1.ZodBoolean>>;
 }, z$1.core.$strip>;
 type ObjectiveAIOptions = z$1.infer<typeof ObjectiveAIOptionsSchema>;
 /**
@@ -4588,6 +4606,7 @@ declare class ObjectiveAI {
     readonly xViewerAddress: string | undefined;
     readonly xCommitAuthorName: string | undefined;
     readonly xCommitAuthorEmail: string | undefined;
+    readonly viewer: boolean;
     constructor(options?: ObjectiveAIOptions | null);
     /**
      * Build headers for a request.

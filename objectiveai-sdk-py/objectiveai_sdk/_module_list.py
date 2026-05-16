@@ -455,7 +455,10 @@ MODULES = [
     'objectiveai_sdk.vector.completions.response.unary.vector_completion',
     'objectiveai_sdk.vector.completions.response.vote',
     'objectiveai_sdk.vector.completions.vector_responses',
+    'objectiveai_sdk.viewer.api_call_envelope',
+    'objectiveai_sdk.viewer.api_call_sub_type',
     'objectiveai_sdk.viewer.event',
+    'objectiveai_sdk.viewer.http_method',
     'objectiveai_sdk.weights',
     'objectiveai_sdk.weights_entry',
 ]

@@ -67,6 +67,42 @@ public partial class EventCliCommand
     public JsonElement Value { get; set; } = default!;
 }
 
+/// <summary>
+/// Host → iframe. One value in the response stream of an
+/// in-process upstream API call started by the iframe via
+/// `api-call-invoke`. `sub_type` identifies which endpoint the
+/// stream belongs to (lets the iframe demux multiple concurrent
+/// calls to *different* endpoints). `value` is an
+/// [`ApiCallEnvelope`](super::ApiCallEnvelope) JSON object: one
+/// `begin`, then one or more `chunk`s (or `error`), then exactly
+/// one `end`.
+/// </summary>
+[Description("""
+Host → iframe. One value in the response stream of an
+in-process upstream API call started by the iframe via
+`api-call-invoke`. `sub_type` identifies which endpoint the
+stream belongs to (lets the iframe demux multiple concurrent
+calls to *different* endpoints). `value` is an
+[`ApiCallEnvelope`](super::ApiCallEnvelope) JSON object: one
+`begin`, then one or more `chunk`s (or `error`), then exactly
+one `end`.
+""")]
+public partial class EventApiCall
+{
+    [JsonPropertyName("destination")]
+    public string Destination { get; set; } = default!;
+
+    [JsonPropertyName("sub_type")]
+    public ApiCallSubType SubType { get; set; } = default!;
+
+    [JsonPropertyName("type")]
+    [JsonSchemaEnum("api_call")]
+    public string Type { get; set; } = default!;
+
+    [JsonPropertyName("value")]
+    public JsonElement Value { get; set; } = default!;
+}
+
 
 /// <summary>
 /// Every event the viewer emits to the JS side. Serde-tagged on
@@ -129,6 +165,29 @@ stream of lines.
 """)]
     [JsonSchemaVariant("CliCommand", Type = "object")]
     public EventCliCommand? CliCommand { get; set; }
+
+    /// <summary>
+    /// Host → iframe. One value in the response stream of an
+    /// in-process upstream API call started by the iframe via
+    /// `api-call-invoke`. `sub_type` identifies which endpoint the
+    /// stream belongs to (lets the iframe demux multiple concurrent
+    /// calls to *different* endpoints). `value` is an
+    /// [`ApiCallEnvelope`](super::ApiCallEnvelope) JSON object: one
+    /// `begin`, then one or more `chunk`s (or `error`), then exactly
+    /// one `end`.
+    /// </summary>
+    [Description("""
+Host → iframe. One value in the response stream of an
+in-process upstream API call started by the iframe via
+`api-call-invoke`. `sub_type` identifies which endpoint the
+stream belongs to (lets the iframe demux multiple concurrent
+calls to *different* endpoints). `value` is an
+[`ApiCallEnvelope`](super::ApiCallEnvelope) JSON object: one
+`begin`, then one or more `chunk`s (or `error`), then exactly
+one `end`.
+""")]
+    [JsonSchemaVariant("ApiCall", Type = "object")]
+    public EventApiCall? ApiCall { get; set; }
 }
 
 public class EventConverter : JsonConverter<Event>
@@ -162,6 +221,16 @@ public class EventConverter : JsonConverter<Event>
                     catch (JsonException) { }
                 }
             }
+            {
+                bool match2 = true;
+                if (!(el.TryGetProperty("type", out var c2_type) && c2_type.GetString() == "api_call"))
+                    match2 = false;
+                if (match2)
+                {
+                    try { var val = JsonSerializer.Deserialize<EventApiCall>(raw, options); if (val != null) return new Event { ApiCall = val }; }
+                    catch (JsonException) { }
+                }
+            }
         }
 
         throw new JsonException($"Data did not match any variant of Event");
@@ -178,6 +247,11 @@ public class EventConverter : JsonConverter<Event>
         if (value.CliCommand != null)
         {
             JsonSerializer.Serialize(writer, value.CliCommand, options);
+            return;
+        }
+        if (value.ApiCall != null)
+        {
+            JsonSerializer.Serialize(writer, value.ApiCall, options);
             return;
         }
         writer.WriteNullValue();
