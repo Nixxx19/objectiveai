@@ -30,31 +30,38 @@
  */
 import { ObjectiveAIFetchError } from "../error";
 import { Stream } from "../stream";
+import type { ViewerApiCallEnvelope } from "./apiCallEnvelope";
+import type { ViewerApiCallSubType } from "./apiCallSubType";
+import type { ViewerHttpMethod } from "./httpMethod";
 
 /** True when running inside an iframe in the host viewer. */
 function isInIframe(): boolean {
   return typeof window !== "undefined" && window.parent !== window;
 }
 
-type HttpMethod = "GET" | "POST" | "DELETE";
-
+/**
+ * `{kind: "plugin-event", type: "api_call", ...}` postMessage shape
+ * that the host's plugin-bridge forwards to iframes. The `sub_type`
+ * and `value` fields are typed against the auto-generated zod
+ * schemas for `viewer.ApiCallSubType` and `viewer.ApiCallEnvelope`.
+ */
 type ApiCallMessage = {
   kind: "plugin-event";
   type: "api_call";
-  sub_type: string;
-  value:
-    | { type: "begin" }
-    | { type: "chunk"; chunk: unknown }
-    | { type: "error"; error: unknown }
-    | { type: "end" };
+  sub_type: ViewerApiCallSubType;
+  value: ViewerApiCallEnvelope;
 };
 
 /**
  * Build the `<METHOD>_<PATH>` sub_type string that matches the Rust
- * [`ApiCallSubType`] serde rename.
+ * [`ApiCallSubType`] serde rename. The resulting string is
+ * type-asserted against the auto-generated `ViewerApiCallSubType`
+ * union (35 enum members) — invalid `(method, path)` combinations
+ * will produce a non-matching string at runtime and the host will
+ * fail to dispatch.
  */
-function buildSubType(method: HttpMethod, path: string): string {
-  return `${method}_${path}`;
+function buildSubType(method: ViewerHttpMethod, path: string): ViewerApiCallSubType {
+  return `${method}_${path}` as ViewerApiCallSubType;
 }
 
 /**
@@ -67,7 +74,7 @@ function buildSubType(method: HttpMethod, path: string): string {
  * Bails synchronously if not running in an iframe (no host present).
  */
 export function viewerApiCallChunks<T>(
-  method: HttpMethod,
+  method: ViewerHttpMethod,
   path: string,
   body: unknown,
 ): AsyncIterable<T> {
@@ -96,7 +103,7 @@ export function viewerApiCallChunks<T>(
         if (msg.type !== "api_call") return;
         if (msg.sub_type !== subType) return;
 
-        const env = msg.value;
+        const env: ViewerApiCallEnvelope | undefined = msg.value;
         if (!env || typeof env !== "object") return;
 
         if (env.type === "begin") {
@@ -170,7 +177,7 @@ export function viewerApiCallChunks<T>(
  * if no chunk arrives before `end`.
  */
 export async function viewerApiCallUnary<T>(
-  method: HttpMethod,
+  method: ViewerHttpMethod,
   path: string,
   body: unknown,
 ): Promise<T> {
@@ -189,7 +196,7 @@ export async function viewerApiCallUnary<T>(
  * `error` envelopes.
  */
 export async function viewerApiCallUnaryNoResponse(
-  method: HttpMethod,
+  method: ViewerHttpMethod,
   path: string,
   body: unknown,
 ): Promise<void> {
@@ -207,7 +214,7 @@ export async function viewerApiCallUnaryNoResponse(
  * mode.
  */
 export function viewerApiCallStream<T>(
-  method: HttpMethod,
+  method: ViewerHttpMethod,
   path: string,
   body: unknown,
 ): Stream<T> {
