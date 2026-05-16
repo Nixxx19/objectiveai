@@ -101,7 +101,12 @@ func goFieldName(propName string) string {
 	if cleaned == "" {
 		cleaned = "Val"
 	}
-	parts := strings.Split(cleaned, "_")
+	// Split on underscores AND forward slashes: enum renames like
+	// `"POST_/agent/completions"` (from viewer.ApiCallSubType) need
+	// to become `POSTAgentCompletions`, not `POST/agent/completions`.
+	parts := strings.FieldsFunc(cleaned, func(r rune) bool {
+		return r == '_' || r == '/'
+	})
 	var b strings.Builder
 	for _, p := range parts {
 		if p == "" {

@@ -319,6 +319,7 @@ pub fn serve(
         notify_agent_completion,
         crate::plugins::list_plugins_with_viewer,
         crate::cli_command::cli_run,
+        crate::api_call::api_call_run,
     ]);
     #[cfg(not(feature = "cli"))]
     let builder = builder.invoke_handler(tauri::generate_handler![

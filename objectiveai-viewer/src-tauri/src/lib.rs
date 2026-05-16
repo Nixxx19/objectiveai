@@ -1,4 +1,6 @@
 #[cfg(feature = "cli")]
+mod api_call;
+#[cfg(feature = "cli")]
 mod cli_command;
 mod plugins;
 #[cfg(test)]

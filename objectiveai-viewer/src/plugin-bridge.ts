@@ -7,7 +7,7 @@
  * postMessage. The iframe consumes those via `@objectiveai/sdk/viewer`'s
  * `listen()` (or by adding its own `window.addEventListener('message')`).
  *
- * Two event variants flow host -> iframe:
+ * Three event variants flow host -> iframe:
  *
  *   - `inbound` — host has data for the plugin (the existing path).
  *     The iframe's `listen(sub_type, handler)` matches on the
@@ -17,12 +17,19 @@
  *     `objectiveai_cli::run()` invocation that this iframe started
  *     via `invokeCli`. No sub_type.
  *
- * The reverse direction (iframe -> host) carries `cli-invoke`
- * postMessages; this module catches them, resolves the originating
- * iframe via `MessageEvent.source`, and dispatches the Tauri command
- * `cli_run` with the originator's plugin name as `origin`. Messages
- * from unknown sources are dropped (security: don't let a random
- * iframe drive the host CLI without identity).
+ *   - `api_call` — one envelope (begin / chunk / error / end) from a
+ *     viewer-mode `ObjectiveAI` client call that this iframe started
+ *     via `api-call-invoke`. The `sub_type` is the
+ *     `"<METHOD>_<PATH>"` rename of the targeted endpoint, so the
+ *     iframe can demux concurrent calls to *different* endpoints.
+ *
+ * The reverse direction (iframe -> host) carries `cli-invoke` and
+ * `api-call-invoke` postMessages; this module catches them, resolves
+ * the originating iframe via `MessageEvent.source`, and dispatches
+ * the matching Tauri command (`cli_run` / `api_call_run`) with the
+ * originator's plugin name as `origin`. Messages from unknown
+ * sources are dropped (security: don't let a random iframe drive
+ * the host without identity).
  */
 import { invoke } from "@tauri-apps/api/core";
 import { listen as tauriListen, type UnlistenFn } from "@tauri-apps/api/event";
@@ -45,7 +52,14 @@ type CliCommandPayload = {
   value: unknown;
 };
 
-type EventPayload = InboundPayload | CliCommandPayload;
+type ApiCallPayload = {
+  type: "api_call";
+  destination: string;
+  sub_type: string;
+  value: unknown;
+};
+
+type EventPayload = InboundPayload | CliCommandPayload | ApiCallPayload;
 
 const iframes = new Map<string, IframeHandle>();
 const tauriUnlisteners = new Map<string, UnlistenFn>();
@@ -89,6 +103,16 @@ async function subscribeToPluginEvents(pluginName: string): Promise<void> {
         { kind: "plugin-event", type: "cli_command", value: payload.value },
         "*",
       );
+    } else if (payload.type === "api_call") {
+      handle.iframe.contentWindow?.postMessage(
+        {
+          kind: "plugin-event",
+          type: "api_call",
+          sub_type: payload.sub_type,
+          value: payload.value,
+        },
+        "*",
+      );
     }
   });
   tauriUnlisteners.set(pluginName, unlisten);
@@ -106,19 +130,39 @@ function ensureReverseListener(): void {
 }
 
 function onIframeMessage(event: MessageEvent): void {
-  const msg = event.data as { kind?: string; args?: unknown } | null;
+  const msg = event.data as
+    | { kind?: string; args?: unknown; subType?: unknown; body?: unknown }
+    | null;
   if (!msg || typeof msg !== "object") return;
-  if (msg.kind !== "cli-invoke") return;
-  if (!Array.isArray(msg.args)) return;
 
-  // Identify which iframe sent this. Drop unidentified sources.
-  const origin = findPluginByWindow(event.source);
-  if (!origin) return;
+  if (msg.kind === "cli-invoke") {
+    if (!Array.isArray(msg.args)) return;
+    const origin = findPluginByWindow(event.source);
+    if (!origin) return;
+    const args = msg.args.filter((a): a is string => typeof a === "string");
+    // Fire-and-forget. The host streams cli_command events back via
+    // the events bus; the iframe consumes them through its async
+    // iterator.
+    void invoke("cli_run", { args, origin });
+    return;
+  }
 
-  const args = msg.args.filter((a): a is string => typeof a === "string");
-  // Fire-and-forget. The host streams cli_command events back via the
-  // events bus; the iframe consumes them through its async iterator.
-  void invoke("cli_run", { args, origin });
+  if (msg.kind === "api-call-invoke") {
+    if (typeof msg.subType !== "string") return;
+    const origin = findPluginByWindow(event.source);
+    if (!origin) return;
+    // Fire-and-forget. The host streams api_call envelope events back
+    // via the events bus; the iframe consumes them through its async
+    // iterator. `subType` is the serde-rename of the targeted endpoint
+    // (e.g. "POST_/agent/completions"); the body is whatever the JS
+    // SDK would have sent over fetch().
+    void invoke("api_call_run", {
+      subType: msg.subType,
+      body: msg.body ?? null,
+      origin,
+    });
+    return;
+  }
 }
 
 function findPluginByWindow(source: MessageEventSource | null): string | null {
