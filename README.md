@@ -1,6 +1,8 @@
 # ObjectiveAI
 
-**The agentic collective judgment harness.**
+**The Swarm Judgment Harness.**
+
+Define and compose swarms of LLM agents. Drive them as chat, collective voting, recursive scoring, or sandboxed execution — from the CLI, the SDKs, or your own agent.
 
 [Website](https://objectiveai.dev) · [Discord](https://discord.gg/gbNFHensby) · [GitHub](https://github.com/ObjectiveAI/objectiveai)
 
@@ -45,13 +47,30 @@ Supported platforms: Linux x86_64, Linux aarch64, macOS x86_64, macOS aarch64, W
 
 ## What ObjectiveAI is
 
-ObjectiveAI is an agentic collective judgment harness. It turns decisions — ranking candidates, classifying inputs, scoring outputs — into composable, trainable, reusable infrastructure backed by swarms of language models.
+ObjectiveAI is a harness for defining, composing, and running swarms of LLM agents. You define an **Agent** once — model, prompts, decoding parameters, output mode, tools, MCP servers. You compose Agents into a **Swarm**. You then run that swarm in any of four execution modes: chat with one agent, vote across the whole swarm, run a trainable recursive scoring pipeline, or hand the swarm a Docker sandbox.
 
-The motivating problem: a single model asked to pick the best answer from a list makes a discrete choice and discards everything else. The model had a full probability distribution over all options; the sampler collapsed it to one. That lost information is exactly what matters for calibration, ensembling, and learning. ObjectiveAI recovers it.
+Agents, Swarms, Functions, and Profiles are all content-addressed Git-hosted resources. The same swarm.json that powers your CLI invocation tonight is the one your colleague pins by commit SHA next month and the one your trained Profile was fit against.
 
-### The core arc
+The brand promise is **judgment**: the system was built so that collective voting — not a single sampled token — produces every decision. The mechanism is **swarms**: reusable, composable, version-tracked collections of configured models. Everything else (the CLI, the API, the web app, the MCP server, the SDKs in five languages) exists to drive swarms in the ways that matter.
 
-An agent has a decision to make. Instead of calling a model directly, it calls a **Function**. The Function fans out to a **Swarm** — a fixed collection of configured models called Agents. Each Agent votes on the available options. Votes combine using **learned weights** to produce a **score vector**: one score per option, summing to 1.
+### Execution modes
+
+The same swarm can be driven in any of four shapes. Each mode resolves the same Agents and Swarms but does something different with them.
+
+| Mode | What it does | Returns | Reach for it when |
+|---|---|---|---|
+| [**Vector completion**](#vector-completions) | Whole swarm votes on a fixed set of responses; votes combine into a score vector via logprobs | Score vector summing to 1 | You want a calibrated, multi-model judgment |
+| [**Function execution**](#function-executions) | Composable, recursive scoring pipeline of vector completions and nested functions | Scalar or vector | You want trainable, reusable judgment infrastructure |
+| [**Agent completion**](#agent-completions) | Single configured agent with tool calls, MCP, and structured output (json_schema, grammar, python, tool_call) | Text or structured object | You want a single answer from a single persona |
+| [**Laboratory execution**](#laboratory-executions) | Builder agents run in a Docker sandbox with persistent filesystem MCP; an optional evaluation agent scores the outputs | Builder outputs + evaluation result | You need agents to write code, files, or artifacts in isolation |
+
+Vector and function modes are the judgment modes — that's where the system's name comes from. Agent completions are the foundational orchestration layer (everything else is built on them). Laboratory executions extend the system to physical-output workloads.
+
+### Why collective judgment
+
+When a language model samples a discrete token — "Option A" — it throws away everything it computed about Options B through Z. Those log-probabilities encode real signal: how confident the model was, where it hedged, what it considered close.
+
+ObjectiveAI bypasses the sampler. It reads the model's log-probability distribution directly, using a prefix tree to structure options so they fall within the model's logprob window. For a set of N responses, the tree assigns each option a unique decodable prefix; the model's probability mass over those prefixes becomes its vote vector. No discrete collapse. No lost signal.
 
 ```
 Agent needs a decision
@@ -81,27 +100,17 @@ Agent needs a decision
   Agent picks — or delegates further
 ```
 
-The output is not a single answer. It is a probability-like score vector over all options. The caller can threshold it, chain it into another Function, or use it raw.
-
-### Why single-model picking loses
-
-When a language model samples a discrete token — "Option A" — it throws away everything it computed about Options B through Z. Those log-probabilities encode real signal: how confident the model was, where it hedged, what it considered close.
-
-ObjectiveAI bypasses the sampler. It reads the model's log-probability distribution directly, using a prefix tree to structure options so they fall within the model's logprob window. For a set of N responses, the tree assigns each option a unique decodable prefix; the model's probability mass over those prefixes becomes its vote vector. No discrete collapse. No lost signal.
-
 This matters twice over: once per model, and once across models. Different models have different failure modes, different training distributions, different calibration profiles. Combining them with learned weights — weights that can be trained against ground truth — is strictly more powerful than picking the one model that scores highest on average.
 
-### Functions are infrastructure
+### Why this system
 
-A Function is not a one-off API call. It is a reusable, composable decision pipeline:
+Reusability across modes. Trainability where it counts. Content-addressing throughout:
 
-- **Recursive** — Functions can call other Functions as subtasks. A scoring pipeline for a complex input can delegate subproblems to specialized sub-Functions.
-- **Content-addressed** — Function IDs are deterministic hashes of their definitions. The same definition always resolves to the same ID; changes produce new IDs automatically.
-- **Version-tracked** — Functions are referenced by ID and hosted on GitHub. You can pin to a commit SHA. The definition you ran six months ago is still reproducible.
-- **Trainable** — A Profile is learned weights over a Function's task structure. Training provides labeled data; ObjectiveAI adjusts weights to minimize loss. The models themselves never change — only how their votes are combined.
-- **Composable** — Functions compose into pipelines. The score vector from one Function becomes the input to the next. Swiss System tournament execution (`input_split` / `input_merge`) handles bracket-style elimination across large option sets.
-
-The result is decision infrastructure that accumulates quality over time. A Function built today can be trained, improved, pinned to a known-good Profile, and reused across every agent in a system — or published for others to import by ID.
+- **Reusable.** An Agent is a 22-character ID — define one once and reference it from any swarm, any function, any lab. A Swarm is a sorted set of `(agent_id, count)` pairs. Define it once and run it for chat, voting, scoring, or sandboxed work without re-defining anything.
+- **Trainable.** Profiles learn weights over a Function's task tree against labeled data. The models stay fixed; the way their votes combine improves.
+- **Reproducible.** Every resource reference is `(owner, repo, commit)`. Pin a commit SHA, get the exact same agent / swarm / function / profile your evaluation ran against six months ago.
+- **Composable.** Functions can call other Functions. Swarms compose into bigger swarms. The CLI dispatches plugins as unknown subcommands. The viewer surfaces plugin UIs as sandboxed iframe tabs.
+- **Polyglot.** Rust, TypeScript, Python, Go, and (in-progress) .NET SDKs share the same generated JSON Schema corpus. Field names and shapes are identical across languages.
 
 ## Quick start
 
@@ -180,15 +189,36 @@ const result = await functionsExecutionsCreateFunctionExecution(client, {
 console.log(result.output); // { Vector: [0.82, 0.14, 0.04] }
 ```
 
-See [Core primitives](#core-primitives) for a full explanation of Agents, Swarms, Functions, and Profiles, and [SDKs](#sdks) for Python, Rust, Go, and .NET patterns including streaming.
+### Other execution modes
+
+Chat with a single configured agent:
+
+```bash
+objectiveai agents completions create standard \
+  --agent-inline '{"upstream":"openrouter","model":"openai/gpt-4o-mini"}' \
+  --messages-inline '[{"role":"user","content":"Hello"}]'
+```
+
+Run builder agents in a sandboxed Docker environment with persistent filesystem access:
+
+```bash
+objectiveai laboratories executions create \
+  --docker-image python:3.12-slim \
+  --builder-agent favorite=my-builder \
+  --builder-messages-inline '[{"role":"user","content":"Write a Python script that prints hello"}]'
+```
+
+See [Core primitives](#core-primitives) for a full explanation of Agents, Swarms, the four execution modes, and Profiles, and [SDKs](#sdks) for Python, Rust, Go, and .NET patterns including streaming.
 
 ## Core primitives
 
+Three **resources** (Agents, Swarms, Profiles) define what's in the system; four **execution modes** (Agent completions, Vector completions, Function executions, Laboratory executions) define what you can do with them. Resources are content-addressed Git-hosted JSON; execution modes resolve resources at request time and stream typed results back. Everything ties together through a shared resource graph at the bottom of this section.
+
 ### Agents
 
-An **Agent** is a fully-specified configuration of a single upstream model: model identity, prompt structure, decoding parameters, output mode, and provider preferences. Agents are content-addressed via XXHash3-128 — the same configuration always produces the same 22-character base62 ID. IDs are deterministic because the serialized configuration is hashed after normalization (empty fields stripped, defaults canonicalized). Two Agents with identical effective settings are the same Agent.
+An **Agent** is a fully-specified configuration of a single upstream model: model identity, prompt structure, decoding parameters, output mode, tools, MCP servers, provider preferences. Agents are content-addressed via XXHash3-128 — the same configuration always produces the same 22-character base62 ID. IDs are deterministic because the serialized configuration is hashed after normalization (empty fields stripped, defaults canonicalized). Two Agents with identical effective settings are the same Agent.
 
-Agents are stored as `agent.json` in Git repositories and referenced by `owner/repo@commit`. They can also be defined inline anywhere a swarm or function accepts an agent slot.
+Agents are stored as `agent.json` in Git repositories and referenced by `owner/repo@commit`. They can also be defined inline anywhere a swarm, function, or laboratory accepts an agent slot.
 
 ```json
 {
@@ -204,7 +234,7 @@ Agents are stored as `agent.json` in Git repositories and referenced by `owner/r
 }
 ```
 
-Each upstream (OpenRouter, Claude Agent SDK, Codex SDK) has its own agent type with its own parameter set. The `output_mode` field controls how the agent structures its vote during vector completions and is ignored for agent completions.
+Each upstream (OpenRouter, Claude Agent SDK, Codex SDK) has its own agent type with its own parameter set. The same Agent can be driven in any of the four execution modes — its `output_mode` field controls structured output in agent completions, structures its vote in vector completions, and the Agent passes through unchanged when it's used as a builder or evaluator in a laboratory.
 
 ### Swarms
 
@@ -240,9 +270,63 @@ Each agent slot has a `count` (number of instances) and optional fallbacks. Dupl
 
 Swarms are stored as `swarm.json` in Git repositories and shared across functions. Because weights are external, the same swarm can be reused with different weight configurations without creating a new swarm.
 
+### Profiles
+
+ObjectiveAI does not fine-tune models. It learns weights.
+
+A Profile is the result of training: given a dataset of `(input, expected_output)` pairs, ObjectiveAI executes a Function repeatedly, computes loss against expected outputs, and adjusts the weights over each task until they converge. The learned configuration — which tasks to trust more, which to discount — is stored as `profile.json`.
+
+Profiles are GitHub-hosted and referenced by `owner/repo@commit`. Pinning a commit SHA is strongly recommended: the Profile's shape (number of tasks, their order) is tied to the function it was trained on, and that function may evolve. A mismatched Profile silently produces wrong weights.
+
+```json
+{
+  "owner": "ObjectiveAI",
+  "repo": "quality-scorer",
+  "commit": "a3f8c21d..."
+}
+```
+
+At execution time, the Function and Profile are independent inputs. The retrieval system fetches both, resolves the resource graph, and applies the learned weights to combine task outputs.
+
+### Agent completions
+
+An **agent completion** is the foundational execution mode: a single Agent runs a conversation, with full tool-calling orchestration, MCP server integration, and configurable structured output. Every higher-level mode (vector completions, function executions, laboratory executions) is built on top of agent completions — they're just multi-agent or multi-step orchestrations of the same underlying primitive.
+
+The agent can be supplied by ID, inline, or as a hybrid (inline overrides on a stored agent). Messages can include images, audio, and files in addition to text. Tool calls are detected mid-stream and executed automatically; MCP servers attached to the agent are dialed transparently. The response carries a `Continuation` that captures the conversation state so the next call can pick up where this one left off.
+
+Structured output is controlled by the agent's `output_mode` (or by overriding `response_format` per request):
+
+| Mode | What the model produces |
+|---|---|
+| `text` | Plain text. |
+| `json_object` | Any valid JSON value. |
+| `json_schema` | A value conforming to a supplied JSON Schema. |
+| `grammar` | Output matching a regular grammar. |
+| `python` | Valid Python source. |
+| `tool_call` | A single tool invocation whose arguments validate against the tool's schema. |
+
+```json
+{
+  "agent": {
+    "upstream": "openrouter",
+    "model": "openai/gpt-4o-mini",
+    "output_mode": "json_schema",
+    "response_format": {
+      "type": "json_schema",
+      "schema": { "type": "object", "properties": { "summary": { "type": "string" } } }
+    }
+  },
+  "messages": [
+    { "role": "user", "content": "Summarize this PR description in one sentence." }
+  ]
+}
+```
+
+CLI: `objectiveai agents completions create standard --agent-inline '...' --messages-inline '...'`. SDK: `agentsCompletionsCreateAgentCompletion` (JS) / `create_agent_completion` (Python) / `agent::completions::http::create_agent_completion` (Rust).
+
 ### Vector completions
 
-Vector completions are the core execution primitive. Given a prompt and a set of candidate responses, each agent in the swarm votes for the response it judges best. Votes are combined with weights to produce a score vector — one score per response, summing to 1.
+Vector completions are the headline judgment primitive. Given a prompt and a set of candidate responses, each agent in the swarm votes for the response it judges best. Votes are combined with weights to produce a score vector — one score per response, summing to 1.
 
 Two distinct vectors are present in every result:
 
@@ -280,7 +364,7 @@ For response sets larger than the logprobs limit (typically 20), a **prefix tree
 
 The result is collective judgment that uses richer information than any individual model's sampled output would provide.
 
-### Functions
+### Function executions
 
 **Functions** are composable scoring pipelines: data in, scores out. A Function is a list of **tasks** executed against an input. Each task is one of:
 
@@ -315,23 +399,26 @@ Functions are stored as `function.json` in Git repositories and referenced by `o
 }
 ```
 
-### Profiles
+### Laboratory executions
 
-ObjectiveAI does not fine-tune models. It learns weights.
+A **laboratory execution** runs Agents in a Docker sandbox with persistent filesystem access. The container starts with `objectiveai-mcp-filesystem` injected as an MCP server, giving the running agents read/write tools over the workspace directory. One or more **builder agents** produce outputs (write files, run code, generate artifacts); an optional **evaluation agent** then runs against the resulting workspace and produces a schema-constrained verdict. Failed evaluations can trigger up to `max_evaluation_retries` builder re-runs.
 
-A Profile is the result of training: given a dataset of `(input, expected_output)` pairs, ObjectiveAI executes the Function repeatedly, computes loss against expected outputs, and adjusts the weights over each task until they converge. The learned configuration — which tasks to trust more, which to discount — is stored as `profile.json`.
+This mode extends the system beyond text scoring into physical-output workloads: an agent that has to write working code, lay out a directory tree, or produce a binary artifact can do all of that inside a hermetic container, with the outputs available to the evaluator (and to you) afterwards.
 
-Profiles are GitHub-hosted and referenced by `owner/repo@commit`. Pinning a commit SHA is strongly recommended: the Profile's shape (number of tasks, their order) is tied to the function it was trained on, and that function may evolve. A mismatched Profile silently produces wrong weights.
-
-```json
-{
-  "owner": "ObjectiveAI",
-  "repo": "quality-scorer",
-  "commit": "a3f8c21d..."
-}
+```bash
+objectiveai laboratories executions create \
+  --docker-image python:3.12-slim \
+  --builder-agent favorite=my-builder \
+  --builder-messages-inline '[{"role":"user","content":"Write tests for src/foo.py"}]' \
+  --evaluation-agent favorite=my-evaluator \
+  --evaluation-messages-inline '[{"role":"user","content":"Did the tests pass?"}]' \
+  --evaluation-output-schema-inline '{"type":"object","properties":{"passed":{"type":"boolean"}}}' \
+  --max-evaluation-retries 3
 ```
 
-At execution time, the Function and Profile are independent inputs. The retrieval system fetches both, resolves the resource graph, and applies the learned weights to combine task outputs.
+Builder messages, evaluation messages, and the evaluation output schema can be supplied inline as JSON, generated via inline Python, or loaded from a Python file (`--builder-messages-python-inline`, `--builder-messages-python-file`, and the corresponding flags for evaluation).
+
+Laboratory executions are not learned-weighted or vote-aggregated — they're sequential agentic pipelines, scoped to a sandbox. Use them when you need agents to *do* something with files, not just judge between options.
 
 ### The resource graph
 
@@ -349,6 +436,8 @@ The Function and Profile are deliberately separate files. The same Function can 
 Remote references resolve lazily: the retrieval system walks the graph starting from the execution request, fetching and caching each resource exactly once. Deduplication is by `(owner, repo, commit)` triple. All fetches are content-verified — a cached resource is never re-fetched if the commit SHA matches. Even deeply nested function graphs execute with minimal network overhead.
 
 ## Function invention
+
+Invention is specific to the **Function** execution mode — it generates `function.json` files that you then run as function executions. Agent completions and laboratory executions don't have an analogous generator; they're authored directly.
 
 An agent facing a new decision problem can ask ObjectiveAI to build the scoring pipeline for it. Invention takes a natural-language description — a `spec` — and an optional set of examples, then runs a five-step agentic process (essay → input schema → essay tasks → tasks → description) that produces a complete, valid `function.json`: typed input schema, task tree with expressions, and description. The output is ready to commit, train against a dataset, and call immediately.
 
@@ -385,7 +474,7 @@ Each cycle produces a reusable, versioned judgment tool. An agent that executes 
 
 ## SDKs
 
-Every SDK exposes the same three surface areas: **Agent Completions** (single-model chat), **Vector Completions** (multi-agent voting that returns a score vector), and **Function Executions** (composable scoring pipelines). All three support streaming via Server-Sent Events. The API emits incremental chunks; each SDK merges them into an accumulating object using an immutable merge system (TypeScript), a mutable push system (Python, Rust, Go), or equivalent. Types are generated from a shared JSON Schema corpus derived from the Rust SDK, so field names and shapes are identical across languages.
+Every SDK exposes the same four execution modes: **Agent Completions** (single-agent chat with tool calls, MCP, and structured output), **Vector Completions** (multi-agent voting that returns a score vector), **Function Executions** (composable scoring pipelines), and **Laboratory Executions** (Docker-sandboxed builder + evaluator runs). All four support streaming via Server-Sent Events. The API emits incremental chunks; each SDK merges them into an accumulating object using an immutable merge system (TypeScript), a mutable push system (Python, Rust, Go), or equivalent. Types are generated from a shared JSON Schema corpus derived from the Rust SDK, so field names and shapes are identical across languages.
 
 ### Languages
 
@@ -503,10 +592,13 @@ The primary user-facing binary. Built with `clap` derive macros and emits newlin
 
 ```bash
 objectiveai agents list
-objectiveai agents completions create --model openai/gpt-4o
+objectiveai agents completions create standard --agent-inline '...' --messages-inline '...'
 objectiveai functions executions create standard --function ...
+objectiveai laboratories executions create --docker-image ... --builder-agent ...
 objectiveai plugins install github --owner ObjectiveAI --repository my-plugin
 ```
+
+Vector completions are reached via the `functions executions create` path (wrap a single `vector.completion` task in a `vector.function`); the dedicated `vector completions` group exposes `logs` only.
 
 The default build embeds the Tauri viewer as a sidecar: running a streaming command opens a live viewer window backed by an in-process HTTP server. Pass `--no-viewer` at install time for a smaller build without the embedded viewer. JSON schemas for every public type are accessible at `objectiveai schemas list` / `objectiveai schemas output <name>`.
 
