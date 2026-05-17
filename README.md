@@ -59,7 +59,7 @@ The same swarm can be driven in any of four shapes. Each mode resolves the same 
 
 | Mode | What it does | Returns | Reach for it when |
 |---|---|---|---|
-| [**Vector completion**](#vector-completions) | Whole swarm votes on a fixed set of responses; votes combine into a score vector via logprobs | Score vector summing to 1 | You want a calibrated, multi-model judgment |
+| [**Vector completion**](#vector-completions) | Whole swarm votes on a fixed set of responses; votes combine into a score vector | Score vector summing to 1 | You want a calibrated, multi-model judgment |
 | [**Function execution**](#function-executions) | Composable, recursive scoring pipeline of vector completions and nested functions | Scalar or vector | You want trainable, reusable judgment infrastructure |
 | [**Agent completion**](#agent-completions) | Single configured agent with tool calls, MCP, and structured output (json_schema, grammar, python, tool_call) | Text or structured object | You want a single answer from a single persona |
 | [**Laboratory execution**](#laboratory-executions) | Builder agents run in a Docker sandbox with persistent filesystem MCP; an optional evaluation agent scores the outputs | Builder outputs + evaluation result | You need agents to write code, files, or artifacts in isolation |
@@ -68,9 +68,9 @@ Vector and function modes are the judgment modes — that's where the system's n
 
 ### Why collective judgment
 
-When a language model samples a discrete token — "Option A" — it throws away everything it computed about Options B through Z. Those log-probabilities encode real signal: how confident the model was, where it hedged, what it considered close.
+A single language model asked to pick "Option A" produces one discrete answer and walks away from everything else it knew about the other options. The signal it had — how confident it really was, where it hedged, what it nearly chose — never leaves the model. ObjectiveAI is built to preserve that signal.
 
-ObjectiveAI bypasses the sampler. It reads the model's log-probability distribution directly, using a prefix tree to structure options so they fall within the model's logprob window. For a set of N responses, the tree assigns each option a unique decodable prefix; the model's probability mass over those prefixes becomes its vote vector. No discrete collapse. No lost signal.
+Each agent in a swarm contributes a preference distribution over the candidate responses rather than a single token. Those distributions combine across the swarm under learned weights to produce the final score vector. No discrete collapse. No lost signal.
 
 ```
 Agent needs a decision
@@ -227,7 +227,6 @@ Agents are stored as `agent.json` in Git repositories and referenced by `owner/r
   "model": "openai/gpt-4o",
   "output_mode": "json_schema",
   "temperature": 0.2,
-  "top_logprobs": 20,
   "prefix_messages": [
     { "role": "system", "content": "You are a rigorous critic. Challenge assumptions." }
   ]
@@ -333,7 +332,7 @@ Two distinct vectors are present in every result:
 - **`weights` vector** — total weight allocated to each response option, reflecting which responses received more agent attention.
 - **`scores` vector** — final normalized scores after combining votes with agent weights. Always sums to 1. This is what callers use.
 
-For discrete votes, an agent's full weight goes to its selected response. For probabilistic votes (via logprobs), weight is divided across responses according to the model's probability distribution.
+For discrete votes, an agent's full weight goes to its selected response. For probabilistic votes, weight is divided across responses according to the agent's preference distribution.
 
 ```text
 Prompt:    "Which approach best handles edge cases?"
@@ -349,20 +348,16 @@ Scores: [0.05, 0.11, 0.31, 0.53]
 
 Responses can be text, images, video, audio, or files. The same mechanism applies regardless of modality.
 
-#### Probabilistic voting via logprobs
+#### Probabilistic voting
 
-Standard LLM sampling is lossy. When a model is 70% confident in option A and 30% confident in option B, the sampler forces a single discrete output — one of those two signals is discarded. ObjectiveAI bypasses the sampler entirely using logprobs.
-
-Instead of asking each model "which option do you pick?" and getting one answer, ObjectiveAI extracts the model's full probability distribution over the response options simultaneously via `top_logprobs`. Each agent's vote becomes a probability vector rather than a point choice. A model that weakly prefers option A contributes proportionally less signal than one that strongly prefers it.
+Each agent contributes a preference distribution over the candidate responses, not a single sampled token. A model that weakly prefers option A contributes proportionally less signal than one that strongly prefers it.
 
 ```text
-Traditional:  Model outputs "A"            — loses the 30% signal for B entirely
-ObjectiveAI:  Model vote = [0.70, 0.30, 0.00, 0.00] — full distribution preserved
+Single-model sampling:  outputs "A"                         (loses everything about B, C, D)
+ObjectiveAI agent vote: [0.70, 0.30, 0.00, 0.00]            (full preference distribution)
 ```
 
-For response sets larger than the logprobs limit (typically 20), a **prefix tree** structures the problem across multiple stages. Each response is assigned a unique prefix key (`` `A` ``, `` `B` ``, … `` `T` ``). The tree width matches the logprobs count — 20 leaves per branch. For larger sets, nested prefixes (`` `A``A` ``, `` `A``B` ``) extend coverage hierarchically. At each node, the model's logprob distribution over the next character captures its preferences at that level. The full tree is traversed in a single pass per agent, preserving probability information at every level. Implemented in `objectiveai-api/src/vector/completions/pfx.rs`. Supports voting over hundreds of options while respecting the logprobs API constraint.
-
-The result is collective judgment that uses richer information than any individual model's sampled output would provide.
+Internal machinery extends this beyond the small response sets a single API call could express directly — vector completions over hundreds of candidate responses still produce a complete score vector. The collective result uses richer information than any individual model's sampled output would provide.
 
 ### Function executions
 
