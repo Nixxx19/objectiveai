@@ -350,13 +350,23 @@ function ObjectiveAIView() {
 
 const OBJECTIVEAI_TAB_ID = "objectiveai";
 
+/**
+ * Mirror of `objectiveai-viewer/src-tauri/src/plugins.rs::ViewerPluginInfo`.
+ * Source of truth is the Rust struct; keep these in sync by hand.
+ */
+export interface ViewerPluginInfo {
+  name: string;
+  iframe_src: string;
+  mobile_ready: boolean;
+}
+
 function App() {
-  const [pluginNames, setPluginNames] = useState<string[]>([]);
+  const [plugins, setPlugins] = useState<ViewerPluginInfo[]>([]);
   const [activeTab, setActiveTab] = useState<string>(OBJECTIVEAI_TAB_ID);
 
   useEffect(() => {
-    invoke<string[]>("list_plugins_with_viewer")
-      .then(setPluginNames)
+    invoke<ViewerPluginInfo[]>("list_plugins_with_viewer")
+      .then(setPlugins)
       .catch((e) => {
         // eslint-disable-next-line no-console
         console.warn("list_plugins_with_viewer failed:", e);
@@ -365,8 +375,10 @@ function App() {
 
   const tabs: Tab[] = [
     { id: OBJECTIVEAI_TAB_ID, label: "ObjectiveAI" },
-    ...pluginNames.map((name) => ({ id: name, label: name })),
+    ...plugins.map((p) => ({ id: p.name, label: p.name })),
   ];
+
+  const activePlugin = plugins.find((p) => p.name === activeTab);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
@@ -374,9 +386,9 @@ function App() {
       <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         {activeTab === OBJECTIVEAI_TAB_ID ? (
           <ObjectiveAIView />
-        ) : (
-          <PluginPane pluginName={activeTab} />
-        )}
+        ) : activePlugin ? (
+          <PluginPane info={activePlugin} />
+        ) : null}
       </div>
     </div>
   );

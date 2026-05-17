@@ -24,6 +24,7 @@ fn minimal_manifest_json() -> String {
         license: None,
         binaries: Binaries::default(),
         viewer_zip: None,
+        viewer_url: None,
         viewer_routes: vec![],
         mobile_ready: false,
     })

@@ -25,9 +25,13 @@ use super::{Manifest, ManifestWithNameAndSource};
 async fn parse_manifest_file(path: &Path) -> Option<ManifestWithNameAndSource> {
     let bytes = tokio::fs::read(path).await.ok()?;
     if let Ok(full) = serde_json::from_slice::<ManifestWithNameAndSource>(&bytes) {
+        // Same validate gate as the install path: malformed
+        // viewer-source combos shouldn't surface as installed plugins.
+        full.manifest.validate().ok()?;
         return Some(full);
     }
     let manifest: Manifest = serde_json::from_slice(&bytes).ok()?;
+    manifest.validate().ok()?;
     let name = path.file_stem()?.to_str()?.to_string();
     let source = path.to_string_lossy().into_owned();
     Some(ManifestWithNameAndSource { name, manifest, source })
@@ -362,6 +366,9 @@ impl Client {
         let mut de = serde_json::Deserializer::from_slice(&bytes);
         let manifest: Manifest = serde_path_to_error::deserialize(&mut de)
             .map_err(super::InstallError::ManifestParse)?;
+        manifest
+            .validate()
+            .map_err(super::InstallError::ManifestInvalid)?;
         Ok(manifest)
     }
 

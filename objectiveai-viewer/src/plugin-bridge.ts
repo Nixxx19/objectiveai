@@ -37,6 +37,16 @@ import { listen as tauriListen, type UnlistenFn } from "@tauri-apps/api/event";
 type IframeHandle = {
   pluginName: string;
   iframe: HTMLIFrameElement;
+  /**
+   * Target origin for host -> iframe postMessage calls. Derived once
+   * at register time from the iframe's `src` URL.origin so we don't
+   * have to fall back to `"*"`. For `plugin://localhost/...` this is
+   * `plugin://localhost`; for `https://plugin.example.com/...` this
+   * is `https://plugin.example.com`. If the URL is malformed (won't
+   * happen in practice — the Rust side resolves it) we degrade to
+   * `"*"` so the iframe still receives messages.
+   */
+  targetOrigin: string;
 };
 
 type InboundPayload = {
@@ -65,10 +75,29 @@ const iframes = new Map<string, IframeHandle>();
 const tauriUnlisteners = new Map<string, UnlistenFn>();
 
 /** Register a plugin iframe so the bridge can forward events to it. */
-export function registerIframe(pluginName: string, iframe: HTMLIFrameElement): void {
-  iframes.set(pluginName, { pluginName, iframe });
+export function registerIframe(
+  pluginName: string,
+  iframe: HTMLIFrameElement,
+  src: string,
+): void {
+  const targetOrigin = deriveTargetOrigin(src);
+  iframes.set(pluginName, { pluginName, iframe, targetOrigin });
   void subscribeToPluginEvents(pluginName);
   ensureReverseListener();
+}
+
+/**
+ * Pull `URL.origin` out of an iframe src so we can use it as the
+ * `targetOrigin` argument to postMessage. Falls back to `"*"` on
+ * any URL parse failure — defensive only; in production the src
+ * is always a Rust-resolved URL that's known-good.
+ */
+function deriveTargetOrigin(src: string): string {
+  try {
+    return new URL(src).origin;
+  } catch {
+    return "*";
+  }
 }
 
 /** Unregister a previously-registered iframe. Cancels its event sub. */
@@ -96,12 +125,12 @@ async function subscribeToPluginEvents(pluginName: string): Promise<void> {
           sub_type: payload.sub_type,
           value: payload.value,
         },
-        "*",
+        handle.targetOrigin,
       );
     } else if (payload.type === "cli_command") {
       handle.iframe.contentWindow?.postMessage(
         { kind: "plugin-event", type: "cli_command", value: payload.value },
-        "*",
+        handle.targetOrigin,
       );
     } else if (payload.type === "api_call") {
       handle.iframe.contentWindow?.postMessage(
@@ -111,7 +140,7 @@ async function subscribeToPluginEvents(pluginName: string): Promise<void> {
           sub_type: payload.sub_type,
           value: payload.value,
         },
-        "*",
+        handle.targetOrigin,
       );
     }
   });
