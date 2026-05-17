@@ -17,6 +17,14 @@ default = []
 viewer = ["objectiveai-cli/viewer"]
 rustpython = ["objectiveai-cli/rustpython"]
 systempython = ["objectiveai-cli/systempython"]
+# Auto-update from GitHub releases on startup. Opt-in — install.sh and
+# the build-mcp-leg CI composite enable it explicitly so the shipped
+# `objectiveai-mcp` binary self-updates; cargo install and library
+# consumers don't carry the updater unless they ask. The
+# objectiveai-cli dep uses default-features = false anyway, so the
+# cli's own updater feature does NOT leak through — this binary runs
+# its own updater for the mcp asset.
+updater = ["objectiveai-sdk/updater"]
 
 # Renames the produced executable from `objectiveai-mcp-cli` to
 # `objectiveai-mcp`. The crate name on crates.io stays unchanged
