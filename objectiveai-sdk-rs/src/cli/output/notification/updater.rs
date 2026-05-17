@@ -18,23 +18,27 @@ use serde::{Deserialize, Serialize};
 #[schemars(rename = "cli.output.notification.Updater")]
 pub enum Updater {
     /// Skipped this run for a non-cooldown reason. (Cooldown is silent.)
+    #[schemars(title = "Skipped")]
     Skipped {
         reason: SkipReason,
     },
     /// All gates passed; about to call
     /// `GET /repos/ObjectiveAI/objectiveai/releases/latest`. The very
     /// first emitted line of any active update run.
+    #[schemars(title = "Checking")]
     Checking {
         asset_name: String,
         current_version: String,
     },
     /// GitHub returned the latest release tag and it's ≤ current.
     /// Terminal — no more events follow.
+    #[schemars(title = "UpToDate")]
     UpToDate {
         current_version: String,
         remote_version: String,
     },
     /// Found a newer release with our asset attached; about to download.
+    #[schemars(title = "Found")]
     Found {
         current_version: String,
         remote_version: String,
@@ -44,6 +48,7 @@ pub enum Updater {
     /// Swap complete; the next line of output will come from the
     /// re-exec'd new binary, not this one. Terminal for the current
     /// process.
+    #[schemars(title = "Installed")]
     Installed {
         current_version: String,
         remote_version: String,
@@ -58,12 +63,15 @@ pub enum Updater {
 #[schemars(rename = "cli.output.notification.SkipReason")]
 pub enum SkipReason {
     /// Host OS/arch combination doesn't have a release asset.
+    #[schemars(title = "UnsupportedPlatform")]
     UnsupportedPlatform,
     /// `OBJECTIVEAI_SKIP_UPDATE` env var is set. The updater respects
     /// this so re-exec'd children don't loop, and so users can disable
     /// auto-update by setting it.
+    #[schemars(title = "OptedOut")]
     OptedOut,
     /// Binary is running out of a `target*/` directory — looks like a
     /// dev build (`cargo run`), not an installed binary.
+    #[schemars(title = "DevTree")]
     DevTree,
 }
