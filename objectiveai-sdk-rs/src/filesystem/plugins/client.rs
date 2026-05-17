@@ -7,6 +7,10 @@
 //! alongside at `<base_dir>/plugins/<name>.json`. The cli's
 //! external-subcommand dispatch uses [`Client::resolve_plugin`] to
 //! turn a user-supplied plugin name into an executable path.
+//!
+//! [`Client::install_plugin`] always writes the canonical
+//! `plugin[.exe]` filename, but [`Client::resolve_plugin`] tolerates a
+//! tiered fallback — see its docstring for the exact lookup order.
 
 use std::path::{Path, PathBuf};
 
@@ -51,18 +55,73 @@ impl Client {
             .join(if cfg!(windows) { "plugin.exe" } else { "plugin" })
     }
 
-    /// Resolve a plugin name to its executable path. Returns
-    /// `Some(path)` when [`Self::plugin_binary_path`] exists on disk
-    /// as a regular file, `None` otherwise.
+    /// Resolve a plugin name to its executable path. Lookup order:
     ///
-    /// Uses `tokio::fs::metadata` so it doesn't block the runtime.
+    /// 1. Platform-preferred canonical:
+    ///    `<plugins_dir>/<name>/plugin.exe` on Windows,
+    ///    `<plugins_dir>/<name>/plugin` elsewhere. Matches what
+    ///    [`Self::install_plugin`] writes.
+    /// 2. Cross-platform canonical: the same two filenames in opposite
+    ///    order, for hand-placed binaries that came from the "wrong"
+    ///    platform's release asset.
+    /// 3. First-found fallback: any file under `<plugin_dir>/` whose
+    ///    `file_stem` is exactly `"plugin"` and whose `extension` is
+    ///    something other than the two canonical cases — e.g.
+    ///    `plugin.bat`, `plugin.sh`, `plugin.cmd`. Tiebreak is
+    ///    `read_dir` order (filesystem-defined).
+    ///
+    /// Tier 3's stem match uses `Path::file_stem`, which strips only
+    /// the last extension component, so multi-segment names like
+    /// `plugin.tar.gz` (stem = `plugin.tar`) don't accidentally count.
+    ///
+    /// Returns `None` if none of the three tiers turn up a regular
+    /// file. Uses `tokio` filesystem APIs throughout — never blocks.
     pub async fn resolve_plugin(&self, name: &str) -> Option<PathBuf> {
-        let path = self.plugin_binary_path(name);
-        tokio::fs::metadata(&path)
-            .await
-            .map(|m| m.is_file())
-            .unwrap_or(false)
-            .then_some(path)
+        let dir = self.plugin_dir(name);
+
+        // Tiers 1 + 2.
+        #[cfg(windows)]
+        let priority: [&str; 2] = ["plugin.exe", "plugin"];
+        #[cfg(not(windows))]
+        let priority: [&str; 2] = ["plugin", "plugin.exe"];
+
+        for filename in priority {
+            let path = dir.join(filename);
+            if tokio::fs::metadata(&path)
+                .await
+                .map(|m| m.is_file())
+                .unwrap_or(false)
+            {
+                return Some(path);
+            }
+        }
+
+        // Tier 3: scan for any other `plugin.<ext>` file.
+        let mut read_dir = tokio::fs::read_dir(&dir).await.ok()?;
+        while let Ok(Some(entry)) = read_dir.next_entry().await {
+            let path = entry.path();
+            let Some(file_name) = path.file_name().and_then(|s| s.to_str()) else {
+                continue;
+            };
+            if file_name == "plugin" || file_name == "plugin.exe" {
+                // Already tried by the priority loop.
+                continue;
+            }
+            if path.file_stem().and_then(|s| s.to_str()) != Some("plugin") {
+                continue;
+            }
+            if path.extension().is_none() {
+                // Defensive: file_stem == "plugin" + no extension would
+                // be the file named exactly "plugin", which the
+                // priority loop already covered.
+                continue;
+            }
+            if entry.metadata().await.map(|m| m.is_file()).unwrap_or(false) {
+                return Some(path);
+            }
+        }
+
+        None
     }
 
     /// Look up a single plugin manifest by name. Reads
