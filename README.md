@@ -30,7 +30,7 @@ Agent has a decision
 
 ### Binaries
 
-Install all three prebuilt binaries with one command:
+Install all four prebuilt binaries with one command:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ObjectiveAI/objectiveai/main/install.sh | bash
@@ -44,23 +44,27 @@ What lands in `~/.objectiveai/`:
 | `objectiveai` | CLI — the user-facing command (`objectiveai agents list`, `objectiveai functions executions create`, etc.) with the embedded Tauri viewer. |
 | `objectiveai-api` | Standalone API server — runs the `objectiveai-api` HTTP server in the foreground; `OBJECTIVEAI_PORT=8080 objectiveai-api`. |
 | `objectiveai-viewer` | Standalone Tauri desktop app — the same viewer the CLI embeds, but launchable on its own. |
+| `objectiveai-mcp` | MCP (Model Context Protocol) server — wraps the CLI as an MCP tool so editors / agents can invoke it via the streamable-HTTP MCP transport. |
 
 Pick a subset via flags (compose freely):
 
 ```bash
-# CLI without the embedded Tauri viewer + standalone API server, skip standalone viewer
+# CLI without the embedded Tauri viewer + api + mcp, skip standalone viewer
 curl -fsSL https://raw.githubusercontent.com/ObjectiveAI/objectiveai/main/install.sh | bash -s -- --no-viewer
 
-# Skip the standalone API server (keep CLI + viewer)
+# Skip the standalone API server (keep CLI + viewer + mcp)
 curl -fsSL https://raw.githubusercontent.com/ObjectiveAI/objectiveai/main/install.sh | bash -s -- --no-api
 
-# Just the CLI, no embedded viewer, no API, no standalone viewer
+# Skip the MCP server (keep CLI + api + viewer)
+curl -fsSL https://raw.githubusercontent.com/ObjectiveAI/objectiveai/main/install.sh | bash -s -- --no-mcp
+
+# Just the CLI, no embedded viewer, no api, no standalone viewer, no mcp
 curl -fsSL https://raw.githubusercontent.com/ObjectiveAI/objectiveai/main/install.sh | bash -s -- --cli-only
 ```
 
 Sourcing `~/.objectiveai/env` puts the binaries on `PATH` for the current shell. New shells pick it up automatically (the installer wires `~/.bashrc` / `~/.zshrc` to source the same file).
 
-Supported platforms: Linux x86_64, Linux aarch64 (Raspberry Pi 4+, Graviton), macOS x86_64, macOS aarch64 (Apple Silicon), Windows x86_64. All three binaries are published per-platform on [GitHub Releases](https://github.com/ObjectiveAI/objectiveai/releases). The CLI self-updates on startup; re-run the installer to upgrade `objectiveai-api` / `objectiveai-viewer`.
+Supported platforms: Linux x86_64, Linux aarch64 (Raspberry Pi 4+, Graviton), macOS x86_64, macOS aarch64 (Apple Silicon), Windows x86_64. All four binaries are published per-platform on [GitHub Releases](https://github.com/ObjectiveAI/objectiveai/releases). The CLI self-updates on startup; re-run the installer to upgrade `objectiveai-api` / `objectiveai-viewer` / `objectiveai-mcp`.
 
 ### SDK
 

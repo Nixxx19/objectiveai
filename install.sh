@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # ObjectiveAI installer — downloads the pre-built release binaries.
 #
-# Default: installs `objectiveai` (CLI), `objectiveai-api` (server), and
-# `objectiveai-viewer` (Tauri desktop app) from the latest GitHub Release.
+# Default: installs `objectiveai` (CLI), `objectiveai-api` (server),
+# `objectiveai-viewer` (Tauri desktop app), and `objectiveai-mcp`
+# (MCP server) from the latest GitHub Release.
 #
 #   curl -fsSL https://raw.githubusercontent.com/ObjectiveAI/objectiveai/main/install.sh | bash
 #
@@ -10,14 +11,15 @@
 #   --no-viewer   skip the standalone viewer binary AND use the CLI variant
 #                 without an embedded viewer.
 #   --no-api      skip the standalone API server binary.
-#   --cli-only    skip both viewer and api (same as --no-viewer --no-api).
+#   --no-mcp      skip the standalone MCP server binary.
+#   --cli-only    skip viewer, api, and mcp (only install the CLI).
 #
 # All binaries land in ~/.objectiveai/ (or ~/.objectiveai/*.exe on Windows)
 # and are added to PATH. No toolchain required.
 #
 # For a from-source install, clone the repo and run the per-crate
 # install.sh scripts under objectiveai-cli/, objectiveai-api/,
-# objectiveai-viewer/.
+# objectiveai-viewer/, objectiveai-mcp-cli/.
 
 set -euo pipefail
 
@@ -27,6 +29,7 @@ INSTALL_DIR="$HOME/.objectiveai"
 NO_VIEWER=0
 INSTALL_API=1
 INSTALL_VIEWER=1
+INSTALL_MCP=1
 
 for arg in "$@"; do
   case "$arg" in
@@ -37,13 +40,17 @@ for arg in "$@"; do
     --no-api)
       INSTALL_API=0
       ;;
+    --no-mcp)
+      INSTALL_MCP=0
+      ;;
     --cli-only)
       NO_VIEWER=1
       INSTALL_API=0
       INSTALL_VIEWER=0
+      INSTALL_MCP=0
       ;;
     -h|--help)
-      sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'
+      sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//'
       exit 0
       ;;
     *)
@@ -154,6 +161,13 @@ if [ "$INSTALL_VIEWER" = "1" ]; then
   install_binary \
     "objectiveai-viewer-${PLATFORM}-${ARCH}${EXE_SUFFIX}" \
     "objectiveai-viewer${EXE_SUFFIX}"
+fi
+
+# MCP — standalone MCP (Model Context Protocol) server.
+if [ "$INSTALL_MCP" = "1" ]; then
+  install_binary \
+    "objectiveai-mcp-${PLATFORM}-${ARCH}${EXE_SUFFIX}" \
+    "objectiveai-mcp${EXE_SUFFIX}"
 fi
 
 # ── PATH ──────────────────────────────────────────────────────────────

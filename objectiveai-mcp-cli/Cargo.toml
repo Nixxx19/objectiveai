@@ -18,6 +18,14 @@ viewer = ["objectiveai-cli/viewer"]
 rustpython = ["objectiveai-cli/rustpython"]
 systempython = ["objectiveai-cli/systempython"]
 
+# Renames the produced executable from `objectiveai-mcp-cli` to
+# `objectiveai-mcp`. The crate name on crates.io stays unchanged
+# (`objectiveai-mcp-cli`), and so does the library target
+# (`objectiveai_mcp_cli`) for in-process consumers.
+[[bin]]
+name = "objectiveai-mcp"
+path = "src/main.rs"
+
 [dependencies]
 anyhow = "1.0.102"
 axum = "0.8.8"
