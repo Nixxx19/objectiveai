@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactElement } from "react";
+import cn from "classnames";
 import type { ViewerPluginInfo } from "./App";
 import { registerIframe, unregisterIframe } from "./plugin-bridge";
 
@@ -35,12 +36,7 @@ export function PluginPane({ info }: PluginPaneProps): ReactElement {
       title={info.name}
       src={info.iframe_src}
       sandbox="allow-scripts allow-forms"
-      style={{
-        flex: 1,
-        width: "100%",
-        height: "100%",
-        border: "none",
-      }}
+      className={cn("flex-1", "w-full", "h-full", "border-0")}
     />
   );
 }

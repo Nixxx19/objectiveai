@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import cn from "classnames";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { AgentCompletionView } from "./AgentCompletionView";
@@ -338,9 +339,13 @@ function ObjectiveAIView() {
   }, []);
 
   return (
-    <main className="container">
-      <h1>ObjectiveAI Viewer</h1>
-      {entries.length === 0 && <p>Waiting for requests...</p>}
+    <main className={cn("mx-auto", "max-w-4xl", "px-4", "py-8", "text-left")}>
+      <h1 className={cn("text-2xl", "font-semibold", "mb-4")}>ObjectiveAI Viewer</h1>
+      {entries.length === 0 && (
+        <p className={cn("text-neutral-500", "dark:text-neutral-400")}>
+          Waiting for requests...
+        </p>
+      )}
       {entries.map((entry) => (
         <EntryView key={entry.id} entry={entry} />
       ))}
@@ -381,9 +386,9 @@ function App() {
   const activePlugin = plugins.find((p) => p.name === activeTab);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+    <div className={cn("flex", "flex-col", "h-screen")}>
       <TabBar tabs={tabs} activeTab={activeTab} onSelect={setActiveTab} />
-      <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+      <div className={cn("flex", "flex-col", "flex-1", "min-h-0")}>
         {activeTab === OBJECTIVEAI_TAB_ID ? (
           <ObjectiveAIView />
         ) : activePlugin ? (
