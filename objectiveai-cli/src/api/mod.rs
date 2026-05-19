@@ -7,6 +7,23 @@ pub mod headers;
 mod run;
 pub mod detach;
 
+// Shared infrastructure for per-endpoint subcommands.
+pub mod body;
+pub mod client;
+pub mod call;
+
+// One subtree per URL root segment. Every leaf inside these mirrors a
+// route in `objectiveai-api/src/run.rs` 1:1 — see
+// `tests/api_endpoint_coverage.rs`.
+pub mod agent;
+pub mod vector;
+pub mod functions;
+pub mod auth;
+pub mod swarms;
+pub mod agents;
+pub mod error;
+pub mod laboratories;
+
 pub use run::*;
 
 use clap::Subcommand;
@@ -43,6 +60,46 @@ pub enum Commands {
         #[command(subcommand)]
         command: headers::Commands,
     },
+    /// `/agent/*` endpoints
+    Agent {
+        #[command(subcommand)]
+        command: agent::Commands,
+    },
+    /// `/vector/*` endpoints
+    Vector {
+        #[command(subcommand)]
+        command: vector::Commands,
+    },
+    /// `/functions/*` endpoints
+    Functions {
+        #[command(subcommand)]
+        command: functions::Commands,
+    },
+    /// `/auth/*` endpoints
+    Auth {
+        #[command(subcommand)]
+        command: auth::Commands,
+    },
+    /// `/swarms/*` endpoints
+    Swarms {
+        #[command(subcommand)]
+        command: swarms::Commands,
+    },
+    /// `/agents/*` endpoints
+    Agents {
+        #[command(subcommand)]
+        command: agents::Commands,
+    },
+    /// `/error` endpoint
+    Error {
+        #[command(subcommand)]
+        command: error::Commands,
+    },
+    /// `/laboratories/*` endpoints
+    Laboratories {
+        #[command(subcommand)]
+        command: laboratories::Commands,
+    },
 }
 
 impl Commands {
@@ -54,6 +111,14 @@ impl Commands {
             Commands::ClaudeAgentSdk { command } => command.handle(cli_config, handle).await,
             Commands::CodexSdk { command } => command.handle(cli_config, handle).await,
             Commands::Headers { command } => command.handle(cli_config, handle).await,
+            Commands::Agent { command } => command.handle(cli_config, handle).await,
+            Commands::Vector { command } => command.handle(cli_config, handle).await,
+            Commands::Functions { command } => command.handle(cli_config, handle).await,
+            Commands::Auth { command } => command.handle(cli_config, handle).await,
+            Commands::Swarms { command } => command.handle(cli_config, handle).await,
+            Commands::Agents { command } => command.handle(cli_config, handle).await,
+            Commands::Error { command } => command.handle(cli_config, handle).await,
+            Commands::Laboratories { command } => command.handle(cli_config, handle).await,
         }
     }
 }
