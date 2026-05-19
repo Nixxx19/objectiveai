@@ -15,7 +15,8 @@ use serde::{Deserialize, Serialize};
 #[serde(tag = "event", rename_all = "snake_case")]
 #[schemars(rename = "cli.output.notification.Updater")]
 pub enum Updater {
-    /// Skipped this run for a non-cooldown reason. (Cooldown is silent.)
+    /// Refused to proceed with the update — the `reason` carries why.
+    /// No binaries were modified.
     #[schemars(title = "Skipped")]
     Skipped {
         reason: SkipReason,
