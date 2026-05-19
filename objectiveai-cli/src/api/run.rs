@@ -221,7 +221,7 @@ fn extract_viewer_binary() -> Result<std::path::PathBuf, crate::error::Error> {
 /// fields backed only by the config-file headers are forwarded explicitly via
 /// `cmd.env(...)`.
 #[cfg(feature = "viewer")]
-async fn spawn_viewer(
+pub(crate) async fn spawn_viewer(
     secret: Option<&str>,
     config: &mut objectiveai_sdk::filesystem::config::Config,
 ) -> Result<(tokio::process::Child, String), crate::error::Error> {
@@ -289,7 +289,7 @@ fn apply_env_overlay(cmd: &mut tokio::process::Command, name: &str, fallback: Op
 /// Resolves the viewer secret/signature pair from config.
 /// Both must be present, or both absent. Returns `(secret, secret_from_env, signature)`.
 #[cfg(feature = "viewer")]
-fn resolve_viewer_secret(
+pub(crate) fn resolve_viewer_secret(
     config: &mut objectiveai_sdk::filesystem::config::Config,
 ) -> Result<(Option<String>, bool, Option<String>), crate::error::Error> {
     let viewer_local = config.viewer().local();

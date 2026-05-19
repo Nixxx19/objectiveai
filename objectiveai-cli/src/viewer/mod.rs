@@ -25,9 +25,16 @@ pub enum Commands {
     /// Generate a new secret/signature pair
     GenerateSecretSignaturePair,
     /// POST a JSON body to a viewer HTTP route and wait for the
-    /// response. Reads `api.headers.x_viewer_address` and
-    /// `api.headers.x_viewer_signature` from the filesystem config
-    /// (the same source the api server's viewer client uses).
+    /// response.
+    ///
+    /// In **remote** viewer mode, reads `api.headers.x_viewer_address`
+    /// and `api.headers.x_viewer_signature` from the filesystem config
+    /// (the same source the api server's viewer client uses) and POSTs
+    /// there. In **local** viewer mode, spawns the embedded viewer
+    /// subprocess on a random port, POSTs to its bound address with the
+    /// locally-configured signature, then kills the subprocess on the
+    /// way out — matching the spawn-kill lifecycle the api server uses
+    /// for transient tasks.
     Send {
         /// URL path on the viewer (must start with `/`), e.g.
         /// `/agent/completions` or `/plugin/<repository>/<route>`.

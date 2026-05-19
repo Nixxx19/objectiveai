@@ -71,6 +71,8 @@ pub enum Error {
     ViewerSendHttp(String),
     #[error("viewer returned status {status}: {body}")]
     ViewerSendBadStatus { status: u16, body: String },
+    #[error("local viewer mode requires the `viewer` feature, but this cli build was compiled without it; switch to remote viewer mode with `objectiveai viewer mode set remote` or use a viewer-enabled build")]
+    LocalViewerFeatureDisabled,
 }
 
 impl Error {

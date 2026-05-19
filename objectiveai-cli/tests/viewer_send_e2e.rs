@@ -26,7 +26,7 @@ fn temp_base() -> PathBuf {
 }
 
 #[tokio::test]
-async fn viewer_send_posts_to_configured_address() {
+async fn viewer_send_remote_mode_posts_to_configured_address() {
     let base = temp_base();
 
     let mock_server = MockServer::start().await;
@@ -52,6 +52,9 @@ async fn viewer_send_posts_to_configured_address() {
         .read_config()
         .await
         .expect("read_config failed");
+    config
+        .viewer()
+        .set_mode(objectiveai_sdk::filesystem::config::ViewerMode::Remote);
     config.api().headers().set_x_viewer_address(mock_server.uri());
     config.api().headers().set_x_viewer_signature(SIGNATURE.to_string());
     fs_client
