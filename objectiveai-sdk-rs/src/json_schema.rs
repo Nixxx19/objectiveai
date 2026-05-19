@@ -496,9 +496,6 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
     {
         schemas.extend([
             schemars::schema_for!(crate::viewer::Event),
-            schemars::schema_for!(crate::viewer::ApiCallSubType),
-            schemars::schema_for!(crate::viewer::ApiCallEnvelope),
-            schemars::schema_for!(crate::viewer::HttpMethod),
         ]);
     }
     schemas

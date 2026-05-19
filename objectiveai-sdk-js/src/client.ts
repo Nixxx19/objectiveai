@@ -91,12 +91,12 @@ export const ObjectiveAIOptionsSchema = z
       .boolean()
       .nullish()
       .describe(
-        "Route every HTTP request through a Tauri postMessage channel " +
-          "(`api-call-invoke`) instead of `fetch()`. Requires running " +
-          "inside an objectiveai-viewer plugin iframe; the host bridge " +
-          "dispatches the request and streams the response back. Falls " +
-          "back to OBJECTIVEAI_VIEWER env var (any truthy value enables " +
-          "it).",
+        "Route every HTTP request through the host viewer's `cli_run` " +
+          "Tauri command (via the `cli-invoke` postMessage) instead of " +
+          "`fetch()`. Requires running inside an objectiveai-viewer " +
+          "plugin iframe; the host spawns `objectiveai api …` and streams " +
+          "its JSONL output back. Falls back to OBJECTIVEAI_VIEWER env var " +
+          "(any truthy value enables it).",
       ),
   })
   .describe("Options for the ObjectiveAI client.");
