@@ -13,18 +13,17 @@ permissions:
 # check-version
 # ├─→ create-release
 # │
-# ├─→ mcp-fs-<leg> ──→ cli-<leg>           (× 5 cli legs)
+# ├─→ cli-<leg>                            (× 5 cli legs)
 # ├─→ mcp-fs-api-<leg> ──→ api-<leg>       (× 5 api legs)
 # ├─→ mcp-fs-viewer-<leg> ──→ viewer-<leg> (× 5 viewer legs)
-# └─→ mcp-fs-mcp-<leg> ──→ mcp-<leg>       (× 5 mcp legs)
+# └─→ mcp-<leg>                            (× 5 mcp legs)
 #
-# Every leg has its own dedicated `mcp-fs-<leg>` upstream so a slow
-# runner allocation, slow build, or transient failure on one platform's
-# mcp-filesystem can't gate any other platform's CLI / API / Viewer /
-# MCP build. The mcp-fs jobs build identical binaries per (arch,
-# isolation group) — duplicated work, but parallel, in exchange for
-# total per-leg isolation. 20 mcp-fs jobs total (5 cli + 5 api +
-# 5 viewer + 5 mcp).
+# The cli no longer embeds the viewer binary or the api server. Since
+# objectiveai-mcp-cli depends on the cli (not on api), the mcp legs
+# also no longer need a paired mcp-filesystem artifact. Only the api
+# and viewer legs (which DO embed mcp-filesystem for their own use)
+# keep their dedicated `mcp-fs-<leg>` upstreams. 10 mcp-fs jobs total
+# (5 api + 5 viewer).
 #
 # All 20 leg jobs (5 cli + 5 api + 5 viewer + 5 mcp) append their
 # assets to the same `v<version>` GitHub Release as they finish.
@@ -98,67 +97,13 @@ jobs:
             --title "v$VERSION" \
             --notes-file release-notes.md
 
-  # ── mcp-filesystem builders (10 dedicated jobs, all on Linux runners) ─────
-
-  mcp-fs-linux-x86_64:
-    needs: check-version
-    if: needs.check-version.outputs.should-release == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/build-mcp-filesystem
-        with:
-          target: x86_64-unknown-linux-musl
-          artifact-name: mcp-filesystem-linux-x86_64
-
-  mcp-fs-linux-aarch64:
-    needs: check-version
-    if: needs.check-version.outputs.should-release == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/build-mcp-filesystem
-        with:
-          target: aarch64-unknown-linux-musl
-          artifact-name: mcp-filesystem-linux-aarch64
-
-  mcp-fs-macos-x86_64:
-    needs: check-version
-    if: needs.check-version.outputs.should-release == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/build-mcp-filesystem
-        with:
-          target: x86_64-unknown-linux-musl
-          artifact-name: mcp-filesystem-macos-x86_64
-
-  mcp-fs-macos-aarch64:
-    needs: check-version
-    if: needs.check-version.outputs.should-release == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/build-mcp-filesystem
-        with:
-          target: aarch64-unknown-linux-musl
-          artifact-name: mcp-filesystem-macos-aarch64
-
-  mcp-fs-windows-x86_64:
-    needs: check-version
-    if: needs.check-version.outputs.should-release == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/build-mcp-filesystem
-        with:
-          target: x86_64-unknown-linux-musl
-          artifact-name: mcp-filesystem-windows-x86_64
-
-  # ── CLI builders (5 dedicated jobs, each pinned to its mcp-fs upstream) ───
+  # ── CLI builders (5 dedicated jobs) ───────────────────────────────────────
+  # The cli no longer embeds the viewer or the api server, so each cli
+  # leg just runs `cargo build` on its own — no paired mcp-fs upstream
+  # needed.
 
   cli-linux-x86_64:
-    needs: [check-version, create-release, mcp-fs-linux-x86_64]
+    needs: [check-version, create-release]
     if: needs.check-version.outputs.should-release == 'true'
     runs-on: ubuntu-22.04
     env:
@@ -167,15 +112,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build-cli-leg
         with:
-          mcp_target: x86_64-unknown-linux-musl
-          mcp_artifact_name: mcp-filesystem-linux-x86_64
           asset: objectiveai-linux-x86_64
           src_name: objectiveai
           version: ${{ needs.check-version.outputs.version }}
           repository: ${{ github.repository }}
 
   cli-linux-aarch64:
-    needs: [check-version, create-release, mcp-fs-linux-aarch64]
+    needs: [check-version, create-release]
     if: needs.check-version.outputs.should-release == 'true'
     runs-on: ubuntu-24.04-arm
     env:
@@ -184,15 +127,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build-cli-leg
         with:
-          mcp_target: aarch64-unknown-linux-musl
-          mcp_artifact_name: mcp-filesystem-linux-aarch64
           asset: objectiveai-linux-aarch64
           src_name: objectiveai
           version: ${{ needs.check-version.outputs.version }}
           repository: ${{ github.repository }}
 
   cli-macos-x86_64:
-    needs: [check-version, create-release, mcp-fs-macos-x86_64]
+    needs: [check-version, create-release]
     if: needs.check-version.outputs.should-release == 'true'
     runs-on: macos-13
     env:
@@ -201,15 +142,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build-cli-leg
         with:
-          mcp_target: x86_64-unknown-linux-musl
-          mcp_artifact_name: mcp-filesystem-macos-x86_64
           asset: objectiveai-macos-x86_64
           src_name: objectiveai
           version: ${{ needs.check-version.outputs.version }}
           repository: ${{ github.repository }}
 
   cli-macos-aarch64:
-    needs: [check-version, create-release, mcp-fs-macos-aarch64]
+    needs: [check-version, create-release]
     if: needs.check-version.outputs.should-release == 'true'
     runs-on: macos-14
     env:
@@ -218,15 +157,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build-cli-leg
         with:
-          mcp_target: aarch64-unknown-linux-musl
-          mcp_artifact_name: mcp-filesystem-macos-aarch64
           asset: objectiveai-macos-aarch64
           src_name: objectiveai
           version: ${{ needs.check-version.outputs.version }}
           repository: ${{ github.repository }}
 
   cli-windows-x86_64:
-    needs: [check-version, create-release, mcp-fs-windows-x86_64]
+    needs: [check-version, create-release]
     if: needs.check-version.outputs.should-release == 'true'
     runs-on: windows-latest
     env:
@@ -235,8 +172,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build-cli-leg
         with:
-          mcp_target: x86_64-unknown-linux-musl
-          mcp_artifact_name: mcp-filesystem-windows-x86_64
           asset: objectiveai-windows-x86_64.exe
           src_name: objectiveai.exe
           version: ${{ needs.check-version.outputs.version }}
@@ -530,67 +465,13 @@ jobs:
           version: ${{ needs.check-version.outputs.version }}
           repository: ${{ github.repository }}
 
-  # ── mcp-filesystem builders for MCP legs (5 dedicated jobs) ───────────────
-
-  mcp-fs-mcp-linux-x86_64:
-    needs: check-version
-    if: needs.check-version.outputs.should-release == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/build-mcp-filesystem
-        with:
-          target: x86_64-unknown-linux-musl
-          artifact-name: mcp-filesystem-mcp-linux-x86_64
-
-  mcp-fs-mcp-linux-aarch64:
-    needs: check-version
-    if: needs.check-version.outputs.should-release == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/build-mcp-filesystem
-        with:
-          target: aarch64-unknown-linux-musl
-          artifact-name: mcp-filesystem-mcp-linux-aarch64
-
-  mcp-fs-mcp-macos-x86_64:
-    needs: check-version
-    if: needs.check-version.outputs.should-release == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/build-mcp-filesystem
-        with:
-          target: x86_64-unknown-linux-musl
-          artifact-name: mcp-filesystem-mcp-macos-x86_64
-
-  mcp-fs-mcp-macos-aarch64:
-    needs: check-version
-    if: needs.check-version.outputs.should-release == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/build-mcp-filesystem
-        with:
-          target: aarch64-unknown-linux-musl
-          artifact-name: mcp-filesystem-mcp-macos-aarch64
-
-  mcp-fs-mcp-windows-x86_64:
-    needs: check-version
-    if: needs.check-version.outputs.should-release == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/build-mcp-filesystem
-        with:
-          target: x86_64-unknown-linux-musl
-          artifact-name: mcp-filesystem-mcp-windows-x86_64
-
-  # ── MCP builders (5 dedicated jobs, each pinned to its mcp-fs upstream) ───
+  # ── MCP builders (5 dedicated jobs) ───────────────────────────────────────
+  # objectiveai-mcp-cli no longer transitively pulls in objectiveai-api
+  # (because the cli no longer does either), so the mcp legs don't need
+  # a paired mcp-filesystem artifact either.
 
   mcp-linux-x86_64:
-    needs: [check-version, create-release, mcp-fs-mcp-linux-x86_64]
+    needs: [check-version, create-release]
     if: needs.check-version.outputs.should-release == 'true'
     runs-on: ubuntu-22.04
     env:
@@ -599,15 +480,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build-mcp-leg
         with:
-          mcp_target: x86_64-unknown-linux-musl
-          mcp_artifact_name: mcp-filesystem-mcp-linux-x86_64
           asset: objectiveai-linux-x86_64-mcp
           src_name: objectiveai-mcp
           version: ${{ needs.check-version.outputs.version }}
           repository: ${{ github.repository }}
 
   mcp-linux-aarch64:
-    needs: [check-version, create-release, mcp-fs-mcp-linux-aarch64]
+    needs: [check-version, create-release]
     if: needs.check-version.outputs.should-release == 'true'
     runs-on: ubuntu-24.04-arm
     env:
@@ -616,15 +495,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build-mcp-leg
         with:
-          mcp_target: aarch64-unknown-linux-musl
-          mcp_artifact_name: mcp-filesystem-mcp-linux-aarch64
           asset: objectiveai-linux-aarch64-mcp
           src_name: objectiveai-mcp
           version: ${{ needs.check-version.outputs.version }}
           repository: ${{ github.repository }}
 
   mcp-macos-x86_64:
-    needs: [check-version, create-release, mcp-fs-mcp-macos-x86_64]
+    needs: [check-version, create-release]
     if: needs.check-version.outputs.should-release == 'true'
     runs-on: macos-13
     env:
@@ -633,15 +510,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build-mcp-leg
         with:
-          mcp_target: x86_64-unknown-linux-musl
-          mcp_artifact_name: mcp-filesystem-mcp-macos-x86_64
           asset: objectiveai-macos-x86_64-mcp
           src_name: objectiveai-mcp
           version: ${{ needs.check-version.outputs.version }}
           repository: ${{ github.repository }}
 
   mcp-macos-aarch64:
-    needs: [check-version, create-release, mcp-fs-mcp-macos-aarch64]
+    needs: [check-version, create-release]
     if: needs.check-version.outputs.should-release == 'true'
     runs-on: macos-14
     env:
@@ -650,15 +525,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build-mcp-leg
         with:
-          mcp_target: aarch64-unknown-linux-musl
-          mcp_artifact_name: mcp-filesystem-mcp-macos-aarch64
           asset: objectiveai-macos-aarch64-mcp
           src_name: objectiveai-mcp
           version: ${{ needs.check-version.outputs.version }}
           repository: ${{ github.repository }}
 
   mcp-windows-x86_64:
-    needs: [check-version, create-release, mcp-fs-mcp-windows-x86_64]
+    needs: [check-version, create-release]
     if: needs.check-version.outputs.should-release == 'true'
     runs-on: windows-latest
     env:
@@ -667,8 +540,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build-mcp-leg
         with:
-          mcp_target: x86_64-unknown-linux-musl
-          mcp_artifact_name: mcp-filesystem-mcp-windows-x86_64
           asset: objectiveai-windows-x86_64-mcp.exe
           src_name: objectiveai-mcp.exe
           version: ${{ needs.check-version.outputs.version }}
