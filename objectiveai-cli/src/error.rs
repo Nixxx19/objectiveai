@@ -61,6 +61,16 @@ pub enum Error {
     },
     #[error("whitelist regex error: {0}")]
     WhitelistRegex(regex::Error),
+    #[error("api.headers.x_viewer_address is not configured; set it with `objectiveai api headers x-viewer-address set <url>`")]
+    ViewerAddressNotConfigured,
+    #[error("viewer path must start with `/`, got {0:?}")]
+    ViewerPathMissingSlash(String),
+    #[error("viewer body is not valid JSON: {0}")]
+    ViewerBodyJsonParse(String),
+    #[error("viewer http error: {0}")]
+    ViewerSendHttp(String),
+    #[error("viewer returned status {status}: {body}")]
+    ViewerSendBadStatus { status: u16, body: String },
 }
 
 impl Error {

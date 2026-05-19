@@ -1,6 +1,7 @@
 pub mod config;
 pub mod mode;
 pub mod local;
+pub mod send;
 
 use clap::Subcommand;
 
@@ -23,6 +24,18 @@ pub enum Commands {
     },
     /// Generate a new secret/signature pair
     GenerateSecretSignaturePair,
+    /// POST a JSON body to a viewer HTTP route and wait for the
+    /// response. Reads `api.headers.x_viewer_address` and
+    /// `api.headers.x_viewer_signature` from the filesystem config
+    /// (the same source the api server's viewer client uses).
+    Send {
+        /// URL path on the viewer (must start with `/`), e.g.
+        /// `/agent/completions` or `/plugin/<repository>/<route>`.
+        path: String,
+        /// JSON body to POST. Validated as well-formed JSON before
+        /// send.
+        body: String,
+    },
 }
 
 impl Commands {
@@ -36,6 +49,7 @@ impl Commands {
                 crate::config::emit_value(&pair, handle).await;
                 Ok(())
             }
+            Commands::Send { path, body } => send::run(cli_config, handle, &path, &body).await,
         }
     }
 }
