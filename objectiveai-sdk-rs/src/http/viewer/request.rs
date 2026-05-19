@@ -1,25 +1,30 @@
+//! Wire shapes for events the viewer client POSTs to a remote viewer's
+//! HTTP server. The api server constructs these and pushes them through
+//! [`super::Client`]; standalone SDK consumers can do the same.
+
 use std::sync::Arc;
-use serde::{Serialize, Deserialize};
+
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ResponseError {
     pub id: String,
     #[serde(flatten)]
-    pub inner: objectiveai_sdk::error::ResponseError,
+    pub inner: crate::error::ResponseError,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentCompletionCreateParams {
     pub id: String,
     #[serde(flatten)]
-    pub inner: Arc<objectiveai_sdk::agent::completions::request::AgentCompletionCreateParams>,
+    pub inner: Arc<crate::agent::completions::request::AgentCompletionCreateParams>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum AgentCompletionRequest {
     Begin(AgentCompletionCreateParams),
-    Continue(objectiveai_sdk::agent::completions::response::streaming::AgentCompletionChunk),
+    Continue(crate::agent::completions::response::streaming::AgentCompletionChunk),
     Error(ResponseError),
 }
 
@@ -27,14 +32,14 @@ pub enum AgentCompletionRequest {
 pub struct FunctionExecutionCreateParams {
     pub id: String,
     #[serde(flatten)]
-    pub inner: Arc<objectiveai_sdk::functions::executions::request::FunctionExecutionCreateParams>,
+    pub inner: Arc<crate::functions::executions::request::FunctionExecutionCreateParams>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum FunctionExecutionRequest {
     Begin(FunctionExecutionCreateParams),
-    Continue(objectiveai_sdk::functions::executions::response::streaming::FunctionExecutionChunk),
+    Continue(crate::functions::executions::response::streaming::FunctionExecutionChunk),
     Error(ResponseError),
 }
 
@@ -42,14 +47,14 @@ pub enum FunctionExecutionRequest {
 pub struct FunctionInventionRecursiveCreateParams {
     pub id: String,
     #[serde(flatten)]
-    pub inner: Arc<objectiveai_sdk::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams>,
+    pub inner: Arc<crate::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum FunctionInventionRecursiveRequest {
     Begin(FunctionInventionRecursiveCreateParams),
-    Continue(objectiveai_sdk::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk),
+    Continue(crate::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk),
     Error(ResponseError),
 }
 
@@ -57,14 +62,14 @@ pub enum FunctionInventionRecursiveRequest {
 pub struct LaboratoryExecutionCreateParams {
     pub id: String,
     #[serde(flatten)]
-    pub inner: Arc<objectiveai_sdk::laboratories::executions::request::LaboratoryExecutionCreateParams>,
+    pub inner: Arc<crate::laboratories::executions::request::LaboratoryExecutionCreateParams>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum LaboratoryExecutionRequest {
     Begin(LaboratoryExecutionCreateParams),
-    Continue(objectiveai_sdk::laboratories::executions::response::streaming::LaboratoryExecutionChunk),
+    Continue(crate::laboratories::executions::response::streaming::LaboratoryExecutionChunk),
     Error(ResponseError),
 }
 
