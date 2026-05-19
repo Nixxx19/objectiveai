@@ -23,10 +23,6 @@ pub enum Commands {
         #[command(subcommand)]
         command: GetCommand,
     },
-    ApiHeadersConfig {
-        #[command(subcommand)]
-        command: GetCommand,
-    },
     Config {
         #[command(subcommand)]
         command: GetCommand,
@@ -73,7 +69,7 @@ impl Commands {
     pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["AgentsConfig", "ApiConfig", "ApiHeadersConfig", "Config", "Favorite", "FunctionsConfig", "FunctionsInventionsConfig", "FunctionsProfilesConfig", "FunctionsProfilesPairsConfig", "PairFavorite", "SwarmsConfig", "ViewerConfig", "ViewerSecretSignaturePair"];
+                const NAMES: &[&str] = &["AgentsConfig", "ApiConfig", "Config", "Favorite", "FunctionsConfig", "FunctionsInventionsConfig", "FunctionsProfilesConfig", "FunctionsProfilesPairsConfig", "PairFavorite", "SwarmsConfig", "ViewerConfig", "ViewerSecretSignaturePair"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
                     objectiveai_sdk::cli::output::Notification {
                         value: objectiveai_sdk::cli::output::Schemas {
@@ -97,17 +93,6 @@ impl Commands {
             Commands::ApiConfig { .. } => {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/filesystem.config.ApiConfig.json"),
-                ).expect("embedded JSON Schema must parse");
-                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
-                        value: objectiveai_sdk::cli::output::Schema { schema },
-                    },
-                ).emit(handle).await;
-                Ok(())
-            }
-            Commands::ApiHeadersConfig { .. } => {
-                let schema: serde_json::Value = serde_json::from_str(
-                    include_str!("../../../../../objectiveai-json-schema/filesystem.config.ApiHeadersConfig.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
                     objectiveai_sdk::cli::output::Notification {

@@ -433,7 +433,6 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemas.extend([
             schemars::schema_for!(crate::filesystem::config::AgentsConfig),
             schemars::schema_for!(crate::filesystem::config::ApiConfig),
-            schemars::schema_for!(crate::filesystem::config::ApiHeadersConfig),
             schemars::schema_for!(crate::filesystem::config::Config),
             schemars::schema_for!(crate::filesystem::config::Favorite),
             schemars::schema_for!(crate::filesystem::config::PairFavorite),

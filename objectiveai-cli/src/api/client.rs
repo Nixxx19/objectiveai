@@ -34,45 +34,28 @@ fn env(name: &str) -> Option<String> {
 pub fn build_http_client(
     config: &mut objectiveai_sdk::filesystem::config::Config,
 ) -> objectiveai_sdk::HttpClient {
-    // Snapshot every field up-front so we don't hold overlapping
-    // `&mut` borrows of `config` across the SDK call.
     let address = env("OBJECTIVEAI_ADDRESS").or_else(|| {
         let api = config.api();
         compose_url(api.get_address(), api.get_port())
     });
 
-    let authorization = env("OBJECTIVEAI_AUTHORIZATION").or_else(|| {
-        config
-            .api()
-            .headers()
-            .get_x_objectiveai_authorization()
-            .map(String::from)
-    });
+    let authorization = env("OBJECTIVEAI_AUTHORIZATION")
+        .or_else(|| config.api().get_objectiveai_authorization().map(String::from));
 
     let user_agent = env("USER_AGENT")
-        .or_else(|| config.api().headers().get_user_agent().map(String::from));
+        .or_else(|| config.api().get_user_agent().map(String::from));
 
     let x_title = env("X_TITLE")
-        .or_else(|| config.api().headers().get_x_title().map(String::from));
+        .or_else(|| config.api().get_x_title().map(String::from));
 
     let http_referer = env("HTTP_REFERER")
-        .or_else(|| config.api().headers().get_http_referer().map(String::from));
+        .or_else(|| config.api().get_http_referer().map(String::from));
 
-    let x_github_authorization = env("GITHUB_AUTHORIZATION").or_else(|| {
-        config
-            .api()
-            .headers()
-            .get_x_github_authorization()
-            .map(String::from)
-    });
+    let x_github_authorization = env("GITHUB_AUTHORIZATION")
+        .or_else(|| config.api().get_github_authorization().map(String::from));
 
-    let x_openrouter_authorization = env("OPENROUTER_AUTHORIZATION").or_else(|| {
-        config
-            .api()
-            .headers()
-            .get_x_openrouter_authorization()
-            .map(String::from)
-    });
+    let x_openrouter_authorization = env("OPENROUTER_AUTHORIZATION")
+        .or_else(|| config.api().get_openrouter_authorization().map(String::from));
 
     let x_mcp_authorization: Option<std::collections::HashMap<String, String>> =
         env("MCP_AUTHORIZATION")
@@ -80,49 +63,23 @@ pub fn build_http_client(
             .or_else(|| {
                 config
                     .api()
-                    .headers()
-                    .get_x_mcp_authorization()
+                    .get_mcp_authorization()
                     .map(|m| m.iter().map(|(k, v)| (k.clone(), v.clone())).collect())
             });
 
     let x_viewer_signature = env("VIEWER_SIGNATURE")
-        .or_else(|| config.viewer().get_signature().map(String::from))
-        .or_else(|| {
-            config
-                .api()
-                .headers()
-                .get_x_viewer_signature()
-                .map(String::from)
-        });
+        .or_else(|| config.viewer().get_signature().map(String::from));
 
-    let x_viewer_address = env("VIEWER_ADDRESS")
-        .or_else(|| {
-            let viewer = config.viewer();
-            compose_url(viewer.get_address(), viewer.get_port())
-        })
-        .or_else(|| {
-            config
-                .api()
-                .headers()
-                .get_x_viewer_address()
-                .map(String::from)
-        });
-
-    let x_commit_author_name = env("COMMIT_AUTHOR_NAME").or_else(|| {
-        config
-            .api()
-            .headers()
-            .get_x_commit_author_name()
-            .map(String::from)
+    let x_viewer_address = env("VIEWER_ADDRESS").or_else(|| {
+        let viewer = config.viewer();
+        compose_url(viewer.get_address(), viewer.get_port())
     });
 
-    let x_commit_author_email = env("COMMIT_AUTHOR_EMAIL").or_else(|| {
-        config
-            .api()
-            .headers()
-            .get_x_commit_author_email()
-            .map(String::from)
-    });
+    let x_commit_author_name = env("COMMIT_AUTHOR_NAME")
+        .or_else(|| config.api().get_commit_author_name().map(String::from));
+
+    let x_commit_author_email = env("COMMIT_AUTHOR_EMAIL")
+        .or_else(|| config.api().get_commit_author_email().map(String::from));
 
     objectiveai_sdk::HttpClient::new(
         reqwest::Client::new(),

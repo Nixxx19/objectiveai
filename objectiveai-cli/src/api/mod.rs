@@ -3,7 +3,15 @@ pub mod address;
 pub mod port;
 pub mod claude_agent_sdk;
 pub mod codex_sdk;
-pub mod headers;
+pub mod objectiveai_authorization;
+pub mod openrouter_authorization;
+pub mod github_authorization;
+pub mod mcp_authorization;
+pub mod user_agent;
+pub mod http_referer;
+pub mod x_title;
+pub mod commit_author_name;
+pub mod commit_author_email;
 mod run;
 pub mod detach;
 
@@ -55,10 +63,50 @@ pub enum Commands {
         #[command(subcommand)]
         command: codex_sdk::Commands,
     },
-    /// API headers configuration
-    Headers {
+    /// `Authorization` header
+    ObjectiveaiAuthorization {
         #[command(subcommand)]
-        command: headers::Commands,
+        command: objectiveai_authorization::Commands,
+    },
+    /// `X-OPENROUTER-AUTHORIZATION` header
+    OpenrouterAuthorization {
+        #[command(subcommand)]
+        command: openrouter_authorization::Commands,
+    },
+    /// `X-GITHUB-AUTHORIZATION` header
+    GithubAuthorization {
+        #[command(subcommand)]
+        command: github_authorization::Commands,
+    },
+    /// `X-MCP-AUTHORIZATION` header (key/value map)
+    McpAuthorization {
+        #[command(subcommand)]
+        command: mcp_authorization::Commands,
+    },
+    /// `User-Agent` header
+    UserAgent {
+        #[command(subcommand)]
+        command: user_agent::Commands,
+    },
+    /// `Referer` / `HTTP-Referer` header
+    HttpReferer {
+        #[command(subcommand)]
+        command: http_referer::Commands,
+    },
+    /// `X-Title` header
+    XTitle {
+        #[command(subcommand)]
+        command: x_title::Commands,
+    },
+    /// `X-COMMIT-AUTHOR-NAME` header
+    CommitAuthorName {
+        #[command(subcommand)]
+        command: commit_author_name::Commands,
+    },
+    /// `X-COMMIT-AUTHOR-EMAIL` header
+    CommitAuthorEmail {
+        #[command(subcommand)]
+        command: commit_author_email::Commands,
     },
     /// `/agent/*` endpoints
     Agent {
@@ -110,7 +158,15 @@ impl Commands {
             Commands::Port { command } => command.handle(cli_config, handle).await,
             Commands::ClaudeAgentSdk { command } => command.handle(cli_config, handle).await,
             Commands::CodexSdk { command } => command.handle(cli_config, handle).await,
-            Commands::Headers { command } => command.handle(cli_config, handle).await,
+            Commands::ObjectiveaiAuthorization { command } => command.handle(cli_config, handle).await,
+            Commands::OpenrouterAuthorization { command } => command.handle(cli_config, handle).await,
+            Commands::GithubAuthorization { command } => command.handle(cli_config, handle).await,
+            Commands::McpAuthorization { command } => command.handle(cli_config, handle).await,
+            Commands::UserAgent { command } => command.handle(cli_config, handle).await,
+            Commands::HttpReferer { command } => command.handle(cli_config, handle).await,
+            Commands::XTitle { command } => command.handle(cli_config, handle).await,
+            Commands::CommitAuthorName { command } => command.handle(cli_config, handle).await,
+            Commands::CommitAuthorEmail { command } => command.handle(cli_config, handle).await,
             Commands::Agent { command } => command.handle(cli_config, handle).await,
             Commands::Vector { command } => command.handle(cli_config, handle).await,
             Commands::Functions { command } => command.handle(cli_config, handle).await,
