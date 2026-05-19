@@ -14,13 +14,6 @@ inputs:
   src_name:
     description: Filename of the built binary inside ~/.objectiveai/ (objectiveai or objectiveai.exe).
     required: true
-  install_args:
-    description: Extra arguments to objectiveai-cli/install.sh, e.g. --no-viewer.
-    required: false
-    default: ""
-  viewer:
-    description: '"true" or "false" — whether the leg builds with the embedded viewer (controls Linux Tauri sysdep install).'
-    required: true
   version:
     description: The version string (without leading "v") used in the release tag.
     required: true
@@ -47,7 +40,7 @@ runs:
         # sdk-runner fingerprint stable across runner OS versions.
         python-version: '3.13'
     - name: Install Linux Tauri deps
-      if: runner.os == 'Linux' && inputs.viewer == 'true'
+      if: runner.os == 'Linux'
       shell: bash
       run: |
         sudo apt-get update
@@ -86,7 +79,7 @@ runs:
         echo "$CURRENT_FP" > "$EMBED_DIR/.fingerprint"
     - name: Build CLI
       shell: bash
-      run: bash objectiveai-cli/install.sh ${{ inputs.install_args }}
+      run: bash objectiveai-cli/install.sh
     - name: Dump build logs on failure
       if: failure()
       shell: bash

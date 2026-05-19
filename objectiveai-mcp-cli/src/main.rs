@@ -23,8 +23,7 @@ async fn main() -> std::io::Result<()> {
         let args: Vec<std::ffi::OsString> = std::env::args_os().collect();
         objectiveai_sdk::updater::maybe_auto_update(
             objectiveai_sdk::updater::UpdaterConfig {
-                asset_prefix: "objectiveai-mcp",
-                variant_suffix: "",
+                package: "mcp",
                 current_version: env!("CARGO_PKG_VERSION"),
                 github_authorization: None,
                 handle: None,

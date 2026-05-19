@@ -21,8 +21,7 @@ async fn main() {
     #[cfg(feature = "updater")]
     objectiveai_sdk::updater::maybe_auto_update(
         objectiveai_sdk::updater::UpdaterConfig {
-            asset_prefix: "objectiveai",
-            variant_suffix: if cfg!(feature = "viewer") { "" } else { "-no-viewer" },
+            package: "cli",
             current_version: env!("CARGO_PKG_VERSION"),
             github_authorization: cli_config.github_authorization.clone(),
             // Share the cli's JSONL stream so updater notifications

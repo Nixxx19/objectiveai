@@ -8,8 +8,7 @@
 #   curl -fsSL https://raw.githubusercontent.com/ObjectiveAI/objectiveai/main/install.sh | bash
 #
 # Flags (compose freely):
-#   --no-viewer   skip the standalone viewer binary AND use the CLI variant
-#                 without an embedded viewer.
+#   --no-viewer   skip the standalone viewer binary.
 #   --no-api      skip the standalone API server binary.
 #   --no-mcp      skip the standalone MCP server binary.
 #   --cli-only    skip viewer, api, and mcp (only install the CLI).
@@ -26,7 +25,6 @@ set -euo pipefail
 REPO="ObjectiveAI/objectiveai"
 INSTALL_DIR="$HOME/.objectiveai"
 
-NO_VIEWER=0
 INSTALL_API=1
 INSTALL_VIEWER=1
 INSTALL_MCP=1
@@ -34,7 +32,6 @@ INSTALL_MCP=1
 for arg in "$@"; do
   case "$arg" in
     --no-viewer)
-      NO_VIEWER=1
       INSTALL_VIEWER=0
       ;;
     --no-api)
@@ -44,7 +41,6 @@ for arg in "$@"; do
       INSTALL_MCP=0
       ;;
     --cli-only)
-      NO_VIEWER=1
       INSTALL_API=0
       INSTALL_VIEWER=0
       INSTALL_MCP=0
@@ -140,33 +136,29 @@ install_binary() {
 
 # ── Install binaries ──────────────────────────────────────────────────
 
-# CLI — always installed. The `-no-viewer` variant is a smaller build
-# that strips the embedded Tauri viewer.
-CLI_ASSET="objectiveai-${PLATFORM}-${ARCH}"
-if [ "$NO_VIEWER" = "1" ]; then
-  CLI_ASSET="${CLI_ASSET}-no-viewer"
-fi
-CLI_ASSET="${CLI_ASSET}${EXE_SUFFIX}"
-install_binary "$CLI_ASSET" "objectiveai${EXE_SUFFIX}"
+# CLI — always installed.
+install_binary \
+  "objectiveai-${PLATFORM}-${ARCH}${EXE_SUFFIX}" \
+  "objectiveai${EXE_SUFFIX}"
 
 # API server — standalone objectiveai-api binary.
 if [ "$INSTALL_API" = "1" ]; then
   install_binary \
-    "objectiveai-api-${PLATFORM}-${ARCH}${EXE_SUFFIX}" \
+    "objectiveai-${PLATFORM}-${ARCH}-api${EXE_SUFFIX}" \
     "objectiveai-api${EXE_SUFFIX}"
 fi
 
 # Viewer — standalone Tauri desktop app.
 if [ "$INSTALL_VIEWER" = "1" ]; then
   install_binary \
-    "objectiveai-viewer-${PLATFORM}-${ARCH}${EXE_SUFFIX}" \
+    "objectiveai-${PLATFORM}-${ARCH}-viewer${EXE_SUFFIX}" \
     "objectiveai-viewer${EXE_SUFFIX}"
 fi
 
 # MCP — standalone MCP (Model Context Protocol) server.
 if [ "$INSTALL_MCP" = "1" ]; then
   install_binary \
-    "objectiveai-mcp-${PLATFORM}-${ARCH}${EXE_SUFFIX}" \
+    "objectiveai-${PLATFORM}-${ARCH}-mcp${EXE_SUFFIX}" \
     "objectiveai-mcp${EXE_SUFFIX}"
 fi
 

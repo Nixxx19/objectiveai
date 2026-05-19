@@ -15,8 +15,7 @@ async fn main() {
         let args: Vec<std::ffi::OsString> = std::env::args_os().collect();
         objectiveai_sdk::updater::maybe_auto_update(
             objectiveai_sdk::updater::UpdaterConfig {
-                asset_prefix: "objectiveai-viewer",
-                variant_suffix: "",
+                package: "viewer",
                 current_version: env!("CARGO_PKG_VERSION"),
                 github_authorization: None,
                 handle: None,

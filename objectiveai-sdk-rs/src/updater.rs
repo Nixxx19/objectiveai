@@ -4,9 +4,9 @@
 //! self-update used by every shipped binary in this repo
 //! (`objectiveai`, `objectiveai-api`, `objectiveai-mcp`,
 //! `objectiveai-viewer`). Each binary's `main.rs` calls
-//! [`maybe_auto_update`] with an [`UpdaterConfig`] that names the asset
-//! prefix the release uses for that binary; everything else (the GitHub
-//! poll, semver compare, swap, re-exec) is shared.
+//! [`maybe_auto_update`] with an [`UpdaterConfig`] naming its
+//! `package` (`"cli"` / `"api"` / `"mcp"` / `"viewer"`); everything
+//! else (the GitHub poll, semver compare, swap, re-exec) is shared.
 //!
 //! **Output policy:** every non-cooldown skip path AND every active
 //! step emits one structured JSONL line through the caller-provided
@@ -35,16 +35,11 @@ use std::ffi::OsString;
 /// Per-binary configuration for the auto-updater. Each binary's
 /// `main.rs` constructs this and passes it to [`maybe_auto_update`].
 pub struct UpdaterConfig {
-    /// Asset filename prefix as published in the GitHub Release.
-    /// Examples: `"objectiveai"` (cli), `"objectiveai-api"`,
-    /// `"objectiveai-mcp"`, `"objectiveai-viewer"`.
-    pub asset_prefix: &'static str,
-
-    /// Suffix appended between `<prefix>-<os>-<arch>` and the file
-    /// extension. Only the cli uses this today, for its `-no-viewer`
-    /// build variant: `if cfg!(feature = "viewer") { "" } else { "-no-viewer" }`.
-    /// api / mcp / viewer pass `""`.
-    pub variant_suffix: &'static str,
+    /// Which binary this updater is configured for. One of
+    /// `"cli"` / `"api"` / `"mcp"` / `"viewer"`. The cli's release
+    /// asset is the bare `objectiveai-<os>-<arch>` filename; every
+    /// other binary appends `-<package>` after the arch.
+    pub package: &'static str,
 
     /// The current binary's version. Caller must pass
     /// `env!("CARGO_PKG_VERSION")` so the compare uses the caller's
@@ -77,7 +72,7 @@ where
     I: IntoIterator<Item = OsString> + Clone,
 {
     if let Err(e) = imp::run(&config, args).await {
-        imp::emit_error(config.handle.as_ref(), config.asset_prefix, &e).await;
+        imp::emit_error(config.handle.as_ref(), config.package, &e).await;
     }
 }
 
@@ -151,7 +146,7 @@ mod imp {
         I: IntoIterator<Item = OsString> + Clone,
     {
         // Platform check — emit Skipped on miss.
-        let Some(asset_name) = asset_name(config.asset_prefix, config.variant_suffix) else {
+        let Some(asset_name) = asset_name(config.package) else {
             emit_notification(
                 config.handle.as_ref(),
                 Updater::Skipped { reason: SkipReason::UnsupportedPlatform },
@@ -195,7 +190,7 @@ mod imp {
         // the config base dir so it shares the CONFIG_BASE_DIR override
         // used everywhere else. Per-binary marker filename so each
         // binary gets its own independent 2-hour window.
-        let marker = marker_path(config.asset_prefix)?;
+        let marker = marker_path(config.package)?;
         if !check_elapsed(&marker) {
             return Ok(());
         }
@@ -326,13 +321,15 @@ mod imp {
 
     pub(super) async fn emit_error(
         handle: Option<&Handle>,
-        asset_prefix: &str,
+        package: &str,
         e: &Error,
     ) {
         let output: Output<serde_json::Value> = Output::Error(crate::cli::output::Error {
             level: crate::cli::output::Level::Warn,
             fatal: false,
-            message: serde_json::Value::String(format!("{asset_prefix}: auto-update error: {e}")),
+            message: serde_json::Value::String(format!(
+                "objectiveai-{package}: auto-update error: {e}"
+            )),
         });
         emit(handle, &output).await;
     }
@@ -373,11 +370,17 @@ mod imp {
         }
     }
 
-    /// Asset filename for this host, parameterized by `prefix` and
-    /// `variant_suffix`. Returns `None` on unsupported platforms.
-    pub(super) fn asset_name(prefix: &str, variant_suffix: &str) -> Option<String> {
+    /// Asset filename for this host. The cli's release asset is the
+    /// bare `objectiveai-<os>-<arch>` filename; every other binary
+    /// appends `-<package>` after the arch. Returns `None` on
+    /// unsupported platforms.
+    pub(super) fn asset_name(package: &str) -> Option<String> {
         let (os, arch, ext) = platform_triple()?;
-        Some(format!("{prefix}-{os}-{arch}{variant_suffix}{ext}"))
+        Some(if package == "cli" {
+            format!("objectiveai-{os}-{arch}{ext}")
+        } else {
+            format!("objectiveai-{os}-{arch}-{package}{ext}")
+        })
     }
 
     /// Extension used for the downloaded-but-not-yet-installed binary.
@@ -409,15 +412,15 @@ mod imp {
     }
 
     fn user_agent(config: &UpdaterConfig) -> String {
-        format!("{}/{}", config.asset_prefix, config.current_version)
+        format!("objectiveai-{}/{}", config.package, config.current_version)
     }
 
-    /// The marker is `<config_base_dir>/updated-<asset_prefix>.txt`.
+    /// The marker is `<config_base_dir>/updated-<package>.txt`.
     /// Reuses `crate::filesystem::Client` so CONFIG_BASE_DIR /
     /// ~/.objectiveai resolution matches the rest of the cli.
-    fn marker_path(asset_prefix: &str) -> Result<PathBuf, Error> {
+    fn marker_path(package: &str) -> Result<PathBuf, Error> {
         let fs_client = fs_client();
-        Ok(fs_client.base_dir().join(format!("updated-{asset_prefix}.txt")))
+        Ok(fs_client.base_dir().join(format!("updated-{package}.txt")))
     }
 
     fn fs_client() -> crate::filesystem::Client {
@@ -646,10 +649,10 @@ mod imp {
 #[cfg(all(test, feature = "updater"))]
 mod tests {
     #[test]
-    fn asset_name_resolves_for_current_target_and_prefix() {
+    fn asset_name_resolves_for_current_target_and_package() {
         // On every supported CI target, asset_name() returns Some(...).
         // The cfg matrix in platform_triple() would otherwise silently
-        // slip into None. Cover all 4 binary prefixes.
+        // slip into None. Cover all 4 binary packages.
         #[cfg(any(
             all(target_os = "linux", target_arch = "x86_64"),
             all(target_os = "linux", target_arch = "aarch64"),
@@ -658,27 +661,28 @@ mod tests {
             all(target_os = "windows", target_arch = "x86_64"),
         ))]
         {
-            for (prefix, variant) in [
-                ("objectiveai", ""),
-                ("objectiveai", "-no-viewer"),
-                ("objectiveai-api", ""),
-                ("objectiveai-mcp", ""),
-                ("objectiveai-viewer", ""),
-            ] {
-                let name = super::imp::asset_name(prefix, variant);
-                assert!(name.is_some(), "asset_name({prefix:?}, {variant:?}) is None");
-                let name = name.unwrap();
-                assert!(name.starts_with(&format!("{prefix}-")));
-                if !variant.is_empty() {
-                    // variant_suffix lives before the extension.
-                    // On windows we get `.exe` at the very end.
-                    let stem = name
-                        .strip_suffix(".exe")
-                        .map(|s| s.to_string())
-                        .unwrap_or_else(|| name.clone());
+            for package in ["cli", "api", "mcp", "viewer"] {
+                let name = super::imp::asset_name(package)
+                    .unwrap_or_else(|| panic!("asset_name({package:?}) is None"));
+                assert!(name.starts_with("objectiveai-"));
+                // CLI is the bare `objectiveai-<os>-<arch>` form.
+                // Every other package appends `-<package>` before the
+                // (optional) `.exe` extension.
+                let stem = name
+                    .strip_suffix(".exe")
+                    .map(|s| s.to_string())
+                    .unwrap_or_else(|| name.clone());
+                if package == "cli" {
                     assert!(
-                        stem.ends_with(variant),
-                        "expected {stem} to end with {variant}"
+                        !stem.ends_with("-api")
+                            && !stem.ends_with("-mcp")
+                            && !stem.ends_with("-viewer"),
+                        "cli asset must not carry a package suffix: {stem}"
+                    );
+                } else {
+                    assert!(
+                        stem.ends_with(&format!("-{package}")),
+                        "expected {stem} to end with -{package}"
                     );
                 }
                 #[cfg(target_os = "windows")]
