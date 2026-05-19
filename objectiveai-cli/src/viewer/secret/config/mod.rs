@@ -1,29 +1,11 @@
-use clap::{Subcommand, ValueEnum};
-
-#[derive(Clone, ValueEnum)]
-pub enum Mode {
-    Remote,
-    Local,
-}
-
-impl From<Mode> for objectiveai_sdk::filesystem::config::ViewerMode {
-    fn from(m: Mode) -> Self {
-        match m {
-            Mode::Remote => objectiveai_sdk::filesystem::config::ViewerMode::Remote,
-            Mode::Local => objectiveai_sdk::filesystem::config::ViewerMode::Local,
-        }
-    }
-}
+use clap::Subcommand;
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Get the mode
+    /// Get the value
     Get,
-    /// Set the mode
-    Set {
-        #[arg(value_enum)]
-        value: Mode,
-    },
+    /// Set the value
+    Set { value: String },
 }
 
 impl Commands {
@@ -31,16 +13,14 @@ impl Commands {
         let (client, mut config) = crate::config::read(cli_config).await?;
         match self {
             Commands::Get => {
-                crate::config::emit_value(&config.viewer().get_mode(), handle).await;
-                Ok(())
-            },
-            Commands::Set { value } => {
-                config.viewer().set_mode(value.into());
-                crate::config::write(&client, &config, cli_config).await?;
-                {
-                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Ok>::Notification(objectiveai_sdk::cli::output::Notification { value: objectiveai_sdk::cli::output::OK }).emit(handle).await;
+                crate::config::emit_value(&config.viewer().get_secret(), handle).await;
                 Ok(())
             }
+            Commands::Set { value } => {
+                config.viewer().set_secret(value);
+                crate::config::write(&client, &config, cli_config).await?;
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Ok>::Notification(objectiveai_sdk::cli::output::Notification { value: objectiveai_sdk::cli::output::OK }).emit(handle).await;
+                Ok(())
             }
         }
     }

@@ -2,8 +2,10 @@ use clap::Subcommand;
 
 #[derive(Subcommand)]
 pub enum Commands {
+    /// Get the value
     Get,
-    Set { value: String },
+    /// Set the value
+    Set { value: u16 },
 }
 
 impl Commands {
@@ -11,16 +13,14 @@ impl Commands {
         let (client, mut config) = crate::config::read(cli_config).await?;
         match self {
             Commands::Get => {
-                crate::config::emit_value(&config.viewer().local().get_signature(), handle).await;
-                Ok(())
-            },
-            Commands::Set { value } => {
-                config.viewer().local().set_signature(value);
-                crate::config::write(&client, &config, cli_config).await?;
-                {
-                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Ok>::Notification(objectiveai_sdk::cli::output::Notification { value: objectiveai_sdk::cli::output::OK }).emit(handle).await;
+                crate::config::emit_value(&config.api().get_port(), handle).await;
                 Ok(())
             }
+            Commands::Set { value } => {
+                config.api().set_port(value);
+                crate::config::write(&client, &config, cli_config).await?;
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Ok>::Notification(objectiveai_sdk::cli::output::Notification { value: objectiveai_sdk::cli::output::OK }).emit(handle).await;
+                Ok(())
             }
         }
     }

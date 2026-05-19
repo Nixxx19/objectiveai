@@ -5,7 +5,7 @@ pub enum Commands {
     /// Get the value
     Get,
     /// Set the value
-    Set { value: bool },
+    Set { value: String },
 }
 
 impl Commands {
@@ -13,16 +13,14 @@ impl Commands {
         let (client, mut config) = crate::config::read(cli_config).await?;
         match self {
             Commands::Get => {
-                crate::config::emit_value(&config.api().local().get_claude_agent_sdk(), handle).await;
-                Ok(())
-            },
-            Commands::Set { value } => {
-                config.api().local().set_claude_agent_sdk(value);
-                crate::config::write(&client, &config, cli_config).await?;
-                {
-                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Ok>::Notification(objectiveai_sdk::cli::output::Notification { value: objectiveai_sdk::cli::output::OK }).emit(handle).await;
+                crate::config::emit_value(&config.viewer().get_signature(), handle).await;
                 Ok(())
             }
+            Commands::Set { value } => {
+                config.viewer().set_signature(value);
+                crate::config::write(&client, &config, cli_config).await?;
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Ok>::Notification(objectiveai_sdk::cli::output::Notification { value: objectiveai_sdk::cli::output::OK }).emit(handle).await;
+                Ok(())
             }
         }
     }

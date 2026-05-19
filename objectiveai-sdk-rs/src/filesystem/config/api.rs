@@ -3,14 +3,18 @@ use serde::{Serialize, Deserialize};
 #[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
 #[schemars(rename = "filesystem.config.ApiConfig")]
 pub struct ApiConfig {
-    #[serde(default)]
-    pub mode: ApiMode,
-    #[serde(skip_serializing_if = "ApiRemoteConfig::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
-    pub remote: Option<ApiRemoteConfig>,
-    #[serde(skip_serializing_if = "ApiLocalConfig::is_none")]
+    pub address: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
-    pub local: Option<ApiLocalConfig>,
+    pub port: Option<u16>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub claude_agent_sdk: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub codex_sdk: Option<bool>,
     #[serde(skip_serializing_if = "ApiHeadersConfig::is_none")]
     #[schemars(extend("omitempty" = true))]
     pub headers: Option<ApiHeadersConfig>,
@@ -18,92 +22,35 @@ pub struct ApiConfig {
 
 impl ApiConfig {
     pub fn is_empty(&self) -> bool {
-        false
+        self.address.is_none()
+            && self.port.is_none()
+            && self.claude_agent_sdk.is_none()
+            && self.codex_sdk.is_none()
+            && ApiHeadersConfig::is_none(&self.headers)
     }
 
     pub fn is_none(this: &Option<Self>) -> bool {
         this.as_ref().is_none_or(|cfg| cfg.is_empty())
-    }
-
-    pub fn remote(&mut self) -> &mut ApiRemoteConfig {
-        self.remote.get_or_insert_with(ApiRemoteConfig::default)
-    }
-
-    pub fn local(&mut self) -> &mut ApiLocalConfig {
-        self.local.get_or_insert_with(ApiLocalConfig::default)
     }
 
     pub fn headers(&mut self) -> &mut ApiHeadersConfig {
         self.headers.get_or_insert_with(ApiHeadersConfig::default)
     }
 
-    pub fn get_mode(&self) -> ApiMode {
-        self.mode
+    pub fn get_address(&self) -> Option<&str> {
+        self.address.as_deref()
     }
 
-    pub fn set_mode(&mut self, mode: ApiMode) {
-        self.mode = mode;
+    pub fn set_address(&mut self, value: impl Into<String>) {
+        self.address = Some(value.into());
     }
 
-    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::super::Error> {
-        super::super::run_jq(self, filter)
-    }
-}
-
-#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "filesystem.config.ApiMode")]
-#[serde(rename_all = "snake_case")]
-pub enum ApiMode {
-    Remote,
-    #[default]
-    Local,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "filesystem.config.ApiRemoteConfig")]
-pub struct ApiRemoteConfig {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[schemars(extend("omitempty" = true))]
-    pub objectiveai_address: Option<String>,
-}
-
-impl ApiRemoteConfig {
-    pub fn is_empty(&self) -> bool {
-        self.objectiveai_address.is_none()
+    pub fn get_port(&self) -> Option<u16> {
+        self.port
     }
 
-    pub fn is_none(this: &Option<Self>) -> bool {
-        this.as_ref().is_none_or(|cfg| cfg.is_empty())
-    }
-
-    pub fn get_objectiveai_address(&self) -> Option<&str> {
-        self.objectiveai_address.as_deref()
-    }
-
-    pub fn set_objectiveai_address(&mut self, value: impl Into<String>) {
-        self.objectiveai_address = Some(value.into());
-    }
-
-    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::super::Error> {
-        super::super::run_jq(self, filter)
-    }
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "filesystem.config.ApiLocalConfig")]
-pub struct ApiLocalConfig {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[schemars(extend("omitempty" = true))]
-    pub claude_agent_sdk: Option<bool>,
-}
-
-impl ApiLocalConfig {
-    pub fn is_empty(&self) -> bool {
-        self.claude_agent_sdk.is_none()
-    }
-
-    pub fn is_none(this: &Option<Self>) -> bool {
-        this.as_ref().is_none_or(|cfg| cfg.is_empty())
+    pub fn set_port(&mut self, value: u16) {
+        self.port = Some(value);
     }
 
     pub fn get_claude_agent_sdk(&self) -> Option<bool> {
@@ -112,6 +59,14 @@ impl ApiLocalConfig {
 
     pub fn set_claude_agent_sdk(&mut self, value: bool) {
         self.claude_agent_sdk = Some(value);
+    }
+
+    pub fn get_codex_sdk(&self) -> Option<bool> {
+        self.codex_sdk
+    }
+
+    pub fn set_codex_sdk(&mut self, value: bool) {
+        self.codex_sdk = Some(value);
     }
 
     pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::super::Error> {

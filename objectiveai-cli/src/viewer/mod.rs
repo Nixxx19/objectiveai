@@ -1,6 +1,6 @@
 pub mod config;
-pub mod mode;
-pub mod local;
+pub mod secret;
+pub mod signature;
 pub mod send;
 
 use clap::Subcommand;
@@ -12,29 +12,20 @@ pub enum Commands {
         #[command(subcommand)]
         command: config::Commands,
     },
-    /// Viewer mode (remote or local)
-    Mode {
+    /// Viewer secret
+    Secret {
         #[command(subcommand)]
-        command: mode::Commands,
+        command: secret::Commands,
     },
-    /// Local viewer configuration
-    Local {
+    /// Viewer signature
+    Signature {
         #[command(subcommand)]
-        command: local::Commands,
+        command: signature::Commands,
     },
     /// Generate a new secret/signature pair
     GenerateSecretSignaturePair,
     /// POST a JSON body to a viewer HTTP route and wait for the
     /// response.
-    ///
-    /// In **remote** viewer mode, reads `api.headers.x_viewer_address`
-    /// and `api.headers.x_viewer_signature` from the filesystem config
-    /// (the same source the api server's viewer client uses) and POSTs
-    /// there. In **local** viewer mode, spawns the embedded viewer
-    /// subprocess on a random port, POSTs to its bound address with the
-    /// locally-configured signature, then kills the subprocess on the
-    /// way out — matching the spawn-kill lifecycle the api server uses
-    /// for transient tasks.
     Send {
         /// URL path on the viewer (must start with `/`), e.g.
         /// `/agent/completions` or `/plugin/<repository>/<route>`.
@@ -49,8 +40,8 @@ impl Commands {
     pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::Config { command } => command.handle(cli_config, handle).await,
-            Commands::Mode { command } => command.handle(cli_config, handle).await,
-            Commands::Local { command } => command.handle(cli_config, handle).await,
+            Commands::Secret { command } => command.handle(cli_config, handle).await,
+            Commands::Signature { command } => command.handle(cli_config, handle).await,
             Commands::GenerateSecretSignaturePair => {
                 let pair = objectiveai_sdk::filesystem::config::generate_viewer_secret_signature_pair();
                 crate::config::emit_value(&pair, handle).await;

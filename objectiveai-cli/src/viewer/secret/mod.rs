@@ -4,7 +4,7 @@ use clap::Subcommand;
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Mode configuration
+    /// Viewer secret configuration
     Config {
         #[command(subcommand)]
         command: config::Commands,

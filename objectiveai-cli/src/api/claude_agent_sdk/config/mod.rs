@@ -1,29 +1,11 @@
-use clap::{Subcommand, ValueEnum};
-
-#[derive(Clone, ValueEnum)]
-pub enum Mode {
-    Remote,
-    Local,
-}
-
-impl From<Mode> for objectiveai_sdk::filesystem::config::ApiMode {
-    fn from(m: Mode) -> Self {
-        match m {
-            Mode::Remote => objectiveai_sdk::filesystem::config::ApiMode::Remote,
-            Mode::Local => objectiveai_sdk::filesystem::config::ApiMode::Local,
-        }
-    }
-}
+use clap::Subcommand;
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Get the mode
+    /// Get the value
     Get,
-    /// Set the mode
-    Set {
-        #[arg(value_enum)]
-        value: Mode,
-    },
+    /// Set the value
+    Set { value: bool },
 }
 
 impl Commands {
@@ -31,11 +13,11 @@ impl Commands {
         let (client, mut config) = crate::config::read(cli_config).await?;
         match self {
             Commands::Get => {
-                crate::config::emit_value(config.api().get_mode(), handle).await;
+                crate::config::emit_value(&config.api().get_claude_agent_sdk(), handle).await;
                 Ok(())
             }
             Commands::Set { value } => {
-                config.api().set_mode(value.into());
+                config.api().set_claude_agent_sdk(value);
                 crate::config::write(&client, &config, cli_config).await?;
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Ok>::Notification(objectiveai_sdk::cli::output::Notification { value: objectiveai_sdk::cli::output::OK }).emit(handle).await;
                 Ok(())

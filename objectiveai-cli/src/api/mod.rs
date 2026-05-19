@@ -1,7 +1,8 @@
 pub mod config;
-pub mod mode;
-pub mod remote;
-pub mod local;
+pub mod address;
+pub mod port;
+pub mod claude_agent_sdk;
+pub mod codex_sdk;
 pub mod headers;
 mod run;
 pub mod detach;
@@ -17,20 +18,25 @@ pub enum Commands {
         #[command(subcommand)]
         command: config::Commands,
     },
-    /// API mode (remote or local)
-    Mode {
+    /// Local API server bind address
+    Address {
         #[command(subcommand)]
-        command: mode::Commands,
+        command: address::Commands,
     },
-    /// Remote API configuration
-    Remote {
+    /// Local API server bind port
+    Port {
         #[command(subcommand)]
-        command: remote::Commands,
+        command: port::Commands,
     },
-    /// Local API configuration
-    Local {
+    /// Claude Agent SDK enabled
+    ClaudeAgentSdk {
         #[command(subcommand)]
-        command: local::Commands,
+        command: claude_agent_sdk::Commands,
+    },
+    /// Codex SDK enabled
+    CodexSdk {
+        #[command(subcommand)]
+        command: codex_sdk::Commands,
     },
     /// API headers configuration
     Headers {
@@ -43,9 +49,10 @@ impl Commands {
     pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::Config { command } => command.handle(cli_config, handle).await,
-            Commands::Mode { command } => command.handle(cli_config, handle).await,
-            Commands::Remote { command } => command.handle(cli_config, handle).await,
-            Commands::Local { command } => command.handle(cli_config, handle).await,
+            Commands::Address { command } => command.handle(cli_config, handle).await,
+            Commands::Port { command } => command.handle(cli_config, handle).await,
+            Commands::ClaudeAgentSdk { command } => command.handle(cli_config, handle).await,
+            Commands::CodexSdk { command } => command.handle(cli_config, handle).await,
             Commands::Headers { command } => command.handle(cli_config, handle).await,
         }
     }

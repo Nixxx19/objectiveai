@@ -13,16 +13,14 @@ impl Commands {
         let (client, mut config) = crate::config::read(cli_config).await?;
         match self {
             Commands::Get => {
-                crate::config::emit_value(&config.api().remote().get_objectiveai_address(), handle).await;
-                Ok(())
-            },
-            Commands::Set { value } => {
-                config.api().remote().set_objectiveai_address(value);
-                crate::config::write(&client, &config, cli_config).await?;
-                {
-                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Ok>::Notification(objectiveai_sdk::cli::output::Notification { value: objectiveai_sdk::cli::output::OK }).emit(handle).await;
+                crate::config::emit_value(&config.api().get_address(), handle).await;
                 Ok(())
             }
+            Commands::Set { value } => {
+                config.api().set_address(value);
+                crate::config::write(&client, &config, cli_config).await?;
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Ok>::Notification(objectiveai_sdk::cli::output::Notification { value: objectiveai_sdk::cli::output::OK }).emit(handle).await;
+                Ok(())
             }
         }
     }
