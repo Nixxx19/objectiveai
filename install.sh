@@ -13,8 +13,14 @@
 #   --no-mcp      skip the standalone MCP server binary.
 #   --cli-only    skip viewer, api, and mcp (only install the CLI).
 #
-# All binaries land in ~/.objectiveai/ (or ~/.objectiveai/*.exe on Windows)
-# and are added to PATH. No toolchain required.
+# Layout on disk:
+#   ~/.objectiveai/objectiveai{.exe}        ← CLI (managed self)
+#   ~/.objectiveai/bin/objectiveai-api{.exe}
+#   ~/.objectiveai/bin/objectiveai-viewer{.exe}
+#   ~/.objectiveai/bin/objectiveai-mcp{.exe}
+#
+# Both ~/.objectiveai and ~/.objectiveai/bin are added to PATH.
+# No toolchain required.
 #
 # For a from-source install, clone the repo and run the per-crate
 # install.sh scripts under objectiveai-cli/, objectiveai-api/,
@@ -96,12 +102,12 @@ fi
 
 # ── Download helper ───────────────────────────────────────────────────
 
-# install_binary <asset_filename> <dst_filename>
+# install_binary <asset_filename> <dst_dir> <dst_filename>
 #
 # Fetches the asset from /releases/latest/download/ and installs it at
-# $INSTALL_DIR/$DST_NAME with the executable bit set.
+# <dst_dir>/<dst_filename> with the executable bit set.
 install_binary() {
-  local asset="$1" dst_name="$2"
+  local asset="$1" dst_dir="$2" dst_name="$3"
   local url="https://github.com/${REPO}/releases/latest/download/${asset}"
   local tmp dst
   tmp=$(mktemp -t objectiveai.XXXXXX)
@@ -125,8 +131,8 @@ install_binary() {
     return 1
   fi
 
-  mkdir -p "$INSTALL_DIR"
-  dst="$INSTALL_DIR/$dst_name"
+  mkdir -p "$dst_dir"
+  dst="$dst_dir/$dst_name"
   # `mv` onto a running Windows exe fails ("in use"); prefer `cp` so a
   # later install over an in-use binary degrades to a clearer error.
   cp "$tmp" "$dst"
@@ -135,16 +141,22 @@ install_binary() {
 }
 
 # ── Install binaries ──────────────────────────────────────────────────
+# CLI sits at the base directory; api/viewer/mcp land in bin/ so the
+# cli's own `objectiveai update` has a stable place to refresh them.
+
+BIN_DIR="$INSTALL_DIR/bin"
 
 # CLI — always installed.
 install_binary \
   "objectiveai-${PLATFORM}-${ARCH}${EXE_SUFFIX}" \
+  "$INSTALL_DIR" \
   "objectiveai${EXE_SUFFIX}"
 
 # API server — standalone objectiveai-api binary.
 if [ "$INSTALL_API" = "1" ]; then
   install_binary \
     "objectiveai-${PLATFORM}-${ARCH}-api${EXE_SUFFIX}" \
+    "$BIN_DIR" \
     "objectiveai-api${EXE_SUFFIX}"
 fi
 
@@ -152,6 +164,7 @@ fi
 if [ "$INSTALL_VIEWER" = "1" ]; then
   install_binary \
     "objectiveai-${PLATFORM}-${ARCH}-viewer${EXE_SUFFIX}" \
+    "$BIN_DIR" \
     "objectiveai-viewer${EXE_SUFFIX}"
 fi
 
@@ -159,6 +172,7 @@ fi
 if [ "$INSTALL_MCP" = "1" ]; then
   install_binary \
     "objectiveai-${PLATFORM}-${ARCH}-mcp${EXE_SUFFIX}" \
+    "$BIN_DIR" \
     "objectiveai-mcp${EXE_SUFFIX}"
 fi
 
@@ -179,6 +193,10 @@ write_env_file() {
 case ":${PATH}:" in
     *:"$HOME/.objectiveai":*) ;;
     *) export PATH="$HOME/.objectiveai:$PATH" ;;
+esac
+case ":${PATH}:" in
+    *:"$HOME/.objectiveai/bin":*) ;;
+    *) export PATH="$HOME/.objectiveai/bin:$PATH" ;;
 esac
 EOF
 }
@@ -202,13 +220,21 @@ write_env_file
 case "$PLATFORM" in
   windows)
     INSTALL_DIR_WIN="$(cygpath -w "$INSTALL_DIR" 2>/dev/null || echo "$INSTALL_DIR")"
+    BIN_DIR_WIN="$(cygpath -w "$BIN_DIR" 2>/dev/null || echo "$BIN_DIR")"
     CURRENT_PATH=$(powershell.exe -NoProfile -Command "[Environment]::GetEnvironmentVariable('Path', 'User')" 2>/dev/null | tr -d '\r' || true)
-    if echo "$CURRENT_PATH" | grep -qiF '.objectiveai'; then
-      echo "PATH already contains $INSTALL_DIR_WIN"
-    else
+    NEED_PREPEND=""
+    if ! echo "$CURRENT_PATH" | grep -qiF "$INSTALL_DIR_WIN"; then
+      NEED_PREPEND="$INSTALL_DIR_WIN;"
+    fi
+    if ! echo "$CURRENT_PATH" | grep -qiF "$BIN_DIR_WIN"; then
+      NEED_PREPEND="$NEED_PREPEND$BIN_DIR_WIN;"
+    fi
+    if [ -n "$NEED_PREPEND" ]; then
       powershell.exe -NoProfile -Command \
-        "[Environment]::SetEnvironmentVariable('Path', '$INSTALL_DIR_WIN;' + [Environment]::GetEnvironmentVariable('Path', 'User'), 'User')" 2>/dev/null
-      echo "Added $INSTALL_DIR_WIN to user PATH (restart cmd/PowerShell to use it)."
+        "[Environment]::SetEnvironmentVariable('Path', '$NEED_PREPEND' + [Environment]::GetEnvironmentVariable('Path', 'User'), 'User')" 2>/dev/null
+      echo "Added $NEED_PREPEND to user PATH (restart cmd/PowerShell to use it)."
+    else
+      echo "PATH already contains $INSTALL_DIR_WIN and $BIN_DIR_WIN"
     fi
     # Also wire up Git Bash / MSYS via the env file.
     [ -f "$HOME/.bashrc" ] && add_to_path "$HOME/.bashrc"

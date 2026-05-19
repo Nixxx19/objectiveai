@@ -67,8 +67,8 @@ bash "$REPO_ROOT/objectiveai-viewer/build.sh" --release
 # ── Build mcp ──────────────────────────────────────────────────────────
 
 # Fully-featured: all three passthrough features on for parity with
-# the cli release, plus the updater so the shipped binary self-updates.
-FEATURES="viewer,rustpython,systempython,updater"
+# the cli release.
+FEATURES="viewer,rustpython,systempython"
 
 echo "Building objectiveai-mcp (release, features: $FEATURES)..."
 cargo build --release -p objectiveai-mcp-cli \
@@ -82,8 +82,10 @@ if [ ! -f "$SRC" ]; then
 fi
 
 # ── Install ────────────────────────────────────────────────────────────
+# api/viewer/mcp land in <base>/bin/; only the cli sits at <base>/.
 
-mkdir -p "$INSTALL_DIR"
-cp "$SRC" "$INSTALL_DIR/$DST_NAME"
-chmod +x "$INSTALL_DIR/$DST_NAME"
-echo "Installed $INSTALL_DIR/$DST_NAME"
+BIN_DIR="$INSTALL_DIR/bin"
+mkdir -p "$BIN_DIR"
+cp "$SRC" "$BIN_DIR/$DST_NAME"
+chmod +x "$BIN_DIR/$DST_NAME"
+echo "Installed $BIN_DIR/$DST_NAME"

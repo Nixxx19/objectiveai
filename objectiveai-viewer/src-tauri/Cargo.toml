@@ -14,12 +14,6 @@ default = []
 cli = ["dep:objectiveai-cli"]
 cli-rustpython = ["cli", "objectiveai-cli/rustpython"]
 cli-systempython = ["cli", "objectiveai-cli/systempython"]
-cli-updater = ["cli", "objectiveai-cli/updater"]
-# Standalone-viewer auto-update from GitHub releases on startup. NOT in
-# default so the embedded-in-cli viewer build (which inherits default
-# features) stays minimal; the standalone release build opts in via
-# `--features updater` from install.sh + build-viewer-leg.
-updater = ["objectiveai-sdk/updater"]
 
 [dependencies]
 axum = "0.8.8"

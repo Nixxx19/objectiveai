@@ -162,6 +162,10 @@ enum Commands {
         #[command(subcommand)]
         command: plugins::Commands,
     },
+    /// Update the cli and all managed binaries (api, viewer, mcp) from
+    /// the latest GitHub release. Refuses to proceed unless all four
+    /// expected assets are present for the host triple.
+    Update,
     /// Run a plugin from `~/.objectiveai/plugins/`. First element is
     /// the plugin name; the rest are forwarded as the plugin's argv.
     /// Captured via clap's external-subcommand mechanism — any first
@@ -188,6 +192,7 @@ impl Commands {
             Commands::Logs { command } => command.handle(cli_config, handle).await,
             Commands::Instructions { command } => command.handle(cli_config, handle).await,
             Commands::Plugins { command } => command.handle(cli_config, handle).await,
+            Commands::Update => crate::updater::run_update(cli_config, handle).await,
             Commands::External(args) => crate::plugins::dispatch_external(args, cli_config, handle).await,
         }
     }

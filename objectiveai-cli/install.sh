@@ -144,7 +144,7 @@ fi
 # ── Build CLI ──────────────────────────────────────────────────────────
 
 # Assemble feature list
-FEATURES="rustpython,systempython,updater"
+FEATURES="rustpython,systempython"
 if [ "$NO_VIEWER" = "0" ]; then
   FEATURES="$FEATURES,viewer"
 fi
@@ -180,11 +180,15 @@ write_env_file() {
 #!/bin/sh
 # objectiveai shell setup. Source this file from your shell rc, or run
 #   . "$HOME/.objectiveai/env"
-# to put `objectiveai` on PATH for the current shell.
+# to put the objectiveai binaries on PATH for the current shell.
 
 case ":${PATH}:" in
     *:"$HOME/.objectiveai":*) ;;
     *) export PATH="$HOME/.objectiveai:$PATH" ;;
+esac
+case ":${PATH}:" in
+    *:"$HOME/.objectiveai/bin":*) ;;
+    *) export PATH="$HOME/.objectiveai/bin:$PATH" ;;
 esac
 EOF
 }
@@ -206,13 +210,21 @@ write_env_file
 case "$PLATFORM" in
   windows)
     INSTALL_DIR_WIN="$(cygpath -w "$INSTALL_DIR")"
+    BIN_DIR_WIN="$(cygpath -w "$INSTALL_DIR/bin")"
     CURRENT_PATH=$(powershell.exe -NoProfile -Command "[Environment]::GetEnvironmentVariable('Path', 'User')" 2>/dev/null | tr -d '\r')
-    if echo "$CURRENT_PATH" | grep -qiF '.objectiveai'; then
-      echo "PATH already contains $INSTALL_DIR_WIN"
-    else
+    NEED_PREPEND=""
+    if ! echo "$CURRENT_PATH" | grep -qiF "$INSTALL_DIR_WIN"; then
+      NEED_PREPEND="$INSTALL_DIR_WIN;"
+    fi
+    if ! echo "$CURRENT_PATH" | grep -qiF "$BIN_DIR_WIN"; then
+      NEED_PREPEND="$NEED_PREPEND$BIN_DIR_WIN;"
+    fi
+    if [ -n "$NEED_PREPEND" ]; then
       powershell.exe -NoProfile -Command \
-        "[Environment]::SetEnvironmentVariable('Path', '$INSTALL_DIR_WIN;' + [Environment]::GetEnvironmentVariable('Path', 'User'), 'User')" 2>/dev/null
-      echo "Added $INSTALL_DIR_WIN to user PATH (restart cmd/PowerShell to use it)."
+        "[Environment]::SetEnvironmentVariable('Path', '$NEED_PREPEND' + [Environment]::GetEnvironmentVariable('Path', 'User'), 'User')" 2>/dev/null
+      echo "Added $NEED_PREPEND to user PATH (restart cmd/PowerShell to use it)."
+    else
+      echo "PATH already contains $INSTALL_DIR_WIN and $BIN_DIR_WIN"
     fi
     # Also wire up Git Bash / MSYS via the env file.
     if [ -f "$HOME/.bashrc" ]; then

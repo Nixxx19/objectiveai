@@ -15,12 +15,6 @@ publish = true
 [features]
 default = ["viewer", "rustpython", "systempython"]
 viewer = []
-# Auto-update from GitHub releases on startup. Opt-in — install.sh
-# and the build-cli-leg CI composite enable it explicitly so the
-# shipped GitHub-Release binary still self-updates; cargo install
-# and library consumers don't carry the updater unless they ask.
-# Forwards to the shared updater in objectiveai-sdk.
-updater = ["objectiveai-sdk/updater"]
 rustpython = ["dep:rustpython"]
 systempython = []
 
@@ -43,6 +37,7 @@ uuid = { version = "1.22", features = ["v4"] }
 base62 = "2.2.4"
 base64 = "0.22.1"
 futures = "0.3.32"
+semver = "1.0.28"
 
 [dev-dependencies]
 wiremock = "0.6"

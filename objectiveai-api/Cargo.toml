@@ -27,11 +27,6 @@ include = [
 default = ["orchestrator-bollard"]
 sqlite-persistent-cache = ["dep:rusqlite"]
 orchestrator-bollard = ["dep:bollard", "dep:tar"]
-# Auto-update from GitHub releases on startup. Opt-in — install.sh and
-# the build-api-leg CI composite enable it explicitly so the shipped
-# `objectiveai-api` binary self-updates; cargo install and library
-# consumers don't carry the updater unless they ask.
-updater = ["objectiveai-sdk/updater"]
 
 [dependencies]
 objectiveai-sdk = { path = "../objectiveai-sdk-rs", version = "2.0.10", default-features = false, features = ["http", "mcp"] }
