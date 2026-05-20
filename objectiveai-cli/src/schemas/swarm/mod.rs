@@ -75,7 +75,8 @@ impl Commands {
             Commands::List => {
                 const NAMES: &[&str] = &["GetSwarmResponse", "InlineSwarm", "InlineSwarmBase", "InlineSwarmBaseOrRemote", "InlineSwarmBaseOrRemoteCommitOptional", "ListSwarmResponse", "ListSwarmsRequest", "ListSwarmsSource", "RemoteSwarm", "RemoteSwarmBase", "Swarm", "SwarmBase", "UsageSwarmResponse"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schemas {
                             schemas: NAMES.iter().map(|s| s.to_string()).collect(),
                         },
@@ -88,7 +89,8 @@ impl Commands {
                     include_str!("../../../../objectiveai-json-schema/swarm.GetSwarmResponse.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -99,7 +101,8 @@ impl Commands {
                     include_str!("../../../../objectiveai-json-schema/swarm.InlineSwarm.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -110,7 +113,8 @@ impl Commands {
                     include_str!("../../../../objectiveai-json-schema/swarm.InlineSwarmBase.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -121,7 +125,8 @@ impl Commands {
                     include_str!("../../../../objectiveai-json-schema/swarm.InlineSwarmBaseOrRemote.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -132,7 +137,8 @@ impl Commands {
                     include_str!("../../../../objectiveai-json-schema/swarm.InlineSwarmBaseOrRemoteCommitOptional.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -143,7 +149,8 @@ impl Commands {
                     include_str!("../../../../objectiveai-json-schema/swarm.ListSwarmResponse.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -154,7 +161,8 @@ impl Commands {
                     include_str!("../../../../objectiveai-json-schema/swarm.ListSwarmsRequest.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -165,7 +173,8 @@ impl Commands {
                     include_str!("../../../../objectiveai-json-schema/swarm.ListSwarmsSource.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -176,7 +185,8 @@ impl Commands {
                     include_str!("../../../../objectiveai-json-schema/swarm.RemoteSwarm.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -187,7 +197,8 @@ impl Commands {
                     include_str!("../../../../objectiveai-json-schema/swarm.RemoteSwarmBase.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -198,7 +209,8 @@ impl Commands {
                     include_str!("../../../../objectiveai-json-schema/swarm.Swarm.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -209,7 +221,8 @@ impl Commands {
                     include_str!("../../../../objectiveai-json-schema/swarm.SwarmBase.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -220,7 +233,8 @@ impl Commands {
                     include_str!("../../../../objectiveai-json-schema/swarm.UsageSwarmResponse.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;

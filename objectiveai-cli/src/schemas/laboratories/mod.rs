@@ -23,7 +23,8 @@ impl Commands {
             Commands::List => {
                 const NAMES: &[&str] = &["executions"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schemas {
                             schemas: NAMES.iter().map(|s| s.to_string()).collect(),
                         },

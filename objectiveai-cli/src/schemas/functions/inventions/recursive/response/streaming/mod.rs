@@ -39,7 +39,8 @@ impl Commands {
             Commands::List => {
                 const NAMES: &[&str] = &["FunctionInventionChunk", "FunctionInventionRecursiveChunk", "InnerError", "Object"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schemas {
                             schemas: NAMES.iter().map(|s| s.to_string()).collect(),
                         },
@@ -52,7 +53,8 @@ impl Commands {
                     include_str!("../../../../../../../../objectiveai-json-schema/functions.inventions.recursive.response.streaming.FunctionInventionChunk.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -63,7 +65,8 @@ impl Commands {
                     include_str!("../../../../../../../../objectiveai-json-schema/functions.inventions.recursive.response.streaming.FunctionInventionRecursiveChunk.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -74,7 +77,8 @@ impl Commands {
                     include_str!("../../../../../../../../objectiveai-json-schema/functions.inventions.recursive.response.streaming.InnerError.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -85,7 +89,8 @@ impl Commands {
                     include_str!("../../../../../../../../objectiveai-json-schema/functions.inventions.recursive.response.streaming.Object.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;

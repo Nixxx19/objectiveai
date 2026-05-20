@@ -71,7 +71,8 @@ impl Commands {
             Commands::List => {
                 const NAMES: &[&str] = &["Agent", "AgentBase", "Continuation", "OutputMode", "Provider", "ProviderQuantization", "Reasoning", "ReasoningEffort", "ReasoningSummaryVerbosity", "Stop", "Upstream", "Verbosity"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schemas {
                             schemas: NAMES.iter().map(|s| s.to_string()).collect(),
                         },
@@ -84,7 +85,8 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.Agent.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -95,7 +97,8 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.AgentBase.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -106,7 +109,8 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.Continuation.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -117,7 +121,8 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.OutputMode.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -128,7 +133,8 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.Provider.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -139,7 +145,8 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.ProviderQuantization.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -150,7 +157,8 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.Reasoning.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -161,7 +169,8 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.ReasoningEffort.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -172,7 +181,8 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.ReasoningSummaryVerbosity.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -183,7 +193,8 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.Stop.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -194,7 +205,8 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.Upstream.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -205,7 +217,8 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/agent.openrouter.Verbosity.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification { agent_id: None,
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;

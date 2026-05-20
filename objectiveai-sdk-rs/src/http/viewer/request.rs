@@ -27,8 +27,11 @@ pub struct AgentCompletionCreateParams {
 #[schemars(rename = "http.viewer.AgentCompletionRequest")]
 #[serde(untagged)]
 pub enum AgentCompletionRequest {
+    #[schemars(title = "Begin")]
     Begin(AgentCompletionCreateParams),
+    #[schemars(title = "Continue")]
     Continue(crate::agent::completions::response::streaming::AgentCompletionChunk),
+    #[schemars(title = "Error")]
     Error(ResponseError),
 }
 
@@ -44,8 +47,11 @@ pub struct FunctionExecutionCreateParams {
 #[schemars(rename = "http.viewer.FunctionExecutionRequest")]
 #[serde(untagged)]
 pub enum FunctionExecutionRequest {
+    #[schemars(title = "Begin")]
     Begin(FunctionExecutionCreateParams),
+    #[schemars(title = "Continue")]
     Continue(crate::functions::executions::response::streaming::FunctionExecutionChunk),
+    #[schemars(title = "Error")]
     Error(ResponseError),
 }
 
@@ -61,8 +67,11 @@ pub struct FunctionInventionRecursiveCreateParams {
 #[schemars(rename = "http.viewer.FunctionInventionRecursiveRequest")]
 #[serde(untagged)]
 pub enum FunctionInventionRecursiveRequest {
+    #[schemars(title = "Begin")]
     Begin(FunctionInventionRecursiveCreateParams),
+    #[schemars(title = "Continue")]
     Continue(crate::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk),
+    #[schemars(title = "Error")]
     Error(ResponseError),
 }
 
@@ -78,8 +87,11 @@ pub struct LaboratoryExecutionCreateParams {
 #[schemars(rename = "http.viewer.LaboratoryExecutionRequest")]
 #[serde(untagged)]
 pub enum LaboratoryExecutionRequest {
+    #[schemars(title = "Begin")]
     Begin(LaboratoryExecutionCreateParams),
+    #[schemars(title = "Continue")]
     Continue(crate::laboratories::executions::response::streaming::LaboratoryExecutionChunk),
+    #[schemars(title = "Error")]
     Error(ResponseError),
 }
 
@@ -87,8 +99,12 @@ pub enum LaboratoryExecutionRequest {
 #[schemars(rename = "http.viewer.Request")]
 #[serde(untagged)]
 pub enum Request {
+    #[schemars(title = "AgentCompletion")]
     AgentCompletion(AgentCompletionRequest),
+    #[schemars(title = "FunctionExecution")]
     FunctionExecution(FunctionExecutionRequest),
+    #[schemars(title = "FunctionInventionRecursive")]
     FunctionInventionRecursive(FunctionInventionRecursiveRequest),
+    #[schemars(title = "LaboratoryExecution")]
     LaboratoryExecution(LaboratoryExecutionRequest),
 }
