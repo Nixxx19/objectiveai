@@ -7,7 +7,7 @@ import {
   type ViewerEvent,
   FilesystemConfigFavoriteSchema,
   type FilesystemConfigFavorite,
-  AgentsFavoritesChangedNotificationSchema,
+  AgentFavoritesChangedNotificationSchema,
 } from "@objectiveai/sdk";
 
 // Wire shape of the `agents favorites config get` cli-output
@@ -79,7 +79,7 @@ export function useFavoriteAgents() {
       const parsed = ViewerEventSchema.safeParse(ev.payload);
       if (!parsed.success || parsed.data.type !== "inbound") return;
       if (parsed.data.sub_type !== "agents_favorites_changed") return;
-      AgentsFavoritesChangedNotificationSchema.safeParse(parsed.data.value);
+      AgentFavoritesChangedNotificationSchema.safeParse(parsed.data.value);
       refetch().catch((e) => setError(String(e)));
     }).then((fn) => {
       unlisten = fn;
