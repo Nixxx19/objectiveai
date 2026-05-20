@@ -342,7 +342,21 @@ async fn handle_initialize(
         // resulting `(Connection, headers)` set encodes into a
         // brand-new id which we echo back in the response header +
         // SSE-deliver the `InitializeResult`.
-        let connections_with_headers = match crate::upstream::connect_all_fresh(&state.client, headers).await {
+        // Capture the caller-supplied agent id at session-open. The
+        // value rides inside the encrypted session id we mint below,
+        // is recoverable from `session.payload.agent_id` on every
+        // subsequent call, AND gets stamped on every outbound request
+        // each upstream connection makes (via connect_all_fresh below).
+        let agent_id = headers
+            .get("X-OBJECTIVEAI-AGENT-ID")
+            .or_else(|| headers.get("OBJECTIVEAI-AGENT-ID"))
+            .and_then(|v| v.to_str().ok())
+            .map(str::to_owned);
+        let connections_with_headers = match crate::upstream::connect_all_fresh(
+            &state.client,
+            headers,
+            agent_id.as_deref(),
+        ).await {
             Ok(pairs) => pairs,
             Err(e @ (BadInit::NotUtf8 { .. } | BadInit::NotJson { .. })) => {
                 return invalid_request_response(request.id, e.to_string());
@@ -351,15 +365,6 @@ async fn handle_initialize(
                 return internal_error_response(request.id, e.to_string());
             }
         };
-        // Capture the caller-supplied agent id at session-open. The
-        // value rides inside the encrypted session id we mint below
-        // and is recoverable from `session.payload.agent_id` on every
-        // subsequent call to this session.
-        let agent_id = headers
-            .get("X-OBJECTIVEAI-AGENT-ID")
-            .or_else(|| headers.get("OBJECTIVEAI-AGENT-ID"))
-            .and_then(|v| v.to_str().ok())
-            .map(str::to_owned);
         let session_id = state.sessions.add(connections_with_headers, agent_id);
         ok_response_fresh_sse(request.id, session_id)
     }
