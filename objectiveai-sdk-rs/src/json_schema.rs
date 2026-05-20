@@ -499,6 +499,21 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::viewer::Event),
         ]);
     }
+    #[cfg(feature = "http")]
+    {
+        schemas.extend([
+            schemars::schema_for!(crate::http::viewer::ResponseError),
+            schemars::schema_for!(crate::http::viewer::AgentCompletionCreateParams),
+            schemars::schema_for!(crate::http::viewer::AgentCompletionRequest),
+            schemars::schema_for!(crate::http::viewer::FunctionExecutionCreateParams),
+            schemars::schema_for!(crate::http::viewer::FunctionExecutionRequest),
+            schemars::schema_for!(crate::http::viewer::FunctionInventionRecursiveCreateParams),
+            schemars::schema_for!(crate::http::viewer::FunctionInventionRecursiveRequest),
+            schemars::schema_for!(crate::http::viewer::LaboratoryExecutionCreateParams),
+            schemars::schema_for!(crate::http::viewer::LaboratoryExecutionRequest),
+            schemars::schema_for!(crate::http::viewer::Request),
+        ]);
+    }
     schemas
 }
 

@@ -20,6 +20,7 @@ pub struct Error {
     /// field is set; producers leave this `None` and let the handle
     /// fill it. Serde-skipped when `None`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub agent_id: Option<String>,
 }
 

@@ -20,5 +20,6 @@ use serde::{Deserialize, Serialize};
 pub struct Notification<T> {
     pub value: T,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub agent_id: Option<String>,
 }
