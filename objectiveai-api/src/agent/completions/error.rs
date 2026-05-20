@@ -33,6 +33,18 @@ pub enum Error {
         error: objectiveai_sdk::mcp::Error,
     },
 
+    #[error("MCP enqueue_notifications error ({url}): {error}")]
+    McpEnqueueNotifications {
+        url: String,
+        error: objectiveai_sdk::mcp::Error,
+    },
+
+    #[error("agent completion not running for response_id: {0}")]
+    NotifyResponseIdNotFound(String),
+
+    #[error("agent has no MCP connection — notify is not deliverable (response_id: {0})")]
+    NotifyNoMcp(String),
+
     #[error("MCP call_tool error: {0}")]
     McpCallTool(objectiveai_sdk::mcp::Error),
 
@@ -81,6 +93,9 @@ impl objectiveai_sdk::error::StatusError for Error {
             Self::McpListTools { .. } => 502,
             Self::McpDrainNotifications { .. } => 502,
             Self::McpQueuedNotifications { .. } => 502,
+            Self::McpEnqueueNotifications { .. } => 502,
+            Self::NotifyResponseIdNotFound(_) => 404,
+            Self::NotifyNoMcp(_) => 400,
             Self::McpCallTool(_) => 502,
             Self::McpProxyBootstrap(_) => 500,
             Self::Fetch(e) => e.code,

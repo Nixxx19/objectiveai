@@ -257,6 +257,23 @@ impl Connection {
         self.inner.has_pending_notifications().await
     }
 
+    /// `POST <self.url>/notify` against the ObjectiveAI MCP proxy.
+    /// Appends `blocks` to the proxy's pending-notifications queue for
+    /// this session; they surface as a user message on the next
+    /// `tools/call` response (wrapped in a `<system-reminder>` block)
+    /// or as the head of the next agent turn when drained between turns.
+    ///
+    /// Mirror of [`Connection::drain_notifications`] / [`Connection::has_pending_notifications`]
+    /// for the inbound side. A 404 from the proxy means the session is
+    /// gone — surfaced as `SessionExpired` so callers can distinguish
+    /// "session lost" from "delivery failed" at the use site.
+    pub async fn enqueue_notifications(
+        &self,
+        blocks: &[super::tool::ContentBlock],
+    ) -> Result<(), super::Error> {
+        self.inner.enqueue_notifications(blocks).await
+    }
+
     /// Reads a resource from the upstream server.
     pub async fn read_resource(
         &self,
@@ -802,6 +819,53 @@ impl ConnectionInner {
             .json::<Vec<super::tool::ContentBlock>>()
             .await
             .map_err(|source| super::Error::Request { url, source })
+    }
+
+    /// `POST <self.url>/notify` against the ObjectiveAI MCP proxy.
+    /// Appends `blocks` to the proxy's pending-notifications queue for
+    /// this session. Single-attempt — the caller decides whether to
+    /// retry. A 404 (session unknown) surfaces as `SessionExpired`
+    /// rather than `Ok(())` because the caller is asking for delivery
+    /// and a lost session means delivery did not happen.
+    async fn enqueue_notifications(
+        &self,
+        blocks: &[super::tool::ContentBlock],
+    ) -> Result<(), super::Error> {
+        if self.mock {
+            return Ok(());
+        }
+
+        let url = format!("{}/notify", self.url.trim_end_matches('/'));
+        let mut request = self
+            .http_client
+            .post(&url)
+            .timeout(self.call_timeout)
+            .header("Content-Type", "application/json")
+            .header("Accept", "application/json")
+            .json(blocks);
+        for (name, value) in &self.headers {
+            request = request.header(name, value);
+        }
+        // Mcp-Session-Id applied last so a same-named entry in `headers`
+        // can never override the connection's own session id — matches
+        // the invariant in `Self::drain_notifications`.
+        request = request.header("Mcp-Session-Id", &self.session_id);
+
+        let response = request.send().await.map_err(|source| super::Error::Request {
+            url: url.clone(),
+            source,
+        })?;
+
+        if response.status() == reqwest::StatusCode::NOT_FOUND {
+            return Err(super::Error::SessionExpired { url });
+        }
+        if !response.status().is_success() {
+            let code = response.status();
+            let body = response.text().await.unwrap_or_default();
+            return Err(super::Error::BadStatus { url, code, body });
+        }
+
+        Ok(())
     }
 
     /// `GET <self.url>/notify/queued` against the ObjectiveAI MCP proxy.

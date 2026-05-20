@@ -51,6 +51,33 @@ where
     Ok(())
 }
 
+/// Variant of [`call_unary`] for endpoints whose API handler returns
+/// an empty body on success (2xx with no JSON). Emits a single
+/// `null` notification so consumers still see a "done" line.
+pub async fn call_unary_no_response<Req>(
+    cli_config: &crate::Config,
+    handle: &Handle,
+    method: reqwest::Method,
+    path: &str,
+    body: Option<Req>,
+    agent_id_arg: Option<String>,
+) -> Result<(), crate::error::Error>
+where
+    Req: serde::Serialize + Send,
+{
+    let (_client, mut config) = crate::config::read(cli_config).await?;
+    let mut http = super::client::build_http_client(&mut config);
+    apply_agent_id_arg(&mut http, agent_id_arg);
+    http.send_unary_no_response(method, path, body).await?;
+    Output::<serde_json::Value>::Notification(Notification {
+        agent_id: None,
+        value: serde_json::Value::Null,
+    })
+    .emit(handle)
+    .await;
+    Ok(())
+}
+
 pub async fn call_streaming<Req, Chunk>(
     cli_config: &crate::Config,
     handle: &Handle,
