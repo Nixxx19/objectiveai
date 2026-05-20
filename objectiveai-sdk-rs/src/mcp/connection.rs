@@ -927,8 +927,7 @@ impl ConnectionInner {
         super::Error,
     > {
         use crate::agent::completions::message::{
-            File, ImageUrl, InputAudio, RichContent, RichContentPart,
-            ToolMessage,
+            File, ImageUrl, RichContentPart, ToolMessage,
         };
         use super::shared::ResourceContentsUnion;
         use super::tool::ContentBlock;
@@ -947,16 +946,16 @@ impl ConnectionInner {
         /// Converts a `ResourceContentsUnion` into one or more rich content
         /// parts. Text resources become text parts. Blob resources with an
         /// image MIME type become image_url parts (data URL); all other blobs
-        /// become file parts.
+        /// become file parts. This conversion is connection-local (the
+        /// `ResourceContentsUnion` shape doesn't exist outside the proxy
+        /// fetch path), so it doesn't go through a generic `From` impl.
         fn resource_contents_to_part(
-            contents: &ResourceContentsUnion,
+            contents: ResourceContentsUnion,
         ) -> RichContentPart {
             match contents {
-                ResourceContentsUnion::Text(text) => {
-                    RichContentPart::Text {
-                        text: text.text.clone(),
-                    }
-                }
+                ResourceContentsUnion::Text(text) => RichContentPart::Text {
+                    text: text.text,
+                },
                 ResourceContentsUnion::Blob(blob) => {
                     let mime = blob
                         .base
@@ -986,7 +985,7 @@ impl ConnectionInner {
 
                         RichContentPart::File {
                             file: File {
-                                file_data: Some(blob.blob.clone()),
+                                file_data: Some(blob.blob),
                                 filename,
                                 file_id: None,
                                 file_url: None,
@@ -999,69 +998,42 @@ impl ConnectionInner {
 
         let mut parts: Vec<RichContentPart> = Vec::new();
 
-        for block in &result.content {
+        for block in result.content {
             match block {
-                ContentBlock::Text(text) => {
-                    parts.push(RichContentPart::Text {
-                        text: text.text.clone(),
-                    });
+                // Text / Image / Audio go through the shared
+                // `From<ContentBlock> for RichContentPart` impl so
+                // every call site converges on one mapping.
+                ContentBlock::Text(_)
+                | ContentBlock::Image(_)
+                | ContentBlock::Audio(_) => {
+                    parts.push(block.into());
                 }
-                ContentBlock::Image(image) => {
-                    parts.push(RichContentPart::ImageUrl {
-                        image_url: ImageUrl {
-                            url: format!(
-                                "data:{};base64,{}",
-                                image.mime_type, image.data
-                            ),
-                            detail: None,
-                        },
-                    });
-                }
-                ContentBlock::Audio(audio) => {
-                    parts.push(RichContentPart::InputAudio {
-                        input_audio: InputAudio {
-                            data: audio.data.clone(),
-                            format: audio.mime_type.clone(),
-                        },
-                    });
-                }
+                // EmbeddedResource needs connection-local resolution
+                // into its inlined content shape — can't go through
+                // the stateless `From` impl (which would JSON-text-
+                // fallback instead of inlining).
                 ContentBlock::EmbeddedResource(embedded) => {
-                    parts.push(resource_contents_to_part(
-                        &embedded.resource,
-                    ));
+                    parts.push(resource_contents_to_part(embedded.resource));
                 }
+                // ResourceLink: when the URI is known, fetch + inline;
+                // otherwise delegate to `From<ContentBlock>` which
+                // text-falls-back to the JSON-serialized link.
                 ContentBlock::ResourceLink(link) => {
                     if known_resource_uris.contains(&link.uri) {
-                        // Fetch the resource and inline its contents.
                         let read_result =
                             self.read_resource(&link.uri).await?;
-                        for contents in &read_result.contents {
-                            parts.push(
-                                resource_contents_to_part(contents),
-                            );
+                        for contents in read_result.contents {
+                            parts.push(resource_contents_to_part(contents));
                         }
                     } else {
-                        // Not a known resource; serialize as JSON text.
-                        parts.push(RichContentPart::Text {
-                            text: serde_json::to_string(link)
-                                .unwrap_or_default(),
-                        });
+                        parts.push(ContentBlock::ResourceLink(link).into());
                     }
                 }
             }
         }
 
-        let content = match parts.len() {
-            0 => RichContent::Text(String::new()),
-            1 => match parts.remove(0) {
-                RichContentPart::Text { text } => RichContent::Text(text),
-                other => RichContent::Parts(vec![other]),
-            },
-            _ => RichContent::Parts(parts),
-        };
-
         Ok(ToolMessage {
-            content,
+            content: parts.into(),
             tool_call_id,
         })
     }

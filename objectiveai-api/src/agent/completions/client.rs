@@ -1388,72 +1388,18 @@ fn extract_callable_tool_calls(
 /// notifications are semantically a user message that arrived between
 /// turns, so they take the user-message shape directly.
 ///
-/// Mapping:
-/// - `Text` → text part
-/// - `Image` → image_url part (data URL, matching `call_tool_as_message`)
-/// - `Audio` → input_audio part
-/// - `ResourceLink` / `EmbeddedResource` → JSON-serialized text part
-///   (we don't have the proxy's resource-list context here; richer
-///   inlining lives in `call_tool_as_message`)
-///
-/// Empty input is the caller's responsibility — the caller checks
-/// `!blocks.is_empty()` before invoking.
+/// Delegates to the SDK's [`From<Vec<ContentBlock>> for RichContent`]
+/// impl — same mapping (text / image-data-URL / audio direct;
+/// `ResourceLink` / `EmbeddedResource` → JSON text), same collapse
+/// of all-text inputs into a single `RichContent::Text`. Empty input
+/// is the caller's responsibility.
 fn build_drain_user_message(
     blocks: Vec<objectiveai_sdk::mcp::tool::ContentBlock>,
 ) -> objectiveai_sdk::agent::completions::message::UserMessage {
-    use objectiveai_sdk::agent::completions::message::{
-        ImageUrl, InputAudio, RichContent, RichContentPart, UserMessage,
-    };
-    use objectiveai_sdk::mcp::tool::ContentBlock;
-
-    let mut parts: Vec<RichContentPart> = Vec::with_capacity(blocks.len());
-    for block in &blocks {
-        match block {
-            ContentBlock::Text(text) => parts.push(RichContentPart::Text {
-                text: text.text.clone(),
-            }),
-            ContentBlock::Image(image) => parts.push(RichContentPart::ImageUrl {
-                image_url: ImageUrl {
-                    url: format!("data:{};base64,{}", image.mime_type, image.data),
-                    detail: None,
-                },
-            }),
-            ContentBlock::Audio(audio) => parts.push(RichContentPart::InputAudio {
-                input_audio: InputAudio {
-                    data: audio.data.clone(),
-                    format: audio.mime_type.clone(),
-                },
-            }),
-            ContentBlock::ResourceLink(_) | ContentBlock::EmbeddedResource(_) => {
-                parts.push(RichContentPart::Text {
-                    text: serde_json::to_string(block).unwrap_or_default(),
-                });
-            }
-        }
+    objectiveai_sdk::agent::completions::message::UserMessage {
+        content: blocks.into(),
+        name: None,
     }
-
-    // Collapse to plain `Text` when every part is text — matches the
-    // shape `call_tool_as_message` lands on and lets `prepare()` fold
-    // the message into a trailing user message in the conversation if
-    // one is present.
-    let all_text = parts
-        .iter()
-        .all(|p| matches!(p, RichContentPart::Text { .. }));
-    let content = if all_text {
-        let joined = parts
-            .into_iter()
-            .filter_map(|p| match p {
-                RichContentPart::Text { text } => Some(text),
-                _ => None,
-            })
-            .collect::<Vec<_>>()
-            .join("\n\n");
-        RichContent::Text(joined)
-    } else {
-        RichContent::Parts(parts)
-    };
-
-    UserMessage { content, name: None }
 }
 
 /// Builds an `AgentCompletionChunk` containing a single tool-response message.
