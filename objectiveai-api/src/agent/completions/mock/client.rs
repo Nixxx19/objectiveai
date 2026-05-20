@@ -371,6 +371,7 @@ impl UpstreamClient<objectiveai_sdk::agent::mock::Agent, objectiveai_sdk::agent:
                         upstream: objectiveai_sdk::agent::Upstream::Mock,
                         error: None,
                         continuation: None,
+                        messages_queued: None,
                     });
                 }
 
@@ -410,6 +411,7 @@ impl UpstreamClient<objectiveai_sdk::agent::mock::Agent, objectiveai_sdk::agent:
                                 upstream: objectiveai_sdk::agent::Upstream::Mock,
                                 error: None,
                                 continuation: None,
+                                messages_queued: None,
                             });
                         }
                     }
@@ -473,6 +475,7 @@ impl UpstreamClient<objectiveai_sdk::agent::mock::Agent, objectiveai_sdk::agent:
                                     upstream: objectiveai_sdk::agent::Upstream::Mock,
                                     error: None,
                                     continuation: None,
+                                    messages_queued: None,
                                 });
                             }
                         }

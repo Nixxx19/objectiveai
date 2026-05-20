@@ -243,6 +243,20 @@ impl Connection {
         self.inner.drain_notifications().await
     }
 
+    /// Non-draining peek at the proxy's `pending_notifications` queue
+    /// via `GET /notify/queued`. Returns `true` iff the queue holds at
+    /// least one block. Companion to [`Connection::drain_notifications`]
+    /// for callers that want to know whether queued blocks exist
+    /// without consuming them.
+    ///
+    /// A 404 from the proxy (session unknown — possible after a proxy
+    /// restart) is mapped to `Ok(false)` for the same reason as the
+    /// drain path: callers do not need to distinguish "no
+    /// notifications" from "lost session" at the use site.
+    pub async fn has_pending_notifications(&self) -> Result<bool, super::Error> {
+        self.inner.has_pending_notifications().await
+    }
+
     /// Reads a resource from the upstream server.
     pub async fn read_resource(
         &self,
@@ -786,6 +800,50 @@ impl ConnectionInner {
 
         response
             .json::<Vec<super::tool::ContentBlock>>()
+            .await
+            .map_err(|source| super::Error::Request { url, source })
+    }
+
+    /// `GET <self.url>/notify/queued` against the ObjectiveAI MCP proxy.
+    /// Non-draining peek — returns `true` iff the proxy's
+    /// pending-notifications queue for this session is non-empty.
+    /// A 404 (session unknown) is mapped to `Ok(false)` to match the
+    /// drain path's soft-fallback contract.
+    async fn has_pending_notifications(&self) -> Result<bool, super::Error> {
+        if self.mock {
+            return Ok(false);
+        }
+
+        let url = format!("{}/notify/queued", self.url.trim_end_matches('/'));
+        let mut request = self
+            .http_client
+            .get(&url)
+            .timeout(self.call_timeout)
+            .header("Accept", "application/json");
+        for (name, value) in &self.headers {
+            request = request.header(name, value);
+        }
+        // Mcp-Session-Id applied last so a same-named entry in `headers`
+        // can never override the connection's own session id — matches
+        // the invariant in `Self::drain_notifications`.
+        request = request.header("Mcp-Session-Id", &self.session_id);
+
+        let response = request.send().await.map_err(|source| super::Error::Request {
+            url: url.clone(),
+            source,
+        })?;
+
+        if response.status() == reqwest::StatusCode::NOT_FOUND {
+            return Ok(false);
+        }
+        if !response.status().is_success() {
+            let code = response.status();
+            let body = response.text().await.unwrap_or_default();
+            return Err(super::Error::BadStatus { url, code, body });
+        }
+
+        response
+            .json::<bool>()
             .await
             .map_err(|source| super::Error::Request { url, source })
     }
@@ -1712,5 +1770,96 @@ mod drain_notifications_tests {
         let conn = Connection::new_mock("http://does-not-matter".into());
         let blocks = conn.drain_notifications().await.expect("mock ok");
         assert!(blocks.is_empty());
+    }
+}
+
+#[cfg(test)]
+mod has_pending_notifications_tests {
+    use super::*;
+    use serde_json::json;
+    use wiremock::matchers::{header, method, path};
+    use wiremock::{Mock, MockServer, ResponseTemplate};
+
+    /// Happy path: proxy returns `true` → Ok(true).
+    #[tokio::test]
+    async fn has_pending_notifications_true() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/notify/queued"))
+            .and(header("Mcp-Session-Id", ""))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!(true)))
+            .mount(&server)
+            .await;
+
+        let conn = Connection::new_for_test("t".into(), server.uri());
+        let got = conn.has_pending_notifications().await.expect("peek ok");
+        assert!(got);
+    }
+
+    /// Proxy returns `false` → Ok(false).
+    #[tokio::test]
+    async fn has_pending_notifications_false() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/notify/queued"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!(false)))
+            .mount(&server)
+            .await;
+
+        let conn = Connection::new_for_test("t".into(), server.uri());
+        let got = conn.has_pending_notifications().await.expect("peek ok");
+        assert!(!got);
+    }
+
+    /// 404 (proxy lost the session) → Ok(false). Same soft-fallback
+    /// contract as drain_notifications — peek must never abort a
+    /// request over a missing-session race.
+    #[tokio::test]
+    async fn has_pending_notifications_404_returns_false() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/notify/queued"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let conn = Connection::new_for_test("t".into(), server.uri());
+        let got = conn
+            .has_pending_notifications()
+            .await
+            .expect("404 → ok(false)");
+        assert!(!got);
+    }
+
+    /// Non-success / non-404 status propagates as `BadStatus`.
+    #[tokio::test]
+    async fn has_pending_notifications_5xx_returns_bad_status() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/notify/queued"))
+            .respond_with(ResponseTemplate::new(500).set_body_string("boom"))
+            .mount(&server)
+            .await;
+
+        let conn = Connection::new_for_test("t".into(), server.uri());
+        let err = conn
+            .has_pending_notifications()
+            .await
+            .expect_err("5xx → err");
+        match err {
+            super::super::Error::BadStatus { code, body, .. } => {
+                assert_eq!(code.as_u16(), 500);
+                assert_eq!(body, "boom");
+            }
+            other => panic!("expected BadStatus, got {other:?}"),
+        }
+    }
+
+    /// Mock connections never hit the network and always return false.
+    #[tokio::test]
+    async fn has_pending_notifications_mock_returns_false() {
+        let conn = Connection::new_mock("http://does-not-matter".into());
+        let got = conn.has_pending_notifications().await.expect("mock ok");
+        assert!(!got);
     }
 }

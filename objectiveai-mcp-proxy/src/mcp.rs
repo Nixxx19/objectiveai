@@ -690,6 +690,33 @@ pub async fn handle_notify_get(
     (StatusCode::OK, Json(blocks)).into_response()
 }
 
+/// `GET /notify/queued` — non-draining peek at the pending-notifications
+/// queue for the session named by `Mcp-Session-Id`. Returns a bare JSON
+/// boolean: `true` iff there is at least one queued block, `false`
+/// otherwise. The queue is left untouched, so subsequent
+/// `GET /notify` (drain) calls still see everything.
+///
+/// Used by the agent completions client to annotate the final chunk
+/// with `messages_queued` so the caller knows whether a follow-up
+/// continuation is needed to flush queued blocks.
+pub async fn handle_notify_queued_get(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Response {
+    let session_id = match extract_session_id(&headers) {
+        Ok(id) => id,
+        Err(resp) => return resp,
+    };
+
+    let session = match state.sessions.get(&session_id) {
+        Some(s) => s,
+        None => return unknown_session_response(),
+    };
+
+    let queued = session.has_pending_notifications().await;
+    (StatusCode::OK, Json(queued)).into_response()
+}
+
 async fn handle_resources_list(
     sessions: &SessionManager,
     headers: &HeaderMap,

@@ -1270,6 +1270,35 @@ where
                 ));
             }
 
+            // Peek the proxy's pending-notifications queue so the
+            // caller can tell whether a follow-up continuation would
+            // surface queued blocks. Only meaningful when a
+            // continuation is also being returned — this site always
+            // sets `continuation: Some(_)`, so the peek is
+            // unconditionally relevant here. A peek failure is
+            // surfaced via the chunk's `error` field only if no prior
+            // error already occupies it (the earlier failure is the
+            // more important signal).
+            let mut messages_queued: Option<bool> = None;
+            if let Some(conn) = &mcp_connection {
+                match conn.has_pending_notifications().await {
+                    Ok(true) => messages_queued = Some(true),
+                    Ok(false) => {}
+                    Err(error) => {
+                        if final_error.is_none() {
+                            final_error = Some(
+                                objectiveai_sdk::error::ResponseError::from(
+                                    &super::Error::McpQueuedNotifications {
+                                        url: conn.url.clone(),
+                                        error,
+                                    },
+                                ),
+                            );
+                        }
+                    }
+                }
+            }
+
             // Single site for usage, continuation, and error (if a continuation call failed).
             yield super::StreamItem::Chunk(
                 objectiveai_sdk::agent::completions::response::streaming::AgentCompletionChunk {
@@ -1279,6 +1308,7 @@ where
                     usage: Some(usage),
                     error: final_error,
                     continuation: Some(continuation_token),
+                    messages_queued,
                     ..Default::default()
                 },
             );
