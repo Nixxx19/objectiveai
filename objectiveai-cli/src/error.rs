@@ -2,7 +2,7 @@
 pub enum Error {
     #[error("{0}")]
     Filesystem(#[from] objectiveai_sdk::filesystem::Error),
-    #[error("{0}")]
+    #[error("{}", format_http_error(.0))]
     Http(#[from] objectiveai_sdk::HttpError),
     #[error("{0}")]
     ResponseError(objectiveai_sdk::error::ResponseError),
@@ -95,5 +95,31 @@ impl Error {
             }
             _ => self.to_string().into(),
         }
+    }
+}
+
+fn http_is_connect_failure(err: &objectiveai_sdk::HttpError) -> bool {
+    use objectiveai_sdk::HttpError as H;
+    let reqwest_err = match err {
+        H::StreamError(reqwest_eventsource::Error::Transport(e)) => e,
+        H::RequestError(e) | H::HttpError(e) => e,
+        _ => return false,
+    };
+    reqwest_err.is_connect() || reqwest_err.is_timeout()
+}
+
+fn format_http_error(err: &objectiveai_sdk::HttpError) -> String {
+    if http_is_connect_failure(err) {
+        format!(
+            "{err}\n\nhint: this looks like a connection failure to the configured API address. \
+to run an API locally:\n  \
+  1. configure address + port (use an available port):\n     \
+       objectiveai api address config set 127.0.0.1\n     \
+       objectiveai api port config set <port>\n  \
+  2. spawn the server:\n     \
+       objectiveai api spawn"
+        )
+    } else {
+        err.to_string()
     }
 }
