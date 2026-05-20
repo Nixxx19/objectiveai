@@ -1,3 +1,4 @@
+pub mod config;
 pub mod address;
 pub mod port;
 pub mod spawn;
@@ -7,6 +8,11 @@ use clap::Subcommand;
 
 #[derive(Subcommand)]
 pub enum Commands {
+    /// MCP configuration
+    Config {
+        #[command(subcommand)]
+        command: config::Commands,
+    },
     /// Local MCP server bind address
     Address {
         #[command(subcommand)]
@@ -32,6 +38,7 @@ impl Commands {
         handle: &objectiveai_sdk::cli::output::Handle,
     ) -> Result<(), crate::error::Error> {
         match self {
+            Commands::Config { command } => command.handle(cli_config, handle).await,
             Commands::Address { command } => command.handle(cli_config, handle).await,
             Commands::Port { command } => command.handle(cli_config, handle).await,
             Commands::Spawn => spawn::handle(cli_config, handle).await,
