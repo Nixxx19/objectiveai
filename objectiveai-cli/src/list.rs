@@ -65,7 +65,7 @@ where
             .collect();
         emit_items(items, &handle).await;
         Ok(())
-    }), false).await
+    })).await
 }
 
 /// Fetches from all sources with de-duplication via api::run.
@@ -125,7 +125,7 @@ where
 
         emit_items(items, &handle).await;
         Ok(())
-    }), false).await
+    })).await
 }
 
 // -- Pair variants (function-profile pairs) --
@@ -194,7 +194,7 @@ where
             .collect();
         emit_pair_items(items, &handle).await;
         Ok(())
-    }), false).await
+    })).await
 }
 
 /// Fetches pairs from all sources with de-duplication via api::run.
@@ -230,5 +230,5 @@ where
 
         emit_pair_items(items, &handle).await;
         Ok(())
-    }), false).await
+    })).await
 }

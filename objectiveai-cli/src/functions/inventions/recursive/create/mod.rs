@@ -237,6 +237,6 @@ impl Commands {
              })
             .emit(&handle).await;
             Ok(())
-        })), true).await
+        }))).await
     }
 }

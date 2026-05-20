@@ -63,7 +63,7 @@ impl Commands {
                     objectiveai_sdk::cli::output::Output::<Pair>::Notification(objectiveai_sdk::cli::output::Notification { value: Pair { pair } })
                         .emit(&handle).await;
                     Ok(())
-                }, false).await
+                }).await
             }
             Commands::List { source } => {
                 match source {

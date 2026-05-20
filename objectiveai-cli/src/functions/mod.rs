@@ -87,7 +87,7 @@ impl Commands {
                      })
                     .emit(&handle).await;
                     Ok(())
-                }, false).await
+                }).await
             }
             Commands::List { source } => {
                 use objectiveai_sdk::functions::request::ListFunctionsSource;

@@ -177,7 +177,6 @@ pub async fn handle(
             .emit(&handle).await;
             Ok(())
         })),
-        true,
     )
     .await
 }

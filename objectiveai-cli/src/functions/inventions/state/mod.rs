@@ -27,7 +27,7 @@ impl Commands {
                      })
                     .emit(&handle).await;
                     Ok(())
-                }, false).await
+                }).await
             }
         }
     }
