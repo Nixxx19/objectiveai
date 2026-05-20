@@ -1,14 +1,11 @@
 //! `objectiveai viewer send <path> <body>` — POST a JSON body to the
 //! viewer's HTTP server and await the response.
 //!
-//! Branches on `config.viewer().get_mode()`:
-//! - **Remote**: reads `api.headers.x_viewer_address` and
-//!   `api.headers.x_viewer_signature` from the filesystem config and POSTs
-//!   there. Same source the api server's viewer client uses.
-//! - **Local**: spawns the embedded viewer subprocess (via the same
-//!   helpers `api/run.rs` uses), POSTs to its bound address with the
-//!   locally-configured signature, then kills the subprocess — matching
-//!   the spawn-kill lifecycle at `api/run.rs:97-99`.
+//! The cli treats the viewer as externally running. Resolves the viewer
+//! address from the env (`VIEWER_ADDRESS`) first, then falls back to
+//! `viewer.address` + `viewer.port` composed via the same `compose_url`
+//! helper `api/client.rs` uses. Same chain for `VIEWER_SIGNATURE` →
+//! `viewer.signature`.
 //!
 //! Bypasses the SDK's `http::viewer::Client` because that client is
 //! fire-and-forget — this command needs a synchronous send so the caller
@@ -41,38 +38,22 @@ pub async fn run(
     let parsed: serde_json::Value = serde_json::from_str(body)
         .map_err(|e| crate::error::Error::ViewerBodyJsonParse(e.to_string()))?;
 
-    let mode = config.viewer().get_mode();
-    match mode {
-        objectiveai_sdk::filesystem::config::ViewerMode::Remote => {
-            let address = config
-                .api()
-                .headers()
-                .get_x_viewer_address()
-                .ok_or(crate::error::Error::ViewerAddressNotConfigured)?
-                .to_string();
-            let signature = config
-                .api()
-                .headers()
-                .get_x_viewer_signature()
-                .map(str::to_string);
-            do_post(&address, path, signature.as_deref(), &parsed, handle).await
-        }
-        #[cfg(feature = "viewer")]
-        objectiveai_sdk::filesystem::config::ViewerMode::Local => {
-            let (secret, _from_env, signature) =
-                crate::api::resolve_viewer_secret(&mut config)?;
-            let (mut child, viewer_addr_str) =
-                crate::api::spawn_viewer(secret.as_deref(), &mut config).await?;
-            let result =
-                do_post(&viewer_addr_str, path, signature.as_deref(), &parsed, handle).await;
-            let _ = child.kill().await;
-            result
-        }
-        #[cfg(not(feature = "viewer"))]
-        objectiveai_sdk::filesystem::config::ViewerMode::Local => {
-            Err(crate::error::Error::LocalViewerFeatureDisabled)
-        }
-    }
+    // Resolve viewer address: env → viewer.address+port composed via
+    // compose_url (same scheme-normalization rules as api/client.rs).
+    let address = std::env::var("VIEWER_ADDRESS")
+        .ok()
+        .or_else(|| {
+            let viewer = config.viewer();
+            crate::api::client::compose_url(viewer.get_address(), viewer.get_port())
+        })
+        .ok_or(crate::error::Error::ViewerAddressNotConfigured)?;
+
+    // Resolve viewer signature: env → viewer.signature.
+    let signature = std::env::var("VIEWER_SIGNATURE")
+        .ok()
+        .or_else(|| config.viewer().get_signature().map(String::from));
+
+    do_post(&address, path, signature.as_deref(), &parsed, handle).await
 }
 
 async fn do_post(

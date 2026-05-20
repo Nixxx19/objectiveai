@@ -2,16 +2,6 @@
 pub enum Error {
     #[error("{0}")]
     Filesystem(#[from] objectiveai_sdk::filesystem::Error),
-    #[error("viewer subprocess failed to start: {0}")]
-    ViewerSpawn(std::io::Error),
-    #[error("viewer subprocess did not report its bound address")]
-    ViewerProtocol,
-    #[error("api setup failed: {0}")]
-    ApiSetup(std::io::Error),
-    #[error("viewer config has secret but no signature, or signature but no secret")]
-    ViewerSecretSignatureConfigMismatch,
-    #[error("VIEWER_SECRET env var set without VIEWER_SIGNATURE, or vice versa")]
-    ViewerSecretSignatureEnvMismatch,
     #[error("{0}")]
     Http(#[from] objectiveai_sdk::HttpError),
     #[error("{0}")]
@@ -61,7 +51,7 @@ pub enum Error {
     },
     #[error("whitelist regex error: {0}")]
     WhitelistRegex(regex::Error),
-    #[error("api.headers.x_viewer_address is not configured; set it with `objectiveai api headers x-viewer-address set <url>`")]
+    #[error("viewer address is not configured; set VIEWER_ADDRESS in the env or run `objectiveai viewer address config set <addr>` (and optionally `objectiveai viewer port config set <port>`)")]
     ViewerAddressNotConfigured,
     #[error("viewer path must start with `/`, got {0:?}")]
     ViewerPathMissingSlash(String),
@@ -71,8 +61,6 @@ pub enum Error {
     ViewerSendHttp(String),
     #[error("viewer returned status {status}: {body}")]
     ViewerSendBadStatus { status: u16, body: String },
-    #[error("local viewer mode requires the `viewer` feature, but this cli build was compiled without it; switch to remote viewer mode with `objectiveai viewer mode set remote` or use a viewer-enabled build")]
-    LocalViewerFeatureDisabled,
     #[error("updater: {0}")]
     Updater(String),
     #[error("{name} is already running (pids: {pids:?})")]

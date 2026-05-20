@@ -11,7 +11,7 @@
 /// Rule: if the address already starts with `http://` or `https://`, leave
 /// it untouched. Otherwise prefix `http://` — regardless of whether the
 /// host is an IPv4, IPv6, or hostname.
-fn compose_url(addr: Option<&str>, port: Option<u16>) -> Option<String> {
+pub(crate) fn compose_url(addr: Option<&str>, port: Option<u16>) -> Option<String> {
     fn ensure_scheme(a: &str) -> String {
         if a.starts_with("http://") || a.starts_with("https://") {
             a.to_string()

@@ -1,12 +1,12 @@
 //! End-to-end test for `objectiveai viewer send`.
 //!
 //! Spawns a `wiremock::MockServer` on a random port as a stand-in for
-//! the real viewer's embedded HTTP server, configures the cli's
-//! filesystem config to point at it (`api.headers.x-viewer-address` +
-//! `x-viewer-signature`), then invokes the cli binary and asserts that
-//! the request lands on the mock with the expected path, body, and
-//! `X-VIEWER-SIGNATURE` header — matching the same header format the
-//! viewer's signature middleware accepts.
+//! the real viewer's HTTP server, configures the cli's filesystem
+//! config to point at it (`viewer.address` + `viewer.signature`),
+//! then invokes the cli binary and asserts that the request lands on
+//! the mock with the expected path, body, and `X-VIEWER-SIGNATURE`
+//! header — matching the same header format the viewer's signature
+//! middleware accepts.
 
 use std::path::PathBuf;
 use std::process::Command;
@@ -52,11 +52,8 @@ async fn viewer_send_remote_mode_posts_to_configured_address() {
         .read_config()
         .await
         .expect("read_config failed");
-    config
-        .viewer()
-        .set_mode(objectiveai_sdk::filesystem::config::ViewerMode::Remote);
-    config.api().headers().set_x_viewer_address(mock_server.uri());
-    config.api().headers().set_x_viewer_signature(SIGNATURE.to_string());
+    config.viewer().set_address(mock_server.uri());
+    config.viewer().set_signature(SIGNATURE.to_string());
     fs_client
         .write_config(&config)
         .await
