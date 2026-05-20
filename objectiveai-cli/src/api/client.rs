@@ -81,6 +81,8 @@ pub fn build_http_client(
     let x_commit_author_email = env("COMMIT_AUTHOR_EMAIL")
         .or_else(|| config.api().get_commit_author_email().map(String::from));
 
+    let agent_id = env("OBJECTIVEAI_AGENT_ID");
+
     objectiveai_sdk::HttpClient::new(
         reqwest::Client::new(),
         address,
@@ -95,6 +97,7 @@ pub fn build_http_client(
         x_viewer_address,
         x_commit_author_name,
         x_commit_author_email,
+        agent_id,
     )
 }
 

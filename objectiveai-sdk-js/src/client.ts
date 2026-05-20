@@ -87,6 +87,12 @@ export const ObjectiveAIOptionsSchema = z
       .string()
       .nullish()
       .describe("X-COMMIT-AUTHOR-EMAIL header for commit author email."),
+    agentId: z
+      .string()
+      .nullish()
+      .describe(
+        "X-OBJECTIVEAI-AGENT-ID header. Falls back to OBJECTIVEAI_AGENT_ID env var.",
+      ),
     viewer: z
       .boolean()
       .nullish()
@@ -139,6 +145,7 @@ export class ObjectiveAI {
   readonly xViewerAddress: string | undefined;
   readonly xCommitAuthorName: string | undefined;
   readonly xCommitAuthorEmail: string | undefined;
+  readonly agentId: string | undefined;
   readonly viewer: boolean;
 
   constructor(options?: ObjectiveAIOptions | null) {
@@ -175,6 +182,8 @@ export class ObjectiveAI {
       options?.xCommitAuthorName ?? readEnv("COMMIT_AUTHOR_NAME") ?? undefined;
     this.xCommitAuthorEmail =
       options?.xCommitAuthorEmail ?? readEnv("COMMIT_AUTHOR_EMAIL") ?? undefined;
+    this.agentId =
+      options?.agentId ?? readEnv("OBJECTIVEAI_AGENT_ID") ?? undefined;
     this.viewer = options?.viewer ?? isTruthyEnv(readEnv("OBJECTIVEAI_VIEWER"));
   }
 
@@ -219,6 +228,9 @@ export class ObjectiveAI {
     }
     if (this.xCommitAuthorEmail) {
       headers.set("X-COMMIT-AUTHOR-EMAIL", this.xCommitAuthorEmail);
+    }
+    if (this.agentId) {
+      headers.set("X-OBJECTIVEAI-AGENT-ID", this.agentId);
     }
 
     // Merge in request-specific headers
