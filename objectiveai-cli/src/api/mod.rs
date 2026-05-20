@@ -18,6 +18,7 @@ mod run;
 pub mod detach;
 
 // Shared infrastructure for per-endpoint subcommands.
+pub mod agent_id_arg;
 pub mod body;
 pub mod client;
 pub mod call;

@@ -12,18 +12,19 @@ use std::sync::Arc;
 use futures::StreamExt;
 use objectiveai_sdk::cli::output::{Handle, Notification, Output};
 
-/// Apply the `--agent-id` cli flag (if any) to the SDK HttpClient
+/// Apply the per-endpoint `--agent-id` flag to the SDK HttpClient
 /// only when `build_http_client` didn't already populate
 /// `http.agent_id` from `OBJECTIVEAI_AGENT_ID`. Matches the user's
 /// rule: handle's agent_id (env-derived, mirrored on
-/// `http.agent_id`) takes precedence; flag is the fallback header.
+/// `http.agent_id`) takes precedence; the flag is the fallback
+/// header.
 fn apply_agent_id_arg(
     http: &mut objectiveai_sdk::HttpClient,
-    cli_config: &crate::Config,
+    agent_id_arg: Option<String>,
 ) {
     if http.agent_id.is_none() {
-        if let Some(id) = &cli_config.agent_id_arg {
-            http.agent_id = Some(Arc::new(id.clone()));
+        if let Some(id) = agent_id_arg {
+            http.agent_id = Some(Arc::new(id));
         }
     }
 }
@@ -34,6 +35,7 @@ pub async fn call_unary<Req, Resp>(
     method: reqwest::Method,
     path: &str,
     body: Option<Req>,
+    agent_id_arg: Option<String>,
 ) -> Result<(), crate::error::Error>
 where
     Req: serde::Serialize + Send,
@@ -41,7 +43,7 @@ where
 {
     let (_client, mut config) = crate::config::read(cli_config).await?;
     let mut http = super::client::build_http_client(&mut config);
-    apply_agent_id_arg(&mut http, cli_config);
+    apply_agent_id_arg(&mut http, agent_id_arg);
     let response: Resp = http.send_unary(method, path, body).await?;
     Output::<Resp>::Notification(Notification { agent_id: None, value: response })
         .emit(handle)
@@ -55,6 +57,7 @@ pub async fn call_streaming<Req, Chunk>(
     method: reqwest::Method,
     path: &str,
     body: Option<Req>,
+    agent_id_arg: Option<String>,
 ) -> Result<(), crate::error::Error>
 where
     Req: serde::Serialize + Send,
@@ -62,7 +65,7 @@ where
 {
     let (_client, mut config) = crate::config::read(cli_config).await?;
     let mut http = super::client::build_http_client(&mut config);
-    apply_agent_id_arg(&mut http, cli_config);
+    apply_agent_id_arg(&mut http, agent_id_arg);
     let stream = http
         .send_streaming::<Chunk, _, _>(method, path.to_string(), body)
         .await?;

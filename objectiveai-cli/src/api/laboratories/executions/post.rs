@@ -5,6 +5,8 @@ use clap::Args as ClapArgs;
 pub struct Args {
     #[command(flatten)]
     pub body: crate::api::body::BodySource,
+    #[command(flatten)]
+    pub agent_id_arg: crate::api::agent_id_arg::AgentIdArg,
 }
 
 pub async fn handle(args: Args, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
@@ -12,10 +14,12 @@ pub async fn handle(args: Args, cli_config: &crate::Config, handle: &objectiveai
     if params.stream.unwrap_or(false) {
         crate::api::call::call_streaming::<_, objectiveai_sdk::laboratories::executions::response::streaming::LaboratoryExecutionChunk>(
             cli_config, handle, reqwest::Method::POST, "laboratories/executions", Some(params),
+            args.agent_id_arg.agent_id,
         ).await
     } else {
         crate::api::call::call_unary::<_, serde_json::Value>(
             cli_config, handle, reqwest::Method::POST, "laboratories/executions", Some(params),
+            args.agent_id_arg.agent_id,
         ).await
     }
 }
