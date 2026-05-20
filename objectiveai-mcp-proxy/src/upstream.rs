@@ -127,7 +127,7 @@ pub async fn reconnect_from_payload(
     client: &Client,
     payload: &crate::session_manager::SessionPayload,
 ) -> Result<Vec<(Connection, IndexMap<String, String>)>, BadInit> {
-    let attempts = payload.iter().map(|(url, headers)| {
+    let attempts = payload.connections.iter().map(|(url, headers)| {
         let url = url.clone();
         let mut headers = headers.clone();
         let session_id = headers.shift_remove(MCP_SESSION_ID_KEY);

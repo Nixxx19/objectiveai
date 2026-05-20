@@ -92,6 +92,14 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK, RETRG, RET
     pub first_chunk_timeout: Duration,
     /// Maximum wait time between subsequent chunks in a streaming response.
     pub other_chunk_timeout: Duration,
+    /// Monotonic indices keyed by `(parent_agent_id, this_agent_id)`.
+    /// Each new agent run for a given (parent, agent.id) pair gets the
+    /// next value; continuation rounds reuse the index already baked
+    /// into the `Continuation`. Process-lifetime; bounded by the
+    /// cardinality of distinct (parent, agent.id) pairs.
+    pub agent_indices: Arc<
+        dashmap::DashMap<(Option<String>, String), std::sync::atomic::AtomicU64>,
+    >,
     _marker: std::marker::PhantomData<CTXEXT>,
 }
 
@@ -135,8 +143,22 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK, RETRG, RETRF, RETRM, CU
             backoff_max_elapsed_time,
             first_chunk_timeout,
             other_chunk_timeout,
+            agent_indices: Arc::new(dashmap::DashMap::new()),
             _marker: std::marker::PhantomData,
         }
+    }
+
+    /// Allocate the next monotonic index for the (parent, agent_id)
+    /// pair. Returns 0 for the first invocation of a given pair,
+    /// 1 for the second, etc. Reused across continuation rounds via
+    /// `Continuation::agent_index`.
+    fn next_agent_index(&self, parent: Option<&str>, agent_id: &str) -> u64 {
+        let key = (parent.map(str::to_string), agent_id.to_string());
+        let entry = self
+            .agent_indices
+            .entry(key)
+            .or_insert_with(|| std::sync::atomic::AtomicU64::new(0));
+        entry.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
     }
 }
 
@@ -163,6 +185,7 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK, RETRG, RETRF, RETRM, CU
             backoff_max_elapsed_time: self.backoff_max_elapsed_time,
             first_chunk_timeout: self.first_chunk_timeout,
             other_chunk_timeout: self.other_chunk_timeout,
+            agent_indices: self.agent_indices.clone(),
             _marker: std::marker::PhantomData,
         }
     }
@@ -410,6 +433,10 @@ where
 
         // 2. Extract continuation items, MCP connection, and upstream type.
         let cont_upstream = continuation.as_ref().map(|c| c.upstream());
+        // Index allocated by the previous turn (if any). On continuation
+        // we reuse this value for every per-attempt connect; on a fresh
+        // call we allocate a new one per attempt from `next_agent_index`.
+        let cont_agent_index = continuation.as_ref().map(|c| c.agent_index());
         let (
             mut cont_items_or,
             mut cont_items_cas,
@@ -417,16 +444,16 @@ where
             mut cont_items_mock,
             internal_conn,
         ) = match continuation {
-            Some(super::Continuation::Openrouter { items, mcp_connection }) => {
+            Some(super::Continuation::Openrouter { items, mcp_connection, .. }) => {
                 (items, vec![], vec![], vec![], mcp_connection)
             }
-            Some(super::Continuation::ClaudeAgentSdk { items, mcp_connection }) => {
+            Some(super::Continuation::ClaudeAgentSdk { items, mcp_connection, .. }) => {
                 (vec![], items, vec![], vec![], mcp_connection)
             }
-            Some(super::Continuation::CodexSdk { items, mcp_connection }) => {
+            Some(super::Continuation::CodexSdk { items, mcp_connection, .. }) => {
                 (vec![], vec![], items, vec![], mcp_connection)
             }
-            Some(super::Continuation::Mock { items, mcp_connection }) => {
+            Some(super::Continuation::Mock { items, mcp_connection, .. }) => {
                 (vec![], vec![], vec![], items, mcp_connection)
             }
             None => (vec![], vec![], vec![], vec![], None),
@@ -473,6 +500,31 @@ where
         let default_mcp_auth_owned = self.mcp_authorization.clone();
         let internal_conn_for_resume = internal_conn.clone();
 
+        // 6.5. Compose the per-attempt agent index and the
+        //      `X-OBJECTIVEAI-AGENT-ID` header we forward to the proxy.
+        //
+        // Continuation rounds reuse the index baked into the prior
+        // turn's continuation; fresh calls allocate a new value per
+        // (parent, agent.id) pair via `next_agent_index`. The parent
+        // is whatever `X-OBJECTIVEAI-AGENT-ID` the caller sent us on
+        // the way in (None counts as its own first-class parent slot).
+        let parent_agent_id = ctx.agent_id().map(|s| s.to_string());
+        let agent_indices: Vec<u64> = filtered_agents
+            .iter()
+            .map(|agent| match cont_agent_index {
+                Some(idx) => idx,
+                None => self.next_agent_index(parent_agent_id.as_deref(), agent.id()),
+            })
+            .collect();
+        let composite_agent_ids: Vec<String> = filtered_agents
+            .iter()
+            .zip(agent_indices.iter())
+            .map(|(agent, idx)| match parent_agent_id.as_deref() {
+                Some(prefix) => format!("{prefix}/{}_{idx}", agent.id()),
+                None => format!("{}_{idx}", agent.id()),
+            })
+            .collect();
+
         let connect_handles: Vec<
             Option<
                 tokio::task::JoinHandle<
@@ -481,7 +533,8 @@ where
             >,
         > = filtered_agents
             .iter()
-            .map(|agent| {
+            .zip(composite_agent_ids.iter())
+            .map(|(agent, composite_agent_id)| {
                 // Build the per-agent X-MCP-* header set: the agent's
                 // declared `mcp_servers` plus any caller-supplied
                 // `extra_mcp_servers` (e.g. the function-inventions
@@ -550,6 +603,7 @@ where
                     indexmap::indexmap! {
                         "X-MCP-Servers".to_string() => serde_json::to_string(&urls).unwrap(),
                         "X-MCP-Headers".to_string() => serde_json::to_string(&per_url_headers).unwrap(),
+                        "X-OBJECTIVEAI-AGENT-ID".to_string() => composite_agent_id.clone(),
                     };
 
                 let mcp_client = self.mcp_client.clone();
@@ -578,11 +632,20 @@ where
                     Result<objectiveai_sdk::mcp::Connection, objectiveai_sdk::mcp::Error>,
                 >,
             >,
+            /// Per-(parent, agent.id) index assigned to this attempt;
+            /// baked into the wrapping `Continuation` so subsequent
+            /// turns reuse the same value.
+            agent_index: u64,
         }
         let mut attempts: Vec<AgentAttempt> = filtered_agents
             .into_iter()
             .zip(connect_handles)
-            .map(|(agent, connect_handle)| AgentAttempt { agent, connect_handle })
+            .zip(agent_indices)
+            .map(|((agent, connect_handle), agent_index)| AgentAttempt {
+                agent,
+                connect_handle,
+                agent_index,
+            })
             .collect();
         // Slot of resolved-or-None per attempt — populated lazily on
         // first awaited iteration of the retry loop, reused across
@@ -657,8 +720,11 @@ where
                                 self.openrouter.clone(), or_agent, rc, &params, mcp_connection.clone(),
                                 &mut cont_items_or, &id, created,
                                 *byok_attempt, ctx.cost_multiplier,
-                                move |items| super::Continuation::Openrouter {
-                                    items, mcp_connection: c,
+                                {
+                                    let agent_index = attempt.agent_index;
+                                    move |items| super::Continuation::Openrouter {
+                                        items, mcp_connection: c, agent_index,
+                                    }
                                 },
                                 |e| super::Error::UpstreamOpenrouter(Box::new(e)),
                                 objectiveai_sdk::agent::InlineAgentRef::Openrouter(&or_agent.base),
@@ -693,8 +759,11 @@ where
                                 self.claude_agent_sdk.clone(), cas_agent, rc, &params, mcp_connection.clone(),
                                 &mut cont_items_cas, &id, created,
                                 *byok_attempt, ctx.cost_multiplier,
-                                move |items| super::Continuation::ClaudeAgentSdk {
-                                    items, mcp_connection: c,
+                                {
+                                    let agent_index = attempt.agent_index;
+                                    move |items| super::Continuation::ClaudeAgentSdk {
+                                        items, mcp_connection: c, agent_index,
+                                    }
                                 },
                                 |e| super::Error::UpstreamClaudeAgentSdk(Box::new(e)),
                                 objectiveai_sdk::agent::InlineAgentRef::ClaudeAgentSdk(&cas_agent.base),
@@ -729,8 +798,11 @@ where
                                 self.codex_sdk.clone(), cdx_agent, rc, &params, mcp_connection.clone(),
                                 &mut cont_items_cdx, &id, created,
                                 *byok_attempt, ctx.cost_multiplier,
-                                move |items| super::Continuation::CodexSdk {
-                                    items, mcp_connection: c,
+                                {
+                                    let agent_index = attempt.agent_index;
+                                    move |items| super::Continuation::CodexSdk {
+                                        items, mcp_connection: c, agent_index,
+                                    }
                                 },
                                 |e| super::Error::UpstreamCodexSdk(Box::new(e)),
                                 objectiveai_sdk::agent::InlineAgentRef::CodexSdk(&cdx_agent.base),
@@ -765,8 +837,11 @@ where
                                 self.mock.clone(), mock_agent, rc, &params, mcp_connection.clone(),
                                 &mut cont_items_mock, &id, created,
                                 *byok_attempt, ctx.cost_multiplier,
-                                move |items| super::Continuation::Mock {
-                                    items, mcp_connection: c,
+                                {
+                                    let agent_index = attempt.agent_index;
+                                    move |items| super::Continuation::Mock {
+                                        items, mcp_connection: c, agent_index,
+                                    }
                                 },
                                 |e| super::Error::UpstreamMock(Box::new(e)),
                                 objectiveai_sdk::agent::InlineAgentRef::Mock(&mock_agent.base),

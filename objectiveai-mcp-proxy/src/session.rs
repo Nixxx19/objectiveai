@@ -127,6 +127,14 @@ impl Session {
 
     /// Append `blocks` to the pending-notifications queue. The next
     /// `tools/call` response on this session drains and prepends them.
+    /// Caller-supplied `X-OBJECTIVEAI-AGENT-ID` captured at session-
+    /// open time. Recovered from the encrypted session-id payload on
+    /// every resume, so upstream sdk runners (which only carry the
+    /// session id back) never have to re-send the header themselves.
+    pub fn agent_id(&self) -> Option<&str> {
+        self.payload.agent_id.as_deref()
+    }
+
     pub async fn enqueue_notifications(&self, blocks: Vec<ContentBlock>) {
         if blocks.is_empty() {
             return;
