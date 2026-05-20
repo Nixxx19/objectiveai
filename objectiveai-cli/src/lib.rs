@@ -17,6 +17,8 @@ mod agents;
 mod swarms;
 mod functions;
 mod viewer;
+mod mcp;
+mod spawn;
 mod schemas;
 mod laboratories;
 mod instructions;

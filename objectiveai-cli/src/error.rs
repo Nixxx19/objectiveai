@@ -75,6 +75,12 @@ pub enum Error {
     LocalViewerFeatureDisabled,
     #[error("updater: {0}")]
     Updater(String),
+    #[error("{name} is already running (pids: {pids:?})")]
+    AlreadyRunning { name: String, pids: Vec<u32> },
+    #[error("{name} did not announce \"listening\" on stderr before exiting")]
+    SpawnNoListeningLine { name: String },
+    #[error("spawn {0}: {1}")]
+    Spawn(String, std::io::Error),
 }
 
 impl Error {

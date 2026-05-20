@@ -12,6 +12,8 @@ pub mod http_referer;
 pub mod x_title;
 pub mod commit_author_name;
 pub mod commit_author_email;
+pub mod spawn;
+pub mod kill;
 mod run;
 pub mod detach;
 
@@ -148,6 +150,12 @@ pub enum Commands {
         #[command(subcommand)]
         command: laboratories::Commands,
     },
+    /// Spawn the `objectiveai-api` server in the background.
+    /// Errors if it's already running.
+    Spawn,
+    /// Terminate every running `objectiveai-api` process.
+    /// Idempotent — succeeds with count = 0 if none were running.
+    Kill,
 }
 
 impl Commands {
@@ -175,6 +183,8 @@ impl Commands {
             Commands::Agents { command } => command.handle(cli_config, handle).await,
             Commands::Error { command } => command.handle(cli_config, handle).await,
             Commands::Laboratories { command } => command.handle(cli_config, handle).await,
+            Commands::Spawn => spawn::handle(cli_config, handle).await,
+            Commands::Kill => kill::handle(cli_config, handle).await,
         }
     }
 }

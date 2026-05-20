@@ -443,6 +443,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::filesystem::config::SwarmsConfig),
             schemars::schema_for!(crate::filesystem::config::ViewerSecretSignaturePair),
             schemars::schema_for!(crate::filesystem::config::ViewerConfig),
+            schemars::schema_for!(crate::filesystem::config::McpConfig),
             schemars::schema_for!(crate::filesystem::logs::ListItem),
             schemars::schema_for!(crate::filesystem::plugins::Binaries),
             schemars::schema_for!(crate::filesystem::plugins::Manifest),

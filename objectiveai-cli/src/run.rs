@@ -6,6 +6,7 @@ use crate::agents;
 use crate::swarms;
 use crate::functions;
 use crate::viewer;
+use crate::mcp;
 use crate::schemas;
 use crate::laboratories;
 use crate::logs;
@@ -132,6 +133,11 @@ enum Commands {
         #[command(subcommand)]
         command: viewer::Commands,
     },
+    /// MCP server management
+    Mcp {
+        #[command(subcommand)]
+        command: mcp::Commands,
+    },
     /// Browse JSON schemas
     Schemas {
         #[command(subcommand)]
@@ -186,6 +192,7 @@ impl Commands {
             Commands::Swarms { command } => command.handle(cli_config, handle).await,
             Commands::Functions { command } => command.handle(cli_config, handle).await,
             Commands::Viewer { command } => command.handle(cli_config, handle).await,
+            Commands::Mcp { command } => command.handle(cli_config, handle).await,
             Commands::Schemas { command } => command.handle(handle).await,
             Commands::Laboratories { command } => command.handle(cli_config, handle).await,
             Commands::Vector { command } => command.handle(cli_config, handle).await,

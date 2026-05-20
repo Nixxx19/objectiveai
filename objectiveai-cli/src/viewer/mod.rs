@@ -4,6 +4,8 @@ pub mod port;
 pub mod secret;
 pub mod signature;
 pub mod send;
+pub mod spawn;
+pub mod kill;
 
 use clap::Subcommand;
 
@@ -46,6 +48,12 @@ pub enum Commands {
         /// send.
         body: String,
     },
+    /// Spawn the `objectiveai-viewer` Tauri shell in the background.
+    /// Errors if it's already running.
+    Spawn,
+    /// Terminate every running `objectiveai-viewer` process.
+    /// Idempotent — succeeds with count = 0 if none were running.
+    Kill,
 }
 
 impl Commands {
@@ -62,6 +70,8 @@ impl Commands {
                 Ok(())
             }
             Commands::Send { path, body } => send::run(cli_config, handle, &path, &body).await,
+            Commands::Spawn => spawn::handle(cli_config, handle).await,
+            Commands::Kill => kill::handle(cli_config, handle).await,
         }
     }
 }
