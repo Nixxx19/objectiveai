@@ -31,6 +31,8 @@ struct EnvConfigBuilder {
     /// `objectiveai-rs/src/http/client.rs`).
     #[envconfig(from = "GITHUB_AUTHORIZATION")]
     github_authorization: Option<String>,
+    #[envconfig(from = "OBJECTIVEAI_AGENT_ID")]
+    agent_id: Option<String>,
 }
 
 impl EnvConfigBuilder {
@@ -45,6 +47,7 @@ impl EnvConfigBuilder {
             commit_author_name: self.commit_author_name,
             commit_author_email: self.commit_author_email,
             github_authorization: self.github_authorization,
+            agent_id: self.agent_id,
         }
     }
 }
@@ -56,6 +59,7 @@ pub struct ConfigBuilder {
     pub commit_author_name: Option<String>,
     pub commit_author_email: Option<String>,
     pub github_authorization: Option<String>,
+    pub agent_id: Option<String>,
 }
 
 impl Envconfig for ConfigBuilder {
@@ -81,6 +85,7 @@ impl ConfigBuilder {
             commit_author_name: self.commit_author_name,
             commit_author_email: self.commit_author_email,
             github_authorization: self.github_authorization,
+            agent_id: self.agent_id,
         }
     }
 }
@@ -92,6 +97,7 @@ pub struct Config {
     pub commit_author_name: Option<String>,
     pub commit_author_email: Option<String>,
     pub github_authorization: Option<String>,
+    pub agent_id: Option<String>,
 }
 
 #[derive(Parser)]
