@@ -133,7 +133,7 @@ impl Commands {
                 })
                 .unwrap_or_default();
 
-            objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Content>::Notification(objectiveai_sdk::cli::output::Notification { value: 
+            objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Content>::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: 
                 objectiveai_sdk::cli::output::Content { content },
              })
             .emit(&handle).await;

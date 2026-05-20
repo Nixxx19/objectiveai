@@ -43,7 +43,7 @@ impl Commands {
             Commands::List => {
                 const NAMES: &[&str] = &["ListResourcesRequest", "ListResourcesResult", "ReadResourceRequestParams", "ReadResourceResult", "Resource"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schemas {
                             schemas: NAMES.iter().map(|s| s.to_string()).collect(),
                         },
@@ -56,7 +56,7 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.resource.ListResourcesRequest.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -67,7 +67,7 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.resource.ListResourcesResult.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -78,7 +78,7 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.resource.ReadResourceRequestParams.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -89,7 +89,7 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.resource.ReadResourceResult.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -100,7 +100,7 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/mcp.resource.Resource.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;

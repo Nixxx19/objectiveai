@@ -265,7 +265,7 @@ where
             // stderr-mirror double-print (handle.rs emits fatal errors
             // to both stdout AND stderr so they survive stdout
             // capture), which is wrong for help output.
-            Output::<String>::Notification(Notification {
+            Output::<String>::Notification(Notification { agent_id: None,
                 value: e.to_string(),
             })
             .emit(&handle)
@@ -277,6 +277,7 @@ where
                 level: Level::Error,
                 fatal: true,
                 message: e.to_string().into(),
+                agent_id: None,
             };
             Output::<serde_json::Value>::Error(err).emit(&handle).await;
             1

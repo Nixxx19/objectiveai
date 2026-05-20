@@ -59,7 +59,7 @@ impl Commands {
             Commands::List => {
                 const NAMES: &[&str] = &["BranchTaskExpression", "InlineFunction", "LeafTaskExpression", "PartialPlaceholderBranchTaskExpression", "PartialPlaceholderScalarFunctionTaskExpression", "PlaceholderScalarFunctionTaskExpression", "RemoteFunction", "ScalarFunctionTaskExpression", "VectorCompletionTaskExpression"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schemas {
                             schemas: NAMES.iter().map(|s| s.to_string()).collect(),
                         },
@@ -72,7 +72,7 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.BranchTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -83,7 +83,7 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.InlineFunction.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -94,7 +94,7 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.LeafTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -105,7 +105,7 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.PartialPlaceholderBranchTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -116,7 +116,7 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.PartialPlaceholderScalarFunctionTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -127,7 +127,7 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -138,7 +138,7 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.RemoteFunction.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -149,7 +149,7 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.ScalarFunctionTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -160,7 +160,7 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.alpha_scalar.VectorCompletionTaskExpression.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;

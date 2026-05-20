@@ -31,7 +31,7 @@ impl Commands {
             Commands::List => {
                 const NAMES: &[&str] = &["ScalarFieldsValidation", "VectorFieldsValidation"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schemas {
                             schemas: NAMES.iter().map(|s| s.to_string()).collect(),
                         },
@@ -44,7 +44,7 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.check.ScalarFieldsValidation.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -55,7 +55,7 @@ impl Commands {
                     include_str!("../../../../../objectiveai-json-schema/functions.check.VectorFieldsValidation.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;

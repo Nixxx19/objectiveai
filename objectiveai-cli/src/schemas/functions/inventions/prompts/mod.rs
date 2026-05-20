@@ -67,7 +67,7 @@ impl Commands {
             Commands::List => {
                 const NAMES: &[&str] = &["GetPromptResponse", "InlinePrompt", "InlinePromptOrRemoteCommitOptional", "ListPromptResponse", "ListPromptsRequest", "ListPromptsSource", "Prompt", "RemotePrompt", "StepPromptExpression", "StepPromptType", "UsagePromptResponse"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schemas {
                             schemas: NAMES.iter().map(|s| s.to_string()).collect(),
                         },
@@ -80,7 +80,7 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.GetPromptResponse.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -91,7 +91,7 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.InlinePrompt.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -102,7 +102,7 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.InlinePromptOrRemoteCommitOptional.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -113,7 +113,7 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.ListPromptResponse.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -124,7 +124,7 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.ListPromptsRequest.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -135,7 +135,7 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.ListPromptsSource.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -146,7 +146,7 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.Prompt.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -157,7 +157,7 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.RemotePrompt.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -168,7 +168,7 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.StepPromptExpression.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -179,7 +179,7 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.StepPromptType.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;
@@ -190,7 +190,7 @@ impl Commands {
                     include_str!("../../../../../../objectiveai-json-schema/functions.inventions.prompts.UsagePromptResponse.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
+                    objectiveai_sdk::cli::output::Notification { agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema },
                     },
                 ).emit(handle).await;

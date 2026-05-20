@@ -84,7 +84,7 @@ async fn do_post(
         .unwrap_or_else(|_| serde_json::Value::String(response_text));
 
     if status.is_success() {
-        Output::<ViewerSendResult>::Notification(Notification {
+        Output::<ViewerSendResult>::Notification(Notification { agent_id: None,
             value: ViewerSendResult {
                 status: status.as_u16(),
                 body: response_body,

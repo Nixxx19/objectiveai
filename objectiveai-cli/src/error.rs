@@ -81,6 +81,7 @@ impl Error {
             level,
             fatal,
             message: self.output_message(),
+            agent_id: None,
         }
     }
 

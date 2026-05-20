@@ -61,8 +61,17 @@ impl ObjectiveAiMcpCli {
         };
 
         let collected = Arc::new(tokio::sync::Mutex::new(Vec::new()));
-        let handle =
-            objectiveai_sdk::cli::output::Handle::Collect(collected.clone());
+        // Per-request handle: stamp the agent_id from the per-request
+        // cli_config so every notification/error the cli emits during
+        // this Run carries `X-OBJECTIVEAI-AGENT-ID`. The Collect
+        // destination mirrors the same agent_id into the in-memory
+        // Vec the runner reassembles below.
+        let handle = objectiveai_sdk::cli::output::Handle {
+            destination: objectiveai_sdk::cli::output::HandleDestination::Collect(
+                collected.clone(),
+            ),
+            agent_id: cli_config.agent_id.clone(),
+        };
         let code = objectiveai_cli::run(args, &cli_config, handle).await;
 
         let outputs = collected.lock().await;

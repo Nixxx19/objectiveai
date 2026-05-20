@@ -24,7 +24,7 @@ where
     let (_client, mut config) = crate::config::read(cli_config).await?;
     let http = super::client::build_http_client(&mut config);
     let response: Resp = http.send_unary(method, path, body).await?;
-    Output::<Resp>::Notification(Notification { value: response })
+    Output::<Resp>::Notification(Notification { agent_id: None, value: response })
         .emit(handle)
         .await;
     Ok(())
@@ -49,7 +49,7 @@ where
     let mut stream = std::pin::pin!(stream);
     while let Some(result) = stream.next().await {
         let chunk = result?;
-        Output::<Chunk>::Notification(Notification { value: chunk })
+        Output::<Chunk>::Notification(Notification { agent_id: None, value: chunk })
             .emit(handle)
             .await;
     }
