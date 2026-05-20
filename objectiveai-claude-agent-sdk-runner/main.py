@@ -382,6 +382,13 @@ async def handle_run(
         ua = params.get("user_agent")
         if ua:
             env["CLAUDE_AGENT_SDK_CLIENT_APP"] = ua
+        agent_id = params.get("agent_id")
+        if agent_id:
+            # Propagates through any objectiveai cli invocation the
+            # subprocess makes via the filesystem — the cli reads
+            # OBJECTIVEAI_AGENT_ID at startup and stamps it on every
+            # outgoing X-OBJECTIVEAI-AGENT-ID header.
+            env["OBJECTIVEAI_AGENT_ID"] = agent_id
 
         opts = ClaudeAgentOptions(
             model=params["model"],

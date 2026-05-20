@@ -431,6 +431,16 @@ async def handle_run(
         _codex_home, env_override = await _prepare_codex_home(
             params["cwd"], params.get("mcp_servers")
         )
+        # Propagate the composite agent id into the codex subprocess
+        # env so any objectiveai cli invocation it makes via the
+        # filesystem sees OBJECTIVEAI_AGENT_ID. Builds env_override
+        # on demand when MCP didn't already need it — both go through
+        # the same CodexOptions(env=...) channel.
+        agent_id = params.get("agent_id")
+        if agent_id:
+            if env_override is None:
+                env_override = {**os.environ}
+            env_override["OBJECTIVEAI_AGENT_ID"] = agent_id
         codex_options = (
             CodexOptions(env=env_override) if env_override is not None else None
         )

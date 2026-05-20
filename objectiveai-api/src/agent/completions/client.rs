@@ -636,15 +636,22 @@ where
             /// baked into the wrapping `Continuation` so subsequent
             /// turns reuse the same value.
             agent_index: u64,
+            /// Composite agent id forwarded as `X-OBJECTIVEAI-AGENT-ID`
+            /// to the MCP proxy and (for runner-backed upstreams) as
+            /// `OBJECTIVEAI_AGENT_ID` in the env dict the runner hands
+            /// to its child SDK subprocess.
+            composite_agent_id: String,
         }
         let mut attempts: Vec<AgentAttempt> = filtered_agents
             .into_iter()
             .zip(connect_handles)
             .zip(agent_indices)
-            .map(|((agent, connect_handle), agent_index)| AgentAttempt {
+            .zip(composite_agent_ids)
+            .map(|(((agent, connect_handle), agent_index), composite_agent_id)| AgentAttempt {
                 agent,
                 connect_handle,
                 agent_index,
+                composite_agent_id,
             })
             .collect();
         // Slot of resolved-or-None per attempt — populated lazily on
@@ -735,6 +742,7 @@ where
                                 invention_step,
                                 invention_tasks_min,
                                 invention_input_schema.clone(),
+                                Some(attempt.composite_agent_id.as_str()),
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -774,6 +782,7 @@ where
                                 invention_step,
                                 invention_tasks_min,
                                 invention_input_schema.clone(),
+                                Some(attempt.composite_agent_id.as_str()),
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -813,6 +822,7 @@ where
                                 invention_step,
                                 invention_tasks_min,
                                 invention_input_schema.clone(),
+                                Some(attempt.composite_agent_id.as_str()),
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -852,6 +862,7 @@ where
                                 invention_step,
                                 invention_tasks_min,
                                 invention_input_schema.clone(),
+                                Some(attempt.composite_agent_id.as_str()),
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -921,6 +932,7 @@ where
         invention_step: Option<usize>,
         invention_tasks_min: Option<u64>,
         invention_input_schema: Option<String>,
+        agent_id_header: Option<&str>,
     ) -> Result<
         Pin<Box<dyn futures::Stream<Item = super::StreamItem<CONT>> + Send>>,
         super::Error,
@@ -988,6 +1000,7 @@ where
             invention_step,
             invention_tasks_min,
             invention_input_schema.clone(),
+            agent_id_header,
         );
         let initial_stream =
             tokio::time::timeout(self.first_chunk_timeout, create_fut)
@@ -1018,6 +1031,7 @@ where
         let params = params.clone();
         let id = id.to_string();
         let byok = byok.map(|s| s.to_string());
+        let agent_id_header = agent_id_header.map(|s| s.to_string());
         let request_continuation = request_continuation.cloned();
 
         Ok(Box::pin(async_stream::stream! {
@@ -1209,6 +1223,7 @@ where
                         invention_step,
                         invention_tasks_min,
                         invention_input_schema.clone(),
+                        agent_id_header.as_deref(),
                     )
                     .await
                 {

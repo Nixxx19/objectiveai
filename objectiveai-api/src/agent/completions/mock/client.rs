@@ -73,6 +73,7 @@ impl UpstreamClient<objectiveai_sdk::agent::mock::Agent, objectiveai_sdk::agent:
         invention_step: Option<usize>,
         invention_tasks_min: Option<u64>,
         invention_input_schema: Option<String>,
+        _agent_id_header: Option<&str>,
     ) -> impl Future<
         Output = Result<
             Self::Stream,
