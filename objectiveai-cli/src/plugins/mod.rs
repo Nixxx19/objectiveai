@@ -273,7 +273,7 @@ pub async fn dispatch_external(
                 Output::<serde_json::Value>::Error(e).emit(handle).await;
             }
             Ok(PluginOutput::Notification(value)) => {
-                Output::<serde_json::Value>::Notification(Notification { value })
+                Output::<serde_json::Value>::Notification(Notification { value, agent_id: None })
                     .emit(handle)
                     .await;
             }
@@ -282,7 +282,7 @@ pub async fn dispatch_external(
             }
             Err(_) => {
                 let value = serde_json::Value::String(trimmed.to_string());
-                Output::<serde_json::Value>::Notification(Notification { value })
+                Output::<serde_json::Value>::Notification(Notification { value, agent_id: None })
                     .emit(handle)
                     .await;
             }

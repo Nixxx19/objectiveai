@@ -19,8 +19,9 @@ pub fn parse_log_stream_ready(line: &str) -> Option<String> {
     let trimmed = line.trim();
     let parsed: Output<LogStreamReady> = serde_json::from_str(trimmed).ok()?;
     match parsed {
-        Output::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None,
+        Output::Notification(objectiveai_sdk::cli::output::Notification {
             value: LogStreamReady { log_stream_ready },
+            ..
         }) => Some(log_stream_ready),
         Output::Error(_) | Output::Begin | Output::End => None,
     }

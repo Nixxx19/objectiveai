@@ -453,7 +453,7 @@ mod imp {
 }
 
 async fn emit_notification(handle: &Handle, value: Updater) {
-    let output: Output<Updater> = Output::Notification(Notification { value });
+    let output: Output<Updater> = Output::Notification(Notification { value, agent_id: None });
     output.emit(handle).await;
 }
 
