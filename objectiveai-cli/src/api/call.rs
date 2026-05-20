@@ -7,8 +7,26 @@
 //!
 //! For no-body endpoints, `Req = ()` and `body = None`.
 
+use std::sync::Arc;
+
 use futures::StreamExt;
 use objectiveai_sdk::cli::output::{Handle, Notification, Output};
+
+/// Apply the `--agent-id` cli flag (if any) to the SDK HttpClient
+/// only when `build_http_client` didn't already populate
+/// `http.agent_id` from `OBJECTIVEAI_AGENT_ID`. Matches the user's
+/// rule: handle's agent_id (env-derived, mirrored on
+/// `http.agent_id`) takes precedence; flag is the fallback header.
+fn apply_agent_id_arg(
+    http: &mut objectiveai_sdk::HttpClient,
+    cli_config: &crate::Config,
+) {
+    if http.agent_id.is_none() {
+        if let Some(id) = &cli_config.agent_id_arg {
+            http.agent_id = Some(Arc::new(id.clone()));
+        }
+    }
+}
 
 pub async fn call_unary<Req, Resp>(
     cli_config: &crate::Config,
@@ -22,7 +40,8 @@ where
     Resp: serde::de::DeserializeOwned + serde::Serialize + Send + 'static,
 {
     let (_client, mut config) = crate::config::read(cli_config).await?;
-    let http = super::client::build_http_client(&mut config);
+    let mut http = super::client::build_http_client(&mut config);
+    apply_agent_id_arg(&mut http, cli_config);
     let response: Resp = http.send_unary(method, path, body).await?;
     Output::<Resp>::Notification(Notification { agent_id: None, value: response })
         .emit(handle)
@@ -42,7 +61,8 @@ where
     Chunk: serde::de::DeserializeOwned + serde::Serialize + Send + 'static,
 {
     let (_client, mut config) = crate::config::read(cli_config).await?;
-    let http = super::client::build_http_client(&mut config);
+    let mut http = super::client::build_http_client(&mut config);
+    apply_agent_id_arg(&mut http, cli_config);
     let stream = http
         .send_streaming::<Chunk, _, _>(method, path.to_string(), body)
         .await?;

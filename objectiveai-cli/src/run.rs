@@ -86,6 +86,7 @@ impl ConfigBuilder {
             commit_author_email: self.commit_author_email,
             github_authorization: self.github_authorization,
             agent_id: self.agent_id,
+            agent_id_arg: None,
         }
     }
 }
@@ -98,6 +99,14 @@ pub struct Config {
     pub commit_author_email: Option<String>,
     pub github_authorization: Option<String>,
     pub agent_id: Option<String>,
+    /// Value of the `--agent-id` cli flag (scoped to `objectiveai api
+    /// ...` subcommands). Distinct from `agent_id`, which is the
+    /// env-derived one used to stamp `Handle.agent_id` (output-side).
+    /// `agent_id_arg` only ever sets the `X-OBJECTIVEAI-AGENT-ID`
+    /// header, and only when `agent_id` (the env one) is `None`.
+    /// Populated by the `Commands::Api` dispatch arm; `None` for all
+    /// other command trees.
+    pub agent_id_arg: Option<String>,
 }
 
 #[derive(Parser)]
@@ -116,6 +125,13 @@ struct Cli {
 enum Commands {
     /// API configuration and operations
     Api {
+        /// Optional agent ID for the request's
+        /// `X-OBJECTIVEAI-AGENT-ID` header. Ignored when
+        /// `OBJECTIVEAI_AGENT_ID` is set in the environment — the
+        /// env value (which also feeds `Handle.agent_id`) always
+        /// wins.
+        #[arg(long, global = true)]
+        agent_id: Option<String>,
         #[command(subcommand)]
         command: api::Commands,
     },
@@ -193,7 +209,11 @@ impl Commands {
         handle: &objectiveai_sdk::cli::output::Handle,
     ) -> Result<(), error::Error> {
         match self {
-            Commands::Api { command } => command.handle(cli_config, handle).await,
+            Commands::Api { agent_id, command } => {
+                let mut cfg = cli_config.clone();
+                cfg.agent_id_arg = agent_id;
+                command.handle(&cfg, handle).await
+            }
             Commands::Agents { command } => command.handle(cli_config, handle).await,
             Commands::Swarms { command } => command.handle(cli_config, handle).await,
             Commands::Functions { command } => command.handle(cli_config, handle).await,
