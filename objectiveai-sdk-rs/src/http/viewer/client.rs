@@ -38,6 +38,10 @@ pub(super) struct ViewerData {
 /// app via `Arc<Client>`.
 pub struct Client {
     tx: mpsc::UnboundedSender<(ViewerData, Request)>,
+    /// Background task handle. `flush(self)` drops `tx` and `.await`s
+    /// this so every enqueued request lands (or exhausts its retry
+    /// budget) before the consumer drops the runtime.
+    handle: tokio::task::JoinHandle<()>,
     /// Fallback address used when a `send_*` call's `address` is
     /// `None`. Set from the constructor's `address` argument, or from
     /// `VIEWER_ADDRESS` if `address` is `None` and the `env` feature
@@ -95,7 +99,7 @@ impl Client {
         let bg_default_address = default_address.clone();
         let bg_default_signature = default_signature.clone();
 
-        tokio::spawn(async move {
+        let handle = tokio::spawn(async move {
             while let Some((viewer_data, request)) = rx.recv().await {
                 let (address, signature) = match viewer_data.address {
                     Some(addr) => (addr, viewer_data.signature),
@@ -117,6 +121,9 @@ impl Client {
                     }
                     Request::LaboratoryExecution(_) => {
                         format!("{}/laboratories/executions", address)
+                    }
+                    Request::AgentsFavoritesChanged(_) => {
+                        format!("{}/agents/favorites/changed", address)
                     }
                 };
 
@@ -169,9 +176,27 @@ impl Client {
 
         Self {
             tx,
+            handle,
             default_address,
             default_signature,
         }
+    }
+
+    /// Closes the channel and awaits the background task. After this
+    /// returns, every enqueued request has either succeeded or
+    /// exhausted its retry budget. Takes `self` so the
+    /// can't-send-after-flush invariant is enforced by the type
+    /// system.
+    ///
+    /// Intended for short-lived consumers (e.g. the cli) that must
+    /// drain in-flight POSTs before dropping the tokio runtime. Long-
+    /// lived consumers (api server) can rely on the natural drop
+    /// behavior — when the `Client` drops, `tx` drops, the bg task's
+    /// `rx.recv()` returns `None`, and the loop exits.
+    pub async fn flush(self) {
+        let Self { tx, handle, .. } = self;
+        drop(tx);
+        let _ = handle.await;
     }
 
     /// Internal helper. Pushes one `(ViewerData, Request)` onto the
@@ -367,6 +392,24 @@ impl Client {
                 id,
                 inner: error,
             })),
+        );
+    }
+
+    /// Enqueue an `agents_favorites_changed` notification. Posts to
+    /// `<address>/agents/favorites/changed`. Fired by the cli's
+    /// `agents favorites config {add,del,edit}` handlers so any
+    /// running viewer that exposes a `useFavoriteAgents()`-style hook
+    /// can refresh its favorites list.
+    pub fn send_agents_favorites_changed(
+        &self,
+        address: Option<Arc<String>>,
+        signature: Option<Arc<String>>,
+        notification: crate::agent::favorites::ChangedNotification,
+    ) {
+        self.enqueue(
+            address,
+            signature,
+            Request::AgentsFavoritesChanged(notification),
         );
     }
 }

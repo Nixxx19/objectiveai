@@ -107,4 +107,6 @@ pub enum Request {
     FunctionInventionRecursive(FunctionInventionRecursiveRequest),
     #[schemars(title = "LaboratoryExecution")]
     LaboratoryExecution(LaboratoryExecutionRequest),
+    #[schemars(title = "AgentsFavoritesChanged")]
+    AgentsFavoritesChanged(crate::agent::favorites::ChangedNotification),
 }

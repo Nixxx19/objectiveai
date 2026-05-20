@@ -101,6 +101,41 @@ pub fn build_http_client(
     )
 }
 
+/// Build the SDK's fire-and-forget viewer client with the same
+/// env→ViewerConfig resolution `build_http_client` uses for the
+/// `HttpClient`'s `x_viewer_*` fields (`VIEWER_ADDRESS` env →
+/// `compose_url(viewer.address, viewer.port)`; `VIEWER_SIGNATURE` env →
+/// `viewer.signature`).
+///
+/// Returned client owns an unbounded mpsc + a background tokio task
+/// that POSTs each enqueued request with exponential-backoff retry.
+/// `max_elapsed_time` is short (5s) because cli callers are
+/// interactive — beyond that the user has moved on and the
+/// notification is stale. Cli callers should `.flush().await` before
+/// returning so the bg task drains before the runtime drops.
+pub fn build_viewer_client(
+    config: &mut objectiveai_sdk::filesystem::config::Config,
+) -> objectiveai_sdk::http::viewer::Client {
+    let address = env("VIEWER_ADDRESS").or_else(|| {
+        let viewer = config.viewer();
+        compose_url(viewer.get_address(), viewer.get_port())
+    });
+    let signature = env("VIEWER_SIGNATURE")
+        .or_else(|| config.viewer().get_signature().map(String::from));
+
+    objectiveai_sdk::http::viewer::Client::new(
+        reqwest::Client::new(),
+        address,
+        signature,
+        std::time::Duration::from_millis(100),
+        std::time::Duration::from_millis(100),
+        0.5,
+        2.0,
+        std::time::Duration::from_secs(2),
+        std::time::Duration::from_secs(5),
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::compose_url;

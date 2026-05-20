@@ -121,6 +121,11 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
             tx.clone(),
         ),
         built_in_route("/laboratories/executions", "laboratories_executions", tx.clone()),
+        built_in_route(
+            "/agents/favorites/changed",
+            "agents_favorites_changed",
+            tx.clone(),
+        ),
     ] {
         app = app.route(path, route);
     }

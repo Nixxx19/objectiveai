@@ -11,6 +11,8 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(crate::agent::InlineAgent),
         schemars::schema_for!(crate::agent::RemoteAgent),
         schemars::schema_for!(crate::agent::Agent),
+        schemars::schema_for!(crate::agent::favorites::Action),
+        schemars::schema_for!(crate::agent::favorites::ChangedNotification),
         schemars::schema_for!(crate::agent::InlineAgentBaseWithFallbacksOrRemote),
         schemars::schema_for!(crate::agent::claude_agent_sdk::AgentBase),
         schemars::schema_for!(crate::agent::claude_agent_sdk::Agent),
