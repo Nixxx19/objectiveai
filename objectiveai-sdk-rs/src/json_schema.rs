@@ -454,6 +454,8 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::filesystem::plugins::ViewerRoute),
             schemars::schema_for!(crate::filesystem::plugins::HttpMethod),
             schemars::schema_for!(crate::filesystem::plugins::WhitelistEntry),
+            schemars::schema_for!(crate::filesystem::tools::Manifest),
+            schemars::schema_for!(crate::filesystem::tools::ManifestWithNameAndSource),
         ]);
     }
     #[cfg(feature = "cli")]
