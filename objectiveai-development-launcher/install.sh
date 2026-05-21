@@ -13,8 +13,8 @@
 # through a fresh `cargo build` — no per-crate install step
 # needed between edit and run.
 #
-# Backs up any existing real binary to `<name>.real$EXT` (once,
-# idempotent) so you can restore later via plain `cp`.
+# Overwrites any existing binary at these paths. To get back to the
+# real release binaries, rerun the root `install.sh` (without --dev).
 #
 # Usage:
 #   bash objectiveai-development-launcher/install.sh
@@ -54,20 +54,10 @@ mkdir -p "$INSTALL_DIR" "$BIN_DIR"
 # Layout matches the root install.sh:
 #   cli at $INSTALL_DIR/objectiveai$EXT
 #   others at $INSTALL_DIR/bin/objectiveai-<x>$EXT
-#
-# Backs up any existing real binary to <name>.real$EXT once
-# (idempotent — only writes the .real backup if absent, so a
-# later run after an updater has overwritten the live .exe still
-# preserves the original).
 
 install_launcher() {
   local name="$1" dst_dir="$2"
   local dst="$dst_dir/$name$EXT"
-  local bak="$dst_dir/$name.real$EXT"
-  if [ -f "$dst" ] && [ ! -f "$bak" ]; then
-    cp "$dst" "$bak"
-    echo "Backed up $dst -> $bak"
-  fi
   cp "$SRC" "$dst"
   chmod +x "$dst" 2>/dev/null || true
   echo "Installed development launcher: $dst (-> cargo run -p <pkg>)"
@@ -79,8 +69,5 @@ install_launcher "objectiveai-viewer" "$BIN_DIR"
 install_launcher "objectiveai-mcp"    "$BIN_DIR"
 
 echo ""
-echo "To restore the real binaries:"
-echo "  cp '$INSTALL_DIR/objectiveai.real$EXT' '$INSTALL_DIR/objectiveai$EXT'"
-echo "  cp '$BIN_DIR/objectiveai-api.real$EXT' '$BIN_DIR/objectiveai-api$EXT'"
-echo "  cp '$BIN_DIR/objectiveai-viewer.real$EXT' '$BIN_DIR/objectiveai-viewer$EXT'"
-echo "  cp '$BIN_DIR/objectiveai-mcp.real$EXT' '$BIN_DIR/objectiveai-mcp$EXT'"
+echo "To get back to the real release binaries, rerun the root install.sh"
+echo "(without --dev)."
