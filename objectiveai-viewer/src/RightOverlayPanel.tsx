@@ -47,6 +47,21 @@ export interface PanelTab {
    * `chunk.id` so the notify call can carry a `response_id`. The
    * first-chunk handler flushes them. Empty when idle. */
   pendingNotifyContent: AgentCompletionsMessageRichContent[];
+  /** Every user message ever sent mid-flight via notify, in
+   * insertion order. Rendered as DIMMED user bubbles at the
+   * BOTTOM of the chat (after all entries) — the "visual queue".
+   * As tool responses arrive carrying embedded
+   * `<system-reminder>` user notifications, the matching prefix
+   * is "absorbed" (FIFO) and those messages render in their
+   * natural position below the tool response. */
+  notifyHistory: AgentCompletionsMessageMessage[];
+  /** Open/closed overrides for collapsibles (reasoning, tool
+   * calls, tool responses). Keyed via the helpers in
+   * `chat/dropdownKey.ts`. Absence = use default state. User
+   * clicks set entries here; persists for the lifetime of the
+   * panel tab so toggling the panel / switching tabs preserves
+   * the user's preference. */
+  dropdownOverrides: Record<string, boolean>;
 }
 
 interface RightOverlayPanelProps {
@@ -90,6 +105,8 @@ export function RightOverlayPanel({
       continuation: null,
       inFlightEntryIndex: null,
       pendingNotifyContent: [],
+      notifyHistory: [],
+      dropdownOverrides: {},
     };
     setPanelTabs((prev) => [...prev, tab]);
     setActivePanelTabId(id);
@@ -260,6 +277,7 @@ export function RightOverlayPanel({
         {activeTab ? (
           <ActiveTabBody
             tab={activeTab}
+            setPanelTabs={setPanelTabs}
             onDraftChange={(draft) => updateTab(activeTab.id, { draft })}
             onAttachmentsChange={(attachments) =>
               updateTab(activeTab.id, { attachments })
@@ -390,6 +408,7 @@ function FavoritesDropdown({ favorites, error, onPick }: FavoritesDropdownProps)
 
 interface ActiveTabBodyProps {
   tab: PanelTab;
+  setPanelTabs: Dispatch<SetStateAction<PanelTab[]>>;
   onDraftChange: (value: string) => void;
   onAttachmentsChange: (
     next: AgentCompletionsMessageRichContentPart[],
@@ -399,6 +418,7 @@ interface ActiveTabBodyProps {
 
 function ActiveTabBody({
   tab,
+  setPanelTabs,
   onDraftChange,
   onAttachmentsChange,
   onSend,
@@ -414,7 +434,7 @@ function ActiveTabBody({
           "dark:bg-neutral-950",
         )}
       >
-        <MessageList tab={tab} />
+        <MessageList tab={tab} setPanelTabs={setPanelTabs} />
       </div>
 
       <ChatPane

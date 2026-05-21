@@ -86,6 +86,9 @@ importers:
       '@tauri-apps/api':
         specifier: ^2.10.1
         version: 2.10.1
+      '@uiw/react-json-view':
+        specifier: 2.0.0-alpha.42
+        version: 2.0.0-alpha.42(@babel/runtime@7.29.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       classnames:
         specifier: ^2.5.1
         version: 2.5.1
@@ -232,6 +235,10 @@ packages:
     resolution: {integrity: sha512-IyDgFV5GeDUVX4YdF/3CPULtVGSXXMLh1xVIgdCgxApktqnQV0r7/8Nqthg+8YLGaAtdyIlo2qIdZrbCv4+7ww==}
     engines: {node: '>=6.0.0'}
     hasBin: true
+
+  '@babel/runtime@7.29.2':
+    resolution: {integrity: sha512-JiDShH45zKHWyGe4ZNVRrCjBz8Nh9TMmZG1kh4QTK8hCBTWBi8Da+i7s1fJw7/lYpM4ccepSNfqzZ/QvABBi5g==}
+    engines: {node: '>=6.9.0'}
 
   '@babel/template@7.28.6':
     resolution: {integrity: sha512-YA6Ma2KsCdGb+WC6UpBVFJGXL58MDA6oyONbjyF/+5sBgxY/dwkhLogbMT2GXXyU84/IhRw/2D1Os1B/giz+BQ==}
@@ -1247,6 +1254,13 @@ packages:
   '@typescript-eslint/visitor-keys@8.56.0':
     resolution: {integrity: sha512-q+SL+b+05Ud6LbEE35qe4A99P+htKTKVbyiNEe45eCbJFyh/HVK9QXwlrbz+Q4L8SOW4roxSVwXYj4DMBT7Ieg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@uiw/react-json-view@2.0.0-alpha.42':
+    resolution: {integrity: sha512-PY7IF+zL3gYaW/FG3th0w6JG2SpkYqh/UZOgKm2XuY/UpCZ5inWlopR+pfRadRz/k/uTaOhsQa9jZnlp8QBJDA==}
+    peerDependencies:
+      '@babel/runtime': '>=7.10.0'
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
 
   '@unrs/resolver-binding-android-arm-eabi@1.11.1':
     resolution: {integrity: sha512-ppLRUgHVaGRWUx0R0Ut06Mjo9gBaBkg3v/8AxusGLhsIotbBLuRk51rAzqLC8gq6NyyAojEXglNjzf6R948DNw==}
@@ -3598,6 +3612,8 @@ snapshots:
     dependencies:
       '@babel/types': 7.29.0
 
+  '@babel/runtime@7.29.2': {}
+
   '@babel/template@7.28.6':
     dependencies:
       '@babel/code-frame': 7.29.0
@@ -4383,6 +4399,12 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 8.56.0
       eslint-visitor-keys: 5.0.0
+
+  '@uiw/react-json-view@2.0.0-alpha.42(@babel/runtime@7.29.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@babel/runtime': 7.29.2
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
 
   '@unrs/resolver-binding-android-arm-eabi@1.11.1':
     optional: true

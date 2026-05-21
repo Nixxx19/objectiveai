@@ -194,16 +194,21 @@ export function useAgentChat(
         const userEntry: PanelTabEntry = { kind: "user", message: built };
 
         if (t.inFlightEntryIndex !== null) {
-          // Mid-flight: append the user message AFTER the streaming completion.
+          // Mid-flight: don't append to entries; push onto
+          // notifyHistory (renders as a dimmed bubble at the
+          // chat bottom). Once the agent's tool response brings
+          // it back as a <system-reminder>, it'll naturally
+          // appear in chronological position and the dimmed
+          // bubble will disappear.
           const inFlight = t.entries[t.inFlightEntryIndex];
           const content = (built as { content: AgentCompletionsMessageRichContent }).content;
           if (inFlight?.kind === "completion" && inFlight.chunk?.id) {
             notifyNow = { responseId: inFlight.chunk.id, content };
-            return { ...cleared, entries: [...t.entries, userEntry] };
+            return { ...cleared, notifyHistory: [...t.notifyHistory, built] };
           }
           return {
             ...cleared,
-            entries: [...t.entries, userEntry],
+            notifyHistory: [...t.notifyHistory, built],
             pendingNotifyContent: [...t.pendingNotifyContent, content],
           };
         }

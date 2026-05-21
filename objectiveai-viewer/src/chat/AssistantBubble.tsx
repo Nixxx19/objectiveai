@@ -3,14 +3,33 @@ import type {
   AgentCompletionsMessageRichContentPart,
   AgentCompletionsResponseStreamingAssistantResponseChunk,
 } from "@objectiveai/sdk";
+import { ReasoningBlock } from "./ReasoningBlock";
+import { ToolCallBlock } from "./ToolCallBlock";
+import { reasoningKey, toolCallKey } from "./dropdownKey";
 
 interface AssistantBubbleProps {
   msg: AgentCompletionsResponseStreamingAssistantResponseChunk;
   streaming?: boolean;
+  entryRequestId: string;
+  msgIndex: number;
+  overrides: Record<string, boolean>;
+  setOverride: (key: string, open: boolean) => void;
 }
 
-export function AssistantBubble({ msg, streaming = false }: AssistantBubbleProps) {
+export function AssistantBubble({
+  msg,
+  streaming = false,
+  entryRequestId,
+  msgIndex,
+  overrides,
+  setOverride,
+}: AssistantBubbleProps) {
   const pulseHere = streaming && !msg.finish_reason;
+  const hasReasoning = !!msg.reasoning && msg.reasoning.length > 0;
+  const hasContent = !isEmptyRichContent(msg.content);
+  const hasToolCalls = (msg.tool_calls?.length ?? 0) > 0;
+  const reasoningDefaultOpen = !hasContent && !hasToolCalls;
+
   return (
     <div
       className={cn(
@@ -33,40 +52,14 @@ export function AssistantBubble({ msg, streaming = false }: AssistantBubbleProps
         "break-words",
       )}
     >
-      {msg.reasoning && (
-        <details
-          className={cn(
-            "mb-2",
-            "rounded",
-            "bg-neutral-100",
-            "dark:bg-neutral-900",
-            "px-2",
-            "py-1",
-          )}
-        >
-          <summary
-            className={cn(
-              "cursor-pointer",
-              "text-xs",
-              "text-neutral-500",
-              "dark:text-neutral-400",
-              "select-none",
-            )}
-          >
-            Thinking
-          </summary>
-          <div
-            className={cn(
-              "mt-1",
-              "text-xs",
-              "text-neutral-600",
-              "dark:text-neutral-400",
-              "whitespace-pre-wrap",
-            )}
-          >
-            {msg.reasoning}
-          </div>
-        </details>
+      {hasReasoning && (
+        <ReasoningBlock
+          text={msg.reasoning ?? ""}
+          dropdownKey={reasoningKey(entryRequestId, msgIndex)}
+          defaultOpen={reasoningDefaultOpen}
+          overrides={overrides}
+          setOverride={setOverride}
+        />
       )}
 
       {msg.refusal && (
@@ -90,9 +83,7 @@ export function AssistantBubble({ msg, streaming = false }: AssistantBubbleProps
         </div>
       )}
 
-      {msg.content !== null && msg.content !== undefined && (
-        <RichContent content={msg.content as unknown} />
-      )}
+      {hasContent && <RichContent content={msg.content as unknown} />}
 
       {pulseHere && (
         <span
@@ -109,8 +100,35 @@ export function AssistantBubble({ msg, streaming = false }: AssistantBubbleProps
           aria-label="streaming"
         />
       )}
+
+      {hasToolCalls &&
+        msg.tool_calls!.map((call, ci) => (
+          <ToolCallBlock
+            key={ci}
+            call={call}
+            dropdownKey={toolCallKey(entryRequestId, msgIndex, ci)}
+            overrides={overrides}
+            setOverride={setOverride}
+          />
+        ))}
     </div>
   );
+}
+
+function isEmptyRichContent(content: unknown): boolean {
+  if (content === null || content === undefined) return true;
+  if (typeof content === "string") return content.trim().length === 0;
+  if (Array.isArray(content)) {
+    if (content.length === 0) return true;
+    return content.every((part) => {
+      if (typeof part !== "object" || part === null) return true;
+      if ("text" in part && typeof (part as { text: unknown }).text === "string") {
+        return (part as { text: string }).text.trim().length === 0;
+      }
+      return false; // image, file, audio, video etc. count as content
+    });
+  }
+  return false;
 }
 
 function RichContent({ content }: { content: unknown }) {
