@@ -1,4 +1,4 @@
-//! Faux launcher binary for `~/.objectiveai/`.
+//! Development launcher binary for `~/.objectiveai/`.
 //!
 //! Copies of this binary live at the install paths for the four
 //! production executables (`objectiveai{,-api,-viewer,-mcp}.exe`).
@@ -28,7 +28,7 @@ fn main() -> std::process::ExitCode {
     let exe = match std::env::current_exe() {
         Ok(p) => p,
         Err(e) => {
-            eprintln!("objectiveai-faux-launcher: current_exe() failed: {e}");
+            eprintln!("objectiveai-development-launcher: current_exe() failed: {e}");
             return std::process::ExitCode::from(127);
         }
     };
@@ -41,7 +41,7 @@ fn main() -> std::process::ExitCode {
         Some(p) => p,
         None => {
             eprintln!(
-                "objectiveai-faux-launcher: unknown launcher name {stem:?} \
+                "objectiveai-development-launcher: unknown launcher name {stem:?} \
                  (expected one of: objectiveai, objectiveai-api, \
                  objectiveai-viewer, objectiveai-mcp)"
             );
@@ -66,7 +66,7 @@ fn main() -> std::process::ExitCode {
         }
         Err(e) => {
             eprintln!(
-                "objectiveai-faux-launcher: failed to spawn `cargo run -p {pkg}` \
+                "objectiveai-development-launcher: failed to spawn `cargo run -p {pkg}` \
                  in {REPO_ROOT:?}: {e}"
             );
             std::process::ExitCode::from(127)
