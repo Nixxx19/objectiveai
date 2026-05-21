@@ -1,0 +1,15 @@
+{
+  "title": "filesystem.tools.Manifest",
+  "description": "Declarative metadata a local tool ships with. The wire shape is\nJSON: `<base_dir>/tools/<name>.json`. Companion executable lives\nalongside in `<base_dir>/tools/<exec>`.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "description": "One-line description of what the tool does. Surfaced to\nagents that consume the tool.",
+      "type": "string"
+    },
+    "exec": {
+      "description": "Filename of the executable to invoke, resolved relative to\n`<base_dir>/tools/`. The author is responsible for including\nany platform-specific extension (`.exe`, `.sh`, `.bat`, …) —\nthe SDK doesn't synthesise one.",
+      "type": "string"
+    }
+  }
+}
