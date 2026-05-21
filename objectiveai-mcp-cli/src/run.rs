@@ -95,7 +95,14 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         suppress_output: _,
     } = config;
 
-    let server = ObjectiveAiMcpCli::new(cli_config);
+    let plugins = objectiveai_sdk::filesystem::Client::new(
+        cli_config.config_base_dir.as_deref(),
+        cli_config.commit_author_name.as_deref(),
+        cli_config.commit_author_email.as_deref(),
+    )
+    .list_plugins(0, usize::MAX)
+    .await;
+    let server = ObjectiveAiMcpCli::with_plugins(cli_config, plugins);
     let ct = CancellationToken::new();
 
     let service: StreamableHttpService<ObjectiveAiMcpCli, LocalSessionManager> =
