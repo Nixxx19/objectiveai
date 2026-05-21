@@ -67,7 +67,3 @@ install_launcher "objectiveai"        "$INSTALL_DIR"
 install_launcher "objectiveai-api"    "$BIN_DIR"
 install_launcher "objectiveai-viewer" "$BIN_DIR"
 install_launcher "objectiveai-mcp"    "$BIN_DIR"
-
-echo ""
-echo "To get back to the real release binaries, rerun the root install.sh"
-echo "(without --dev)."
