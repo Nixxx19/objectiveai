@@ -9,10 +9,11 @@ import {
   type AgentCompletionsMessageMessage,
   type AgentCompletionsMessageRichContent,
   type AgentCompletionsMessageRichContentPart,
+  type FilesystemConfigFavorite,
   type ViewerEvent,
 } from "@objectiveai/sdk";
 import { buildAgentCompletionRequest } from "./buildAgentCompletionRequest";
-import type { PanelTab, PanelTabTurn } from "../RightOverlayPanel";
+import type { PanelTab, PanelTabCompletionEntry, PanelTabEntry } from "../RightOverlayPanel";
 
 interface UseAgentChat {
   sendMessage: (tabId: string) => void;
@@ -43,104 +44,55 @@ export function useAgentChat(
     [],
   );
 
-  const finalizeTurn = useCallback(
-    (tabId: string) => {
-      let drain = false;
-      setPanelTabs((prev) => prev.map((t) => {
-        if (t.id !== tabId || t.inFlightIndex === null) return t;
-        const idx = t.inFlightIndex;
-        const turn = t.turns[idx];
-        if (!turn) return t;
-        const finalChunk = turn.completion;
-        const continuation = finalChunk?.continuation ?? t.continuation;
-        const messagesQueued = finalChunk?.messages_queued === true;
-        const turns = t.turns.slice();
-        turns[idx] = { ...turn, streaming: false };
-        drain = messagesQueued;
-        return {
-          ...t,
-          turns,
-          continuation,
-          inFlightIndex: null,
-          pendingNotifyContent: [],
-        };
-      }));
-      if (drain) {
-        queueMicrotask(() => startTurn(tabId, []));
-      }
-    },
-    [setPanelTabs],
-  );
-
-  const startTurn = useCallback(
-    async (tabId: string, users: AgentCompletionsMessageMessage[]) => {
-      const requestId = crypto.randomUUID();
+  const startStream = useCallback(
+    async (
+      tabId: string,
+      requestId: string,
+      favorite: FilesystemConfigFavorite,
+      messages: AgentCompletionsMessageMessage[],
+      continuation: string | null,
+    ) => {
       const origin = `agent-completion-${requestId}`;
-
-      let favorite: PanelTab["favorite"] | undefined;
-      let continuation: string | null = null;
-      let invalid = false;
-      setPanelTabs((prev) => prev.map((t) => {
-        if (t.id !== tabId) return t;
-        if (t.inFlightIndex !== null) {
-          invalid = true;
-          return t;
-        }
-        favorite = t.favorite;
-        continuation = t.continuation;
-        const turn: PanelTabTurn = {
-          users,
-          completion: null,
-          streaming: true,
-          error: null,
-          requestId,
-        };
-        return {
-          ...t,
-          turns: [...t.turns, turn],
-          inFlightIndex: t.turns.length,
-          pendingNotifyContent: [],
-        };
-      }));
-      if (invalid || !favorite) return;
-
-      const request = buildAgentCompletionRequest(favorite, users, continuation);
+      const request = buildAgentCompletionRequest(favorite, messages, continuation);
 
       let unlisten: UnlistenFn | undefined;
       unlisten = await listen<ViewerEvent>(origin, (ev) => {
         const ce = ViewerEventSchema.safeParse(ev.payload);
         if (!ce.success || ce.data.type !== "cli_command") return;
         const line = ce.data.value as { type?: string; value?: unknown };
+
         if (line.type === "notification") {
           const parsed = AgentCompletionsResponseStreamingAgentCompletionChunkSchema
             .safeParse(line.value);
           if (!parsed.success) return;
           const next = parsed.data;
           const toFlush: AgentCompletionsMessageRichContent[] = [];
-          let firstChunkResponseId: string | null = null;
+          let flushedResponseId: string | null = null;
           setPanelTabs((prev) => prev.map((t) => {
-            if (t.id !== tabId || t.inFlightIndex === null) return t;
-            const idx = t.inFlightIndex;
-            const turn = t.turns[idx];
-            if (!turn || turn.requestId !== requestId) return t;
-            const wasNull = turn.completion === null;
-            const merged: typeof next = turn.completion
+            if (t.id !== tabId || t.inFlightEntryIndex === null) return t;
+            const idx = t.inFlightEntryIndex;
+            const entry = t.entries[idx];
+            if (!entry || entry.kind !== "completion" || entry.requestId !== requestId) {
+              return t;
+            }
+            const wasNull = entry.chunk === null;
+            const merged = entry.chunk
               ? agentCompletionsResponseStreamingAgentCompletionChunkMerged(
-                  turn.completion, next,
+                  entry.chunk, next,
                 )[0]
               : next;
+            const entries = t.entries.slice();
+            entries[idx] = { ...entry, chunk: merged };
+
             if (wasNull && merged.id && t.pendingNotifyContent.length > 0) {
-              firstChunkResponseId = merged.id;
+              flushedResponseId = merged.id;
               toFlush.push(...t.pendingNotifyContent);
+              return { ...t, entries, pendingNotifyContent: [] };
             }
-            const turns = t.turns.slice();
-            turns[idx] = { ...turn, completion: merged };
-            return wasNull && toFlush.length > 0
-              ? { ...t, turns, pendingNotifyContent: [] }
-              : { ...t, turns };
+            return { ...t, entries };
           }));
-          if (firstChunkResponseId !== null) {
-            const rid = firstChunkResponseId;
+          if (flushedResponseId !== null) {
+            const rid = flushedResponseId;
             for (const content of toFlush) {
               queueMicrotask(() => fireNotify(rid, content));
             }
@@ -149,17 +101,19 @@ export function useAgentChat(
           const parsed = ErrorResponseErrorSchema.safeParse(line.value);
           if (!parsed.success) return;
           setPanelTabs((prev) => prev.map((t) => {
-            if (t.id !== tabId || t.inFlightIndex === null) return t;
-            const idx = t.inFlightIndex;
-            const turn = t.turns[idx];
-            if (!turn || turn.requestId !== requestId) return t;
-            const turns = t.turns.slice();
-            turns[idx] = { ...turn, error: parsed.data };
-            return { ...t, turns };
+            if (t.id !== tabId || t.inFlightEntryIndex === null) return t;
+            const idx = t.inFlightEntryIndex;
+            const entry = t.entries[idx];
+            if (!entry || entry.kind !== "completion" || entry.requestId !== requestId) {
+              return t;
+            }
+            const entries = t.entries.slice();
+            entries[idx] = { ...entry, error: parsed.data };
+            return { ...t, entries };
           }));
         } else if (line.type === "end") {
           unlisten?.();
-          finalizeTurn(tabId);
+          finalizeStream(tabId, requestId);
         }
       });
 
@@ -171,50 +125,124 @@ export function useAgentChat(
         origin,
       });
     },
-    [setPanelTabs, fireNotify, finalizeTurn],
+    [setPanelTabs, fireNotify],
+  );
+
+  const finalizeStream = useCallback(
+    (tabId: string, requestId: string) => {
+      let scheduleDrain: { favorite: FilesystemConfigFavorite; continuation: string | null; drainRequestId: string } | null = null;
+      setPanelTabs((prev) => prev.map((t) => {
+        if (t.id !== tabId || t.inFlightEntryIndex === null) return t;
+        const idx = t.inFlightEntryIndex;
+        const entry = t.entries[idx];
+        if (!entry || entry.kind !== "completion" || entry.requestId !== requestId) {
+          return t;
+        }
+        const finalChunk = entry.chunk;
+        const continuation = finalChunk?.continuation ?? t.continuation;
+        const messagesQueued = finalChunk?.messages_queued === true;
+        const entries = t.entries.slice();
+        entries[idx] = { ...entry, streaming: false };
+
+        if (messagesQueued) {
+          const drainRequestId = crypto.randomUUID();
+          const drainEntry: PanelTabCompletionEntry = {
+            kind: "completion",
+            chunk: null,
+            streaming: true,
+            error: null,
+            requestId: drainRequestId,
+          };
+          entries.push(drainEntry);
+          scheduleDrain = { favorite: t.favorite, continuation, drainRequestId };
+          return {
+            ...t,
+            entries,
+            continuation,
+            inFlightEntryIndex: entries.length - 1,
+            pendingNotifyContent: [],
+          };
+        }
+
+        return {
+          ...t,
+          entries,
+          continuation,
+          inFlightEntryIndex: null,
+          pendingNotifyContent: [],
+        };
+      }));
+      if (scheduleDrain) {
+        const { favorite, continuation, drainRequestId } = scheduleDrain;
+        queueMicrotask(() => startStream(tabId, drainRequestId, favorite, [], continuation));
+      }
+    },
+    [setPanelTabs, startStream],
   );
 
   const sendMessage = useCallback(
     (tabId: string) => {
-      let userMsg: AgentCompletionsMessageMessage | null = null;
-      let startFresh = false;
+      let startFresh:
+        | { favorite: FilesystemConfigFavorite; continuation: string | null; requestId: string; userMsg: AgentCompletionsMessageMessage }
+        | null = null;
       let notifyNow: { responseId: string; content: AgentCompletionsMessageRichContent } | null = null;
       setPanelTabs((prev) => prev.map((t) => {
         if (t.id !== tabId) return t;
         const built = buildUserMessage(t.draft, t.attachments);
         if (built === null) return t;
-        userMsg = built;
         const cleared = { ...t, draft: "", attachments: [] };
-        if (t.inFlightIndex === null) {
-          startFresh = true;
-          return cleared;
+        const userEntry: PanelTabEntry = { kind: "user", message: built };
+
+        if (t.inFlightEntryIndex !== null) {
+          // Mid-flight: append the user message AFTER the streaming completion.
+          const inFlight = t.entries[t.inFlightEntryIndex];
+          const content = (built as { content: AgentCompletionsMessageRichContent }).content;
+          if (inFlight?.kind === "completion" && inFlight.chunk?.id) {
+            notifyNow = { responseId: inFlight.chunk.id, content };
+            return { ...cleared, entries: [...t.entries, userEntry] };
+          }
+          return {
+            ...cleared,
+            entries: [...t.entries, userEntry],
+            pendingNotifyContent: [...t.pendingNotifyContent, content],
+          };
         }
-        const idx = t.inFlightIndex;
-        const turn = t.turns[idx];
-        if (!turn) return cleared;
-        const turns = t.turns.slice();
-        turns[idx] = { ...turn, users: [...turn.users, built] };
-        const content = (built as { content: AgentCompletionsMessageRichContent }).content;
-        if (turn.completion?.id) {
-          notifyNow = { responseId: turn.completion.id, content };
-          return { ...cleared, turns };
-        }
+
+        // Idle: append user entry + completion entry atomically, set inFlight.
+        const requestId = crypto.randomUUID();
+        const completionEntry: PanelTabEntry = {
+          kind: "completion",
+          chunk: null,
+          streaming: true,
+          error: null,
+          requestId,
+        };
+        const entries = [...t.entries, userEntry, completionEntry];
+        startFresh = {
+          favorite: t.favorite,
+          continuation: t.continuation,
+          requestId,
+          userMsg: built,
+        };
         return {
           ...cleared,
-          turns,
-          pendingNotifyContent: [...t.pendingNotifyContent, content],
+          entries,
+          inFlightEntryIndex: entries.length - 1,
+          pendingNotifyContent: [],
         };
       }));
-      if (startFresh && userMsg) {
-        const msg = userMsg;
-        queueMicrotask(() => startTurn(tabId, [msg]));
+      if (startFresh) {
+        const { favorite, continuation, requestId, userMsg } = startFresh;
+        queueMicrotask(() =>
+          startStream(tabId, requestId, favorite, [userMsg], continuation),
+        );
       }
       if (notifyNow) {
         const n = notifyNow as { responseId: string; content: AgentCompletionsMessageRichContent };
         queueMicrotask(() => fireNotify(n.responseId, n.content));
       }
     },
-    [setPanelTabs, startTurn, fireNotify],
+    [setPanelTabs, startStream, fireNotify],
   );
 
   return { sendMessage };

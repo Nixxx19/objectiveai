@@ -12,22 +12,40 @@ import { useFavoriteAgents } from "./useFavoriteAgents";
 import { ChatPane } from "./ChatPane";
 import { MessageList } from "./chat/MessageList";
 
-export interface PanelTabTurn {
-  users: AgentCompletionsMessageMessage[];
-  completion: AgentCompletionsResponseStreamingAgentCompletionChunk | null;
+export interface PanelTabUserEntry {
+  kind: "user";
+  message: AgentCompletionsMessageMessage;
+}
+
+export interface PanelTabCompletionEntry {
+  kind: "completion";
+  chunk: AgentCompletionsResponseStreamingAgentCompletionChunk | null;
   streaming: boolean;
   error: ErrorResponseError | null;
+  /** Per-completion uuid used as the cli_run channel name. Distinct
+   * from `chunk.id` (server-assigned response_id used for notify). */
   requestId: string;
 }
+
+export type PanelTabEntry = PanelTabUserEntry | PanelTabCompletionEntry;
 
 export interface PanelTab {
   id: string;
   favorite: FilesystemConfigFavorite;
   draft: string;
   attachments: AgentCompletionsMessageRichContentPart[];
-  turns: PanelTabTurn[];
+  /** Chronologically-ordered chat entries. Render in order. */
+  entries: PanelTabEntry[];
+  /** Opaque continuation, from the most recent completion entry's
+   * final chunk. */
   continuation: string | null;
-  inFlightIndex: number | null;
+  /** Index into `entries` of the currently-streaming completion
+   * entry (which has `kind: "completion"` and `streaming: true`),
+   * or `null` when idle. */
+  inFlightEntryIndex: number | null;
+  /** RichContent payloads waiting on the in-flight completion's
+   * `chunk.id` so the notify call can carry a `response_id`. The
+   * first-chunk handler flushes them. Empty when idle. */
   pendingNotifyContent: AgentCompletionsMessageRichContent[];
 }
 
@@ -68,9 +86,9 @@ export function RightOverlayPanel({
       favorite,
       draft: "",
       attachments: [],
-      turns: [],
+      entries: [],
       continuation: null,
-      inFlightIndex: null,
+      inFlightEntryIndex: null,
       pendingNotifyContent: [],
     };
     setPanelTabs((prev) => [...prev, tab]);
