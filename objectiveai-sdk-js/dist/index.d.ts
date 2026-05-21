@@ -3608,6 +3608,7 @@ declare const AgentCompletionsResponseStreamingAgentCompletionChunkSchema: z.Zod
         role: z.ZodLiteral<"tool">;
         tool_call_id: z.ZodString;
     }, z.core.$strip>]>>;
+    messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     object: z.ZodLiteral<"agent.completion.chunk">;
     upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
     usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -4045,6 +4046,7 @@ declare const AgentCompletionsResponseUnaryAgentCompletionSchema: z.ZodObject<{
         role: z.ZodLiteral<"tool">;
         tool_call_id: z.ZodString;
     }, z.core.$strip>]>>;
+    messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     object: z.ZodLiteral<"agent.completion">;
     upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
     usage: z.ZodObject<{
@@ -38145,6 +38147,7 @@ declare const FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema: z
         role: z.ZodLiteral<"tool">;
         tool_call_id: z.ZodString;
     }, z.core.$strip>]>>;
+    messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     object: z.ZodLiteral<"agent.completion.chunk">;
     upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
     usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -38363,6 +38366,7 @@ declare const FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchem
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion.chunk">;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
         usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -38636,6 +38640,7 @@ declare const FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema: 
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion.chunk">;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
         usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -38883,6 +38888,7 @@ declare const FunctionsExecutionsResponseUnaryReasoningSummarySchema: z.ZodObjec
         role: z.ZodLiteral<"tool">;
         tool_call_id: z.ZodString;
     }, z.core.$strip>]>>;
+    messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     object: z.ZodLiteral<"agent.completion">;
     upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
     usage: z.ZodObject<{
@@ -39084,6 +39090,7 @@ declare const FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema: z.ZodO
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion">;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
         usage: z.ZodObject<{
@@ -39356,6 +39363,7 @@ declare const FunctionsExecutionsResponseUnaryFunctionExecutionSchema: z.ZodObje
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion">;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
         usage: z.ZodObject<{
@@ -41910,6 +41918,7 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionChun
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion.chunk">;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
         usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -44189,6 +44198,7 @@ declare const FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
                 role: z.ZodLiteral<"tool">;
                 tool_call_id: z.ZodString;
             }, z.core.$strip>]>>;
+            messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             object: z.ZodLiteral<"agent.completion.chunk">;
             upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
             usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -46517,6 +46527,7 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiv
                 role: z.ZodLiteral<"tool">;
                 tool_call_id: z.ZodString;
             }, z.core.$strip>]>>;
+            messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             object: z.ZodLiteral<"agent.completion">;
             upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
             usage: z.ZodObject<{
@@ -48827,6 +48838,7 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema: 
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion">;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
         usage: z.ZodObject<{
@@ -56425,6 +56437,7 @@ declare const FunctionsInventionsResponseStreamingAgentCompletionChunkSchema: z.
         role: z.ZodLiteral<"tool">;
         tool_call_id: z.ZodString;
     }, z.core.$strip>]>>;
+    messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     object: z.ZodLiteral<"agent.completion.chunk">;
     upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
     usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -56605,6 +56618,7 @@ declare const FunctionsInventionsResponseStreamingFunctionInventionChunkSchema: 
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion.chunk">;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
         usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -58899,6 +58913,7 @@ declare const FunctionsInventionsResponseUnaryFunctionInventionSchema: z.ZodObje
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion">;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
         usage: z.ZodObject<{
@@ -61178,6 +61193,7 @@ declare const FunctionsInventionsResponseUnaryAgentCompletionSchema: z.ZodObject
         role: z.ZodLiteral<"tool">;
         tool_call_id: z.ZodString;
     }, z.core.$strip>]>>;
+    messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     object: z.ZodLiteral<"agent.completion">;
     upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
     usage: z.ZodObject<{
@@ -69561,6 +69577,7 @@ declare const FunctionsProfilesComputationsResponseStreamingFunctionExecutionChu
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion.chunk">;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
         usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -71126,6 +71143,7 @@ declare const FunctionsProfilesComputationsResponseStreamingFunctionProfileCompu
                 role: z.ZodLiteral<"tool">;
                 tool_call_id: z.ZodString;
             }, z.core.$strip>]>>;
+            messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             object: z.ZodLiteral<"agent.completion.chunk">;
             upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
             usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -71438,6 +71456,7 @@ declare const FunctionsProfilesComputationsResponseUnaryFunctionProfileComputati
                 role: z.ZodLiteral<"tool">;
                 tool_call_id: z.ZodString;
             }, z.core.$strip>]>>;
+            messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             object: z.ZodLiteral<"agent.completion">;
             upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
             usage: z.ZodObject<{
@@ -71746,6 +71765,7 @@ declare const FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema:
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion">;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
         usage: z.ZodObject<{
@@ -95109,6 +95129,7 @@ declare const HttpViewerAgentCompletionRequestSchema: z.ZodUnion<readonly [z.Zod
         role: z.ZodLiteral<"tool">;
         tool_call_id: z.ZodString;
     }, z.core.$strip>]>>;
+    messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     object: z.ZodLiteral<"agent.completion.chunk">;
     upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
     usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -101398,6 +101419,7 @@ declare const HttpViewerFunctionExecutionRequestSchema: z.ZodUnion<readonly [z.Z
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion.chunk">;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
         usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -105155,6 +105177,7 @@ declare const HttpViewerFunctionInventionRecursiveRequestSchema: z.ZodUnion<read
                 role: z.ZodLiteral<"tool">;
                 tool_call_id: z.ZodString;
             }, z.core.$strip>]>>;
+            messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             object: z.ZodLiteral<"agent.completion.chunk">;
             upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
             usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -113212,6 +113235,7 @@ declare const HttpViewerLaboratoryExecutionRequestSchema: z.ZodUnion<readonly [z
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion.chunk">;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
         usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -113395,6 +113419,7 @@ declare const HttpViewerLaboratoryExecutionRequestSchema: z.ZodUnion<readonly [z
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion.chunk">;
         output: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionInputValue, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputValue, unknown>>>>;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
@@ -115085,6 +115110,7 @@ declare const HttpViewerRequestSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
         role: z.ZodLiteral<"tool">;
         tool_call_id: z.ZodString;
     }, z.core.$strip>]>>;
+    messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     object: z.ZodLiteral<"agent.completion.chunk">;
     upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
     usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -118338,6 +118364,7 @@ declare const HttpViewerRequestSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion.chunk">;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
         usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -120319,6 +120346,7 @@ declare const HttpViewerRequestSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
                 role: z.ZodLiteral<"tool">;
                 tool_call_id: z.ZodString;
             }, z.core.$strip>]>>;
+            messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
             object: z.ZodLiteral<"agent.completion.chunk">;
             upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
             usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -125498,6 +125526,7 @@ declare const HttpViewerRequestSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion.chunk">;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
         usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -125681,6 +125710,7 @@ declare const HttpViewerRequestSchema: z.ZodUnion<readonly [z.ZodUnion<readonly 
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion.chunk">;
         output: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionInputValue, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputValue, unknown>>>>;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
@@ -128780,6 +128810,7 @@ declare const LaboratoriesExecutionsResponseStreamingBuilderChunkSchema: z.ZodOb
         role: z.ZodLiteral<"tool">;
         tool_call_id: z.ZodString;
     }, z.core.$strip>]>>;
+    messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     object: z.ZodLiteral<"agent.completion.chunk">;
     upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
     usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -128960,6 +128991,7 @@ declare const LaboratoriesExecutionsResponseStreamingEvaluationChunkSchema: z.Zo
         role: z.ZodLiteral<"tool">;
         tool_call_id: z.ZodString;
     }, z.core.$strip>]>>;
+    messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     object: z.ZodLiteral<"agent.completion.chunk">;
     output: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionInputValue, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputValue, unknown>>>>;
     upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
@@ -129161,6 +129193,7 @@ declare const LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkSch
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion.chunk">;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
         usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -129344,6 +129377,7 @@ declare const LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkSch
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion.chunk">;
         output: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionInputValue, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputValue, unknown>>>>;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
@@ -129562,6 +129596,7 @@ declare const LaboratoriesExecutionsResponseUnaryLaboratoryExecutionSchema: z.Zo
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion">;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
         usage: z.ZodObject<{
@@ -129744,6 +129779,7 @@ declare const LaboratoriesExecutionsResponseUnaryLaboratoryExecutionSchema: z.Zo
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion">;
         output: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionInputValue, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputValue, unknown>>>>;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
@@ -129956,6 +129992,7 @@ declare const LaboratoriesExecutionsResponseUnaryBuilderSchema: z.ZodObject<{
         role: z.ZodLiteral<"tool">;
         tool_call_id: z.ZodString;
     }, z.core.$strip>]>>;
+    messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     object: z.ZodLiteral<"agent.completion">;
     upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
     usage: z.ZodObject<{
@@ -130135,6 +130172,7 @@ declare const LaboratoriesExecutionsResponseUnaryEvaluationSchema: z.ZodObject<{
         role: z.ZodLiteral<"tool">;
         tool_call_id: z.ZodString;
     }, z.core.$strip>]>>;
+    messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     object: z.ZodLiteral<"agent.completion">;
     output: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionInputValue, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputValue, unknown>>>>;
     upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
@@ -150875,6 +150913,7 @@ declare const VectorCompletionsResponseStreamingAgentCompletionChunkSchema: z.Zo
         role: z.ZodLiteral<"tool">;
         tool_call_id: z.ZodString;
     }, z.core.$strip>]>>;
+    messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     object: z.ZodLiteral<"agent.completion.chunk">;
     upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
     usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -151067,6 +151106,7 @@ declare const VectorCompletionsResponseStreamingVectorCompletionChunkSchema: z.Z
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion.chunk">;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
         usage: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -151292,6 +151332,7 @@ declare const VectorCompletionsResponseUnaryVectorCompletionSchema: z.ZodObject<
             role: z.ZodLiteral<"tool">;
             tool_call_id: z.ZodString;
         }, z.core.$strip>]>>;
+        messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
         object: z.ZodLiteral<"agent.completion">;
         upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
         usage: z.ZodObject<{
@@ -151517,6 +151558,7 @@ declare const VectorCompletionsResponseUnaryAgentCompletionSchema: z.ZodObject<{
         role: z.ZodLiteral<"tool">;
         tool_call_id: z.ZodString;
     }, z.core.$strip>]>>;
+    messages_queued: z.ZodOptional<z.ZodNullable<z.ZodBoolean>>;
     object: z.ZodLiteral<"agent.completion">;
     upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"codex_sdk">, z.ZodLiteral<"mock">]>;
     usage: z.ZodObject<{
