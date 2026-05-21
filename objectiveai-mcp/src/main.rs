@@ -12,9 +12,9 @@ async fn main() -> std::io::Result<()> {
         .init();
 
     let _ = dotenv::dotenv();
-    let config = objectiveai_mcp_cli::ConfigBuilder::init_from_env()
+    let config = objectiveai_mcp::ConfigBuilder::init_from_env()
         .unwrap_or_default()
         .build();
 
-    objectiveai_mcp_cli::run(config).await
+    objectiveai_mcp::run(config).await
 }

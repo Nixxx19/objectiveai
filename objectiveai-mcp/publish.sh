@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Publishes objectiveai-mcp-cli to crates.io as the `objectiveai-mcp-cli` crate.
+# Publishes objectiveai-mcp to crates.io as the `objectiveai-mcp` crate.
 #
 # Usage:
-#   bash objectiveai-mcp-cli/publish.sh                # crates.io (via GHA)
-#   bash objectiveai-mcp-cli/publish.sh --build-only   # local cargo publish --dry-run
+#   bash objectiveai-mcp/publish.sh                # crates.io (via GHA)
+#   bash objectiveai-mcp/publish.sh --build-only   # local cargo publish --dry-run
 #
 # `--test` is not supported (crates.io has no test registry).
 #
-# Output is captured to .logs/publish/objectiveai-mcp-cli.txt.
+# Output is captured to .logs/publish/objectiveai-mcp.txt.
 #
 # Setup (one-time):
 #   - CARGO_REGISTRY_TOKEN must be set as a repo secret.
@@ -15,8 +15,8 @@
 
 set -euo pipefail
 
-MODULE="objectiveai-mcp-cli"
-CRATE="objectiveai-mcp-cli"
+MODULE="objectiveai-mcp"
+CRATE="objectiveai-mcp"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 LOG_DIR="$REPO_ROOT/.logs/publish"

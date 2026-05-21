@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
-# Builds and installs a standalone objectiveai-mcp binary (the MCP
-# (Model Context Protocol) server wrapper around the cli — published
-# from the objectiveai-mcp-cli crate, but the binary itself is named
-# `objectiveai-mcp`).
+# Builds and installs the standalone objectiveai-mcp binary — the
+# MCP (Model Context Protocol) server wrapper around the cli.
 #
 # The cli no longer embeds the viewer or api, so the build chain is
 # now just `cargo build` with the cli's passthrough features.
 #
 # Usage:
-#   bash objectiveai-mcp-cli/install.sh
+#   bash objectiveai-mcp/install.sh
 
 set -euo pipefail
 
@@ -37,7 +35,7 @@ fi
 FEATURES="rustpython,systempython"
 
 echo "Building objectiveai-mcp (release, features: $FEATURES)..."
-cargo build --release -p objectiveai-mcp-cli \
+cargo build --release -p objectiveai-mcp \
   --features "$FEATURES" \
   --manifest-path "$REPO_ROOT/Cargo.toml"
 

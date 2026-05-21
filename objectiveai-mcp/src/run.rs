@@ -1,7 +1,7 @@
-//! ObjectiveAI MCP CLI server.
+//! ObjectiveAI MCP server.
 //!
 //! Mirrors the `objectiveai-mcp-proxy` `run.rs` shape so other crates can
-//! `use objectiveai_mcp_cli::{ConfigBuilder, run}` and spawn the server
+//! `use objectiveai_mcp::{ConfigBuilder, run}` and spawn the server
 //! in-process without going through the binary.
 
 use std::sync::Arc;
