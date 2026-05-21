@@ -474,6 +474,8 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::cli::output::notification::Plugin),
             schemars::schema_for!(crate::cli::output::notification::Plugins),
             schemars::schema_for!(crate::cli::output::notification::Installed),
+            schemars::schema_for!(crate::cli::output::notification::Tool),
+            schemars::schema_for!(crate::cli::output::notification::Tools),
             schemars::schema_for!(crate::cli::output::notification::Published),
             schemars::schema_for!(crate::cli::output::notification::Updater),
             schemars::schema_for!(crate::cli::output::notification::SkipReason),

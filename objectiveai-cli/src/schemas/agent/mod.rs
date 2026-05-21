@@ -4,6 +4,7 @@
 pub mod claude_agent_sdk;
 pub mod codex_sdk;
 pub mod completions;
+pub mod favorites;
 pub mod mock;
 pub mod openrouter;
 
@@ -35,6 +36,11 @@ pub enum Commands {
     Completions {
         #[command(subcommand)]
         command: completions::Commands,
+    },
+    #[command(name = "favorites")]
+    Favorites {
+        #[command(subcommand)]
+        command: favorites::Commands,
     },
     #[command(name = "mock")]
     Mock {
@@ -148,7 +154,7 @@ impl Commands {
     pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["claude_agent_sdk", "codex_sdk", "completions", "mock", "openrouter", "Agent", "AgentBase", "AgentWithFallbacks", "AgentWithFallbacksWithCount", "Continuation", "GetAgentResponse", "InlineAgent", "InlineAgentBase", "InlineAgentBaseWithFallbacks", "InlineAgentBaseWithFallbacksOrRemote", "InlineAgentBaseWithFallbacksOrRemoteCommitOptional", "InlineAgentBaseWithFallbacksOrRemoteWithCount", "InlineAgentWithFallbacks", "ListAgentResponse", "ListAgentsRequest", "ListAgentsSource", "McpServer", "OutputMode", "RemoteAgent", "RemoteAgentBase", "RemoteAgentBaseWithFallbacks", "RemoteAgentWithFallbacks", "Upstream", "UsageAgentResponse"];
+                const NAMES: &[&str] = &["claude_agent_sdk", "codex_sdk", "completions", "favorites", "mock", "openrouter", "Agent", "AgentBase", "AgentWithFallbacks", "AgentWithFallbacksWithCount", "Continuation", "GetAgentResponse", "InlineAgent", "InlineAgentBase", "InlineAgentBaseWithFallbacks", "InlineAgentBaseWithFallbacksOrRemote", "InlineAgentBaseWithFallbacksOrRemoteCommitOptional", "InlineAgentBaseWithFallbacksOrRemoteWithCount", "InlineAgentWithFallbacks", "ListAgentResponse", "ListAgentsRequest", "ListAgentsSource", "McpServer", "OutputMode", "RemoteAgent", "RemoteAgentBase", "RemoteAgentBaseWithFallbacks", "RemoteAgentWithFallbacks", "Upstream", "UsageAgentResponse"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
                     objectiveai_sdk::cli::output::Notification {
                         agent_id: None,
@@ -162,6 +168,7 @@ impl Commands {
             Commands::ClaudeAgentSdk { command } => command.handle(handle).await,
             Commands::CodexSdk { command } => command.handle(handle).await,
             Commands::Completions { command } => command.handle(handle).await,
+            Commands::Favorites { command } => command.handle(handle).await,
             Commands::Mock { command } => command.handle(handle).await,
             Commands::Openrouter { command } => command.handle(handle).await,
             Commands::Agent { .. } => {
