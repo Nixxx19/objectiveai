@@ -22,3 +22,23 @@ pub struct Tools {
 pub struct Tool {
     pub tool: Option<ManifestWithNameAndSource>,
 }
+
+/// One line of subprocess output from a tool spawned by
+/// `objectiveai tools <name> <args…>`. Wire shape:
+///
+/// - stdout line: `{"line":"hello","stdout":true}`
+/// - stderr line: `{"line":"oops","stderr":true}`
+///
+/// Exactly one of `stdout` / `stderr` is set per emission; the other
+/// is omitted from the wire shape via `skip_serializing_if`.
+#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
+#[schemars(rename = "cli.output.notification.ToolLine")]
+pub struct ToolLine {
+    pub line: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub stdout: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub stderr: Option<bool>,
+}

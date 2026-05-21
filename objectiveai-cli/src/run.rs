@@ -257,9 +257,13 @@ where
         Ok(cli) => match cli.command.handle(cli_config, &handle).await {
             Ok(()) => 0,
             Err(e) => {
+                let exit_code = match &e {
+                    error::Error::ToolExit(code) => *code,
+                    _ => 1,
+                };
                 let err = e.to_output(Level::Error, true);
                 Output::<serde_json::Value>::Error(err).emit(&handle).await;
-                1
+                exit_code
             }
         },
         Err(e) if is_informational(&e) => {
