@@ -23,6 +23,12 @@ struct EnvConfigBuilder {
     port: Option<u16>,
     #[envconfig(from = "SUPPRESS_OUTPUT")]
     suppress_output: Option<String>,
+    #[envconfig(from = "CONFIG_BASE_DIR")]
+    config_base_dir: Option<String>,
+    #[envconfig(from = "COMMIT_AUTHOR_NAME")]
+    commit_author_name: Option<String>,
+    #[envconfig(from = "COMMIT_AUTHOR_EMAIL")]
+    commit_author_email: Option<String>,
 }
 
 impl EnvConfigBuilder {
@@ -30,10 +36,12 @@ impl EnvConfigBuilder {
         ConfigBuilder {
             address: self.address,
             port: self.port,
-            cli_config: None,
             suppress_output: self.suppress_output.map(|v| {
                 matches!(v.to_ascii_lowercase().as_str(), "1" | "true" | "yes" | "on")
             }),
+            config_base_dir: self.config_base_dir,
+            commit_author_name: self.commit_author_name,
+            commit_author_email: self.commit_author_email,
         }
     }
 }
@@ -42,8 +50,10 @@ impl EnvConfigBuilder {
 pub struct ConfigBuilder {
     pub address: Option<String>,
     pub port: Option<u16>,
-    pub cli_config: Option<Arc<objectiveai_cli::Config>>,
     pub suppress_output: Option<bool>,
+    pub config_base_dir: Option<String>,
+    pub commit_author_name: Option<String>,
+    pub commit_author_email: Option<String>,
 }
 
 impl Envconfig for ConfigBuilder {
@@ -68,14 +78,10 @@ impl ConfigBuilder {
         Config {
             address: self.address.unwrap_or_else(|| "0.0.0.0".to_string()),
             port: self.port.unwrap_or(3000),
-            cli_config: self.cli_config.unwrap_or_else(|| {
-                Arc::new(
-                    objectiveai_cli::ConfigBuilder::init_from_env()
-                        .unwrap_or_default()
-                        .build(),
-                )
-            }),
             suppress_output: self.suppress_output.unwrap_or(false),
+            config_base_dir: self.config_base_dir,
+            commit_author_name: self.commit_author_name,
+            commit_author_email: self.commit_author_email,
         }
     }
 }
@@ -83,25 +89,39 @@ impl ConfigBuilder {
 pub struct Config {
     pub address: String,
     pub port: u16,
-    pub cli_config: Arc<objectiveai_cli::Config>,
     pub suppress_output: bool,
+    pub config_base_dir: Option<String>,
+    pub commit_author_name: Option<String>,
+    pub commit_author_email: Option<String>,
 }
 
 pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, axum::Router)> {
     let Config {
         address,
         port,
-        cli_config,
         suppress_output: _,
+        config_base_dir,
+        commit_author_name,
+        commit_author_email,
     } = config;
 
+    let cli_config = Arc::new(objectiveai_cli::Config {
+        config_set_forbidden: false,
+        config_base_dir: config_base_dir.clone(),
+        commit_author_name: commit_author_name.clone(),
+        commit_author_email: commit_author_email.clone(),
+        github_authorization: None,
+        agent_id: None,
+    });
+
     let plugins = objectiveai_sdk::filesystem::Client::new(
-        cli_config.config_base_dir.as_deref(),
-        cli_config.commit_author_name.as_deref(),
-        cli_config.commit_author_email.as_deref(),
+        config_base_dir,
+        commit_author_name,
+        commit_author_email,
     )
     .list_plugins(0, usize::MAX)
     .await;
+
     let server = ObjectiveAiMcpCli::with_plugins(cli_config, plugins);
     let ct = CancellationToken::new();
 
