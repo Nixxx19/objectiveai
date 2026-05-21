@@ -8,6 +8,7 @@ import { FunctionExecutionView } from "./FunctionExecutionView";
 import { TabBar, type Tab } from "./TabBar";
 import { PluginPane } from "./PluginPane";
 import { RightOverlayPanel, type PanelTab } from "./RightOverlayPanel";
+import { useAgentChat } from "./chat/useAgentChat";
 import { z } from "zod";
 import {
   AgentCompletionsRequestAgentCompletionCreateParamsSchema,
@@ -373,6 +374,7 @@ function App() {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [panelTabs, setPanelTabs] = useState<PanelTab[]>([]);
   const [activePanelTabId, setActivePanelTabId] = useState<string | null>(null);
+  const { sendMessage } = useAgentChat(setPanelTabs);
 
   useEffect(() => {
     invoke<ViewerPluginInfo[]>("list_plugins_with_viewer")
@@ -445,6 +447,7 @@ function App() {
             setPanelTabs={setPanelTabs}
             activePanelTabId={activePanelTabId}
             setActivePanelTabId={setActivePanelTabId}
+            sendMessage={sendMessage}
           />
         )}
       </div>

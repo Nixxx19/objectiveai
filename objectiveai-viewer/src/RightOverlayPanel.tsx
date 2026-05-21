@@ -1,17 +1,34 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import cn from "classnames";
 import type {
+  AgentCompletionsMessageMessage,
+  AgentCompletionsMessageRichContent,
   AgentCompletionsMessageRichContentPart,
+  AgentCompletionsResponseStreamingAgentCompletionChunk,
+  ErrorResponseError,
   FilesystemConfigFavorite,
 } from "@objectiveai/sdk";
 import { useFavoriteAgents } from "./useFavoriteAgents";
 import { ChatPane } from "./ChatPane";
+import { MessageList } from "./chat/MessageList";
+
+export interface PanelTabTurn {
+  users: AgentCompletionsMessageMessage[];
+  completion: AgentCompletionsResponseStreamingAgentCompletionChunk | null;
+  streaming: boolean;
+  error: ErrorResponseError | null;
+  requestId: string;
+}
 
 export interface PanelTab {
   id: string;
   favorite: FilesystemConfigFavorite;
   draft: string;
   attachments: AgentCompletionsMessageRichContentPart[];
+  turns: PanelTabTurn[];
+  continuation: string | null;
+  inFlightIndex: number | null;
+  pendingNotifyContent: AgentCompletionsMessageRichContent[];
 }
 
 interface RightOverlayPanelProps {
@@ -19,6 +36,7 @@ interface RightOverlayPanelProps {
   setPanelTabs: Dispatch<SetStateAction<PanelTab[]>>;
   activePanelTabId: string | null;
   setActivePanelTabId: Dispatch<SetStateAction<string | null>>;
+  sendMessage: (tabId: string) => void;
 }
 
 export function RightOverlayPanel({
@@ -26,6 +44,7 @@ export function RightOverlayPanel({
   setPanelTabs,
   activePanelTabId,
   setActivePanelTabId,
+  sendMessage,
 }: RightOverlayPanelProps) {
   const { favorites, loading, error } = useFavoriteAgents();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -44,7 +63,16 @@ export function RightOverlayPanel({
 
   const openFavorite = (favorite: FilesystemConfigFavorite) => {
     const id = crypto.randomUUID();
-    const tab: PanelTab = { id, favorite, draft: "", attachments: [] };
+    const tab: PanelTab = {
+      id,
+      favorite,
+      draft: "",
+      attachments: [],
+      turns: [],
+      continuation: null,
+      inFlightIndex: null,
+      pendingNotifyContent: [],
+    };
     setPanelTabs((prev) => [...prev, tab]);
     setActivePanelTabId(id);
     setDropdownOpen(false);
@@ -218,9 +246,7 @@ export function RightOverlayPanel({
             onAttachmentsChange={(attachments) =>
               updateTab(activeTab.id, { attachments })
             }
-            onSend={() =>
-              updateTab(activeTab.id, { draft: "", attachments: [] })
-            }
+            onSend={() => sendMessage(activeTab.id)}
           />
         ) : (
           <div
@@ -366,39 +392,11 @@ function ActiveTabBody({
           "flex-1",
           "min-h-0",
           "overflow-y-auto",
-          "p-4",
-          "text-sm",
-          "text-neutral-500",
-          "dark:text-neutral-400",
+          "bg-neutral-50",
+          "dark:bg-neutral-950",
         )}
       >
-        <div className={cn("text-xs", "uppercase", "tracking-wide")}>
-          Agent
-        </div>
-        <div
-          className={cn(
-            "mt-1",
-            "text-neutral-900",
-            "dark:text-neutral-50",
-            "font-semibold",
-          )}
-        >
-          {tab.favorite.name}
-        </div>
-        {tab.favorite.note && (
-          <div className={cn("mt-1", "text-sm")}>{tab.favorite.note}</div>
-        )}
-        <div
-          className={cn(
-            "mt-6",
-            "text-xs",
-            "italic",
-            "text-neutral-400",
-            "dark:text-neutral-500",
-          )}
-        >
-          (Chat history will render here.)
-        </div>
+        <MessageList tab={tab} />
       </div>
 
       <ChatPane
