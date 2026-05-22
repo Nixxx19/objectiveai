@@ -1,65 +1,120 @@
 //! `ConduitMcpHandler` — the CLI's reverse-attach implementation.
 //!
-//! Spawns `objectiveai-mcp` as a subprocess on first use and holds a
-//! [`objectiveai_sdk::mcp::Connection`] to it for the CLI's
-//! lifetime. Every inbound `server_request` from the API is
-//! translated into one of two paths:
+//! The CLI talks to a **remote** `objectiveai-mcp` server. The
+//! address comes from config (`config.mcp().get_address()` /
+//! `get_port()`, env-var overridable via `OBJECTIVEAI_MCP_ADDRESS` /
+//! `OBJECTIVEAI_MCP_PORT`), parsed the same way
+//! `objectiveai-cli/src/api/client.rs` parses the API endpoint.
 //!
-//! - `initialize` — answered locally from the connection's cached
-//!   [`InitializeResult`]; we don't re-handshake. We also strip
-//!   `{tools,resources}.listChanged` from the advertised capabilities
-//!   so the proxy never subscribes to notifications (the chain is
-//!   single-shot end-to-end).
-//! - everything else — forwarded as a raw HTTP POST through the
-//!   Connection's `http_client` + `url` + `session_id`. Response is
-//!   parsed as bare JSON or SSE-wrapped JSON (rmcp's
-//!   `StreamableHttpService` may pick either; the SDK already
-//!   tolerates both).
+//! On the first inbound `server_request` the handler dials the
+//! remote MCP via `objectiveai_sdk::mcp::Client::connect`, with
+//! that request's headers forwarded as-is. The resulting
+//! [`Connection`] is held in an Arc'd Mutex inside the handler and
+//! reused for every subsequent forwarded request — so all calls
+//! that share a handler instance share one MCP session.
 //!
-//! The Connection is created with the headers from the **first**
-//! forwarded request — typically the proxy's `initialize` POST.
-//! Subsequent requests are dispatched against that same Connection;
-//! their headers don't influence connect parameters.
+//! Dispatch:
+//! - `initialize` → synthesize from `connection.initialize_result`
+//!   (the SDK already handshook). Strip
+//!   `{tools,resources}.listChanged` from advertised capabilities
+//!   so the proxy never subscribes — the chain stays single-shot.
+//! - notifications (no `id`) → 202 Accepted, no body, never round-trip.
+//! - everything else → raw POST through `connection.http_client` +
+//!   `connection.url` + `connection.session_id`. Response parsed by
+//!   [`parse_json_or_sse`] (rmcp's `StreamableHttpService` may pick
+//!   either shape).
 
 use indexmap::IndexMap;
 use objectiveai_sdk::client_objectiveai_mcp::{server_request, server_response};
 use objectiveai_sdk::http::McpHandler;
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::sync::OnceCell;
-
-/// Process-wide singleton holding the subprocess + SDK Connection.
-/// Initialized lazily on the first `ConduitMcpHandler::handle` call
-/// (any `ConduitMcpHandler` instance shares this). Lives for the
-/// CLI process lifetime; the subprocess is killed by the OS when
-/// the CLI exits (kill_on_drop fires if the static is ever
-/// dropped, which Rust's runtime doesn't guarantee — orphaned
-/// children get reparented to init).
-static STATE: OnceCell<Arc<ConduitState>> = OnceCell::const_new();
+use tokio::sync::Mutex;
 
 struct ConduitState {
-    _child: tokio::process::Child,
     connection: objectiveai_sdk::mcp::Connection,
 }
 
-#[derive(Default)]
-pub struct ConduitMcpHandler;
+#[derive(Clone)]
+pub struct ConduitMcpHandler {
+    inner: Arc<Inner>,
+}
+
+struct Inner {
+    /// Configured remote MCP URL (e.g. `https://mcp.example.com`).
+    /// `None` ⇒ MCP isn't configured for this CLI invocation; every
+    /// request 501s the same way [`objectiveai_sdk::http::RejectHandler`]
+    /// would.
+    mcp_url: Option<String>,
+    client: objectiveai_sdk::mcp::Client,
+    state: Mutex<Option<Arc<ConduitState>>>,
+}
 
 impl ConduitMcpHandler {
-    pub fn new() -> Self {
-        Self
+    /// Construct a handler that dials the given URL on first use.
+    /// `None` makes every `handle()` call reject with 501.
+    pub fn new(mcp_url: Option<String>) -> Self {
+        let http = reqwest::Client::builder()
+            .build()
+            .expect("reqwest::Client::build is infallible without rustls toggles");
+        let client = objectiveai_sdk::mcp::Client::new(
+            http,
+            "objectiveai-cli-conduit".to_string(),
+            String::new(),
+            String::new(),
+            Duration::from_secs(30),
+            Duration::from_secs(1),
+            Duration::from_secs(1),
+            0.5,
+            2.0,
+            Duration::from_secs(30),
+            Duration::from_secs(30),
+            Duration::from_secs(60),
+        );
+        Self {
+            inner: Arc::new(Inner {
+                mcp_url,
+                client,
+                state: Mutex::new(None),
+            }),
+        }
     }
 }
 
 impl McpHandler for ConduitMcpHandler {
     async fn handle(&self, request: server_request::Request) -> server_response::Response {
         let id_for_err = request.id.clone();
-        let state = match STATE
-            .get_or_try_init(|| ensure_state(request.headers.clone()))
-            .await
-        {
-            Ok(s) => s.clone(),
-            Err(e) => return conduit_error(id_for_err, format!("init: {e}")),
+
+        let Some(mcp_url) = self.inner.mcp_url.as_ref() else {
+            return reject_no_mcp(id_for_err);
+        };
+
+        // Lazy connect on first call.
+        let state = {
+            let mut guard = self.inner.state.lock().await;
+            match guard.as_ref() {
+                Some(s) => s.clone(),
+                None => {
+                    let mut connect_headers = request.headers.clone();
+                    // Hop-by-hop and layer-internal: don't propagate to MCP.
+                    for k in ["Host", "host", "Content-Length", "content-length",
+                              "Mcp-Session-Id", "mcp-session-id"] {
+                        connect_headers.shift_remove(k);
+                    }
+                    let connection = match self
+                        .inner
+                        .client
+                        .connect(mcp_url.clone(), None, Some(connect_headers))
+                        .await
+                    {
+                        Ok(c) => c,
+                        Err(e) => return conduit_error(id_for_err, format!("connect: {e}")),
+                    };
+                    let st = Arc::new(ConduitState { connection });
+                    *guard = Some(st.clone());
+                    st
+                }
+            }
         };
 
         match forward(&state, request).await {
@@ -69,98 +124,13 @@ impl McpHandler for ConduitMcpHandler {
     }
 }
 
-/// Spawn objectiveai-mcp, dial it via the SDK Client, return the
-/// live state. Only ever called once (by `OnceCell`).
-async fn ensure_state(
-    first_request_headers: IndexMap<String, String>,
-) -> Result<Arc<ConduitState>, ConduitError> {
-    // Grab a free port by binding ephemerally.
-    let listener = std::net::TcpListener::bind("127.0.0.1:0")
-        .map_err(ConduitError::PortBind)?;
-    let port = listener
-        .local_addr()
-        .map_err(ConduitError::PortBind)?
-        .port();
-    drop(listener);
-
-    let child = tokio::process::Command::new("objectiveai-mcp")
-        .env("ADDRESS", "127.0.0.1")
-        .env("PORT", port.to_string())
-        .env(
-            "RUST_LOG",
-            std::env::var("OBJECTIVEAI_MCP_LOG").unwrap_or_else(|_| "warn".to_string()),
-        )
-        .stdin(std::process::Stdio::null())
-        .stdout(std::process::Stdio::null())
-        .stderr(std::process::Stdio::inherit())
-        .kill_on_drop(true)
-        .spawn()
-        .map_err(ConduitError::Spawn)?;
-
-    // Wait for the subprocess to accept connections.
-    let url = format!("http://127.0.0.1:{port}");
-    let ready_deadline = std::time::Instant::now() + Duration::from_secs(5);
-    loop {
-        if std::time::Instant::now() > ready_deadline {
-            return Err(ConduitError::ReadyTimeout);
-        }
-        if tokio::net::TcpStream::connect(("127.0.0.1", port))
-            .await
-            .is_ok()
-        {
-            break;
-        }
-        tokio::time::sleep(Duration::from_millis(50)).await;
-    }
-
-    // Build the SDK MCP Client + connect with the proxy's headers.
-    // Mcp-Session-Id is stripped before forwarding — the proxy's
-    // session id belongs to a different layer; rmcp will mint its
-    // own and the Connection tracks it internally.
-    let http = reqwest::Client::builder()
-        .build()
-        .map_err(ConduitError::ClientBuild)?;
-    let client = objectiveai_sdk::mcp::Client::new(
-        http,
-        "objectiveai-cli-conduit".to_string(),
-        String::new(),
-        String::new(),
-        Duration::from_secs(30),
-        Duration::from_secs(1),
-        Duration::from_secs(1),
-        0.5,
-        2.0,
-        Duration::from_secs(30),
-        Duration::from_secs(30),
-        Duration::from_secs(60),
-    );
-    let mut connect_headers = first_request_headers;
-    connect_headers.shift_remove("Mcp-Session-Id");
-    connect_headers.shift_remove("mcp-session-id");
-    connect_headers.shift_remove("Host");
-    connect_headers.shift_remove("host");
-    connect_headers.shift_remove("Content-Length");
-    connect_headers.shift_remove("content-length");
-    let connection = client
-        .connect(url, None, Some(connect_headers))
-        .await
-        .map_err(|e| ConduitError::Connect(e.to_string()))?;
-
-    Ok(Arc::new(ConduitState {
-        _child: child,
-        connection,
-    }))
-}
-
-/// Dispatch one inbound `server_request` against the live state and
-/// build a `server_response`.
 async fn forward(
     state: &ConduitState,
     request: server_request::Request,
 ) -> Result<server_response::Response, ConduitError> {
     let envelope = request.body.clone();
 
-    // Notifications (no `id`) and bodyless methods get 202.
+    // Notifications (no `id`) → 202 with no body; don't round-trip.
     let rpc_id = envelope
         .as_ref()
         .and_then(|v| v.get("id"))
@@ -179,13 +149,11 @@ async fn forward(
         });
     }
 
-    // `initialize`: synthesize from cached InitializeResult; don't
-    // re-handshake (the Connection already did it).
+    // `initialize`: synthesize from the SDK Connection's cached
+    // InitializeResult; don't re-handshake.
     if rpc_method.as_deref() == Some("initialize") {
         let mut init_value = serde_json::to_value(&state.connection.initialize_result)
             .map_err(ConduitError::Serialize)?;
-        // Strip listChanged advertisements so the proxy never
-        // subscribes — keeps the chain single-shot.
         if let Some(caps) = init_value.pointer_mut("/capabilities") {
             if let Some(obj) = caps.as_object_mut() {
                 if let Some(tools) = obj.get_mut("tools").and_then(|t| t.as_object_mut()) {
@@ -211,8 +179,7 @@ async fn forward(
         });
     }
 
-    // Everything else: forward as a raw POST through the
-    // Connection's http_client + url + session_id.
+    // Everything else: raw POST through the Connection.
     let conn = &state.connection;
     let mut req = conn.http_client.post(&conn.url);
     for (k, v) in &request.headers {
@@ -242,8 +209,8 @@ async fn forward(
         if k.as_str().eq_ignore_ascii_case("mcp-session-id")
             || k.as_str().eq_ignore_ascii_case("content-type")
         {
-            // Stripped — these belong to the local layer or are
-            // about to be re-set by the API.
+            // Local-layer session id + the content-type the API
+            // will re-set verbatim. Stripped.
             continue;
         }
         if let Ok(value) = v.to_str() {
@@ -259,6 +226,22 @@ async fn forward(
         headers: resp_headers,
         body: resp_body,
     })
+}
+
+fn reject_no_mcp(id: String) -> server_response::Response {
+    server_response::Response {
+        id,
+        status: 501,
+        headers: IndexMap::new(),
+        body: Some(serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": serde_json::Value::Null,
+            "error": {
+                "code": -32601,
+                "message": "this client has no MCP server configured (set `objectiveai mcp address`)",
+            },
+        })),
+    }
 }
 
 fn conduit_error(id: String, message: impl Into<String>) -> server_response::Response {
@@ -278,9 +261,9 @@ fn conduit_error(id: String, message: impl Into<String>) -> server_response::Res
     }
 }
 
-/// Try bare JSON first, then strip `data:` prefixes from each line
-/// and reparse. Mirrors `objectiveai_sdk::mcp::transport::parse_streamable_http_response`.
-/// Empty body → `None`.
+/// Parses bare JSON; falls back to stripping `data:` prefixes and
+/// reparsing for SSE-wrapped responses. Mirrors
+/// `objectiveai_sdk::mcp::transport::parse_streamable_http_response`.
 fn parse_json_or_sse(text: &str) -> Option<serde_json::Value> {
     if text.is_empty() {
         return None;
@@ -298,18 +281,27 @@ fn parse_json_or_sse(text: &str) -> Option<serde_json::Value> {
     serde_json::from_str::<serde_json::Value>(&collected).ok()
 }
 
+/// Build a handler for the current process by reading the MCP
+/// address out of the on-disk config (with env-var overrides).
+/// Mirrors `crate::api::client::build_http_client`'s config-loading
+/// pattern. Returns a handler that rejects every request with 501
+/// when no MCP address is configured.
+pub fn build_handler(
+    config: &mut objectiveai_sdk::filesystem::config::Config,
+) -> ConduitMcpHandler {
+    let mcp_url = std::env::var("OBJECTIVEAI_MCP_ADDRESS").ok().or_else(|| {
+        let mcp = config.mcp();
+        let port = std::env::var("OBJECTIVEAI_MCP_PORT")
+            .ok()
+            .and_then(|s| s.parse::<u16>().ok())
+            .or_else(|| mcp.get_port());
+        crate::api::client::compose_url(mcp.get_address(), port)
+    });
+    ConduitMcpHandler::new(mcp_url)
+}
+
 #[derive(Debug, thiserror::Error)]
 enum ConduitError {
-    #[error("could not bind a local port: {0}")]
-    PortBind(std::io::Error),
-    #[error("could not spawn objectiveai-mcp subprocess: {0}")]
-    Spawn(std::io::Error),
-    #[error("objectiveai-mcp subprocess did not become ready in time")]
-    ReadyTimeout,
-    #[error("could not build reqwest client: {0}")]
-    ClientBuild(reqwest::Error),
-    #[error("MCP connect failed: {0}")]
-    Connect(String),
     #[error("forwarding HTTP request failed: {0}")]
     Request(reqwest::Error),
     #[error("reading response body failed: {0}")]

@@ -67,11 +67,11 @@ pub async fn handle(
     let log_writer = fs_client.write_laboratory_execution();
 
     let handle = handle.clone();
-    crate::api::run(
-        Box::new(move |http_client| Box::pin(async move {
+    crate::api::run_with_conduit(
+        Box::new(move |http_client, conduit| Box::pin(async move {
             let (stream, _notifier) =
                 objectiveai_sdk::laboratories::executions::create_laboratory_execution_streaming(
-                    &http_client, params, crate::api::conduit::ConduitMcpHandler::new(),
+                    &http_client, params, conduit,
                 )
                 .await?;
 
