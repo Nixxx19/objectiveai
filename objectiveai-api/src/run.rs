@@ -707,6 +707,15 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         std::time::Duration::from_millis(agent_completions_other_chunk_timeout),
     ));
 
+    // Reverse-channel registry for the objectiveai-MCP endpoint. WS
+    // handlers populate this on upgrade; the MCP endpoint route reads
+    // it when a proxy upstream dials in for a session.
+    let reverse_channels = streaming_ws::new_reverse_channel_registry();
+    let reverse_attach = streaming_ws::ReverseAttachConfig {
+        registry: reverse_channels.clone(),
+        api_port: port,
+    };
+
     // Vector Completions Client
     let vector_completions_client = Arc::new(vector::completions::Client::new(
         agent_completions_client.clone(),
@@ -846,9 +855,11 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
             axum::routing::any({
                 let agent_completions_client = agent_completions_client.clone();
                 let persistent_cache = persistent_cache.clone();
+                let reverse_attach = reverse_attach.clone();
                 move |transport: streaming_ws::Transport, req: axum::extract::Request| {
                     let agent_completions_client = agent_completions_client.clone();
                     let persistent_cache = persistent_cache.clone();
+                    let reverse_attach = reverse_attach.clone();
                     async move {
                         use axum::extract::FromRequest;
                         use axum::extract::FromRequestParts;
@@ -864,7 +875,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                             }
                             streaming_ws::Transport::WebSocket => {
                                 match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
-                                    Ok(ws) => streaming_ws_handlers::create_agent_completion_ws(agent_completions_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Ok(ws) => streaming_ws_handlers::create_agent_completion_ws(agent_completions_client, reverse_attach, headers, persistent_cache, suppress_output, ws).await,
                                     Err(rej) => rej.into_response(),
                                 }
                             }
@@ -880,10 +891,12 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                 let vector_completions_client = vector_completions_client.clone();
                 let agent_completions_client = agent_completions_client.clone();
                 let persistent_cache = persistent_cache.clone();
+                let reverse_attach = reverse_attach.clone();
                 move |transport: streaming_ws::Transport, req: axum::extract::Request| {
                     let vector_completions_client = vector_completions_client.clone();
                     let agent_completions_client = agent_completions_client.clone();
                     let persistent_cache = persistent_cache.clone();
+                    let reverse_attach = reverse_attach.clone();
                     async move {
                         use axum::extract::FromRequest;
                         use axum::extract::FromRequestParts;
@@ -899,7 +912,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                             }
                             streaming_ws::Transport::WebSocket => {
                                 match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
-                                    Ok(ws) => streaming_ws_handlers::create_vector_completion_ws(vector_completions_client, agent_completions_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Ok(ws) => streaming_ws_handlers::create_vector_completion_ws(vector_completions_client, agent_completions_client, reverse_attach, headers, persistent_cache, suppress_output, ws).await,
                                     Err(rej) => rej.into_response(),
                                 }
                             }
@@ -994,10 +1007,12 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                 let function_executions_client = function_executions_client.clone();
                 let agent_completions_client = agent_completions_client.clone();
                 let persistent_cache = persistent_cache.clone();
+                let reverse_attach = reverse_attach.clone();
                 move |transport: streaming_ws::Transport, req: axum::extract::Request| {
                     let function_executions_client = function_executions_client.clone();
                     let agent_completions_client = agent_completions_client.clone();
                     let persistent_cache = persistent_cache.clone();
+                    let reverse_attach = reverse_attach.clone();
                     async move {
                         use axum::extract::FromRequest;
                         use axum::extract::FromRequestParts;
@@ -1013,7 +1028,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                             }
                             streaming_ws::Transport::WebSocket => {
                                 match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
-                                    Ok(ws) => streaming_ws_handlers::execute_function_ws(function_executions_client, agent_completions_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Ok(ws) => streaming_ws_handlers::execute_function_ws(function_executions_client, agent_completions_client, reverse_attach, headers, persistent_cache, suppress_output, ws).await,
                                     Err(rej) => rej.into_response(),
                                 }
                             }
@@ -1094,10 +1109,12 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                 let function_inventions_client = function_inventions_client.clone();
                 let agent_completions_client = agent_completions_client.clone();
                 let persistent_cache = persistent_cache.clone();
+                let reverse_attach = reverse_attach.clone();
                 move |transport: streaming_ws::Transport, req: axum::extract::Request| {
                     let function_inventions_client = function_inventions_client.clone();
                     let agent_completions_client = agent_completions_client.clone();
                     let persistent_cache = persistent_cache.clone();
+                    let reverse_attach = reverse_attach.clone();
                     async move {
                         use axum::extract::FromRequest;
                         use axum::extract::FromRequestParts;
@@ -1113,7 +1130,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                             }
                             streaming_ws::Transport::WebSocket => {
                                 match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
-                                    Ok(ws) => streaming_ws_handlers::create_function_invention_ws(function_inventions_client, agent_completions_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Ok(ws) => streaming_ws_handlers::create_function_invention_ws(function_inventions_client, agent_completions_client, reverse_attach, headers, persistent_cache, suppress_output, ws).await,
                                     Err(rej) => rej.into_response(),
                                 }
                             }
@@ -1130,11 +1147,13 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                     function_inventions_recursive_client.clone();
                 let agent_completions_client = agent_completions_client.clone();
                 let persistent_cache = persistent_cache.clone();
+                let reverse_attach = reverse_attach.clone();
                 move |transport: streaming_ws::Transport, req: axum::extract::Request| {
                     let function_inventions_recursive_client =
                         function_inventions_recursive_client.clone();
                     let agent_completions_client = agent_completions_client.clone();
                     let persistent_cache = persistent_cache.clone();
+                    let reverse_attach = reverse_attach.clone();
                     async move {
                         use axum::extract::FromRequest;
                         use axum::extract::FromRequestParts;
@@ -1150,7 +1169,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                             }
                             streaming_ws::Transport::WebSocket => {
                                 match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
-                                    Ok(ws) => streaming_ws_handlers::create_function_invention_recursive_ws(function_inventions_recursive_client, agent_completions_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Ok(ws) => streaming_ws_handlers::create_function_invention_recursive_ws(function_inventions_recursive_client, agent_completions_client, reverse_attach, headers, persistent_cache, suppress_output, ws).await,
                                     Err(rej) => rej.into_response(),
                                 }
                             }
@@ -1219,10 +1238,12 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                     profile_computations_client.clone();
                 let agent_completions_client = agent_completions_client.clone();
                 let persistent_cache = persistent_cache.clone();
+                let reverse_attach = reverse_attach.clone();
                 move |transport: streaming_ws::Transport, req: axum::extract::Request| {
                     let profile_computations_client = profile_computations_client.clone();
                     let agent_completions_client = agent_completions_client.clone();
                     let persistent_cache = persistent_cache.clone();
+                    let reverse_attach = reverse_attach.clone();
                     async move {
                         use axum::extract::FromRequest;
                         use axum::extract::FromRequestParts;
@@ -1238,7 +1259,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                             }
                             streaming_ws::Transport::WebSocket => {
                                 match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
-                                    Ok(ws) => streaming_ws_handlers::create_profile_computation_ws(profile_computations_client, agent_completions_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Ok(ws) => streaming_ws_handlers::create_profile_computation_ws(profile_computations_client, agent_completions_client, reverse_attach, headers, persistent_cache, suppress_output, ws).await,
                                     Err(rej) => rej.into_response(),
                                 }
                             }
@@ -1415,10 +1436,12 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                 let error_client = Arc::new(crate::error::Client::new());
                 let agent_completions_client = agent_completions_client.clone();
                 let persistent_cache = persistent_cache.clone();
+                let reverse_attach = reverse_attach.clone();
                 move |transport: streaming_ws::Transport, req: axum::extract::Request| {
                     let error_client = error_client.clone();
                     let agent_completions_client = agent_completions_client.clone();
                     let persistent_cache = persistent_cache.clone();
+                    let reverse_attach = reverse_attach.clone();
                     async move {
                         use axum::extract::FromRequest;
                         use axum::extract::FromRequestParts;
@@ -1434,7 +1457,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                             }
                             streaming_ws::Transport::WebSocket => {
                                 match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
-                                    Ok(ws) => streaming_ws_handlers::create_error_ws(error_client, agent_completions_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Ok(ws) => streaming_ws_handlers::create_error_ws(error_client, agent_completions_client, reverse_attach, headers, persistent_cache, suppress_output, ws).await,
                                     Err(rej) => rej.into_response(),
                                 }
                             }
@@ -1450,10 +1473,12 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                 let laboratory_executions_client = laboratory_executions_client.clone();
                 let agent_completions_client = agent_completions_client.clone();
                 let persistent_cache = persistent_cache.clone();
+                let reverse_attach = reverse_attach.clone();
                 move |transport: streaming_ws::Transport, req: axum::extract::Request| {
                     let laboratory_executions_client = laboratory_executions_client.clone();
                     let agent_completions_client = agent_completions_client.clone();
                     let persistent_cache = persistent_cache.clone();
+                    let reverse_attach = reverse_attach.clone();
                     async move {
                         use axum::extract::FromRequest;
                         use axum::extract::FromRequestParts;
@@ -1469,7 +1494,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                             }
                             streaming_ws::Transport::WebSocket => {
                                 match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
-                                    Ok(ws) => streaming_ws_handlers::execute_laboratory_ws(laboratory_executions_client, agent_completions_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Ok(ws) => streaming_ws_handlers::execute_laboratory_ws(laboratory_executions_client, agent_completions_client, reverse_attach, headers, persistent_cache, suppress_output, ws).await,
                                     Err(rej) => rej.into_response(),
                                 }
                             }
@@ -1477,6 +1502,22 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                     }
                 }
             }),
+        )
+        // ObjectiveAI-MCP endpoint (reverse-attach Streamable HTTP)
+        .route(
+            "/objectiveai-mcp/{session_id}",
+            axum::routing::post({
+                let reverse_channels = reverse_channels.clone();
+                move |axum::extract::Path(session_id): axum::extract::Path<String>,
+                      body: axum::body::Bytes| {
+                    let reverse_channels = reverse_channels.clone();
+                    async move {
+                        objectiveai_mcp_endpoint::handle_post(session_id, reverse_channels, body).await
+                    }
+                }
+            })
+            .get(objectiveai_mcp_endpoint::handle_get)
+            .delete(objectiveai_mcp_endpoint::handle_delete),
         )
         // CORS
         .layer(

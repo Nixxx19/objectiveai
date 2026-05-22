@@ -108,13 +108,10 @@ impl Manifest {
         self.viewer_zip.is_some() || self.viewer_url.is_some()
     }
 
-    /// LLM-visible tool name: `{owner}-{name}-{version}` with every
-    /// `.` substituted to `-`. The substitution makes the result
-    /// Anthropic-tool-name-regex safe (`^[a-zA-Z0-9_-]{1,128}$`)
-    /// even when the version field carries semver dots
-    /// (`1.2.3` -> `1-2-3`).
+    /// LLM-visible tool name. See
+    /// [`crate::agent::materialize_tool_name`].
     pub fn tool_name(&self, name: &str) -> String {
-        format!("{}-{}-{}", self.owner, name, self.version).replace('.', "-")
+        crate::agent::materialize_tool_name(&self.owner, name, &self.version)
     }
 
     /// Validate fields that can't be enforced by serde alone:

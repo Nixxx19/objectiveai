@@ -1,18 +1,21 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-/// One of the standard MCP request shapes the API forwards down the
-/// reverse-attach channel to the MCP-server layer of a calling
-/// client's local `objectiveai-mcp`.
+/// Envelope: correlation `id` + tagged [`super::Payload`]. Wire shape
+/// (the `id` field lives at the envelope level, the `type`
+/// discriminator and the variant's payload fields are flattened
+/// alongside):
 ///
-/// Wire shape (internally-tagged):
-///
-/// - `{"type": "mcp_tools_list", "cursor": "..."}`
-/// - `{"type": "mcp_tools_call", "name": "...", "arguments": {...}, ...}`
+/// ```json
+/// {"id":"…","type":"mcp_tools_list","cursor":"…"}
+/// {"id":"…","type":"mcp_tools_call","name":"…","arguments":{…}}
+/// ```
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "client_objectiveai_mcp.server_request.Request")]
-#[serde(tag = "type", rename_all = "snake_case")]
-pub enum Request {
-    McpToolsList(crate::mcp::tool::ListToolsRequest),
-    McpToolsCall(crate::mcp::tool::CallToolRequestParams),
+pub struct Request {
+    /// Server-minted correlation id. Echoed by the matching
+    /// [`super::super::server_response::Response`].
+    pub id: String,
+    #[serde(flatten)]
+    pub payload: super::Payload,
 }

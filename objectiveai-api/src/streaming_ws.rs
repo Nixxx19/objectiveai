@@ -38,7 +38,7 @@ use futures::{SinkExt, StreamExt};
 use futures::stream::{SplitSink, SplitStream};
 use objectiveai_sdk::error::ResponseError;
 use serde::Serialize;
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, oneshot};
 
 use crate::error::ResponseErrorExt;
 
@@ -226,23 +226,149 @@ pub async fn send_close_split(sink: &SharedSink, code: CloseCode) {
         .await;
 }
 
-/// Recv loop: drain the split stream, parse each text frame as
-/// [`client_request::Request`](objectiveai_sdk::client_objectiveai_mcp::client_request::Request),
-/// validate the `response_id` against the session tracker, and
-/// dispatch to `notify_fn` on hit. Writes the matching
-/// [`client_response::Response`](objectiveai_sdk::client_objectiveai_mcp::client_response::Response)
-/// back through `sink` for every parsed request (success → `Ok`,
-/// failure → `Error { code, message }`).
+/// Per-WS-connection registry of outstanding
+/// [`server_request::Request`](objectiveai_sdk::client_objectiveai_mcp::server_request::Request)s
+/// the API has emitted and is awaiting a matching
+/// [`server_response::Response`](objectiveai_sdk::client_objectiveai_mcp::server_response::Response)
+/// for. Keys are the API-minted `id`; values are the oneshot the
+/// awaiting future is parked on. The recv side of the WS drains
+/// `server_response` frames, looks up `id`, and fulfills the oneshot.
+pub type PendingRequests = Arc<
+    dashmap::DashMap<
+        String,
+        oneshot::Sender<objectiveai_sdk::client_objectiveai_mcp::server_response::Result>,
+    >,
+>;
+
+pub fn new_pending_requests() -> PendingRequests {
+    Arc::new(dashmap::DashMap::new())
+}
+
+/// Reverse-attach handle for the API's MCP endpoint to forward proxy
+/// traffic over an in-flight agent-completion WS. Holds both halves
+/// of the per-connection state: the sink to write `server_request`
+/// frames out, and the registry to park awaits for matching
+/// `server_response` frames coming back.
+#[derive(Clone)]
+pub struct ReverseChannel {
+    pub sink: SharedSink,
+    pub pending: PendingRequests,
+}
+
+/// Process-wide registry of live [`ReverseChannel`]s keyed by an
+/// opaque session id minted on WS upgrade. Populated by the `_ws`
+/// handlers; consulted by the `/objectiveai-mcp/<session_id>` route
+/// and by the agent-completion verification probe.
+pub type ReverseChannelRegistry = Arc<dashmap::DashMap<String, ReverseChannel>>;
+
+pub fn new_reverse_channel_registry() -> ReverseChannelRegistry {
+    Arc::new(dashmap::DashMap::new())
+}
+
+/// Bundle of the things each `_ws` handler needs to wire up the
+/// reverse-attach: the global [`ReverseChannelRegistry`] (so it can
+/// insert/remove its session) plus the API's own listening port (so
+/// the agent client can build a `http://127.0.0.1:<port>/objectiveai-mcp/<session>`
+/// URL the proxy will dial).
+#[derive(Clone)]
+pub struct ReverseAttachConfig {
+    pub registry: ReverseChannelRegistry,
+    pub api_port: u16,
+}
+
+/// RAII guard: registers a fresh session_id -> [`ReverseChannel`]
+/// mapping on construction, removes it on drop. The `session_id` is
+/// owned by the guard so callers can clone it into URLs (e.g. the
+/// localhost objectiveai-mcp URL the agent client hands to the
+/// proxy) without worrying about lifetime.
+pub struct ReverseAttachGuard {
+    registry: ReverseChannelRegistry,
+    pub session_id: String,
+}
+
+impl ReverseAttachGuard {
+    pub fn new(
+        registry: ReverseChannelRegistry,
+        sink: SharedSink,
+        pending: PendingRequests,
+    ) -> Self {
+        let session_id = uuid::Uuid::new_v4().to_string();
+        registry.insert(
+            session_id.clone(),
+            ReverseChannel { sink, pending },
+        );
+        Self {
+            registry,
+            session_id,
+        }
+    }
+}
+
+impl Drop for ReverseAttachGuard {
+    fn drop(&mut self) {
+        self.registry.remove(&self.session_id);
+    }
+}
+
+/// Mint an id, register a oneshot, write the
+/// [`server_request::Request`](objectiveai_sdk::client_objectiveai_mcp::server_request::Request)
+/// frame, and return the receiver. The caller is responsible for
+/// applying a timeout (via `tokio::time::timeout`) on the await. On
+/// connection drop the recv loop returns and pending oneshots are
+/// dropped — receivers observe the close as `Err(RecvError)`.
+pub async fn send_server_request(
+    sink: &SharedSink,
+    pending: &PendingRequests,
+    payload: objectiveai_sdk::client_objectiveai_mcp::server_request::Payload,
+) -> Result<
+    oneshot::Receiver<objectiveai_sdk::client_objectiveai_mcp::server_response::Result>,
+    (),
+> {
+    let id = uuid::Uuid::new_v4().to_string();
+    let (tx, rx) = oneshot::channel();
+    pending.insert(id.clone(), tx);
+
+    let request = objectiveai_sdk::client_objectiveai_mcp::server_request::Request {
+        id: id.clone(),
+        payload,
+    };
+    let frame = match serde_json::to_string(&request) {
+        Ok(s) => s,
+        Err(_) => {
+            pending.remove(&id);
+            return Err(());
+        }
+    };
+    let mut guard = sink.lock().await;
+    if guard.send(Message::Text(frame.into())).await.is_err() {
+        drop(guard);
+        pending.remove(&id);
+        return Err(());
+    }
+    Ok(rx)
+}
+
+/// Recv loop: drain the split stream, parse each text frame, and
+/// dispatch based on shape.
 ///
-/// Frames that don't parse as a `Request` are logged at `warn!` and
-/// dropped — no response is emitted because there's no `id` to
-/// correlate to.
+/// - Frames that parse as
+///   [`client_request::Request`](objectiveai_sdk::client_objectiveai_mcp::client_request::Request)
+///   go through the notify pipeline: validate `response_id` against
+///   the session tracker, dispatch to `notify_fn`, write back a
+///   [`client_response::Response`](objectiveai_sdk::client_objectiveai_mcp::client_response::Response)
+///   echoing the request `id`.
+/// - Frames that parse as
+///   [`server_response::Response`](objectiveai_sdk::client_objectiveai_mcp::server_response::Response)
+///   are routed to the pending-request registry: the matching
+///   oneshot is taken and fulfilled. Unknown `id` → log + drop.
+/// - Frames that match neither shape are logged + dropped.
 ///
 /// Returns when the recv half closes (peer hung up or close frame).
-pub async fn recv_notify_loop<F, Fut>(
+pub async fn recv_loop<F, Fut>(
     mut rx: SplitStream<WebSocket>,
     tracker: Arc<SessionTracker>,
     sink: SharedSink,
+    pending: PendingRequests,
     notify_fn: F,
 ) where
     F: Fn(objectiveai_sdk::agent::completions::request::AgentCompletionNotifyParams) -> Fut
@@ -251,8 +377,9 @@ pub async fn recv_notify_loop<F, Fut>(
     Fut: std::future::Future<Output = Result<(), crate::agent::completions::Error>> + Send,
 {
     use objectiveai_sdk::client_objectiveai_mcp::{
-        client_request::{Payload, Request},
+        client_request::{Payload as ClientPayload, Request as ClientRequest},
         client_response::{Response as ClientResponse, Result as ClientResult},
+        server_response::Response as ServerResponse,
     };
 
     while let Some(msg) = rx.next().await {
@@ -270,47 +397,61 @@ pub async fn recv_notify_loop<F, Fut>(
             }
         };
 
-        let request: Request = match serde_json::from_str(text.as_str()) {
-            Ok(r) => r,
-            Err(e) => {
-                eprintln!("dropping unparseable client_request frame: {e}");
-                continue;
-            }
-        };
-
-        let Request { id, payload } = request;
-        match payload {
-            Payload::AgentCompletionNotify(params) => {
-                let result: ClientResult = if !tracker.contains(&params.response_id) {
-                    ClientResult::Error {
-                        code: 404,
-                        message: serde_json::Value::String(format!(
-                            "response_id {:?} not from this stream",
-                            params.response_id
-                        )),
-                    }
-                } else {
-                    match notify_fn(params).await {
-                        Ok(()) => ClientResult::Ok,
-                        Err(e) => {
-                            let inner = ResponseError::from(&e);
-                            ClientResult::Error {
-                                code: inner.code,
-                                message: inner.message,
+        // Parse strategy: try client_request first (the discriminator
+        // tag `type` distinguishes it from server_response — they
+        // share the `id` field but differ everywhere else), then
+        // server_response, then drop.
+        if let Ok(request) = serde_json::from_str::<ClientRequest>(text.as_str()) {
+            let ClientRequest { id, payload } = request;
+            match payload {
+                ClientPayload::AgentCompletionNotify(params) => {
+                    let result: ClientResult = if !tracker.contains(&params.response_id) {
+                        ClientResult::Error {
+                            code: 404,
+                            message: serde_json::Value::String(format!(
+                                "response_id {:?} not from this stream",
+                                params.response_id
+                            )),
+                        }
+                    } else {
+                        match notify_fn(params).await {
+                            Ok(()) => ClientResult::Ok,
+                            Err(e) => {
+                                let inner = ResponseError::from(&e);
+                                ClientResult::Error {
+                                    code: inner.code,
+                                    message: inner.message,
+                                }
                             }
                         }
+                    };
+                    let response = ClientResponse { id, result };
+                    let frame = match serde_json::to_string(&response) {
+                        Ok(s) => s,
+                        Err(_) => continue,
+                    };
+                    let mut guard = sink.lock().await;
+                    if guard.send(Message::Text(frame.into())).await.is_err() {
+                        return;
                     }
-                };
-                let response = ClientResponse { id, result };
-                let frame = match serde_json::to_string(&response) {
-                    Ok(s) => s,
-                    Err(_) => continue,
-                };
-                let mut guard = sink.lock().await;
-                if guard.send(Message::Text(frame.into())).await.is_err() {
-                    return;
                 }
             }
+            continue;
         }
+
+        if let Ok(response) = serde_json::from_str::<ServerResponse>(text.as_str()) {
+            let ServerResponse { id, result } = response;
+            match pending.remove(&id) {
+                Some((_, tx)) => {
+                    let _ = tx.send(result);
+                }
+                None => {
+                    eprintln!("dropping server_response for unknown id {id:?}");
+                }
+            }
+            continue;
+        }
+
+        eprintln!("dropping unparseable WS frame (matched neither client_request nor server_response)");
     }
 }

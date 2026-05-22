@@ -108,6 +108,7 @@ pub(crate) async fn create_agent_completion_ws(
             impl agent::completions::usage_handler::UsageHandler<ctx::DefaultContextExt> + Send + Sync + 'static,
         >,
     >,
+    reverse_attach: streaming_ws::ReverseAttachConfig,
     headers: axum::http::HeaderMap,
     persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
     suppress_output: bool,
@@ -150,8 +151,14 @@ pub(crate) async fn create_agent_completion_ws(
         };
 
         let tracker = streaming_ws::SessionTracker::new();
+        let pending = streaming_ws::new_pending_requests();
         let (tx, rx) = socket.split();
         let sink: streaming_ws::SharedSink = Arc::new(tokio::sync::Mutex::new(tx));
+        let _attach_guard = streaming_ws::ReverseAttachGuard::new(
+            reverse_attach.registry.clone(),
+            sink.clone(),
+            pending.clone(),
+        );
 
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
@@ -167,10 +174,11 @@ pub(crate) async fn create_agent_completion_ws(
             streaming_ws::send_close_split(&send_sink, close_code::NORMAL).await;
         };
 
-        let recv = streaming_ws::recv_notify_loop(
+        let recv = streaming_ws::recv_loop(
             rx,
             tracker,
             sink,
+            pending,
             notify_fn_for(notify_client),
         );
 
@@ -196,6 +204,7 @@ pub(crate) async fn create_vector_completion_ws<
     agent_completions_client: Arc<
         agent::completions::Client<ctx::DefaultContextExt, NOR, NCAG, NCX, NMK, NRG, NRF, NRM, NAU>,
     >,
+    reverse_attach: streaming_ws::ReverseAttachConfig,
     headers: axum::http::HeaderMap,
     persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
     suppress_output: bool,
@@ -255,8 +264,14 @@ where
         };
 
         let tracker = streaming_ws::SessionTracker::new();
+        let pending = streaming_ws::new_pending_requests();
         let (tx, rx) = socket.split();
         let sink: streaming_ws::SharedSink = Arc::new(tokio::sync::Mutex::new(tx));
+        let _attach_guard = streaming_ws::ReverseAttachGuard::new(
+            reverse_attach.registry.clone(),
+            sink.clone(),
+            pending.clone(),
+        );
 
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
@@ -271,10 +286,11 @@ where
             streaming_ws::send_close_split(&send_sink, close_code::NORMAL).await;
         };
 
-        let recv = streaming_ws::recv_notify_loop(
+        let recv = streaming_ws::recv_loop(
             rx,
             tracker,
             sink,
+            pending,
             notify_fn_for(agent_completions_client),
         );
 
@@ -297,6 +313,7 @@ pub(crate) async fn execute_function_ws<
     agent_completions_client: Arc<
         agent::completions::Client<ctx::DefaultContextExt, NOR, NCAG, NCX, NMK, NRG, NRF, NRM, NAU>,
     >,
+    reverse_attach: streaming_ws::ReverseAttachConfig,
     headers: axum::http::HeaderMap,
     persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
     suppress_output: bool,
@@ -360,8 +377,14 @@ where
         };
 
         let tracker = streaming_ws::SessionTracker::new();
+        let pending = streaming_ws::new_pending_requests();
         let (tx, rx) = socket.split();
         let sink: streaming_ws::SharedSink = Arc::new(tokio::sync::Mutex::new(tx));
+        let _attach_guard = streaming_ws::ReverseAttachGuard::new(
+            reverse_attach.registry.clone(),
+            sink.clone(),
+            pending.clone(),
+        );
 
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
@@ -376,10 +399,11 @@ where
             streaming_ws::send_close_split(&send_sink, close_code::NORMAL).await;
         };
 
-        let recv = streaming_ws::recv_notify_loop(
+        let recv = streaming_ws::recv_loop(
             rx,
             tracker,
             sink,
+            pending,
             notify_fn_for(agent_completions_client),
         );
 
@@ -395,6 +419,7 @@ pub(crate) async fn create_profile_computation_ws<NOR, NCAG, NCX, NMK, NRG, NRF,
     agent_completions_client: Arc<
         agent::completions::Client<ctx::DefaultContextExt, NOR, NCAG, NCX, NMK, NRG, NRF, NRM, NAU>,
     >,
+    reverse_attach: streaming_ws::ReverseAttachConfig,
     headers: axum::http::HeaderMap,
     persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
     suppress_output: bool,
@@ -438,8 +463,14 @@ where
         };
 
         let tracker = streaming_ws::SessionTracker::new();
+        let pending = streaming_ws::new_pending_requests();
         let (tx, rx) = socket.split();
         let sink: streaming_ws::SharedSink = Arc::new(tokio::sync::Mutex::new(tx));
+        let _attach_guard = streaming_ws::ReverseAttachGuard::new(
+            reverse_attach.registry.clone(),
+            sink.clone(),
+            pending.clone(),
+        );
 
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
@@ -472,10 +503,11 @@ where
             streaming_ws::send_close_split(&send_sink, close_code::NORMAL).await;
         };
 
-        let recv = streaming_ws::recv_notify_loop(
+        let recv = streaming_ws::recv_loop(
             rx,
             tracker,
             sink,
+            pending,
             notify_fn_for(agent_completions_client),
         );
 
@@ -498,6 +530,7 @@ pub(crate) async fn create_function_invention_ws<
     agent_completions_client: Arc<
         agent::completions::Client<ctx::DefaultContextExt, NOR, NCAG, NCX, NMK, NRG, NRF, NRM, NAU>,
     >,
+    reverse_attach: streaming_ws::ReverseAttachConfig,
     headers: axum::http::HeaderMap,
     persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
     suppress_output: bool,
@@ -561,8 +594,14 @@ where
         };
 
         let tracker = streaming_ws::SessionTracker::new();
+        let pending = streaming_ws::new_pending_requests();
         let (tx, rx) = socket.split();
         let sink: streaming_ws::SharedSink = Arc::new(tokio::sync::Mutex::new(tx));
+        let _attach_guard = streaming_ws::ReverseAttachGuard::new(
+            reverse_attach.registry.clone(),
+            sink.clone(),
+            pending.clone(),
+        );
 
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
@@ -577,10 +616,11 @@ where
             streaming_ws::send_close_split(&send_sink, close_code::NORMAL).await;
         };
 
-        let recv = streaming_ws::recv_notify_loop(
+        let recv = streaming_ws::recv_loop(
             rx,
             tracker,
             sink,
+            pending,
             notify_fn_for(agent_completions_client),
         );
 
@@ -603,6 +643,7 @@ pub(crate) async fn create_function_invention_recursive_ws<
     agent_completions_client: Arc<
         agent::completions::Client<ctx::DefaultContextExt, NOR, NCAG, NCX, NMK, NRG, NRF, NRM, NAU>,
     >,
+    reverse_attach: streaming_ws::ReverseAttachConfig,
     headers: axum::http::HeaderMap,
     persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
     suppress_output: bool,
@@ -667,8 +708,14 @@ where
         };
 
         let tracker = streaming_ws::SessionTracker::new();
+        let pending = streaming_ws::new_pending_requests();
         let (tx, rx) = socket.split();
         let sink: streaming_ws::SharedSink = Arc::new(tokio::sync::Mutex::new(tx));
+        let _attach_guard = streaming_ws::ReverseAttachGuard::new(
+            reverse_attach.registry.clone(),
+            sink.clone(),
+            pending.clone(),
+        );
 
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
@@ -683,10 +730,11 @@ where
             streaming_ws::send_close_split(&send_sink, close_code::NORMAL).await;
         };
 
-        let recv = streaming_ws::recv_notify_loop(
+        let recv = streaming_ws::recv_loop(
             rx,
             tracker,
             sink,
+            pending,
             notify_fn_for(agent_completions_client),
         );
 
@@ -702,6 +750,7 @@ pub(crate) async fn create_error_ws<NOR, NCAG, NCX, NMK, NRG, NRF, NRM, NAU>(
     agent_completions_client: Arc<
         agent::completions::Client<ctx::DefaultContextExt, NOR, NCAG, NCX, NMK, NRG, NRF, NRM, NAU>,
     >,
+    reverse_attach: streaming_ws::ReverseAttachConfig,
     headers: axum::http::HeaderMap,
     persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
     suppress_output: bool,
@@ -747,8 +796,14 @@ where
         // Error stream doesn't carry agent-completion ids; tracker stays
         // empty, every incoming notify will validation-fail with 404.
         let tracker = streaming_ws::SessionTracker::new();
+        let pending = streaming_ws::new_pending_requests();
         let (tx, rx) = socket.split();
         let sink: streaming_ws::SharedSink = Arc::new(tokio::sync::Mutex::new(tx));
+        let _attach_guard = streaming_ws::ReverseAttachGuard::new(
+            reverse_attach.registry.clone(),
+            sink.clone(),
+            pending.clone(),
+        );
 
         let send_sink = sink.clone();
         let send = async move {
@@ -777,10 +832,11 @@ where
             streaming_ws::send_close_split(&send_sink, close_code::NORMAL).await;
         };
 
-        let recv = streaming_ws::recv_notify_loop(
+        let recv = streaming_ws::recv_loop(
             rx,
             tracker,
             sink,
+            pending,
             notify_fn_for(agent_completions_client),
         );
 
@@ -803,6 +859,7 @@ pub(crate) async fn execute_laboratory_ws<
     agent_completions_client: Arc<
         agent::completions::Client<ctx::DefaultContextExt, NOR, NCAG, NCX, NMK, NRG, NRF, NRM, NAU>,
     >,
+    reverse_attach: streaming_ws::ReverseAttachConfig,
     headers: axum::http::HeaderMap,
     persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>,
     suppress_output: bool,
@@ -867,8 +924,14 @@ where
         };
 
         let tracker = streaming_ws::SessionTracker::new();
+        let pending = streaming_ws::new_pending_requests();
         let (tx, rx) = socket.split();
         let sink: streaming_ws::SharedSink = Arc::new(tokio::sync::Mutex::new(tx));
+        let _attach_guard = streaming_ws::ReverseAttachGuard::new(
+            reverse_attach.registry.clone(),
+            sink.clone(),
+            pending.clone(),
+        );
 
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
@@ -883,10 +946,11 @@ where
             streaming_ws::send_close_split(&send_sink, close_code::NORMAL).await;
         };
 
-        let recv = streaming_ws::recv_notify_loop(
+        let recv = streaming_ws::recv_loop(
             rx,
             tracker,
             sink,
+            pending,
             notify_fn_for(agent_completions_client),
         );
 

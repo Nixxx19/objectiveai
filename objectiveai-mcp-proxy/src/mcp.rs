@@ -307,11 +307,12 @@ async fn handle_initialize(
             return ok_response_resume_sse(request.id);
         }
         // Branch 2 — decrypt and reconnect strictly from the payload.
-        let (connections_with_headers, decoded_agent_id) = match state.sessions.decode_session_id(sid) {
+        let (connections_with_headers, decoded_agent_id, decoded_tool_allowlists) = match state.sessions.decode_session_id(sid) {
             Some(payload) => {
                 let agent_id = payload.agent_id.clone();
+                let tool_allowlists = payload.tool_allowlists.clone();
                 match crate::upstream::reconnect_from_payload(&state.client, &payload).await {
-                    Ok(pairs) => (pairs, agent_id),
+                    Ok(pairs) => (pairs, agent_id, tool_allowlists),
                     Err(e @ BadInit::UpstreamConnectFailed { .. }) => {
                         return internal_error_response(request.id, e.to_string());
                     }
@@ -334,7 +335,11 @@ async fn handle_initialize(
         // id is deterministic and matches what the client already
         // holds; we discard the return value because the resume path
         // doesn't echo the id back.
-        let _ = state.sessions.add(connections_with_headers, decoded_agent_id);
+        let _ = state.sessions.add(
+            connections_with_headers,
+            decoded_agent_id,
+            decoded_tool_allowlists,
+        );
         ok_response_resume_sse(request.id)
     } else {
         // Branch 3 — fresh init. `X-MCP-Servers` / `X-MCP-Headers`
@@ -352,12 +357,12 @@ async fn handle_initialize(
             .or_else(|| headers.get("OBJECTIVEAI-AGENT-ID"))
             .and_then(|v| v.to_str().ok())
             .map(str::to_owned);
-        let connections_with_headers = match crate::upstream::connect_all_fresh(
+        let (connections_with_headers, tool_allowlists) = match crate::upstream::connect_all_fresh(
             &state.client,
             headers,
             agent_id.as_deref(),
         ).await {
-            Ok(pairs) => pairs,
+            Ok(pair) => pair,
             Err(e @ (BadInit::NotUtf8 { .. } | BadInit::NotJson { .. })) => {
                 return invalid_request_response(request.id, e.to_string());
             }
@@ -365,7 +370,7 @@ async fn handle_initialize(
                 return internal_error_response(request.id, e.to_string());
             }
         };
-        let session_id = state.sessions.add(connections_with_headers, agent_id);
+        let session_id = state.sessions.add(connections_with_headers, agent_id, tool_allowlists);
         ok_response_fresh_sse(request.id, session_id)
     }
 }
