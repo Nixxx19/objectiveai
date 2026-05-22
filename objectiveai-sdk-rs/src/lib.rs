@@ -69,6 +69,9 @@ pub use http::*;
 #[cfg(feature = "mcp")]
 pub mod mcp;
 
+#[cfg(feature = "mcp")]
+pub mod client_objectiveai_mcp;
+
 #[cfg(feature = "cli")]
 pub mod cli;
 

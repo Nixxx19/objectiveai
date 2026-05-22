@@ -403,6 +403,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::mcp::initialize_result::TasksRequestsCapability),
             schemars::schema_for!(crate::mcp::initialize_result::TasksToolsCapability),
             schemars::schema_for!(crate::mcp::initialize_result::TasksToolsCallCapability),
+            schemars::schema_for!(crate::client_objectiveai_mcp::Request),
             schemars::schema_for!(crate::mcp::JsonRpcRequest),
             schemars::schema_for!(crate::mcp::JsonRpcError),
             schemars::schema_for!(crate::mcp::JsonRpcNotification),
