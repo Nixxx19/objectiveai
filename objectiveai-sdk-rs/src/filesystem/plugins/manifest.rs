@@ -108,6 +108,15 @@ impl Manifest {
         self.viewer_zip.is_some() || self.viewer_url.is_some()
     }
 
+    /// LLM-visible tool name: `{owner}-{name}-{version}` with every
+    /// `.` substituted to `-`. The substitution makes the result
+    /// Anthropic-tool-name-regex safe (`^[a-zA-Z0-9_-]{1,128}$`)
+    /// even when the version field carries semver dots
+    /// (`1.2.3` -> `1-2-3`).
+    pub fn tool_name(&self, name: &str) -> String {
+        format!("{}-{}-{}", self.owner, name, self.version).replace('.', "-")
+    }
+
     /// Validate fields that can't be enforced by serde alone:
     /// `viewer_zip` and `viewer_url` are mutually exclusive, and
     /// `viewer_url` (when present) must be `https://` or `http://`
@@ -290,4 +299,12 @@ pub struct ManifestWithNameAndSource {
     /// a URL, or a registry reference. Free-form string; the host
     /// just displays it.
     pub source: String,
+}
+
+impl ManifestWithNameAndSource {
+    /// LLM-visible tool name. See [`Manifest::tool_name`] — this
+    /// helper supplies the `name` field automatically.
+    pub fn tool_name(&self) -> String {
+        self.manifest.tool_name(&self.name)
+    }
 }

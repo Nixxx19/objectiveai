@@ -28,6 +28,18 @@ pub struct Manifest {
     pub exec: String,
 }
 
+impl Manifest {
+    /// LLM-visible tool name: `{owner}-{name}-{version}` with every
+    /// `.` substituted to `-`, mirroring
+    /// `filesystem::plugins::Manifest::tool_name`. The substitution
+    /// keeps the result Anthropic-tool-name-regex safe
+    /// (`^[a-zA-Z0-9_-]{1,128}$`) even when the version field carries
+    /// semver dots (`1.2.3` -> `1-2-3`).
+    pub fn tool_name(&self, name: &str) -> String {
+        format!("{}-{}-{}", self.owner, name, self.version).replace('.', "-")
+    }
+}
+
 /// A [`Manifest`] enriched with the tool's identifying `name` and the
 /// `source` it was loaded from. Same shape and ordering convention
 /// as `filesystem::plugins::ManifestWithNameAndSource`.
@@ -42,4 +54,12 @@ pub struct ManifestWithNameAndSource {
     /// Where this manifest came from — typically an absolute
     /// filesystem path. Free-form string; the host just displays it.
     pub source: String,
+}
+
+impl ManifestWithNameAndSource {
+    /// LLM-visible tool name. See [`Manifest::tool_name`] — this
+    /// helper supplies the `name` field automatically.
+    pub fn tool_name(&self) -> String {
+        self.manifest.tool_name(&self.name)
+    }
 }
