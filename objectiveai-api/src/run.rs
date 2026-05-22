@@ -878,9 +878,11 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
             "/vector/completions",
             axum::routing::any({
                 let vector_completions_client = vector_completions_client.clone();
+                let agent_completions_client = agent_completions_client.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |transport: streaming_ws::Transport, req: axum::extract::Request| {
                     let vector_completions_client = vector_completions_client.clone();
+                    let agent_completions_client = agent_completions_client.clone();
                     let persistent_cache = persistent_cache.clone();
                     async move {
                         use axum::extract::FromRequest;
@@ -897,7 +899,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                             }
                             streaming_ws::Transport::WebSocket => {
                                 match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
-                                    Ok(ws) => streaming_ws_handlers::create_vector_completion_ws(vector_completions_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Ok(ws) => streaming_ws_handlers::create_vector_completion_ws(vector_completions_client, agent_completions_client, headers, persistent_cache, suppress_output, ws).await,
                                     Err(rej) => rej.into_response(),
                                 }
                             }
@@ -990,9 +992,11 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
             "/functions/executions",
             axum::routing::any({
                 let function_executions_client = function_executions_client.clone();
+                let agent_completions_client = agent_completions_client.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |transport: streaming_ws::Transport, req: axum::extract::Request| {
                     let function_executions_client = function_executions_client.clone();
+                    let agent_completions_client = agent_completions_client.clone();
                     let persistent_cache = persistent_cache.clone();
                     async move {
                         use axum::extract::FromRequest;
@@ -1009,7 +1013,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                             }
                             streaming_ws::Transport::WebSocket => {
                                 match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
-                                    Ok(ws) => streaming_ws_handlers::execute_function_ws(function_executions_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Ok(ws) => streaming_ws_handlers::execute_function_ws(function_executions_client, agent_completions_client, headers, persistent_cache, suppress_output, ws).await,
                                     Err(rej) => rej.into_response(),
                                 }
                             }
@@ -1088,9 +1092,11 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
             "/functions/inventions",
             axum::routing::any({
                 let function_inventions_client = function_inventions_client.clone();
+                let agent_completions_client = agent_completions_client.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |transport: streaming_ws::Transport, req: axum::extract::Request| {
                     let function_inventions_client = function_inventions_client.clone();
+                    let agent_completions_client = agent_completions_client.clone();
                     let persistent_cache = persistent_cache.clone();
                     async move {
                         use axum::extract::FromRequest;
@@ -1107,7 +1113,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                             }
                             streaming_ws::Transport::WebSocket => {
                                 match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
-                                    Ok(ws) => streaming_ws_handlers::create_function_invention_ws(function_inventions_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Ok(ws) => streaming_ws_handlers::create_function_invention_ws(function_inventions_client, agent_completions_client, headers, persistent_cache, suppress_output, ws).await,
                                     Err(rej) => rej.into_response(),
                                 }
                             }
@@ -1122,10 +1128,12 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
             axum::routing::any({
                 let function_inventions_recursive_client =
                     function_inventions_recursive_client.clone();
+                let agent_completions_client = agent_completions_client.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |transport: streaming_ws::Transport, req: axum::extract::Request| {
                     let function_inventions_recursive_client =
                         function_inventions_recursive_client.clone();
+                    let agent_completions_client = agent_completions_client.clone();
                     let persistent_cache = persistent_cache.clone();
                     async move {
                         use axum::extract::FromRequest;
@@ -1142,7 +1150,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                             }
                             streaming_ws::Transport::WebSocket => {
                                 match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
-                                    Ok(ws) => streaming_ws_handlers::create_function_invention_recursive_ws(function_inventions_recursive_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Ok(ws) => streaming_ws_handlers::create_function_invention_recursive_ws(function_inventions_recursive_client, agent_completions_client, headers, persistent_cache, suppress_output, ws).await,
                                     Err(rej) => rej.into_response(),
                                 }
                             }
@@ -1209,9 +1217,11 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
             axum::routing::any({
                 let profile_computations_client =
                     profile_computations_client.clone();
+                let agent_completions_client = agent_completions_client.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |transport: streaming_ws::Transport, req: axum::extract::Request| {
                     let profile_computations_client = profile_computations_client.clone();
+                    let agent_completions_client = agent_completions_client.clone();
                     let persistent_cache = persistent_cache.clone();
                     async move {
                         use axum::extract::FromRequest;
@@ -1228,7 +1238,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                             }
                             streaming_ws::Transport::WebSocket => {
                                 match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
-                                    Ok(ws) => streaming_ws_handlers::create_profile_computation_ws(profile_computations_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Ok(ws) => streaming_ws_handlers::create_profile_computation_ws(profile_computations_client, agent_completions_client, headers, persistent_cache, suppress_output, ws).await,
                                     Err(rej) => rej.into_response(),
                                 }
                             }
@@ -1403,9 +1413,11 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
             "/error",
             axum::routing::any({
                 let error_client = Arc::new(crate::error::Client::new());
+                let agent_completions_client = agent_completions_client.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |transport: streaming_ws::Transport, req: axum::extract::Request| {
                     let error_client = error_client.clone();
+                    let agent_completions_client = agent_completions_client.clone();
                     let persistent_cache = persistent_cache.clone();
                     async move {
                         use axum::extract::FromRequest;
@@ -1422,7 +1434,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                             }
                             streaming_ws::Transport::WebSocket => {
                                 match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
-                                    Ok(ws) => streaming_ws_handlers::create_error_ws(error_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Ok(ws) => streaming_ws_handlers::create_error_ws(error_client, agent_completions_client, headers, persistent_cache, suppress_output, ws).await,
                                     Err(rej) => rej.into_response(),
                                 }
                             }
@@ -1436,9 +1448,11 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
             "/laboratories/executions",
             axum::routing::any({
                 let laboratory_executions_client = laboratory_executions_client.clone();
+                let agent_completions_client = agent_completions_client.clone();
                 let persistent_cache = persistent_cache.clone();
                 move |transport: streaming_ws::Transport, req: axum::extract::Request| {
                     let laboratory_executions_client = laboratory_executions_client.clone();
+                    let agent_completions_client = agent_completions_client.clone();
                     let persistent_cache = persistent_cache.clone();
                     async move {
                         use axum::extract::FromRequest;
@@ -1455,7 +1469,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                             }
                             streaming_ws::Transport::WebSocket => {
                                 match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
-                                    Ok(ws) => streaming_ws_handlers::execute_laboratory_ws(laboratory_executions_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Ok(ws) => streaming_ws_handlers::execute_laboratory_ws(laboratory_executions_client, agent_completions_client, headers, persistent_cache, suppress_output, ws).await,
                                     Err(rej) => rej.into_response(),
                                 }
                             }

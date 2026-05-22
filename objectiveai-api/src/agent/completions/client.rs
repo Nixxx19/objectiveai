@@ -188,6 +188,77 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK, RETRG, RETRF, RETRM, CU
         entry.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
     }
 
+    /// Forward `content` to the MCP proxy notify queue(s) of the
+    /// agent completion identified by `response_id`. Returns
+    /// [`super::Error::NotifyResponseIdNotFound`] if the completion
+    /// isn't currently streaming (never started, already finished, or
+    /// cancelled), and [`super::Error::NotifyNoMcp`] if the completion
+    /// is streaming but its agent has no MCP connection — in which
+    /// case there's no queue to forward to.
+    ///
+    /// Mutually exclusive with the stream's final-chunk queue peek
+    /// via a per-`response_id` [`tokio::sync::Mutex`]: the stream
+    /// locks, removes the registry entry, then peeks the queue — so
+    /// any notify that returns `Ok` is reflected in the final chunk's
+    /// `messages_queued` field, and any notify that races against
+    /// remove sees the dashmap miss on its post-lock re-check and
+    /// returns `NotifyResponseIdNotFound`.
+    ///
+    /// Note: same-stream scoping (only allow notifies for
+    /// `response_id`s emitted by *this WS connection's* stream) is
+    /// enforced at the WS-handler layer via the per-connection
+    /// `SessionTracker`. This method trusts that the caller has
+    /// already gated the request through that check.
+    pub async fn notify(
+        &self,
+        params: objectiveai_sdk::agent::completions::request::AgentCompletionNotifyParams,
+    ) -> Result<(), super::Error> {
+        // Look up the entry + clone the Arc<Mutex<…>>; release the
+        // dashmap shard lock immediately.
+        let arc = {
+            let entry = self
+                .notify_targets
+                .get(&params.response_id)
+                .ok_or_else(|| {
+                    super::Error::NotifyResponseIdNotFound(params.response_id.clone())
+                })?;
+            entry.value().clone()
+        };
+
+        // Acquire the per-response_id mutex. Mutually exclusive with
+        // the stream's remove + queue-peek.
+        let guard = arc.lock().await;
+
+        // Re-check the dashmap: the stream may have removed the entry
+        // while we were waiting on the mutex, in which case its
+        // `has_pending_notifications` has already been (or is about
+        // to be) computed and delivering now would leave a notify
+        // unreported in the final chunk.
+        if !self.notify_targets.contains_key(&params.response_id) {
+            return Err(super::Error::NotifyResponseIdNotFound(
+                params.response_id,
+            ));
+        }
+
+        match &*guard {
+            super::NotifyTargets::NoMcp => {
+                Err(super::Error::NotifyNoMcp(params.response_id))
+            }
+            super::NotifyTargets::Active(conns) => {
+                let blocks: Vec<objectiveai_sdk::mcp::tool::ContentBlock> =
+                    params.content.into();
+                for conn in conns {
+                    conn.enqueue_notifications(&blocks).await.map_err(
+                        |error| super::Error::McpEnqueueNotifications {
+                            url: conn.url.clone(),
+                            error,
+                        },
+                    )?;
+                }
+                Ok(())
+            }
+        }
+    }
 }
 
 impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK, RETRG, RETRF, RETRM, CUSG> Clone

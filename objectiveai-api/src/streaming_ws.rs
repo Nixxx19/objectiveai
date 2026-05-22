@@ -28,15 +28,58 @@
 //!
 //! Stage 1 of #193; #194 tracks the migration.
 
+use std::sync::Arc;
+
 use axum::extract::FromRequestParts;
 use axum::extract::ws::{CloseCode, CloseFrame, Message, WebSocket, close_code};
 use axum::http::request::Parts;
 use axum::response::Response;
-use futures::{Stream, StreamExt};
+use futures::{SinkExt, StreamExt};
+use futures::stream::{SplitSink, SplitStream};
 use objectiveai_sdk::error::ResponseError;
 use serde::Serialize;
+use tokio::sync::Mutex;
 
 use crate::error::ResponseErrorExt;
+
+/// Shared sender half of a split WebSocket, wrapped under a tokio
+/// mutex so the send-side (chunk forwarder) and recv-side (notify
+/// responder) can both write frames safely. Locks are short-lived —
+/// only held across a single `send`.
+pub type SharedSink = Arc<Mutex<SplitSink<WebSocket, Message>>>;
+
+/// Per-WS-connection tracker of agent-completion `response_id`s
+/// emitted by this stream. Populated on the send side as each chunk
+/// flows out (via [`AgentCompletionIds`]) and read on the recv side
+/// to validate incoming notify requests' `response_id`. Notifies
+/// targeting an id not in this tracker are rejected with 404.
+pub struct SessionTracker {
+    ids: dashmap::DashSet<String>,
+}
+
+impl SessionTracker {
+    pub fn new() -> Arc<Self> {
+        Arc::new(Self {
+            ids: dashmap::DashSet::new(),
+        })
+    }
+
+    /// Extend the tracker with every agent-completion id this chunk
+    /// carries. Borrows into the chunk; no allocation beyond the
+    /// `insert` itself.
+    pub fn observe<C>(&self, chunk: &C)
+    where
+        C: objectiveai_sdk::agent::completions::response::streaming::AgentCompletionIds,
+    {
+        for id in chunk.agent_completion_ids() {
+            self.ids.insert(id.to_string());
+        }
+    }
+
+    pub fn contains(&self, id: &str) -> bool {
+        self.ids.contains(id)
+    }
+}
 
 /// Transport the client wants. Set via the `X-Transport` request
 /// header; missing or unknown values default to [`Transport::WebSocket`].
@@ -144,70 +187,130 @@ pub async fn send_error_and_close(socket: &mut WebSocket, err: &ResponseError, c
         .await;
 }
 
-/// Drain `stream` to `socket`, one JSON text frame per chunk, then
-/// `Close(1000)`. If `socket.send` fails (peer hung up), the loop
-/// breaks early and no close is attempted.
-pub async fn serve_chunks<C, S>(socket: &mut WebSocket, stream: S)
-where
-    C: Serialize,
-    S: Stream<Item = C> + Unpin,
-{
-    let mut stream = stream;
-    while let Some(chunk) = stream.next().await {
-        let json = match serde_json::to_string(&chunk) {
-            Ok(s) => s,
-            Err(_) => continue, // chunk types are infallible to serialize in practice
-        };
-        if socket.send(Message::Text(json.into())).await.is_err() {
-            return;
-        }
-    }
-    let _ = socket
-        .send(Message::Close(Some(CloseFrame {
-            code: close_code::NORMAL,
-            reason: "".into(),
-        })))
-        .await;
-}
-
-/// Drain `stream` (where each item is itself a `Result`) to `socket`.
-/// Both `Ok` and `Err` arms are serialized in-band as text frames —
-/// `Err` items do **not** terminate the stream. Mirrors the SSE
-/// behavior in `create_error` and `create_profile_computation` where
-/// per-chunk errors arrive as normal `data:` events alongside `Ok`
-/// chunks. Closes `1000` at end of stream.
-pub async fn serve_result_chunks<C, E, S>(socket: &mut WebSocket, stream: S)
-where
-    C: Serialize,
-    E: Serialize,
-    S: Stream<Item = Result<C, E>> + Unpin,
-{
-    let mut stream = stream;
-    while let Some(item) = stream.next().await {
-        let json = match item {
-            Ok(chunk) => serde_json::to_string(&chunk),
-            Err(err) => serde_json::to_string(&err),
-        };
-        let json = match json {
-            Ok(s) => s,
-            Err(_) => continue,
-        };
-        if socket.send(Message::Text(json.into())).await.is_err() {
-            return;
-        }
-    }
-    let _ = socket
-        .send(Message::Close(Some(CloseFrame {
-            code: close_code::NORMAL,
-            reason: "".into(),
-        })))
-        .await;
-}
-
 /// Close the socket with `Close(1011)` after sending the given
 /// `ResponseError` as a text frame. Used when setup (e.g.
 /// `create_streaming_handle_usage`) fails before any chunk has been
 /// produced.
 pub async fn fatal_setup_error(socket: &mut WebSocket, err: &ResponseError) {
     send_error_and_close(socket, err, close_code::ERROR).await;
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Split-sink variants. Used by `_ws` handlers after splitting the
+// socket so the send-side (chunk forwarder) and recv-side (notify
+// responder) can write through the same socket concurrently.
+// ────────────────────────────────────────────────────────────────────
+
+/// Send one chunk as a text frame. Caller observes the chunk into the
+/// session tracker beforehand. Returns `Err(())` if the peer hung up.
+pub async fn send_chunk_split<C: Serialize>(sink: &SharedSink, chunk: &C) -> Result<(), ()> {
+    let json = match serde_json::to_string(chunk) {
+        Ok(s) => s,
+        Err(_) => return Ok(()), // chunk types are infallible to serialize in practice
+    };
+    let mut guard = sink.lock().await;
+    guard
+        .send(Message::Text(json.into()))
+        .await
+        .map_err(|_| ())
+}
+
+/// Send a `Close(code)` frame, ignoring any I/O error.
+pub async fn send_close_split(sink: &SharedSink, code: CloseCode) {
+    let mut guard = sink.lock().await;
+    let _ = guard
+        .send(Message::Close(Some(CloseFrame {
+            code,
+            reason: "".into(),
+        })))
+        .await;
+}
+
+/// Recv loop: drain the split stream, parse each text frame as
+/// [`client_request::Request`](objectiveai_sdk::client_objectiveai_mcp::client_request::Request),
+/// validate the `response_id` against the session tracker, and
+/// dispatch to `notify_fn` on hit. Writes the matching
+/// [`client_response::Response`](objectiveai_sdk::client_objectiveai_mcp::client_response::Response)
+/// back through `sink` for every parsed request (success → `Ok`,
+/// failure → `Error { code, message }`).
+///
+/// Frames that don't parse as a `Request` are logged at `warn!` and
+/// dropped — no response is emitted because there's no `id` to
+/// correlate to.
+///
+/// Returns when the recv half closes (peer hung up or close frame).
+pub async fn recv_notify_loop<F, Fut>(
+    mut rx: SplitStream<WebSocket>,
+    tracker: Arc<SessionTracker>,
+    sink: SharedSink,
+    notify_fn: F,
+) where
+    F: Fn(objectiveai_sdk::agent::completions::request::AgentCompletionNotifyParams) -> Fut
+        + Send
+        + Sync,
+    Fut: std::future::Future<Output = Result<(), crate::agent::completions::Error>> + Send,
+{
+    use objectiveai_sdk::client_objectiveai_mcp::{
+        client_request::{Payload, Request},
+        client_response::{Response as ClientResponse, Result as ClientResult},
+    };
+
+    while let Some(msg) = rx.next().await {
+        let text = match msg {
+            Ok(Message::Text(t)) => t,
+            Ok(Message::Binary(_)) => {
+                eprintln!("ignoring binary frame on streaming WS recv side");
+                continue;
+            }
+            Ok(Message::Ping(_) | Message::Pong(_)) => continue,
+            Ok(Message::Close(_)) => return,
+            Err(e) => {
+                eprintln!("streaming WS recv error: {e}");
+                return;
+            }
+        };
+
+        let request: Request = match serde_json::from_str(text.as_str()) {
+            Ok(r) => r,
+            Err(e) => {
+                eprintln!("dropping unparseable client_request frame: {e}");
+                continue;
+            }
+        };
+
+        let Request { id, payload } = request;
+        match payload {
+            Payload::AgentCompletionNotify(params) => {
+                let result: ClientResult = if !tracker.contains(&params.response_id) {
+                    ClientResult::Error {
+                        code: 404,
+                        message: serde_json::Value::String(format!(
+                            "response_id {:?} not from this stream",
+                            params.response_id
+                        )),
+                    }
+                } else {
+                    match notify_fn(params).await {
+                        Ok(()) => ClientResult::Ok,
+                        Err(e) => {
+                            let inner = ResponseError::from(&e);
+                            ClientResult::Error {
+                                code: inner.code,
+                                message: inner.message,
+                            }
+                        }
+                    }
+                };
+                let response = ClientResponse { id, result };
+                let frame = match serde_json::to_string(&response) {
+                    Ok(s) => s,
+                    Err(_) => continue,
+                };
+                let mut guard = sink.lock().await;
+                if guard.send(Message::Text(frame.into())).await.is_err() {
+                    return;
+                }
+            }
+        }
+    }
 }
