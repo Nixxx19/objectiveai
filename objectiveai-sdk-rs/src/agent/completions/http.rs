@@ -1,6 +1,6 @@
 //! HTTP functions for agent completions.
 
-use crate::{HttpClient, HttpError};
+use crate::{HttpClient, HttpError, McpHandler, Notifier};
 use futures::Stream;
 
 /// Creates a agent completion (non-streaming).
@@ -28,35 +28,41 @@ pub async fn create_agent_completion_unary(
 
 /// Creates a streaming agent completion.
 ///
-/// Sends a request to the agent completions endpoint and returns a stream
-/// of response chunks as they arrive via Server-Sent Events.
+/// Opens a WebSocket to the agent completions endpoint, sends `params`
+/// as the body frame, and returns a `(Stream, Notifier)` tuple:
 ///
-/// # Arguments
+/// - The `Stream` yields only `AgentCompletionChunk`s — the same shape
+///   the previous SSE endpoint emitted.
+/// - The `Notifier` provides `notify(...)` for pushing a user message
+///   into the running completion at any point before the stream ends.
 ///
-/// * `client` - The HTTP client to use
-/// * `params` - Agent completion parameters (stream flag will be set to true)
-///
-/// # Returns
-///
-/// A stream of agent completion chunks.
+/// `handler` is invoked for every inbound objectiveai-mcp
+/// `server_request` (tools/list, tools/call) the API forwards from a
+/// proxy upstream that dialed `/objectiveai-mcp/{session_id}`. Pass
+/// [`crate::http::RejectHandler`] if the calling client doesn't host
+/// objectiveai-mcp — agents that declare `client_objectiveai_mcp`
+/// will then fall through to the next fallback agent server-side.
 pub async fn create_agent_completion_streaming(
     client: &HttpClient,
     mut params: super::request::AgentCompletionCreateParams,
+    handler: impl McpHandler,
 ) -> Result<
-    impl Stream<
-        Item = Result<
-            super::response::streaming::AgentCompletionChunk,
-            HttpError,
-        >,
-    >
-    + Send
-    + 'static
-    + use<>,
+    (
+        impl Stream<
+            Item = Result<
+                super::response::streaming::AgentCompletionChunk,
+                HttpError,
+            >,
+        > + Send
+        + Unpin
+        + 'static,
+        Notifier,
+    ),
     HttpError,
 > {
     params.stream = Some(true);
     client
-        .send_streaming(reqwest::Method::POST, "agent/completions", Some(params))
+        .send_streaming_ws(reqwest::Method::POST, "agent/completions", params, handler)
         .await
 }
 
