@@ -28,6 +28,12 @@ struct ConduitState {
     /// `http://127.0.0.1:<port>` — the subprocess's listener.
     base_url: String,
     http: reqwest::Client,
+    /// The `Mcp-Session-Id` the LOCAL objectiveai-mcp minted on its
+    /// `initialize` response. We stamp it on every subsequent
+    /// outbound request so rmcp recognizes the session. The proxy's
+    /// own `Mcp-Session-Id` (which the API forwards to us) belongs
+    /// to a different layer and is stripped before we forward.
+    local_session_id: Mutex<Option<String>>,
 }
 
 pub struct ConduitMcpHandler {
@@ -103,6 +109,7 @@ impl ConduitMcpHandler {
             _child: child,
             base_url,
             http,
+            local_session_id: Mutex::new(None),
         });
         *guard = Some(state.clone());
         Ok(state)
@@ -119,23 +126,31 @@ impl ConduitMcpHandler {
 
         let mut req = state.http.request(method, &state.base_url);
 
-        // Pass through every header except hop-by-hop and ones we'd
-        // be overriding ourselves (`host`, `content-length`,
-        // `accept`).
+        // Pass through every header except hop-by-hop and ones we
+        // override ourselves (`host`, `content-length`, `accept`,
+        // and `mcp-session-id` which we remap from local state).
         for (k, v) in &request.headers {
             if k.eq_ignore_ascii_case("host")
                 || k.eq_ignore_ascii_case("content-length")
                 || k.eq_ignore_ascii_case("accept")
                 || k.eq_ignore_ascii_case("connection")
+                || k.eq_ignore_ascii_case("mcp-session-id")
             {
                 continue;
             }
             req = req.header(k, v);
         }
-        // Force JSON-only — the calling client doesn't want SSE on
-        // this leg, and the local objectiveai-mcp will happily
-        // serve JSON when asked.
-        req = req.header("Accept", "application/json");
+        // MCP Streamable HTTP requires the client to accept both
+        // shapes. rmcp's StreamableHttpService always replies with
+        // SSE-wrapped JSON regardless — `parse_json_or_sse` below
+        // handles either; the API only ever sees the unwrapped JSON.
+        req = req.header("Accept", "application/json, text/event-stream");
+
+        // Stamp the local objectiveai-mcp's session id (if we have
+        // one yet — `initialize` runs before this is set).
+        if let Some(sid) = state.local_session_id.lock().await.as_ref() {
+            req = req.header("Mcp-Session-Id", sid);
+        }
 
         if let Some(body) = &request.body {
             req = req.json(body);
@@ -149,16 +164,37 @@ impl ConduitMcpHandler {
                 resp_headers.insert(k.as_str().to_string(), value.to_string());
             }
         }
-        let resp_text = resp.text().await.map_err(ConduitError::Body)?;
-        let resp_body: Option<serde_json::Value> = if resp_text.is_empty() {
-            None
-        } else {
-            serde_json::from_str(&resp_text).ok()
-        };
 
-        // Strip `tools.listChanged` from any initialize response so
-        // the proxy never subscribes to notifications. Keeps the
-        // chain single-shot end-to-end.
+        // Capture the local objectiveai-mcp's `Mcp-Session-Id` on
+        // the initialize response so subsequent forwards stamp it.
+        // The proxy/API layer uses a different session id (the URL
+        // path segment) — we don't expose the local one to them,
+        // so strip it from the response headers below.
+        for (k, v) in &resp_headers {
+            if k.eq_ignore_ascii_case("mcp-session-id") {
+                let mut slot = state.local_session_id.lock().await;
+                if slot.is_none() {
+                    *slot = Some(v.clone());
+                }
+                break;
+            }
+        }
+        resp_headers.shift_remove("mcp-session-id");
+        resp_headers.shift_remove("Mcp-Session-Id");
+
+        let resp_text = resp.text().await.map_err(ConduitError::Body)?;
+        let resp_body = parse_json_or_sse(&resp_text);
+
+        // The leg back to the API + proxy is bare JSON
+        // (`Content-Type: application/json`), so strip any SSE
+        // `Content-Type` rmcp may have sent. Mirror the JSON-only
+        // posture we forced on the request side.
+        resp_headers.shift_remove("content-type");
+        resp_headers.shift_remove("Content-Type");
+
+        // Strip `{tools,resources}.listChanged` from any initialize
+        // response so the proxy never subscribes to notifications.
+        // Keeps the chain single-shot end-to-end.
         let resp_body = strip_list_changed(resp_body);
 
         Ok(server_response::Response {
@@ -208,6 +244,30 @@ enum ConduitError {
     Request(reqwest::Error),
     #[error("reading response body failed: {0}")]
     Body(reqwest::Error),
+}
+
+/// Parse an HTTP response body that the local objectiveai-mcp
+/// returned. Even with `Accept: application/json` on the request,
+/// rmcp's `StreamableHttpService` may wrap a single JSON-RPC
+/// response in an SSE envelope (`data: {...}\n\n`). Mirror the
+/// fallback in `objectiveai_sdk::mcp::transport::parse_streamable_http_response`:
+/// try bare JSON first, then strip `data:` prefixes from each line
+/// and reparse. Empty body → `None`.
+fn parse_json_or_sse(text: &str) -> Option<serde_json::Value> {
+    if text.is_empty() {
+        return None;
+    }
+    if let Ok(v) = serde_json::from_str::<serde_json::Value>(text) {
+        return Some(v);
+    }
+    let collected: String = text
+        .lines()
+        .filter_map(|l| l.strip_prefix("data: ").or_else(|| l.strip_prefix("data:")))
+        .collect();
+    if collected.is_empty() {
+        return None;
+    }
+    serde_json::from_str::<serde_json::Value>(&collected).ok()
 }
 
 /// Walks a JSON-RPC `initialize` response and removes
