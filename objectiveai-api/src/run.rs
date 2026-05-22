@@ -5,6 +5,7 @@
 
 use axum::{
     Json,
+    extract::ws::WebSocketUpgrade,
     response::{IntoResponse, Sse, sse::Event},
 };
 use envconfig::Envconfig;
@@ -15,7 +16,7 @@ use crate::{
     filesystem,
     functions::{self, profiles::computations::Client},
     github, objectiveai_http,
-    retrieval, viewer,
+    retrieval, streaming_ws, streaming_ws_handlers, viewer,
     util::StreamOnce,
     vector,
 };
@@ -839,16 +840,36 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
 
     // Router
     let app = axum::Router::new()
-        // Agent Completions - create
+        // Agent Completions - create (transport selected by X-Transport header)
         .route(
             "/agent/completions",
-            axum::routing::post({
+            axum::routing::any({
                 let agent_completions_client = agent_completions_client.clone();
                 let persistent_cache = persistent_cache.clone();
-                move |headers: axum::http::HeaderMap, Json(body): Json<
-                    objectiveai_sdk::agent::completions::request::AgentCompletionCreateParams,
-                >| {
-                    create_agent_completion(agent_completions_client, headers, persistent_cache, suppress_output, body)
+                move |transport: streaming_ws::Transport, req: axum::extract::Request| {
+                    let agent_completions_client = agent_completions_client.clone();
+                    let persistent_cache = persistent_cache.clone();
+                    async move {
+                        use axum::extract::FromRequest;
+                        use axum::extract::FromRequestParts;
+                        let (mut parts, body) = req.into_parts();
+                        let headers = parts.headers.clone();
+                        match transport {
+                            streaming_ws::Transport::Sse => {
+                                let req = axum::extract::Request::from_parts(parts, body);
+                                match Json::<objectiveai_sdk::agent::completions::request::AgentCompletionCreateParams>::from_request(req, &()).await {
+                                    Ok(Json(body)) => create_agent_completion(agent_completions_client, headers, persistent_cache, suppress_output, body).await,
+                                    Err(rej) => rej.into_response(),
+                                }
+                            }
+                            streaming_ws::Transport::WebSocket => {
+                                match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
+                                    Ok(ws) => streaming_ws_handlers::create_agent_completion_ws(agent_completions_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Err(rej) => rej.into_response(),
+                                }
+                            }
+                        }
+                    }
                 }
             }),
         )
@@ -864,16 +885,36 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                 }
             }),
         )
-        // Vector Completions - create
+        // Vector Completions - create (transport selected by X-Transport header)
         .route(
             "/vector/completions",
-            axum::routing::post({
+            axum::routing::any({
                 let vector_completions_client = vector_completions_client.clone();
                 let persistent_cache = persistent_cache.clone();
-                move |headers: axum::http::HeaderMap, Json(body): Json<
-                    objectiveai_sdk::vector::completions::request::VectorCompletionCreateParams,
-                >| {
-                    create_vector_completion(vector_completions_client, headers, persistent_cache, suppress_output, body)
+                move |transport: streaming_ws::Transport, req: axum::extract::Request| {
+                    let vector_completions_client = vector_completions_client.clone();
+                    let persistent_cache = persistent_cache.clone();
+                    async move {
+                        use axum::extract::FromRequest;
+                        use axum::extract::FromRequestParts;
+                        let (mut parts, body) = req.into_parts();
+                        let headers = parts.headers.clone();
+                        match transport {
+                            streaming_ws::Transport::Sse => {
+                                let req = axum::extract::Request::from_parts(parts, body);
+                                match Json::<objectiveai_sdk::vector::completions::request::VectorCompletionCreateParams>::from_request(req, &()).await {
+                                    Ok(Json(body)) => create_vector_completion(vector_completions_client, headers, persistent_cache, suppress_output, body).await,
+                                    Err(rej) => rej.into_response(),
+                                }
+                            }
+                            streaming_ws::Transport::WebSocket => {
+                                match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
+                                    Ok(ws) => streaming_ws_handlers::create_vector_completion_ws(vector_completions_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Err(rej) => rej.into_response(),
+                                }
+                            }
+                        }
+                    }
                 }
             }),
         )
@@ -956,22 +997,36 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                 }
             }),
         )
-        // Function Executions - create
+        // Function Executions - create (transport selected by X-Transport header)
         .route(
             "/functions/executions",
-            axum::routing::post({
+            axum::routing::any({
                 let function_executions_client = function_executions_client.clone();
                 let persistent_cache = persistent_cache.clone();
-                move |headers: axum::http::HeaderMap, Json(body): Json<
-                    objectiveai_sdk::functions::executions::request::FunctionExecutionCreateParams,
-                >| {
-                    execute_function(
-                        function_executions_client,
-                        headers,
-                        persistent_cache,
-                        suppress_output,
-                        body,
-                    )
+                move |transport: streaming_ws::Transport, req: axum::extract::Request| {
+                    let function_executions_client = function_executions_client.clone();
+                    let persistent_cache = persistent_cache.clone();
+                    async move {
+                        use axum::extract::FromRequest;
+                        use axum::extract::FromRequestParts;
+                        let (mut parts, body) = req.into_parts();
+                        let headers = parts.headers.clone();
+                        match transport {
+                            streaming_ws::Transport::Sse => {
+                                let req = axum::extract::Request::from_parts(parts, body);
+                                match Json::<objectiveai_sdk::functions::executions::request::FunctionExecutionCreateParams>::from_request(req, &()).await {
+                                    Ok(Json(body)) => execute_function(function_executions_client, headers, persistent_cache, suppress_output, body).await,
+                                    Err(rej) => rej.into_response(),
+                                }
+                            }
+                            streaming_ws::Transport::WebSocket => {
+                                match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
+                                    Ok(ws) => streaming_ws_handlers::execute_function_ws(function_executions_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Err(rej) => rej.into_response(),
+                                }
+                            }
+                        }
+                    }
                 }
             }),
         )
@@ -1040,36 +1095,71 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                 }
             }),
         )
-        // Function Inventions - create
+        // Function Inventions - create (transport selected by X-Transport header)
         .route(
             "/functions/inventions",
-            axum::routing::post({
+            axum::routing::any({
                 let function_inventions_client = function_inventions_client.clone();
                 let persistent_cache = persistent_cache.clone();
-                move |headers: axum::http::HeaderMap, Json(body): Json<
-                    objectiveai_sdk::functions::inventions::request::FunctionInventionCreateParams,
-                >| {
-                    create_function_invention(function_inventions_client, headers, persistent_cache, suppress_output, body)
+                move |transport: streaming_ws::Transport, req: axum::extract::Request| {
+                    let function_inventions_client = function_inventions_client.clone();
+                    let persistent_cache = persistent_cache.clone();
+                    async move {
+                        use axum::extract::FromRequest;
+                        use axum::extract::FromRequestParts;
+                        let (mut parts, body) = req.into_parts();
+                        let headers = parts.headers.clone();
+                        match transport {
+                            streaming_ws::Transport::Sse => {
+                                let req = axum::extract::Request::from_parts(parts, body);
+                                match Json::<objectiveai_sdk::functions::inventions::request::FunctionInventionCreateParams>::from_request(req, &()).await {
+                                    Ok(Json(body)) => create_function_invention(function_inventions_client, headers, persistent_cache, suppress_output, body).await,
+                                    Err(rej) => rej.into_response(),
+                                }
+                            }
+                            streaming_ws::Transport::WebSocket => {
+                                match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
+                                    Ok(ws) => streaming_ws_handlers::create_function_invention_ws(function_inventions_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Err(rej) => rej.into_response(),
+                                }
+                            }
+                        }
+                    }
                 }
             }),
         )
         // Function Inventions Recursive - create
         .route(
             "/functions/inventions/recursive",
-            axum::routing::post({
+            axum::routing::any({
                 let function_inventions_recursive_client =
                     function_inventions_recursive_client.clone();
                 let persistent_cache = persistent_cache.clone();
-                move |headers: axum::http::HeaderMap, Json(body): Json<
-                    objectiveai_sdk::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams,
-                >| {
-                    create_function_invention_recursive(
-                        function_inventions_recursive_client,
-                        headers,
-                        persistent_cache,
-                        suppress_output,
-                        body,
-                    )
+                move |transport: streaming_ws::Transport, req: axum::extract::Request| {
+                    let function_inventions_recursive_client =
+                        function_inventions_recursive_client.clone();
+                    let persistent_cache = persistent_cache.clone();
+                    async move {
+                        use axum::extract::FromRequest;
+                        use axum::extract::FromRequestParts;
+                        let (mut parts, body) = req.into_parts();
+                        let headers = parts.headers.clone();
+                        match transport {
+                            streaming_ws::Transport::Sse => {
+                                let req = axum::extract::Request::from_parts(parts, body);
+                                match Json::<objectiveai_sdk::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams>::from_request(req, &()).await {
+                                    Ok(Json(body)) => create_function_invention_recursive(function_inventions_recursive_client, headers, persistent_cache, suppress_output, body).await,
+                                    Err(rej) => rej.into_response(),
+                                }
+                            }
+                            streaming_ws::Transport::WebSocket => {
+                                match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
+                                    Ok(ws) => streaming_ws_handlers::create_function_invention_recursive_ws(function_inventions_recursive_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Err(rej) => rej.into_response(),
+                                }
+                            }
+                        }
+                    }
                 }
             }),
         )
@@ -1125,23 +1215,37 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                 }
             }),
         )
-        // Function Profile Computations - create
+        // Function Profile Computations - create (transport selected by X-Transport header)
         .route(
             "/functions/profiles/compute",
-            axum::routing::post({
+            axum::routing::any({
                 let profile_computations_client =
                     profile_computations_client.clone();
                 let persistent_cache = persistent_cache.clone();
-                move |headers: axum::http::HeaderMap, Json(body): Json<
-                    objectiveai_sdk::functions::profiles::computations::request::FunctionProfileComputationCreateParams,
-                >| {
-                    create_profile_computation(
-                        profile_computations_client,
-                        headers,
-                        persistent_cache,
-                        suppress_output,
-                        body,
-                    )
+                move |transport: streaming_ws::Transport, req: axum::extract::Request| {
+                    let profile_computations_client = profile_computations_client.clone();
+                    let persistent_cache = persistent_cache.clone();
+                    async move {
+                        use axum::extract::FromRequest;
+                        use axum::extract::FromRequestParts;
+                        let (mut parts, body) = req.into_parts();
+                        let headers = parts.headers.clone();
+                        match transport {
+                            streaming_ws::Transport::Sse => {
+                                let req = axum::extract::Request::from_parts(parts, body);
+                                match Json::<objectiveai_sdk::functions::profiles::computations::request::FunctionProfileComputationCreateParams>::from_request(req, &()).await {
+                                    Ok(Json(body)) => create_profile_computation(profile_computations_client, headers, persistent_cache, suppress_output, body).await,
+                                    Err(rej) => rej.into_response(),
+                                }
+                            }
+                            streaming_ws::Transport::WebSocket => {
+                                match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
+                                    Ok(ws) => streaming_ws_handlers::create_profile_computation_ws(profile_computations_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Err(rej) => rej.into_response(),
+                                }
+                            }
+                        }
+                    }
                 }
             }),
         )
@@ -1306,35 +1410,69 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                 }
             }),
         )
-        // Error - create
+        // Error - create (transport selected by X-Transport header)
         .route(
             "/error",
-            axum::routing::post({
+            axum::routing::any({
                 let error_client = Arc::new(crate::error::Client::new());
                 let persistent_cache = persistent_cache.clone();
-                move |headers: axum::http::HeaderMap, Json(body): Json<
-                    objectiveai_sdk::error::request::ErrorCreateParams,
-                >| {
-                    create_error(error_client, headers, persistent_cache, suppress_output, body)
+                move |transport: streaming_ws::Transport, req: axum::extract::Request| {
+                    let error_client = error_client.clone();
+                    let persistent_cache = persistent_cache.clone();
+                    async move {
+                        use axum::extract::FromRequest;
+                        use axum::extract::FromRequestParts;
+                        let (mut parts, body) = req.into_parts();
+                        let headers = parts.headers.clone();
+                        match transport {
+                            streaming_ws::Transport::Sse => {
+                                let req = axum::extract::Request::from_parts(parts, body);
+                                match Json::<objectiveai_sdk::error::request::ErrorCreateParams>::from_request(req, &()).await {
+                                    Ok(Json(body)) => create_error(error_client, headers, persistent_cache, suppress_output, body).await,
+                                    Err(rej) => rej.into_response(),
+                                }
+                            }
+                            streaming_ws::Transport::WebSocket => {
+                                match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
+                                    Ok(ws) => streaming_ws_handlers::create_error_ws(error_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Err(rej) => rej.into_response(),
+                                }
+                            }
+                        }
+                    }
                 }
             }),
         )
-        // Laboratory Executions - create
+        // Laboratory Executions - create (transport selected by X-Transport header)
         .route(
             "/laboratories/executions",
-            axum::routing::post({
+            axum::routing::any({
                 let laboratory_executions_client = laboratory_executions_client.clone();
                 let persistent_cache = persistent_cache.clone();
-                move |headers: axum::http::HeaderMap, Json(body): Json<
-                    objectiveai_sdk::laboratories::executions::request::LaboratoryExecutionCreateParams,
-                >| {
-                    execute_laboratory(
-                        laboratory_executions_client,
-                        headers,
-                        persistent_cache,
-                        suppress_output,
-                        body,
-                    )
+                move |transport: streaming_ws::Transport, req: axum::extract::Request| {
+                    let laboratory_executions_client = laboratory_executions_client.clone();
+                    let persistent_cache = persistent_cache.clone();
+                    async move {
+                        use axum::extract::FromRequest;
+                        use axum::extract::FromRequestParts;
+                        let (mut parts, body) = req.into_parts();
+                        let headers = parts.headers.clone();
+                        match transport {
+                            streaming_ws::Transport::Sse => {
+                                let req = axum::extract::Request::from_parts(parts, body);
+                                match Json::<objectiveai_sdk::laboratories::executions::request::LaboratoryExecutionCreateParams>::from_request(req, &()).await {
+                                    Ok(Json(body)) => execute_laboratory(laboratory_executions_client, headers, persistent_cache, suppress_output, body).await,
+                                    Err(rej) => rej.into_response(),
+                                }
+                            }
+                            streaming_ws::Transport::WebSocket => {
+                                match WebSocketUpgrade::from_request_parts(&mut parts, &()).await {
+                                    Ok(ws) => streaming_ws_handlers::execute_laboratory_ws(laboratory_executions_client, headers, persistent_cache, suppress_output, ws).await,
+                                    Err(rej) => rej.into_response(),
+                                }
+                            }
+                        }
+                    }
                 }
             }),
         )
@@ -1370,7 +1508,7 @@ pub async fn run(config: Config) -> std::io::Result<()> {
 
 // Create Context
 
-fn context(headers: &axum::http::HeaderMap, persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>, suppress_output: bool) -> ctx::Context<ctx::DefaultContextExt, impl ctx::persistent_cache::PersistentCacheClient> {
+pub(crate) fn context(headers: &axum::http::HeaderMap, persistent_cache: Arc<impl ctx::persistent_cache::PersistentCacheClient + 'static>, suppress_output: bool) -> ctx::Context<ctx::DefaultContextExt, impl ctx::persistent_cache::PersistentCacheClient> {
     ctx::Context::new(
         Arc::new(ctx::DefaultContextExt),
         persistent_cache,
