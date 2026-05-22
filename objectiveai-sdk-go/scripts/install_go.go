@@ -768,14 +768,28 @@ func generateAnyOfStruct(typeName string, anyOf []any, selfTitle string, schema 
 			continue
 		}
 
-		// Determine variant field name from schema title, falling back to positional
+		// Determine variant field name from schema title, falling back
+		// to the single-value `type` discriminator (internally-tagged
+		// enum variants without explicit titles — e.g. Ok/Error in a
+		// `#[serde(tag = "type")]` enum where schemars 1.x emits no
+		// per-variant title).
 		variantTitle, _ := m["title"].(string)
+		if variantTitle == "" {
+			if props, ok := m["properties"].(map[string]any); ok {
+				if typeProp, ok := props["type"].(map[string]any); ok {
+					if enumVals, ok := typeProp["enum"].([]any); ok && len(enumVals) == 1 {
+						if val, ok := enumVals[0].(string); ok {
+							variantTitle = val
+						}
+					}
+				}
+			}
+		}
 		var fieldName, vStructName string
 		if variantTitle != "" {
 			fieldName = goFieldName(variantTitle)
 			vStructName = typeName + fieldName
 		} else {
-			// Every variant must have a title
 			panic(fmt.Sprintf("variant in %s has no title", typeName))
 		}
 
