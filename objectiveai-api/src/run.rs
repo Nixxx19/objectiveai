@@ -1516,7 +1516,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                       body: axum::body::Bytes| {
                     let reverse_channels = reverse_channels.clone();
                     async move {
-                        objectiveai_mcp_endpoint::handle_request(
+                        crate::objectiveai_mcp_endpoint::handle_request(
                             session_id,
                             method,
                             reverse_channels,

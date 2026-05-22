@@ -1,0 +1,43 @@
+{
+  "title": "client_objectiveai_mcp.client_response.Response",
+  "description": "Envelope: correlation `id` + tagged [`super::Result`]. Wire shape:\n\n```json\n{\"id\":\"…\",\"type\":\"ok\"}                         // empty success\n{\"id\":\"…\",\"type\":\"error\",\"code\":404,\"message\":…}  // failure\n```",
+  "type": "object",
+  "anyOf": [
+    {
+      "description": "Empty success — the request was accepted.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "ok"
+          ]
+        }
+      }
+    },
+    {
+      "description": "The request failed. With internally-tagged + struct-variant\nserde flattens the inner fields alongside the `type` tag —\ne.g. `{\"id\":\"…\",\"type\":\"error\",\"code\":404,\"message\":…}`.",
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "message": {},
+        "type": {
+          "type": "string",
+          "enum": [
+            "error"
+          ]
+        }
+      }
+    }
+  ],
+  "properties": {
+    "id": {
+      "description": "Matches the `id` of the\n[`super::super::client_request::Request`] this response is for.",
+      "type": "string"
+    }
+  }
+}

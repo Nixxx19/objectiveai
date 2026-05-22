@@ -17,16 +17,17 @@ pub async fn create_error_unary(
 /// `(Stream<Chunk>, Notifier)`; see
 /// [`crate::agent::completions::http::create_agent_completion_streaming`]
 /// for the demux + handler semantics.
-pub async fn create_error_streaming(
+pub async fn create_error_streaming<H: McpHandler>(
     client: &HttpClient,
     mut params: super::request::ErrorCreateParams,
-    handler: impl McpHandler,
+    handler: H,
 ) -> Result<
     (
         impl Stream<Item = Result<super::response::ErrorResponse, HttpError>>
             + Send
             + Unpin
-            + 'static,
+            + 'static
+            + use<H>,
         Notifier,
     ),
     HttpError,

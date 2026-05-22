@@ -18,10 +18,10 @@ pub async fn compute_profile_unary(
 /// Streaming profile computation. Returns `(Stream<Chunk>, Notifier)`;
 /// see [`crate::agent::completions::http::create_agent_completion_streaming`]
 /// for the demux + handler semantics.
-pub async fn compute_profile_streaming(
+pub async fn compute_profile_streaming<H: McpHandler>(
     client: &HttpClient,
     mut params: super::request::FunctionProfileComputationCreateParams,
-    handler: impl McpHandler,
+    handler: H,
 ) -> Result<
     (
         impl Stream<
@@ -31,7 +31,8 @@ pub async fn compute_profile_streaming(
             >,
         > + Send
         + Unpin
-        + 'static,
+        + 'static
+        + use<H>,
         Notifier,
     ),
     HttpError,

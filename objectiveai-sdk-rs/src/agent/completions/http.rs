@@ -42,10 +42,10 @@ pub async fn create_agent_completion_unary(
 /// [`crate::http::RejectHandler`] if the calling client doesn't host
 /// objectiveai-mcp — agents that declare `client_objectiveai_mcp`
 /// will then fall through to the next fallback agent server-side.
-pub async fn create_agent_completion_streaming(
+pub async fn create_agent_completion_streaming<H: McpHandler>(
     client: &HttpClient,
     mut params: super::request::AgentCompletionCreateParams,
-    handler: impl McpHandler,
+    handler: H,
 ) -> Result<
     (
         impl Stream<
@@ -55,7 +55,8 @@ pub async fn create_agent_completion_streaming(
             >,
         > + Send
         + Unpin
-        + 'static,
+        + 'static
+        + use<H>,
         Notifier,
     ),
     HttpError,

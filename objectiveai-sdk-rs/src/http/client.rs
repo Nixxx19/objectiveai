@@ -408,15 +408,19 @@ impl HttpClient {
     /// task and closes the connection cleanly. Dropping only one
     /// keeps the WS alive — useful when a caller wants to send
     /// notifies after the chunk stream has finished, or vice-versa.
-    pub async fn send_streaming_ws<Chunk, B, H>(
+    pub async fn send_streaming_ws<Chunk, B, H, P>(
         &self,
         method: reqwest::Method,
-        path: impl AsRef<str>,
+        path: P,
         body: B,
         handler: H,
     ) -> Result<
         (
-            impl Stream<Item = Result<Chunk, super::HttpError>> + Send + Unpin + 'static,
+            impl Stream<Item = Result<Chunk, super::HttpError>>
+                + Send
+                + Unpin
+                + 'static
+                + use<Chunk, B, H, P>,
             super::Notifier,
         ),
         super::HttpError,
@@ -425,6 +429,7 @@ impl HttpClient {
         Chunk: serde::de::DeserializeOwned + Send + 'static,
         B: serde::Serialize + Send + 'static,
         H: super::McpHandler,
+        P: AsRef<str>,
     {
         use crate::client_objectiveai_mcp::{
             client_response::Response as ClientResponse,

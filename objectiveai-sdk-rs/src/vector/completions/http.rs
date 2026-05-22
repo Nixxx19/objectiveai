@@ -21,10 +21,10 @@ pub async fn create_vector_completion_unary(
 /// Opens a WebSocket and returns `(Stream<Chunk>, Notifier)`. See
 /// [`crate::agent::completions::http::create_agent_completion_streaming`]
 /// for the full semantics of `handler` and the demux.
-pub async fn create_vector_completion_streaming(
+pub async fn create_vector_completion_streaming<H: McpHandler>(
     client: &HttpClient,
     mut params: super::request::VectorCompletionCreateParams,
-    handler: impl McpHandler,
+    handler: H,
 ) -> Result<
     (
         impl Stream<
@@ -34,7 +34,8 @@ pub async fn create_vector_completion_streaming(
             >,
         > + Send
         + Unpin
-        + 'static,
+        + 'static
+        + use<H>,
         Notifier,
     ),
     HttpError,

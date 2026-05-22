@@ -18,10 +18,10 @@ pub async fn create_laboratory_execution_unary(
 /// `(Stream<Chunk>, Notifier)`; see
 /// [`crate::agent::completions::http::create_agent_completion_streaming`]
 /// for the demux + handler semantics.
-pub async fn create_laboratory_execution_streaming(
+pub async fn create_laboratory_execution_streaming<H: McpHandler>(
     client: &HttpClient,
     mut params: super::request::LaboratoryExecutionCreateParams,
-    handler: impl McpHandler,
+    handler: H,
 ) -> Result<
     (
         impl Stream<
@@ -31,7 +31,8 @@ pub async fn create_laboratory_execution_streaming(
             >,
         > + Send
         + Unpin
-        + 'static,
+        + 'static
+        + use<H>,
         Notifier,
     ),
     HttpError,
