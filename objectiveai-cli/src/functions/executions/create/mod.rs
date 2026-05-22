@@ -162,8 +162,8 @@ impl Commands {
 
         let handle = handle.clone();
         crate::api::run(Box::new(|http_client| Box::pin(async move {
-            let stream = objectiveai_sdk::functions::executions::create_function_execution_streaming(
-                &http_client, params,
+            let (stream, _notifier) = objectiveai_sdk::functions::executions::create_function_execution_streaming(
+                &http_client, params, crate::api::conduit::ConduitMcpHandler::new(),
             ).await?;
 
             // Emit each chunk's inner errors live (Warn) before pushing

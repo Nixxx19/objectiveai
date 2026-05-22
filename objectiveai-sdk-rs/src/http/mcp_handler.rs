@@ -1,17 +1,17 @@
 //! Handler trait for inbound objectiveai-mcp `server_request` frames.
 //!
-//! The API speaks a bidirectional WS protocol on its streaming
-//! endpoints: outbound chunks coexist with outbound MCP `tools/list`
-//! / `tools/call` requests the proxy forwards from
-//! `/objectiveai-mcp/{session_id}`. Clients that want to expose
-//! objectiveai-mcp tools to the agent supply an `McpHandler` to
-//! [`crate::http::HttpClient::send_streaming_ws`]; the SDK demuxes
-//! frames and dispatches each `server_request::Payload` to it,
-//! writing the returned `server_response::Result` back as the
-//! matching reply.
+//! The API hosts `/objectiveai-mcp/{session_id}` as a pure HTTP→WS
+//! bridge: every HTTP request the proxy makes is forwarded over the
+//! reverse-attach WS as a [`server_request::Request`], and the
+//! handler's returned [`server_response::Response`] is translated
+//! back into the HTTP response the proxy receives.
 //!
-//! Clients that don't expose objectiveai-mcp use [`RejectHandler`],
-//! which errors every request with `code: 501`.
+//! Clients that host objectiveai-mcp (e.g. the CLI) implement
+//! [`McpHandler`] to spawn / forward / reply. Clients that don't
+//! use [`RejectHandler`], which 501s every request — the API's
+//! list-tools verification probe then short-circuits and any agent
+//! that declares `client_objectiveai_mcp` falls through to the next
+//! fallback server-side.
 
 use crate::client_objectiveai_mcp::{server_request, server_response};
 use std::future::Future;
@@ -23,31 +23,36 @@ use std::future::Future;
 /// must be `Send + Sync + 'static` since the demux task that
 /// invokes them is spawned.
 pub trait McpHandler: Send + Sync + 'static {
-    /// Dispatch a single request. The return future's `Result` is
-    /// written back as the matching `server_response::Response` —
-    /// `Ok` carries the MCP-shape JSON the proxy expects (e.g.
-    /// `ListToolsResult`), `Error` carries a code + message.
+    /// Dispatch a single request. The returned `Response`'s `id`
+    /// must echo `request.id` so the API can correlate the reply
+    /// to the in-flight proxy request waiting on it.
     fn handle(
         &self,
-        request: server_request::Payload,
-    ) -> impl Future<Output = server_response::Result> + Send;
+        request: server_request::Request,
+    ) -> impl Future<Output = server_response::Response> + Send;
 }
 
-/// Default handler that rejects every `server_request` with
-/// `code: 501`. Used when the calling client doesn't host the local
-/// objectiveai-mcp surface — agents that declare
-/// `client_objectiveai_mcp` will see this and fall through to the
-/// next fallback agent on the server side.
+/// Default handler that 501s every `server_request`. Used when the
+/// calling client doesn't host objectiveai-mcp — agents that
+/// declare `client_objectiveai_mcp` will see this and fall through
+/// to the next fallback agent on the server side.
 #[derive(Debug, Clone, Copy, Default)]
 pub struct RejectHandler;
 
 impl McpHandler for RejectHandler {
-    async fn handle(&self, _request: server_request::Payload) -> server_response::Result {
-        server_response::Result::Error {
-            code: 501,
-            message: serde_json::Value::String(
-                "this client does not host objectiveai-mcp".into(),
-            ),
+    async fn handle(&self, request: server_request::Request) -> server_response::Response {
+        server_response::Response {
+            id: request.id,
+            status: 501,
+            headers: indexmap::IndexMap::new(),
+            body: Some(serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": serde_json::Value::Null,
+                "error": {
+                    "code": -32601,
+                    "message": "this client does not host objectiveai-mcp",
+                },
+            })),
         }
     }
 }

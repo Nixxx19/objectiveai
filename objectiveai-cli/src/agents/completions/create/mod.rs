@@ -97,8 +97,8 @@ impl Commands {
 
         let handle = handle.clone();
         crate::api::run(Box::new(|http_client| Box::pin(async move {
-            let stream = objectiveai_sdk::agent::completions::create_agent_completion_streaming(
-                &http_client, params,
+            let (stream, _notifier) = objectiveai_sdk::agent::completions::create_agent_completion_streaming(
+                &http_client, params, crate::api::conduit::ConduitMcpHandler::new(),
             ).await?;
 
             let mut accumulated = crate::log_stream::consume_with_coalesced_writes(

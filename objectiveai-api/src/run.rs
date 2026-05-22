@@ -1503,21 +1503,30 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
                 }
             }),
         )
-        // ObjectiveAI-MCP endpoint (reverse-attach Streamable HTTP)
+        // ObjectiveAI-MCP endpoint (reverse-attach Streamable HTTP).
+        // Pure HTTP-to-WS bridge: every method (POST/GET/DELETE) is
+        // forwarded verbatim to the calling client's McpHandler.
         .route(
             "/objectiveai-mcp/{session_id}",
-            axum::routing::post({
+            axum::routing::any({
                 let reverse_channels = reverse_channels.clone();
                 move |axum::extract::Path(session_id): axum::extract::Path<String>,
+                      method: axum::http::Method,
+                      headers: axum::http::HeaderMap,
                       body: axum::body::Bytes| {
                     let reverse_channels = reverse_channels.clone();
                     async move {
-                        objectiveai_mcp_endpoint::handle_post(session_id, reverse_channels, body).await
+                        objectiveai_mcp_endpoint::handle_request(
+                            session_id,
+                            method,
+                            reverse_channels,
+                            headers,
+                            body,
+                        )
+                        .await
                     }
                 }
-            })
-            .get(objectiveai_mcp_endpoint::handle_get)
-            .delete(objectiveai_mcp_endpoint::handle_delete),
+            }),
         )
         // CORS
         .layer(

@@ -186,8 +186,8 @@ impl Commands {
 
         let handle = handle.clone();
         crate::api::run(Box::new(|http_client| Box::pin(async move {
-            let stream = objectiveai_sdk::functions::inventions::recursive::create_function_invention_recursive_streaming(
-                &http_client, request,
+            let (stream, _notifier) = objectiveai_sdk::functions::inventions::recursive::create_function_invention_recursive_streaming(
+                &http_client, request, crate::api::conduit::ConduitMcpHandler::new(),
             ).await?;
 
             // Emit each chunk's inner errors live (Warn) before pushing.

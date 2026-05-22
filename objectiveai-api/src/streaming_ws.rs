@@ -232,11 +232,12 @@ pub async fn send_close_split(sink: &SharedSink, code: CloseCode) {
 /// [`server_response::Response`](objectiveai_sdk::client_objectiveai_mcp::server_response::Response)
 /// for. Keys are the API-minted `id`; values are the oneshot the
 /// awaiting future is parked on. The recv side of the WS drains
-/// `server_response` frames, looks up `id`, and fulfills the oneshot.
+/// `server_response` frames, looks up `id`, and fulfills the oneshot
+/// with the full response (status + headers + body).
 pub type PendingRequests = Arc<
     dashmap::DashMap<
         String,
-        oneshot::Sender<objectiveai_sdk::client_objectiveai_mcp::server_response::Result>,
+        oneshot::Sender<objectiveai_sdk::client_objectiveai_mcp::server_response::Response>,
     >,
 >;
 
@@ -310,28 +311,24 @@ impl Drop for ReverseAttachGuard {
     }
 }
 
-/// Mint an id, register a oneshot, write the
-/// [`server_request::Request`](objectiveai_sdk::client_objectiveai_mcp::server_request::Request)
-/// frame, and return the receiver. The caller is responsible for
-/// applying a timeout (via `tokio::time::timeout`) on the await. On
+/// Register a oneshot under `request.id`, write the request as a
+/// text frame, and return the receiver. The caller is responsible
+/// for minting the id (and putting it on the request) and applying
+/// a timeout (via `tokio::time::timeout`) on the await. On
 /// connection drop the recv loop returns and pending oneshots are
 /// dropped — receivers observe the close as `Err(RecvError)`.
 pub async fn send_server_request(
     sink: &SharedSink,
     pending: &PendingRequests,
-    payload: objectiveai_sdk::client_objectiveai_mcp::server_request::Payload,
+    request: objectiveai_sdk::client_objectiveai_mcp::server_request::Request,
 ) -> Result<
-    oneshot::Receiver<objectiveai_sdk::client_objectiveai_mcp::server_response::Result>,
+    oneshot::Receiver<objectiveai_sdk::client_objectiveai_mcp::server_response::Response>,
     (),
 > {
-    let id = uuid::Uuid::new_v4().to_string();
+    let id = request.id.clone();
     let (tx, rx) = oneshot::channel();
     pending.insert(id.clone(), tx);
 
-    let request = objectiveai_sdk::client_objectiveai_mcp::server_request::Request {
-        id: id.clone(),
-        payload,
-    };
     let frame = match serde_json::to_string(&request) {
         Ok(s) => s,
         Err(_) => {
@@ -456,13 +453,15 @@ pub async fn recv_loop<F, Fut>(
         }
 
         if let Ok(response) = serde_json::from_str::<ServerResponse>(text.as_str()) {
-            let ServerResponse { id, result } = response;
-            match pending.remove(&id) {
+            match pending.remove(&response.id) {
                 Some((_, tx)) => {
-                    let _ = tx.send(result);
+                    let _ = tx.send(response);
                 }
                 None => {
-                    eprintln!("dropping server_response for unknown id {id:?}");
+                    eprintln!(
+                        "dropping server_response for unknown id {:?}",
+                        response.id
+                    );
                 }
             }
             continue;

@@ -429,7 +429,6 @@ impl HttpClient {
         use crate::client_objectiveai_mcp::{
             client_response::Response as ClientResponse,
             server_request::Request as ServerRequest,
-            server_response::Response as ServerResponse,
         };
         use futures::stream::SplitStream;
         use tokio::net::TcpStream;
@@ -570,12 +569,12 @@ impl HttpClient {
                     continue;
                 }
                 if let Ok(request) = serde_json::from_str::<ServerRequest>(&text) {
-                    let ServerRequest { id, payload } = request;
                     let handler = handler.clone();
                     let demux_sink = demux_sink.clone();
                     tokio::spawn(async move {
-                        let result = handler.handle(payload).await;
-                        let response = ServerResponse { id, result };
+                        // Handler returns the full response (incl.
+                        // matching id); we just frame + write it.
+                        let response = handler.handle(request).await;
                         let frame = match serde_json::to_string(&response) {
                             Ok(s) => s,
                             Err(_) => return,
