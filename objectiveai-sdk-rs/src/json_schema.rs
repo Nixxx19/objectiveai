@@ -86,6 +86,8 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(crate::agent::completions::response::CostDetails),
         schemars::schema_for!(crate::agent::Continuation),
         schemars::schema_for!(crate::agent::McpServer),
+        schemars::schema_for!(crate::agent::ClientObjectiveaiMcp),
+        schemars::schema_for!(crate::agent::ClientObjectiveaiMcpEntry),
         schemars::schema_for!(crate::agent::claude_agent_sdk::Continuation),
         schemars::schema_for!(crate::agent::codex_sdk::Continuation),
         schemars::schema_for!(crate::agent::mock::AgentBase),
