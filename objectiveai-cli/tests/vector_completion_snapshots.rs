@@ -1,65 +1,51 @@
 //! Snapshot tests for the CLI driving `vector completions post`.
 //!
-//! Sibling to `agent_completion_snapshots.rs`. Same fixture-directory
-//! convention (`objectiveai-api/assets/vector/completions/client_tests/`).
+//! Sibling to `agent_completion_snapshots.rs`. Snapshots live under
+//! `objectiveai-cli/assets/vector/completions/snapshots/` (CLI-side
+//! assets — the API-side `client_tests/` directory is for API
+//! integration test snapshots).
 //!
 //! Currently exercises one scenario: a 20-agent mock swarm where every
 //! agent declares 10 entries in `client_objectiveai_mcp.tools` (no
 //! plugins, `objectiveai` field omitted). Driven through the CLI's
 //! `objectiveai api vector completions post --body-inline …` command
-//! (`stream: true` so the SSE-stamped CLI path is taken), not via
-//! direct SDK / API calls — exercising the full CLI-resolves-config
-//! -> CLI-emits-jsonl -> SDK-talks-to-api path.
+//! with `stream: true` so the SSE-stamped CLI path is taken;
+//! deserializes each emitted JSONL chunk as a `VectorCompletionChunk`,
+//! aggregates via the SDK's `push` method, converts to the unary
+//! `VectorCompletion` shape, and `normalize_for_tests`-es to zero
+//! `id` / `created` and sort completions+votes for determinism.
 //!
 //! Set `UPDATE_VECTOR_COMPLETIONS_CLIENT_TESTS_SNAPSHOTS=1` to (re)write
-//! the snapshot from the current run, matching the API integration
-//! suite's convention.
+//! the snapshot, matching the API integration suite's convention.
 
 mod cli_test_util;
 
+use objectiveai_sdk::vector::completions::response::streaming::VectorCompletionChunk;
+use objectiveai_sdk::vector::completions::response::unary::VectorCompletion;
 use std::path::{Path, PathBuf};
 
 fn snapshots_dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../objectiveai-api/assets/vector/completions/client_tests")
+        .join("assets/vector/completions/snapshots")
 }
 
-/// The full streaming chunk array is full of wall-clock-derived ids
-/// and `created` timestamps that change every run. Reduce to the
-/// determinism-bearing fields only: the final chunk's `scores`,
-/// `weights`, content-hashed `swarm` id, and the total count of
-/// agent completions across all chunks (a regression in count
-/// expansion would surface here).
-fn distill(chunks: &serde_json::Value) -> serde_json::Value {
-    let arr = chunks.as_array().expect("expected array of chunks");
-    let last = arr.last().expect("expected at least one chunk");
-    let total_completions: usize = arr
-        .iter()
-        .filter_map(|c| c.get("completions").and_then(|v| v.as_array()).map(|a| a.len()))
-        .sum();
-    serde_json::json!({
-        "scores": last.get("scores").cloned().unwrap_or(serde_json::Value::Null),
-        "weights": last.get("weights").cloned().unwrap_or(serde_json::Value::Null),
-        "swarm": last.get("swarm").cloned().unwrap_or(serde_json::Value::Null),
-        "total_completions": total_completions,
-    })
-}
-
-fn assert_snapshot(actual: &serde_json::Value, name: &str) {
+fn assert_snapshot(actual: &str, name: &str) {
     let path = snapshots_dir().join(format!("{name}.json"));
-    let actual_str = serde_json::to_string_pretty(actual).unwrap();
     if std::env::var("UPDATE_VECTOR_COMPLETIONS_CLIENT_TESTS_SNAPSHOTS").as_deref()
         == Ok("1")
     {
-        std::fs::write(&path, format!("{actual_str}\n")).unwrap();
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent).unwrap();
+        }
+        std::fs::write(&path, format!("{actual}\n")).unwrap();
         eprintln!("Updated snapshot: {}", path.display());
         return;
     }
-    let expected_str = std::fs::read_to_string(&path)
+    let expected = std::fs::read_to_string(&path)
         .unwrap_or_else(|e| panic!("failed to read snapshot {}: {e}", path.display()));
     assert_eq!(
-        actual_str,
-        expected_str.trim_end(),
+        actual,
+        expected.trim_end(),
         "snapshot mismatch for {}",
         path.display(),
     );
@@ -87,11 +73,34 @@ fn test_twenty_agents_10x_tools_seed_42() {
     })
     .to_string();
 
-    let chunks = cli_test_util::run_cli(&[
+    let chunks_json = cli_test_util::run_cli(&[
         "api", "vector", "completions", "post",
         "--body-inline", &body,
     ]);
 
-    let distilled = distill(&chunks);
-    assert_snapshot(&distilled, "twenty_agents_10x_tools_seed_42");
+    // Deserialize every emitted notification as a typed chunk.
+    let chunks: Vec<VectorCompletionChunk> = chunks_json
+        .as_array()
+        .expect("CLI returned a single value, expected array of chunks")
+        .iter()
+        .map(|c| {
+            serde_json::from_value(c.clone())
+                .expect("failed to deserialize VectorCompletionChunk from CLI output")
+        })
+        .collect();
+    assert!(!chunks.is_empty(), "no chunks emitted");
+
+    // Aggregate: start from the first chunk, push the rest in.
+    let mut chunks_iter = chunks.into_iter();
+    let mut agg = chunks_iter.next().expect("at least one chunk");
+    for chunk in chunks_iter {
+        agg.push(&chunk);
+    }
+
+    // Convert to the unary shape and normalize for determinism.
+    let mut result: VectorCompletion = agg.into();
+    result.normalize_for_tests();
+
+    let actual_str = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(&actual_str, "twenty_agents_10x_tools_seed_42");
 }
