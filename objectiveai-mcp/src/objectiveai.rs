@@ -166,7 +166,7 @@ impl ServerHandler for ObjectiveAiMcpCli {
             protocol_version: ProtocolVersion::V_2025_06_18,
             capabilities: ServerCapabilities::builder().enable_tools().build(),
             server_info: Implementation {
-                name: "oaicli".into(),
+                name: "oai".into(),
                 title: None,
                 version: env!("CARGO_PKG_VERSION").into(),
                 description: None,
