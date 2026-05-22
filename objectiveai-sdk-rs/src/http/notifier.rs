@@ -27,7 +27,7 @@ pub(crate) type SharedSink = Arc<
 /// oneshot senders the demux task fulfills when the matching
 /// `client_response::Response` arrives.
 pub(crate) type PendingNotifies =
-    Arc<dashmap::DashMap<String, oneshot::Sender<client_response::Result>>>;
+    Arc<dashmap::DashMap<String, oneshot::Sender<client_response::Response>>>;
 
 /// Client-side handle for sending notifies to a running agent
 /// completion (or any other streaming endpoint) over the same WS
@@ -88,14 +88,14 @@ impl Notifier {
             }
         }
 
-        let result = match rx.await {
+        let response = match rx.await {
             Ok(r) => r,
             Err(_) => return Err(super::HttpError::NotifyChannelClosed),
         };
 
-        match result {
-            client_response::Result::Ok => Ok(()),
-            client_response::Result::Error { code, message } => {
+        match response {
+            client_response::Response::Ok { .. } => Ok(()),
+            client_response::Response::Error { code, message, .. } => {
                 Err(super::HttpError::NotifyRejected { code, message })
             }
         }

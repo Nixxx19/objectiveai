@@ -327,8 +327,11 @@ impl HttpClient {
         // Stop the stream at [DONE] to prevent reqwest_eventsource from
         // auto-reconnecting. Uses take_while on the raw SSE events, then
         // maps/filters the remaining events into typed chunks.
+        // Stamps X-Transport: sse so the API's transport dispatcher
+        // routes this to the SSE branch (the API default is WS).
         Ok(
             self.request(method, path.as_ref(), body)
+                .header("X-Transport", "sse")
                 .eventsource()?
                 .take_while(|result| {
                     let dominated = matches!(
@@ -567,9 +570,9 @@ impl HttpClient {
                 // tend to have many fields; the envelopes have a
                 // distinctive `id` + tagged `type`.
                 if let Ok(response) = serde_json::from_str::<ClientResponse>(&text) {
-                    let ClientResponse { id, result } = response;
+                    let id = response.id().to_string();
                     if let Some((_, tx)) = demux_pending.remove(&id) {
-                        let _ = tx.send(result);
+                        let _ = tx.send(response);
                     }
                     continue;
                 }

@@ -378,7 +378,7 @@ pub async fn recv_loop<F, Fut>(
 {
     use objectiveai_sdk::client_objectiveai_mcp::{
         client_request::{Payload as ClientPayload, Request as ClientRequest},
-        client_response::{Response as ClientResponse, Result as ClientResult},
+        client_response::Response as ClientResponse,
         server_response::Response as ServerResponse,
     };
 
@@ -419,8 +419,9 @@ pub async fn recv_loop<F, Fut>(
                     let sink = sink.clone();
                     let notify_fn = notify_fn.clone();
                     tokio::spawn(async move {
-                        let result: ClientResult = if !tracker.contains(&params.response_id) {
-                            ClientResult::Error {
+                        let response: ClientResponse = if !tracker.contains(&params.response_id) {
+                            ClientResponse::Error {
+                                id,
                                 code: 404,
                                 message: serde_json::Value::String(format!(
                                     "response_id {:?} not from this stream",
@@ -429,17 +430,17 @@ pub async fn recv_loop<F, Fut>(
                             }
                         } else {
                             match (notify_fn)(params).await {
-                                Ok(()) => ClientResult::Ok,
+                                Ok(()) => ClientResponse::Ok { id },
                                 Err(e) => {
                                     let inner = ResponseError::from(&e);
-                                    ClientResult::Error {
+                                    ClientResponse::Error {
+                                        id,
                                         code: inner.code,
                                         message: inner.message,
                                     }
                                 }
                             }
                         };
-                        let response = ClientResponse { id, result };
                         let frame = match serde_json::to_string(&response) {
                             Ok(s) => s,
                             Err(_) => return,

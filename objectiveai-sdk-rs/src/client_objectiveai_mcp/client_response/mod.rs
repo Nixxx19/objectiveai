@@ -5,5 +5,3 @@
 
 mod response;
 pub use response::*;
-mod result;
-pub use result::*;

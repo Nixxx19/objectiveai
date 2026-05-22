@@ -18,9 +18,10 @@ fn manifest_minimal_roundtrip() {
     let json = serde_json::to_value(&m).unwrap();
     // `skip_serializing_if = "Option::is_none"` keeps the wire shape lean.
     let obj = json.as_object().unwrap();
-    assert_eq!(obj.len(), 2);
+    assert_eq!(obj.len(), 3);
     assert_eq!(obj["description"], "tiny test plugin");
     assert_eq!(obj["version"], "0.1.0");
+    assert_eq!(obj["owner"], "wiggidy");
     // Roundtrip back.
     let back: Manifest = serde_json::from_value(json).unwrap();
     assert_eq!(back.description, "tiny test plugin");
@@ -83,6 +84,7 @@ fn manifest_with_name_and_source_field_order() {
         r#""name":"psyops","#,
         r#""description":"do things","#,
         r#""version":"1.2.3","#,
+        r#""owner":"wiggidy","#,
         r#""author":"Wiggidy","#,
         r#""license":"MIT","#,
         r#""source":"/home/user/.objectiveai/plugins/psyops.manifest.json""#,
@@ -106,7 +108,8 @@ fn manifest_with_name_and_source_field_order() {
 fn manifest_deserializes_minimal_json() {
     let json = serde_json::json!({
         "description": "x",
-        "version": "0.1.0"
+        "version": "0.1.0",
+        "owner": "wiggidy"
     });
     let m: Manifest = serde_json::from_value(json).unwrap();
     assert_eq!(m.description, "x");
@@ -175,7 +178,8 @@ fn manifest_omits_empty_binaries_field() {
 fn manifest_deserializes_without_binaries_field() {
     let json = serde_json::json!({
         "description": "x",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "owner": "wiggidy"
     });
     let m: Manifest = serde_json::from_value(json).unwrap();
     assert!(m.binaries.is_empty());
@@ -315,7 +319,8 @@ fn manifest_omits_viewer_fields_when_absent() {
 fn manifest_deserializes_without_viewer_fields() {
     let json = serde_json::json!({
         "description": "x",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "owner": "wiggidy"
     });
     let m: Manifest = serde_json::from_value(json).unwrap();
     assert!(m.viewer_zip.is_none());

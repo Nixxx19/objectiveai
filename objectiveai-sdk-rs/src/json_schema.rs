@@ -406,7 +406,6 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::client_objectiveai_mcp::client_request::Request),
             schemars::schema_for!(crate::client_objectiveai_mcp::client_request::Payload),
             schemars::schema_for!(crate::client_objectiveai_mcp::client_response::Response),
-            schemars::schema_for!(crate::client_objectiveai_mcp::client_response::Result),
             schemars::schema_for!(crate::client_objectiveai_mcp::server_request::Request),
             schemars::schema_for!(crate::client_objectiveai_mcp::server_response::Response),
             schemars::schema_for!(crate::mcp::JsonRpcRequest),
