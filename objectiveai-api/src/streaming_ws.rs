@@ -373,14 +373,23 @@ pub async fn recv_loop<F, Fut>(
 ) where
     F: Fn(objectiveai_sdk::agent::completions::request::AgentCompletionNotifyParams) -> Fut
         + Send
-        + Sync,
-    Fut: std::future::Future<Output = Result<(), crate::agent::completions::Error>> + Send,
+        + Sync
+        + 'static,
+    Fut: std::future::Future<Output = Result<(), crate::agent::completions::Error>>
+        + Send
+        + 'static,
 {
     use objectiveai_sdk::client_objectiveai_mcp::{
         client_request::{Payload as ClientPayload, Request as ClientRequest},
         client_response::{Response as ClientResponse, Result as ClientResult},
         server_response::Response as ServerResponse,
     };
+
+    // Arc-wrap the notify dispatcher so each spawned dispatch task
+    // can hold its own cheap clone. Required because we spawn notify
+    // handling to keep the recv loop unblocked for server_response
+    // frames the MCP endpoint is timing out on.
+    let notify_fn = Arc::new(notify_fn);
 
     while let Some(msg) = rx.next().await {
         let text = match msg {
@@ -405,38 +414,45 @@ pub async fn recv_loop<F, Fut>(
             let ClientRequest { id, payload } = request;
             match payload {
                 ClientPayload::AgentCompletionNotify(params) => {
-                    let result: ClientResult = if !tracker.contains(&params.response_id) {
-                        ClientResult::Error {
-                            code: 404,
-                            message: serde_json::Value::String(format!(
-                                "response_id {:?} not from this stream",
-                                params.response_id
-                            )),
-                        }
-                    } else {
-                        match notify_fn(params).await {
-                            Ok(()) => ClientResult::Ok,
-                            Err(e) => {
-                                let inner = ResponseError::from(&e);
-                                ClientResult::Error {
-                                    code: inner.code,
-                                    message: inner.message,
+                    // Spawn so the recv loop can immediately move on
+                    // to the next frame — notify dispatch can be slow
+                    // (it hits the agent's MCP connection) and we
+                    // don't want it blocking server_response routing.
+                    let tracker = tracker.clone();
+                    let sink = sink.clone();
+                    let notify_fn = notify_fn.clone();
+                    tokio::spawn(async move {
+                        let result: ClientResult = if !tracker.contains(&params.response_id) {
+                            ClientResult::Error {
+                                code: 404,
+                                message: serde_json::Value::String(format!(
+                                    "response_id {:?} not from this stream",
+                                    params.response_id
+                                )),
+                            }
+                        } else {
+                            match (notify_fn)(params).await {
+                                Ok(()) => ClientResult::Ok,
+                                Err(e) => {
+                                    let inner = ResponseError::from(&e);
+                                    ClientResult::Error {
+                                        code: inner.code,
+                                        message: inner.message,
+                                    }
                                 }
                             }
-                        }
-                    };
-                    let response = ClientResponse { id, result };
-                    let frame = match serde_json::to_string(&response) {
-                        Ok(s) => s,
-                        Err(_) => continue,
-                    };
-                    let mut guard = sink.lock().await;
-                    if guard.send(Message::Text(frame.into())).await.is_err() {
-                        return;
-                    }
+                        };
+                        let response = ClientResponse { id, result };
+                        let frame = match serde_json::to_string(&response) {
+                            Ok(s) => s,
+                            Err(_) => return,
+                        };
+                        let mut guard = sink.lock().await;
+                        let _ = guard.send(Message::Text(frame.into())).await;
+                    });
+                    continue;
                 }
             }
-            continue;
         }
 
         if let Ok(response) = serde_json::from_str::<ServerResponse>(text.as_str()) {
