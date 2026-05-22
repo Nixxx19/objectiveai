@@ -5,6 +5,7 @@ fn manifest_minimal_roundtrip() {
     let m = Manifest {
         description: "tiny test plugin".to_string(),
         version: "0.1.0".to_string(),
+        owner: "wiggidy".to_string(),
         author: None,
         homepage: None,
         license: None,
@@ -35,6 +36,7 @@ fn manifest_full_roundtrip() {
     let m = Manifest {
         description: "Generate viral psyops content from a topic spec".to_string(),
         version: "0.3.1".to_string(),
+        owner: "wiggidy".to_string(),
         author: Some("Wiggidy".to_string()),
         homepage: Some("https://github.com/Wiggidy/psychological-operations".to_string()),
         license: Some("MIT".to_string()),
@@ -60,6 +62,7 @@ fn manifest_with_name_and_source_field_order() {
         manifest: Manifest {
             description: "do things".to_string(),
             version: "1.2.3".to_string(),
+            owner: "wiggidy".to_string(),
             author: Some("Wiggidy".to_string()),
             homepage: None,
             license: Some("MIT".to_string()),
@@ -129,6 +132,7 @@ fn manifest_with_binaries_roundtrip() {
     let m = Manifest {
         description: "x".to_string(),
         version: "1.0.0".to_string(),
+        owner: "wiggidy".to_string(),
         author: None,
         homepage: None,
         license: None,
@@ -152,6 +156,7 @@ fn manifest_omits_empty_binaries_field() {
     let m = Manifest {
         description: "x".to_string(),
         version: "1.0.0".to_string(),
+        owner: "wiggidy".to_string(),
         author: None,
         homepage: None,
         license: None,
@@ -181,6 +186,7 @@ fn manifest_with_binaries_field_order() {
     let m = Manifest {
         description: "x".to_string(),
         version: "1.0.0".to_string(),
+        owner: "wiggidy".to_string(),
         author: None,
         homepage: None,
         license: None,
@@ -217,6 +223,7 @@ fn manifest_with_sparse_binaries_is_valid() {
     let m = Manifest {
         description: "linux-only plugin".to_string(),
         version: "0.1.0".to_string(),
+        owner: "wiggidy".to_string(),
         author: None,
         homepage: None,
         license: None,
@@ -245,6 +252,7 @@ fn manifest_with_viewer_fields_roundtrip() {
     let m = Manifest {
         description: "viewer plugin".to_string(),
         version: "1.0.0".to_string(),
+        owner: "wiggidy".to_string(),
         author: None,
         homepage: None,
         license: None,
@@ -286,6 +294,7 @@ fn manifest_omits_viewer_fields_when_absent() {
     let m = Manifest {
         description: "x".to_string(),
         version: "1.0.0".to_string(),
+        owner: "wiggidy".to_string(),
         author: None,
         homepage: None,
         license: None,
@@ -337,6 +346,7 @@ fn manifest_without_viewer() -> Manifest {
     Manifest {
         description: "t".to_string(),
         version: "0.0.1".to_string(),
+        owner: "wiggidy".to_string(),
         author: None,
         homepage: None,
         license: None,

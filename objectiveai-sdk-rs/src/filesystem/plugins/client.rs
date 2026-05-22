@@ -477,9 +477,14 @@ impl Client {
         };
 
         let manifest_bytes: Vec<u8> = {
+            // Override the author-claimed `owner` with the GitHub
+            // `<owner>` we were actually installed from — forks land
+            // on disk with the fork's owner, not the upstream's.
+            let mut manifest = manifest.clone();
+            manifest.owner = owner.to_string();
             let bundle = ManifestWithNameAndSource {
                 name: repository.to_string(),
-                manifest: manifest.clone(),
+                manifest,
                 source: source.to_string(),
             };
             serde_json::to_vec_pretty(&bundle).map_err(super::InstallError::ManifestSerialize)?

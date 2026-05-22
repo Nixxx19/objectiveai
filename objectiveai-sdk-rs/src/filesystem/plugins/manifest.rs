@@ -18,6 +18,12 @@ pub struct Manifest {
     /// enforced — the host just displays whatever's here.
     pub version: String,
 
+    /// GitHub `<owner>` segment of the source repo. Authors write
+    /// their canonical owner here; the installer overwrites this
+    /// field with whatever owner it was actually installed from (so
+    /// forks land on disk with the fork's owner, not the upstream's).
+    pub owner: String,
+
     /// Author or authors of the plugin. Free-form string.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]

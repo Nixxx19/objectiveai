@@ -11,6 +11,16 @@ pub struct Manifest {
     /// agents that consume the tool.
     pub description: String,
 
+    /// Version string. Free-form; the host displays whatever's here
+    /// (semver convention recommended but not enforced).
+    pub version: String,
+
+    /// GitHub-style owner (user or org) of the tool's source repo.
+    /// Free-form; tools have no installer, so this is purely
+    /// author-supplied metadata — nothing overrides it the way the
+    /// plugin installer overrides the plugin manifest's owner.
+    pub owner: String,
+
     /// Filename of the executable to invoke, resolved relative to
     /// `<base_dir>/tools/`. The author is responsible for including
     /// any platform-specific extension (`.exe`, `.sh`, `.bat`, …) —
